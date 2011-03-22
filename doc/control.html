@@ -1,0 +1,80 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>{foreach item="item" from=$types}{if $item.name==$URI1}{assign var="control" value=$item}{break}{/if}{/foreach}{foreach item="item" from=$types}{if $item.name==$control.super}{assign var="super" value=$item}{break}{/if}{/foreach}
+<head>
+<title>{$control.desc}</title>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312">
+<link rel="stylesheet" type="text/css" href="../common/common.css" />
+</head>
+<body>
+<h1><a>ecui.ui.{$URI1|capitalize}</a></h1>
+<hr size="1">
+<p class="clsRef">{$control.desc}</p>
+<blockquote>{if $super}
+  <p>{$control.desc}继承自 {$super.name|control}</p>{/if}
+  <p>{eval var=$control.remark[1]}</p>{if $control.interface}
+  <p>此控件还继承了来自 {foreach from=$control.interface item="item" key="key"}{if $key}、{/if}{$item|control}{/foreach} 的接口方法</p>{/if}
+  <p>下面列出了{$control.name}中的所有<a href="#method">方法</a>、<a href="#event">事件</a>及<a href="#style">样式</a>，点击链接即可前往详细信息。如果需要查看全部的事件请参见 {'events'|menu}。</p>
+</blockquote>
+<p class="clsRef">使用方法</p>
+<blockquote>
+  <ul>{if $control.html}
+    <li>页面初始化示例
+      <p><pre class="clsCode">{$control.html|replace:"<":"&lt;"|replace:">":"&gt;"}</pre></p>
+    </li>
+    <li>JS初始化示例
+      <p><pre class="clsCode">ecui.{'create'|method:'core'}('{$URI1}', params}</pre></p>
+    </li>{/if}
+    <li>控件扩展的 params 参数
+      <p>
+        <table class="clsSTD">{assign var="controlName" value=$URI1}{while $controlName}{foreach from=$types item="item"}{if $item.name==$controlName}{foreach from=$item.params item="param"}
+          <tr>
+            <td>{$param.name}</td>
+            <td>{$param.desc}</td>
+          </tr>{/foreach}{/if}{/foreach}{assign var="controlName" value=$item.super}{/while}
+        </table>
+      </p>
+    </li>
+  </ul>
+</blockquote>{if $control.section}
+<p class="clsRef">部件</p>
+<blockquote>
+  <table class="clsSTD">{foreach from=$control.section item="item"}
+  <tr>
+    <td>{$item.name}</td>
+    <td>{$item.desc}</td>
+  </tr>
+  {/foreach}
+  </table>
+</blockquote>{/if}
+<p class="clsRef"><a name="method" id="method"></a>方法</p>
+<blockquote>
+  <table class="clsSTD">{foreach item="item" from=$sortedMethods}{if $lastName!=$item.name}{capture assign="link"}{eval var='{\$item.name|method:"$URI1"|default}'}{/capture}{capture assign="type"}{$link|regex_replace:'.+type=(.+)".+':"$1"}{/capture}{assign var="lastName" value=$item.name}{/if}{if $item.type==$type}
+    <tr>
+      <td>{$link}</td>
+      <td>{$item.desc}{if $type!=$URI1} (From：{$type|control}){/if}</td>
+    </tr>{/if}{/foreach}
+  </table>
+</blockquote>
+<p class="clsRef"><a name="method" id="method"></a>事件</p>
+<blockquote>
+  <table class="clsSTD">{foreach item="item" from=$sortedEvents}{if $lastName!=$item.name}{capture assign="link"}{eval var='{\$item.name|event:"$URI1"|default}'}{/capture}{capture assign="type"}{$link|regex_replace:'.+type=(.+)".+':"$1"}{/capture}{assign var="lastName" value=$item.name}{/if}{if $item.type==$type}
+    <tr>
+      <td>{$link}</td>
+      <td>{$item.desc}{if $type!=$URI1} (From：{$type|control}){/if}</td>
+    </tr>{/if}{/foreach}
+  </table>
+</blockquote>
+<!--<p class="clsRef"><a name="style" id="style"></a>样式</p>
+<blockquote>
+    <table class="clsSTD">
+    {foreach from=$slist item="item"}{assign var="info" value=$style.`$item`}
+    <tr>
+      <td>{`$control.name || $item`}</td>
+      <td>{$control.desc}</td>
+    </tr>
+    {/foreach}
+  </table>
+</blockquote>-->
+<div style="text-align:right"><a href="../controls.html">返回</a></div>
+</body>
+</html>

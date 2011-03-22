@@ -1,0 +1,23 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+<title>ECUI 事件</title>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312">
+<link rel="stylesheet" type="text/css" href="../common/common.css" />
+</head>
+<body>
+<h1><a>ECUI 事件</a></h1>
+<hr size="1">
+<p>下面列出了 ECUI 中的所有的事件参数对象的属性和方法</p>
+<p class="clsRef">事件</p>
+<blockquote>{foreach from=$eventArg item="item" key="key"}{add var="list" value=$key}{/foreach}{sort var="list"}
+    <table class="clsSTD">{foreach from=$list item="item"}
+    <tr>
+      <td>{$item}</td>
+      <td>{$eventArg.`$item`.type}</td>
+      <td>{$eventArg.`$item`.desc}</td>
+  </tr>{/foreach}
+  </table>
+</blockquote>
+</body>
+</html>

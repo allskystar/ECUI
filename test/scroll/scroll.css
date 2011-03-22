@@ -1,0 +1,16 @@
+.ec-vscroll {
+	position:absolute;
+	top:0px;
+	left:0px;
+	width:15px;
+	padding:15px 0px 15px 0px;
+	font-size:1px
+}
+.ec-hscroll {
+	position:absolute;
+	top:0px;
+	left:0px;
+	height:15px;
+	padding:0px 15px 0px 15px;
+	font-size:1px
+}

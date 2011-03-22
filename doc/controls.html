@@ -1,0 +1,22 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+<title>ECUI 控件</title>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312">
+<link rel="stylesheet" type="text/css" href="common/common.css" />
+</head>
+<body>
+<h1><a>ECUI 控件</a></h1>
+<hr size="1">
+<p>下面列出了 ECUI 的标准控件，点击链接即可前往控件的定义，其中包含了该对象的所有成员集。</p>
+<p class="clsRef">标准控件</p>
+<blockquote>
+  <table class="clsSTD">{foreach item="item" from=$types}{if $item.type=="ui"}
+    <tr>
+      <td>{$item.name|control}</td>
+      <td>{eval var=$item.remark[0]}({$item.position})</td>
+    </tr>{/if}{/foreach}
+  </table>
+</blockquote>
+</body>
+</html>

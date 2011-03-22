@@ -1,0 +1,29 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+<title>基本功能扩展</title>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312">
+<link rel="stylesheet" type="text/css" href="common/common.css" />
+</head>
+<body>
+<h1><a>基本功能扩展</a></h1>
+<hr />
+<p class="clsRef">控件功能扩展</p>
+<p>各控件具有大量以$符号开头的方法，在使用控件时不提倡调用这些方法。但在扩展控件功能，进行二次开发的时候调用、重写这些方法就能达到想要的效果。</p>
+<p>$打头的方法都直接由框架调用，用于完成控件的默认行为。比如 Control 控件的 $create 在框架中的实现就是调用自身的 paint 方法刷新控件。</p>
+<p>$打头的方法不同于控件的事件处理函数，虽然两者几乎都能完成相同的任务，但从语义上讲前者是用于二次开发，更多的是处理与控件本身相关的事务，而后者是给用户使用以处理具体业务的。</p>
+<p>框架本身提供的控件都不带任何样式，对于那些需要漂亮UI的使用场景，就需要小小的扩展下控件的基本功能，使其默认就带有装饰器。如下是对于竖形滚动条控件中的滚动条默认添加一个上下装饰器，然后再对装饰器做样式设定，带圆角的滚动条就轻松实现了。
+<blockquote>
+  <pre class="clsCode">
+//重写竖形滚动条控件的$create方法，为其添加上下装饰器
+ecui.ui.VScroll.prototype.$create = function () {
+  var block = this.getBlock(), width = block.getWidth();  //获取滚动条控件的滚动条，并获取它的宽度
+  new ecui.ext.TBDecorator(block, 'vsblockdtr');        //为滚动条添加上下装饰器
+  block.setSize(width);                                   //重设滚动条宽度，避免添加装饰器后造成的宽度改变
+  this.paint();                                           //重绘控件 $create方法的默认实现
+};
+  </pre>
+</blockquote>
+<p>具体的$方法及其介绍请参见<a href="controls.html">各控件方法说明</a></p>
+</body>
+</html>

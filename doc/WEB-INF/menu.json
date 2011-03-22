@@ -1,0 +1,13 @@
+[
+	{"name": "ecui",        "type": "base", "desc": "ECUI 使用方式"},
+	{"name": "core",        "type": "base", "desc": "ECUI 核心"},
+	{"name": "controls",    "type": "base", "desc": "ECUI 控件"},
+	{"name": "methods",     "type": "base", "desc": "ECUI 方法"},
+	{"name": "events",      "type": "base", "desc": "ECUI 事件"},
+	{"name": "styles",      "type": "base", "desc": "ECUI 样式"},
+	{"name": "decorators",  "type": "base", "desc": "ECUI 装饰器"},
+	{"name": "extend",      "type": "ext",  "desc": "ECUI 基本功能扩展(样式/事件/结构)"},
+	{"name": "inherit",     "type": "ext",  "desc": "ECUI 控件继承"},
+	{"name": "association", "type": "ext",  "desc": "ECUI 控件组合"},
+	{"name": "connect",     "type": "ext",  "desc": "ECUI 控件关联"}
+]

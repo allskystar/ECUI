@@ -1,0 +1,3455 @@
+{
+    "core": [
+        {
+            "name": "$bind",
+            "type": "core",
+            "desc": "使一个 DOM 节点与一个 {'controls'|menu} 在逻辑上绑定。",
+            "params": [
+                {"name": "el", "type": "HTMLElement", "desc": "Element 对象"},
+                {"name": "control", "type": "ecui.ui.Control", "desc": "{'controls'|menu}"}
+            ],
+            "return": {"type": "boolean", "desc": "绑定操作是否成功"},
+            "remark": "一个 DOM 节点只能绑定一个 {'controls'|menu}，多次绑定仅第一次有效，绑定后的 DOM 节点可以通过 {'getControl'|method:'core'} 方法得到绑定的 {'controls'|menu}。使用页面静态初始化(参见 {'ecui'|menu})控件后，如果需要修改 DOM 节点绑定的 {'controls'|menu}，<font color=\"red\">通过改变 DOM 节点的 ecui 属性值，并调用核心提供的 {'init'|method:'core'} 方法初始化，是无效的</font>。请调用 {'dispose'|method:'core'} 方法释放控件后，重新初始化，<font color=\"red\">控件的 {'\\$dispose'|method:'control'} 方法或 {'ondispose'|event:'control'} 事件中需要释放与其相关联的所有 DOM 绑定</font>。"
+        },
+
+        {
+            "name": "$connect",
+            "type": "core",
+            "desc": "为两个 {'controls'|menu} 建立连接。",
+            "params": [
+                {"name": "caller", "type": "ecui.ui.Control", "desc": "发起建立连接请求的 {'controls'|menu}"},
+                {"name": "func", "type": "Function", "desc": "用于建立连接的方法，即通过调用 func.call(caller, ecui.get(targetId)) 建立连接"},
+                {"name": "targetId", "type": "string", "desc": "被连接的 {'controls'|menu} 标识符，即在标签的 ecui 属性中定义的 id 值"}
+            ],
+            "remark": "使用页面静态初始化或页面动态初始化(参见 {'ecui'|menu})方式，控件创建时，需要的关联控件也许还未创建。$connect 方法提供将指定的函数滞后到对应的控件创建后才调用的模式。如果 targetId 对应的控件还未创建，则调用会被搁置，直到需要的控件创建成功后，再自动执行，参见 {'create'|method:'core'} 方法。"
+        },
+
+        {
+            "name": "$create",
+            "type": "core",
+            "desc": "创建 {'controls'|menu}。",
+            "params": [
+                {"name": "type", "type": "string", "desc": "控件的名称"},
+                {"name": "params", "type": "Object", "desc": "初始化参数，参见 {'controls'|menu}"}
+            ],
+            "return": {"type": "ecui.ui.Control", "desc": "{'controls'|menu}"},
+            "remark": [
+                "$create 方法创建 ECUI 控件，不会自动渲染控件，为了加快渲染速度，应该首先使用 $create 方法创建完所有的控件后，再调用控件的 cache 与 paint 方法渲染控件。params 参数对象支持的属性如下：",
+                "<table class=\"clsSTD\"><tr><td>id</td><td>string，当前控件的 id，提供给 {'\\$connect'|method:'core'} 与 {'get'|method:'core'} 使用</td></tr><tr><td>base</td><td>string，控件的基本样式，参见 {'getBaseClass'|method:'control'} 方法，有关样式的描述参见 {'styles'|menu}，如果忽略此参数将使用基本 Element 对象的 className 属性</td></tr><tr><td>element</td><td>HTMLElement，与控件绑捆的 Element 对象，参见 {'getBase'|method:'control'} 方法，如果忽略此参数将创建 Element 对象与控件绑捆</td></tr><tr><td>parent</td><td>ecui.ui.Control 或者 HTMLElement，父控件对象或者父 Element 对象</td></tr><tr><td>type</td><td>string，控件的默认样式，通常情况下省略此参数，使用 \"ec-控件名称\" 作为控件的默认样式</td></tr></table>"
+            ]
+        },
+
+        {
+            "name": "$fastCreate",
+            "type": "core",
+            "desc": "快速创建 {'controls'|menu}。",
+            "params": [
+                {"name": "type", "type": "Function", "desc": "控件的构造函数"},
+                {"name": "el", "type": "HTMLElement", "desc": "控件对应的 Element 对象"},
+                {"name": "parent", "type": "ecui.ui.Control", "desc": "控件的父控件"},
+                {"name": "params", "type": "Object", "desc": "初始化参数，参见 {'controls'|menu}"}
+            ],
+            "return": {"type": "ecui.ui.Control", "desc": "{'controls'|menu}"},
+            "remark": "$fastCreate 方法分解 Element 对象的 className 属性得到样式信息，其中第一个样式为类型样式，第二个样式为基本样式。"
+        },
+
+        {
+            "name": "$register",
+            "type": "core",
+            "desc": "注册一个扩展组件。",
+            "params": [
+                {"name": "name", "type": "string", "desc": "扩展组件的参数名称"},
+                {"name": "func", "type": "Function", "desc": "扩展组件的初始化函数"}
+            ]
+        },
+
+        {
+            "name": "calcHeightRevise",
+            "type": "core",
+            "desc": "获取高度修正值(即计算 padding, border 样式对 height 样式的影响)。",
+            "params": [
+                {"name": "style", "type": "CssStyle", "desc": "CssStyle 对象"}
+            ],
+            "return": {"type": "number", "desc": "高度修正值"},
+            "remark": "IE 在盒子模型上不完全遵守 W3C 标准，因此，需要使用 calcHeightRevise 方法计算 offsetHeight 与实际的 height 样式之间的修正值。"
+        },
+
+        {
+            "name": "calcLeftRevise",
+            "type": "core",
+            "desc": "获取左定位修正值(即计算 border 样式对 left 样式的影响)。",
+            "params": [
+                {"name": "el", "type": "HTMLElement", "desc": "Element 对象"}
+            ],
+            "return": {"type": "number", "desc": "左定位修正值"},
+            "remark": "opera 等浏览器，offsetLeft 与 left 样式的取值受到了 border 样式的影响，因此，需要使用 calcLeftRevise 方法计算 offsetLeft 与实际的 left 样式之间的修正值。"
+        },
+
+        {
+            "name": "calcTopRevise",
+            "type": "core",
+            "desc": "获取上定位修正值(即计算 border 样式对 top 样式的影响)。",
+            "params": [
+                {"name": "el", "type": "HTMLElement", "desc": "Element 对象"}
+            ],
+            "return": {"type": "number", "desc": "上定位修正值"},
+            "remark": "opera 等浏览器，offsetTop 与 top 样式的取值受到了 border 样式的影响，因此，需要使用 calcTopRevise 方法计算 offsetTop 与实际的 top 样式之间的修正值。"
+        },
+
+        {
+            "name": "calcWidthRevise",
+            "type": "core",
+            "desc": "获取宽度修正值(即计算 padding,border 样式对 width 样式的影响)。",
+            "params": [
+                {"name": "style", "type": "CssStyle", "desc": "CssStyle 对象"}
+            ],
+            "return": {"type": "number", "desc": "宽度修正值"},
+            "remark": "IE 在盒子模型上不完全遵守 W3C 标准，因此，需要使用 calcWidthRevise 方法计算 offsetWidth 与实际的 width 样式之间的修正值。"
+        },
+
+        {
+            "name": "create",
+            "type": "core",
+            "desc": "创建 {'controls'|menu}。",
+            "params": [
+                {"name": "type", "type": "string", "desc": "控件的名称"},
+                {"name": "params", "type": "Object", "desc": "初始化参数，参见 {'controls'|menu}"}
+            ],
+            "return": {"type": "ecui.ui.Control", "desc": "{'controls'|menu}"},
+            "remark": [
+                "标准的创建 {'controls'|menu} 的工厂方法，所有的 {'controls'|menu} 都应该通过 create 方法或者 {'\\$fastCreate'|method:'core'} 方法生成。params 参数对象支持的属性如下：",
+                "<table class=\"clsSTD\"><tr><td>id</td><td>string，当前控件的 id，提供给 {'\\$connect'|method:'core'} 与 {'get'|method:'core'} 使用</td></tr><tr><td>base</td><td>string，控件的基本样式，参见 {'getBaseClass'|method:'control'} 方法，有关样式的描述参见 {'styles'|menu}，如果忽略此参数将使用基本 Element 对象的 className 属性</td></tr><tr><td>element</td><td>HTMLElement，与控件绑捆的 Element 对象，参见 {'getBase'|method:'control'} 方法，如果忽略此参数将创建 Element 对象与控件绑捆</td></tr><tr><td>parent</td><td>ecui.ui.Control 或者 HTMLElement，父控件对象或者父 Element 对象</td></tr><tr><td>type</td><td>string，控件的默认样式，通常情况下省略此参数，使用 \"ec-控件名称\" 作为控件的默认样式</td></tr></table>"
+            ],
+            "example": [
+                "<div id=\"ctrl\"></div>",
+                "var control = ecui.create(\"Control\", {element: document.getElementById(\"ctrl\")});"
+            ]
+        },
+
+        {
+            "name": "dispose",
+            "type": "core",
+            "desc": "释放 {'controls'|menu} 及其子控件占用的内存。",
+            "params": [
+                {"name": "control", "type": "ecui.ui.Control|HTMLElement", "desc": "需要释放的 {'controls'|menu} 或包含控件的 DOM 节点"}
+            ]
+        },
+
+        {
+            "name": "drag",
+            "type": "core",
+            "desc": "将指定的 {'controls'|menu} 设置为拖拽状态。",
+            "params": [
+                {"name": "control", "type": "ecui.ui.Control", "desc": "需要进行拖拽的 {'controls'|menu} 对象"},
+                {"name": "event", "type": "Event", "desc": "事件对象"},
+                {"name": "range", "type": "Object", "desc": "控件允许拖拽的范围，省略参数时，控件默认只允许在 offsetParent 定义的区域内拖拽，如果 offsetParent 是 body，则只允许在当前浏览器可视范围内拖拽"}
+            ],
+            "remark": [
+                "只有在鼠标左键按下时，才允许调用 drag 方法设置待拖拽的 ECUI 控件，在拖拽操作过程中，将依次触发 {'ondragstart'|event:'control'}、{'ondragmove'|event:'control'} 与 {'ondragend'|event:'control'} 事件。range 参数支持的属性如下：", 
+                "<table class=\"clsSTD\"><tr><td>top</td><td>number，控件允许拖拽到的最小Y轴坐标</td></tr><tr><td>right</td><td>number，控件允许拖拽到的最大X轴坐标</td></tr><tr><td>bottom</td><td>number，控件允许拖拽到的最大Y轴坐标</td></tr><tr><td>left</td><td>number，控件允许拖拽到的最小X轴坐标</td></tr></table>"
+            ],
+            "example": [
+                "<style>\n.ec-control {width:100px;height:100px;border:1px solid black;position:absolute}\n</style>\n<div ecui=\"type:control;id:ctrl\" onmousedown=\"ecui.drag(this, event)\">点击在当前窗口的范围内拖拽</div>"
+            ]
+        },
+
+        {
+            "name": "event",
+            "type": "core",
+            "desc": "事件对象标准化。",
+            "params": [
+                {"name": "event", "type": "Event", "desc": "事件对象"}
+            ],
+            "return": {"type": "Event", "desc": "标准化后的事件对象"},
+            "remark": [
+                "event 方法将浏览器产生的鼠标与键盘事件标准化并添加 ECUI 框架需要的信息到事件对象中。标准化的属性如下：",
+                "<table class=\"clsSTD\"><tr><td>pageX</td><td>number，鼠标的X轴坐标</td></tr><tr><td>pageY</td><td>number，鼠标的Y轴坐标</td></tr><tr><td>which</td><td>number，触发事件的键盘代码</td></tr><tr><td>target</td><td>HTMLElement，触发事件的 Element 对象</td></tr><tr><td>stopPropagation</td><td>Function，事件停止冒泡</td></tr><tr><td>preventDefault</td><td>Function，阻止事件默认的处理</td></tr><tr><td>getTarget</td><td>Function，获取事件相关的 {'controls'|menu} 对象</td></tr></table>"
+            ]
+        },
+
+        {
+            "name": "findControl",
+            "type": "core",
+            "desc": "从指定的 DOM 节点开始，依次向它的父节点查找绑定的 {'controls'|menu}。",
+            "params": [
+                {"name": "el", "type": "HTMLElement", "desc": "Element 对象"}
+            ],
+            "return": {"type": "ecui.ui.Control", "desc": "{'controls'|menu}，如果不能找到，返回 null"},
+            "remark": "findControl 方法，会返回从当前 DOM 节点开始，依次向它的父节点查找到的第一个绑定(参见 {'\\$bind'|method:'core'} 方法)的 {'controls'|menu}。findControl 方法一般在控件创建时使用，用于查找父控件对象。",
+            "example": [
+                "<div ecui=\"type:control;id:ctrl\">findControl <span id=\"test\">方法</span></div>",
+                "//下面表达式的结果是true\necui.findControl(document.getElementById(\"test\")) === ecui.get(\"ctrl\");"
+            ]
+        },
+
+        {
+            "name": "get",
+            "type": "core",
+            "desc": "获取指定名称的 {'controls'|menu}。",
+            "params": [
+                {"name": "id", "type": "string", "desc": "{'controls'|menu} 的名称，通过 DOM 节点的 ecui 属性的 id 值定义"}
+            ],
+            "return": {"type": "ecui.ui.Control", "desc": "指定名称的 {'controls'|menu} 对象，如果不存在返回 null"},
+            "remark": "使用页面静态初始化或页面动态初始化(参见 {'ecui'|menu})创建的控件，如果在 ecui 属性中指定了 id，就可以通过 get 方法得到控件，也可以在 DOM 对象上使用 {'getControl'|method:'core'} 方法。",
+            "example": [
+                "<div id=\"ctrl1\" class=\"ctrl\" ecui=\"type:control;id:ctrl2\"></div>",
+                "//下面表达式的结果是true\necui.get(\"ctrl2\") === document.getElementById(\"ctrl1\").getControl();"
+            ]
+        },
+
+        {
+            "name": "getAttributeName",
+            "type": "core",
+            "desc": "获取当前的初始化属性名称。",
+            "return": {"type": "string", "desc": "当前的初始化属性名称"},
+            "remark": "getAttributeName 方法返回页面静态初始化(参见 {'ecui'|menu})使用的属性名称，通过在 BODY 节点的 data-ecui 属性中指定，默认使用 ecui 作为初始化属性名称。",
+            "example": [
+                "<body data-ecui=\"name:data-ecui\">\n  <div data-ecui=\"type:control\"></div>\n</body>"
+            ]
+        },
+
+        {
+            "name": "getControl",
+            "type": "core",
+            "desc": "获取当前 DOM 节点绑定的 ECUI 控件。",
+            "syntax": "<i>ecui.ui.Control</i> = <i>HTMLElement.</i><b>getControl(</b><i></i><b>)</b>",
+            "return": {"type": "ecui.ui.Control", "desc": "与指定的 DOM 节点绑定的 {'controls'|menu}"},
+            "remark": "与控件关联的 DOM 节点(例如通过 {'init'|method:'core'} 方法初始化，或者使用 {'\\$bind'|method:'core'} 方法绑定，或者使用 {'create'|method:'core'}、{'\\$fastCreate'|method:'core'} 方法生成控件)，会被添加一个 getControl 方法用于获取它绑定的 {'controls'|menu}，更多获取控件的方法参见 {'get'|method:'core'}。",
+            "example": [
+                "<div id=\"ctrl1\" class=\"ctrl\" ecui=\"type:control;id:ctrl2\"></div>",
+                "//下面表达式的结果是true\ndocument.getElementById(\"ctrl1\").getControl() === ecui.get(\"ctrl2\");"
+            ]
+        },
+
+        {
+            "name": "getFocused",
+            "type": "core",
+            "desc": "获取当前拥有焦点的控件。",
+            "return": {"type": "ecui.ui.Control", "desc": "当前拥有焦点的 {'controls'|menu}，如果不存在返回 null"},
+            "example": [
+                "<div style=\"border:1px solid #000\" ecui=\"type:control;id:ctrl1\"></div>",
+                "ecui.get(\"ctrl1\").onclick = function (event) {\n  //显示true\n  alert(ecui.getFocused() == this);\n}"
+            ]
+        },
+
+        {
+            "name": "getKey",
+            "type": "core",
+            "desc": "获取最近一次键盘按下事件的按键值。",
+            "return": {"type": "number", "desc": "按键的编码"},
+            "remark": "getKey 方法返回的是最近一次 keydown 事件的 keyCode/which 值，用于解决浏览器的 keypress 事件中没有特殊按钮(例如方向键等)取值的问题。",
+            "example": [
+                "<div id=\"ele\" style=\"border:1px solid #000\"></div>",
+                "document.getElementById(\"ele\").onclick = function () {\n  this.innerHTML = '当前按键的值是：' + ecui.getKey();\n}"
+            ]
+        },
+
+        {
+            "name": "getMouseX",
+            "type": "core",
+            "desc": "获取当前鼠标光标的页面/相对于控件内部区域的X轴坐标。",
+            "params": [
+                {"name": "control", "type": "ecui.ui.Control", "desc": "{'controls'|menu}，如果省略参数，将获取鼠标在页面的X轴坐标，否则获取鼠标相对于控件内部区域的X轴坐标"}
+            ],
+            "return": {"type": "number", "desc": "X轴坐标值"},
+            "remark": "getMouseX 方法计算相对于控件内部区域的X轴坐标时，按照 Element 盒子模型的标准，需要减去内层 Element 对象的 borderLeftWidth 样式的值。",
+            "example": [
+                "<div id=\"ele\" style=\"border:1px solid #000\"></div>",
+                "var ele = document.getElementById(\"ele\");\nsetInterval(function () {\n  ele.innerHTML = 'Mouse X ' + ecui.getMouseX();\n}, 1);"
+            ]
+        },
+
+        {
+            "name": "getMouseY",
+            "type": "core",
+            "desc": "获取当前鼠标光标的页面/相对于控件内部区域的Y轴坐标。",
+            "params": [
+                {"name": "control", "type": "ecui.ui.Control", "desc": "{'controls'|menu}，如果省略参数，将获取鼠标在页面的Y轴坐标，否则获取鼠标相对于控件内部区域的Y轴坐标"}
+            ],
+            "return": {"type": "number", "desc": "Y轴坐标值"},
+            "remark": "getMouseY 方法计算相对于控件内部区域的Y轴坐标时，按照 Element 盒子模型的标准，需要减去 内层 Element 对象的 borderTopWidth 样式的值。",
+            "example": [
+                "<div id=\"ele\" style=\"border:1px solid #000\"></div>",
+                "var ele = document.getElementById(\"ele\");\nsetInterval(function () {\n  ele.innerHTML = 'Mouse Y ' + ecui.getMouseY();\n}, 1);"
+            ]
+        },
+
+        {
+            "name": "getParameters",
+            "type": "core",
+            "desc": "从 Element 对象中获取初始化参数对象。",
+            "params": [
+                {"name": "el", "type": "HTMLElement", "desc": "Element 对象"},
+                {"name": "attributeName", "type": "string", "desc": "当前的初始化属性名称(参见 {'getAttributeName'|method:'core'} 方法)"}
+            ],
+            "return": {"type": "Object", "desc": "参数对象"}
+        },
+
+        {
+            "name": "getPressed",
+            "type": "core",
+            "desc": "获取当前处于按压状态的 {'controls'|menu}。",
+            "return": {"type": "ecui.ui.Control", "desc": "处于按压状态的 {'controls'|menu}，如果不存在返回 null"},
+            "remark": "控件的按压状态，指的是鼠标在控件上按下，到松开的全过程，之间无论鼠标移动到哪个位置，被按压的控件对象都不会发生改变。",
+            "example": [
+                "<div style=\"border:1px solid #000\" ecui=\"type:control;id:ctrl1\"></div>",
+                "ecui.get(\"ctrl1\").onmousedown = function () {\n  //显示true\n  alert(ecui.getPressed() == this);\n}"
+            ]
+        },
+
+        {
+            "name": "getScrollNarrow",
+            "type": "core",
+            "desc": "获取浏览器滚动条相对窄的一边的长度。",
+            "return": {"type": "number", "desc": "浏览器滚动条相对窄的一边的长度"},
+            "remark": "getScrollNarrow 方法对于垂直滚动条，返回的是滚动条的宽度，对于水平滚动条，返回的是滚动条的高度。"
+        },
+
+        {
+            "name": "getStatus",
+            "type": "core",
+            "desc": "获取框架当前的状态。",
+            "return": {"type": "boolean", "desc": "框架当前的状态"},
+            "remark": "getStatus 方法返回框架当前的工作状态，目前支持三类工作状态：NORMAL(正常状态)、INIT(加载状态)与PAINT(刷新状态)"
+        },
+
+        {
+            "name": "getTarget",
+            "type": "core",
+            "desc": "获取触发本次事件的 {'controls'|menu}。",
+            "syntax": "<i>ecui.ui.Control</i> = <i>Event.</i><b>getTarget(</b><i></i><b>)</b>",
+            "return": {"type": "ecui.ui.Control", "desc": "触发当前事件的 {'controls'|menu}"},
+            "example": [
+                "<div style=\"border:1px solid #000\" ecui=\"type:control;id:ctrl1\"></div>",
+                "ecui.get(\"ctrl1\").onclick = function (event) {\n  //显示true\n  alert(event.getTarget() == this);\n}"
+            ]
+        },
+
+        {
+            "name": "init",
+            "type": "core",
+            "desc": "初始化指定的 DOM 节点及它的子节点。",
+            "params": [
+                {"name": "el", "type": "HTMLElement", "desc": "Element 对象"}
+            ],
+            "remark": [
+                "init 方法将初始化指定的 DOM 节点及它的子节点，如果这些节点拥有初始化属性(ecui)，将按照规则为它们绑定 {'controls'|menu}，每一个节点只会被绑定一次，重复的绑定无效。页面加载完成时，将会自动针对 document.body 执行这个方法，相当于自动执行以下的语句：",
+                "<pre class=\"clsCode\">ecui.init(document.body)</pre>"
+            ],
+            "example": [
+                "<div id=\"ctrl1\"></div>",
+                "var oDiv = document.createElement('ctrl1');\noDiv.innerHTML = '<div id=\"ctrl2\" class=\"ctrl2\" ecui=\"type:control;id:ctrl2\"></div>';\necui.init(oDiv);"
+            ]
+        },
+
+        {
+            "name": "intercept",
+            "type": "core",
+            "desc": "设置框架拦截之后的一次点击，并将点击事件发送给指定的 {'controls'|menu}。",
+            "params": [
+                {"name": "control", "type": "ecui.ui.Control", "desc": "{'controls'|menu}"}
+            ],
+            "remark": "intercept 方法将下一次的鼠标点击事件转给指定控件的 {'\\$intercept'|method:'control'} 方法处理，相当于拦截了一次框架的鼠标事件点击操作，框架其它的状态不会自动改变，例如拥有焦点的控件不会改变。如果 {'\\$intercept'|method:'control'} 方法不返回 false，将自动调用 {'restore'|method:'core'} 方法。",
+            "example": [
+                "<style>\n.ec-control {width:100px;height:100px;border:1px solid black}\n.ec-control-focus {background-color:red}\n</style>\n<div ecui=\"type:control;id:ctrl\">控件获得焦点后，第一次点击不会失去焦点</div>",
+                "var control = ecui.get(\"ctrl\");\ncontrol.onfocus = function () {\n  ecui.intercept(control);\n}"
+            ]
+        },
+
+        {
+            "name": "isFixedSize",
+            "type": "core",
+            "desc": "判断容器大小是否需要修正(即计算 padding, border 样式对 width, height 样式的影响)。",
+            "return": {"type": "boolean", "desc": "容器大小是否需要修正"}
+        },
+
+        {
+            "name": "loseFocus",
+            "type": "core",
+            "desc": "使控件失去焦点。",
+            "params": [
+                {"name": "control", "type": "ecui.ui.Control", "desc": "{'controls'|menu}"}
+            ],
+            "remark": "如果控件及它的子控件没有焦点，执行 loseFocus 方法系统的状态将不会产生变化。如果控件或它的子控件拥有焦点，执行 loseFocus 方法将使控件失去焦点，如果控件拥有父控件，此时父控件获得焦点。如果控件从拥有焦点状态变为了未拥有焦点状态，则触发 {'onblur'|event:'control'} 事件，它不完全是 {'setFocused'|method:'core'} 方法的逆向行为。",
+            "example": [
+                "<style>\n.ec-control {width:100px;height:100px;border:1px solid black}\n.ec-control-focus {background-color:red}\n</style>\n<div ecui=\"type:control;id:ctrl\">点击获得焦点</div>\n<div onmouseover=\"ecui.loseFocus(ecui.get('ctrl'))\">移入清除控件焦点</div>"
+            ]
+        },
+
+        {
+            "name": "mask",
+            "type": "core",
+            "desc": "使用一个层遮罩整个浏览器可视化区域。",
+            "params": [
+                {"name": "opacity", "type": "number", "desc": "透明度，如 0.5，如果省略参数将关闭遮罩层"},
+                {"name": "zIndex", "type": "number", "desc": "遮罩层的 zIndex 样式值，如果省略使用 32767"}
+            ],
+            "remark": "遮罩层的 z-index 样式默认取值为 32767，<font color=\"red\">请不要将 Element 对象的 z-index 样式设置大于 32767</font>。",
+            "example": [
+                "<div id=\"ctrl1\" ecui=\"type:control;id:ctrl1\">开启遮罩</div>\n<div id=\"ctrl2\" ecui=\"type:control;id:ctrl2\" style=\"z-index:65536\">关闭遮罩</div>",
+                "ecui.get(\"ctrl1\").onclick = function() {\n  //打开遮罩层\n  ecui.mask(0.5);\n}\necui.get(\"ctrl2\").onclick = function() {\n  //关闭遮罩层\n  ecui.mask();\n}"
+            ]
+        },
+
+        {
+            "name": "paint",
+            "type": "core",
+            "desc": "重绘浏览器区域的控件。",
+            "remark": "paint 方法在页面改变大小时自动触发，一些特殊情况下，例如包含框架的页面，页面变化时不会触发 onresize 事件，需要手工调用 paint 函数刷新所有的控件大小。"
+        },
+
+        {
+            "name": "query",
+            "type": "core",
+            "desc": "查询满足条件的控件列表。",
+            "params": [
+                {"name": "condition", "type": "Object", "desc": "查询条件，如果省略将返回全部的控件"}
+            ],
+            "return": {"type": "Array", "desc": "控件列表"},
+            "remark": [
+                "query 方法允许按多种条件组合查询满足需要的控件，如果省略条件表示不进行限制。condition 参数对象支持的属性如下：", 
+                "<table class=\"clsSTD\"><tr><td>type</td><td>Function，控件的类型构造函数</td></tr><tr><td>parent</td><td>ecui.ui.Control，控件的父控件对象</td></tr><tr><td>custom</td><td>Function，自定义查询函数，传入的参数是控件对象</td></tr></table>"
+            ]
+        },
+
+        {
+            "name": "restore",
+            "type": "core",
+            "desc": "恢复当前框架的状态到上一个状态。",
+            "remark": "restore 用于恢复调用特殊操作如 {'drag'|method:'core'}、{'intercept'|method:'core'} 与 {'zoom'|method:'core'} 后改变的框架环境，包括各框架事件处理函数的恢复、控件的焦点设置等。"
+        },
+
+        {
+            "name": "select",
+            "type": "core",
+            "desc": "将指定的控件设置为选择状态。",
+            "params": [
+                {"name": "control", "type": "ecui.ui.Control", "desc": "{'controls'|menu}"},
+                {"name": "event", "type": "Event", "desc": "事件对象"},
+                {"name": "className", "type": "string", "desc": "选择框的样式名称，如果省略将使用 ec-selector"}
+            ],
+            "remark": "select 方法将控件设置为选择，显示选择框并对选择框调用 {'zoom'|method:'core'} 方法。调用它会触发控件对象的 {'onselectstart'|event:'control'} 事件，在整个 select 的周期中，还将触发 {'onselect'|event:'control'} 与 {'onselectend'|event:'control'} 事件，在释放鼠标按键时选择操作周期结束。"
+        },
+
+        {
+            "name": "setFocused",
+            "type": "core",
+            "desc": "使 {'controls'|menu} 得到焦点。",
+            "params": [
+                {"name": "control", "type": "ecui.ui.Control", "desc": "{'controls'|menu}"}
+            ],
+            "remark": "setFocused 方法会将焦点状态设置到指定的控件，允许不指定需要获得焦点的控件，则当前拥有焦点的控件将失去焦点，需要当前获得焦点的控件失去焦点还可以调用 {'loseFocus'|method:'core'} 方法。获得焦点的控件触发 {'onfocus'|event:'control'} 事件，失去焦点的控件触发 {'onblur'|event:'control'} 事件。<font color=\"red\">需要注意的是，如果控件拥有焦点，当通过 setFocused 方法设置它的子控件获得焦点时，虽然焦点对应的控件对象发生了变化，但是控件并不会触发 {'onblur'|event:'control'} 方法，此时控件逻辑上仍然处于拥有焦点状态。</font>",
+            "example": [
+                "<style>\n.ec-control {width:100px;height:100px;border:1px solid black}\n.ec-control-focus {background-color:red}\n</style>\n<div ecui=\"type:control;id:ctrl\"></div>\n<button onclick=\"ecui.focus(ecui.get('ctrl'))\">设置控件获得焦点</button>"
+            ]
+        },
+
+        {
+            "name": "zoom",
+            "type": "core",
+            "desc": "将指定的 {'controls'|menu} 设置为缩放状态。",
+            "params": [
+                {"name": "control", "type": "ecui.ui.Control", "desc": "{'controls'|menu}"},
+                {"name": "event", "type": "Event", "desc": "事件对象"},
+                {"name": "range", "type": "Object", "desc": "控件允许的缩放范围参数"}
+            ],
+            "remark": [
+                "zoom 方法将控件设置为缩放，缩放的值允许负数，用于表示反向的缩放，调用它会触发控件对象的 {'onzoomstart'|event:'control'} 事件，在整个 zoom 的周期中，还将触发 {'onzoom'|event:'control'} 与 {'onzoomend'|event:'control'} 事件，在释放鼠标按键时缩放操作周期结束。range 参数支持的属性如下：", "<table class=\"clsSTD\"><tr><td>minWidth</td><td>number，控件允许缩放的最小宽度</td></tr><tr><td>maxWidth</td><td>number，控件允许缩放的最大宽度</td></tr><tr><td>minHeight</td><td>number，控件允许缩放的最小高度</td></tr><tr><td>maxHeight</td><td>number，控件允许缩放的最大高度</td></tr></table>"
+            ],
+            "example": [
+                "<div id=\"ctrl1\" class=\"ctrl\" ecui=\"type:control;id:ctrl1\"></div>",
+                "//点击控件触发控件本身的缩放\necui.get(\"ctrl1\").onmousedown = function(event) {\n  ecui.zoom(this, event);\n}"
+            ]
+        }
+    ],
+
+    "array": [
+        {
+            "name": "indexOf",
+            "type": "array",
+            "desc": "查询数组中指定对象的位置序号。",
+            "params": [
+                {"name": "list", "type": "Array", "desc": "数组对象"},
+                {"name": "obj", "type": "Object", "desc": "需要查询的对象"}
+            ],
+            "return": {"type": "number", "desc": "位置序号，不存在返回 -1"},
+            "remark": "indexOf 方法返回完全匹配的对象在数组中的序号，如果在数组中找不到指定的对象，返回 -1。"
+        },
+
+        {
+            "name": "remove",
+            "type": "array",
+            "desc": "从数组中移除对象。",
+            "params": [
+                {"name": "list", "type": "Array", "desc": "数组对象"},
+                {"name": "obj", "type": "Object", "desc": "需要移除的对象"}
+            ]
+        }
+    ],
+
+    "dom": [
+        {
+            "name": "addClass",
+            "type": "dom",
+            "desc": "为 Element 对象添加新的样式。",
+            "params": [
+                {"name": "el", "type": "HTMLElement", "desc": "Element 对象"},
+                {"name": "className", "type": "string", "desc": "样式名，可以是多个，中间使用空白符分隔"}
+            ]
+        },
+
+        {
+            "name": "children",
+            "type": "dom",
+            "desc": "获取 Element 对象的所有深度为1的子 Element 对象。",
+            "params": [
+                {"name": "el", "type": "HTMLElement", "desc": "Element 对象"}
+            ],
+            "return": {"type": "Array", "desc": "Element 对象数组"}
+        },
+
+        {
+            "name": "contain",
+            "type": "dom",
+            "desc": "判断一个 Element 对象是否包含另一个 Element 对象。",
+            "params": [
+                {"name": "container", "type": "HTMLElement", "desc": "包含的 Element 对象"},
+                {"name": "contained", "type": "HTMLElement", "desc": "被包含的 Element 对象"}],
+            "return": {"type": "boolean", "desc": "contained 对象是否被包含于 container 对象的 DOM 节点上"},
+            "remark": "contain 方法会将两个 Element 对象相同也认为是包含。"
+        },
+
+        {
+            "name": "create",
+            "type": "dom",
+            "desc": "创建 Element 对象。",
+            "params": [
+                {"name": "className", "type": "string", "desc": "样式名称"},
+                {"name": "cssText", "type": "string", "desc": "样式文本"},
+                {"name": "tagName", "type": "string", "desc": "标签名称，默认创建一个空的 div 对象"}
+            ],
+            "return": {"type": "HTMLElement", "desc": "创建的 Element 对象"}
+        },
+
+        {
+            "name": "first",
+            "type": "dom",
+            "desc": "获取 Element 对象的第一个子 Element 对象。",
+            "params": [
+                {"name": "el", "type": "HTMLElement", "desc": "Element 对象"}
+            ],
+            "return": {"type": "HTMLElement", "desc": "子 Element 对象"}
+        },
+
+        {
+            "name": "getParent",
+            "type": "dom",
+            "desc": "获取 Element 对象的父 Element 对象。",
+            "params": [
+                {"name": "el", "type": "HTMLElement", "desc": "Element 对象"}
+            ],
+            "return": {"type": "HTMLElement", "desc": "父 Element 对象，如果没有，返回 null"}
+        },
+
+        {
+            "name": "getPosition",
+            "type": "dom",
+            "desc": "获取 Element 对象的页面位置。",
+            "params": [
+                {"name": "el", "type": "HTMLElement", "desc": "Element 对象"}
+            ],
+            "return": {"type": "Object", "desc": "位置信息"},
+            "remark": [
+                "getPosition 方法将返回指定 Element 对象的位置信息。属性如下：",
+                "<table class=\"clsSTD\"><tr><td>left</td><td>number，X轴坐标</td></tr><tr><td>top</td><td>number，Y轴坐标</td></tr></table>"
+            ]
+        },
+
+        {
+            "name": "getStyle",
+            "type": "dom",
+            "desc": "获取 Element 对象的 CssStyle 对象或者是指定的样式值。",
+            "params": [
+                {"name": "el", "type": "HTMLElement", "desc": "Element 对象"},
+                {"name": "name", "type": "string", "desc": "样式名称"}
+            ],
+            "return": {"type": "CssStyle|Object", "desc": "CssStyle 对象或样式值"},
+            "remark": "getStyle 方法如果不指定样式名称，将返回 Element 对象的当前 CssStyle 对象。"
+        },
+
+        {
+            "name": "getText",
+            "type": "dom",
+            "desc": "获取 Element 对象的文本。",
+            "params": [
+                {"name": "el", "type": "HTMLElement", "desc": "Element 对象"}
+            ],
+            "return": {"type": "string", "desc": "Element 对象的文本"}
+        },
+
+        {
+            "name": "insertAfter",
+            "type": "dom",
+            "desc": "将 Element 对象插入指定的 Element 对象之后。",
+            "params": [
+                {"name": "el", "type": "HTMLElement", "desc": "被插入的 Element 对象"},
+                {"name": "target", "type": "HTMLElement", "desc": "目标 Element 对象"}
+            ],
+            "return": {"type": "HTMLElement", "desc": "被插入的 Element 对象"},
+            "remark": "如果指定的 Element 对象没有父 Element 对象，相当于 {'remove'|method:'dom'} 操作。"
+        },
+
+        {
+            "name": "insertBefore",
+            "type": "dom",
+            "desc": "将 Element 对象插入指定的 Element 对象之前。",
+            "params": [
+                {"name": "el", "type": "HTMLElement", "desc": "被插入的 Element 对象"},
+                {"name": "target", "type": "HTMLElement", "desc": "目标 Element 对象"}
+            ],
+            "return": {"type": "HTMLElement", "desc": "被插入的 Element 对象"},
+            "remark": "如果指定的 Element 对象没有父 Element 对象，相当于 {'remove'|method:'dom'} 操作。"
+        },
+
+        {
+            "name": "insertHTML",
+            "type": "dom",
+            "desc": "向指定的 Element 对象内插入一段 html 代码。",
+            "params": [
+                {"name": "el", "type": "HTMLElement", "desc": "Element 对象"},
+                {"name": "position", "type": "string", "desc": "插入 html 的位置信息，取值为 beforeBegin,afterBegin,beforeEnd,afterEnd"},
+                {"name": "html", "type": "string", "desc": "要插入的 html 代码"}
+            ]
+        },
+
+        {
+            "name": "last",
+            "type": "dom",
+            "desc": "获取 Element 对象的最后一个子 Element 对象。",
+            "params": [
+                {"name": "el", "type": "HTMLElement", "desc": "Element 对象"}
+            ],
+            "return": {"type": "HTMLElement", "desc": "子 Element 对象"}
+        },
+
+        {
+            "name": "moveElements",
+            "type": "dom",
+            "desc": "将指定的 Element 对象的内容移动到目标 Element 对象中。",
+            "params": [
+                {"name": "source", "type": "HTMLElement", "desc": "指定的 Element 对象"},
+                {"name": "target", "type": "HTMLElement", "desc": "目标 Element 对象"},
+                {"name": "all", "type": "boolean", "desc": "是否移动所有的 DOM 对象，默认仅移动 ElementNode 对象"}
+            ]
+        },
+
+        {
+            "name": "next",
+            "type": "dom",
+            "desc": "获取 Element 对象的下一个 Element 对象。",
+            "params": [
+                {"name": "el", "type": "HTMLElement", "desc": "Element 对象"}
+            ],
+            "return": {"type": "HTMLElement", "desc": "Element 对象"}
+        },
+
+        {
+            "name": "ready",
+            "type": "dom",
+            "desc": "设置页面加载完毕后自动执行的方法。",
+            "params": [
+                {"name": "func", "type": "Function", "desc": "需要自动执行的方法"}
+            ]
+        },
+
+        {
+            "name": "remove",
+            "type": "dom",
+            "desc": "从页面中移除 Element 对象。",
+            "params": [
+                {"name": "el", "type": "HTMLElement", "desc": "Element 对象"}
+            ],
+            "return": {"type": "HTMLElement", "desc": "被移除的 Element 对象"}
+        },
+
+        {
+            "name": "removeClass",
+            "type": "dom",
+            "desc": "删除 Element 对象中的样式。",
+            "params": [
+                {"name": "el", "type": "HTMLElement", "desc": "Element 对象"},
+                {"name": "className", "type": "string", "desc": "样式名，可以是多个，中间使用空白符分隔"}
+            ]
+        },
+
+        {
+            "name": "setInput",
+            "type": "dom",
+            "desc": "设置输入框的表单项属性。",
+            "params": [
+                {"name": "el", "type": "HTMLElement", "desc": "InputElement 对象"},
+                {"name": "name", "type": "string", "desc": "新的表单项名称，默认与 el 相同"},
+                {"name": "type", "type": "string", "desc": "新的表单项类型，默认为 el 相同"}
+            ],
+            "return": {"type": "HTMLElement", "desc": "设置后的 InputElement 对象"},
+            "remark": "如果没有指定一个表单项，setInput 方法将创建一个表单项。"
+        },
+
+        {
+            "name": "setStyle",
+            "type": "dom",
+            "desc": "设置 Element 对象的样式值。",
+            "params": [
+                {"name": "el", "type": "HTMLElement", "desc": "Element 对象"},
+                {"name": "name", "type": "string", "desc": "样式名称"},
+                {"name": "value", "type": "string", "desc": "样式值"}
+            ]
+        },
+
+        {
+            "name": "setText",
+            "type": "dom",
+            "desc": "设置 Element 对象的文本。",
+            "params": [
+                {"name": "el", "type": "HTMLElement", "desc": "Element 对象"},
+                {"name": "text", "type": "string", "desc": "Element 对象的文本"}
+            ]
+        }
+    ],
+
+    "string": [
+        {
+            "name": "encodeHTML",
+            "type": "string",
+            "desc": "对目标字符串进行 html 编码。",
+            "params": [
+                {"name": "source", "type": "string", "desc": "目标字符串"}
+            ],
+            "return": {"type": "string", "desc": "结果字符串"},
+            "remark": "encodeHTML 方法对四个字符进行编码，分别是 &<>\""
+        },
+
+        {
+            "name": "getByteLength",
+            "type": "string",
+            "desc": "计算字符串的字节长度。",
+            "params": [
+                {"name": "source", "type": "string", "desc": "目标字符串"},
+                {"name": "charsetName", "type": "string", "desc": "字符对应的编码集"}
+            ],
+            "return": {"type": "number", "desc": "字节长度"},
+            "remark": "如果没有指定编码集，getByteLength 方法相当于核心的 String.length 属性。"
+        },
+
+        {
+            "name": "sliceByte",
+            "type": "string",
+            "desc": "根据字节长度截取字符串。",
+            "params": [
+                {"name": "source", "type": "string", "desc": "目标字符串"},
+                {"name": "length", "type": "number", "desc": "需要截取的字节长度"},
+                {"name": "charsetName", "type": "string", "desc": "字符对应的编码集"}
+            ],
+            "return": {"type": "string", "desc": "结果字符串"},
+            "remark": "如果没有指定编码集，sliceByte 方法相当于核心的 String.slice 属性。"
+        },
+
+        {
+            "name": "toCamelCase",
+            "type": "string",
+            "desc": "驼峰命名法转换。",
+            "params": [
+                {"name": "source", "type": "string", "desc": "目标字符串"}
+            ],
+            "return": {"type": "string", "desc": "结果字符串"},
+            "remark": "toCamelCase 方法将 xxx-xxx 字符串转换成 xxxXxx。"
+        },
+
+        {
+            "name": "toHalfWidth",
+            "type": "string",
+            "desc": "将目标字符串中常见全角字符转换成半角字符。",
+            "params": [
+                {"name": "source", "type": "string", "desc": "目标字符串"}
+            ],
+            "return": {"type": "string", "desc": "结果字符串"}
+        },
+
+        {
+            "name": "trim",
+            "type": "string",
+            "desc": "过滤字符串两端的空白字符。",
+            "params": [
+                {"name": "source", "type": "string", "desc": "目标字符串"}
+            ],
+            "return": {"type": "string", "desc": "结果字符串"}
+        }
+    ],
+
+    "util": [
+        {
+            "name": "attachEvent",
+            "type": "util",
+            "desc": "挂载事件。",
+            "params": [
+                {"name": "obj", "type": "Object", "desc": "响应事件的对象"},
+                {"name": "type", "type": "string", "desc": "事件类型"},
+                {"name": "func", "type": "Function", "desc": "事件处理函数"}
+            ]
+        },
+
+        {
+            "name": "blank",
+            "type": "util",
+            "desc": "空函数。",
+            "syntax": "ecui.ui.Control.onXXXXXX = ecui.<b>blank</b>",
+            "remark": "blank 方法不应该被执行，也不进行任何处理，它用于提供给不需要执行操作的事件方法进行赋值，与 blank 类似的用于给事件方法进行赋值，而不直接被执行的方法还有 {'cancel'|method:'core'}。",
+            "example": [
+                "<body><div ecui=\"type:control;id:ctrl\" onmousedown=\"alert(1)\"></div></body>",
+                "ecui.get(\"ctrl\").onmousedown = ecui.util.blank;"
+            ]
+        },
+
+        {
+            "name": "cancel",
+            "type": "util",
+            "desc": "返回 false。",
+            "syntax": "ecui.ui.Control.onXXXXXX = ecui.<b>cancel</b>",
+            "remark": "cancel 方法不应该被执行，它每次返回 false，用于提供给需要返回逻辑假操作的事件方法进行赋值，例如需要取消默认事件操作的情况，与 cancel 类似的用于给事件方法进行赋值，而不直接被执行的方法还有 {'blank'|method:'core'}。",
+            "example": [
+                "<body><div ecui=\"type:checkbox;id:ctrl\"></div></body>",
+                "//下面的操作后，点击后checkbox不能选中\necui.get(\"ctrl\").onclick = ecui.util.cancel;"
+            ]
+        },
+
+        {
+            "name": "copy",
+            "type": "util",
+            "desc": "对象属性复制。",
+            "params": [
+                {"name": "target", "type": "Object", "desc": "目标对象"},
+                {"name": "source", "type": "Object", "desc": "源对象"}
+            ],
+            "return": {"type": "Object", "desc": "目标对象"}
+        },
+
+        {
+            "name": "detachEvent",
+            "type": "util",
+            "desc": "卸载事件。",
+            "params": [
+                {"name": "obj", "type": "Object", "desc": "响应事件的对象"},
+                {"name": "type", "type": "string", "desc": "事件类型"},
+                {"name": "func", "type": "Function", "desc": "事件处理函数"}
+            ]
+        },
+
+        {
+            "name": "findConstructor",
+            "type": "util",
+            "desc": "在 prototype 链的 constructor 上查找指定的属性。",
+            "params": [
+                {"name": "object", "type": "Object", "desc": "需要查找属性的对象"},
+                {"name": "name", "type": "string", "desc": "属性名称"}
+            ],
+            "return": {"type": "Object", "desc": "属性值"}
+        },
+
+        {
+            "name": "getView",
+            "type": "util",
+            "desc": "获取浏览器可视区域的相关信息。",
+            "return": {"type": "Object", "desc": "浏览器可视区域信息"},
+            "remark": [
+                "getView 方法将返回浏览器可视区域的信息。属性如下：",
+                "<table class=\"clsSTD\"><tr><td>top</td><td>number，可视区域最小X轴坐标</td></tr><tr><td>right</td><td>number，可视区域最大Y轴坐标</td></tr><tr><td>bottom</td><td>number，可视区域最大X轴坐标</td></tr><tr><td>left</td><td>number，可视区域最小Y轴坐标</td></tr><tr><td>width</td><td>number，可视区域的宽度</td></tr><tr><td>height</td><td>number，可视区域的高度</td></tr></table>"
+            ]
+        },
+
+        {
+            "name": "inherits",
+            "type": "util",
+            "desc": "类继承。",
+            "params": [
+                {"name": "subClass", "type": "Function", "desc": "子类"},
+                {"name": "superClass", "type": "Function", "desc": "父类"}
+            ],
+            "return": {"type": "Object", "desc": "subClass 的 prototype 属性"}
+        },
+
+        {
+            "name": "timer",
+            "type": "util",
+            "desc": "创建一个定时器对象，从第4个参数起都是传入 func 中的变量。",
+            "params": [
+                {"name": "func", "type": "Function", "desc": "定时器需要调用的函数"},
+                {"name": "delay", "type": "number", "desc": "定时器延迟调用的毫秒数，如果为负数表示需要连续触发"},
+                {"name": "caller", "type": "Object", "desc": "调用者，在 func 被执行时，this 指针指向的对象，可以为空"}
+            ],
+            "return": {"type": "Function", "desc": "用于关闭定时器的方法"}
+        },
+
+        {
+            "name": "toNumber",
+            "type": "util",
+            "desc": "将对象转换成数值。",
+            "params": [
+                {"name": "obj", "type": "Object", "desc": "需要转换的对象"}
+            ],
+            "return": {"type": "number", "desc": "对象的数值"},
+            "remark": "toNumber 方法会省略数值的符号，例如字符串 9px 将当成数值的 9，不能识别的数值将默认为 0。"
+        }
+    ],
+
+    "control": [
+        {
+            "name": "$append",
+            "type": "control",
+            "desc": "控件增加子控件事件的默认处理。",
+            "params": [
+                {"name": "child", "type": "ecui.ui.Control", "desc": "子控件"}
+            ],
+            "return": {"type": "boolean", "desc": "如果不允许增加子控件，返回 false"}
+        },
+
+        {
+            "name": "$blur",
+            "type": "control",
+            "desc": "控件失去焦点事件的默认处理。",
+            "remark": "控件失去焦点时默认调用 {'\\$blur'|method:'control'} 方法，删除控件在 {'\\$focus'|method:'control'} 方法中添加的扩展样式 -focus。",
+            "event": 10
+        },
+
+        {
+            "name": "$cache",
+            "type": "control",
+            "desc": "计算控件的缓存。",
+            "params": [
+                {"name": "style", "type": "CssStyle", "desc": "基本 Element 对象的 Css 样式对象"},
+                {"name": "cacheSize", "type": "boolean", "desc": "是否需要缓存控件大小，如果控件是另一个控件的部件时，不缓存大小能加快渲染速度，默认缓存"}
+            ],
+            "remark": "控件缓存部分核心属性的值，提高控件属性的访问速度，在子控件或者应用程序开发过程中，如果需要避开控件提供的方法({'setSize'|method:'control'}、{'alterClass'|method:'control'} 等)直接操作 Element 对象，<font color=\"red\">操作完成后必须调用 {'clearCache'|method:'control'} 方法清除控件的属性缓存，否则将引发错误。</font>"
+        },
+
+        {
+            "name": "$change",
+            "type": "control",
+            "desc": "控件内容改变事件的默认处理。",
+            "event": 1
+        },
+
+        {
+            "name": "$click",
+            "type": "control",
+            "desc": "鼠标单击控件事件的默认处理。",
+            "params": [
+                {"name": "event", "type": "Event", "desc": "事件对象"}
+            ],
+            "event": 10
+        },
+
+        {
+            "name": "$create",
+            "type": "control",
+            "desc": "控件建立完成事件的默认处理。",
+            "params": [
+                {"name": "params", "type": "Object", "desc": "初始化参数，参见 {'create'|method:'control'} 方法"}
+            ],
+            "remark": "$create 方法在控件被建立后调用，用于某一类控件的公共的初始化操作。"
+        },
+
+        {
+            "name": "$dispose",
+            "type": "control",
+            "desc": "销毁控件的默认处理。",
+            "remark": "页面卸载时将销毁所有的控件，释放循环引用，防止在 IE 下发生内存泄漏，$dispose 方法的调用不会受到 {'ondispose'|event:'control'} 事件返回值的影响。"
+        },
+
+        {
+            "name": "$dragend",
+            "type": "control",
+            "desc": "控件拖拽结束事件的默认处理。",
+            "params": [
+                {"name": "event", "type": "Event", "desc": "事件对象"}
+            ],
+            "remark": "控件被拖曳的周期结束时，如果 {'ondragend'|event:'control'} 事件返回值不为 false，则调用 $dragend 方法，参见 {'drag'|method:'core'} 方法。"
+        },
+
+        {
+            "name": "$dragmove",
+            "type": "control",
+            "desc": "控件拖拽移动事件的默认处理。",
+            "params": [
+                {"name": "event", "type": "Event", "desc": "事件对象"},
+                {"name": "x", "type": "number", "desc": "X轴坐标"},
+                {"name": "y", "type": "number", "desc": "Y轴坐标"}
+            ],
+            "return": {"type": "boolean", "desc": "是否自动设置控件新的位置，默认值为 true"},
+            "remark": "控件被拖曳的周期中鼠标移动时，如果 {'ondragmove'|event:'control'} 事件返回值不为 false，则调用 $dragmove 方法。如果 $dragmove 方法返回值不为 false，框架将设置控件的位置，参见 {'drag'|method:'core'} 方法。"
+        },
+
+        {
+            "name": "$dragstart",
+            "type": "control",
+            "desc": "控件拖拽开始事件的默认处理。",
+            "params": [
+                {"name": "event", "type": "Event", "desc": "事件对象"}
+            ],
+            "remark": "控件被拖曳的周期开始时，如果 {'ondragstart'|event:'control'} 事件返回值不为 false，则调用 $dragstart 方法，参见 {'drag'|method:'core'} 方法。"
+        },
+
+        {
+            "name": "$focus",
+            "type": "control",
+            "desc": "控件获得焦点事件的默认处理。",
+            "remark": "控件获得焦点时默认调用 $focus 方法，调用 {'alterClass'|method:'control'} 方法为控件添加扩展样式 -focus。",
+            "event": 10
+        },
+
+        {
+            "name": "$getSection",
+            "type": "control",
+            "desc": "获取指定的部件。",
+            "params": [
+                {"name": "name", "type": "string", "desc": "部件名称"}
+            ],
+            "return": {"type": "ecui.ui.Control", "desc": "部件对象"},
+            "remark": "$getSection 方法返回控件的一个部件对象，部件对象也是 {'controls'|menu}，是当前控件的组成成份，不可缺少，请不要轻易的对部件对象进行操作。"
+        },
+
+        {
+            "name": "$hide",
+            "type": "control",
+            "desc": "隐藏控件。"
+        },
+
+        {
+            "name": "$init",
+            "type": "control",
+            "desc": "控件渲染完成后初始化的默认处理。",
+            "remark": "$init 方法在控件渲染完成后调用，参见 {'create'|method:'core'} 与 {'init'|method:'core'} 方法。"
+        },
+
+        {
+            "name": "$intercept",
+            "type": "control",
+            "desc": "界面点击强制拦截事件的默认处理。",
+            "params": [
+                {"name": "event", "type": "Event", "desc": "事件对象"}
+            ],
+            "remark": "当调用了 {'intercept'|method:'core'} 方法后，下一次对界面的点击将会触发指定控件的 {'onintercept'|event:'control'} 事件，如果事件返回值不为 false，则调用 $intercept 方法。如果 $intercept 方法返回值不为 false，将调用 {'restore'|method:'core'} 方法，否则框架将 onmousedown 事件传递给上一层的事件响应环境。"
+        },
+
+        {
+            "name": "$keydown",
+            "type": "control",
+            "desc": "控件拥有焦点时，键盘按下事件的默认处理。",
+            "params": [
+                {"name": "event", "type": "Event", "desc": "事件对象"}
+            ],
+            "event": 10
+        },
+
+        {
+            "name": "$keypress",
+            "type": "control",
+            "desc": "控件拥有焦点时，键盘按压事件的默认处理。",
+            "params": [
+                {"name": "event", "type": "Event", "desc": "事件对象"}
+            ],
+            "event": 10
+        },
+
+        {
+            "name": "$keyup",
+            "type": "control",
+            "desc": "控件拥有焦点时，键盘弹起事件的默认处理。",
+            "params": [
+                {"name": "event", "type": "Event", "desc": "事件对象"}
+            ],
+            "event": 10
+        },
+
+        {
+            "name": "$locate",
+            "type": "control",
+            "desc": "设置控件容器内部定位化。",
+            "return": {"type": "boolean", "desc": "$locate 方法执行后，容器内部 DOM 节点的 position 属性设置成 absolute 时将相对基本 Element 对象定位。"}
+        },
+
+        {
+            "name": "$mousedown",
+            "type": "control",
+            "desc": "鼠标在控件区域内按下事件的默认处理。",
+            "params": [
+                {"name": "event", "type": "Event", "desc": "事件对象"}
+            ],
+            "event": 10
+        },
+
+        {
+            "name": "$mousemove",
+            "type": "control",
+            "desc": "鼠标在控件区域内移动事件的默认处理。",
+            "params": [
+                {"name": "event", "type": "Event", "desc": "事件对象"}
+            ],
+            "event": 10
+        },
+
+        {
+            "name": "$mouseout",
+            "type": "control",
+            "desc": "鼠标移出控件区域事件的默认处理。",
+            "params": [
+                {"name": "event", "type": "Event", "desc": "事件对象"}
+            ],
+            "remark": "鼠标移出控件区域时默认调用 $mouseout 方法，删除控件在 {'\\$mouseover'|method:'control'} 方法中添加的扩展样式 -over。",
+            "event": 10
+        },
+
+        {
+            "name": "$mouseover",
+            "type": "control",
+            "desc": "鼠标移入控件区域事件的默认处理。",
+            "params": [
+                {"name": "event", "type": "Event", "desc": "事件对象"}
+            ],
+            "remark": "鼠标移入控件区域时默认调用 $mouseover 方法，调用 {'alterClass'|method:'control'} 方法为控件添加扩展样式 -over。",
+            "event": 10
+        },
+
+        {
+            "name": "$mouseup",
+            "type": "control",
+            "desc": "鼠标在控件区域内弹起事件的默认处理。",
+            "params": [
+                {"name": "event", "type": "Event", "desc": "事件对象"}
+            ],
+            "event": 10
+        },
+
+        {
+            "name": "$mousewheel",
+            "type": "control",
+            "desc": "鼠标在控件区域滚动滚轮事件的默认处理。",
+            "params": [
+                {"name": "event", "type": "Event", "desc": "事件对象"}
+            ],
+            "return": {"type": "boolean", "desc": "是否停止冒泡"},
+            "event": 10
+        },
+
+        {
+            "name": "$pressend",
+            "type": "control",
+            "desc": "控件按压状态结束事件的默认处理。",
+            "params": [
+                {"name": "event", "type": "Event", "desc": "事件对象"}
+            ],
+            "remark": "鼠标左键按压控件结束时默认调用 $pressend 方法，删除控件在 {'\\$pressstart'|method:'control'} 方法中添加的扩展样式 -press。",
+            "event": 10
+        },
+
+        {
+            "name": "$pressmove",
+            "type": "control",
+            "desc": "控件按压状态中鼠标在控件区域内移动事件的默认处理。",
+            "params": [
+                {"name": "event", "type": "Event", "desc": "事件对象"}
+            ],
+            "event": 10
+        },
+
+        {
+            "name": "$pressout",
+            "type": "control",
+            "desc": "控件按压状态中鼠标移出控件区域事件的默认处理。",
+            "params": [
+                {"name": "event", "type": "Event", "desc": "事件对象"}
+            ],
+            "remark": "默认与 {'\\$pressend'|method:'control'} 方法相同，删除控件在 {'\\$pressstart'|method:'control'} 方法中添加的扩展样式 -press。",
+            "event": 10
+        },
+
+        {
+            "name": "$pressover",
+            "type": "control",
+            "desc": "控件按压状态中鼠标移入控件区域事件的默认处理。",
+            "params": [
+                {"name": "event", "type": "Event", "desc": "事件对象"}
+            ],
+            "remark": "默认与 {'\\$pressstart'|method:'control'} 方法相同，调用 {'alterClass'|method:'control'} 方法为控件添加扩展样式 -press。",
+            "event": 10
+        },
+
+        {
+            "name": "$pressstart",
+            "type": "control",
+            "desc": "控件按压状态开始事件的默认处理。",
+            "params": [
+                {"name": "event", "type": "Event", "desc": "事件对象"}
+            ],
+            "remark": "鼠标左键按压控件开始时默认调用 $pressstart 方法，调用 {'alterClass'|method:'control'} 方法为控件添加扩展样式 -press。",
+            "event": 10
+        },
+
+        {
+            "name": "$ready",
+            "type": "control",
+            "desc": "控件自动渲染全部完成后的处理。"
+        },
+
+        {
+            "name": "$remove",
+            "type": "control",
+            "desc": "控件移除子控件事件的默认处理。",
+            "params": [
+                {"name": "child", "type": "ecui.ui.Control", "desc": "子控件"}
+            ]
+        },
+
+        {
+            "name": "$resize",
+            "type": "control",
+            "desc": "控件大小发生变化的默认处理。",
+            "event": 1
+        },
+
+        {
+            "name": "$scroll",
+            "type": "control",
+            "desc": "控件的滚动条发生滚动的默认处理。",
+            "remark": "如果控件包含滚动条，滚动条滚动时触发 {'onscroll'|event:'control'} 事件，如果事件返回值不为 false，则调用 $scroll 方法。"
+        },
+
+        {
+            "name": "$select",
+            "type": "control",
+            "desc": "区域选择事件的默认处理。",
+            "params": [
+                {"name": "event", "type": "Event", "desc": "事件对象"}
+            ],
+            "remark": "控件在区域选择周期中鼠标移动时，如果 {'onselect'|event:'control'} 事件返回值不为 false，则调用 $select 方法，参见 {'select'|method:'core'} 方法。"
+        },
+
+        {
+            "name": "$selectend",
+            "type": "control",
+            "desc": "区域选择结束事件的默认处理。",
+            "params": [
+                {"name": "event", "type": "Event", "desc": "事件对象"}
+            ],
+            "remark": "控件在区域选择周期结束时，如果 {'onselectend'|event:'control'} 事件返回值不为 false，则调用 $selectend 方法，参见 {'select'|method:'core'} 方法。"
+        },
+
+        {
+            "name": "$selectstart",
+            "type": "control",
+            "desc": "区域选择开始事件的默认处理。",
+            "params": [
+                {"name": "event", "type": "Event", "desc": "事件对象"}
+            ],
+            "remark": "控件在区域选择周期开始时，如果 {'onselectstart'|event:'control'} 事件返回值不为 false，则调用 $selectstart 方法，参见 {'select'|method:'core'} 方法。"
+        },
+
+        {
+            "name": "$setBody",
+            "type": "control",
+            "desc": "设置控件内层的 Element 对象。",
+            "params": [
+                {"name": "el", "type": "HTMLElement", "desc": "Element 对象"}
+            ],
+            "remark": "{'controls'|menu} 逻辑上分为外层 Element 对象、基本 Element 对象与内层 Element 对象，外层对象用于控制控件自身布局，基本对象是控件生成时捆绑的 Element 对象，而内层对象用于控制控件对象的子控件与文本布局，通常情形下三者是同一个 Element 对象。"
+        },
+
+        {
+            "name": "$setBodyHTML",
+            "type": "control",
+            "params": [
+                {"name": "innerHTML", "type": "string", "desc": "HTML 片断"}
+            ],
+            "desc": "设置控件内层 Element 对象的 innerHTML 属性。",
+            "example": [
+                "<body><div id=\"custom\" ecui=\"type:control;id:ctrl1\"><span>hello world</span></div></body>",
+                "//显示 <span>hello world</span>\nalert(ecui.get(\"ctrl1\").getHTML());\n//设置HTML\necui.get(\"ctrl1\").$setBodyHTML(\"<span>hello ECUI</span>\");\n//显示 <span>hello ECUI</span>\nalert(ecui.get(\"ctrl1\").getHTML());"
+            ]
+        },
+
+        {
+            "name": "$setParent",
+            "type": "control",
+            "desc": "直接设置父控件。",
+            "params": [
+                {"name": "parent", "type": "ecui.ui.Control", "desc": "{'controls'|menu}"}
+            ],
+            "remark": "与 {'setParent'|method:'control'} 方法最大的不同，$setParent 方法仅设置控件对象逻辑上的父对象，不进行任何逻辑上的检查，用于某些特殊情况下的设定，如 {'select'|control} 中的选项框子控件需要使用 $setParent 方法设置它的逻辑父控件为下拉框控件。"
+        },
+
+        {
+            "name": "$setSize",
+            "type": "control",
+            "desc": "设置控件的大小。",
+            "params": [
+                {"name": "width", "type": "number", "desc": "宽度，如果不需要设置则将参数设置为等价于逻辑非的值"},
+                {"name": "height", "type": "number", "desc": "高度，如果不需要设置则省略此参数"}
+            ],
+            "remark": "$setSize 方法设置控件实际的大小，不改变其它的如缓存等信息。"
+        },
+
+        {
+            "name": "$show",
+            "type": "control",
+            "desc": "显示控件。"
+        },
+
+        {
+            "name": "$zoom",
+            "type": "control",
+            "desc": "控件缩放移动事件的默认处理。",
+            "params": [
+                {"name": "event", "type": "Event", "desc": "事件对象"}
+            ],
+            "return": {"type": "boolean", "desc": "是否自动设置控件新的大小，默认值为 true"},
+            "remark": "控件在缩放周期中鼠标移动时，如果 {'onzoom'|event:'control'} 事件返回值不为 false，则调用 $zoom 方法。如果 $zoom 方法返回值不为 false，框架将设置控件的大小，参见 {'zoom'|method:'core'} 方法。"
+        },
+
+        {
+            "name": "$zoomend",
+            "type": "control",
+            "desc": "控件缩放结束事件的默认处理。",
+            "params": [
+                {"name": "event", "type": "Event", "desc": "事件对象"}
+            ],
+            "remark": "控件在缩放周期结束时，如果 {'onzoomend'|event:'control'} 事件返回值不为 false，则调用 $zoomend 方法，参见 {'zoom'|method:'core'} 方法。"
+        },
+
+        {
+            "name": "$zoomstart",
+            "type": "control",
+            "desc": "控件缩放开始事件的默认处理。",
+            "params": [
+                {"name": "event", "type": "Event", "desc": "事件对象"}
+            ],
+            "remark": "控件在缩放周期开始时，如果 {'onzoomstart'|event:'control'} 事件返回值不为 false，则调用 $zoomstart 方法，参见 {'zoom'|method:'core'} 方法。"
+        },
+
+        {
+            "name": "alterClass",
+            "type": "control",
+            "desc": "为控件增加/删除一个扩展样式。",
+            "params": [
+                {"name": "className", "type": "string", "desc": "扩展样式的尾缀"},
+                {"name": "isRemoved", "type": "boolean", "desc": "为 true 时删除样式，否则新增样式"}
+            ],
+            "example": [
+                "<style>\n.ec-control-custom {background:#F0F}\n</style><body><div ecui=\"type:control;id:ctrl1\"></div></body>",
+                "//会添加ec-control-custom样式\necui.get(\"ctrl1\").alterClass(\"custom\");"
+            ]
+        },
+
+        {
+            "name": "blur",
+            "type": "control",
+            "desc": "控件失去焦点。",
+            "event": 10
+        },
+
+        {
+            "name": "cache",
+            "type": "control",
+            "desc": "计算控件的缓存。",
+            "params": [
+                {"name": "cacheSize", "type": "boolean", "desc": "是否需要缓存控件大小，如果控件是另一个控件的部件时，不缓存大小能加快渲染速度，默认缓存"}
+            ],
+            "remark": "控件缓存部分核心属性的值，提高控件属性的访问速度，在子控件或者应用程序开发过程中，如果需要避开控件提供的方法({'setSize'|method:'control'}、{'alterClass'|method:'control'} 等)直接操作 Element 对象，<font color=\"red\">操作完成后必须调用 clearCache 方法清除控件的属性缓存，否则将引发错误。</font>"
+        },
+
+        {
+            "name": "change",
+            "type": "control",
+            "desc": "控件改变。",
+            "event": 1
+        },
+
+        {
+            "name": "clearCache",
+            "type": "control",
+            "desc": "清除控件的缓存。",
+            "remark": "控件缓存部分核心属性的值，提高控件属性的访问速度，在子控件或者应用程序开发过程中，如果需要避开控件提供的方法({'setSize'|method:'control'}、{'alterClass'|method:'control'} 等)直接操作 Element 对象，<font color=\"red\">操作完成后必须调用 clearCache 方法清除控件的属性缓存，否则将引发错误。</font>",
+            "example": [
+                "<body><div ecui=\"type:control;id:ctrl1\"><div ecui=\"type:control;id:ctrl2\"></div></div></body>",
+                "var control = ecui.get(\"ctrl1\");\ncontrol.getBody().className = \"custom\";\ncontrol.clearCache(); "
+            ]
+        },
+
+        {
+            "name": "click",
+            "type": "control",
+            "desc": "鼠标点击。",
+            "event": 10
+        },
+
+        {
+            "name": "contain",
+            "type": "control",
+            "desc": "判断当前控件是否包含指定的控件。",
+            "params": [
+                {"name": "control", "type": "ecui.ui.Control", "desc": "{'controls'|menu}"}],
+            "return": {"type": "boolean", "desc": "是否包含指定的控件"},
+            "remark": "contain 方法判断指定的控件是否逻辑上属于当前控件的内部区域，即通过反复调用控件的 {'getParent'|method:'control'} 方法是否能得到当前控件。",
+            "example": [
+                "<body><div ecui=\"type:control;id:ctrl1\"><div ecui=\"type:control;id:ctrl2\"></div></div></body>",
+                "//显示true\nalert(ecui.get(\"ctrl1\").contain(ecui.get(\"ctrl2\")));"
+            ]
+        },
+
+        {
+            "name": "create",
+            "type": "control",
+            "desc": "控件建立完成事件的处理。",
+            "params": [
+                {"name": "params", "type": "Object", "desc": "初始化参数，参见 {'create'|method:'control'} 方法"}
+            ],
+            "remark": "create 方法触发 {'oncreate'|event:'control'} 事件，然后调用 {'\\$create'|method:'control'} 方法，create 方法在控件创建时被自动调用，不需要直接调用。"
+        },
+
+        {
+            "name": "dispose",
+            "type": "control",
+            "desc": "销毁控件。",
+            "remark": "dispose 方法触发 {'ondispose'|event:'control'} 事件，然后调用 {'\\$dispose'|method:'control'} 方法，dispose 方法在页面卸载时会被自动调用，通常不需要直接调用。",
+            "example": [
+                "<body><div id=\"ctrl1\" class=\"ctrl\" ecui=\"type:control;id:ctrl1\"></div></body>",
+                "//销毁控件，取消与DOM元素的关联\necui.get(\"ctrl1\").dispose();"
+            ]
+        },
+
+        {
+            "name": "focus",
+            "type": "control",
+            "desc": "控件获取焦点。",
+            "event": 10
+        },
+
+        {
+            "name": "getBase",
+            "type": "control",
+            "desc": "获取控件的基本 Element 对象。",
+            "return": {"type": "HTMLElement", "desc": "Element 对象"},
+            "remark": "getBase 方法返回控件生成时捆绑的 Element 对象，参见 {'create'|method:'core'} 方法。",
+            "example": [
+                "<body><div id=\"custom\" ecui=\"type:control;id:ctrl1\"></div></body>",
+                "//显示 custom\nalert(ecui.get(\"ctrl1\").getBase().id);"
+            ]
+        },
+
+        {
+            "name": "getBaseClass",
+            "type": "control",
+            "desc": "获取控件的基本样式。",
+            "return": {"type": "string", "desc": "控件的基本样式"},
+            "remark": "getBaseClass 方法返回控件生成时捆绑的样式，参见 {'create'|method:'core'} 方法。与调用 {'getClass'|method:'control'} 方法返回当前样式的区别在于，基本样式不会改变，而当前样式允许通过 {'setClass'|method:'control'} 方法来设置。",
+            "example": [
+                "<body><div ecui=\"type:control;id:ctrl1\"></div><div class=\"custom\" ecui=\"type:control;id:ctrl2\"></div></body>",
+                "//显示ec-control\nalert(ecui.get(\"ctrl1\").getBaseClass());\n//显示custom\nalert(ecui.get(\"ctrl2\").getBaseClass());"
+            ]
+        },
+
+        {
+            "name": "getBody",
+            "type": "control",
+            "desc": "获取控件内层的 Element 对象。",
+            "return": {"type": "HTMLElement", "desc": "Element 对象"},
+            "remark": "getBody 方法返回用于控制子控件与文本布局的内层 Element 对象。",
+            "example": [
+                "<body><div id=\"custom\" ecui=\"type:control;id:ctrl1\"></div></body>",
+                "//显示 custom\nalert(ecui.get(\"ctrl1\").getBody().id);"
+            ]
+        },
+
+        {
+            "name": "getBodyHeight",
+            "type": "control",
+            "desc": "获取控件内层可使用区域的高度。",
+            "return": {"type": "number", "desc": "控件内层可使用区域的高度"},
+            "remark": "getBodyHeight 方法返回能被子控件与文本填充的控件区域高度，相当于盒子模型的 content 区域的高度。",
+            "example": [
+                "<body><div style=\"padding:4px;height:100px;\" ecui=\"type:control;id:ctrl1\"></div></body>",
+                "alert(ecui.get(\"ctrl1\").getBodyHeight());"
+            ]
+        },
+
+        {
+            "name": "getBodyWidth",
+            "type": "control",
+            "desc": "获取控件内层可使用区域的宽度。",
+            "return": {"type": "number", "desc": "控件内层可使用区域的宽度。"},
+            "remark": "getBodyWidth 方法返回能被子控件与文本填充的控件区域宽度，相当于盒子模型的 content 区域的宽度。",
+            "example": [
+                "<body><div style=\"padding:4px;height:100px;\" ecui=\"type:control;id:ctrl1\"></div></body>",
+                "alert(ecui.get(\"ctrl1\").getBodyWidth());"
+            ]
+        },
+
+        {
+            "name": "getClass",
+            "type": "control",
+            "desc": "获取控件的当前样式。",
+            "return": {"type": "string", "desc": "控件的当前样式"},
+            "remark": "getClass 方法返回控件当前使用的样式，在调用 {'alterClass'|method:'control'} 方法时，当前样式与默认样式会被添加样式后缀，从而实现控件状态的样式变更。与调用 {'getBaseClass'|method:'control'} 方法返回基本样式的区别在于，基本样式不会改变，而当前样式允许通过 {'setClass'|method:'control'} 方法来设置。",
+            "example": [
+                "<body><div ecui=\"type:control;id:ctrl1\"></div><div class=\"custom\" ecui=\"type:control;id:ctrl2\"></div></body>",
+                "//显示ec-control\nalert(ecui.get(\"ctrl1\").getClass());\n//显示custom\nalert(ecui.get(\"ctrl2\").getClass());"
+            ]
+        },
+
+        {
+            "name": "getHeight",
+            "type": "control",
+            "return": {"type": "number", "desc": "控件的高度"},
+            "desc": "获取控件区域的高度。",
+            "example": [
+                "<body><div ecui=\"type:control;id:ctrl1\"></div></body>",
+                "alert(ecui.get(\"ctrl1\").getHeight());"
+            ]
+        },
+
+        {
+            "name": "getInvalidHeight",
+            "type": "control",
+            "desc": "获取控件的无效高度，即控件与控件内部区域高度的差值。",
+            "return": {"type": "number", "desc": "控件的无效高度"},
+            "example": [
+                "<body><div ecui=\"type:control;id:ctrl1\"></div></body>",
+                "alert(ecui.get(\"ctrl1\").getInvalidHeight());"
+            ]
+        },
+
+        {
+            "name": "getInvalidWidth",
+            "type": "control",
+            "desc": "获取控件的无效宽度，即控件与控件内部区域宽度的差值。",
+            "return": {"type": "number", "desc": "控件的无效宽度"},
+            "example": [
+                "<body><div ecui=\"type:control;id:ctrl1\"></div></body>",
+                "alert(ecui.get(\"ctrl1\").getInvalidWidth());"
+            ]
+        },
+
+        {
+            "name": "getOuter",
+            "type": "control",
+            "desc": "获取控件外层的 Element 对象。",
+            "return": {"type": "HTMLElement", "desc": "Element 对象"},
+            "remark": "getOuter 方法返回用于控制控件自身布局的外层 Element 对象。",
+            "example": [
+                "<body><div id=\"custom\" ecui=\"type:control;id:ctrl1\"></div></body>",
+                "//显示 custom\nalert(ecui.get(\"ctrl1\").getOuter().id);"
+            ]
+        },
+
+        {
+            "name": "getParent",
+            "type": "control",
+            "return": {"type": "ecui.ui.Control", "desc": "父控件对象"},
+            "desc": "获取父控件。",
+            "example": [
+                "<body><div id=\"parent\" ecui=\"type:control;id:ctrl1\"><div id=\"child\" ecui=\"type:control;id:ctrl2\"></div></div></body>",
+                "//显示 parent\nalert(ecui.get(\"ctrl2\").getParent().getBase().id)"
+            ]
+        },
+
+        {
+            "name": "getType",
+            "type": "control",
+            "desc": "获取控件的默认样式。",
+            "return": {"type": "string", "desc": "控件的默认样式"},
+            "remark": "控件的默认样式也称为控件的类型样式，在调用 {'alterClass'|method:'control'} 方法时，默认样式与当前样式会被添加样式后缀，从而实现控件状态的样式变更。在调用 {'create'|method:'core'} 方法时指定，参见 {'getClass'|method:'control'} 与 {'getBaseClass'|method:'control'} 方法。",
+            "example": [
+                "<body><div ecui=\"type:control;id:ctrl1\"></div></body>",
+                "//显示ec-control\nalert(ecui.get(\"ctrl1\").getType());"
+            ]
+        },
+
+        {
+            "name": "getUID",
+            "type": "control",
+            "desc": "获取控件的内部唯一标识符。",
+            "return": {"type": "string", "desc": "控件 ID"},
+            "remark": "getUID 方法返回的 ID 不是标签 ecui 属性中指定的 id，而是框架为每个控件生成的内部唯一标识符。",
+            "example": [
+                "<body><div ecui=\"type:control;id:ctrl1\"></div></body>",
+                "alert(ecui.get(\"ctrl1\").getUID());"
+            ]
+        },
+
+        {
+            "name": "getWidth",
+            "type": "control",
+            "desc": "获取控件区域的宽度。",
+            "return": {"type": "number", "desc": "控件的宽度"},
+            "example": [
+                "<body><div ecui=\"type:control;id:ctrl1\"></div></body>",
+                "alert(ecui.get(\"ctrl1\").getWidth());"
+            ]
+        },
+
+        {
+            "name": "getX",
+            "type": "control",
+            "desc": "获取控件的相对X轴坐标。",
+            "return": {"type": "number", "desc": "X轴坐标"},
+            "remark": "getX 方法返回控件的外层 Element 对象的 offsetLeft 属性值。如果需要得到控件相对于整个文档的X轴坐标，请调用 {'getOuter'|method:'control'} 方法获得外层 Element 对象，然后调用 DOM 的相关函数计算(例如 core.dom.getPosition)。",
+            "example": [
+                "<body><div ecui=\"type:control;id:ctrl1\"></div></body>",
+                "alert(ecui.get(\"ctrl1\").getX());"
+            ]
+        },
+
+        {
+            "name": "getY",
+            "type": "control",
+            "desc": "获取控件的相对Y轴坐标。",
+            "return": {"type": "number", "desc": "Y轴坐标"},
+            "remark": "getY 方法返回控件的外层 Element 对象的 offsetTop 属性值。如果需要得到控件相对于整个文档的X轴坐标，请调用 {'getOuter'|method:'control'} 方法获得外层 Element 对象，然后调用 DOM 的相关函数计算(例如 core.dom.getPosition)。",
+            "example": [
+                "<body><div ecui=\"type:control;id:ctrl1\"></div></body>",
+                "alert(ecui.get(\"ctrl1\").getY());"
+            ]
+        },
+
+        {
+            "name": "hide",
+            "type": "control",
+            "desc": "隐藏控件。",
+            "remark": "如果控件处于显示状态，调用 hide 方法会触发 {'onhide'|event:'control'} 事件，控件转为隐藏状态，并且控件会自动失去焦点。如果控件已经处于隐藏状态，则不执行任何操作。",
+            "example": [
+                "<body><div ecui=\"type:control;id:ctrl1\"></div></body>",
+                "//隐藏控件\necui.get(\"ctrl1\").hide();\n//显示false\necui.get(\"ctrl1\").isShow();\n//显示控件\necui.get(\"ctr1\").show();\n//显示true\necui.get(\"ctrl1\").isShow();"
+            ]
+        },
+
+        {
+            "name": "init",
+            "type": "control",
+            "desc": "控件渲染完成后初始化的处理。",
+            "remark": "init 方法触发 {'oninit'|event:'control'} 事件，然后调用 {'\\$init'|method:'control'} 方法，init 方法在控件渲染完成时被自动调用，不需要直接调用，参见 {'create'|method:'core'} 与 {'init'|method:'core'} 方法。"
+        },
+
+        {
+            "name": "isCapture",
+            "type": "control",
+            "desc": "判断控件是否响应浏览器事件。",
+            "return": {"type": "boolean", "desc": "控件是否响应浏览器事件"},
+            "remark": "控件不响应浏览器事件时，相应的事件由父控件进行处理。"
+        },
+
+        {
+            "name": "isEnabled",
+            "type": "control",
+            "desc": "判断控件是否处于可操作状态。",
+            "return": {"type": "boolean", "desc": "控件是否可操作"},
+            "remark": "控件是否处于可操作状态，影响控件是否处理事件，控件的可操作状态，受父控件的可操作状态影响。可以通过 {'setEnabled'|method:'control'} 方法改变控件的可操作状态，如果控件设置为不可操作，它所有的子控件也都不可操作。",
+            "example": [
+                "<body><div ecui=\"type:control;id:ctrl1\"></div></body>",
+                "//显示true\nalert(ecui.get(\"ctrl1\").isEnabled());"
+            ]
+        },
+
+        {
+            "name": "isFocusable",
+            "type": "control",
+            "desc": "判断控件是否允许获取焦点。",
+            "return": {"type": "boolean", "desc": "控件是否允许获取焦点"},
+            "remark": "控件不允许获取焦点时，被点击时不会改变当前的焦点控件，但此时控件拥有框架处理的最高优先级。"
+        },
+
+        {
+            "name": "isSelectStart",
+            "type": "control",
+            "desc": "判断控件是否允许选中内容。",
+            "return": {"type": "boolean", "desc": "控件是否允许选中内容"}
+        },
+
+        {
+            "name": "isShow",
+            "type": "control",
+            "desc": "判断控件是否处于显示状态。",
+            "return": {"type": "boolean", "desc": "控件是否显示"},
+            "example": [
+                "<body><div ecui=\"type:control;id:ctrl1\"></div></body>",
+                "//显示true\nalert(ecui.get(\"ctrl1\").isShow());"
+            ]
+        },
+
+        {
+            "name": "keydown",
+            "type": "control",
+            "desc": "控件拥有焦点时，键盘按下。",
+            "params": [
+                {"name": "event", "type":"Event", "desc": "事件对象"}
+            ],
+            "event": 10
+        },
+
+        {
+            "name": "keypress",
+            "type": "control",
+            "desc": "控件拥有焦点时，键盘按压。",
+            "params": [
+                {"name": "event", "type":"Event", "desc": "事件对象"}
+            ],
+            "event": 10
+        },
+
+        {
+            "name": "keyup",
+            "type": "control",
+            "desc": "控件拥有焦点时，键盘弹起。",
+            "params": [
+                {"name": "event", "type":"Event", "desc": "事件对象"}
+            ],
+            "event": 10
+        },
+
+        {
+            "name": "mousedown",
+            "type": "control",
+            "desc": "鼠标在控件区域内按下。",
+            "params": [
+                {"name": "event", "type":"Event", "desc": "事件对象"}
+            ],
+            "event": 10
+        },
+
+        {
+            "name": "mousemove",
+            "type": "control",
+            "desc": "鼠标在控件区域内移动。",
+            "params": [
+                {"name": "event", "type":"Event", "desc": "事件对象"}
+            ],
+            "event": 10
+        },
+
+        {
+            "name": "mouseout",
+            "type": "control",
+            "desc": "鼠标移出控件区域。",
+            "params": [
+                {"name": "event", "type":"Event", "desc": "事件对象"}
+            ],
+            "event": 10
+        },
+
+        {
+            "name": "mouseover",
+            "type": "control",
+            "desc": "鼠标移入控件区域。",
+            "params": [
+                {"name": "event", "type":"Event", "desc": "事件对象"}
+            ],
+            "event": 10
+        },
+
+        {
+            "name": "mouseup",
+            "type": "control",
+            "desc": "鼠标在控件区域内弹起。",
+            "params": [
+                {"name": "event", "type":"Event", "desc": "事件对象"}
+            ],
+            "event": 10
+        },
+
+        {
+            "name": "mousewheel",
+            "type": "control",
+            "desc": "鼠标在控件区域滚动滚轮。",
+            "params": [
+                {"name": "event", "type":"Event", "desc": "事件对象"}
+            ],
+            "return": {"type": "boolean", "desc": "是否停止冒泡"},
+            "event": 10
+        },
+
+        {
+            "name": "paint",
+            "type": "control",
+            "desc": "控件刷新。",
+            "params": [
+                {"name": "isCreated", "type":"boolean", "desc": "是否处于创建过程中，如果省略表示否"}
+            ],
+            "remark": "paint 方法将导致控件整体重绘，在通常情况下，建议控件改变的状态进行重绘，而不是调用 paint 方法。"
+        },
+
+        {
+            "name": "pressend",
+            "type": "control",
+            "desc": "控件按压状态结束。",
+            "params": [
+                {"name": "event", "type":"Event", "desc": "事件对象"}
+            ],
+            "event": 10
+        },
+
+        {
+            "name": "pressmove",
+            "type": "control",
+            "desc": "控件按压状态中鼠标在控件区域内移动。",
+            "params": [
+                {"name": "event", "type":"Event", "desc": "事件对象"}
+            ],
+            "event": 10
+        },
+
+        {
+            "name": "pressout",
+            "type": "control",
+            "desc": "控件按压状态中鼠标移出控件区域。",
+            "params": [
+                {"name": "event", "type":"Event", "desc": "事件对象"}
+            ],
+            "event": 10
+        },
+
+        {
+            "name": "pressover",
+            "type": "control",
+            "desc": "控件按压状态中鼠标移入控件区域。",
+            "params": [
+                {"name": "event", "type":"Event", "desc": "事件对象"}
+            ],
+            "event": 10
+        },
+
+        {
+            "name": "pressstart",
+            "type": "control",
+            "desc": "控件按压状态开始。",
+            "params": [
+                {"name": "event", "type":"Event", "desc": "事件对象"}
+            ],
+            "event": 10
+        },
+
+        {
+            "name": "resize",
+            "type": "control",
+            "desc": "控件大小发生变化的处理。",
+            "remark": "resize 方法重新计算并设置控件的大小，resize 方法触发 {'onresize'|event:'control'} 事件，如果事件返回值不为 false，则调用 {'\\$resize'|method:'control'} 方法。因为浏览器可视化区域发生变化时，可能需要改变控件大小，框架会自动调用控件的 resize 方法来刷新控件。"
+        },
+
+        {
+            "name": "setBodySize",
+            "type": "control",
+            "params": [
+                {"name": "width", "type": "number", "desc": "宽度"},
+                {"name": "height", "type": "number", "desc": "高度"}
+            ],
+            "desc": "设置控件内层可使用区域的大小。",
+            "remark": "可使用区域的大小，与 {'getWidth'|method:'control'}、{'getHeight'|method:'control'}、{'getInvalidWidth'|method:'control'}、{'getInvalidHeight'|method:'control'} 四个方法有关。",
+            "example": [
+                "<body><div ecui=\"type:control;id:ctrl1\"></div></body>",
+                "ecui.get(\"ctrl1\").setBodySize(100, 100);"
+            ]
+        },
+
+        {
+            "name": "setCapture",
+            "type": "control",
+            "params": [
+                {"name": "status", "type": "boolean", "desc": "控件是否响应浏览器事件，默认响应事件"}
+            ],
+            "desc": "设置控件是否响应浏览器事件。",
+            "remark": "控件不响应浏览器事件时，相应的事件由父控件进行处理。"
+        },
+
+        {
+            "name": "setClass",
+            "type": "control",
+            "desc": "设置控件的当前样式。",
+            "params": [
+                {"name": "currClass", "type": "string", "desc": "控件的当前样式"}
+            ],
+            "remark": "setClass 方法设置控件当前使用的样式，在调用 {'alterClass'|method:'control'} 方法时，当前样式与默认样式会被添加样式后缀，从而实现控件状态的样式变更。控件的当前样式通过 {'getClass'|method:'control'} 方法获取。<font color=\"red\">请注意，使用 setClass 方法不会改变控件部件的基本样式。</font>",
+            "example": [
+                "<body><div ecui=\"type:control;id:ctrl1\"></div></body>",
+                "//设置控件样式为custom\necui.get(\"ctrl1\").setClass(\"custom\");\n//显示custom\nalert(ecui.get(\"ctrl1\").getClass());"
+            ]
+        },
+
+        {
+            "name": "setEnabled",
+            "type": "control",
+            "params": [
+                {"name": "status", "type": "boolean", "desc": "控件是否可操作，默认为 true"}
+            ],
+            "desc": "设置控件的可操作状态。",
+            "remark": "如果控件设置为不可操作，调用 {'alterClass'|method:'control'} 方法为控件添加扩展样式 -disabled，同时自动失去焦点；如果设置为可操作，移除控件的扩展样式 -disabled。setEnabled 方法只是设置控件自身的可操作状态，然后控件设置为可操作，并不代表调用 {'isEnabled'|method:'control'} 方法返回的值一定是 true，控件的可操作状态还受到父控件的可操作状态的影响。",
+            "example": [
+                "<body><div ecui=\"type:control;id:ctrl1\"></div></body>",
+                "ecui.get(\"ctrl1\").setEnabled(false);"
+            ]
+        },
+
+        {
+            "name": "setFocusable",
+            "type": "control",
+            "params": [
+                {"name": "status", "type": "boolean", "desc": "控件是否允许获取焦点，默认允许"}
+            ],
+            "desc": "设置控件是否允许获取焦点。",
+            "remark": "控件不允许获取焦点时，被点击时不会改变当前的焦点控件，但此时控件拥有框架处理的最高优先级。"
+        },
+
+        {
+            "name": "setParent",
+            "type": "control",
+            "desc": "设置当前控件的父控件。",
+            "params": [
+                {"name": "parent", "type": "ecui.ui.Control|HTMLElement", "desc": "父控件对象/父 Element 对象，忽略参数则将控件移出 DOM 树"}
+            ],
+            "remark": "setParent 方法设置父控件，参数是父控件对象时，将当前控件挂接到父控件对象的内层 Element 对象下，如果参数是父 Element 对象，将当前控件挂接到这个 Element 对象上并使用 {'findControl'|method:'core'} 查找父控件对象。调用 setParent 方法设置父控件，如果在设置父控件之前已经存在父控件，会触发原父控件的 {'onremove'|event:'control'} 事件并解除控件与原父控件的关联，新的父控件如果存在，会触发父控件的 {'onappend'|event:'control'} 事件，如果事件返回 false，表示父控件不允许当前控件作为它的子控件，设置失败，相当于忽略 parent 参数。",
+            "example": [
+                "<body><div id=\"newparent\" ecui=\"type:control;id:ctrl3\"></div><div id=\"parent\" ecui=\"type:control;id:ctrl1\"><div id=\"child\" ecui=\"type:control;id:ctrl2\"></div></div></body>",
+                "//显示 parent\nalert(ecui.get(\"ctrl2\").getParent().getBase().id)\n//重新设置父控件\necui.get(\"ctrl2\").setParent(ecui.get(\"ctrl3\"));\n//显示 newparent\nalert(ecui.get(\"ctrl2\").getParent().getBase().id)"
+            ]
+        },
+
+        {
+            "name": "setPosition",
+            "type": "control",
+            "desc": "设置控件的坐标。",
+            "params": [
+                {"name": "x", "type": "number", "desc": "控件的X轴坐标"},
+                {"name": "y", "type": "number", "desc": "控件的Y轴坐标"}
+            ],
+            "remark": "setPosition 方法设置的是控件的 left 与 top 样式，受到 position 样式的影响。",
+            "example": [
+                "<body><div style=\"position:absolute;\" ecui=\"type:control;id:ctrl1\"></div></body>",
+                "ecui.get(\"ctrl1\").setPosition(100, 100);"
+            ]
+        },
+
+        {
+            "name": "setSize",
+            "type": "control",
+            "desc": "设置控件的大小。",
+            "params": [
+                {"name": "width", "type": "number", "desc": "控件的宽度"},
+                {"name": "height", "type": "number", "desc": "控件的高度"}
+            ],
+            "example": [
+                "<body><div ecui=\"type:control;id:ctrl1\"></div></body>",
+                "ecui.get(\"ctrl1\").setSize(100, 100);"
+            ]
+        },
+
+        {
+            "name": "show",
+            "type": "control",
+            "desc": "显示控件。",
+            "remark": "如果控件处于隐藏状态，调用 show 方法会触发 {'onshow'|event:'control'} 事件，控件转为显示状态。如果控件已经处于显示状态，则不执行任何操作。",
+            "example": [
+                "<body><div ecui=\"type:control;id:ctrl1\"></div></body>",
+                "//隐藏控件\necui.get(\"ctrl1\").hide();\n//显示false\nalert(ecui.get(\"ctrl1\").isShow());//显示控件\necui.get(\"ctr1\").show();\n//显示true\nalert(ecui.get(\"ctrl1\").isShow());"
+            ]
+        }
+    ],
+
+    "scroll": [
+        {
+            "name": "$allowNext",
+            "type": "scroll",
+            "desc": "判断是否允许当前值向最大值方向移动。",
+            "return": {"type": "boolean", "desc": "判断是否允许向最大值方向移动。"},
+            "remark": "受当前鼠标位置的影响，在当前值向最大值方向移动的过程中需要先判断移动是否得到许可。"
+        },
+
+        {
+            "name": "$allowPrev",
+            "type": "scroll",
+            "desc": "判断是否允许当前值向0方向移动。",
+            "return": {"type": "boolean", "desc": "判断是否允许向0方向移动。"},
+            "remark": "受当前鼠标位置的影响，在当前值向0方向移动的过程中需要先判断移动是否得到许可。"
+        },
+
+        {
+            "name": "$calcDragValue",
+            "type": "scroll",
+            "desc": "计算滑动块拖拽时滚动条的当前值。",
+            "params": [
+                {"name": "x", "type": "number", "desc": "滑动块实际到达的X轴坐标"},
+                {"name": "y", "type": "number", "desc": "滑动块实际到达的Y轴坐标"}
+            ],
+            "remark": "虚方法，继承自滚动条控件的控件必须实现。"
+        },
+
+        {
+            "name": "$create",
+            "type": "scroll",
+            "params": [
+                {"name": "cacheSize", "type": "boolean", "desc": "是否需要缓存控件大小，如果控件是另一个控件的部件时，不缓存大小能加快渲染速度，默认缓存"}
+            ],
+            "remark": "滚动条控件建立完成后不进行任何处理。"
+        },
+
+        {
+            "name": "$flush",
+            "type": "scroll",
+            "desc": "滚动条控件刷新。",
+            "remark": "滚动条控件的大小，最大值/当前值发生变化时，调用 $flash 方法刷新滑动块的大小与位置。"
+        },
+
+        {
+            "name": "$getPageStep",
+            "type": "scroll",
+            "desc": "获取一页的步长。",
+            "return": {"type": "number", "desc": "一页的步长"},
+            "remark": "$getPageStep 方法根据 {'getStep'|method:'scroll'} 方法获取的步长，计算父控件一页的步长的大小，一页的步长一定是滚动条控件步长的整数倍。"
+        },
+
+        {
+            "name": "$pressend",
+            "type": "scroll",
+            "remark": "鼠标左键按压控件结束时停止自动滚动，恢复控件状态。"
+        },
+
+        {
+            "name": "$pressout",
+            "type": "scroll",
+            "remark": "控件按压状态中鼠标移出控件区域时停止自动滚动，恢复控件状态。"
+        },
+
+        {
+            "name": "$pressover",
+            "type": "scroll",
+            "remark": "控件按压状态中鼠标移入控件区域开始自动滚动。"
+        },
+
+        {
+            "name": "$pressstart",
+            "type": "scroll",
+            "remark": "鼠标左键按压控件开始时计算自动滚动的方向，并开始自动滚动。"
+        },
+
+        {
+            "name": "$setPageStep",
+            "type": "scroll",
+            "desc": "设置滚动条控件的单页滚动距离。",
+            "params": [
+                {"name": "value", "type": "number", "desc": "单页滚动距离"}
+            ]
+        },
+
+        {
+            "name": "$setValue",
+            "type": "scroll",
+            "desc": "直接设置控件的当前值。",
+            "params": [
+                {"name": "value", "type": "number", "desc": "控件的当前值"}
+            ],
+            "remark": "$setValue 仅仅设置控件的参数值，不进行合法性验证，也不改变滑动块的位置信息，用于滑动块滚动时同步设置当前值。"
+        },
+
+        {
+            "name": "focus",
+            "type": "scroll",
+            "desc": "父控件获取焦点。",
+            "remark": "在父控件没有焦点时，focus 方法将焦点设置到父控件上。"
+        },
+
+        {
+            "name": "getStep",
+            "type": "scroll",
+            "desc": "获取滚动条控件的单次滚动距离。",
+            "return": {"type": "number", "desc": "单次滚动距离"},
+            "remark": "getStep 方法返回滚动条控件发生滚动时，移动的最小步长值，通过 {'setStep'|method:'scroll'} 设置。"
+        },
+
+        {
+            "name": "getTotal",
+            "type": "scroll",
+            "desc": "获取滚动条控件的最大值。",
+            "return": {"type": "number", "desc": "控件的最大值"},
+            "remark": "getTotal 方法返回滚动条控件允许滚动的最大值，最大值、当前值与滑动块控件的实际位置互相影响，通过 {'setTotal'|method:'scroll'} 设置。"
+        },
+
+        {
+            "name": "getValue",
+            "type": "scroll",
+            "desc": "获取滚动条控件的当前值。",
+            "return": {"type": "number", "desc": "控件的当前值"},
+            "remark": "getValue 方法返回滚动条控件的当前值，最大值、当前值与滑动块控件的实际位置互相影响，但是当前值不允许超过最大值，通过 {'setValue'|method:'scroll'} 方法设置。"
+        },
+
+        {
+            "name": "hide",
+            "type": "scroll",
+            "remark": "隐藏滚动条控件时，滚动条控件的当前值需要复位为0，参见 {'setValue'|method:'scroll'} 与 {'setTotal'|method:'scroll'} 方法。"
+        },
+
+        {
+            "name": "scroll",
+            "type": "scroll",
+            "desc": "滚动条滚动。",
+            "remark": "scroll 方法首先调用 {'change'|method:'scroll'} 方法，之后触发父控件的 {'onscroll'|event:'control'} 事件，如果事件返回值不为 false，则调用父控件的 {'\\$scroll'|method:'control'} 方法。"
+        },
+
+        {
+            "name": "setStep",
+            "type": "scroll",
+            "desc": "设置滚动条控件的单次滚动距离。",
+            "params": [
+                {"name": "value", "type": "number", "desc": "单次滚动距离"}
+            ],
+            "remark": "setStep 方法设置的值必须大于0，否则不会进行操作。"
+        },
+
+        {
+            "name": "setTotal",
+            "type": "scroll",
+            "desc": "设置滚动条控件的最大值。",
+            "params": [
+                {"name": "value", "type": "number", "desc": "控件的最大值"}
+            ],
+            "remark": "setTotal 方法设置的值不能为负数，并且当前值如果大于最大值，将改变当前值，并调用 {'scroll'|method:'scroll'} 方法，最大值发生改变将导致滚动条控件刷新。"
+        },
+
+        {
+            "name": "setValue",
+            "type": "scroll",
+            "desc": "设置滚动条控件的当前值。",
+            "params": [{"name": "value", "desc": "控件的当前值"}],
+            "remark": "setValue 方法设置的值不能为负数，也不允许超过使用 {'setTotal'|method:'scroll'} 方法设置的控件的最大值，如果当前值不合法，将自动设置为最接近合法值的数值，如果当前值发生改变将导致滚动条控件刷新，并调用 {'scroll'|method:'scroll'} 方法。"
+        },
+
+        {
+            "name": "skip",
+            "type": "scroll",
+            "desc": "滚动条控件当前值移动指定的步长次数。",
+            "params": [
+                {"name": "n", "type": "number", "desc": "移动的步长次数"}
+            ],
+            "remark": "参数 value 必须是整数, 正数则向最大值方向移动，负数则向0方向移动，允许移动的区间在0-最大值之间，参见 {'setStep'|method:'scroll'}、{'setTotal'|method:'scroll'} 与 {'setValue'|method:'scroll'} 方法。"
+        }
+    ],
+
+    "panel": [
+        {
+            "name": "$keydown",
+            "type": "panel",
+            "remark": "接管方向键的处理，可显示区域随按键进行上下左右的移动。"
+        },
+
+        {
+            "name": "$keypress",
+            "type": "panel",
+            "remark": "Opera 下仅用 keydown 不能屏蔽方向键事件，还需要在 keypress 中屏蔽。"
+        },
+
+        {
+            "name": "$mousewheel",
+            "type": "panel",
+            "remark": "如果有垂直滚动条，则垂直滚动条随滚轮滚动。"
+        },
+
+        {
+            "name": "getScrollLeft",
+            "type": "panel",
+            "desc": "获取水平滚动条的当前值。",
+            "return": {"type": "number", "desc": "水平滚动条的当前值，如果没有水平滚动条返回-1"},
+            "remark": "getScrollLeft 方法提供了对水平滚动条当前值的快捷访问方式，参见 {'getValue'|method:'scroll'} 方法。"
+        },
+
+        {
+            "name": "getScrollTop",
+            "type": "panel",
+            "desc": "获取垂直滚动条的当前值。",
+            "return": {"type": "number", "desc": "垂直滚动条的当前值，如果没有垂直滚动条返回-1"},
+            "remark": "getScrollTop 方法提供了对水平滚动条当前值的快捷访问方式，参见 {'getValue'|method:'scroll'} 方法。"
+        }
+    ],
+
+    "item": [
+        {
+            "name": "$mousedown",
+            "type": "item",
+            "remark": "阻止 DOM 文本选中操作。"
+        },
+
+        {
+            "name": "alterClass",
+            "type": "item",
+            "remark": "选项控件改变样式后需要自动恢复原来的大小。"
+        }
+    ],
+
+    "items": [
+        {
+            "name": "$alterItems",
+            "type": "items",
+            "desc": "选项控件发生变化的处理。",
+            "remark": "在 {'items'|control} 中，选项控件发生增加/减少操作时调用此方法。"
+        },
+
+        {
+            "name": "$append",
+            "type": "items",
+            "desc": "控件增加子控件事件的默认处理。",
+            "params": [
+                {"name": "control", "type": "ecui.ui.Control", "desc": "子控件"}
+            ],
+            "return": {"type": "boolean", "desc": "如果不允许增加子控件，返回 false"},
+            "remark": "选项组增加子选项时需要判断子控件的类型，并额外添加引用。"
+        },
+
+        {
+            "name": "$initItems",
+            "type": "items",
+            "desc": "初始化选项组对应的 Element 对象。",
+            "remark": "实现了 Items 接口的类在初始化时需要调用 $initItems 方法自动生成选项控件，$initItems 方法保证一个控件对象只允许被调用一次，多次的调用无效。",
+            "example": [
+                "<body><div id=\"ctrl1\" class=\"ctrl1\" ecui=\"type:control;id:ctrl1\"></div></body>",
+                "var oDiv = document.createElement(\"div\");\ndocument.body.appendChild(oDiv);\noDiv.innerHTML = '<div id=\"ctrl2\" class=\"ctrl2\" ecui=\"type:control;id:ctrl2\"></div>';\necui.init(oDiv);"
+            ]
+        },
+
+        {
+            "name": "$remove",
+            "type": "items",
+            "desc": "控件移除子控件事件的默认处理。",
+            "params": [
+                {"name": "item", "type": "ecui.ui.Item", "desc": "选项控件"}
+            ],
+            "remark": "选项组移除子选项时需要额外移除引用。"
+        },
+
+        {
+            "name": "$setActived",
+            "type": "items",
+            "desc": "设置激活的选项。",
+            "params": [
+                {"name": "item", "type": "ecui.ui.Item", "desc": "选项控件"}
+            ],
+            "remark": "$setActived 方法改变选项组控件中当前激活项的效果。"
+        },
+
+        {
+            "name": "add",
+            "type": "items",
+            "desc": "添加子选项控件。",
+            "params": [
+                {"name": "item", "type": "string|HTMLElement|ecui.ui.Item", "desc": "控件的 html 内容/控件对应的 Element 对象/选项控件"},
+                {"name": "index", "type": "number", "desc": "子选项控件需要添加的位置序号"},
+                {"name": "params", "type": "Object", "desc": "子控件初始化参数"}
+            ],
+            "return": {"type": "ecui.ui.Item", "desc": "子选项控件"},
+            "remark": "add 方法中如果位置序号不合法，子选项控件将添加在末尾的位置。"
+        },
+
+        {
+            "name": "append",
+            "type": "items",
+            "desc": "向选项组最后添加子选项控件。",
+            "params": [
+                {"name": "item", "type": "string|HTMLElement|ecui.ui.Item", "desc": "控件的 html 内容/控件对应的 Element 对象/选项控件"},
+                {"name": "params", "type": "Object", "desc": "子控件初始化参数"}
+            ],
+            "return": {"type": "ecui.ui.Item", "desc": "子选项控件"},
+            "remark": "append 方法是 {'add'|method:'items'} 方法去掉第二个 index 参数的版本。<font color=\"red\">具体的参数请参见实现了接口的控件的说明。</font>"
+        },
+
+        {
+            "name": "getActived",
+            "type": "items",
+            "desc": "获取当前处于激活状态的选项。",
+            "return": {"type": "ecui.ui.Item", "desc": "子选项控件"}
+        },
+
+        {
+            "name": "getItems",
+            "type": "items",
+            "desc": "获取全部的子选项控件。",
+            "return": {"type": "Array", "desc": "子选项控件数组"}
+        },
+
+        {
+            "name": "remove",
+            "type": "items",
+            "desc": "移除子选项控件。",
+            "return": {"type": "ecui.ui.Item", "desc": "被移除的子选项控件"},
+            "params": [
+                {"name": "item", "type":"number|ecui.ui.Item", "desc": "选项控件的位置序号/选项控件"}
+            ]
+        },
+
+        {
+            "name": "setItemSize",
+            "type": "items",
+            "desc": "设置控件内所有子选项控件的大小。",
+            "params": [
+                {"name": "itemWidth", "type": "number", "desc": "子选项控件的宽度"},
+                {"name": "itemHeight", "type": "number", "desc": "子选项控件的高度"}
+            ]
+        }
+    ],
+
+    "label": [
+        {
+            "name": "$click",
+            "type": "label",
+            "remark": "将点击事件转发到 {'setFor'|method:'label'} 方法指定的控件。"
+        },
+        
+        {
+            "name": "setFor",
+            "type": "label",
+            "desc": "设置控件的事件转发接收控件。",
+            "params": [
+                {"name": "control", "type": "ecui.ui.Control", "desc": "事件转发接收控件"}
+            ],
+            "remark": "setFor 方法设置事件转发的被动接收者，如果没有设置，则事件不会被转发。"
+        }
+    ],
+
+    "edit": [
+        {
+            "name": "$submit",
+            "type": "edit",
+            "desc": "输入框控件提交前的默认处理。",
+            "params": [
+                {"name": "event", "type": "Event", "desc": "事件对象"}
+            ]
+        },
+
+        {
+            "name": "getInput",
+            "type": "edit",
+            "desc": "获取控件外层的 InputElement 对象。",
+            "return": {"type": "HTMLElement", "desc": "InputElement 对象"}
+        },
+
+        {
+            "name": "getName",
+            "type": "edit",
+            "desc": "获取控件的表单项名称。",
+            "return": {"type": "string", "desc": "表单项名称"},
+            "remark": "输入控件可以在表单中被提交，getName 方法返回提交时用的表单项名称，表单项名称可以使用 {'setName'|method:'edit'} 方法改变。"
+        },
+
+        {
+            "name": "getValue",
+            "type": "edit",
+            "desc": "获取控件的值。",
+            "return": {"type": "string", "desc": "控件的值"},
+            "remark": "getValue 方法返回提交时用的表单项的值，使用 {'setValue'|method:'edit'} 方法设置。"
+        },
+
+        {
+            "name": "setCaret",
+            "type": "edit",
+            "desc": "设置输入框光标的位置。",
+            "params": [
+                {"name": "pos", "type": "number", "desc": "位置索引"}
+            ]
+        },
+
+        {
+            "name": "setName",
+            "type": "edit",
+            "desc": "设置控件的表单项名称。",
+            "params": [
+                {"name": "name", "type": "string", "desc": "表单项名称"}
+            ],
+            "remark": "输入控件可以在表单中被提交，setName 方法设置提交时用的表单项名称，表单项名称可以使用 {'getName'|method:'edit'} 方法获取。"
+        },
+
+        {
+            "name": "setValue",
+            "type": "edit",
+            "desc": "设置控件的值。",
+            "params": [
+                {"name": "value", "type": "string", "desc": "控件的值"}
+            ],
+            "remark": "setValue 方法设置提交时用的表单项的值，使用 {'getValue'|method:'edit'} 方法获取设置的值。"
+        }
+    ],
+
+    "format-edit": [
+        {
+            "name": "$getInputText",
+            "type": "format-edit",
+            "desc": "获取当前输入的内容，如果是粘贴操作是一个长度超过1的字符串。",
+            "return": {"type": "string", "desc": "当前输入的内容"}
+        },
+
+        {
+            "name": "getSelectionStart",
+            "type": "format-edit",
+            "desc": "获得当前选区的起始位置，即当前光标的位置。",
+            "return": {"type": "number", "desc": "输入框当前选区的起始位置，即输入框当前光标的位置"}
+        },
+
+        {
+            "name": "getSelectionEnd",
+            "type": "format-edit",
+            "desc": "获得当前选区的结束位置。",
+            "return": {"type": "number", "desc": "输入框当前选区的结束位置"}
+        },
+
+        {
+            "name": "restore",
+            "type": "format-edit",
+            "desc": "恢复输入框的值。"
+        },
+
+        {
+            "name": "validate",
+            "type": "format-edit",
+            "desc": "检测输入框当前的值是否合法。",
+            "return": {"type": "boolean", "desc": "当前值是否合法"}
+        }
+    ],
+
+    "checkbox": [
+        {
+            "name": "$click",
+            "type": "checkbox",
+            "remark": "控件点击时将改变当前的选中状态。"
+        },
+
+        {
+            "name": "$keydown",
+            "type": "checkbox",
+            "remark": "屏蔽空格键按下事件。"
+        },
+
+        {
+            "name": "$keypress",
+            "type": "checkbox",
+            "remark": "Opera 下仅用 keydown 不能屏蔽空格键事件，还需要在 keypress 中屏蔽。"
+        },
+
+        {
+            "name": "$keyup",
+            "type": "checkbox",
+            "remark": "接管空格键的处理，按控格键相当于执行一次点击操作。"
+        },
+
+        {
+            "name": "getInferiors",
+            "type": "checkbox",
+            "desc": "获取全部的从属复选框控件。",
+            "return": {"type": "Array", "desc": "复选框控件数组"},
+            "remark": "复选框控件调用 {'setSuperior'|method:'checkbox'} 方法指定了上级复选框控件后，它就是上级复选框控件的从属复选框控件之一。"
+        },
+
+        {
+            "name": "getSuperior",
+            "type": "checkbox",
+            "desc": "获取上级复选框。",
+            "return": {"type": "ecui.ui.Checkbox", "desc": "复选框控件"},
+            "remark": "getSuperior 方法返回调用 {'setSuperior'|method:'checkbox'} 方法指定的上级复选框控件。"
+        },
+
+        {
+            "name": "isChecked",
+            "type": "checkbox",
+            "desc": "判断控件是否选中。",
+            "return": {"type": "boolean", "desc": "是否选中"}
+        },
+
+        {
+            "name": "setChecked",
+            "type": "checkbox",
+            "desc": "设置复选框控件选中状态。",
+            "params": [
+                {"name": "status", "type": "boolean", "desc": "是否选中，默认选中"}
+            ]
+        },
+
+        {
+            "name": "setSuperior",
+            "type": "checkbox",
+            "desc": "设置上级复选框。",
+            "params": [
+                {"name": "superior", "type": "ecui.ui.Checkbox", "desc": "复选框控件"}
+            ],
+            "remark": "setSuperior 方法指定上级复选框控件后，可以通过访问上级复选框控件的 {'getInferiors'|method:'checkbox'} 方法获取列表，列表中即包含了当前的控件。"
+        }
+    ],
+
+    "radio": [
+        {
+            "name": "$click",
+            "type": "radio",
+            "remark": "控件点击时将控件设置成为选中状态，同时取消同一个单选框控件组的其它控件的选中状态。"
+        },
+
+        {
+            "name": "checked",
+            "type": "radio",
+            "desc": "设置单选框控件为选中状态。",
+            "remark": "将控件设置成为选中状态，同时取消同一个单选框控件组的其它控件的选中状态。"
+        },
+
+        {
+            "name": "getItems",
+            "type": "radio",
+            "desc": "获取与当前单选框同组的全部单选框。",
+            "return": {"type": "Array", "desc": "单选框控件数组"},
+            "remark": "getItems 方法返回包括当前单选框在内的与当前单选框同组的全部单选框，同组的单选框选中状态存在唯一性。"
+        },
+
+        {
+            "name": "getName",
+            "type": "radio",
+            "desc": "获取控件的表单项名称。",
+            "return": {"type": "string", "desc": "单选框组的名称，如果没有关联到任何一个组，返回 undefined"},
+            "remark": "单选框控件可以在表单中被提交，getName 方法返回提交时用的表单项名称，表单项名称决定单选框的分组，可以使用 {'setName'|method:'radio'} 方法改变。"
+        },
+
+        {
+            "name": "getValue",
+            "type": "radio",
+            "desc": "获取控件的值。",
+            "return": {"type": "string", "desc": "控件的值"},
+            "remark": "getValue 方法返回控件自身的值，只有控件是选中状态，这个值才会被提交时的表单项使用，判断是否处于选中状态使用 {'isChecked'|method:'radio'} 方法，使用 {'setValue'|method:'radio'} 方法设置。"
+        },
+
+        {
+            "name": "isChecked",
+            "type": "radio",
+            "desc": "判断控件是否选中。",
+            "return": {"type": "boolean", "desc": "是否选中"}
+        },
+
+        {
+            "name": "setName",
+            "type": "radio",
+            "desc": "设置控件的表单项名称。",
+            "params": [
+                {"name": "name", "type": "string", "desc": "表单项名称，如果省略将设置成无分组"}
+            ],
+            "remark": "单选框控件可以在表单中被提交，setName 方法设置提交时用的表单项名称，名称相同的单选框位于同一个分组，表单项名称可以使用 {'getName'|method:'radio'} 方法获取。"
+        },
+
+        {
+            "name": "setValue",
+            "type": "radio",
+            "desc": "设置控件的值。",
+            "params": [
+                {"name": "value", "type": "string", "desc": "控件的值"}
+            ],
+            "remark": "setValue 方法设置控件自身的值，只有控件是选中状态，这个值才会被提交时的表单项使用，判断是否处于选中状态使用 {'isChecked'|method:'radio'} 方法，使用 {'getValue'|method:'radio'} 方法获取设置的值。"
+        }
+    ],
+
+    "select": [
+        {
+            "name": "$intercept",
+            "type": "select",
+            "remark": "控件在下拉框展开时，需要拦截浏览器的点击事件，如果点击在下拉选项区域，则选中当前项，否则直接隐藏下拉选项框，但不会改变控件激活状态。"
+        },
+
+        {
+            "name": "$keydown",
+            "type": "select",
+            "remark": "接管上下键与回车键的处理，在下拉框展开时，通过上下键选择当前移入项，如果没有展开，通过下键与回车键会将下拉框展开。"
+        },
+
+        {
+            "name": "$keypress",
+            "type": "select",
+            "remark": "Opera 下仅用 keydown 不能屏蔽空格键事件，还需要在 keypress 中屏蔽。"
+        },
+
+        {
+            "name": "$mousewheel",
+            "type": "select",
+            "remark": "如果控件拥有焦点，则当前选中项随滚轮滚动而自动指向前一项或者后一项。"
+        },
+
+        {
+            "name": "$pressend",
+            "type": "select",
+            "remark": "鼠标左键按压控件结束时设置下一次点击事件被拦截，需要根据点击的位置选择是关闭展开的下拉框还是选中选项。"
+        },
+
+        {
+            "name": "$pressstart",
+            "type": "select",
+            "remark": "鼠标左键按压控件开始时显示下拉框。"
+        },
+
+        {
+            "name": "$remove",
+            "type": "select",
+            "params": [
+                {"name": "item", "type": "ecui.ui.Item", "desc": "选项控件"}
+            ],
+            "remark": "下拉框移除子选项时需要检查选项是否被选中，如果被选中需要清除状态。"
+        },
+
+        {
+            "name": "add",
+            "type": "select",
+            "desc": "添加子选项控件。",
+            "params": [
+                {"name": "item", "type": "string|HTMLElement|ecui.ui.Item", "desc": "选项控件的 html 内容/控件对应的 Element 对象/选项控件"},
+                {"name": "index", "type": "number", "desc": "子选项控件需要添加的位置序号"},
+                {"name": "value", "type": "string", "desc": "选项对应的表单项提交值，如果忽略将使用控件的文本内容作为提交值"}
+            ],
+            "return": {"type": "ecui.ui.Item", "desc": "子选项控件"}
+        },
+
+        {
+            "name": "append",
+            "type": "select",
+            "desc": "向下拉框中最后添加子选项控件。",
+            "params": [
+                {"name": "item", "type": "string|HTMLElement|ecui.ui.Item", "desc": "选项控件的 html 内容/控件对应的 Element 对象/选项控件"},
+                {"name": "value", "type": "string", "desc": "选项对应的表单项提交值，如果忽略将使用控件的文本内容作为提交值"}
+            ],
+            "return": {"type": "ecui.ui.Item", "desc": "子选项控件"},
+            "remark": "append 方法是 {'add'|method:'select'} 方法去掉第二个 index 参数的版本。"
+        },
+
+        {
+            "name": "getSelected",
+            "type": "select",
+            "desc": "获取被选中的选项控件。",
+            "return": {"type": "ecui.ui.Item", "desc": "选项控件"}
+        },
+
+        {
+            "name": "getValue",
+            "type": "select",
+            "desc": "获取控件的值。",
+            "syntax": "<i>string</i> = <i>ecui.ui.Edit.</i><b>getValue()</b></pre><pre class=\"clsSyntax\"><i>string</i> = <i>ecui.ui.Select.Item.</i><b>getValue()</b>",
+            "return": {"type": "string", "desc": "控件的值"},
+            "remark": "ecui.ui.Edit.{'getValue'|method:'edit'} 方法参见编辑框控件的说明，ecui.ui.Select.Item.getValue 方法返回选项控件的值，即选项选中时整个下拉框控件的值。"
+        },
+
+        {
+            "name": "setOptionSize",
+            "type": "select",
+            "desc": "设置下拉框允许显示的选项数量。",
+            "params": [
+                {"name": "value", "type": "number", "desc": "显示的选项数量，必须大于 1"}
+            ],
+            "remark": "如果实际选项数量小于这个数量，没有影响，否则将出现垂直滚动条，通过滚动条控制其它选项的显示。"
+        },
+
+        {
+            "name": "setSelected",
+            "type": "select",
+            "desc": "选中选项。",
+            "params": [
+                {"name": "item", "type": "number|ecui.ui.Item", "desc": "选项的序号/选项控件"}
+            ]
+        },
+
+        {
+            "name": "setValue",
+            "type": "select",
+            "desc": "设置控件的值。",
+            "syntax": "<i>string</i> = <i>ecui.ui.Edit.</i><b>setValue(</b><i>value</i><b>)</b></pre><pre class=\"clsSyntax\"><i>string</i> = <i>ecui.ui.Select.Item.</i><b>setValue(</b><i>value</i><b>)</b>",
+            "params": [
+                {"name": "value", "type": "string", "desc": "控件的值"}
+            ],
+            "remark": "setValue 方法设置控件的值，设置的值必须与一个子选项的值相等，否则将被设置为空，使用 {'getValue'|method:'select'} 方法获取设置的值。"
+        }
+    ],
+
+    "combox": [
+    ],
+
+    "multi-select": [
+        {
+            "name": "$intercept",
+            "type": "multi-select",
+            "remark": "控件在多选下拉框展开时，需要拦截浏览器的点击事件，如果点击在下拉选项区域，则选中当前项，否则直接隐藏下拉选项框，但不会改变控件激活状态。"
+        },
+
+        {
+            "name": "$mousewheel",
+            "type": "multi-select",
+            "remark": "如果控件拥有焦点，则当前选中项随滚轮滚动而自动指向前一项或者后一项。"
+        },
+
+        {
+            "name": "$pressend",
+            "type": "multi-select",
+            "remark": "鼠标左键按压控件结束时设置下一次点击事件被拦截，需要根据点击的位置选择是关闭展开的下拉框还是选中选项。"
+        },
+
+        {
+            "name": "$pressstart",
+            "type": "multi-select",
+            "remark": "鼠标左键按压控件开始时显示下拉框。"
+        },
+
+        {
+            "name": "$remove",
+            "type": "multi-select",
+            "params": [
+                {"name": "item", "type": "ecui.ui.Item", "desc": "选项控件"}
+            ],
+            "remark": "下拉框移除子选项时需要检查选项是否被选中，如果被选中需要清除状态。"
+        },
+
+        {
+            "name": "getSelected",
+            "type": "multi-select",
+            "desc": "获取全部选中的选项控件。",
+            "return": {"type": "Array", "desc": "选项控件列表"}
+        },
+
+        {
+            "name": "setOptionSize",
+            "type": "multi-select",
+            "desc": "设置下拉框允许显示的选项数量。",
+            "params": [
+                {"name": "value", "type": "number", "desc": "显示的选项数量，必须大于 1"}
+            ],
+            "remark": "如果实际选项数量小于这个数量，没有影响，否则将出现垂直滚动条，通过滚动条控制其它选项的显示。"
+        },
+
+        {
+            "name": "setValue",
+            "type": "multi-select",
+            "desc": "设置控件的值。",
+            "params": [
+                {"name": "values", "type": "Array", "desc": "控件被选中的值列表"}
+            ],
+            "remark": "setValue 方法批量设置控件的值，如果设置的某个值与所有子选项的值不相等，将忽略这个值的设置。"
+        }
+    ],
+
+    "collection": [
+        {
+            "name": "$setSize",
+            "type": "collection",
+            "remark": "网格控件的 $setSize 方法设置的大小不一定是实际控件的大小，为了保证子控件宽度与高度完全相等，内部可用区域的宽度与高度需要自动适应成各个子控件的大小的整数倍。"
+        },
+
+        {
+            "name": "getIndex",
+            "type": "collection",
+            "owner": "ecui.ui.Collection.Item",
+            "desc": "获取网格子控件在网格控件中的序号。",
+            "return": {"type": "number", "desc": "子控件的序号"},
+            "remark": "在网格控件的事件中，事件对应的 this 是真正产生事件的网格子控件，通过 getIndex 方法能知道当前的网格子控件在网格控件中的序号，参见 {'getItem'|method:'collection'} 方法。"
+        },
+
+        {
+            "name": "getItem",
+            "type": "collection",
+            "desc": "获取指定的网格子控件。",
+            "params": [
+                {"name": "index", "type": "number", "desc": "子控件的总序号"}
+            ],
+            "return": {"type": "ecui.ui.Control", "desc": "子控件对象"},
+            "remark": "子控件的序号从行到列，逐一累加，例如，一个 3*3 的网格控件，第一行第一列序号为 0，第一行第二列序号为 1，第一行第三列序号为 2，第二行第一列序号为3，行二行第二列序号为 4，依此类推。"
+        }
+    ],
+
+    "calendar": [
+        {
+            "name": "$setSize",
+            "type": "calendar",
+            "remark": "日历控件与 {'collection'|control} 类似，$setSize 方法设置的大小不一定是实际控件的大小，受到了内部部件的影响。"
+        },
+
+        {
+            "name": "getMonth",
+            "type": "calendar",
+            "desc": "获取日历控件当前显示的月份。",
+            "return": {"type": "number", "desc": "月份(1-12)"}
+        },
+
+        {
+            "name": "getYear",
+            "type": "calendar",
+            "desc": "获取日历控件当前显示的年份。",
+            "return": {"type": "number", "desc": "年份(19xx-20xx)"}
+        },
+
+        {
+            "name": "move",
+            "type": "calendar",
+            "desc": "日历显示移动指定的月份数。",
+            "params": [
+                {"name": "offsetMonth", "type": "number", "desc": "日历移动的月份数"}
+            ],
+            "remark": "参数为正整数则表示向当前月份之后的月份移动，负数则表示向当前月份之前的月份移动，设置后日历控件会刷新以显示新的日期。"
+        },
+
+        {
+            "name": "setDate",
+            "type": "calendar",
+            "desc": "设置日历控件当前显示的日期。",
+            "params": [
+                {"name": "year", "type": "number", "desc": "年份(19xx-20xx)，如果省略使用浏览器的当前年份"},
+                {"name": "month", "type": "number", "desc": "月份(1-12)，如果省略使用浏览器的当前月份"}
+            ]
+        }
+    ],
+
+    "form": [
+        {
+            "name": "$focus",
+            "type": "form",
+            "remark": "窗体控件获得焦点时需要将自己置于所有窗体控件的顶部。"
+        },
+
+        {
+            "name": "center",
+            "type": "form",
+            "remark": "窗体居中显示。"
+        },
+
+        {
+            "name": "hide",
+            "type": "form",
+            "remark": "如果窗体是以 {'showModal'|method:'form'} 方式打开的，隐藏窗体时，需要恢复页面的状态。"
+        },
+
+        {
+            "name": "setTitle",
+            "type": "form",
+            "desc": "设置窗体控件标题。",
+            "params": [
+                {"name": "text", "type": "string", "desc": "窗体标题"}
+            ]
+        },
+
+        {
+            "name": "show",
+            "type": "form",
+            "remark": "显示窗体控件时，需要将窗体控件设置为获得焦点状态，即窗体控件或者子控件拥有焦点。"
+        },
+
+        {
+            "name": "showModal",
+            "type": "form",
+            "desc": "窗体控件以独占方式显示。",
+            "params": [
+                {"name": "opacity", "type": "number", "desc": "遮罩层透明度，默认为0.05"}
+            ],
+            "remark": "showModal 方法将窗体控件以独占方式显示，此时鼠标点击窗体以外的内容无效，关闭窗体后自动恢复。"
+        }
+    ],
+
+    "tree": [
+        {
+            "name": "$cache",
+            "type": "tree",
+            "desc": "无效，树控件禁止设置大小。"
+        },
+
+        {
+            "name": "$click",
+            "type": "tree",
+            "remark": "控件点击时改变子树控件的显示/隐藏状态。"
+        },
+
+        {
+            "name": "$resize",
+            "type": "tree",
+            "desc": "无效，树控件禁止设置大小。"
+        },
+
+        {
+            "name": "$setSize",
+            "type": "tree",
+            "desc": "无效，树控件禁止设置大小。"
+        },
+
+        {
+            "name": "add",
+            "type": "tree",
+            "desc": "添加子树控件。",
+            "params": [
+                {"name": "item", "type": "string|ecui.ui.Tree", "desc": "子树控件的 html 内容/树控件"},
+                {"name": "index", "type": "number", "desc": "子树控件需要添加的位置序号，不指定将添加在最后"}
+            ],
+            "return": {"type": "ecui.ui.Tree", "desc": "树控件"}
+        },
+
+        {
+            "name": "collapse",
+            "type": "tree",
+            "desc": "收缩当前树控件的所有子树控件。",
+            "remark": "collapse 方法将递归的调用子树控件的 collapse 方法。"
+        },
+
+        {
+            "name": "expand",
+            "type": "tree",
+            "desc": "展开当前树控件的所有子树控件。",
+            "remark": "expand 方法将递归的调用子树控件的 expand 方法。"
+        },
+
+        {
+            "name": "getChildTrees",
+            "type": "tree",
+            "desc": "获取当前树控件的所有子树控件。",
+            "return": {"type": "Array", "desc": "树控件列表"},
+            "remark": "getChildTrees 方法返回使用 {'add'|method:'tree'} 方法或 {'setParent'|method:'tree'} 方法调用声明父子关系的树控件。"
+        },
+
+        {
+            "name": "getFirst",
+            "type": "tree",
+            "desc": "获取当前树控件的第一个子树控件。",
+            "return": {"type": "ecui.ui.Tree", "desc": "树控件，如果没有，返回 null"}
+        },
+
+        {
+            "name": "getLast",
+            "type": "tree",
+            "desc": "获取当前树控件的最后一个子树控件。",
+            "return": {"type": "ecui.ui.Tree", "desc": "树控件，如果没有，返回 null"}
+        },
+
+        {
+            "name": "getNext",
+            "type": "tree",
+            "desc": "获取当前树控件的后一个同级树控件。",
+            "return": {"type": "ecui.ui.Tree", "desc": "树控件，如果没有，返回 null"}
+        },
+
+        {
+            "name": "getPrev",
+            "type": "tree",
+            "desc": "获取当前树控件的前一个同级树控件。",
+            "return": {"type": "ecui.ui.Tree", "desc": "树控件，如果没有，返回 null"}
+        },
+
+        {
+            "name": "getRoot",
+            "type": "tree",
+            "desc": "获取当前树控件的根。",
+            "return": {"type": "ecui.ui.Tree", "desc": "树控件的根"}
+        },
+
+        {
+            "name": "isFold",
+            "type": "tree",
+            "desc": "当前子控件区域是否显示/隐藏。",
+            "return": {"type": "boolean", "desc": "表示子控件区域隐藏，false 表示子控件区域显示"}
+        },
+
+        {
+            "name": "hide",
+            "type": "tree",
+            "remark": "隐藏树控件的同时需要将子树区域也隐藏。"
+        },
+
+        {
+            "name": "setFold",
+            "type": "tree",
+            "desc": "显示/隐藏子控件区域。",
+            "remark": "setFold 方法将触发各级父树控件的 {'onchange'|event:'tree'} 事件。",
+            "params": [
+                {"name": "status", "type": "boolean", "desc": "如果为 false 表示显示子树控件，否则为隐藏子树控件"}
+            ]
+        },
+
+        {
+            "name": "show",
+            "type": "tree",
+            "remark": "显示树控件的同时需要将子树区域也显示。"
+        }
+    ],
+
+    "radio-tree": [
+        {
+            "name": "getName",
+            "type": "radio-tree",
+            "desc": "获取控件表单项的名称。",
+            "return": {"type": "string", "desc": "INPUT 对象名称"}
+        },
+
+        {
+            "name": "getSelected",
+            "type": "radio-tree",
+            "desc": "获取当前树控件选中的项。",
+            "return": {"type": "ecui.ui.Tree", "desc": "树控件选中的项"}
+        },
+
+        {
+            "name": "getValue",
+            "type": "radio-tree",
+            "desc": "获取控件的值。",
+            "return": {"type": "string", "desc": "控件的值"}
+        }
+    ],
+
+    "check-tree": [
+        {
+            "name": "getChecked",
+            "type": "check-tree",
+            "desc": "获取包括当前树控件在内的全部选中的子树控件。",
+            "return": {"type": "Array", "desc": "全部选中的树控件列表"}
+        },
+        {
+            "name": "getValue",
+            "type": "check-tree",
+            "desc": "获取当前树控件复选框的表单项的值。",
+            "return": {"type": "string", "desc": "表单项的值"}
+        },
+        {
+            "name": "isChecked",
+            "type": "check-tree",
+            "desc": "判断树控件是否选中。",
+            "return": {"type": "boolean", "desc": "是否选中"}
+        },
+        {
+            "name": "setChecked",
+            "type": "check-tree",
+            "desc": "设置当前树控件复选框选中状态。",
+            "params": [
+                {"name": "status", "type": "boolean", "desc": "是否选中当前树控件复选框"}
+            ]
+        }
+    ],
+
+    "table": [
+        {
+            "name": "$getCell",
+            "type": "table",
+            "owner": "ecui.ui.Table",
+            "desc": "获取单元格元素。",
+            "params": [
+                {"name": "rowIndex", "type": "number", "desc": "单元格的行数，从0开始"},
+                {"name": "colIndex", "type": "number", "desc": "单元格的列数，从0开始"}
+            ],
+            "return": {"type": "HTMLElement", "desc": "单元格 DOM 元素"},
+            "remark": "$getCell 方法在合法的行列序号内一定会返回一个 DOM 元素，如果当前单元格被合并，将返回合并后的 DOM 元素。"
+        },
+
+        {
+            "name": "$getCols",
+            "type": "table",
+            "owner": "ecui.ui.Table.Row",
+            "desc": "获取一行中单元格的 Element 对象数组。",
+            "return": {"type": "Array", "desc": "单元格的 Element 对象数组"}
+        },
+
+/*        {
+            "name": "$initRow",
+            "type": "table",
+            "desc": "初始化一行的数据。",
+            "params": [
+                {"name": "row", "type": "HTMLElement", "desc": "一行的DIV对象"},
+                {"name": "index", "type": "number", "desc": "行的序列号"}
+            ],
+            "return": {"type": "ecui.ui.Table.Row", "desc": "行控件"}
+        },
+*/
+        {
+            "name": "$setStyles",
+            "type": "table",
+            "owner": "ecui.ui.Table.Col",
+            "desc": "设置整列的样式。",
+            "params": [
+                {"name": "name", "type": "string", "desc": "样式的名称"},
+                {"name": "value", "type": "string", "desc": "样式的值"},
+                {"name": "widthRevise", "type": "string", "desc": "改变样式后表格宽度的变化，如果省略表示没有变化"}
+            ],
+            "remark": "$setStyles 方法批量设置一列所有单元格的样式，但不包括表头的单元格。"
+        },
+
+        {
+            "name": "addCol",
+            "type": "table",
+            "desc": "新增一列。",
+            "params": [
+                {"name": "params", "type": "列的初始化参数"},
+                {"name": "index", "type": "number", "desc": "被添加的列的位置序号，如果不合法将添加在末尾"}
+            ],
+            "return": {"type": "ecui.ui.Table.Col", "desc": "列控件"},
+            "remark": [
+                "params 参数对象支持的属性如下：",
+                "<table class=\"clsSTD\"><tr><td>width</td><td>number，列的宽度</td></tr><tr><td>base</td><td>string，列的基本样式</td></tr><tr><td>title</td><td>string，列的标题</td></tr></table>"
+            ]
+        },
+
+        {
+            "name": "addRow",
+            "type": "table",
+            "desc": "表格新增一行。",
+            "params": [
+                {"name": "data", "type": "Array", "desc": "数据源(一维数组)"},
+                {"name": "index", "type": "number", "desc": "被添加的行的位置序号，如果不合法将添加在最后"}
+            ]
+        },
+/*
+        {
+            "name": "addRows",
+            "type": "table",
+            "desc": "表格新增多行。",
+            "params": [
+                {"name": "data", "type": "Array", "desc": "数据源(二维数组)"},
+                {"name": "index", "type": "number", "desc": "被添加的行的位置序号，如果不合法将添加在最后"}
+            ]
+        },
+
+        {
+            "name": "cancel",
+            "type": "table",
+            "desc": "结束编辑状态，编辑的内容恢复编辑前的值。",
+            "remark": "当表格在编辑状态时，调用 cancel 方法会恢复编辑前的内容，如果需要保存编辑的内容，请使用 {'save'|method:'table'} 方法，如果表格没有处于编辑状态中，调用 cancel 方法没有任何作用。"
+        },
+
+        {
+            "name": "edit",
+            "type": "table",
+            "owner": "ecui.ui.Table.Row",
+            "desc": "编辑当前行的内容。",
+            "remark": "edit 方法使表格进入编辑状态，需要使用 {'save'|method:'table'} 或者 {'cancel'|method:'table'} 方法来结束编辑状态。"
+        },
+*/
+        {
+            "name": "getCell",
+            "type": "table",
+            "desc": "获取单元格控件。",
+            "params": [
+                {"name": "rowIndex", "type": "number", "desc": "单元格的行数，从0开始"},
+                {"name": "colIndex", "type": "number", "desc": "单元格的列数，从0开始"}
+            ],
+            "return": {"type": "ecui.ui.Control", "desc": "单元格控件"}
+        },
+
+        {
+            "name": "getCol",
+            "type": "table",
+            "desc": "获取列控件/一行中的单元格控件。",
+            "syntax": "<i>ecui.ui.Table.Col</i> = <i>ecui.ui.Table.</i><b>getCol(</b><i>index</i><b>)</b></pre><pre class=\"clsSyntax\"><i>ecui.ui.Control</i> = <i>ecui.ui.Table.Row.</i><b>getCol(</b><i>index</i><b>)</b>",
+            "params": [
+                {"name": "index", "type": "number", "desc": "列数，从0开始"}
+            ],
+            "return": {"type": "ecui.ui.Table.Col", "desc": "列控件/单元格控件"},
+            "remark": "列控件只是通常的称呼，实际上就是普通的基础控件，提供了一些针对整列进行操作的方法，包括 {'hide'|method:'table'}、{'setSize'|method:'table'}(仅能设置宽度) 与 {'show'|method:'table'} 方法等。"
+        },
+
+        {
+            "name": "getColCount",
+            "type": "table",
+            "desc": "获取列控件的数量。",
+            "return": {"type": "number", "desc": "列控件数量"}
+        },
+
+        {
+            "name": "getCols",
+            "type": "table",
+            "desc": "获取全部的列控件/一行中的全部单元格控件。",
+            "syntax": "<i>Array</i> = <i>ecui.ui.Table.</i><b>getCols()</b></pre><pre class=\"clsSyntax\"><i>Array</i> = <i>ecui.ui.Table.Row.</i><b>getCols()</b>",
+            "return": {"type": "Array", "desc": "列控件数组/单元格控件数组"}
+        },
+
+        {
+            "name": "getRow",
+            "type": "table",
+            "desc": "获取行控件。",
+            "params": [
+                {"name": "index", "type": "number", "desc": "行数，从0开始"}
+            ],
+            "return": {"type": "ecui.ui.Table.Row", "desc": "行控件"}
+        },
+
+        {
+            "name": "getColCount",
+            "type": "table",
+            "desc": "获取行控件的数量。",
+            "return": {"type": "number", "desc": "行控件数量"}
+        },
+
+        {
+            "name": "getRows",
+            "type": "table",
+            "desc": "获取表格中所有的行控件。",
+            "return": {"type": "Array", "desc": "行控件列表"}
+        },
+
+        {
+            "name": "hide",
+            "type": "table",
+            "desc": "隐藏控件/隐藏一列。",
+            "syntax": "<i>boolean</i> = <i>ecui.ui.Table.</i><b>hide()</b></pre><pre class=\"clsSyntax\"><i>boolean</i> = <i>ecui.ui.Table.Col.</i><b>hide()</b>"
+        },
+
+        {
+            "name": "removeCol",
+            "type": "table",
+            "desc": "表格移除一列。",
+            "params": [
+                {"name": "index", "type": "number", "desc": "列的序号，从0开始计数"}
+            ]
+        },
+
+        {
+            "name": "removeRow",
+            "type": "table",
+            "desc": "移除一行并释放占用的空间。",
+            "params": [
+                {"name": "index", "type": "number", "desc": "行的序号，从0开始计数"}
+            ]
+        },
+/*
+        {
+            "name": "removeRows",
+            "type": "table",
+            "desc": "表格移除所有的行。"
+        },
+
+        {
+            "name": "save",
+            "type": "table",
+            "desc": "结束编辑状态，保存编辑的内容回写至表格控件中。",
+            "remark": "当表格在编辑状态时，调用 save 方法会保存编辑的内容，如果需要恢复编辑前的内容，请使用 {'cancel'|method:'table'} 方法，如果表格没有处于编辑状态中，调用 save 方法没有任何作用。"
+        },
+
+        {
+            "name": "setEditor",
+            "type": "table",
+            "owner": "ecui.ui.Table.Col",
+            "desc": "设置指定列的编辑控件。",
+            "params": [
+                {"name": "editor", "type": "ecui.ui.Input", "desc": "编辑控件"}
+            ],
+            "remark": "需要编辑的列必须使用 setEditor 方法设置相应的编辑控件，在表格进入编辑状态时，编辑控件会出现在对应的单元格中。"
+        },
+
+        {
+            "name": "setEllipsis",
+            "type": "table",
+            "owner": "ecui.ui.Table.Col",
+            "desc": "设置指定列是否为省略状态。",
+            "params": [
+                {"name": "status", "type": "boolean", "desc": "是否为省略状态"}
+            ],
+            "remark": "如果设置成省略状态，即当前列内容实际宽度超过列宽时，部分内容显示为省略号。"
+        },
+*/
+        {
+            "name": "setSize",
+            "type": "table",
+            "desc": "设置控件的大小/设置整列的宽度。",
+            "syntax": "<i>boolean</i> = <i>ecui.ui.Table.</i><b>setSize(</b><i>width, height</i><b>)</b></pre><pre class=\"clsSyntax\"><i>boolean</i> = <i>ecui.ui.Table.Col.</i><b>setSize(</b><i>width</i><b>)</b>"
+        },
+
+        {
+            "name": "show",
+            "type": "table",
+            "desc": "显示控件/显示一列。",
+            "syntax": "<i>boolean</i> = <i>ecui.ui.Table.</i><b>show()</b></pre><pre class=\"clsSyntax\"><i>boolean</i> = <i>ecui.ui.Table.Col.</i><b>show()</b>"
+        }
+    ],
+
+    "locked-table": [
+    ],
+
+    "popup": [
+        {
+            "name": "$blur",
+            "type": "popup",
+            "remark": "弹出菜单控件失去焦点时需要隐藏自己，参见 {'hide'|method:'popup'} 方法。"
+        },
+
+        {
+            "name": "$intercept",
+            "type": "popup",
+            "remark": "弹出菜单需要强制拦截浏览器的点击事件，关闭弹出菜单。"
+        },
+
+        {
+            "name": "add",
+            "type": "popup",
+            "syntax": "<i>ecui.ui.Items.</i><b>add(</b><i>item, index</i><b>)</b></pre><pre class=\"clsSyntax\"><i>ecui.ui.Popup.Item.</i><b>add(</b><i>item, index</i><b>)</b>"
+        },
+
+        {
+            "name": "getInferior",
+            "type": "popup",
+            "desc": "获取当前激活的下级弹出菜单。",
+            "return": {"type": "ecui.ui.Popup", "desc": "弹出菜单控件"},
+            "remark": "getInferior 方法返回弹出菜单处于显示状态时，通过它打开的子弹出菜单。"
+        },
+
+        {
+            "name": "getItems",
+            "type": "popup",
+            "syntax": "<i>Array</i> = <i>ecui.ui.Popup.</i><b>getItems()</b></pre><pre class=\"clsSyntax\"><i>Array</i> = <i>ecui.ui.Popup.Item.</i><b>getItems()</b>",
+            "desc": "获取全部的子选项控件/获取当前菜单选项控件的所有子选项控件。",
+            "return": {"type": "Array", "desc": "子选项控件列表，如果不存在返回空列表"}
+        },
+
+        {
+            "name": "getSuperior",
+            "type": "popup",
+            "desc": "获取当前激活的上级弹出菜单。",
+            "return": {"type": "ecui.ui.Popup", "desc": "弹出菜单控件"},
+            "remark": "getSuperior 方法返回弹出菜单处于显示状态时，打开它的父弹出菜单。"
+        },
+
+        {
+            "name": "hide",
+            "type": "popup",
+            "remark": "隐藏弹出菜单，同时隐藏所有的子弹出菜单。"
+        },
+
+        {
+            "name": "remove",
+            "type": "popup",
+            "syntax": "<i>ecui.ui.Items.</i><b>remove(</b><i>item</i><b>)</b></pre><pre class=\"clsSyntax\"><i>ecui.ui.Popup.Item.</i><b>remove(</b><i>item</i><b>)</b>"
+        },
+
+        {
+            "name": "show",
+            "type": "popup",
+            "remark": "显示弹出菜单时，必须保证弹出菜单显示在屏幕内，并且子弹出菜单展开的方向尽可能一致。"
+        }
+    ],
+
+    "listbox": [
+        {
+            "name": "add",
+            "type": "listbox",
+            "params": [
+                {"name": "item", "type": "string|HTMLElement|ecui.ui.Item", "desc": "选项控件的 html 内容/控件对应的 Element 对象/选项控件"},
+                {"name": "index", "type": "number", "desc": "选项控件需要添加的位置序号"},
+                {"name": "value", "type": "string", "desc": "选项对应的表单项提交值，如果忽略将使用控件的文本内容作为提交值"}
+            ]
+        },
+
+        {
+            "name": "append",
+            "type": "listbox",
+            "params": [
+                {"name": "item", "type": "string|HTMLElement|ecui.ui.Item", "desc": "选项控件的 html 内容/控件对应的 Element 对象/选项控件"},
+                {"name": "value", "type": "string", "desc": "选项对应的表单项提交值，如果忽略将使用控件的文本内容作为提交值"}
+            ]
+        },
+
+        {
+            "name": "getName",
+            "type": "listbox",
+            "desc": "获取控件的表单项名称。",
+            "return": {"type": "string", "desc": "单选框名称"},
+            "remark": "多选框控件可以在表单中被提交，getName 方法返回提交时用的表单项名称，表单项名称可以使用 {'setName'|method:'listbox'} 方法改变。"
+        },
+
+        {
+            "name": "getSelected",
+            "type": "listbox",
+            "desc": "获取所有选中的选项。",
+            "return": {"type": "Array", "desc": "选项数组"}
+        },
+
+        {
+            "name": "isSelected",
+            "type": "listbox",
+            "owner": "ecui.ui.Listbox.Item",
+            "desc": "判断多选框的选项控件是否被选中。",
+            "return": {"type": "boolean", "desc": "选项是否被选中"}
+        },
+
+        {
+            "name": "selectAll",
+            "type": "listbox",
+            "desc": "选中所有的选项。",
+            "remark": "某些场景下，需要多选框控件的内容都可以被提交，可以在表单的 onsubmit 事件中调用 selectAll 方法全部选择。"
+        },
+
+        {
+            "name": "setName",
+            "type": "listbox",
+            "desc": "设置控件的表单项名称。",
+            "params": [
+                {"name": "name", "type": "string", "desc": "表单项名称"}
+            ],
+            "remark": "多选框控件可以在表单中被提交，setName 方法设置提交时用的表单项名称，表单项名称可以使用 {'getName'|method:'listbox'} 方法获取。"
+        },
+
+        {
+            "name": "setSelected",
+            "type": "listbox",
+            "owner": "ecui.ui.Listbox.Item",
+            "desc": "设置选中状态。",
+            "params": [
+                {"name": "status", "type": "boolean", "desc": "是否选中，默认为选中"}
+            ]
+        }
+    ],
+
+    "progress": [
+        {
+            "name": "setText",
+            "type": "progress",
+            "desc": "设置进度的比例以及需要显示的文本。",
+            "params": [
+                {"name": "rate", "type": "number", "desc": "进度比例，在0-1之间"},
+                {"name": "text", "type": "string", "desc": "显示的文本，如果省略将显示成 xx%"}
+            ]
+        }
+    ],
+
+    "palette": [
+        {
+            "name": "getColor",
+            "type": "palette",
+            "desc": "获取拾色器当前选中的颜色对象。",
+            "return": {"type": "ecui.Color", "desc": "拾色器当前选中的颜色对象"}
+        },
+
+        {
+            "name": "setColor",
+            "type": "palette",
+            "desc": "设置拾色器当前选中的颜色对象。",
+            "params": [
+                {"name": "color", "type": "ecui.Color", "desc": "颜色对象"}
+            ]
+        }
+    ],
+
+    "tab": [
+        {
+            "name": "$getLeftMostIndex",
+            "type": "tab",
+            "desc": "获得当前显示的选项卡中左边元素的索引，只在能左右滚动时有效。",
+            "return": {"type": "number", "desc": "最左边元素的索引"}
+        },
+
+        {
+            "name": "getSelected",
+            "type": "tab",
+            "desc": "获得当前选中的选项卡控件。",
+            "return": {"type": "ecui.ui.Tab.Item", "desc": "选中的选项卡控件"}
+        },
+
+        {
+            "name": "move",
+            "type": "tab",
+            "desc": "移动分页选项头部。",
+            "params": [
+                {"name": "skip", "type": "number", "desc": "移动头部指定个数的选项卡数量，正数向后，负数向前"}
+            ]
+        },
+
+        {
+            "name": "setSelected",
+            "type": "tab",
+            "desc": "设置被选中的选项卡。",
+            "params": [
+                {"name": "item", "type": "number|ecui.ui.Tab.Item", "desc": "选项卡子选项的索引/选项卡子选项控件"}
+            ]
+        }
+    ]
+}

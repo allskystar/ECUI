@@ -1,0 +1,491 @@
+{
+    "core": [
+    ],
+
+    "array": [
+    ],
+
+    "dom": [
+    ],
+
+    "string": [
+    ],
+
+    "util": [
+    ],
+
+    "control": [
+        {
+            "name": "onappend",
+            "desc": "控件增加子控件事件。",
+            "type": "control",
+            "params": [{"name": "ecui.ui.Control", "desc": "被增加的子控件"}],
+            "remark": "子控件添加到父控件时，父控件触发本事件，如果事件返回 false，子控件不会添加到父控件下。"
+        },
+
+        {
+            "name": "onblur",
+            "desc": "控件失去焦点事件。",
+            "type": "control",
+            "params": [{"name": "event", "desc": "事件对象"}],
+            "remark": "控件可以通过点击控件区域外或调用 {'setFocused'|method:'core'} / {'loseFocus'|method:'core'} 方法将焦点设置到其它控件上，将触发本事件。"
+        },
+
+        {
+            "name": "onchange",
+            "desc": "控件改变事件。",
+            "type": "control",
+            "remark": "滚动条控件发生滚动时触发。输入框控件内容发生改变时触发。复选框控件选中状态发生改变时触发。日历控件发生改变时触发。"
+        },
+
+        {
+            "name": "onclick",
+            "desc": "鼠标单击控件事件。",
+            "type": "control",
+            "params": [{"name": "event", "desc": "事件对象"}]
+        },
+
+        {
+            "name": "oncreate",
+            "desc": "控件创建事件。",
+            "type": "control",
+            "params": [
+                {"name": "params", "type": "Object", "desc": "初始化参数"}
+            ],
+            "remark": "控件构造函数调用成功后，将触发本事件。"
+        },
+
+        {
+            "name": "ondispose",
+            "desc": "销毁控件事件。",
+            "type": "control",
+            "remark": "业务自定义针对 DOM 节点的引用，需要在本事件中释放。"
+        },
+
+        {
+            "name": "ondragend",
+            "desc": "控件拖拽结束事件。",
+            "type": "control",
+            "params": [{"name": "event", "desc": "事件对象"}],
+            "remark": "调用核心的 {'drag'|method:'core'} 方法后，释放鼠标左键触发。"
+        },
+
+        {
+            "name": "ondragmove",
+            "desc": "控件拖拽移动事件。",
+            "type": "control",
+            "params": [{"name": "event", "desc": "事件对象"},{"name": "x", "desc": "X轴坐标"},{"name": "y", "desc": "Y轴坐标"}],
+            "remark": "调用核心的 {'drag'|method:'core'} 方法后，释放鼠标左键之前，在浏览器中移动时触发。如果事件返回 false，将不会调用 {'setPosition'|method:'control'}(x, y) 方法设置控件的坐标。"
+        },
+
+        {
+            "name": "ondragstart",
+            "desc": "控件拖拽开始事件。",
+            "type": "control",
+            "params": [{"name": "event", "desc": "事件对象"}],
+            "remark": "调用核心提供的 {'drag'|method:'core'} 方法触发。"
+        },
+
+        {
+            "name": "onfocus",
+            "desc": "控件获得焦点事件。",
+            "type": "control",
+            "params": [{"name": "event", "desc": "事件对象"}],
+            "remark": "控件可以通过点击或调用 {'setFocused'|method:'core'} 方法获取焦点，将触发本事件。"
+        },
+
+        {
+            "name": "onintercept",
+            "desc": "界面点击强制拦截事件。",
+            "type": "control",
+            "remark": "调用核心的 {'intercept'|method:'core'} 方法后，鼠标左键在浏览器内点击触发，this 指针是调用 {'intercept'|method:'core'} 方法时传入的控件对象。"
+        },
+
+        {
+            "name": "onhide",
+            "desc": "控件隐藏事件。",
+            "type": "control",
+            "remark": "控件从显示状态变为隐藏状态时触发本事件，父控件隐藏时不会触发本事件。"
+        },
+
+        {
+            "name": "oninit",
+            "desc": "控件初始化事件。",
+            "type": "control",
+            "remark": "控件生成/缓存/渲染完成后，将触发本事件。"
+        },
+
+        {
+            "name": "onkeydown",
+            "desc": "键盘按下事件。",
+            "type": "control",
+            "params": [{"name": "event", "desc": "事件对象"}],
+            "remark": "在控件拥有焦点时，键盘按下时触发本事件。"
+        },
+
+        {
+            "name": "onkeypress",
+            "desc": "键盘按压事件。",
+            "type": "control",
+            "params": [{"name": "event", "desc": "事件对象"}],
+            "remark": "在控件拥有焦点时，键盘按压时触发本事件。"
+        },
+
+        {
+            "name": "onkeyup",
+            "desc": "键盘弹起事件。",
+            "type": "control",
+            "params": [{"name": "event", "desc": "事件对象"}],
+            "remark": "在控件拥有焦点时，键盘弹起时触发本事件。"
+        },
+
+        {
+            "name": "onmousedown",
+            "desc": "鼠标在控件区域内按下事件。",
+            "type": "control",
+            "params": [{"name": "event", "desc": "事件对象"}]
+        },
+
+        {
+            "name": "onmousemove",
+            "desc": "鼠标在控件区域内移动事件。",
+            "type": "control",
+            "params": [{"name": "event", "desc": "事件对象"}]
+        },
+
+        {
+            "name": "onmouseout",
+            "desc": "鼠标移出控件区域事件。",
+            "type": "control",
+            "params": [{"name": "event", "desc": "事件对象"}]
+        },
+
+        {
+            "name": "onmouseover",
+            "desc": "鼠标移入控件区域事件。",
+            "type": "control",
+            "params": [{"name": "event", "desc": "事件对象"}]
+        },
+
+        {
+            "name": "onmouseup",
+            "desc": "鼠标在控件区域内弹起事件。",
+            "type": "control",
+            "params": [{"name": "event", "desc": "事件对象"}]
+        },
+
+        {
+            "name": "onmousewheel",
+            "desc": "鼠标滚轮事件。",
+            "type": "control",
+            "params": [{"name": "event", "desc": "事件对象"}],
+            "remark": "如果本事件不返回 false，将依次触发父控件的本事件。"
+        },
+
+        {
+            "name": "onpressend",
+            "desc": "控件按压状态结束事件。",
+            "type": "control",
+            "params": [{"name": "event", "desc": "事件对象"}]
+        },
+
+        {
+            "name": "onpressmove",
+            "desc": "控件按压状态中鼠标在控件区域内移动事件。",
+            "type": "control",
+            "params": [{"name": "event", "desc": "事件对象"}]
+        },
+
+        {
+            "name": "onpressout",
+            "desc": "控件按压状态中鼠标移出控件区域事件。",
+            "type": "control",
+            "params": [{"name": "event", "desc": "事件对象"}]
+        },
+
+        {
+            "name": "onpressover",
+            "desc": "控件按压状态中鼠标移入控件区域事件。",
+            "type": "control",
+            "params": [{"name": "event", "desc": "事件对象"}]
+        },
+
+        {
+            "name": "onpressstart",
+            "desc": "控件按压状态开始事件。",
+            "type": "control",
+            "params": [{"name": "event", "desc": "事件对象"}]
+        },
+
+        {
+            "name": "onremove",
+            "desc": "控件移除子控件事件。",
+            "type": "control",
+            "params": [{"name": "ecui.ui.Control", "desc": "被移除的子控件"}],
+            "remark": "从父控件移除子控件时，父控件触发本事件。"
+        },
+
+        {
+            "name": "onresize",
+            "desc": "控件大小改变事件。",
+            "type": "control",
+            "remark": "浏览器大小发生改变时，如果控件大小发生改变，将触发本事件。"
+        },
+
+        {
+            "name": "onselect",
+            "type": "control",
+            "desc": "区域选择事件。",
+            "params": [{"name": "event", "desc": "事件对象"}],
+            "remark": "调用核心 {'select'|method:'core'} 方法后，则鼠标拖拽引起选择框大小变化时触发事件。"
+        },
+
+        {
+            "name": "onselectend",
+            "type": "control",
+            "desc": "区域选择结束事件。",
+            "params": [{"name": "event", "desc": "事件对象"}],
+            "remark": "调用核心 {'select'|method:'core'} 方法后，则鼠标拖拽结束时触发事件。"
+        },
+
+        {
+            "name": "onselectstart",
+            "type": "control",
+            "desc": "区域选择开始事件。",
+            "params": [{"name": "event", "desc": "事件对象"}],
+            "remark": "调用核心 {'select'|method:'core'} 方法后，将触发 onselectstart 事件。"
+        },
+
+        {
+            "name": "onshow",
+            "desc": "控件显示事件。",
+            "type": "control",
+            "remark": "控件从隐藏状态变为显示状态时触发本事件，父控件显示时不会触发本事件。"
+        },
+
+        {
+            "name": "onzoom",
+            "desc": "缩放事件。",
+            "type": "control",
+            "params": [{"name": "event", "desc": "事件对象"}],
+            "remark": "调用核心 {'zoom'|method:'core'} 方法后，则鼠标拖拽过程中触发事件。"
+        },
+
+        {
+            "name": "onzoomend",
+            "desc": "缩放结束事件。",
+            "type": "control",
+            "params": [{"name": "event", "desc": "事件对象"}],
+            "remark": "调用核心 {'zoom'|method:'core'} 方法后，则鼠标拖拽结束时触发事件。"
+        },
+
+        {
+            "name": "onzoomstart",
+            "desc": "缩放开始事件。",
+            "type": "control",
+            "params": [{"name": "event", "desc": "事件对象"}],
+            "remark": "调用核心 {'zoom'|method:'core'} 方法后，将触发 onzoomstart 事件。"
+        }
+    ],
+
+    "scroll": [
+        {
+            "name": "onscroll",
+            "type": "scroll",
+            "desc": "滚动条滚动事件。",
+            "params": [{"name": "scroll", "desc": "滚动条控件"}],
+            "remark": "滚动条控件滚动时将触发父控件的本事件，scroll 参数是滚动条控件，用于区分是由哪个滚动条触发的本事件。"
+        }
+    ],
+
+    "panel": [
+    ],
+
+    "item": [
+    ],
+
+    "items": [
+    ],
+
+    "label": [
+    ],
+
+    "edit": [
+    ],
+
+    "format-edit": [
+        {
+            "name": "onerror",
+            "type": "format-edit",
+            "desc": "数据格式错误事件。",
+            "params": [{"name": "err", "desc": "错误格式信息"}]
+        },
+
+        {
+            "name": "onsubmit",
+            "type": "format-edit",
+            "desc": "数据提交事件。",
+            "params": [{"name": "event", "desc": "事件对象"}]
+        }
+    ],
+
+    "checkbox": [
+    ],
+
+    "radio": [
+    ],
+
+    "select": [
+    ],
+
+    "combox": [
+    ],
+
+    "multi-select": [
+    ],
+
+    "collection": [
+    ],
+
+    "calendar": [
+        {
+            "name": "ondateclick",
+            "desc": "日历控件内鼠标单击日期项事件。",
+            "type": "calendar",
+            "params": [{"name": "date", "desc": "日期对象"}]
+        }
+    ],
+
+    "form": [
+    ],
+
+    "tree": [
+    ],
+
+    "check-tree": [
+    ],
+
+    "radio-tree": [
+    ],
+
+    "table": [
+        {
+            "name": "oncellclick",
+            "desc": "表格控件内鼠标单击单元格事件。",
+            "type": "table",
+            "remark": "由表格行控件的相应鼠标事件转发，this 指针指向单元格的 Element 对象。"
+        },
+
+        {
+            "name": "oncelldown",
+            "desc": "表格控件内鼠标在单元格区域内按下事件。",
+            "params": [{"name": "event", "desc": "事件对象"}],
+            "type": "table",
+            "remark": "由表格行控件的相应鼠标事件转发，this 指针指向单元格的 Element 对象。"
+        },
+
+        {
+            "name": "oncellmove",
+            "desc": "表格控件内鼠标在单元格区域内移动事件。",
+            "params": [{"name": "event", "desc": "事件对象"}],
+            "type": "table",
+            "remark": "由表格行控件的相应鼠标事件转发，this 指针指向单元格的 Element 对象。"
+        },
+
+        {
+            "name": "oncellout",
+            "desc": "表格控件内鼠标移出单元格区域事件。",
+            "params": [{"name": "event", "desc": "事件对象"}],
+            "type": "table",
+            "remark": "由表格行控件的相应鼠标事件转发，this 指针指向单元格的 Element 对象。如果事件返回 false，将不会移除在 !oncellover! 事件中添加的 -over 扩展样式。"
+        },
+
+        {
+            "name": "oncellover",
+            "desc": "表格控件内鼠标移入单元格区域事件。",
+            "params": [{"name": "event", "desc": "事件对象"}],
+            "type": "table",
+            "remark": "由表格行控件的相应鼠标事件转发，this 指针指向单元格的 Element 对象。如果事件返回 false，将不会添加 -over 扩展样式。"
+        },
+
+        {
+            "name": "oncellup",
+            "desc": "表格控件内鼠标在单元格区域内弹起事件。",
+            "params": [{"name": "event", "desc": "事件对象"}],
+            "type": "table",
+            "remark": "由表格行控件的相应鼠标事件转发，this 指针指向单元格的 Element 对象。"
+        },
+
+        {
+            "name": "onrowclick",
+            "desc": "鼠标单击表格行控件事件。",
+            "params": [{"name": "event", "desc": "事件对象"}],
+            "type": "table",
+            "remark": "由表格行控件的相应鼠标事件转发。如果事件返回 false，将阻止鼠标单击表格行控件事件的默认处理，即不会调用表格行控件的 $click 方法。"
+        },
+
+        {
+            "name": "onrowdown",
+            "desc": "鼠标在表格行控件区域内按下事件。",
+            "params": [{"name": "event", "desc": "事件对象"}],
+            "type": "table",
+            "remark": "由表格行控件的相应鼠标事件转发。如果事件返回 false，将阻止鼠标在表格行控件区域内按下事件的默认处理，即不会调用表格行控件的 $mousedown 方法。"
+        },
+
+        {
+            "name": "onrowmove",
+            "desc": "鼠标在表格行控件区域内移动事件。",
+            "params": [{"name": "event", "desc": "事件对象"}],
+            "type": "table",
+            "remark": "由表格行控件的相应鼠标事件转发。如果事件返回 false，将阻止鼠标在表格行控件区域内移动事件的默认处理，即不会调用表格行控件的 $mousemove 方法。"
+        },
+
+        {
+            "name": "onrowout",
+            "desc": "鼠标移出表格行控件区域事件。",
+            "params": [{"name": "event", "desc": "事件对象"}],
+            "type": "table",
+            "remark": "由表格行控件的相应鼠标事件转发。如果事件返回 false，将阻止鼠标移出表格行控件区域事件的默认处理，即不会调用表格行控件的 $mouseout 方法。"
+        },
+
+        {
+            "name": "onrowover",
+            "desc": "鼠标移入表格行控件区域事件。",
+            "params": [{"name": "event", "desc": "事件对象"}],
+            "type": "table",
+            "remark": "由表格行控件的相应鼠标事件转发。如果事件返回 false，将阻止鼠标移入表格行控件区域事件的默认处理，即不会调用表格行控件的 $mouseover 方法。"
+        },
+
+        {
+            "name": "onrowup",
+            "desc": "鼠标在表格行控件区域内弹起事件。",
+            "params": [{"name": "event", "desc": "事件对象"}],
+            "type": "table",
+            "remark": "由表格行控件的相应鼠标事件转发。如果事件返回 false，将阻止鼠标在表格行控件区域内弹起事件的默认处理，即不会调用表格行控件的 $mouseup 方法。"
+        }
+    ],
+
+    "locked-table": [
+    ],
+
+    "popup": [
+    ],
+
+    "listbox": [
+    ],
+
+    "progress": [
+    ],
+
+    "palette": [
+        {
+            "name": "onconfirm",
+            "desc": "色彩选择确认事件。",
+            "type": "palette",
+            "remark": "拾色器选中色彩后确认触发本事件，可以通过 {'getColor'|method:'palette'} 方法得到色彩值。"
+        }
+    ],
+
+    "tab": [
+    ]
+}

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<alias>
+		<host class="org.lilystudio.ordinary.web.Host" />
+		<mapping class="org.lilystudio.ordinary.web.Mapping" />
+		<command class="org.lilystudio.ordinary.web.Command" />
+		<capture class="org.lilystudio.ordinary.web.Capture" />
+		<result class="org.lilystudio.ordinary.web.result.SmartyResult" />
+		<result name="redirect" class="org.lilystudio.ordinary.web.result.RedirectResult">
+			<default type="location" />
+		</result>
+		<action name="load" class="org.lilystudio.ordinary.web.action.LoadAction" />
+</alias>

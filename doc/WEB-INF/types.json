@@ -1,0 +1,462 @@
+[
+	{
+        "name": "core",
+        "type": "core",
+        "position": "ecui"
+    },
+
+	{
+        "name": "array",
+        "type": "core",
+        "position": "ecui.array"
+    },
+
+	{
+        "name": "dom",
+        "type": "core",
+        "position": "ecui.dom"
+    },
+
+    {
+        "name": "string",
+        "type": "core",
+        "position": "ecui.string"
+    },
+
+	{
+        "name": "util",
+        "type": "core",
+        "position": "ecui.util"
+    },
+
+    {
+        "name": "control",
+        "type": "ui",
+        "position": "ecui.ui.Control",
+        "desc": "基础控件",
+        "params": [
+            {"name": "capture", "desc": "boolean，是否需要捕获鼠标事件，默认捕获"},
+            {"name": "select", "desc": "boolean，是否允许选中内容，默认允许"},
+            {"name": "focus", "desc": "boolean，是否允许获取焦点，默认允许"},
+            {"name": "enabled", "desc": "boolean，是否可用，默认可用"}
+        ],
+        "remark": [
+            "ECUI 的核心组成部分，定义了基本的控件行为。",
+            "基础控件是 ECUI 的核心组成部分，对 DOM 树上的节点区域进行封装。基础控件扩展了 Element 节点的标准事件(例如得到与失去焦点、鼠标按压事件等)，提供了方法对控件的基本属性(例如控件大小、位置与显示状态等)进行改变，是一切控件实现的基础。基本控件支持四种状态：得到焦点(focus)、鼠标移入(over)、按压时鼠标移入(press)与失效(disabled)。"
+        ],
+        "html": "<div ecui=\"type:control\">...</div>"
+    },
+
+    {
+        "name": "scroll",
+        "type": "ui",
+        "position": "ecui.ui.Scroll",
+        "super": "control",
+        "desc": "滚动条控件",
+        "section": [
+            {"name": "Block", "desc": "滑动块"},
+            {"name": "Next", "desc": "向后滚动按钮"},
+            {"name": "Prev", "desc": "向前滚动按钮"}
+        ],
+        "remark": [
+            "定义在一个区间轴内移动的基本操作。",
+            "滚动条控件，内部包含三个部件，分别是向前(滚动条的当前值变小)滚动按钮(基础控件)、向后(滚动条的当前值变大)滚动按钮(基础控件)与滑动块(基础控件)。滚动条控件是滚动行为的虚拟实现，不允许直接初始化，它的子类通常情况下也不会被直接初始化，而是作为控件的一部分用于控制父控件的行为。"
+        ]
+    },
+
+    {
+        "name": "panel",
+        "type": "ui",
+        "position": "ecui.ui.Panel",
+        "super": "control",
+        "desc": "截面控件",
+        "params": [
+            {"name": "vScroll", "desc": "boolean，是否自动展现垂直滚动条，默认是开启自动展示"},
+            {"name": "hScroll", "desc": "boolean，是否自动展现水平滚动条，默认是开启自动展示"},
+            {"name": "browser", "desc": "boolean，是否使用浏览器原生的滚动条，默认使用模拟的滚动条"},
+            {"name": "absolute", "desc": "boolean，是否包含绝对定位的 Element 默认为false，默认是不包含"},
+            {"name": "wheelDelta", "desc": "number，鼠标滚轮滚动一次的差值，相当于移动了多少个最小步长单位，默认为总步长(差值*步长)为不大于20像素的最大值"}
+        ],
+        "section": [
+            {"name": "Corner", "desc": "两个滚动条之间的夹角"},
+            {"name": "HScroll", "desc": "水平滚动条"},
+            {"name": "VScroll", "desc": "垂直滚动条"}
+        ],
+        "html": "<div ecui=\"type:panel;id:ctrl1\"></div>",
+        "remark": [
+            "定义在一个小区域内截取显示大区域内容的基本操作。",
+            "截面控件，内部包含三个部件，分别是垂直滚动条、水平滚动条与两个滚动条之间的夹角(基础控件)。截面控件的内容区域可以超过控件实际大小，通过拖拽滚动条显示完整的内容，截面控件可以设置参数决定是否自动显示水平/垂直滚动条，如果设置不显示水平/垂直滚动条，水平/垂直内容超出的部分将直接被截断，当设置两个滚动条都不显示时，层控件从显示效果上等同于基础控件。在层控件上滚动鼠标滑轮，将控制层控件往垂直方向(如果没有垂直滚动条则在水平方向)前移或者后移滚动条，在获得焦点后，通过键盘的方向键也可以操作层控件的滚动条。"
+        ]
+    },
+
+    {
+        "name": "item",
+        "type": "ui",
+        "position": "ecui.ui.Item",
+        "super": "control",
+        "desc": "选项控件",
+        "remark": [
+            "定义选项操作相关的基本操作。",
+            "选项控件，继承自基础控件，用于弹出菜单、下拉框、交换框等控件的单个选项，通常不直接初始化。选项控件必须用在使用选项组接口(Items)的控件中，选项控件支持移入操作的缓存，不会因为鼠标移出而改变状态，因此可以通过函数调用来改变移入移出状态，选控件默认屏蔽了 DOM 的文本选中操作。"
+        ]
+    },
+
+    {
+        "name": "items",
+        "type": "ui",
+        "position": "ecui.ui.Items",
+        "desc": "选项组接口",
+        "remark": [
+            "定义选项组的相关基本操作。",
+            "选项组不是控件，是一组对选项进行操作的方法的集合，提供了基本的增/删操作，以及对选项控件的状态控制的接口，通过将 ecui.ui.Items 对象下的方法复制到类的 prototype 属性下继承接口，最终对象要正常使用还需要在类构造器中调用 <a href=\"../method/initItems.html?type=item\">init</a> 方法。"
+        ]
+    },
+
+    {
+        "name": "label",
+        "type": "ui",
+        "position": "ecui.ui.Label",
+        "super": "control",
+        "desc": "标签控件",
+        "params": [
+            {"name": "for", "desc": "string，被转发的控件 id"}
+        ],
+        "html": "<div ecui=\"type:label;for:checkbox1\"></div>",
+        "remark": [
+            "定义事件转发的基本操作。",
+            "标签控件，将事件转发到指定的控件上，通常与 Radio、Checkbox 等控件联合使用，扩大点击响应区域。"
+        ]
+    },
+
+    {
+        "name": "edit",
+        "type": "ui",
+        "position": "ecui.ui.Edit",
+        "super": "control",
+        "desc": "输入框控件",
+        "params": [
+            {"name": "name", "desc": "string，输入框的表单项名称"},
+            {"name": "value", "desc": "string，输入框的表单项的值"},
+            {"name": "input", "desc": "string，输入框的类型，默认为 text"},
+            {"name": "hidden", "desc": "boolean，输入框是否隐藏，隐藏状态下将不会绑定键盘事件"}
+        ],
+        "html": "<div ecui=\"type:edit;id:ctrl1\"></div>",
+        "remark": [
+            "定义输入数据的基本操作。",
+            "输入框控件，实现了对原生 InputElement 的功能扩展，包括光标的控制、输入事件的实时响应(每次改变均触发事件)，以及 IE 下不能动态改变输入框的表单项名称的模拟处理。输入框控件默认使用文本输入框，对于需要使用加密框的场景，可以使用 &lt;input type=\"password\" ecui=\"type:edit\"&gt; 的方式初始化。"
+        ]
+    },
+
+    {
+        "name": "format-edit",
+        "type": "ui",
+        "position": "ecui.ui.FormatEdit",
+        "super": "edit",
+        "desc": "格式化输入框控件",
+        "params": [
+            {"name": "symbol", "desc": "boolean，是否进行全角转半角操作，默认为 true"},
+            {"name": "trim", "desc": "boolean，是否进行前后空格过滤，默认为 true (注：粘贴内容也会进行前后空格过滤)"},
+            {"name": "charset", "desc": "string，字符编码，允许 utf8 与 gbk，如果不设置表示基于字符验证长度"},
+            {"name": "keyMask", "desc": "string，允许的字符集正则表达式"},
+            {"name": "minLength", "desc": "number，最小长度限制"},
+            {"name": "maxLength", "desc": "number，最大长度限制"},
+            {"name": "minValue", "desc": "number，数字允许的最小值"},
+            {"name": "maxLength", "desc": "number，数字允许的最大值"},
+            {"name": "format", "desc": "string，字符串的正则表达式，自动添加正则表达式的^$"}
+        ],
+        "html": "<div ecui=\"type:format-edit;id:ctrl1\"></div>",
+        "remark": [
+            "定义格式化输入数据的基本操作。",
+            "格式化输入框控件，对输入的数据内容格式进行限制。"
+        ]
+    },
+
+    {
+        "name": "checkbox",
+        "type": "ui",
+        "position": "ecui.ui.Checkbox",
+        "super": "edit",
+        "desc": "复选框控件",
+        "params": [
+            {"name": "checked", "desc": "boolean，控件是否默认选中"},
+            {"name": "superior", "desc": "string，父级复选框 ID，会自动与父级复选框建立关联"}
+        ],
+        "html": "<div ecui=\"type:checkbox;id:ctrl1;checked:true\"></div>",
+        "remark": [
+            "定义单个设置项选择状态的基本操作。",
+            "复选框控件，实现了对原生 InputElement 复选框的功能扩展，支持复选框之间的主从关系定义。当一个复选框的“从复选框”选中一部分时，“主复选框”将处于半选状态，这种状态逻辑意义上等同于未选择状态，但显示效果不同，复选框的主从关系可以有多级。"
+        ]
+    },
+
+    {
+        "name": "radio",
+        "type": "ui",
+        "position": "ecui.ui.Radio",
+        "super": "edit",
+        "desc": "单选框控件",
+        "params": [
+            {"name": "checked", "desc": "boolean，控件是否默认选中"},
+            {"name": "name", "desc": "string，控件所属组的名称"},
+            {"name": "value", "desc": "string，控件的值"}
+        ],
+        "html": "<div ecui=\"type:radio;id:ctrl1;value:hello;name:check;checked:true\"></div>",
+        "remark": [
+            "定义一组选项中选择唯一选项的基本操作。",
+            "单选框控件，实现了对原生 InputElement 单选框的功能扩展，支持对选中的图案的选择。单选框控件需要分组后使用，一组内只有一个单选框能被选中。"
+        ]
+    },
+
+    {
+        "name": "select",
+        "type": "ui",
+        "position": "ecui.ui.Select",
+        "super": "edit",
+        "interface": ["items"],
+        "desc": "下拉框控件",
+        "params": [
+            {"name": "browser", "desc": "boolean，是否使用浏览器原生的滚动条，默认使用模拟的滚动条"},
+            {"name": "optionSize", "desc": "number，下拉框最大允许显示的选项数量，默认为5"}
+        ],
+        "html": "<select ecui=\"type:select;id:ctrl1\"><option value=\"1\">Hello</option></select>",
+        "remark": [
+            "定义模拟下拉框行为的基本操作。",
+            "下拉框控件，内部包含了三个部件，分别是下拉框显示的文本(选项控件)、下拉框的按钮(基础控件)与下拉选项框(截面控件，只使用垂直滚动条)。下拉框控件扩展了原生 SelectElement 的功能，允许指定下拉选项框的最大选项数量，在屏幕显示不下的时候，会自动显示在下拉框的上方。在没有选项时，下拉选项框有一个选项的高度。下拉框控件允许使用键盘与滚轮操作，在下拉选项框打开时，可以通过回车键或鼠标点击选择，上下键选择选项的当前条目，在关闭下拉选项框后，只要拥有焦点，就可以通过滚轮上下选择选项。"
+        ]
+    },
+
+    {
+        "name": "combox",
+        "type": "ui",
+        "position": "ecui.ui.Combox",
+        "super": "select",
+        "interface": ["items"],
+        "desc": "输入式下拉框控件",
+        "html": "<select ecui=\"type:combox;id:ctrl1\"><option value=\"1\">Hello</option></select>",
+        "remark": [
+            "定义可输入下拉框行为的基本操作。",
+            "可输入下拉框控件，在下拉框控件的基础上允许选项框可输入内容。"
+        ]
+    },
+
+    {
+        "name": "multi-select",
+        "type": "ui",
+        "position": "ecui.ui.MultiSelect",
+        "super": "edit",
+        "interface": ["items"],
+        "desc": "多选下拉框控件",
+        "params": [
+            {"name": "optionSize", "desc": "number，下拉框最大允许显示的选项数量，默认为5"}
+        ],
+        "html": "<div ecui=\"type:tab;selected:1\"><!-- 包含内容的选项卡 --><div><label>标题1</label><!-- 这里是内容 -->...</div><!-- 仅有标题的选项卡，以下selected定义与控件定义是一致的，可以忽略其中之一 --><label ecui=\"selected:true\">标题2</label></div>",
+        "remark": [
+            "定义多选下拉框行为的基本操作。",
+            "多选下拉框控件，继承自输入框控件，实现了选项组接口，参见 {'select'|control}。"
+        ]
+    },
+
+    {
+        "name": "collection",
+        "type": "ui",
+        "position": "ecui.ui.Collection",
+        "super": "control",
+        "desc": "集合控件",
+        "html": "<div ecui=\"type:collection\"></div>",
+        "remark": [
+            "定义批量控件集的事件与基本操作。",
+            "集合控件，继承自基础控件，将大量子控件组合而成的控件。集合控件统一管理，所有子控件的事件允许调用统一的事件方法，可用于日历、调色板等。"
+        ]
+    },
+
+    {
+        "name": "calendar",
+        "type": "ui",
+        "position": "ecui.ui.Calendar",
+        "super": "control",
+        "desc": "日历控件",
+        "params": [
+            {"name": "year", "desc": "number，日历控件的年份，默认为当前年份"},
+            {"name": "month", "desc": "number，日历控件的月份(1-12)，默认为当前月份"}
+        ],
+        "html": "<div ecui=\"type:calendar;id:ctrl1\"></div>",
+        "remark": [
+            "定义日历显示的基本操作。",
+            "日历控件，内部包含了两个部件，分别是星期名称(网格控件)与日期(网格控件)。在日期网格控件里，第一行包含上个月最后几天的信息，最后一行包含下个月最前几天的信息。日历控件不包含年/月/日的快速选择与切换，如果需要实现这些功能，请将下拉框(选择月份)、输入框(输入年份)等组合使用建立新的控件或直接在页面上布局并调用接口。"
+        ]
+    },
+
+    {
+        "name": "form",
+        "type": "ui",
+        "position": "ecui.ui.Form",
+        "super": "control",
+        "desc": "窗体控件",
+        "params": [
+            {"name": "hide", "desc": "boolean，是否默认隐藏窗体控件"},
+            {"name": "titleAuto", "desc": "boolean，是否自适应宽度，默认自适应宽度"}
+        ],
+        "html": "<div ecui=\"type:form;id:ctrl1\"><label>窗体控件标题栏</label>内容区域</div>",
+        "remark": [
+            "定义独立于文档布局的内容区域的基本操作。",
+            "窗体控件，内部包含了三个部件，分别是标题栏(基础控件)、关闭按钮(基础控件)与内容区域(截面控件)。窗体控件仿真浏览器的多窗体效果，如果在其中包含 iframe 标签，可以在当前页面打开一个新的页面，避免了使用 window.open 在不同浏览器下的兼容性问题。多个窗体控件同时工作时，当前激活的窗体在最上层。窗体控件的标题栏默认可以拖拽，窗体可以设置置顶方式显示，在置顶模式下，只有当前窗体可以响应操作。窗体控件的 z-index 从4096开始，页面开发请不要使用大于或等于4096的 z-index 值。"
+        ]
+    },
+
+    {
+        "name": "tree",
+        "type": "ui",
+        "position": "ecui.ui.Tree",
+        "super": "control",
+        "desc": "树控件",
+        "params": [
+            {"name": "fold", "desc": "boolean，子树是否默认收缩，默认为展开"}
+        ],
+        "html": "<div ecui=\"type:tree;id:ctrl1\"><label>sop</label><div>超哥</div><div><label>fe</label><div>ecomfe</div><div>searchfe</div></div><div><label>op</label><div>ecomop</div><div>...</div></div></div>",
+        "remark": [
+            "定义树形结构的基本操作。",
+            "树控件，不可以被改变大小。树控件可以包含普通子控件或者子树控件，普通子控件显示在它的文本区域，如果是子树控件，将在专门的子树控件区域显示。子树控件区域可以被收缩隐藏或是展开显示，默认情况下点击树控件就改变子树控件区域的状态。"
+        ]
+    },
+
+    {
+        "name": "radio-tree",
+        "type": "ui",
+        "position": "ecui.ui.RadioTree",
+        "super": "control",
+        "desc": "单选框式树控件",
+        "params": [
+            {"name": "name", "desc": "string，单选框提交项的默认名称"},
+            {"name": "value", "desc": "string，单选框提交项的值"}
+        ],
+        "html": "<div ecui=\"type:tree;id:ctrl1\"><label>sop</label><div>超哥</div><div><label>fe</label><div>ecomfe</div><div>searchfe</div></div><div><label>op</label><div>ecomop</div><div>...</div></div></div>",
+        "remark": [
+            "定义单选框的树形结构的基本操作。",
+            "包含单选框的树控件，继承自树控件，每次点击可以选择一个树节点。"
+        ]
+    },
+
+    {
+        "name": "check-tree",
+        "type": "ui",
+        "position": "ecui.ui.CheckTree",
+        "super": "tree",
+        "desc": "复选框式树控件",
+        "params": [
+            {"name": "name", "desc": "string，复选框提交项的默认名称"},
+            {"name": "value", "desc": "string，复选框提交项的值"},
+            {"name": "superior", "desc": "string，父复选框的标识"}
+        ],
+        "html": "<div ecui=\"type:check-tree;name:id;id:ctrl1\"><label>sop</label><div ecui=\"value:1\">超哥</div><div ecui=\"value:2\"><label>fe</label><div ecui=\"value:3\">ecomfe</div><div ecui=\"value:4\">searchfe</div></div><div ecui=\"value:5\"><label>op</label><div ecui=\"value:6\">ecomop</div><div ecui=\"value:7\">...</div></div></div>",
+        "remark": [
+            "定义包含复选框的树形结构的基本操作。",
+            "包含复选框的树控件，继承自树控件。每一个选项包含一个复选框进行选择，除非特别的指定，否则子节点的复选框与父节点的复选框自动联动。"
+        ]
+    },
+
+    {
+        "name": "table",
+        "type": "ui",
+        "position": "ecui.ui.Table",
+        "super": "panel",
+        "desc": "表格控件",
+        "html": "<div ecui=\"type:table;id:ctrl1\"><table><!-- 表头区域 --><thead><tr><th style=\"width:200px;\">公司名</th><th style=\"width:200px;\">url</th><th style=\"width:250px;\">地址</th><th style=\"width:100px;\">创办时间</th></tr></thead><!-- 内容行区域 --><tr><td>百度</td><td>www.baidu.com</td><td>中国北京中关村</td><td>1999</td></tr></table></div>",
+        "remark": [
+            "定义由行列构成的表格的基本操作。",
+            "表格控件，内部包含一个部件——标题区(基础控件)。表格控件对基本的 TableElement 功能进行了扩展，表头固定，不会随表格的垂直滚动条滚动而滚动，在行列滚动时，支持整行整列移动，允许直接对表格的数据进行增加/删除/修改操作。"
+        ]
+    },
+
+    {
+        "name": "locked-table",
+        "type": "ui",
+        "position": "ecui.ui.LockedTable",
+        "super": "table",
+        "desc": "锁定式表格控件",
+        "params": [
+            {"name": "leftLock", "desc": "number，左边需要锁定的列数"},
+            {"name": "rightLock", "desc": "number，右边需要锁定的列数"}
+        ],
+        "html": "<div ecui=\"type:locked-table;id:ctrl1;left-lock:1\"><table><!-- 表头区域 --><thead><tr><th style=\"width:200px;\">公司名</th><th style=\"width:200px;\">url</th><th style=\"width:250px;\">地址</th><th style=\"width:100px;\">创办时间</th></tr></thead><!-- 内容行区域 --><tr><td>百度</td><td>www.baidu.com</td><td>中国北京中关村</td><td>1999</td></tr></table></div>",
+        "remark": [
+            "定义允许左右锁定若干列显示的高级表格的基本操作。",
+            "允许锁定左右两列的高级表格控件，继承自表格控件，内部包含两个部件——锁定的表头区(基础控件)与锁定的行内容区(基础控件)。"
+        ]
+    },
+
+    {
+        "name": "popup",
+        "type": "ui",
+        "position": "ecui.ui.Popup",
+        "super": "control",
+        "interface": ["items"],
+        "desc": "弹出菜单控件",
+        "params": [
+            {"name": "optionSize", "desc": "number，弹出菜单选项的显示数量，不设置将全部显示"}
+        ],
+        "html": "<div ecui=\"type:popup;id:ctrl1\"><div>选项一</div><div><label>菜单项二(子菜单)</label><div>子菜单选项1</div><div>子菜单选项2/div></div></div>",
+        "remark": [
+            "定义弹出菜单项的基本操作。",
+            "弹出菜单控件，弹出式菜单操作时不会改变当前已经激活的对象，任何点击都将导致弹出菜单消失，弹出菜单默认向右展开子菜单，如果右部已经到达浏览器最边缘，将改为向左显示。"
+        ]
+    },
+
+    {
+        "name": "listbox",
+        "type": "ui",
+        "position": "ecui.ui.Listbox",
+        "super": "panel",
+        "interface": ["items"],
+        "desc": "多选框控件",
+        "html": "<div ecui=\"type:listbox;id:ctrl1\"><div>选项一</div><div>选项二</div><div>选项三</div></div>",
+        "remark": [
+            "定义了多项选择的基本操作。",
+            "多选框控件，扩展了多选的 SelectElement 的功能，允许使用鼠标拖拽进行多项选择，多个多选框，可以将选中的选项在互相之间移动。多选框控件也可以单独的使用，选中的选项在表单提交时将被提交。"
+        ]
+    },
+
+    {
+        "name": "progress",
+        "type": "ui",
+        "position": "ecui.ui.Progress",
+        "super": "control",
+        "desc": "进度条控件",
+        "params": [
+            {"name": "rate", "desc": "number，初始的进度条位置"}
+        ],
+        "html": "<div ecui=\"type:progress;id:ctrl1;rate:0.5\"></div>",
+        "remark": [
+            "定义进度显示的基本操作。",
+            "进度条控件，面向用户显示一个任务执行的程度。"
+        ]
+    },
+
+    {
+        "name": "palette",
+        "type": "ui",
+        "position": "ecui.ui.Palette",
+        "super": "control",
+        "desc": "拾色器控件",
+        "html": "<div ecui=\"type:palette\"></div>",
+        "remark": [
+            "定义拾色器的基本操作。",
+            "拾色器控件，内部包含了多个部件，分别是色彩选择区(基础控件)、色彩选择区箭头(基础控件)、亮度条选择区(基础控件)、亮度条选择区箭头(基础控件)、基本色彩选择区(基础控件组)、色彩显示区(基础控件)、输入区域(输入框控件组)与确认按钮(基础控件)。"
+        ]
+    },
+
+    {
+        "name": "tab",
+        "type": "ui",
+        "position": "ecui.ui.Tab",
+        "super": "control",
+        "interface": ["items"],
+        "desc": "选项卡控件",
+        "params": [
+            {"name": "selected", "desc": "number，选中的选项序号，默认为0"}
+        ],
+        "html": "<div ecui=\"type:tab;selected:1\"><!-- 包含内容的选项卡 --><div><label>标题1</label><!-- 这里是内容 -->...</div><!-- 仅有标题的选项卡，以下selected定义与控件定义是一致的，可以忽略其中之一 --><label ecui=\"selected:true\">标题2</label></div>",
+        "remark": [
+            "定义分页选项卡的操作。",
+            "选项卡控件，继承自基础控件，实现了选项组接口。每一个选项卡都包含一个头部区域与内容区域，选项卡控件存在互斥性，只有唯一的一个选项卡能被选中显卡内容区域。"
+        ]
+    }
+]

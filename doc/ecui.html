@@ -1,0 +1,46 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+<title>ECUI 使用方式</title>
+<meta http-equiv="Content-type" content="text/html; charset=gb2312">
+<link rel="stylesheet" type="text/css" href="common/common.css" />
+</head>
+<body>
+<h1>ECUI 使用方式</h1>
+<hr size="1">
+<p>首先，我们需要创建 ECUI 控件对象，创建控件对象有以下三种方式：</p>
+<ul>
+  <li>页面静态初始化</li>
+  <p>页面静态初始化是指直接在 HTML 标签上声明控件，例如：&lt;div ecui="type:control;id:control"&gt;。标签的 ecui 属性定义控件的属性，ecui 的定义类似于 style 属性的定义，使用分号作为参数之间的分隔符，上面的例子表示将 div 标签初始化成为一个 {"control"|control}，并且控件的标识符是 control，详细的参数请参见 {"controls"|menu}。</p>
+  <li>页面动态初始化</li>
+  <p>页面动态初始化与页面静态初始化在使用上类似，对于动态得到的 DOM 节点(例如 AJAX 操作后，通过设置节点对象的 innerHTML 属性创建的新节点)，通过调用 {"core"|menu} 的 {"init"|method:"core"} 方法来初始化指定的节点下所有的控件。</p>
+  <li>JS初始化</li>
+  <p>JS初始化指通过调用 {"core"|menu} 的 {"create"|method:"core"} 方法得到控件对象。</p>
+</ul>
+<p>前面两种方式生成的控件，使用 {"get"|method:"core"}(id) 的方式获取控件对象(如果在标签的 ecui 属性中定义了 id 参数)，或者先得到 DOM 对象，然后调用 DOM 对象的 {"getControl"|method:"core"} 方法获取控件对象。</p>
+<hr size="1">
+<p>控件创建简单介绍到这里，我们先用第一种方式初始化一个基础控件：<pre class="clsSyntax">&lt;div class="control" ecui="type:control;id:control"&gt;...&lt;/div&gt;</pre>并通过以下JS语句得到这个控件对象：<pre class="clsSyntax">var control = ecui.get("control")</pre></p>
+<hr size="1">
+<p>我们得到控件对象了，此时我们需要定义控件需要响应的 {"events"|menu}，在事件里，通过调用 {"methods"|menu}，完成控件交互，具体每一类控件支持的方法，参见 {"controls"|menu}。
+<pre class="clsSyntax">
+control.onfocus = function () {
+  control.getBody().innerHTML = "我被激活，按键将提示键码";
+}
+control.onblur = function () {
+  control.getBody().innerHTML = "";
+}
+control.onkeydown = function () {
+  alert("你按键的编码是：" + ecui.getKey());
+}
+</pre>
+<hr size="1">
+<p>不要忘记 ECUI 直接集成的“事件-样式”绑定功能，设置好样式信息，让你的页面动起来，参见 {"styles"|menu}。</p>
+<pre class="clsSyntax">
+.control{ldelim}width:100px;height:100px;border:1px solid black}
+.control-over{ldelim}background-color:yellow;color:red}
+.control-focus{ldelim}border:1px solid red}
+</pre>
+<hr size="1">
+<p>最后，是不是觉得控件太单调了，没关系，我们可以通过设置 {"decorators"|menu}，改变控件的表现结构，例如增加圆角等。</p>
+</body>
+</html>

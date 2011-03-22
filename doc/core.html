@@ -1,0 +1,22 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+<title>ECUI 核心功能</title>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312">
+<link rel="stylesheet" type="text/css" href="common/common.css" />
+</head>
+<body>
+<h1><a>ECUI 核心功能</a></h1>
+<hr size="1">
+<p>下面列出了 ECUI 核心功能包括的所有方法，核心功能提供对控件状态改变、拖拽、缩放等功能的支持，提供公用的函数对象，点击链接即可前往方法的定义。</p>{foreach item="type" from=$types}{if $type.type=='core'}
+<p class="clsRef">{$type.position} 包</p>
+<blockquote>
+  <table class="clsSTD">{foreach from=$sortedMethods item="item"}{if $item.type==$type.name}
+    <tr>
+      <td>{eval var="{\$item.name|method:'`$type.name`'}"}</td>
+      <td>{eval var=$item.desc}</td>
+    </tr>{/if}{/foreach}
+  </table>
+</blockquote>{/if}{/foreach}
+</body>
+</html>

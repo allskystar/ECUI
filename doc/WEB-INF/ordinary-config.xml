@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ordinary-config version="0.1">
+	<alias>
+		<import-dom name="alias.xml" />
+	</alias>
+	<modules>
+	</modules>
+
+	<process>
+		<host name=".*">
+			<filter class="load" name="menu" file="menu.json" />
+			<filter class="load" name="methods" file="methods.json" />
+			<filter class="load" name="events" file="events.json" />
+			<filter class="load" name="types" file="types.json" />
+			<filter class="temp.SortAction" name="sortedMethods" data="methods" />
+			<filter class="temp.SortAction" name="sortedEvents" data="events" />
+        	<command name="/">
+				<result class="redirect" type="location" url="default.html" />
+			</command>
+			<command name="/method/(.*)\.html">
+				<result path="/method.html" />
+			</command>
+			<command name="/control/(.*)\.html">
+				<result path="/control.html" />
+			</command>
+			<command name="/event/event.html">
+			    <result path="/eventArg.html" />
+			</command>
+			<command name="/event/(.*)\.html">
+				<result path="/event.html" />
+			</command>
+            <command name="/style/(.*)\.html">
+                <result path="/style.html" />
+            </command>
+			<command name="/decorator/(.*)\.html">
+                <result path="/decorator.html" />
+            </command>
+			<command name=".*\.html">
+				<result />
+			</command>
+		</host>
+	</process>
+</ordinary-config>
