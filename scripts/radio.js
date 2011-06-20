@@ -134,6 +134,7 @@ Radio - 定义一组选项中选择唯一选项的基本操作。
                     result.push(o.getControl());
                 }
             }
+            return result;
         }
         else if (o) {
             return query({type: UI_RADIO, custom: function (control) {

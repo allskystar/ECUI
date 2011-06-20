@@ -21,6 +21,7 @@ _eInput  - INPUT对象
 
     var core = ecui,
         dom = core.dom,
+        string = core.string,
         ui = core.ui,
         util = core.util,
 
@@ -33,8 +34,10 @@ _eInput  - INPUT对象
 
         createDom = dom.create,
         insertBefore = dom.insertBefore,
+        removeChild = dom.removeChild,
         setInput = dom.setInput,
         setStyle = dom.setStyle,
+        encodeHTML = string.encodeHTML,
         attachEvent = util.attachEvent,
         blank = util.blank,
         detachEvent = util.detachEvent,
@@ -67,9 +70,14 @@ _eInput  - INPUT对象
     var UI_EDIT =
         ui.Edit = function (el, params) {
             var input = el;
+            if (params.value === 0) {
+                params.value = '0';
+            }
 
             if (el.tagName == 'INPUT') {
                 // 检查是否存在Input，如果没有生成一个Input
+                input = setInput(input, params.name, params.input);
+
                 el = createDom(input.className, input.style.cssText + ';overflow:hidden');
 
                 input.className = '';
@@ -118,6 +126,26 @@ _eInput  - INPUT对象
                 }
             }
         }
+    }
+
+    /**
+     * 表单复位事件处理。
+     * @private
+     *
+     * @param {Event} event 事件对象
+     */
+    function UI_EDIT_FORM_RESET(event) {
+        event = standardEvent(event);
+
+        timer(function () {
+            //__transform__elements_list
+            //__transform__el_o
+            for (var i = 0, elements = event.target.elements, el; el = elements[i++]; ) {
+                if (el.getControl) {
+                    el.getControl().$ready();
+                }
+            }
+        }, 0);
     }
 
     /**
@@ -218,8 +246,11 @@ _eInput  - INPUT对象
     UI_EDIT_CLASS.$setParent = function (parent) {
         UI_CONTROL_CLASS.$setParent.call(this, parent);
         if (parent = this._eInput.form) {
-            detachEvent(parent, 'submit', UI_EDIT_FORM_SUBMIT);
-            attachEvent(parent, 'submit', UI_EDIT_FORM_SUBMIT);
+            if (!parent.getControl) {
+                attachEvent(parent, 'submit', UI_EDIT_FORM_SUBMIT);
+                attachEvent(parent, 'reset', UI_EDIT_FORM_RESET);
+                parent.getControl = blank;
+            }
         }
     };
 
@@ -323,6 +354,28 @@ _eInput  - INPUT对象
         range.select();
     } : function (pos) {
         this._eInput.setSelectionRange(pos, pos);
+    };
+
+    /**
+     * 设置控件的可操作状态。
+     * 如果控件设置为不可操作，调用 alterClass 方法为控件添加扩展样式 -disabled，同时自动失去焦点；如果设置为可操作，移除控件的扩展样式 -disabled。setEnabled 方法只是设置控件自身的可操作状态，然后控件设置为可操作，并不代表调用 isEnabled 方法返回的值一定是 true，控件的可操作状态还受到父控件的可操作状态的影响。
+     * @public
+     *
+     * @param {boolean} status 控件是否可操作，默认为 true
+     */
+    UI_EDIT_CLASS.setEnabled = function (status) {
+        if (status !== this.isEnabled()) {
+            var body = this.getBody();
+            if (status) {
+                body.innerHTML = '';
+                body.appendChild(this._eInput);
+            }
+            else {
+                body.removeChild(this._eInput);
+                body.innerHTML = encodeHTML(this._eInput.value);
+            }
+            UI_CONTROL_CLASS.setEnabled.call(this, status);
+        }
     };
 
     /**

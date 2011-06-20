@@ -15,7 +15,7 @@ Form - 定义独立于文档布局的内容区域的基本操作。
 </div>
 
 属性
-_bHide      - 初始是否自动隐藏
+_bFlag      - 初始是否自动隐藏/是否使用showModal激活
 _bAuto      - 标题栏是否自适应宽度
 _uTitle     - 标题栏
 _uClose     - 关闭按钮
@@ -24,13 +24,15 @@ _uClose     - 关闭按钮
 (function () {
 
     var core = ecui,
+        array = core.array,
         dom = core.dom,
         ui = core.ui,
         util = core.util,
 
         undefined,
 
-        indexOf = core.array.indexOf,
+        indexOf = array.indexOf,
+        remove = array.remove,
         createDom = dom.create,
         first = dom.first,
         getStyle = dom.getStyle,
@@ -93,8 +95,9 @@ _uClose     - 关闭按钮
 
             el.style.overflow = 'hidden';
             el.appendChild(o);
+            this.$setBody(o);
 
-            this._bHide = params.hide;
+            this._bFlag = params.hide;
             this._bAuto = params.titleAuto !== false;
 
             // 初始化标题区域
@@ -102,9 +105,6 @@ _uClose     - 关闭按钮
 
             // 初始化关闭按钮
             this._uClose = $fastCreate(UI_FORM_CLOSE, titleEl.nextSibling, this, partParams);
-
-            // 计算当前窗体显示的层级
-            this.getOuter().style.zIndex = UI_FORM_ALL.push(this) + 4095;
         },
         UI_FORM_CLASS = inherits(UI_FORM, UI_CONTROL),
 
@@ -132,10 +132,26 @@ _uClose     - 关闭按钮
         },
         UI_FORM_CLOSE_CLASS = inherits(UI_FORM_CLOSE, UI_CONTROL),
 
-        UI_FORM_ALL = []; // 当前全部初始化的窗体
+        UI_FORM_ALL = [],   // 当前显示的全部窗体
+        UI_FORM_MODAL = 0;  // 当前showModal的窗体数
 //{else}//
     /**
-     * 标题栏鼠标按压开始事件处理，需要触发拖动，如果当前窗体未得到焦点则得到焦点
+     * 刷新所有显示的窗体的zIndex属性。
+     * @protected
+     *
+     * @param {ecui.ui.Form} form 置顶显示的窗体
+     */
+    function UI_FORM_FLUSH_ZINDEX(form) {
+        UI_FORM_ALL.push(UI_FORM_ALL.splice(indexOf(UI_FORM_ALL, form), 1)[0]);
+
+        // 改变当前窗体之后的全部窗体z轴位置，将当前窗体置顶
+        for (var i = 0, j = UI_FORM_ALL.length - UI_FORM_MODAL, o; o = UI_FORM_ALL[i++]; ) {
+            o.getOuter().style.zIndex = i > j ? 32767 + (i - j) * 2 : 4095 + i;
+        }
+    }
+
+    /**
+     * 标题栏鼠标按压开始事件处理，需要触发拖动，如果当前窗体未得到焦点则得到焦点。
      * @protected
      *
      * @param {Event} event 事件对象
@@ -146,7 +162,7 @@ _uClose     - 关闭按钮
     };
 
     /**
-     * 窗体关闭按钮点击事件，关闭窗体
+     * 窗体关闭按钮点击事件，关闭窗体。
      * @protected
      *
      * @params {Event} event 事件对象
@@ -175,6 +191,17 @@ _uClose     - 关闭按钮
     };
 
     /**
+     * 销毁控件的默认处理。
+     * 页面卸载时将销毁所有的控件，释放循环引用，防止在 IE 下发生内存泄漏，$dispose 方法的调用不会受到 ondispose 事件返回值的影响。
+     * @protected
+     */
+    UI_FORM_CLASS.$dispose = function () {
+        UI_CONTROL_CLASS.hide.call(this);
+
+        UI_CONTROL_CLASS.$dispose.call(this);
+    };
+
+    /**
      * 控件获得焦点事件的默认处理。
      * 窗体控件获得焦点时需要将自己置于所有窗体控件的顶部。如果控件处于可操作状态(参见 isEnabled)，focus 方法触发 onfocus 事件，如果事件返回值不为 false，则调用 $focus 方法。
      * @protected
@@ -182,28 +209,33 @@ _uClose     - 关闭按钮
     UI_FORM_CLASS.$focus = function () {
         UI_CONTROL_CLASS.$focus.call(this);
 
-        var i = indexOf(UI_FORM_ALL, this),
-            o;
-
-        if (this.getOuter().style.zIndex < 32768) {
-            // 如果不是showModal模式，将当前窗体置顶
-            UI_FORM_ALL.push(UI_FORM_ALL.splice(i, 1)[0]);
-            for (; o = UI_FORM_ALL[i++]; ) {
-                o.getOuter().style.zIndex = 4095 + i;
-            }
-        }
+        UI_FORM_FLUSH_ZINDEX(this);
     };
 
     /**
      * 隐藏控件。
-     * 如果窗体是以 showModal 方式打开的，隐藏窗体时，需要恢复页面的状态。
      * @protected
      */
     UI_FORM_CLASS.$hide = function () {
-        UI_CONTROL_CLASS.$hide.call(this);
-        if (this.getOuter().style.zIndex == 32768) {
-            mask();
+        // showModal模式下隐藏窗体需要释放遮罩层
+        var i = indexOf(UI_FORM_ALL, this);
+        UI_FORM_ALL.splice(i, 1);
+
+        if (i > UI_FORM_ALL.length - UI_FORM_MODAL) {
+            if (this._bFlag) {
+                if (i == UI_FORM_ALL.length) {
+                    mask();
+                }
+                else {
+                    // 如果不是最后一个，将遮罩层标记后移
+                    UI_FORM_ALL[i]._bFlag = true;
+                }
+                this._bFlag = false;
+            }
+            UI_FORM_MODAL--;
         }
+
+        UI_CONTROL_CLASS.$hide.call(this);
     };
 
     /**
@@ -215,8 +247,12 @@ _uClose     - 关闭按钮
         UI_CONTROL_CLASS.$init.call(this);
         this._uTitle.$init();
         this._uClose.$init();
-        if (this._bHide) {
+        if (this._bFlag) {
             this.$hide();
+            this._bFlag = false;
+        }
+        else {
+            this.$show();
         }
     };
 
@@ -241,6 +277,16 @@ _uClose     - 关闭按钮
     };
 
     /**
+     * 显示控件。
+     * @protected
+     */
+    UI_FORM_CLASS.$show = function () {
+        UI_FORM_ALL.push(this);
+        UI_CONTROL_CLASS.$show.call(this);
+        setFocused(this);
+    };
+
+    /**
      * 窗体居中显示。
      * @public
      */
@@ -261,6 +307,23 @@ _uClose     - 关闭按钮
     };
 
     /**
+     * 隐藏控件。
+     * 如果控件处于显示状态，调用 hide 方法会触发 onhide 事件，控件转为隐藏状态，并且控件会自动失去焦点。如果控件已经处于隐藏状态，则不执行任何操作。
+     * @public
+     *
+     * @return {boolean} 显示状态是否改变
+     */
+    UI_FORM_CLASS.hide = function () {
+        // showModal模式下，只有最顶层的窗体才允许关闭
+        for (var i = indexOf(UI_FORM_ALL, this), o; o = UI_FORM_ALL[++i]; ) {
+            if (o._bFlag) {
+                return false;
+            }
+        }
+        return UI_CONTROL_CLASS.hide.call(this);
+    };
+
+    /**
      * 设置窗体控件标题。
      * @public
      *
@@ -278,10 +341,16 @@ _uClose     - 关闭按钮
      * @return {boolean} 显示状态是否改变
      */
     UI_FORM_CLASS.show = function () {
-        if (!this.contain(getFocused())) {
-            setFocused(this);
+        if (UI_FORM_MODAL && indexOf(UI_FORM_ALL, this) < UI_FORM_ALL.length - UI_FORM_MODAL) {
+            // 如果已经使用showModal，对原来不是showModal的窗体进行处理
+            UI_FORM_MODAL++;
         }
-        return UI_CONTROL_CLASS.show.call(this);
+
+        var result = UI_CONTROL_CLASS.show.call(this);
+        if (!result) {
+            UI_FORM_FLUSH_ZINDEX(this);
+        }
+        return result;
     };
 
     /**
@@ -292,9 +361,18 @@ _uClose     - 关闭按钮
      * @param {number} opacity 遮罩层透明度，默认为0.05
      */
     UI_FORM_CLASS.showModal = function (opacity) {
-        this.show();
-        this.getOuter().style.zIndex = 32768;
-        mask(opacity !== undefined ? opacity : 0.05);
+        if (!this._bFlag) {
+            if (indexOf(UI_FORM_ALL, this) < UI_FORM_ALL.length - UI_FORM_MODAL) {
+                UI_FORM_MODAL++;
+            }
+
+            mask(opacity !== undefined ? opacity : 0.05, 32766 + UI_FORM_MODAL * 2);
+
+            this._bFlag = true;
+            if (!UI_CONTROL_CLASS.show.call(this)) {
+                UI_FORM_FLUSH_ZINDEX(this);
+            }
+        }
     };
 //{/if}//
 //{if 0}//

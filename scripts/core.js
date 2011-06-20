@@ -1367,10 +1367,15 @@
         function mousedown(control, event, flag) {
             if (!flag) {
                 bubble(pressedControl = control, 'mousedown', event);
+                if (!pressedControl) {
+                    // 在mousedown冒泡中有alert类似操作，并松开了鼠标左键，导致操作提前中止
+                    event.preventDefault();
+                    return;
+                }
                 pressedControl.pressstart(event);
             }
             for (; control; control = control.getParent()) {
-                if (control.isSelectStart()) {
+                if (!control.isSelectStart()) {
                     event.preventDefault();
                 }
             }
