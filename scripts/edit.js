@@ -33,6 +33,7 @@ _eInput  - INPUT对象
         ieVersion = /msie (\d+\.\d)/i.test(USER_AGENT) ? DOCUMENT.documentMode || (REGEXP.$1 - 0) : undefined,
 
         createDom = dom.create,
+        getParent = dom.getParent,
         insertBefore = dom.insertBefore,
         removeChild = dom.removeChild,
         setInput = dom.setInput,
@@ -362,20 +363,35 @@ _eInput  - INPUT对象
      * @public
      *
      * @param {boolean} status 控件是否可操作，默认为 true
+     * @return {boolean} 状态是否发生改变
      */
     UI_EDIT_CLASS.setEnabled = function (status) {
-        if (status !== this.isEnabled()) {
+        if (UI_CONTROL_CLASS.setEnabled.call(this, status)) {
             var body = this.getBody();
-            if (status) {
-                body.innerHTML = '';
-                body.appendChild(this._eInput);
+
+            if (this.isEnabled()) {
+                if (getParent(this._eInput)) {
+                    this._eInput.disabled = false;
+                }
+                else {
+                    body.innerHTML = '';
+                    body.appendChild(this._eInput);
+                }
             }
             else {
-                body.removeChild(this._eInput);
-                body.innerHTML = encodeHTML(this._eInput.value);
+                if (this._eInput.offsetWidth) {
+                    body.removeChild(this._eInput);
+                    body.innerHTML = encodeHTML(this._eInput.value);
+                }
+                else {
+                    this._eInput.disabled = true;
+                }
             }
-            UI_CONTROL_CLASS.setEnabled.call(this, status);
+
+            return true;
         }
+
+        return false;
     };
 
     /**

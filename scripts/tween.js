@@ -141,8 +141,9 @@ Tween - 点击及按压动画插件，通过修改click或pressstart/pressend方
              * @param {ecui.ui.Control} control 控件对象
              * @param {Function} action 动画函数
              * @param {number} interval 时间间隔
+             * @param {Event} event 事件对象
              */
-            function startTween(control, action, interval) {
+            function startTween(control, action, interval, event) {
                 // 捕获动画的结束点
                 click.call(control, event);
 
@@ -201,7 +202,7 @@ Tween - 点击及按压动画插件，通过修改click或pressstart/pressend方
                         params.value = getValue(this);
                     }
 
-                    startTween(this, steady, 40);
+                    startTween(this, steady, 40, event);
 
                     pressstart.call(this, event);
                 };
@@ -247,7 +248,7 @@ Tween - 点击及按压动画插件，通过修改click或pressstart/pressend方
                         params.start = getValue(this);
                     }
 
-                    startTween(this, decelerate, 20);
+                    startTween(this, decelerate, 20, event);
                 };
             }
         };

@@ -54,12 +54,33 @@
         },
 
         {
+            "name": "$messagebox",
+            "type": "core",
+            "desc": "消息框显示提示信息，仅包含确认按钮。",
+            "params": [
+                {"name": "text", "type": "string", "desc": "提示信息文本"},
+                {"name": "buttonTexts", "type": "Array", "desc": "按钮的文本数组"},
+                {"name": "...", "type": "Function", "desc": "按钮的点击事件处理函数，顺序与参数中按钮文本定义的顺序一致"}
+            ]
+        },
+
+        {
             "name": "$register",
             "type": "core",
             "desc": "注册一个扩展组件。",
             "params": [
                 {"name": "name", "type": "string", "desc": "扩展组件的参数名称"},
                 {"name": "func", "type": "Function", "desc": "扩展组件的初始化函数"}
+            ]
+        },
+
+        {
+            "name": "alert",
+            "type": "core",
+            "desc": "消息框显示提示信息，仅包含确认按钮。",
+            "params": [
+                {"name": "text", "type": "string", "desc": "提示信息文本"},
+                {"name": "onok", "type": "Function", "desc": "确认按钮点击事件处理函数"}
             ]
         },
 
@@ -105,6 +126,17 @@
             ],
             "return": {"type": "number", "desc": "宽度修正值"},
             "remark": "IE 在盒子模型上不完全遵守 W3C 标准，因此，需要使用 calcWidthRevise 方法计算 offsetWidth 与实际的 width 样式之间的修正值。"
+        },
+
+        {
+            "name": "confirm",
+            "type": "core",
+            "desc": "消息框显示提示信息，包含确认/取消按钮。",
+            "params": [
+                {"name": "text", "type": "string", "desc": "提示信息文本"},
+                {"name": "onok", "type": "Function", "desc": "确认按钮点击事件处理函数"},
+                {"name": "oncancel", "type": "Function", "desc": "取消按钮点击事件处理函数"}
+            ]
         },
 
         {
@@ -1883,6 +1915,7 @@
         {
             "name": "setEnabled",
             "type": "control",
+            "return": {"type": "boolean", "desc": "状态是否发生改变"},
             "params": [
                 {"name": "status", "type": "boolean", "desc": "控件是否可操作，默认为 true"}
             ],
@@ -1964,7 +1997,7 @@
             "name": "$allowNext",
             "type": "scroll",
             "desc": "判断是否允许当前值向最大值方向移动。",
-            "return": {"type": "boolean", "desc": "判断是否允许向最大值方向移动。"},
+            "return": {"type": "boolean", "desc": "判断是否允许向最大值方向移动"},
             "remark": "受当前鼠标位置的影响，在当前值向最大值方向移动的过程中需要先判断移动是否得到许可。"
         },
 
@@ -1972,7 +2005,7 @@
             "name": "$allowPrev",
             "type": "scroll",
             "desc": "判断是否允许当前值向0方向移动。",
-            "return": {"type": "boolean", "desc": "判断是否允许向0方向移动。"},
+            "return": {"type": "boolean", "desc": "判断是否允许向0方向移动"},
             "remark": "受当前鼠标位置的影响，在当前值向0方向移动的过程中需要先判断移动是否得到许可。"
         },
 

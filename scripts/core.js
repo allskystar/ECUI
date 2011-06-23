@@ -717,7 +717,7 @@
             }
 
             for (; o = allControls[i++]; ) {
-                if (type ? control.contain(o) : contain(control, o.getOuter())) {
+                if (type ? control.contain(o) : !!o.getOuter() && contain(control, o.getOuter())) {
                     if (o == overedControl) {
                         overedControl = null;
                     }

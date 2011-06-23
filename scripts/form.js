@@ -248,8 +248,8 @@ _uClose     - 关闭按钮
         this._uTitle.$init();
         this._uClose.$init();
         if (this._bFlag) {
-            this.$hide();
             this._bFlag = false;
+            this.$hide();
         }
         else {
             this.$show();
@@ -291,9 +291,11 @@ _uClose     - 关闭按钮
      * @public
      */
     UI_FORM_CLASS.center = function () {
-        o = this.getOuter().offsetParent;
+        o = this.getOuter();
+        o.style.position = this.$cache$position = 'absolute';
+        o = o.offsetParent;
 
-        if (o.tagName == 'BODY' || o.tagName == 'HTML') {
+        if (!o || o.tagName == 'BODY' || o.tagName == 'HTML') {
             var o = getView(),
                 x = o.right + o.left,
                 y = o.bottom + o.top;

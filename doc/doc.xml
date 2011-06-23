@@ -22,14 +22,13 @@
         <section>
             <title>第一步：建立html</title>
             <para>新建一个UTF-8编码的文本文件，命名为demo.html。</para>
-            <para>一个完整的标准的html包含了DOCTYPE、html、head以及body部分。目前ecui框架只能依赖于tangram，所以您需要在head中引入tangram以及ecui框架的javascript文件。</para>
+            <para>一个完整的标准的html包含了DOCTYPE、html、head以及body部分。</para>
             <para>通常一个html需要在head部分的顶端指定content-type，定义内容类型以及字符集。UTF-8更适合于国际化。</para>
             <programlisting><![CDATA[<!DOCTYPE html>
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>hello</title>
-<script type="text/javascript" src="http://img.baidu.com/js/tangram-1.3.2.js"></script>
 <script type="text/javascript" src="ecui-1.2.0.js"></script>
 </head>
 <body></body>
@@ -74,7 +73,6 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>hello</title>
-<script type="text/javascript" src="http://img.baidu.com/js/tangram-1.3.2.js"></script>
 <script type="text/javascript" src="ecui-1.2.0.js"></script>
 <style>
 .ec-control-over {background:blue;color:white}

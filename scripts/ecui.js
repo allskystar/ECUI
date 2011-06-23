@@ -34,6 +34,7 @@
 //{if $multi_select_js}////{include file="multi-select.js"}////{/if}//
 //{if $table_js}////{include file="table.js"}////{/if}//
 //{if $locked_table_js}////{include file="locked-table.js"}////{/if}//
+//{if $messagebox_js}////{include file="messagebox.js"}////{/if}//
 //{if $decorator_js}////{include file="decorator.js"}////{/if}//
 //{if $tween_js}////{include file="tween.js"}////{/if}//
 //{/foreach}//

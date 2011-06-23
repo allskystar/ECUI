@@ -780,6 +780,7 @@ $cache$position          - 控件布局方式缓存
      * @public
      *
      * @param {boolean} status 控件是否可操作，默认为 true
+     * @return {boolean} 状态是否发生改变
      */
     UI_CONTROL_CLASS.setEnabled = function (status) {
         status = status !== false;
@@ -792,7 +793,10 @@ $cache$position          - 控件布局方式缓存
                 loseFocus(this);
             }
             this._bEnabled = status;
+            return true;
         }
+
+        return false;
     };
 
     /**
