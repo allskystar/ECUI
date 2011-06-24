@@ -464,7 +464,7 @@ _aCol        - 行的列Element对象，如果当前列需要向左合并为null
         var oldWidth = this.getWidth();
 
         this.$setSize(width);
-        this.$setStyles('width', width - this.getInvalidWidth(true) + 'px', width - oldWidth);
+        this.$setStyles('width', width - this.$getInvalidWidth() + 'px', width - oldWidth);
     };
 
     /**
@@ -599,8 +599,8 @@ _aCol        - 行的列Element对象，如果当前列需要向左合并为null
             mainHeight = this.$cache$mainHeight,
             vsWidth = vscroll && vscroll.getWidth(),
             hsHeight = hscroll && hscroll.getHeight(),
-            invalidWidth = this.getInvalidWidth(true),
-            invalidHeight = this.getInvalidHeight(true),
+            invalidWidth = this.$getInvalidWidth(),
+            invalidHeight = this.$getInvalidHeight(),
             mainWidthRevise = mainWidth + invalidWidth,
             mainHeightRevise = mainHeight + invalidHeight,
             bodyWidth = width - invalidWidth,

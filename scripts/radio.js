@@ -7,6 +7,9 @@ Radio - 定义一组选项中选择唯一选项的基本操作。
 <input ecui="type:radio" type="radio" name="test" checked="checked" />
 也可以使用其它标签初始化:
 <div ecui="type:radio;name:test;checked:true"></div>
+
+属性
+_bDefault  - 默认的选中状态
 */
 //{if 0}//
 (function () {
@@ -42,9 +45,15 @@ Radio - 定义一组选项中选择唯一选项的基本操作。
             params.input = 'radio';
 
             UI_EDIT.call(this, el, params);
+
+            el = this.getInput();
+
             if (params.checked) {
-                this.getInput().checked = true;
+                el.defaultChecked = el.checked = true;
             }
+
+            // 修复IE6/7下移动DOM节点时选中状态发生改变的问题
+            this._bDefault = el.defaultChecked;
         },
         UI_RADIO_CLASS = inherits(UI_RADIO, UI_EDIT);
 //{else}//
@@ -57,7 +66,8 @@ Radio - 定义一组选项中选择唯一选项的基本操作。
      */
     function UI_RADIO_FLUSH(control, status) {
         if (status !== undefined) {
-            control.getInput().checked = status;
+            var el = control.getInput();
+            el.defaultChecked = el.checked = status;
         }
         control.setClass(control.getBaseClass() + (control.isChecked() ? '-checked' : ''));
     }
@@ -98,6 +108,18 @@ Radio - 定义一组选项中选择唯一选项的基本操作。
      */
     UI_RADIO_CLASS.$ready = function () {
         UI_RADIO_FLUSH(this);
+    };
+
+    /**
+     * 输入框控件重置的默认处理。
+     * @protected
+     *
+     * @param {Event} event 事件对象
+     */
+    UI_RADIO_CLASS.$reset = function (event) {
+        // 修复IE6/7下移动DOM节点时选中状态发生改变的问题
+        this.getInput().checked = this._bDefault;
+        UI_EDIT_CLASS.$reset.call(this, event);
     };
 
     /**

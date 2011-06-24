@@ -147,8 +147,8 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
             var i = 0,
                 name = this._uName,
                 date = this._uDate,
-                itemWidth = FLOOR((width - this.getInvalidWidth(true)) / 7),
-                itemHeight = FLOOR((height - this.getInvalidHeight(true) - name.getHeight()) / 6);
+                itemWidth = FLOOR((width - this.$getInvalidWidth()) / 7),
+                itemHeight = FLOOR((height - this.$getInvalidHeight() - name.getHeight()) / 6);
             i < 7;
         ) {
             name.getItem(i++).$setSize(itemWidth);

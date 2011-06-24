@@ -1,7 +1,5 @@
 /*
 Tween - 点击及按压动画插件，通过修改click或pressstart/pressend方法来实现移动时的动画效果
-
-属性
 */
 //{if 0}//
 (function () {

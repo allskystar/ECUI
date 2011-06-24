@@ -89,7 +89,7 @@ _eInput  - INPUT对象
                 el.style.overflow = 'hidden';
                 if (!(input = el.getElementsByTagName('input')[0])) {
                     input = setInput(null, params.name, params.input);
-                    input.value = params.value || '';
+                    input.defaultValue = input.value = params.value || '';
                     el.appendChild(input);
                 }
                 input.style.border = '0px';
@@ -143,7 +143,9 @@ _eInput  - INPUT对象
             //__transform__el_o
             for (var i = 0, elements = event.target.elements, el; el = elements[i++]; ) {
                 if (el.getControl) {
-                    el.getControl().$ready();
+                    if (!(el.onreset && el.onreset(event) === false)) {
+                        el.getControl().$reset(event);
+                    }
                 }
             }
         }, 0);
@@ -236,6 +238,16 @@ _eInput  - INPUT对象
         this._eInput.getControl = undefined;
         this._eInput = null;
         UI_CONTROL_CLASS.$dispose.call(this);
+    };
+
+    /**
+     * 输入框控件重置的默认处理。
+     * @protected
+     *
+     * @param {Event} event 事件对象
+     */
+    UI_EDIT_CLASS.$reset = function (event) {
+        this.$ready();
     };
 
     /**

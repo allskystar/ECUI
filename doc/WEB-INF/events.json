@@ -311,6 +311,19 @@
     ],
 
     "edit": [
+        {
+            "name": "onreset",
+            "type": "edit",
+            "desc": "数据重置事件。",
+            "params": [{"name": "event", "desc": "事件对象"}]
+        },
+
+        {
+            "name": "onsubmit",
+            "type": "edit",
+            "desc": "数据提交事件。",
+            "params": [{"name": "event", "desc": "事件对象"}]
+        }
     ],
 
     "format-edit": [
@@ -319,13 +332,6 @@
             "type": "format-edit",
             "desc": "数据格式错误事件。",
             "params": [{"name": "err", "desc": "错误格式信息"}]
-        },
-
-        {
-            "name": "onsubmit",
-            "type": "format-edit",
-            "desc": "数据提交事件。",
-            "params": [{"name": "event", "desc": "事件对象"}]
         }
     ],
 

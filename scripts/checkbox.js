@@ -13,6 +13,7 @@ Checkbox - 定义单个设置项选择状态的基本操作。
 </div>
 
 属性
+_bDefault  - 默认的选中状态
 _nStatus   - 复选框当前的状态，0--全选，1--未选，2--半选
 _cSuperior - 复选框的上级管理者
 _aInferior - 所有的下级复选框
@@ -55,10 +56,15 @@ _aInferior - 所有的下级复选框
             params.input = 'checkbox';
 
             UI_EDIT.call(this, el, params);
+
+            el = this.getInput();
+
             if (params.checked) {
-                this.getInput().checked = true;
+                el.defaultChecked = el.checked = true;
             }
 
+            // 修复IE6/7下移动DOM节点时选中状态发生改变的问题
+            this._bDefault = el.defaultChecked;
             this._aInferior = [];
 
             $connect(this, this.setSuperior, params.superior);
@@ -78,7 +84,9 @@ _aInferior - 所有的下级复选框
             control.setClass(control.getBaseClass() + ['-checked', '', '-part'][status]);
 
             control._nStatus = status;
-            control.getInput().checked = !status;
+
+            var el = control.getInput();
+            el.defaultChecked = el.checked = !status;
 
             // 如果有上级复选框，刷新上级复选框的状态
             if (control._cSuperior) {
@@ -147,6 +155,18 @@ _aInferior - 所有的下级复选框
         if (!this._aInferior.length) {
             UI_CHECKBOX_CHANGE(this, this.getInput().checked ? 0 : 1);
         }
+    };
+
+    /**
+     * 输入框控件重置的默认处理。
+     * @protected
+     *
+     * @param {Event} event 事件对象
+     */
+    UI_CHECKBOX_CLASS.$reset = function (event) {
+        // 修复IE6/7下移动DOM节点时选中状态发生改变的问题
+        this.getInput().checked = this._bDefault;
+        UI_EDIT_CLASS.$reset.call(this, event);
     };
 
     /**

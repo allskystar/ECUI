@@ -417,7 +417,7 @@
                     if (ieVersion < 8) {
                         for (; o = list[--i]; ) {
                             j = o.getBase();
-                            j.style.width = j.offsetWidth - (flgFixedSize ? o.getInvalidWidth(true) * 2 : 0) + 'px';
+                            j.style.width = j.offsetWidth - (flgFixedSize ? o.$getInvalidWidth() * 2 : 0) + 'px';
                         }
                     }
 

@@ -142,7 +142,7 @@ _uOptions     - 下拉选择框
 
             this._uText = $fastCreate(UI_ITEM, el[0], this, partParams);
             this._uButton = $fastCreate(UI_CONTROL, el[1], this, partParams);
-            el[2].value = value;
+            el[2].defaultValue = el[2].value = value;
 
             // 初始化下拉区域最多显示的选项数量
             this._nOptionSize = params.optionSize || 5;

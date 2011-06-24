@@ -36,6 +36,7 @@
 //{if $locked_table_js}////{include file="locked-table.js"}////{/if}//
 //{if $messagebox_js}////{include file="messagebox.js"}////{/if}//
 //{if $decorator_js}////{include file="decorator.js"}////{/if}//
+//{if $shield_js}////{include file="shield.js"}////{/if}//
 //{if $tween_js}////{include file="tween.js"}////{/if}//
 //{/foreach}//
 })();

@@ -1039,6 +1039,20 @@
         },
 
         {
+            "name": "$getInvalidHeight",
+            "type": "control",
+            "desc": "获取控件的基本无效高度，即控件基本区域与控件内部区域高度的差值。",
+            "return": {"type": "number", "desc": "控件的无效高度"}
+        },
+
+        {
+            "name": "$getInvalidWidth",
+            "type": "control",
+            "desc": "获取控件的基本无效宽度，即控件基本区域与控件内部区域宽度的差值。",
+            "return": {"type": "number", "desc": "控件的无效宽度"}
+        },
+
+        {
             "name": "$getSection",
             "type": "control",
             "desc": "获取指定的部件。",
@@ -1550,7 +1564,7 @@
         {
             "name": "getInvalidHeight",
             "type": "control",
-            "desc": "获取控件的无效高度，即控件与控件内部区域高度的差值。",
+            "desc": "获取控件的完全无效高度，即控件外部区域与控件内部区域高度的差值。",
             "return": {"type": "number", "desc": "控件的无效高度"},
             "example": [
                 "<body><div ecui=\"type:control;id:ctrl1\"></div></body>",
@@ -1561,7 +1575,7 @@
         {
             "name": "getInvalidWidth",
             "type": "control",
-            "desc": "获取控件的无效宽度，即控件与控件内部区域宽度的差值。",
+            "desc": "获取控件的完全无效宽度，即控件外部区域与控件内部区域宽度的差值。",
             "return": {"type": "number", "desc": "控件的无效宽度"},
             "example": [
                 "<body><div ecui=\"type:control;id:ctrl1\"></div></body>",
@@ -2349,6 +2363,15 @@
     ],
 
     "edit": [
+        {
+            "name": "$reset",
+            "type": "edit",
+            "desc": "输入框控件重置的默认处理。",
+            "params": [
+                {"name": "event", "type": "Event", "desc": "事件对象"}
+            ]
+        },
+
         {
             "name": "$submit",
             "type": "edit",

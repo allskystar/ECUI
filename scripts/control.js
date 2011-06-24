@@ -160,10 +160,10 @@ $cache$position          - 控件布局方式缓存
         if (cacheSize !== false) {
             this._nWidth =
                 el.offsetWidth ||
-                    toNumber(style.width || el.style.width) + (fixedSize ? this.getInvalidWidth(true) : 0);
+                    toNumber(style.width || el.style.width) + (fixedSize ? this.$getInvalidWidth() : 0);
             this._nHeight =
                 el.offsetHeight ||
-                    toNumber(style.height || el.style.height) + (fixedSize ? this.getInvalidHeight(true) : 0);
+                    toNumber(style.height || el.style.height) + (fixedSize ? this.$getInvalidHeight() : 0);
         }
     };
 
@@ -185,6 +185,30 @@ $cache$position          - 控件布局方式缓存
      */
     UI_CONTROL_CLASS.$focus = function () {
         this.alterClass('focus');
+    };
+
+    /**
+     * 获取控件的基本无效高度，即控件基本区域与控件内部区域高度的差值。
+     * @public
+     *
+     * @return {number} 控件的无效高度
+     */
+    UI_CONTROL_CLASS.$getInvalidHeight = function () {
+        this.cache();
+        return this.$cache$borderTopWidth + this.$cache$borderBottomWidth +
+            this.$cache$paddingTop + this.$cache$paddingBottom;
+    };
+
+    /**
+     * 获取控件的基本无效宽度，即控件基本区域与控件内部区域宽度的差值。
+     * @public
+     *
+     * @return {number} 控件的无效宽度
+     */
+    UI_CONTROL_CLASS.$getInvalidWidth = function () {
+        this.cache();
+        return this.$cache$borderLeftWidth + this.$cache$borderRightWidth +
+            this.$cache$paddingLeft + this.$cache$paddingRight;
     };
 
     /**
@@ -313,7 +337,7 @@ $cache$position          - 控件布局方式缓存
             var style = getStyle(el);
             if (style.width == 'auto' && style.display == 'block') {
                 currStyle.width = '100%';
-                currStyle.width = el.offsetWidth - (isFixedSize() ? this.getInvalidWidth(true) * 2 : 0) + 'px';
+                currStyle.width = el.offsetWidth - (isFixedSize() ? this.$getInvalidWidth() * 2 : 0) + 'px';
             }
         }
         currStyle.height = this._sHeight;
@@ -366,12 +390,12 @@ $cache$position          - 控件布局方式缓存
             flgFixedSize = isFixedSize();
 
         if (width) {
-            style.width = width - (flgFixedSize ? this.getInvalidWidth(true) : 0) + 'px';
+            style.width = width - (flgFixedSize ? this.$getInvalidWidth() : 0) + 'px';
             this._nWidth = width;
         }
 
         if (height) {
-            style.height = height - (flgFixedSize ? this.getInvalidHeight(true) : 0) + 'px';
+            style.height = height - (flgFixedSize ? this.$getInvalidHeight() : 0) + 'px';
             this._nHeight = height;
         }
     };
@@ -506,7 +530,7 @@ $cache$position          - 控件布局方式缓存
      * @return {number} 控件内层可使用区域的宽度
      */
     UI_CONTROL_CLASS.getBodyHeight = function () {
-        return this.getHeight(true) - this.getInvalidHeight(true);
+        return this.getHeight() - this.getInvalidHeight();
     };
 
     /**
@@ -517,7 +541,7 @@ $cache$position          - 控件布局方式缓存
      * @return {number} 控件内层可使用区域的宽度
      */
     UI_CONTROL_CLASS.getBodyWidth = function () {
-        return this.getWidth(true) - this.getInvalidWidth(true);
+        return this.getWidth() - this.getInvalidWidth();
     };
 
     /**
@@ -543,27 +567,23 @@ $cache$position          - 控件布局方式缓存
     };
 
     /**
-     * 获取控件的无效高度，即控件与控件内部区域高度的差值。
+     * 获取控件的完全无效高度，即控件外部区域与控件内部区域高度的差值。
      * @public
      *
      * @return {number} 控件的无效高度
      */
     UI_CONTROL_CLASS.getInvalidHeight = function () {
-        this.cache();
-        return this.$cache$borderTopWidth + this.$cache$borderBottomWidth +
-            this.$cache$paddingTop + this.$cache$paddingBottom;
+        return this.$getInvalidHeight();
     };
 
     /**
-     * 获取控件的无效宽度，即控件与控件内部区域宽度的差值。
+     * 获取控件的完全无效宽度，即控件外部区域与控件内部区域宽度的差值。
      * @public
      *
      * @return {number} 控件的无效宽度
      */
     UI_CONTROL_CLASS.getInvalidWidth = function () {
-        this.cache();
-        return this.$cache$borderLeftWidth + this.$cache$borderRightWidth +
-            this.$cache$paddingLeft + this.$cache$paddingRight;
+        return this.$getInvalidWidth();
     };
 
     /**
