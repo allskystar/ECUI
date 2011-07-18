@@ -151,13 +151,13 @@ _uClose     - 关闭按钮
     }
 
     /**
-     * 标题栏鼠标按压开始事件处理，需要触发拖动，如果当前窗体未得到焦点则得到焦点。
+     * 标题栏激活开始事件处理，需要触发拖动，如果当前窗体未得到焦点则得到焦点。
      * @protected
      *
      * @param {Event} event 事件对象
      */
-    UI_FORM_TITLE_CLASS.$pressstart = function (event) {
-        UI_CONTROL_CLASS.$pressstart.call(this, event);
+    UI_FORM_TITLE_CLASS.$activate = function (event) {
+        UI_CONTROL_CLASS.$activate.call(this, event);
         drag(this.getParent(), event);
     };
 

@@ -56,6 +56,7 @@
         safariVersion =
             /(\d+\.\d)(\.\d)?\s+safari/i.test(USER_AGENT) && !/chrome/i.test(USER_AGENT) ? REGEXP.$1 - 0 : undefined;
 
+    // 字符集基本操作定义
     var charset = {
             utf8: {
                 getLength: function (source) {
@@ -75,9 +76,20 @@
                 codeLength: function (code) {
                     return code > 127 ? 2 : 1;
                 }
+            },
+
+            '': {
+                getLength: function (source) {
+                    return source.length;
+                },
+
+                codeLength: function (code) {
+                    return 1;
+                }
             }
         };
 
+    // 读写特殊的 css 属性操作
     var styleFixer = {
             display:
                 ieVersion < 8 ? {
@@ -158,11 +170,13 @@
          * @param {string} className 样式名，可以是多个，中间使用空白符分隔
          */
         addClass = dom.addClass = function (el, className) {
+            // 这里直接添加是为了提高效率，因此对于可能重复添加的属性，请使用标志位判断是否已经存在，
+            // 或者先使用 removeClass 方法删除之前的样式
             el.className += ' ' + className;
         },
 
         /**
-         * 获取 Element 对象的所有深度为1的子 Element 对象。
+         * 获取所有 parentNode 为指定 Element 的子 Element 集合。
          * @public
          * 
          * @param {HTMLElement} el Element 对象
@@ -179,7 +193,7 @@
 
         /**
          * 判断一个 Element 对象是否包含另一个 Element 对象。
-         * contain 方法会将两个 Element 对象相同也认为是包含。
+         * contain 方法认为两个相同的 Element 对象相互包含。
          * @public
          * 
          * @param {HTMLElement} container 包含的 Element 对象
@@ -187,8 +201,7 @@
          * @return {boolean} contained 对象是否被包含于 container 对象的 DOM 节点上
          */
         contain = dom.contain = function (container, contained) {
-            return container.contains ?
-                container.contains(contained)
+            return container.contains ? container.contains(contained)
                 : container == contained || !!(container.compareDocumentPosition(contained) & 16);
         },
 
@@ -202,7 +215,7 @@
          * @return {HTMLElement} 创建的 Element 对象
          */
         createDom = dom.create = function (className, cssText, tagName) {
-            tagName = DOCUMENT.createElement(tagName || 'div');
+            tagName = DOCUMENT.createElement(tagName || 'DIV');
             if (className) {
                 tagName.className = className;
             }
@@ -225,6 +238,7 @@
 
         /**
          * 获取 Element 对象的父 Element 对象。
+         * 在 IE 下，Element 对象被 removeChild 方法移除时，parentNode 仍然指向原来的父 Element 对象，与 W3C 标准兼容的属性应该是 parentElement。
          * @public
          *
          * @param {HTMLElement} el Element 对象
@@ -254,6 +268,7 @@
 
             if (ieVersion) {
                 if(!isStrict) {
+                    // 在怪异模式下，IE 将 body 的边框也算在了偏移值中，需要先纠正
                     o = getStyle(body);
                     if (ISNAN(top = PARSEINT(o.borderTopWidth))) {
                         top = -2;
@@ -400,7 +415,7 @@
          *
          * @param {HTMLElement} source 指定的 Element 对象
          * @param {HTMLElement} target 目标 Element 对象
-         * @param {boolean} all 是否移动所有的 DOM 对象，默认仅移动 ElementNode 对象
+         * @param {boolean} all 是否移动所有的 DOM 对象，默认仅移动 ElementNode 类型的对象
          */
         moveElements = dom.moveElements = function (source, target, all) {
             //__transform__el_o
@@ -557,19 +572,19 @@
 
         /**
          * 计算字符串的字节长度。
-         * 如果没有指定编码集，getByteLength 方法相当于核心的 String.length 属性。
+         * 如果没有指定编码集，相当于获取字符串属性 length 的值。
          * 
          * @param {string} source 目标字符串
          * @param {string} charsetName 字符对应的编码集
          * @return {number} 字节长度
          */
         getByteLength = string.getByteLength = function (source, charsetName) {
-            return charsetName ? charset[charsetName].getLength(source) : source.length;
+            return charset[charsetName || ''].getLength(source);
         },
 
         /**
          * 根据字节长度截取字符串。
-         * 如果没有指定编码集，sliceByte 方法相当于核心的 String.slice 方法。
+         * 如果没有指定编码集，相当于字符串的 slice 方法。
          * 
          * @param {string} source 目标字符串
          * @param {number} length 需要截取的字节长度
@@ -577,17 +592,14 @@
          * @return {string} 结果字符串
          */
         sliceByte = string.sliceByte = function (source, length, charsetName) {
-            if (charsetName) {
-                for (var i = 0, func = charset[charsetName].codeLength; i < source.length; i++) {
-                    length -= func(source.charCodeAt(i));
-                    if (length < 0) {
-                        return source.slice(0, i);
-                    }
+            for (var i = 0, func = charset[charsetName || ''].codeLength; i < source.length; i++) {
+                length -= func(source.charCodeAt(i));
+                if (length < 0) {
+                    return source.slice(0, i);
                 }
-
-                return source;
             }
-            return source.slice(0, length);
+
+            return source;
         },
 
         /**
@@ -667,21 +679,6 @@
         },
 
         /**
-         * 对象属性复制。
-         * @public
-         *
-         * @param {Object} target 目标对象
-         * @param {Object} source 源对象
-         * @return {Object} 目标对象
-         */
-        copy = util.copy = function (target, source) {
-            for (var key in source) {
-                target[key] = source[key];
-            }
-            return target;
-        },
-
-        /**
          * 卸载事件。
          * @public
          *
@@ -696,6 +693,21 @@
             else {
                 obj.removeEventListener(type, func, false);
             }
+        },
+
+        /**
+         * 对象属性复制。
+         * @public
+         *
+         * @param {Object} target 目标对象
+         * @param {Object} source 源对象
+         * @return {Object} 目标对象
+         */
+        extend = util.extend = function (target, source) {
+            for (var key in source) {
+                target[key] = source[key];
+            }
+            return target;
         },
 
         /**
@@ -718,12 +730,14 @@
         /**
          * 获取浏览器可视区域的相关信息。
          * getView 方法将返回浏览器可视区域的信息。属性如下：
-         * top    {number} 可视区域最小X轴坐标
-         * right  {number} 可视区域最大Y轴坐标
-         * bottom {number} 可视区域最大X轴坐标
-         * left   {number} 可视区域最小Y轴坐标
-         * width  {number} 可视区域的宽度
-         * height {number} 可视区域的高度
+         * top        {number} 可视区域最小X轴坐标
+         * right      {number} 可视区域最大Y轴坐标
+         * bottom     {number} 可视区域最大X轴坐标
+         * left       {number} 可视区域最小Y轴坐标
+         * width      {number} 可视区域的宽度
+         * height     {number} 可视区域的高度
+         * pageWidth  {number} 页面的宽度
+         * pageHeight {number} 页面的高度
          * @public
          *
          * @return {Object} 浏览器可视区域信息
@@ -746,8 +760,8 @@
                 left: scrollLeft,
                 width: clientWidth,
                 height: clientHeight,
-                maxWidth: MAX(html.scrollWidth, body.scrollWidth, clientWidth),
-                maxHeight: MAX(html.scrollHeight, body.scrollHeight, clientHeight)
+                pageWidth: MAX(html.scrollWidth, body.scrollWidth, clientWidth),
+                pageHeight: MAX(html.scrollHeight, body.scrollHeight, clientHeight)
             };
         },
 
@@ -764,7 +778,7 @@
                 clazz = new FUNCTION();
                 
             clazz.prototype = superClass.prototype;
-            copy(subClass.prototype = new clazz(), oldPrototype);
+            extend(subClass.prototype = new clazz(), oldPrototype);
             subClass.prototype.constructor = subClass;
             subClass.superClass = superClass.prototype;
 
@@ -772,19 +786,21 @@
         },
 
         /**
-         * 创建一个定时器对象，从第4个参数起都是传入 func 中的变量。
+         * 创建一个定时器对象。
          * @public
          *
          * @param {Function} func 定时器需要调用的函数
          * @param {number} delay 定时器延迟调用的毫秒数，如果为负数表示需要连续触发
          * @param {Object} caller 调用者，在 func 被执行时，this 指针指向的对象，可以为空
+         * @param {Object} ... 向 func 传递的参数
          * @return {Function} 用于关闭定时器的方法
          */
         timer = util.timer = function (func, delay, caller) {
             var args = Array.prototype.slice.call(arguments, 3),
                 handle = (delay < 0 ? setInterval : setTimeout)(function () {
                     func.apply(caller, args);
-                    if (delay >= 0) {
+                    // 使用delay<0而不是delay>=0，是防止delay没有值的时候，不进入分支
+                    if (!(delay < 0)) {
                         func = caller = args = null;
                     }
                 }, ABS(delay));

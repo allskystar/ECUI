@@ -339,13 +339,13 @@ _aButton          - 按钮数组
     };
 
     /**
-     * 色彩选择区或亮度条选择区左键按压开始事件的默认处理。
+     * 色彩选择区或亮度条选择区激活开始事件的默认处理。
      * @protected
      *
      * @param {Event} event 事件对象
      */
-    UI_PALETTE_AREA_CLASS.$pressstart = function (event) {
-        UI_CONTROL_CLASS.$pressstart.call(this, event);
+    UI_PALETTE_AREA_CLASS.$activate = function (event) {
+        UI_CONTROL_CLASS.$activate.call(this, event);
 
         var control = this._uIcon,
             x,
@@ -421,7 +421,7 @@ _aButton          - 按钮数组
     };
 
     /**
-     * RGB 色彩输入框键盘按压事件的默认处理。
+     * RGB 色彩输入框键盘按下事件的默认处理。
      * @protected
      *
      * @param {Event} event 事件对象

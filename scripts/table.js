@@ -74,8 +74,8 @@ _aCol        - 行的列Element对象，如果当前列需要向左合并为null
 
         eventNames = [
             'mousedown', 'mouseover', 'mousemove', 'mouseout', 'mouseup',
-            'pressstart', 'pressover', 'pressmove', 'pressout', 'pressend',
-            'click', 'focus', 'blur', 'keydown', 'keypress', 'keyup', 'mousewheel',
+            'click', 'focus', 'blur', 'activate', 'deactivate',
+            'keydown', 'keypress', 'keyup', 'mousewheel',
             'change', 'resize', 'create', 'init'
         ],
 
@@ -442,7 +442,7 @@ _aCol        - 行的列Element对象，如果当前列需要向左合并为null
             table.resize();
         }
         else {
-            table.paint();
+            table.repaint();
         }
     };
 
@@ -515,6 +515,7 @@ _aCol        - 行的列Element对象，如果当前列需要向左合并为null
         this._uHead.cache(false, true);
 
         // 以下使用 style 表示临时对象 o
+        this.$cache$mainHeight += this.$cache$paddingTop;
         this.$cache$mainHeight -= this.$cache$paddingTop = getParent(this._uHead.getBody()).offsetHeight;
         for (var i = 0, pos = 0; style = this._aRow[i++]; ) {
             style.$cache$pos = pos;
@@ -535,12 +536,12 @@ _aCol        - 行的列Element对象，如果当前列需要向左合并为null
 
     /**
      * 获取单元格元素。
-     * $getCell 方法在合法的行列序号内一定会返回一个 DOM 元素，如果当前单元格被合并，将返回合并后的 DOM 元素。
+     * $getCell 方法在合法的行列序号内一定会返回一个 Element 对象，如果当前单元格被合并，将返回合并后的 Element 对象。
      * @protected
      *
      * @param {number} rowIndex 单元格的行数，从0开始
      * @param {number} colIndex 单元格的列数，从0开始
-     * @return {HTMLElement} 单元格 DOM 元素
+     * @return {HTMLElement} 单元格 Element 对象
      */
     UI_TABLE_CLASS.$getCell = function (rowIndex, colIndex) {
         //__gzip_original__rows
@@ -634,7 +635,7 @@ _aCol        - 行的列Element对象，如果当前列需要向左合并为null
      * params 参数对象支持的属性如下：
      * width   {number} 列的宽度
      * base    {string} 列的基本样式
-     * title   {string} 列的标题
+     * caption {string} 列的标题
      * @public
      *
      * @param {Object} params 列的初始化参数
@@ -660,7 +661,7 @@ _aCol        - 行的列Element对象，如果当前列需要向左合并为null
         }
 
         this._aCol.splice(index, 0, col);
-        el.innerHTML = params.title || '';
+        el.innerHTML = params.caption || '';
         this._uHead.getBody().insertBefore(el, o);
 
         typeClass = typeClass + '-item ' + baseClass + '-item';
@@ -730,7 +731,7 @@ _aCol        - 行的列Element对象，如果当前列需要向左合并为null
                 for (
                     var o = i,
                         colspan = col.isShow() ? 1 : 0,
-                        width = -col.getInvalidWidth();
+                        width = col.getWidth() - col.getInvalidWidth();
                     (col = this._aCol[++i]) && data[i] === null;
                 ) {
                     rowCols[i] = null;
@@ -770,8 +771,7 @@ _aCol        - 行的列Element对象，如果当前列需要向左合并为null
         }
 
         row._aCol = rowCols;
-        this.paint();
-
+        this.resize();
         return row;
     };
 
@@ -937,7 +937,7 @@ _aCol        - 行的列Element对象，如果当前列需要向左合并为null
             disposeControl(remove);
             this._aRow.splice(index, 1);
 
-            this.paint();
+            this.repaint();
         }
     };
 

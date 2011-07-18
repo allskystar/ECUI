@@ -76,7 +76,7 @@ _cSelected - 树的根节点拥有，保存当前选中的项
      * @param {Event} event 事件对象
      */
     UI_RADIO_TREE_CLASS.$click = function (event) {
-        if (getMouseX(this) <= toNumber(getStyle(this.getBase(), 'paddingLeft'))) {
+        if (getMouseX(this) <= toNumber(getStyle(this.getBody(), 'paddingLeft'))) {
             var root = this.getRoot(),
                 selected = root._cSelected;
 

@@ -55,14 +55,14 @@ _uOptions     - 下拉选择框
         moveElements = dom.moveElements,
         removeDom = dom.remove,
         encodeHTML = string.encodeHTML,
-        copy = util.copy,
+        extend = util.extend,
         getView = util.getView,
         inherits = util.inherits,
 
         $fastCreate = core.$fastCreate,
         findControl = core.findControl,
+        getActived = core.getActived,
         getAttributeName = core.getAttributeName,
-        getPressed = core.getPressed,
         intercept = core.intercept,
         mask = core.mask,
         restore = core.restore,
@@ -212,7 +212,7 @@ _uOptions     - 下拉选择框
         }
     }
 
-    copy(UI_SELECT_CLASS, UI_ITEMS);
+    extend(UI_SELECT_CLASS, UI_ITEMS);
 
     /**
      * 销毁控件的默认处理。
@@ -338,7 +338,7 @@ _uOptions     - 下拉选择框
             length = list.length,
             active = this.getActived();
 
-        if (getPressed() != this) {
+        if (getActived() != this) {
             // 当前不能存在鼠标操作，否则屏蔽按键
             if (which == 40 || which == 38) {
                 if (length) {
@@ -392,14 +392,13 @@ _uOptions     - 下拉选择框
     };
 
     /**
-     * 控件按压状态开始事件的默认处理。
-     * 鼠标左键按压控件开始时显示下拉框。如果控件处于可操作状态(参见 isEnabled)，pressstart 方法触发 onpressstart 事件，如果事件返回值不为 false，则调用 $pressstart 方法。
+     * 控件激活状态开始事件的默认处理。
      * @protected
      *
      * @param {Event} event 事件对象
      */
-    UI_SELECT_CLASS.$pressstart = function (event) {
-        UI_EDIT_CLASS.$pressstart.call(this, event);
+    UI_SELECT_CLASS.$activate = function (event) {
+        UI_EDIT_CLASS.$activate.call(this, event);
         this._uOptions.show();
         // 拦截之后的点击，同时屏蔽所有的控件点击事件
         intercept(this);

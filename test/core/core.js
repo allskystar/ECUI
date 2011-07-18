@@ -1,222 +1,225 @@
 function before() {
     var el = document.createElement('div');
-    el.innerHTML = '<div id="inner"></div>';
+    el.innerHTML = '<div id="parent"><div id="child">'
+                + '<div id="inner" style="width:400px;height:400px;font-size:1px"></div>'
+                + '</div></div>';
     el.id = 'common';
-    el.style.cssText = 'width:400px;height:400px;font-size:1px';
     document.body.appendChild(el);
     ecui.create('control', {id: 'common', element: el});
+    ecui.create('control', {id: 'parent', element: el.firstChild});
+    ecui.create('control', {id: 'child', element: el.firstChild.firstChild});
 }
 
 function after() {
-    ecui.setFocused();
     ecui.dispose(ecui.get('common'));
     document.body.removeChild(document.getElementById('common'));
-    var result = ecui.query({type: ecui.ui.Control});
-    value_of(!result.len || (result.len == 1 && result[0].getBase() == 'ec-selector')).should_be_true();
+    value_of(!ecui.query().length).should_be_true();
 }
 
-test('控件绑定与连接测试', {
-    '绑定DOM对象与ECUI控件对象($bind)': function () {
+test('$bind', {
+    '绑定DOM对象与ECUI控件对象': function () {
         var el = document.createElement('div'),
-            ctrl = ecui.get('common');
-        value_of(el.getControl).should_be(void(0));
-        ecui.$bind(el, ctrl);
-        value_of(el.getControl()).should_be(ctrl);
-    },
-
-    '同一个DOM多次绑定ECUI控件($bind)': function () {
-        var el = document.createElement('div'),
-            ctrl = ecui.get('common'),
-            newCtrl = ecui.create('Control');
-        ecui.$bind(el, ctrl);
-        value_of(el.getControl()).should_be(ctrl);
-        ecui.$bind(el, newCtrl);
-        value_of(el.getControl()).should_be(ctrl);
-        ecui.dispose(newCtrl);
-    },
-
-    '控件连接已经生成的控件($connect)': function () {
-        var caller, connected,
-            newCtrl = ecui.create('Control');
-        function test(target) {
-            caller = this;
-            connected = target;
-        }
-        ecui.$connect(newCtrl, test, 'common');
-        value_of(caller).should_be(newCtrl);
-        value_of(connected).should_be(ecui.get('common'));
-        ecui.dispose(newCtrl);
-    },
-
-    '控件滞后连接生成的控件($connect)': function () {
-        var caller, connected,
             common = ecui.get('common');
-        function test(target) {
-            caller = this;
-            connected = target;
-        }
-        ecui.$connect(common, test, 'connect');
-        value_of(caller).should_be(void(0));
-        value_of(connected).should_be(void(0));
-        var newCtrl = ecui.create('Control', {id: 'connect'});
-        value_of(caller).should_be(common);
-        value_of(connected).should_be(newCtrl);
-        ecui.dispose(newCtrl);
+        value_of(el.getControl).should_be(void(0));
+        ecui.$bind(el, common);
+        value_of(el.getControl()).should_be(common);
     },
 
-    '在绑定控件的DOM节点向上查找控件(findControl)': function () {
-        var el = document.getElementById('common');
-        value_of(ecui.findControl(el)).should_be(ecui.get('common'));
-    },
-
-    '在控件内部的DOM节点向上查找控件(findControl)': function () {
-        var el = document.getElementById('inner');
-        value_of(ecui.findControl(el)).should_be(ecui.get('common'));
-    },
-
-    '在控件外部的DOM节点向上查找控件(findControl)': function () {
-        var el = document.createElement('div');
-        document.body.appendChild(el);
-        value_of(ecui.findControl(el)).should_be(null);
-    },
-
-    '根据控件ID或者DOM对象获取控件(get/getControl)': function () {
-        var ctrl = ecui.get('ctrl');
-        value_of(ctrl).should_be(null);
-        ctrl = ecui.get('common');
-        value_of(ctrl.getBase().getAttribute('id')).should_be('common');
-        value_of(document.getElementById('common').getControl()).should_be(ctrl);
-    }
-});
-
-test('公共函数测试',{
-    '盒子模型修正计算(calcHeightRevise/calcLeftRevise/calcTopRevise/calcWidthRevise)': function () {
-        var el = document.getElementById('inner');
-        el.style.cssText = 'position:relative;padding:5px;margin:5px;border:1px solid';
-        el.innerHTML = '<div style="position:absolute;left:1px;top:1px"></div>';
-        var style = ecui.dom.getStyle(el);
-        value_of(ecui.calcHeightRevise(style)).should_be(ecui.isFixedSize() ? 12 : 0);
-        value_of(ecui.calcWidthRevise(style)).should_be(ecui.isFixedSize() ? 12 : 0);
-
-        el = el.firstChild;
-        value_of(ecui.calcLeftRevise(el)).should_be(baidu.browser.opera ? 1 : 0);
-        value_of(ecui.calcTopRevise(el)).should_be(baidu.browser.opera ? 1 : 0);
-    },
-
-    '读取过一次属性的不能再读到属性(getParameters)': function () {
-        value_of(ecui.getParameters(document.getElementById('common'))).should_be({});
-    },
-
-    '第一次读取属性(getParameters)': function () {
-        var el = document.getElementById('common');
-        el.setAttribute('ecui', 'number:1.5;  true  ;false:  false  ;');
-        value_of(ecui.getParameters(el)).should_be({number: 1.5, 'true': true, 'false': false});
-        value_of(el.getAttribute('ecui')).should_be(null);
-    },
-
-    '是否需要修正盒子模型(isFixedSize)': function () {
-        value_of(ecui.isFixedSize()).should_be(!(baidu.browser.ie && baidu.browser.ie < 8 && !baidu.browser.isStrict));
-    }
-});
-
-test('控件创建与销毁测试', {
-    '不设置参数创建控件(create)': function () {
-        var ctrl = ecui.create('Control');
-        value_of(ctrl.getType()).should_be('ec-control');
-        value_of(ctrl.getBaseClass()).should_be('ec-control');
-        ecui.dispose(ctrl);
-    },
-
-    '设置全部参数创建控件(create)': function () {
+    '同一个DOM多次绑定ECUI控件': function () {
         var el = document.createElement('div'),
             common = ecui.get('common'),
-            ctrl = ecui.create(
-                'Control',
-                {'id': 'create', 'base': 'custom', 'element': el, 'parent': common, 'type': 'customType'}
-            );
-        value_of(ctrl).should_be(ecui.get('create'));
-        value_of(ctrl.getType()).should_be('customType');
-        value_of(ctrl.getBaseClass()).should_be('custom');
-        value_of(ctrl.getBase()).should_be(el);
-        value_of(ctrl.getParent()).should_be(common);
-        ecui.dispose(ctrl);
-    },
-
-    '基于指定的DOM节点创建控件(create)': function () {
-        var el = document.getElementById('inner'),
-            common = ecui.get('common');
-        el.innerHTML = '<div class="create"></div>';
-        el = el.firstChild;
-        var ctrl = ecui.create('Control', {'id': 'create', 'element': el});
-        value_of(ctrl.getType()).should_be('ec-control');
-        value_of(ctrl.getBaseClass()).should_be('create');
-        value_of(ctrl.getParent()).should_be(common);
-        ecui.dispose(ctrl);
-    },
-
-    '删除并释放控件(dispose/init)': function () {
-        var el = document.getElementById('inner');
-        el.innerHTML =
-            '<div id="parent" ecui="type:control;id:parent">'
-            + '<div id="child" ecui="type:control;id:child"></div></div>';
-        ecui.init(el);
-
-        var parent = ecui.get('parent'),
-            child = ecui.get('child');
-
-        value_of(parent).should_not_be(null);
-        value_of(child).should_not_be(null);
-        value_of(child.getParent()).should_be(parent);
-        value_of(ecui.query({type: ecui.ui.Control}).length).should_be(3);
-
-        ecui.dispose(parent);
-        value_of(ecui.get('parent')).should_be(null);
-        value_of(ecui.get('child')).should_be(null);
-        value_of(document.getElementById('parent').getControl).should_be(void(0));
-        value_of(document.getElementById('child').getControl).should_be(void(0));
-        value_of(ecui.query({type: ecui.ui.Control}).length).should_be(1);
-    },
-
-    '删除并释放DOM节点下的控件(dispose/init)': function () {
-        var el = document.getElementById('inner');
-        el.innerHTML =
-            '<div id="parent" ecui="type:control;id:parent">'
-            + '<div id="child" ecui="type:control;id:child"></div></div>';
-        ecui.init(el);
-
-        var parent = ecui.get('parent'),
-            child = ecui.get('child');
-
-        value_of(parent).should_not_be(null);
-        value_of(child).should_not_be(null);
-        value_of(child.getParent()).should_be(parent);
-        value_of(ecui.query({type: ecui.ui.Control}).length).should_be(3);
-
-        ecui.dispose(document.getElementById('parent'));
-        value_of(ecui.get('parent')).should_be(null);
-        value_of(ecui.get('child')).should_be(null);
-        value_of(document.getElementById('parent').getControl).should_be(void(0));
-        value_of(document.getElementById('child').getControl).should_be(void(0));
-        value_of(ecui.query({type: ecui.ui.Control}).length).should_be(1);
+            control = ecui.create('Control');
+        ecui.$bind(el, common);
+        value_of(el.getControl()).should_be(common);
+        ecui.$bind(el, control);
+        value_of(el.getControl()).should_be(common);
+        ecui.dispose(control);
     }
 });
 
-test('特殊操作测试', {
-    '拖拽事件触发顺序(drag)': function () {
-        var ctrl = ecui.get('common'),
-            el = ctrl.getBase();
+test('$clearState', {
+    '控件自身存在状态': function () {
+        var parent = ecui.get('parent'),
+            common = ecui.get('common'),
+            el = parent.getBase();
+        uiut.MockEvents.mouseover(el);
+        uiut.MockEvents.mousedown(el);
+        uiut.MockEvents.mouseup(el);
+        ecui.$clearState(parent);
+        value_of(ecui.getOvered()).should_be(common);
+        value_of(ecui.getFocused()).should_be(common);
+    },
+
+    '控件的子控件存在状态': function () {
+        var parent = ecui.get('parent'),
+            child = ecui.get('child'),
+            common = ecui.get('common'),
+            el = child.getBase();
+        uiut.MockEvents.mouseover(el);
+        uiut.MockEvents.mousedown(el);
+        uiut.MockEvents.mouseup(el);
+        ecui.$clearState(parent);
+        value_of(ecui.getOvered()).should_be(common);
+        value_of(ecui.getFocused()).should_be(common);
+    },
+
+    '存在状态的控件不是控件的子控件': function () {
+        var parent = ecui.get('parent'),
+            child = ecui.get('child'),
+            common = ecui.get('common'),
+            control = ecui.create('control', {parent: common}),
+            el = child.getBase();
+        uiut.MockEvents.mouseover(el);
+        uiut.MockEvents.mousedown(el);
+        uiut.MockEvents.mouseup(el);
+        ecui.$clearState(control);
+        value_of(ecui.getOvered()).should_be(child);
+        value_of(ecui.getFocused()).should_be(child);
+        ecui.dispose(control);
+    },
+
+    '在mousedown中清除状态': function () {
+        var parent = ecui.get('parent'),
+            el = parent.getBase(),
+            clicked = false;
+
+        parent.onclick = function () {
+            clicked = true;
+        };
+
+        uiut.MockEvents.mouseover(el);
+        uiut.MockEvents.mousedown(el);
+        ecui.$clearState(parent);
+        uiut.MockEvents.mouseup(el);
+        value_of(clicked).should_be(false);
+        value_of(ecui.getActived()).should_be(null);
+    }
+});
+
+test('$connect', {
+    '控件连接已经生成的控件': function () {
+        var caller, connected,
+            control = ecui.create('Control');
+        function test(target) {
+            caller = this;
+            connected = target;
+        }
+        ecui.$connect(control, test, 'common');
+        value_of(caller).should_be(control);
+        value_of(connected).should_be(ecui.get('common'));
+        ecui.dispose(control);
+    },
+
+    '控件滞后连接生成的控件': function () {
+        var caller, connected,
+            common = ecui.get('common');
+        function test(target) {
+            caller = this;
+            connected = target;
+        }
+        ecui.$connect(common, test, 'control');
+        value_of(caller).should_be(void(0));
+        value_of(connected).should_be(void(0));
+        var control = ecui.create('Control', {id: 'control'});
+        value_of(caller).should_be(common);
+        value_of(connected).should_be(control);
+        ecui.dispose(control);
+    }
+});
+
+test('create', {
+    '不设置参数': function () {
+        var control = ecui.create('Control');
+        value_of(control.getType()).should_be('ec-control');
+        value_of(control.getBaseClass()).should_be('ec-control');
+        ecui.dispose(control);
+    },
+
+    '设置全部参数': function () {
+        var el = document.createElement('div'),
+            common = ecui.get('common'),
+            control = ecui.create(
+                'Control',
+                {id:'create', 'base': 'custom', 'element': el, 'parent': common, 'type': 'customType'}
+            );
+
+        value_of(control).should_be(ecui.get('create'));
+        value_of(control.getType()).should_be('customType');
+        value_of(control.getBaseClass()).should_be('custom');
+        value_of(control.getBase()).should_be(el);
+        value_of(control.getParent()).should_be(common);
+        ecui.dispose(control);
+    },
+
+    '基于指定的DOM节点，自动设置样式与查找父节点': function () {
+        var el = document.getElementById('inner');
+        el.innerHTML = '<div class="first"></div>';
+        el = el.firstChild;
+
+        var control = ecui.create('Control', {'element': el});
+        value_of(control.getType()).should_be('ec-control');
+        value_of(control.getBaseClass()).should_be('first');
+        value_of(control.getParent()).should_be(ecui.get('child'));
+        ecui.dispose(control);
+    }
+});
+
+test('dispose', {
+    '删除并释放控件': function () {
+        var length = ecui.query().length;
+
+        ecui.dispose(ecui.get('parent'));
+        value_of(ecui.get('parent')).should_be(null);
+        value_of(ecui.get('child')).should_be(null);
+        value_of(document.getElementById('parent').getControl).should_be(void(0));
+        value_of(document.getElementById('child').getControl).should_be(void(0));
+        value_of(ecui.query().length + 2).should_be(length);
+    },
+
+    '删除并释放DOM节点下的控件': function () {
+        var length = ecui.query().length;
+
+        ecui.dispose(ecui.get('parent').getOuter());
+        value_of(ecui.get('parent')).should_be(null);
+        value_of(ecui.get('child')).should_be(null);
+        value_of(document.getElementById('parent').getControl).should_be(void(0));
+        value_of(document.getElementById('child').getControl).should_be(void(0));
+        value_of(ecui.query().length + 2).should_be(length);
+    },
+
+    '删除并释放DOM节点下的控件且控件包含状态': function () {
+        var length = ecui.query().length,
+            common = ecui.get('common'),
+            child = ecui.get('child'),
+            el = child.getBase();
+
+        uiut.MockEvents.mouseover(el);
+        uiut.MockEvents.mousedown(el);
+        ecui.dispose(ecui.get('parent').getOuter());
+        value_of(ecui.getActived()).should_be(common);
+        value_of(ecui.getOvered()).should_be(common);
+        value_of(ecui.getFocused()).should_be(common);
+        value_of(ecui.query().length + 2).should_be(length);
+        uiut.MockEvents.mouseup(common.getBase());
+    }
+});
+
+test('drag', {
+    '拖拽事件触发顺序': function () {
+        var common = ecui.get('common'),
+            el = common.getBase();
 
         var result = [];
-        ctrl.ondragstart = function () {
+        common.ondragstart = function () {
             result.push('ondragstart');
         };
-        ctrl.ondragmove = function () {
+        common.ondragmove = function () {
             result.push('ondragmove');
         };
-        ctrl.ondragend = function () {
+        common.ondragend = function () {
             result.push('ondragend');
         };
-        ctrl.onmousedown = function (event) {
+        common.onmousedown = function (event) {
             ecui.drag(this, event);
         };
 
@@ -228,62 +231,68 @@ test('特殊操作测试', {
         value_of(result).should_be(['ondragstart', 'ondragmove', 'ondragmove', 'ondragend']);
     },
 
-    '拖拽范围设置(drag)': function () {
-        var ctrl = ecui.get('common'),
-            el = ctrl.getBase();
+    '拖拽范围设置': function () {
+        var common = ecui.get('common'),
+            el = common.getBase();
 
         el.style.position = 'absolute';
-        ctrl.setPosition(100, 100);
-        ctrl.setSize(10, 10);
+        el.style.overflow = 'hidden';
+        common.setPosition(100, 100);
+        common.setSize(10, 10);
 
-        ctrl.onmousedown = function (event) {
+        common.onmousedown = function (event) {
             ecui.drag(this, event, {'top': 100, 'left': 100, 'bottom': 200, 'right': 200});
         };
 
         uiut.MockEvents.mousedown(el);
         uiut.MockEvents.mousemove(el, {'clientX': -10, 'clientY': -10});
-        value_of(ctrl.getX()).should_be(100);
-        value_of(ctrl.getY()).should_be(100);
+        value_of(common.getX()).should_be(100);
+        value_of(common.getY()).should_be(100);
         uiut.MockEvents.mousemove(el, {'clientX': 50, 'clientY': 50});
-        value_of(ctrl.getX()).should_be(150);
-        value_of(ctrl.getY()).should_be(150);
+        value_of(common.getX()).should_be(150);
+        value_of(common.getY()).should_be(150);
         uiut.MockEvents.mousemove(el, {'clientX': 90, 'clientY': 90});
-        value_of(ctrl.getX()).should_be(190);
-        value_of(ctrl.getY()).should_be(190);
+        value_of(common.getX()).should_be(190);
+        value_of(common.getY()).should_be(190);
         uiut.MockEvents.mousemove(el, {'clientX': 91, 'clientY': 91});
-        value_of(ctrl.getX()).should_be(190);
-        value_of(ctrl.getY()).should_be(190);
+        value_of(common.getX()).should_be(190);
+        value_of(common.getY()).should_be(190);
         uiut.MockEvents.mouseup(el);
     },
 
-    '拖拽范围默认设置(drag)': function () {
+    '拖拽范围默认设置': function () {
         var common = ecui.get('common'),
-            ctrl = ecui.create('Control', {parent: common}),
-            el = ctrl.getBase();
+            control = ecui.create('Control', {parent: common}),
+            el = control.getBase();
 
-        common.getBase().style.position = 'relative';
-        el.style.cssText = 'position:absolute;left:0px;top:0px;width:10px;height:10px';
-        ctrl.clearCache();
-        ctrl.onmousedown = function (event) {
+        common.getBase().style.cssText = 'position:absolute;overflow:hidden';
+        common.setPosition(0, 0);
+        common.setSize(400, 400);
+        control.getOuter().style.position = 'absolute';
+        control.setPosition(0, 0);
+        control.setSize(10, 10);
+        control.onmousedown = function (event) {
             ecui.drag(this, event);
         };
 
         uiut.MockEvents.mousedown(el);
         uiut.MockEvents.mousemove(el, {'clientX': -1, 'clientY': -1});
-        value_of(ctrl.getX()).should_be(0);
-        value_of(ctrl.getY()).should_be(0);
+        value_of(control.getX()).should_be(0);
+        value_of(control.getY()).should_be(0);
         uiut.MockEvents.mousemove(el, {'clientX': 50, 'clientY': 50});
-        value_of(ctrl.getX()).should_be(50);
-        value_of(ctrl.getY()).should_be(50);
+        value_of(control.getX()).should_be(50);
+        value_of(control.getY()).should_be(50);
         uiut.MockEvents.mousemove(el, {'clientX': 390, 'clientY': 390});
-        value_of(ctrl.getX()).should_be(390);
-        value_of(ctrl.getY()).should_be(390);
+        value_of(control.getX()).should_be(390);
+        value_of(control.getY()).should_be(390);
         uiut.MockEvents.mousemove(el, {'clientX': 391, 'clientY': 391});
-        value_of(ctrl.getX()).should_be(390);
-        value_of(ctrl.getY()).should_be(390);
+        value_of(control.getX()).should_be(390);
+        value_of(control.getY()).should_be(390);
         uiut.MockEvents.mouseup(el);
-    },
+    }
+});
 
+test('特殊操作测试', {
     '强制点击拦截(intercept)': function () {
         var result = [],
             common = ecui.get('common'),
@@ -416,6 +425,80 @@ test('特殊操作测试', {
         value_of(ctrl.getHeight()).should_be(5);
         value_of(ctrl.getWidth()).should_be(5);
         uiut.MockEvents.mouseup(el);
+    }
+});
+
+test('dispose', {
+    '删除并释放控件(dispose/init)': function () {
+        var el = document.getElementById('inner');
+        el.innerHTML =
+            '<div id="newParent" ecui="type:control;id:newParent">'
+            + '<div id="newChild" ecui="type:control;id:newChild"></div></div>';
+        ecui.init(el);
+
+        var parent = ecui.get('parent'),
+            child = ecui.get('child');
+
+        value_of(parent).should_not_be(null);
+        value_of(child).should_not_be(null);
+        value_of(child.getParent()).should_be(parent);
+        value_of(ecui.query({type: ecui.ui.Control}).length).should_be(3);
+
+        ecui.dispose(parent);
+        value_of(ecui.get('parent')).should_be(null);
+        value_of(ecui.get('child')).should_be(null);
+        value_of(document.getElementById('parent').getControl).should_be(void(0));
+        value_of(document.getElementById('child').getControl).should_be(void(0));
+        value_of(ecui.query({type: ecui.ui.Control}).length).should_be(1);
+    },
+
+    '删除并释放DOM节点下的控件(dispose/init)': function () {
+        var el = document.getElementById('inner');
+        el.innerHTML =
+            '<div id="parent" ecui="type:control;id:parent">'
+            + '<div id="child" ecui="type:control;id:child"></div></div>';
+        ecui.init(el);
+
+        var parent = ecui.get('parent'),
+            child = ecui.get('child');
+
+        value_of(parent).should_not_be(null);
+        value_of(child).should_not_be(null);
+        value_of(child.getParent()).should_be(parent);
+        value_of(ecui.query({type: ecui.ui.Control}).length).should_be(3);
+
+        ecui.dispose(document.getElementById('parent'));
+        value_of(ecui.get('parent')).should_be(null);
+        value_of(ecui.get('child')).should_be(null);
+        value_of(document.getElementById('parent').getControl).should_be(void(0));
+        value_of(document.getElementById('child').getControl).should_be(void(0));
+        value_of(ecui.query({type: ecui.ui.Control}).length).should_be(1);
+    }
+});
+
+test('控件绑定与连接测试', {
+    '在绑定控件的DOM节点向上查找控件(findControl)': function () {
+        var el = document.getElementById('common');
+        value_of(ecui.findControl(el)).should_be(ecui.get('common'));
+    },
+
+    '在控件内部的DOM节点向上查找控件(findControl)': function () {
+        var el = document.getElementById('inner');
+        value_of(ecui.findControl(el)).should_be(ecui.get('common'));
+    },
+
+    '在控件外部的DOM节点向上查找控件(findControl)': function () {
+        var el = document.createElement('div');
+        document.body.appendChild(el);
+        value_of(ecui.findControl(el)).should_be(null);
+    },
+
+    '根据控件ID或者DOM对象获取控件(get/getControl)': function () {
+        var ctrl = ecui.get('ctrl');
+        value_of(ctrl).should_be(null);
+        ctrl = ecui.get('common');
+        value_of(ctrl.getBase().getAttribute('id')).should_be('common');
+        value_of(document.getElementById('common').getControl()).should_be(ctrl);
     }
 });
 

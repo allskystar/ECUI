@@ -49,7 +49,7 @@ _cPopup      - 是否包含下级弹出菜单
         moveElements = dom.moveElements,
         removeDom = dom.remove,
         blank = util.blank,
-        copy = util.copy,
+        extend = util.extend,
         getView = util.getView,
         inherits = util.inherits,
         toNumber = util.toNumber,
@@ -138,7 +138,7 @@ _cPopup      - 是否包含下级弹出菜单
             if (o && o.tagName == 'LABEL') {
                 moveElements(el, tmpEl = createDom('ec-popup ' + params.parent.getBaseClass()));
                 el.appendChild(o);
-                this._cPopup = $fastCreate(UI_POPUP, tmpEl, this, copy({}, params));
+                this._cPopup = $fastCreate(UI_POPUP, tmpEl, this, extend({}, params));
             }
 
             UI_POPUP_ITEM_FLUSH(this);
@@ -160,7 +160,7 @@ _cPopup      - 是否包含下级弹出菜单
         }
     }
 
-    copy(UI_POPUP_CLASS, UI_ITEMS);
+    extend(UI_POPUP_CLASS, UI_ITEMS);
 
     /**
      * 鼠标单击控件事件的默认处理。
@@ -255,13 +255,13 @@ _cPopup      - 是否包含下级弹出菜单
     };
 
     /**
-     * 菜单项按压结束的默认处理
+     * 菜单项激活结束的默认处理
      * @protected
      *
      * @params {Event} event 事件对象
      */
-    UI_POPUP_ITEM_CLASS.$pressend = function (event) {
-        UI_ITEM_CLASS.$pressend.call(this, event);
+    UI_POPUP_ITEM_CLASS.$deactivate = function (event) {
+        UI_ITEM_CLASS.$deactivate.call(this, event);
         if (!this.contain(event.getTarget())) {
             UI_POPUP_CHAIN_FIRST.hide();
         }
@@ -505,12 +505,12 @@ _cPopup      - 是否包含下级弹出菜单
 
     /**
      * 控件刷新。
-     * paint 方法将导致控件整体重绘，在通常情况下，建议控件改变的状态进行重绘，而不是调用 paint 方法。
+     * repaint 方法将导致控件整体重绘，在通常情况下，建议控件改变的状态进行重绘，而不是调用 repaint 方法。
      * @public
      */
-    UI_POPUP_CLASS.paint = function () {
+    UI_POPUP_CLASS.repaint = function () {
         if (getParent(this.getOuter())) {
-            UI_CONTROL_CLASS.paint.call(this);
+            UI_CONTROL_CLASS.repaint.call(this);
         }
     };
 

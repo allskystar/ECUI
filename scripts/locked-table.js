@@ -59,8 +59,8 @@ _cJoint      - 行(锁定行)对应的锁定行(行)控件
 
         eventNames = [
             'mousedown', 'mouseover', 'mousemove', 'mouseout', 'mouseup',
-            'pressstart', 'pressover', 'pressmove', 'pressout', 'pressend',
-            'click', 'focus', 'blur', 'keydown', 'keypress', 'keyup', 'mousewheel',
+            'click', 'focus', 'blur', 'activate', 'deactivate',
+            'keydown', 'keypress', 'keyup', 'mousewheel',
             'change', 'resize', 'create', 'init'
         ],
 
@@ -367,7 +367,7 @@ _cJoint      - 行(锁定行)对应的锁定行(行)控件
      * @return {ecui.ui.Table.Row} 行控件
      */
     UI_LOCKED_TABLE_CLASS.addRow = function (data, index) {
-        this.paint = blank;
+        this.repaint = blank;
 
         //__gzip_original__lockedRow
         var row = UI_TABLE_CLASS.addRow.call(this, data, index),
@@ -384,8 +384,8 @@ _cJoint      - 行(锁定行)对应的锁定行(行)控件
         this._aLockedRow.splice(index, 0, o);
         UI_LOCKED_TABLE_ROW_SPLIT(o);
 
-        delete this.paint;
-        this.paint();
+        delete this.repaint;
+        this.repaint();
 
         return row;
     };
@@ -421,7 +421,7 @@ _cJoint      - 行(锁定行)对应的锁定行(行)控件
             };
         }
 
-        for (var i = 0; i < 13; ) {
+        for (var i = 0; i < 10; ) {
             build('$' + eventNames[i++]);
         }
     })();

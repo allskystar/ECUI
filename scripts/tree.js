@@ -38,7 +38,7 @@ _aTree         - 子控件集合
         removeDom = dom.remove,
         trim = string.trim,
         blank = util.blank,
-        copy = util.copy,
+        extend = util.extend,
         inherits = util.inherits,
 
         $fastCreate = core.$fastCreate,
@@ -128,7 +128,7 @@ _aTree         - 子控件集合
      */
     function UI_TREE_CREATE_CHILD(el, parent, params) {
         el.className = parent.getType() + ' ' + (trim(el.className) || parent.getBaseClass());
-        return $fastCreate(parent.constructor, el, null, copy(copy({}, params), getParameters(el)));
+        return $fastCreate(parent.constructor, el, null, extend(extend({}, params), getParameters(el)));
     }
 
     /**

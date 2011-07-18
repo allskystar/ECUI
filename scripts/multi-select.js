@@ -33,7 +33,7 @@ _eInput - 多选项的INPUT对象
         getText = dom.getText,
         removeDom = dom.remove,
         setInput = dom.setInput,
-        copy = util.copy,
+        extend = util.extend,
         inherits = util.inherits,
 
         findControl = core.findControl,
@@ -102,7 +102,7 @@ _eInput - 多选项的INPUT对象
         }
     }
 
-    copy(UI_MULTI_SELECT_CLASS, UI_ITEMS);
+    extend(UI_MULTI_SELECT_CLASS, UI_ITEMS);
 
     /**
      * 鼠标单击控件事件的默认处理。
@@ -235,22 +235,20 @@ _eInput - 多选项的INPUT对象
     };
 
     /**
-     * 控件按压状态结束事件的默认处理。
-     * 鼠标左键按压控件结束时设置下一次点击事件被拦截，需要根据点击的位置选择是关闭展开的下拉框还是选中选项。如果控件处于可操作状态(参见 isEnabled)，pressend 方法触发 onpressend 事件，如果事件返回值不为 false，则调用 $pressend 方法。
+     * 控件激活状态结束事件的默认处理。
      * @protected
      *
      * @param {Event} event 事件对象
      */
-    UI_MULTI_SELECT_CLASS.$pressend = UI_SELECT_CLASS.$pressend;
+    UI_MULTI_SELECT_CLASS.$deactivate = UI_SELECT_CLASS.$deactivate;
 
     /**
-     * 控件按压状态开始事件的默认处理。
-     * 鼠标左键按压控件开始时显示下拉框。如果控件处于可操作状态(参见 isEnabled)，pressstart 方法触发 onpressstart 事件，如果事件返回值不为 false，则调用 $pressstart 方法。
+     * 控件激活状态开始事件的默认处理。
      * @protected
      *
      * @param {Event} event 事件对象
      */
-    UI_MULTI_SELECT_CLASS.$pressstart = UI_SELECT_CLASS.$pressstart;
+    UI_MULTI_SELECT_CLASS.$activate = UI_SELECT_CLASS.$activate;
 
     /**
      * 控件自动渲染全部完成后的处理。

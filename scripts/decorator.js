@@ -60,6 +60,7 @@ _oInner  - 内层装饰器或者控件对象
 
             insertBefore(this._eBase = createDom(this._sClass = baseClass), o).appendChild(o);
             $bind(this._eBase, control);
+            control.clearCache();
 
             EXT_DECORATOR[id] = this;
 
@@ -90,6 +91,8 @@ _oInner  - 内层装饰器或者控件对象
     /**
      * 清除所有的装饰器效果，同时清除所有的代理函数
      * @public
+     *
+     * @param {ecui.ui.Control} control ECUI 控件
      */
     EXT_DECORATOR.clear = function (control) {
         var id = control.getUID(),
@@ -202,18 +205,6 @@ _oInner  - 内层装饰器或者控件对象
     };
 
     /**
-     * 计算控件的缓存。
-     * 控件缓存部分核心属性的值，提高控件属性的访问速度，在子控件或者应用程序开发过程中，如果需要避开控件提供的方法(setSize、alterClass 等)直接操作 Element 对象，操作完成后必须调用 clearCache 方法清除控件的属性缓存，否则将引发错误。
-     * @public
-     *
-     * @param {boolean} cacheSize 是否需要缓存控件大小，如果控件是另一个控件的部件时，不缓存大小能加快渲染速度，默认缓存
-     * @param {boolean} force 是否需要强制刷新缓存，相当于执行了 clearCache 方法，默认不强制刷新
-     */
-    EXT_DECORATOR_CLASS.cache = function (cacheSize, force) {
-        this._oInner.cache(cacheSize, force, true);
-    };
-
-    /**
      * 获取装饰器的基本样式名称
      * @public
      *
@@ -297,11 +288,11 @@ _oInner  - 内层装饰器或者控件对象
         for (
             var i = 0, names = [
                 ['$cache', 2], ['$init', 0], ['$resize', 0], ['$setSize', 2],
-                ['alterClass', 2], ['cache', 2], ['getHeight', 0],
-                ['getInvalidHeight', 0], ['getInvalidWidth', 0],
-                ['getOuter', 0], ['getWidth', 0]
+                ['alterClass', 2], ['getOuter', 0],
+                ['getInvalidWidth', 0], ['getInvalidHeight', 0],
+                ['getWidth', 0], ['getHeight', 0]
             ];
-            i < 11;
+            i < 10;
         ) {
             // 如果是代理进入的，会多出来一个参数作为标志位
             build(names[i][0], names[i++][1]);

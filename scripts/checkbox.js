@@ -29,7 +29,7 @@ _aInferior - 所有的下级复选框
         remove = array.remove,
         inherits = util.inherits,
 
-        INIT = core.INIT,
+        LOADING = core.LOADING,
 
         $connect = core.$connect,
         getKey = core.getKey,
@@ -167,20 +167,6 @@ _aInferior - 所有的下级复选框
         // 修复IE6/7下移动DOM节点时选中状态发生改变的问题
         this.getInput().checked = this._bDefault;
         UI_EDIT_CLASS.$reset.call(this, event);
-    };
-
-    /**
-     * 设置当前控件的父控件。
-     * 复选框控件改变父控件时，还需要同步清除主从附属关系。
-     * @public
-     *
-     * @param {ecui.ui.Control|HTMLElement} parent 父控件对象/父 Element 对象，忽略参数则将控件移出 DOM 树
-     */
-    UI_CHECKBOX_CLASS.$setParent = function (parent) {
-        UI_EDIT_CLASS.$setParent.call(this, parent);
-        if (!parent && getStatus() != INIT) {
-            this.setSuperior();
-        }
     };
 
     /**

@@ -31,12 +31,13 @@ _oRange         - 滑动块的合法滑动区间
         MIN = MATH.min,
 
         children = dom.children,
-        copy = util.copy,
+        extend = util.extend,
         inherits = util.inherits,
         timer = util.timer,
 
         $fastCreate = core.$fastCreate,
         drag = core.drag,
+        getActived = core.getActived,
         getMouseX = core.getMouseX,
         getMouseY = core.getMouseY,
 
@@ -65,7 +66,7 @@ _oRange         - 滑动块的合法滑动区间
                 typeClass = params.type,
                 partParams = {select: false, focus: false};
 
-            UI_CONTROL.call(this, el, copy(params, partParams));
+            UI_CONTROL.call(this, el, extend(params, partParams));
 
             el.innerHTML =
                 '<div class="' + typeClass + '-prev ' +
@@ -166,13 +167,13 @@ _oRange         - 滑动块的合法滑动区间
     };
 
     /**
-     * 鼠标在滑动块区域内按压开始事件的默认处理，触发滑动块拖动功能。
+     * 鼠标在滑动块激活事件的默认处理，触发滑动块拖动功能。
      * @protected
      *
      * @param {Event} event 事件对象
      */
-    UI_SCROLL_BLOCK_CLASS.$pressstart = function (event) {
-        UI_CONTROL_CLASS.$pressstart.call(this, event);
+    UI_SCROLL_BLOCK_CLASS.$activate = function (event) {
+        UI_CONTROL_CLASS.$activate.call(this, event);
 
         drag(this, event, this._oRange);
     };
@@ -196,25 +197,39 @@ _oRange         - 滑动块的合法滑动区间
     };
 
     /**
-     * 控扭控件按压状态结束事件与控扭控件按压状态中鼠标移出控件区域事件的默认处理。
+     * 控扭控件激活状态结束事件与控扭控件激活状态中鼠标移出控件区域事件的默认处理。
      * @protected
      *
      * @param {Event} event 事件对象
      */
-    UI_SCROLL_BUTTON_CLASS.$pressend = UI_SCROLL_BUTTON_CLASS.$pressout = function (event) {
-        UI_CONTROL_CLASS[event.type == 'mouseup' ? '$pressend' : '$pressout'].call(this, event);
+    UI_SCROLL_BUTTON_CLASS.$deactivate = function (event) {
+        UI_CONTROL_CLASS.$deactivate.call(this, event);
         this.getParent()._oStop();
     };
 
+    UI_SCROLL_BUTTON_CLASS.$mouseout = function (event) {
+        UI_CONTROL_CLASS.$mouseout.call(this, event);
+        if (getActived() == this) {
+            this.getParent()._oStop();
+        }
+    };
+
     /**
-     * 控扭控件按压状态中鼠标移入控件区域事件与控扭控件按压状态开始事件的默认处理。
+     * 控扭控件激活状态中鼠标移入控件区域事件与控扭控件激活状态开始事件的默认处理。
      * @protected
      *
      * @param {Event} event 事件对象
      */
-    UI_SCROLL_BUTTON_CLASS.$pressover = UI_SCROLL_BUTTON_CLASS.$pressstart = function (event) {
-        UI_CONTROL_CLASS[event.type == 'mousedown' ? '$pressstart' : '$pressover'].call(this, event);
+    UI_SCROLL_BUTTON_CLASS.$activate = function (event) {
+        UI_CONTROL_CLASS.$activate.call(this, event);
         UI_SCROLL_MOVE(this, MAX(this.getParent()._nStep, 5));
+    };
+
+    UI_SCROLL_BUTTON_CLASS.$mouseover = function (event) {
+        UI_CONTROL_CLASS.$mouseover.call(this, event);
+        if (getActived() == this) {
+            UI_SCROLL_MOVE(this, MAX(this.getParent()._nStep, 5));
+        }
     };
 
     /**
@@ -256,28 +271,42 @@ _oRange         - 滑动块的合法滑动区间
     };
 
     /**
-     * 控件按压状态结束事件与控件按压状态中鼠标移出控件区域事件的默认处理。
+     * 控件激活状态结束事件与控件激活状态中鼠标移出控件区域事件的默认处理。
      * @protected
      *
      * @param {Event} event 事件对象
      */
-    UI_SCROLL_CLASS.$pressend = UI_SCROLL_CLASS.$pressout = function (event) {
-        UI_CONTROL_CLASS[event.type == 'mouseup' ? '$pressend' : '$pressout'].call(this, event);
+    UI_SCROLL_CLASS.$deactivate = function (event) {
+        UI_CONTROL_CLASS.$deactivate.call(this, event);
         this._oStop();
     };
 
+    UI_SCROLL_CLASS.$mouseout = function (event) {
+        UI_CONTROL_CLASS.$mouseout.call(this, event);
+        if (getActived() == this) {
+            this._oStop();
+        }
+    };
+
     /**
-     * 控件按压状态中鼠标移入控件区域事件与控件按压状态开始事件的默认处理。
+     * 控件激活状态中鼠标移入控件区域事件与控件激活状态开始事件的默认处理。
      * @protected
      *
      * @param {Event} event 事件对象
      */
-    UI_SCROLL_CLASS.$pressover = UI_SCROLL_CLASS.$pressstart = function (event) {
-        UI_CONTROL_CLASS[event.type == 'mousedown' ? '$pressstart' : '$pressover'].call(this, event);
+    UI_SCROLL_CLASS.$activate = function (event) {
+        UI_CONTROL_CLASS.$activate.call(this, event);
         UI_SCROLL_MOVE(
-            event.type == 'mousedown' ? this._cButton = this.$allowPrev() ? this._uPrev : this._uNext : this._cButton,
+            this._cButton = this.$allowPrev() ? this._uPrev : this._uNext,
             this.$getPageStep()
         );
+    };
+
+    UI_SCROLL_CLASS.$mouseover = function (event) {
+        UI_CONTROL_CLASS.$mouseover.call(this, event);
+        if (getActived() == this) {
+            UI_SCROLL_MOVE(this._cButton, this.$getPageStep());
+        }
     };
 
     /**

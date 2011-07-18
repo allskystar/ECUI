@@ -27,8 +27,8 @@ _aItem  - 子控件集合
 
         eventNames = [
             'mousedown', 'mouseover', 'mousemove', 'mouseout', 'mouseup',
-            'pressstart', 'pressover', 'pressmove', 'pressout', 'pressend',
-            'click', 'focus', 'blur', 'keydown', 'keypress', 'keyup', 'mousewheel',
+            'click', 'focus', 'blur', 'activate', 'deactivate',
+            'keydown', 'keypress', 'keyup', 'mousewheel',
             'change', 'resize', 'create', 'init'
         ],
 
@@ -126,7 +126,7 @@ _aItem  - 子控件集合
                 }
             };
         }
-        for (var i = 0; i < 13; ) {
+        for (var i = 0; i < 10; ) {
             build(eventNames[i++]);
         }
     })();

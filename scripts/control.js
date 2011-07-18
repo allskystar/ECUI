@@ -1,8 +1,8 @@
 /*
 Control - ECUI 的核心组成部分，定义了基本的控件行为。
 基础控件是 ECUI 的核心组成部分，对 DOM 树上的节点区域进行封装。基础控件扩展了 Element 节点的标准事件(例如得到与失去焦
-点、鼠标按压事件等)，提供了方法对控件的基本属性(例如控件大小、位置与显示状态等)进行改变，是一切控件实现的基础。基本控
-件支持四种状态：得到焦点(focus)、鼠标移入(over)、按压时鼠标移入(press)与失效(disabled)
+点、激活事件等)，提供了方法对控件的基本属性(例如控件大小、位置与显示状态等)进行改变，是一切控件实现的基础。基本控件支
+持四种状态：得到焦点(focus)、鼠标移入(over)、激活时鼠标移入(active)与失效(disabled)
 
 基本控件直接HTML初始化的例子，id指定名称，可以通过ecui.get(id)的方式访问控件:
 <div ecui="type:control;id:test">
@@ -65,21 +65,20 @@ $cache$position          - 控件布局方式缓存
         timer = util.timer,
         toNumber = util.toNumber,
 
-        INIT = core.INIT,
-        PAINT = core.PAINT,
+        REPAINT = core.REPAINT,
 
         $bind = core.$bind,
+        $clearState = core.$clearState,
         calcLeftRevise = core.calcLeftRevise,
         calcTopRevise = core.calcTopRevise,
         findControl = core.findControl,
         getStatus = core.getStatus,
         isFixedSize = core.isFixedSize,
-        loseFocus = core.loseFocus,
 
         eventNames = [
             'mousedown', 'mouseover', 'mousemove', 'mouseout', 'mouseup',
-            'pressstart', 'pressover', 'pressmove', 'pressout', 'pressend',
-            'click', 'focus', 'blur', 'keydown', 'keypress', 'keyup', 'mousewheel',
+            'click', 'focus', 'blur', 'activate', 'deactivate',
+            'keydown', 'keypress', 'keyup', 'mousewheel',
             'change', 'resize', 'create', 'init'
         ];
 //{/if}//
@@ -122,6 +121,26 @@ $cache$position          - 控件布局方式缓存
 
         UI_CONTROL_READY_LIST;
 //{else}//
+    /**
+     * 控件激活状态结束或控件激活状态中鼠标移出控件区域事件的默认处理。
+     * @protected
+     *
+     * @param {Event} event 事件对象
+     */
+    UI_CONTROL_CLASS.$deactivate = function () {
+        this.alterClass('active', true);
+    };
+
+    /**
+     * 控件激活状态开始或控件激活状态中鼠标移入控件区域事件的默认处理。
+     * @protected
+     *
+     * @param {Event} event 事件对象
+     */
+    UI_CONTROL_CLASS.$activate = function () {
+        this.alterClass('active');
+    };
+
     /**
      * 控件失去焦点事件的默认处理。
      * 控件失去焦点时默认调用 $blur 方法，删除控件在 $focus 方法中添加的扩展样式 -focus。如果控件处于可操作状态(参见 isEnabled)，blur 方法触发 onblur 事件，如果事件返回值不为 false，则调用 $blur 方法。
@@ -194,7 +213,6 @@ $cache$position          - 控件布局方式缓存
      * @return {number} 控件的无效高度
      */
     UI_CONTROL_CLASS.$getInvalidHeight = function () {
-        this.cache();
         return this.$cache$borderTopWidth + this.$cache$borderBottomWidth +
             this.$cache$paddingTop + this.$cache$paddingBottom;
     };
@@ -206,7 +224,6 @@ $cache$position          - 控件布局方式缓存
      * @return {number} 控件的无效宽度
      */
     UI_CONTROL_CLASS.$getInvalidWidth = function () {
-        this.cache();
         return this.$cache$borderLeftWidth + this.$cache$borderRightWidth +
             this.$cache$paddingLeft + this.$cache$paddingRight;
     };
@@ -234,7 +251,7 @@ $cache$position          - 控件布局方式缓存
             this._sDisplay = style.display;
             style.display = 'none';
             // 如果控件拥有焦点，设置成隐藏状态时需要失去焦点
-            loseFocus(this);
+            $clearState(this);
         }
     };
 
@@ -248,7 +265,7 @@ $cache$position          - 控件布局方式缓存
         this.$setSize(this.getWidth(), this.getHeight());
 
         if (this.$ready) {
-            if (getStatus() != INIT || UI_CONTROL_READY_LIST === null) {
+            if (UI_CONTROL_READY_LIST === null) {
                 this.$ready();
             }
             else {
@@ -268,7 +285,7 @@ $cache$position          - 控件布局方式缓存
 
     /**
      * 设置控件容器内部定位化。
-     * $locate 方法执行后，容器内部 DOM 节点的 position 属性设置成 absolute 时将相对基本 Element 对象定位。
+     * $locate 方法执行后，容器内部 Element 对象的 position 属性设置成 absolute 时将相对基本 Element 对象定位。
      * @protected
      */
     UI_CONTROL_CLASS.$locate = function () {
@@ -300,28 +317,6 @@ $cache$position          - 控件布局方式缓存
     };
 
     /**
-     * 控件按压状态结束或控件按压状态中鼠标移出控件区域事件的默认处理。
-     * 鼠标左键按压控件结束或控件按压状态中鼠标移出控件区域时默认调用 $pressend/$pressout 方法，删除控件在 $pressstart/$pressover 方法中添加的扩展样式 -press。如果控件处于可操作状态(参见 isEnabled)，pressend/pressout 方法触发 onpressend/onpressout 事件，如果事件返回值不为 false，则调用 $pressend/$pressout 方法。
-     * @protected
-     *
-     * @param {Event} event 事件对象
-     */
-    UI_CONTROL_CLASS.$pressend = UI_CONTROL_CLASS.$pressout = function () {
-        this.alterClass('press', true);
-    };
-
-    /**
-     * 控件按压状态开始或控件按压状态中鼠标移入控件区域事件的默认处理。
-     * 鼠标左键按压控件开始或控件按压状态中鼠标移入控件区域时默认调用 $pressstart/$pressover 方法，调用 alterClass 方法为控件添加扩展样式 -press。如果控件处于可操作状态(参见 isEnabled)，pressstart/pressover 方法触发 onpressstart/onpressover 事件，如果事件返回值不为 false，则调用 $pressstart/$pressover 方法。
-     * @protected
-     *
-     * @param {Event} event 事件对象
-     */
-    UI_CONTROL_CLASS.$pressover = UI_CONTROL_CLASS.$pressstart = function () {
-        this.alterClass('press');
-    };
-
-    /**
      * 控件大小发生变化的默认处理。
      * @protected
      */
@@ -332,7 +327,7 @@ $cache$position          - 控件布局方式缓存
             currStyle = el.style;
 
         currStyle.width = this._sWidth;
-        if (ieVersion < 8 && getStatus() != PAINT) {
+        if (ieVersion < 8 && getStatus() != REPAINT) {
             // 如果此时浏览器在进行整体的刷新重绘，则不进入此分支
             var style = getStyle(el);
             if (style.width == 'auto' && style.display == 'block') {
@@ -341,7 +336,7 @@ $cache$position          - 控件布局方式缓存
             }
         }
         currStyle.height = this._sHeight;
-        this.paint();
+        this.repaint();
     };
 
     /**
@@ -737,10 +732,10 @@ $cache$position          - 控件布局方式缓存
 
     /**
      * 控件刷新。
-     * paint 方法将导致控件整体重绘，在通常情况下，建议控件改变的状态进行重绘，而不是调用 paint 方法。
+     * repaint 方法将导致控件整体重绘，在通常情况下，建议控件改变的状态进行重绘，而不是调用 repaint 方法。
      * @public
      */
-    UI_CONTROL_CLASS.paint = function () {
+    UI_CONTROL_CLASS.repaint = function () {
         this.cache(true, true);
         this.$setSize(this.getWidth(), this.getHeight());
     };
@@ -810,7 +805,7 @@ $cache$position          - 控件布局方式缓存
             this.alterClass('disabled', status);
             // 如果控件拥有焦点，设置成不可用状态时需要失去焦点
             if (!status) {
-                loseFocus(this);
+                $clearState(this);
             }
             this._bEnabled = status;
             return true;
@@ -941,7 +936,7 @@ $cache$position          - 控件布局方式缓存
 
         // 初始化事件处理函数，以事件名命名，这些函数行为均是判断控件是否可操作/是否需要调用事件/是否需要执行缺省的事件处理，对应的缺省事件处理函数名以$开头后接事件名，处理函数以及缺省事件处理函数参数均为事件对象，仅执行一次。
         for (var i = 0, o; o = eventNames[i++]; ) {
-            build(o, i > 17 || i == 10);
+            build(o, i > 14 || i == 10);
         }
 
         // 初始化空操作的一些缺省处理

@@ -1,5 +1,5 @@
 /*
-Tween - 点击及按压动画插件，通过修改click或pressstart/pressend方法来实现移动时的动画效果
+Tween - 点击及按压动画插件
 */
 //{if 0}//
 (function () {
@@ -36,8 +36,8 @@ Tween - 点击及按压动画插件，通过修改click或pressstart/pressend方
             //__gzip_unitize__value
             //__gzip_unitize__end
             var click = object.$click,
-                pressstart = object.$pressstart,
-                pressend = object.$pressend,
+                activate = object.$activate,
+                deactivate = object.$deactivate,
                 totalTime = (params.second * 1000) || 500,
                 pressStep = params.pressStep,
                 getValue = params.getValue ||
@@ -181,12 +181,12 @@ Tween - 点击及按压动画插件，通过修改click或pressstart/pressend方
                 };
 
                 /**
-                 * 实现动画的按压开始方法。
+                 * 实现动画的激活开始方法。
                  * @protected
                  *
                  * @param {Event} event 事件对象
                  */
-                object.$pressstart = function (event) {
+                object.$activate = function (event) {
                     var params = EXT_TWEEN[this.getUID()];
 
                     if (params) {
@@ -202,16 +202,16 @@ Tween - 点击及按压动画插件，通过修改click或pressstart/pressend方
 
                     startTween(this, steady, 40, event);
 
-                    pressstart.call(this, event);
+                    activate.call(this, event);
                 };
 
                 /**
-                 * 实现动画的按压结束方法。
+                 * 实现动画的激活结束方法。
                  * @protected
                  *
                  * @param {Event} event 事件对象
                  */
-                object.$pressend = function (event) {
+                object.$deactivate = function (event) {
                     var params = EXT_TWEEN[this.getUID()];
 
                     // 动画转入减减速运动
@@ -219,7 +219,7 @@ Tween - 点击及按压动画插件，通过修改click或pressstart/pressend方
                     params.start = params.value;
                     params.stop = timer(decelerate, -20, this);
 
-                    pressend.call(this, event);
+                    deactivate.call(this, event);
                 };
             }
             else {

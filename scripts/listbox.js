@@ -33,7 +33,7 @@ _eInput - 选项对应的input，form提交时使用
 
         getText = dom.getText,
         setInput = dom.setInput,
-        copy = util.copy,
+        extend = util.extend,
         inherits = util.inherits,
 
         getMouseY = core.getMouseY,
@@ -134,7 +134,7 @@ _eInput - 选项对应的input，form提交时使用
         return MIN(MAX(0, o), parent.getItems().length - 1);
     }
 
-    copy(UI_LISTBOX_CLASS, UI_ITEMS);
+    extend(UI_LISTBOX_CLASS, UI_ITEMS);
 
     /**
      * 销毁控件的默认处理。
@@ -147,13 +147,13 @@ _eInput - 选项对应的input，form提交时使用
     };
 
     /**
-     * 鼠标在滑动块区域内按压开始事件的默认处理。
+     * 鼠标在滑动块激活开始事件的默认处理。
      * @protected
      *
      * @param {Event} event 事件对象
      */
-    UI_LISTBOX_ITEM_CLASS.$pressstart = function (event) {
-        UI_ITEM_CLASS.$pressstart.call(this, event);
+    UI_LISTBOX_ITEM_CLASS.$activate = function (event) {
+        UI_ITEM_CLASS.$activate.call(this, event);
         core.select(this, event, 'listbox');
     };
 

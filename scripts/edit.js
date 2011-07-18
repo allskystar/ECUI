@@ -148,7 +148,7 @@ _eInput  - INPUT对象
                     }
                 }
             }
-        }, 0);
+        });
     }
 
     /**
@@ -181,9 +181,7 @@ _eInput  - INPUT对象
         // 设置默认失去焦点事件，阻止在blur/focus事件中再次回调
         event['$' + type] = UI_CONTROL_CLASS['$' + type];
         if (type == 'blur') {
-            if (event.isEnabled()) {
-                loseFocus(event);
-            }
+            loseFocus(event);
         }
         else {
             // 如果控件处于不可操作状态，不允许获得焦点

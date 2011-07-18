@@ -47,7 +47,7 @@ _eContent        - 内容 DOM 元素
         first = dom.first,
         insertBefore = dom.insertBefore,
         setStyle = dom.setStyle,
-        copy = util.copy,
+        extend = util.extend,
         inherits = util.inherits,
         toNumber = util.toNumber,
 
@@ -164,7 +164,7 @@ _eContent        - 内容 DOM 元素
         );
     }
 
-    copy(UI_TAB_CLASS, UI_ITEMS);
+    extend(UI_TAB_CLASS, UI_ITEMS);
 
     /**
      * 鼠标单击控件事件的默认处理。
