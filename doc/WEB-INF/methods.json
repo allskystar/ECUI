@@ -466,7 +466,7 @@
                 {"name": "func", "type": "Function", "desc": "用于建立连接的方法，即通过调用 func.call(caller, ecui.get(targetId)) 建立连接"},
                 {"name": "targetId", "type": "string", "desc": "被连接的 {'controls'|menu} 标识符，即在标签的 ecui 属性中定义的 id 值"}
             ],
-            "remark": "使用页面静态初始化或页面动态初始化(参见 {'ecui'|menu})方式，控件创建时，需要的关联控件也许还未创建。$connect 方法提供将指定的函数滞后到对应的控件创建后才调用的模式。如果 targetId 对应的控件还未创建，则调用会被搁置，直到需要的控件创建成功后，再自动执行，参见 {'create'|method:'core'} 方法。"
+            "remark": "使用页面静态初始化或页面动态初始化(参见 {'ecui'|menu})方式，控件创建时，需要的关联控件也许还未创建。$connect 方法提供将指定的函数滞后到对应的控件创建后才调用的模式。如果 targetId 对应的控件还未创建，则调用会被搁置，直到需要的控件创建成功后，再自动执行(参见 {'create'|method:'core'} 方法)。"
         },
 
         {
@@ -475,12 +475,12 @@
             "desc": "创建 {'controls'|menu}。",
             "params": [
                 {"name": "type", "type": "string", "desc": "控件的名称"},
-                {"name": "params", "type": "Object", "desc": "初始化参数，参见 {'controls'|menu}"}
+                {"name": "params", "type": "Object", "desc": "初始化参数(参见 {'controls'|menu})"}
             ],
             "return": {"type": "ecui.ui.Control", "desc": "{'controls'|menu}"},
             "remark": [
                 "$create 方法创建控件时不会自动渲染控件。在大批量创建控件时，为了加快渲染速度，应该首先使用 $create 方法创建所有控件完成后，再批量分别调用控件的 {'cache'|method:'control'}、{'init'|method:'control'} 与 {'repaint'|method:'control'} 方法渲染控件。params 参数对象支持的属性如下：",
-                "<table class=\"clsSTD\"><tr><td>id</td><td>string，当前控件的 id，提供给 {'\\$connect'|method:'core'} 与 {'get'|method:'core'} 使用</td></tr><tr><td>base</td><td>string，控件的基本样式，参见 {'getBaseClass'|method:'control'} 方法，有关样式的描述参见 {'styles'|menu}，如果忽略此参数将使用基本 Element 对象的 className 属性</td></tr><tr><td>element</td><td>HTMLElement，与控件绑捆的 Element 对象，参见 {'getBase'|method:'control'} 方法，如果忽略此参数将创建 Element 对象与控件绑捆</td></tr><tr><td>parent</td><td>ecui.ui.Control 或者 HTMLElement，父控件对象或者父 Element 对象</td></tr><tr><td>type</td><td>string，控件的默认样式，通常情况下省略此参数，使用 \"ec-控件名称\" 作为控件的默认样式</td></tr></table>"
+                "<table class=\"clsSTD\"><tr><td>id</td><td>string，当前控件的 id，提供给 {'\\$connect'|method:'core'} 与 {'get'|method:'core'} 使用</td></tr><tr><td>base</td><td>string，控件的基本样式(参见 {'getBaseClass'|method:'control'} 方法)，有关样式的描述参见 {'styles'|menu}，如果忽略此参数将使用基本元素的 className 属性</td></tr><tr><td>element</td><td>HTMLElement，与控件绑捆的 Element 对象(参见 {'getBase'|method:'control'} 方法)，如果忽略此参数将创建 Element 对象与控件绑捆</td></tr><tr><td>parent</td><td>ecui.ui.Control 或者 HTMLElement，父控件对象或者父 Element 对象</td></tr><tr><td>type</td><td>string，控件的类型样式，通常情况下省略此参数，使用 \"ec-控件名称\" 作为控件的类型样式</td></tr></table>"
             ]
         },
 
@@ -492,7 +492,7 @@
                 {"name": "type", "type": "Function", "desc": "控件的构造函数"},
                 {"name": "el", "type": "HTMLElement", "desc": "控件对应的 Element 对象"},
                 {"name": "parent", "type": "ecui.ui.Control", "desc": "控件的父控件"},
-                {"name": "params", "type": "Object", "desc": "初始化参数，参见 {'controls'|menu}"}
+                {"name": "params", "type": "Object", "desc": "初始化参数(参见 {'controls'|menu})"}
             ],
             "return": {"type": "ecui.ui.Control", "desc": "{'controls'|menu}"},
             "remark": "$fastCreate 方法仅供控件生成自己的部件使用，生成的控件不在控件列表中注册，不自动刷新也不能通过 {'query'|method:'core'} 方法查询(参见 {'\\$create'|method:'core'} 方法)。$fastCreate 方法通过分解 Element 对象的 className 属性得到样式信息，其中第一个样式为类型样式，第二个样式为基本样式。"
@@ -558,12 +558,12 @@
             "desc": "创建 {'controls'|menu}。",
             "params": [
                 {"name": "type", "type": "string", "desc": "控件的名称"},
-                {"name": "params", "type": "Object", "desc": "初始化参数，参见 {'controls'|menu}"}
+                {"name": "params", "type": "Object", "desc": "初始化参数(参见 {'controls'|menu})"}
             ],
             "return": {"type": "ecui.ui.Control", "desc": "{'controls'|menu}"},
             "remark": [
                 "标准的创建 {'controls'|menu} 的工厂方法，适用于少量创建控件，生成的控件不需要任何额外的调用即可正常的显示，对于批量创建控件，请使用 {'\\$create'|method:'core'} 方法。params 参数对象支持的属性如下：",
-                "<table class=\"clsSTD\"><tr><td>id</td><td>string，当前控件的 id，提供给 {'\\$connect'|method:'core'} 与 {'get'|method:'core'} 使用</td></tr><tr><td>base</td><td>string，控件的基本样式，参见 {'getBaseClass'|method:'control'} 方法，有关样式的描述参见 {'styles'|menu}，如果忽略此参数将使用基本 Element 对象的 className 属性</td></tr><tr><td>element</td><td>HTMLElement，与控件绑捆的 Element 对象，参见 {'getBase'|method:'control'} 方法，如果忽略此参数将创建 Element 对象与控件绑捆</td></tr><tr><td>parent</td><td>ecui.ui.Control 或者 HTMLElement，父控件对象或者父 Element 对象</td></tr><tr><td>type</td><td>string，控件的默认样式，通常情况下省略此参数，使用 \"ec-控件名称\" 作为控件的默认样式</td></tr></table>"
+                "<table class=\"clsSTD\"><tr><td>id</td><td>string，当前控件的 id，提供给 {'\\$connect'|method:'core'} 与 {'get'|method:'core'} 使用</td></tr><tr><td>base</td><td>string，控件的基本样式(参见 {'getBaseClass'|method:'control'} 方法)，有关样式的描述参见 {'styles'|menu}，如果忽略此参数将使用基本元素的 className 属性</td></tr><tr><td>element</td><td>HTMLElement，与控件绑捆的 Element 对象(参见 {'getBase'|method:'control'} 方法)，如果忽略此参数将创建 Element 对象与控件绑捆</td></tr><tr><td>parent</td><td>ecui.ui.Control 或者 HTMLElement，父控件对象或者父 Element 对象</td></tr><tr><td>type</td><td>string，控件的类型样式，通常情况下省略此参数，使用 \"ec-控件名称\" 作为控件的类型样式</td></tr></table>"
             ]
         },
 
@@ -582,26 +582,12 @@
             "desc": "将指定的 {'controls'|menu} 设置为拖拽状态。",
             "params": [
                 {"name": "control", "type": "ecui.ui.Control", "desc": "需要进行拖拽的 {'controls'|menu} 对象"},
-                {"name": "event", "type": "Event", "desc": "事件对象"},
+                {"name": "event", "type": "ecui.ui.Event", "desc": "事件对象"},
                 {"name": "range", "type": "Object", "desc": "控件允许拖拽的范围，省略参数时，控件默认只允许在 offsetParent 定义的区域内拖拽，如果 offsetParent 是 body，则只允许在当前浏览器可视范围内拖拽"}
             ],
             "remark": [
                 "只有在鼠标左键按下时，才允许调用 drag 方法设置待拖拽的 ECUI 控件，在拖拽操作过程中，将依次触发 {'ondragstart'|event:'control'}、{'ondragmove'|event:'control'} 与 {'ondragend'|event:'control'} 事件。range 参数支持的属性如下：", 
                 "<table class=\"clsSTD\"><tr><td>top</td><td>number，控件允许拖拽到的最小Y轴坐标</td></tr><tr><td>right</td><td>number，控件允许拖拽到的最大X轴坐标</td></tr><tr><td>bottom</td><td>number，控件允许拖拽到的最大Y轴坐标</td></tr><tr><td>left</td><td>number，控件允许拖拽到的最小X轴坐标</td></tr></table>"
-            ]
-        },
-
-        {
-            "name": "event",
-            "type": "core",
-            "desc": "事件对象标准化。",
-            "params": [
-                {"name": "event", "type": "Event", "desc": "事件对象"}
-            ],
-            "return": {"type": "Event", "desc": "标准化后的事件对象"},
-            "remark": [
-                "event 方法将浏览器产生的鼠标与键盘事件标准化并添加 ECUI 框架需要的信息到事件对象中。标准化的属性如下：",
-                "<table class=\"clsSTD\"><tr><td>pageX</td><td>number，鼠标的X轴坐标</td></tr><tr><td>pageY</td><td>number，鼠标的Y轴坐标</td></tr><tr><td>which</td><td>number，触发事件的键盘代码</td></tr><tr><td>target</td><td>HTMLElement，触发事件的 Element 对象</td></tr><tr><td>stopPropagation</td><td>Function，事件停止冒泡</td></tr><tr><td>preventDefault</td><td>Function，阻止事件默认的处理</td></tr><tr><td>getTarget</td><td>Function，获取事件相关的 {'controls'|menu} 对象</td></tr></table>"
             ]
         },
 
@@ -632,7 +618,7 @@
             "type": "core",
             "desc": "获取当前处于激活状态的 {'controls'|menu}。",
             "return": {"type": "ecui.ui.Control", "desc": "处于激活状态的 {'controls'|menu}，如果不存在返回 null"},
-            "remark": "激活状态，指鼠标在控件区域左键从按下到弹起的全过程，无论鼠标移动到哪个位置，被激活的控件对象不会发生改变。"
+            "remark": "激活状态，指鼠标在控件区域左键从按下到弹起的全过程，无论鼠标移动到哪个位置，被激活的控件对象不会发生改变。处于激活状态的控件及其父控件，都具有激活状态样式。"
         },
 
         {
@@ -647,7 +633,7 @@
         },
 
         {
-            "name": "getControl",
+            "name": "getControl(Element)",
             "type": "core",
             "desc": "获取当前 Element 对象绑定的 {'controls'|menu}。",
             "syntax": "<i>ecui.ui.Control</i> = <i>HTMLElement.</i><b>getControl(</b><i></i><b>)</b>",
@@ -656,11 +642,27 @@
         },
 
         {
+            "name": "getControl(Event)",
+            "type": "core",
+            "desc": "获取触发本次事件的 {'controls'|menu}。",
+            "syntax": "<i>ecui.ui.Control</i> = <i>Event.</i><b>getControl(</b><i></i><b>)</b>",
+            "return": {"type": "ecui.ui.Control", "desc": "触发当前事件的 {'controls'|menu}"}
+        },
+
+        {
             "name": "getFocused",
             "type": "core",
             "desc": "获取当前处于焦点状态的控件。",
             "return": {"type": "ecui.ui.Control", "desc": "处于焦点状态的 {'controls'|menu}，如果不存在返回 null"},
-            "remark": "焦点状态，默认优先处理键盘/滚轮等特殊事件，同时处于焦点状态的控件及其父控件，都具有焦点状态样式。通常鼠标左键的点击将使控件获得焦点状态，之前拥有焦点状态的控件将失去焦点状态。"
+            "remark": "焦点状态，默认优先处理键盘/滚轮等特殊事件。处于焦点状态的控件及其父控件，都具有焦点状态样式。通常鼠标左键的点击将使控件获得焦点状态，之前拥有焦点状态的控件将失去焦点状态。"
+        },
+
+        {
+            "name": "getHovered",
+            "type": "core",
+            "desc": "获取当前处于悬停状态的控件。",
+            "return": {"type": "ecui.ui.Control", "desc": "处于悬停状态的 {'controls'|menu}，如果不存在返回 null"},
+            "remark": "悬停状态，指鼠标当前位于控件区域。处于悬停状态的控件及其父控件，都具有悬停状态样式。"
         },
 
         {
@@ -694,13 +696,6 @@
         },
 
         {
-            "name": "getOvered",
-            "type": "core",
-            "desc": "获取当前处于移入状态的控件。",
-            "return": {"type": "ecui.ui.Control", "desc": "处于移入状态的 {'controls'|menu}，如果不存在返回 null"}
-        },
-
-        {
             "name": "getParameters",
             "type": "core",
             "desc": "从 Element 对象中获取初始化参数对象。",
@@ -725,14 +720,6 @@
             "desc": "获取框架当前的状态。",
             "return": {"type": "boolean", "desc": "框架当前的状态"},
             "remark": "getStatus 方法返回框架当前的工作状态，目前支持三类工作状态：NORMAL(正常状态)、ONLOAD(加载状态)与REPAINT(刷新状态)"
-        },
-
-        {
-            "name": "getTarget",
-            "type": "core",
-            "desc": "获取触发本次事件的 {'controls'|menu}。",
-            "syntax": "<i>ecui.ui.Control</i> = <i>Event.</i><b>getTarget(</b><i></i><b>)</b>",
-            "return": {"type": "ecui.ui.Control", "desc": "触发当前事件的 {'controls'|menu}"}
         },
 
         {
@@ -822,7 +809,7 @@
             "desc": "将指定的控件设置为选择状态。",
             "params": [
                 {"name": "control", "type": "ecui.ui.Control", "desc": "{'controls'|menu}"},
-                {"name": "event", "type": "Event", "desc": "事件对象"},
+                {"name": "event", "type": "ecui.ui.Event", "desc": "事件对象"},
                 {"name": "className", "type": "string", "desc": "选择框的样式名称，如果省略将使用 ec-selector"}
             ],
             "remark": "select 方法将控件设置为选择，显示选择框并对选择框调用 {'zoom'|method:'core'} 方法。调用它会触发控件对象的 {'onselectstart'|event:'control'} 事件，在整个 select 的周期中，还将触发 {'onselect'|event:'control'} 与 {'onselectend'|event:'control'} 事件，在释放鼠标按键时选择操作周期结束。"
@@ -839,12 +826,26 @@
         },
 
         {
+            "name": "wrapperEvent",
+            "type": "core",
+            "desc": "包装事件对象。",
+            "params": [
+                {"name": "event", "type": "Event", "desc": "浏览器事件对象"}
+            ],
+            "return": {"type": "ecui.ui.Event", "desc": "包装后的事件对象"},
+            "remark": [
+                "wrapperEvent 方法将浏览器产生的鼠标与键盘事件包装并使原生对象符合 W3C 标准。属性如下：",
+                "<table class=\"clsSTD\"><tr><td>pageX</td><td>number，鼠标的X轴坐标</td></tr><tr><td>pageY</td><td>number，鼠标的Y轴坐标</td></tr><tr><td>which</td><td>number，触发事件的按键码</td></tr><tr><td>target</td><td>HTMLElement，触发事件的 Element 对象</td></tr><tr><td>returnValue</td><td>boolean，是否进行默认处理</td></tr><tr><td>cancelBubble</td><td>boolean，是否取消冒泡</td></tr><tr><td>getControl</td><td>Function，获取触发事件的 {'controls'|menu} 对象</td></tr><tr><td>getNative</td><td>Function，获取原生的事件对象</td></tr><tr><td>preventDefault</td><td>Function，阻止事件的默认处理</td></tr><tr><td>stopPropagation</td><td>Function，事件停止冒泡</td></tr></table>"
+            ]
+        },
+
+        {
             "name": "zoom",
             "type": "core",
             "desc": "将指定的 {'controls'|menu} 设置为缩放状态。",
             "params": [
                 {"name": "control", "type": "ecui.ui.Control", "desc": "{'controls'|menu}"},
-                {"name": "event", "type": "Event", "desc": "事件对象"},
+                {"name": "event", "type": "ecui.ui.Event", "desc": "事件对象"},
                 {"name": "range", "type": "Object", "desc": "控件允许的缩放范围参数"}
             ],
             "remark": [
@@ -855,6 +856,17 @@
     ],
 
     "control": [
+        {
+            "name": "$activate",
+            "type": "control",
+            "desc": "控件获得激活事件的默认处理。",
+            "params": [
+                {"name": "event", "type": "ecui.ui.Event", "desc": "事件对象"}
+            ],
+            "remark": "控件获得激活时，添加状态样式 -active。",
+            "event": 10
+        },
+
         {
             "name": "$append",
             "type": "control",
@@ -869,46 +881,43 @@
             "name": "$blur",
             "type": "control",
             "desc": "控件失去焦点事件的默认处理。",
-            "remark": "控件失去焦点时默认调用 {'\\$blur'|method:'control'} 方法，删除控件在 {'\\$focus'|method:'control'} 方法中添加的扩展样式 -focus。",
+            "params": [
+                {"name": "event", "type": "ecui.ui.Event", "desc": "事件对象"}
+            ],
+            "remark": "控件失去焦点时，移除状态样式 -focus。",
             "event": 10
         },
 
         {
             "name": "$cache",
             "type": "control",
-            "desc": "计算控件的缓存。",
+            "desc": "缓存控件的属性。",
             "params": [
-                {"name": "style", "type": "CssStyle", "desc": "基本 Element 对象的 Css 样式对象"},
-                {"name": "cacheSize", "type": "boolean", "desc": "是否需要缓存控件大小，如果控件是另一个控件的部件时，不缓存大小能加快渲染速度，默认缓存"}
+                {"name": "style", "type": "CssStyle", "desc": "基本元素的 Css 样式对象"},
+                {"name": "cacheSize", "type": "boolean", "desc": "是否需要缓存控件的大小，如果控件是另一个控件的部件时，不缓存大小能加快渲染速度，默认缓存"}
             ],
-            "remark": "控件缓存部分核心属性的值，提高控件属性的访问速度，在子控件或者应用程序开发过程中，如果需要避开控件提供的方法({'setSize'|method:'control'}、{'alterClass'|method:'control'} 等)直接操作 Element 对象，<font color=\"red\">操作完成后必须调用 {'clearCache'|method:'control'} 方法清除控件的属性缓存，否则将引发错误。</font>"
-        },
-
-        {
-            "name": "$change",
-            "type": "control",
-            "desc": "控件内容改变事件的默认处理。",
-            "event": 1
+            "remark": "$cache 方法缓存部分控件属性的值，在初始化时避免频繁的读写交替操作，加快渲染的速度，在子控件或者应用程序开发过程中，如果需要避开控件提供的方法直接操作 Element 对象，<font color=\"red\">操作完成后必须调用 {'clearCache'|method:'control'} 方法清除控件的属性缓存，否则将引发错误。</font>"
         },
 
         {
             "name": "$click",
             "type": "control",
-            "desc": "鼠标单击控件事件的默认处理。",
+            "desc": "控件点击事件的默认处理。",
             "params": [
-                {"name": "event", "type": "Event", "desc": "事件对象"}
+                {"name": "event", "type": "ecui.ui.Event", "desc": "事件对象"}
             ],
             "event": 10
         },
 
         {
-            "name": "$create",
+            "name": "$deactivate",
             "type": "control",
-            "desc": "控件建立完成事件的默认处理。",
+            "desc": "控件失去激活事件的默认处理。",
             "params": [
-                {"name": "params", "type": "Object", "desc": "初始化参数，参见 {'create'|method:'control'} 方法"}
+                {"name": "event", "type": "ecui.ui.Event", "desc": "事件对象"}
             ],
-            "remark": "$create 方法在控件被建立后调用，用于某一类控件的公共的初始化操作。"
+            "remark": "控件失去激活时，移除状态样式 -active。",
+            "event": 10
         },
 
         {
@@ -923,9 +932,9 @@
             "type": "control",
             "desc": "控件拖拽结束事件的默认处理。",
             "params": [
-                {"name": "event", "type": "Event", "desc": "事件对象"}
+                {"name": "event", "type": "ecui.ui.Event", "desc": "事件对象"}
             ],
-            "remark": "控件被拖曳的周期结束时，如果 {'ondragend'|event:'control'} 事件返回值不为 false，则调用 $dragend 方法，参见 {'drag'|method:'core'} 方法。"
+            "remark": "控件被拖曳的周期结束时，如果 {'ondragend'|event:'control'} 事件返回值不为 false，则调用 $dragend 方法，详细的描述请参见 {'drag'|method:'core'} 方法。"
         },
 
         {
@@ -933,12 +942,12 @@
             "type": "control",
             "desc": "控件拖拽移动事件的默认处理。",
             "params": [
-                {"name": "event", "type": "Event", "desc": "事件对象"},
+                {"name": "event", "type": "ecui.ui.Event", "desc": "事件对象"},
                 {"name": "x", "type": "number", "desc": "X轴坐标"},
                 {"name": "y", "type": "number", "desc": "Y轴坐标"}
             ],
             "return": {"type": "boolean", "desc": "是否自动设置控件新的位置，默认值为 true"},
-            "remark": "控件被拖曳的周期中鼠标移动时，如果 {'ondragmove'|event:'control'} 事件返回值不为 false，则调用 $dragmove 方法。如果 $dragmove 方法返回值不为 false，框架将设置控件的位置，参见 {'drag'|method:'core'} 方法。"
+            "remark": "控件被拖曳的周期中鼠标移动时，如果 {'ondragmove'|event:'control'} 事件返回值不为 false，则调用 $dragmove 方法。如果 $dragmove 方法返回值不为 false，框架将设置控件的位置，详细的描述请参见 {'drag'|method:'core'} 方法。"
         },
 
         {
@@ -946,31 +955,36 @@
             "type": "control",
             "desc": "控件拖拽开始事件的默认处理。",
             "params": [
-                {"name": "event", "type": "Event", "desc": "事件对象"}
+                {"name": "event", "type": "ecui.ui.Event", "desc": "事件对象"}
             ],
-            "remark": "控件被拖曳的周期开始时，如果 {'ondragstart'|event:'control'} 事件返回值不为 false，则调用 $dragstart 方法，参见 {'drag'|method:'core'} 方法。"
+            "remark": "控件被拖曳的周期开始时，如果 {'ondragstart'|event:'control'} 事件返回值不为 false，则调用 $dragstart 方法，详细的描述请参见 {'drag'|method:'core'} 方法。"
         },
 
         {
             "name": "$focus",
             "type": "control",
             "desc": "控件获得焦点事件的默认处理。",
-            "remark": "控件获得焦点时默认调用 $focus 方法，调用 {'alterClass'|method:'control'} 方法为控件添加扩展样式 -focus。",
+            "params": [
+                {"name": "event", "type": "ecui.ui.Event", "desc": "事件对象"}
+            ],
+            "remark": "控件获得焦点时，添加状态样式 -focus。",
             "event": 10
         },
 
         {
-            "name": "$getInvalidHeight",
+            "name": "$getBasicHeight",
             "type": "control",
-            "desc": "获取控件的基本无效高度，即控件基本区域与控件内部区域高度的差值。",
-            "return": {"type": "number", "desc": "控件的无效高度"}
+            "desc": "获取控件的基本高度。",
+            "return": {"type": "number", "desc": "控件的基本高度"},
+            "remark": "控件的基本高度指控件基本区域与用户数据存放区域的高度差值，即基本元素与内部元素(如果相同则忽略其中之一)的上下边框宽度(border-width)与上下内填充宽度(padding)之和。"
         },
 
         {
-            "name": "$getInvalidWidth",
+            "name": "$getBasicWidth",
             "type": "control",
-            "desc": "获取控件的基本无效宽度，即控件基本区域与控件内部区域宽度的差值。",
-            "return": {"type": "number", "desc": "控件的无效宽度"}
+            "desc": "获取控件的基本宽度。",
+            "return": {"type": "number", "desc": "控件的基本宽度"},
+            "remark": "控件的基本宽度指控件基本区域与用户数据存放区域的宽度差值，即基本元素与内部元素(如果相同则忽略其中之一)的左右边框宽度(border-width)与左右内填充宽度(padding)之和。"
         },
 
         {
@@ -987,32 +1001,26 @@
         {
             "name": "$hide",
             "type": "control",
-            "desc": "隐藏控件。"
-        },
-
-        {
-            "name": "$init",
-            "type": "control",
-            "desc": "控件渲染完成后初始化的默认处理。",
-            "remark": "$init 方法在控件渲染完成后调用，参见 {'create'|method:'core'} 与 {'init'|method:'core'} 方法。"
+            "desc": "隐藏控件。",
+            "remark": "$hide 方法直接隐藏控件，控件失去激活、悬停与焦点状态，不检查控件之前的状态，因此不会导致浏览器的刷新操作。"
         },
 
         {
             "name": "$intercept",
             "type": "control",
-            "desc": "界面点击强制拦截事件的默认处理。",
+            "desc": "强制拦截点击事件的默认处理。",
             "params": [
-                {"name": "event", "type": "Event", "desc": "事件对象"}
+                {"name": "event", "type": "ecui.ui.Event", "desc": "事件对象"}
             ],
-            "remark": "当调用了 {'intercept'|method:'core'} 方法后，下一次对界面的点击将会触发指定控件的 {'onintercept'|event:'control'} 事件，如果事件返回值不为 false，则调用 $intercept 方法。如果 $intercept 方法返回值不为 false，将调用 {'restore'|method:'core'} 方法，否则框架将 onmousedown 事件传递给上一层的事件响应环境。"
+            "remark": "当调用了 {'intercept'|method:'core'} 方法后，下一次对界面的点击将会触发指定控件的 {'onintercept'|event:'control'} 事件，如果事件返回值不为 false，则调用 $intercept 方法。如果 $intercept 方法返回值不为 false，将调用 {'restore'|method:'core'} 方法，否则框架将 {'onmousedown'|event:'control'} 事件传递给上一层环境响应。"
         },
 
         {
             "name": "$keydown",
             "type": "control",
-            "desc": "控件拥有焦点时，键盘按下事件的默认处理。",
+            "desc": "键盘按下事件的默认处理。",
             "params": [
-                {"name": "event", "type": "Event", "desc": "事件对象"}
+                {"name": "event", "type": "ecui.ui.Event", "desc": "事件对象"}
             ],
             "event": 10
         },
@@ -1020,9 +1028,9 @@
         {
             "name": "$keypress",
             "type": "control",
-            "desc": "控件拥有焦点时，键盘按压事件的默认处理。",
+            "desc": "键盘按住事件的默认处理。",
             "params": [
-                {"name": "event", "type": "Event", "desc": "事件对象"}
+                {"name": "event", "type": "ecui.ui.Event", "desc": "事件对象"}
             ],
             "event": 10
         },
@@ -1030,9 +1038,9 @@
         {
             "name": "$keyup",
             "type": "control",
-            "desc": "控件拥有焦点时，键盘弹起事件的默认处理。",
+            "desc": "键盘松开事件的默认处理。",
             "params": [
-                {"name": "event", "type": "Event", "desc": "事件对象"}
+                {"name": "event", "type": "ecui.ui.Event", "desc": "事件对象"}
             ],
             "event": 10
         },
@@ -1040,16 +1048,16 @@
         {
             "name": "$locate",
             "type": "control",
-            "desc": "设置控件容器内部定位化。",
-            "return": {"type": "boolean", "desc": "$locate 方法执行后，容器内部 Element 对象的 position 属性设置成 absolute 时将相对基本 Element 对象定位。"}
+            "desc": "设置控件容器支持坐标定位。",
+            "return": {"type": "boolean", "desc": "$locate 方法执行后，容器内部 Element 对象的 offsetParent 将指向基本元素(参见 {'getBase'|method:'control'} 方法)"}
         },
 
         {
             "name": "$mousedown",
             "type": "control",
-            "desc": "鼠标在控件区域内按下事件的默认处理。",
+            "desc": "鼠标键按下事件的默认处理。",
             "params": [
-                {"name": "event", "type": "Event", "desc": "事件对象"}
+                {"name": "event", "type": "ecui.ui.Event", "desc": "事件对象"}
             ],
             "event": 10
         },
@@ -1057,9 +1065,9 @@
         {
             "name": "$mousemove",
             "type": "control",
-            "desc": "鼠标在控件区域内移动事件的默认处理。",
+            "desc": "鼠标移动事件的默认处理。",
             "params": [
-                {"name": "event", "type": "Event", "desc": "事件对象"}
+                {"name": "event", "type": "ecui.ui.Event", "desc": "事件对象"}
             ],
             "event": 10
         },
@@ -1067,31 +1075,31 @@
         {
             "name": "$mouseout",
             "type": "control",
-            "desc": "鼠标移出控件区域事件的默认处理。",
+            "desc": "鼠标移出事件的默认处理。",
             "params": [
-                {"name": "event", "type": "Event", "desc": "事件对象"}
+                {"name": "event", "type": "ecui.ui.Event", "desc": "事件对象"}
             ],
-            "remark": "鼠标移出控件区域时默认调用 $mouseout 方法，删除控件在 {'\\$mouseover'|method:'control'} 方法中添加的扩展样式 -over。",
+            "remark": "鼠标移出控件区域时，控件失去悬停状态，移除状态样式 -hover。",
             "event": 10
         },
 
         {
             "name": "$mouseover",
             "type": "control",
-            "desc": "鼠标移入控件区域事件的默认处理。",
+            "desc": "鼠标移入事件的默认处理。",
             "params": [
-                {"name": "event", "type": "Event", "desc": "事件对象"}
+                {"name": "event", "type": "ecui.ui.Event", "desc": "事件对象"}
             ],
-            "remark": "鼠标移入控件区域时默认调用 $mouseover 方法，调用 {'alterClass'|method:'control'} 方法为控件添加扩展样式 -over。",
+            "remark": "鼠标移入控件区域时，控件获得悬停状态，添加状态样式 -hover。",
             "event": 10
         },
 
         {
             "name": "$mouseup",
             "type": "control",
-            "desc": "鼠标在控件区域内弹起事件的默认处理。",
+            "desc": "鼠标键松开事件的默认处理。",
             "params": [
-                {"name": "event", "type": "Event", "desc": "事件对象"}
+                {"name": "event", "type": "ecui.ui.Event", "desc": "事件对象"}
             ],
             "event": 10
         },
@@ -1099,72 +1107,18 @@
         {
             "name": "$mousewheel",
             "type": "control",
-            "desc": "鼠标在控件区域滚动滚轮事件的默认处理。",
+            "desc": "鼠标滚轮滚动事件的默认处理。",
             "params": [
-                {"name": "event", "type": "Event", "desc": "事件对象"}
+                {"name": "event", "type": "ecui.ui.Event", "desc": "事件对象"}
             ],
-            "return": {"type": "boolean", "desc": "是否停止冒泡"},
-            "event": 10
-        },
-
-        {
-            "name": "$pressend",
-            "type": "control",
-            "desc": "控件按压状态结束事件的默认处理。",
-            "params": [
-                {"name": "event", "type": "Event", "desc": "事件对象"}
-            ],
-            "remark": "鼠标左键按压控件结束时默认调用 $pressend 方法，删除控件在 {'\\$pressstart'|method:'control'} 方法中添加的扩展样式 -press。",
-            "event": 10
-        },
-
-        {
-            "name": "$pressmove",
-            "type": "control",
-            "desc": "控件按压状态中鼠标在控件区域内移动事件的默认处理。",
-            "params": [
-                {"name": "event", "type": "Event", "desc": "事件对象"}
-            ],
-            "event": 10
-        },
-
-        {
-            "name": "$pressout",
-            "type": "control",
-            "desc": "控件按压状态中鼠标移出控件区域事件的默认处理。",
-            "params": [
-                {"name": "event", "type": "Event", "desc": "事件对象"}
-            ],
-            "remark": "默认与 {'\\$pressend'|method:'control'} 方法相同，删除控件在 {'\\$pressstart'|method:'control'} 方法中添加的扩展样式 -press。",
-            "event": 10
-        },
-
-        {
-            "name": "$pressover",
-            "type": "control",
-            "desc": "控件按压状态中鼠标移入控件区域事件的默认处理。",
-            "params": [
-                {"name": "event", "type": "Event", "desc": "事件对象"}
-            ],
-            "remark": "默认与 {'\\$pressstart'|method:'control'} 方法相同，调用 {'alterClass'|method:'control'} 方法为控件添加扩展样式 -press。",
-            "event": 10
-        },
-
-        {
-            "name": "$pressstart",
-            "type": "control",
-            "desc": "控件按压状态开始事件的默认处理。",
-            "params": [
-                {"name": "event", "type": "Event", "desc": "事件对象"}
-            ],
-            "remark": "鼠标左键按压控件开始时默认调用 $pressstart 方法，调用 {'alterClass'|method:'control'} 方法为控件添加扩展样式 -press。",
             "event": 10
         },
 
         {
             "name": "$ready",
             "type": "control",
-            "desc": "控件自动渲染全部完成后的处理。"
+            "desc": "页面完全加载完成后的处理。",
+            "remark": "浏览器有可能在 window.onload 事件后恢复 input 的值，控件需要在之后进行一些设置工作，相关的设置工作在 $ready 方法中完成。"
         },
 
         {
@@ -1179,25 +1133,18 @@
         {
             "name": "$resize",
             "type": "control",
-            "desc": "控件大小发生变化的默认处理。",
+            "desc": "控件大小变化事件的默认处理。",
             "event": 1
-        },
-
-        {
-            "name": "$scroll",
-            "type": "control",
-            "desc": "控件的滚动条发生滚动的默认处理。",
-            "remark": "如果控件包含滚动条，滚动条滚动时触发 {'onscroll'|event:'control'} 事件，如果事件返回值不为 false，则调用 $scroll 方法。"
         },
 
         {
             "name": "$select",
             "type": "control",
-            "desc": "区域选择事件的默认处理。",
+            "desc": "区域选择移动事件的默认处理。",
             "params": [
-                {"name": "event", "type": "Event", "desc": "事件对象"}
+                {"name": "event", "type": "ecui.ui.Event", "desc": "事件对象"}
             ],
-            "remark": "控件在区域选择周期中鼠标移动时，如果 {'onselect'|event:'control'} 事件返回值不为 false，则调用 $select 方法，参见 {'select'|method:'core'} 方法。"
+            "remark": "控件在区域选择周期中鼠标移动时，如果 {'onselect'|event:'control'} 事件返回值不为 false，则调用 $select 方法，详细的描述请参见 {'select'|method:'core'} 方法。"
         },
 
         {
@@ -1205,9 +1152,9 @@
             "type": "control",
             "desc": "区域选择结束事件的默认处理。",
             "params": [
-                {"name": "event", "type": "Event", "desc": "事件对象"}
+                {"name": "event", "type": "ecui.ui.Event", "desc": "事件对象"}
             ],
-            "remark": "控件在区域选择周期结束时，如果 {'onselectend'|event:'control'} 事件返回值不为 false，则调用 $selectend 方法，参见 {'select'|method:'core'} 方法。"
+            "remark": "控件在区域选择周期结束时，如果 {'onselectend'|event:'control'} 事件返回值不为 false，则调用 $selectend 方法，详细的描述请参见 {'select'|method:'core'} 方法。"
         },
 
         {
@@ -1215,32 +1162,19 @@
             "type": "control",
             "desc": "区域选择开始事件的默认处理。",
             "params": [
-                {"name": "event", "type": "Event", "desc": "事件对象"}
+                {"name": "event", "type": "ecui.ui.Event", "desc": "事件对象"}
             ],
-            "remark": "控件在区域选择周期开始时，如果 {'onselectstart'|event:'control'} 事件返回值不为 false，则调用 $selectstart 方法，参见 {'select'|method:'core'} 方法。"
+            "remark": "控件在区域选择周期开始时，如果 {'onselectstart'|event:'control'} 事件返回值不为 false，则调用 $selectstart 方法，详细的描述请参见 {'select'|method:'core'} 方法。"
         },
 
         {
             "name": "$setBody",
             "type": "control",
-            "desc": "设置控件内层的 Element 对象。",
+            "desc": "设置控件的内层元素。",
             "params": [
                 {"name": "el", "type": "HTMLElement", "desc": "Element 对象"}
             ],
-            "remark": "{'controls'|menu} 逻辑上分为外层 Element 对象、基本 Element 对象与内层 Element 对象，外层对象用于控制控件自身布局，基本对象是控件生成时捆绑的 Element 对象，而内层对象用于控制控件对象的子控件与文本布局，通常情形下三者是同一个 Element 对象。"
-        },
-
-        {
-            "name": "$setBodyHTML",
-            "type": "control",
-            "params": [
-                {"name": "innerHTML", "type": "string", "desc": "HTML 片断"}
-            ],
-            "desc": "设置控件内层 Element 对象的 innerHTML 属性。",
-            "example": [
-                "<body><div id=\"custom\" ecui=\"type:control;id:ctrl1\"><span>hello world</span></div></body>",
-                "//显示 <span>hello world</span>\nalert(ecui.get(\"ctrl1\").getHTML());\n//设置HTML\necui.get(\"ctrl1\").$setBodyHTML(\"<span>hello ECUI</span>\");\n//显示 <span>hello ECUI</span>\nalert(ecui.get(\"ctrl1\").getHTML());"
-            ]
+            "remark": "{'controls'|menu} 逻辑上分为外层元素、基本元素与内层元素，外层元素用于控制控件自身布局，基本元素是控件生成时捆绑的 Element 对象，而内层元素用于控制控件对象的子控件与文本布局，三者允许是同一个 Element 对象。"
         },
 
         {
@@ -1250,7 +1184,7 @@
             "params": [
                 {"name": "parent", "type": "ecui.ui.Control", "desc": "{'controls'|menu}"}
             ],
-            "remark": "与 {'setParent'|method:'control'} 方法最大的不同，$setParent 方法仅设置控件对象逻辑上的父对象，不进行任何逻辑上的检查，用于某些特殊情况下的设定，如 {'select'|control} 中的选项框子控件需要使用 $setParent 方法设置它的逻辑父控件为下拉框控件。"
+            "remark": "相对于 {'setParent'|method:'control'} 方法，$setParent 方法仅设置控件对象逻辑上的父对象，不进行任何逻辑上的检查，用于某些特殊情况下的设定，如 {'select'|control} 中的选项框子控件需要使用 $setParent 方法设置它的逻辑父控件为下拉框控件。"
         },
 
         {
@@ -1260,14 +1194,14 @@
             "params": [
                 {"name": "width", "type": "number", "desc": "宽度，如果不需要设置则将参数设置为等价于逻辑非的值"},
                 {"name": "height", "type": "number", "desc": "高度，如果不需要设置则省略此参数"}
-            ],
-            "remark": "$setSize 方法设置控件实际的大小，不改变其它的如缓存等信息。"
+            ]
         },
 
         {
             "name": "$show",
             "type": "control",
-            "desc": "显示控件。"
+            "desc": "显示控件。",
+            "remark": "$show 方法直接显示控件，不检查控件之前的状态，因此不会导致浏览器的刷新操作。"
         },
 
         {
@@ -1275,10 +1209,10 @@
             "type": "control",
             "desc": "控件缩放移动事件的默认处理。",
             "params": [
-                {"name": "event", "type": "Event", "desc": "事件对象"}
+                {"name": "event", "type": "ecui.ui.Event", "desc": "事件对象"}
             ],
             "return": {"type": "boolean", "desc": "是否自动设置控件新的大小，默认值为 true"},
-            "remark": "控件在缩放周期中鼠标移动时，如果 {'onzoom'|event:'control'} 事件返回值不为 false，则调用 $zoom 方法。如果 $zoom 方法返回值不为 false，框架将设置控件的大小，参见 {'zoom'|method:'core'} 方法。"
+            "remark": "控件在缩放周期中鼠标移动时，如果 {'onzoom'|event:'control'} 事件返回值不为 false，则调用 $zoom 方法。如果 $zoom 方法返回值不为 false，框架将设置控件的大小，详细的描述请参见 {'zoom'|method:'core'} 方法。"
         },
 
         {
@@ -1286,9 +1220,9 @@
             "type": "control",
             "desc": "控件缩放结束事件的默认处理。",
             "params": [
-                {"name": "event", "type": "Event", "desc": "事件对象"}
+                {"name": "event", "type": "ecui.ui.Event", "desc": "事件对象"}
             ],
-            "remark": "控件在缩放周期结束时，如果 {'onzoomend'|event:'control'} 事件返回值不为 false，则调用 $zoomend 方法，参见 {'zoom'|method:'core'} 方法。"
+            "remark": "控件在缩放周期结束时，如果 {'onzoomend'|event:'control'} 事件返回值不为 false，则调用 $zoomend 方法，详细的描述请参见 {'zoom'|method:'core'} 方法。"
         },
 
         {
@@ -1296,115 +1230,121 @@
             "type": "control",
             "desc": "控件缩放开始事件的默认处理。",
             "params": [
-                {"name": "event", "type": "Event", "desc": "事件对象"}
+                {"name": "event", "type": "ecui.ui.Event", "desc": "事件对象"}
             ],
-            "remark": "控件在缩放周期开始时，如果 {'onzoomstart'|event:'control'} 事件返回值不为 false，则调用 $zoomstart 方法，参见 {'zoom'|method:'core'} 方法。"
+            "remark": "控件在缩放周期开始时，如果 {'onzoomstart'|event:'control'} 事件返回值不为 false，则调用 $zoomstart 方法，详细的描述请参见 {'zoom'|method:'core'} 方法。"
+        },
+
+        {
+            "name": "activate",
+            "type": "control",
+            "desc": "控件获得激活。",
+            "params": [
+                {"name": "event", "type": "ecui.ui.Event", "desc": "事件对象"}
+            ],
+            "remark": "activate 方法不会导致控件获得激活状态，只是添加控件的激活状态样式。",
+            "event": 10
         },
 
         {
             "name": "alterClass",
             "type": "control",
-            "desc": "为控件增加/删除一个扩展样式。",
+            "desc": "为控件添加/移除一个扩展样式。",
             "params": [
-                {"name": "className", "type": "string", "desc": "扩展样式的尾缀"},
-                {"name": "isRemoved", "type": "boolean", "desc": "为 true 时删除样式，否则新增样式"}
+                {"name": "className", "type": "string", "desc": "扩展样式名，以+号开头表示添加扩展样式，以-号开头表示移除扩展样式"}
             ],
-            "example": [
-                "<style>\n.ec-control-custom {background:#F0F}\n</style><body><div ecui=\"type:control;id:ctrl1\"></div></body>",
-                "//会添加ec-control-custom样式\necui.get(\"ctrl1\").alterClass(\"custom\");"
-            ]
+            "remark": "扩展样式分别附加在类型样式与当前样式之后(参见 {'getType'|method:'control'} 与 {'getBaseClass'|method:'control'} 方法)，使用-号进行分隔。如果类型样式为 ec-control，当前样式为 demo，扩展样式 hover 后，控件基本元素将存在四个样式，分别为 ec-control、demo、ec-control-hover 与 demo-hover。"
         },
 
         {
             "name": "blur",
             "type": "control",
             "desc": "控件失去焦点。",
+            "remark": "blur 方法不会导致控件失去焦点状态，只是移除控件的焦点状态样式，如果需要使控件失去焦点，请使用 {'loseFocus'|method:'core'} 或 {'setFocused'|method:'core'} 方法。",
             "event": 10
         },
 
         {
             "name": "cache",
             "type": "control",
-            "desc": "计算控件的缓存。",
+            "desc": "缓存控件的属性。",
             "params": [
-                {"name": "cacheSize", "type": "boolean", "desc": "是否需要缓存控件大小，如果控件是另一个控件的部件时，不缓存大小能加快渲染速度，默认缓存"}
+                {"name": "cacheSize", "type": "boolean", "desc": "是否需要缓存控件的大小，如果控件是另一个控件的部件时，不缓存大小能加快渲染速度，默认缓存"},
+                {"name": "force", "type": "boolean", "desc": "是否需要强制刷新缓存，相当于之前执行了 {'clearCache'|method:'control'} 方法，默认不强制刷新"}
             ],
-            "remark": "控件缓存部分核心属性的值，提高控件属性的访问速度，在子控件或者应用程序开发过程中，如果需要避开控件提供的方法({'setSize'|method:'control'}、{'alterClass'|method:'control'} 等)直接操作 Element 对象，<font color=\"red\">操作完成后必须调用 clearCache 方法清除控件的属性缓存，否则将引发错误。</font>"
-        },
-
-        {
-            "name": "change",
-            "type": "control",
-            "desc": "控件改变。",
-            "event": 1
+            "remark": "cache 方法验证控件是否已经缓存，如果未缓存将调用 {'\\$cache'|method:'control'} 方法缓存控件属性的值。在子控件或者应用程序开发过程中，如果需要避开控件提供的方法直接操作 Element 对象，<font color=\"red\">操作完成后必须调用 {'clearCache'|method:'control'} 方法清除控件的属性缓存，否则将引发错误。</font>"
         },
 
         {
             "name": "clearCache",
             "type": "control",
             "desc": "清除控件的缓存。",
-            "remark": "控件缓存部分核心属性的值，提高控件属性的访问速度，在子控件或者应用程序开发过程中，如果需要避开控件提供的方法({'setSize'|method:'control'}、{'alterClass'|method:'control'} 等)直接操作 Element 对象，<font color=\"red\">操作完成后必须调用 clearCache 方法清除控件的属性缓存，否则将引发错误。</font>",
-            "example": [
-                "<body><div ecui=\"type:control;id:ctrl1\"><div ecui=\"type:control;id:ctrl2\"></div></div></body>",
-                "var control = ecui.get(\"ctrl1\");\ncontrol.getBody().className = \"custom\";\ncontrol.clearCache(); "
-            ]
+            "remark": "在子控件或者应用程序开发过程中，如果需要避开控件提供的方法直接操作 Element 对象，操作完成后必须调用 clearCache 方法清除控件的属性缓存，否则将引发错误。"
         },
 
         {
             "name": "click",
             "type": "control",
-            "desc": "鼠标点击。",
+            "desc": "控件点击。",
             "event": 10
         },
 
         {
             "name": "contain",
             "type": "control",
-            "desc": "判断当前控件是否包含指定的控件。",
+            "desc": "判断是否包含指定的控件。",
             "params": [
                 {"name": "control", "type": "ecui.ui.Control", "desc": "{'controls'|menu}"}],
             "return": {"type": "boolean", "desc": "是否包含指定的控件"},
-            "remark": "contain 方法判断指定的控件是否逻辑上属于当前控件的内部区域，即通过反复调用控件的 {'getParent'|method:'control'} 方法是否能得到当前控件。",
-            "example": [
-                "<body><div ecui=\"type:control;id:ctrl1\"><div ecui=\"type:control;id:ctrl2\"></div></div></body>",
-                "//显示true\nalert(ecui.get(\"ctrl1\").contain(ecui.get(\"ctrl2\")));"
-            ]
+            "remark": "contain 方法判断指定的控件是否逻辑上属于当前控件的内部区域，即当前控件是指定的控件的某一级父控件。"
         },
 
         {
-            "name": "create",
+            "name": "deactivate",
             "type": "control",
-            "desc": "控件建立完成事件的处理。",
+            "desc": "控件失去激活。",
             "params": [
-                {"name": "params", "type": "Object", "desc": "初始化参数，参见 {'create'|method:'control'} 方法"}
+                {"name": "event", "type": "ecui.ui.Event", "desc": "事件对象"}
             ],
-            "remark": "create 方法触发 {'oncreate'|event:'control'} 事件，然后调用 {'\\$create'|method:'control'} 方法，create 方法在控件创建时被自动调用，不需要直接调用。"
+            "remark": "deactivate 方法不会导致控件失去激活状态，只是移除控件的激活状态样式。",
+            "event": 10
+        },
+
+        {
+            "name": "disable",
+            "type": "control",
+            "desc": "控件获得失效状态。",
+            "remark": "控件获得失效状态时，添加状态样式 -disabled(参见 alterClass 方法)。disable 方法导致控件失去激活、悬停、焦点状态，所有子控件的 {'isDisabled'|method:'control'} 方法返回 true，但不会设置子控件的失效状态样式。"
         },
 
         {
             "name": "dispose",
             "type": "control",
             "desc": "销毁控件。",
-            "remark": "dispose 方法触发 {'ondispose'|event:'control'} 事件，然后调用 {'\\$dispose'|method:'control'} 方法，dispose 方法在页面卸载时会被自动调用，通常不需要直接调用。"
+            "remark": "dispose 方法销毁控件及其所有的子控件，相当于调用 ecui.{'dispose'|method:'core'}(this) 方法。"
+        },
+
+        {
+            "name": "enable",
+            "type": "control",
+            "desc": "控件解除失效状态。",
+            "remark": "控件解除失效状态时，移除状态样式 -disabled(参见 alterClass 方法)。enable 方法仅解除控件自身的失效状态，如果其父控件失效，{'isDisabled'|method:'control'} 方法返回 true。"
         },
 
         {
             "name": "focus",
             "type": "control",
-            "desc": "控件获取焦点。",
+            "desc": "控件获得焦点。",
+            "remark": "focus 方法不会导致控件获得焦点状态，只是添加控件的焦点状态样式，如果需要使控件获得焦点，请使用 {'setFocused'|method:'core'} 方法。",
             "event": 10
         },
 
         {
             "name": "getBase",
             "type": "control",
-            "desc": "获取控件的基本 Element 对象。",
+            "desc": "获取控件的基本元素。",
             "return": {"type": "HTMLElement", "desc": "Element 对象"},
-            "remark": "getBase 方法返回控件生成时捆绑的 Element 对象，参见 {'create'|method:'core'} 方法。",
-            "example": [
-                "<body><div id=\"custom\" ecui=\"type:control;id:ctrl1\"></div></body>",
-                "//显示 custom\nalert(ecui.get(\"ctrl1\").getBase().id);"
-            ]
+            "remark": "getBase 方法返回控件生成时定义的 Element 对象(参见 {'create'|method:'core'} 方法)。"
         },
 
         {
@@ -1412,23 +1352,15 @@
             "type": "control",
             "desc": "获取控件的基本样式。",
             "return": {"type": "string", "desc": "控件的基本样式"},
-            "remark": "getBaseClass 方法返回控件生成时捆绑的样式，参见 {'create'|method:'core'} 方法。与调用 {'getClass'|method:'control'} 方法返回当前样式的区别在于，基本样式不会改变，而当前样式允许通过 {'setClass'|method:'control'} 方法来设置。",
-            "example": [
-                "<body><div ecui=\"type:control;id:ctrl1\"></div><div class=\"custom\" ecui=\"type:control;id:ctrl2\"></div></body>",
-                "//显示ec-control\nalert(ecui.get(\"ctrl1\").getBaseClass());\n//显示custom\nalert(ecui.get(\"ctrl2\").getBaseClass());"
-            ]
+            "remark": "getBaseClass 方法返回控件生成时指定的 base 参数(参见 {'create'|method:'core'} 方法)。基本样式与通过 {'getClass'|method:'control'} 方法返回的当前样式存在区别，在控件生成初期，当前样式等于基本样式，基本样式在初始化后无法改变，{'setClass'|method:'control'} 方法改变当前样式。"
         },
 
         {
             "name": "getBody",
             "type": "control",
-            "desc": "获取控件内层的 Element 对象。",
+            "desc": "获取控件的内层元素。",
             "return": {"type": "HTMLElement", "desc": "Element 对象"},
-            "remark": "getBody 方法返回用于控制子控件与文本布局的内层 Element 对象。",
-            "example": [
-                "<body><div id=\"custom\" ecui=\"type:control;id:ctrl1\"></div></body>",
-                "//显示 custom\nalert(ecui.get(\"ctrl1\").getBody().id);"
-            ]
+            "remark": "getBody 方法返回用于控制子控件与文本布局的内层元素。"
         },
 
         {
@@ -1436,11 +1368,7 @@
             "type": "control",
             "desc": "获取控件内层可使用区域的高度。",
             "return": {"type": "number", "desc": "控件内层可使用区域的高度"},
-            "remark": "getBodyHeight 方法返回能被子控件与文本填充的控件区域高度，相当于盒子模型的 content 区域的高度。",
-            "example": [
-                "<body><div style=\"padding:4px;height:100px;\" ecui=\"type:control;id:ctrl1\"></div></body>",
-                "alert(ecui.get(\"ctrl1\").getBodyHeight());"
-            ]
+            "remark": "getBodyHeight 方法返回能被子控件与文本填充的控件区域高度，相当于盒子模型的 content 区域的高度。"
         },
 
         {
@@ -1448,11 +1376,7 @@
             "type": "control",
             "desc": "获取控件内层可使用区域的宽度。",
             "return": {"type": "number", "desc": "控件内层可使用区域的宽度。"},
-            "remark": "getBodyWidth 方法返回能被子控件与文本填充的控件区域宽度，相当于盒子模型的 content 区域的宽度。",
-            "example": [
-                "<body><div style=\"padding:4px;height:100px;\" ecui=\"type:control;id:ctrl1\"></div></body>",
-                "alert(ecui.get(\"ctrl1\").getBodyWidth());"
-            ]
+            "remark": "getBodyWidth 方法返回能被子控件与文本填充的控件区域宽度，相当于盒子模型的 content 区域的宽度。"
         },
 
         {
@@ -1460,79 +1384,54 @@
             "type": "control",
             "desc": "获取控件的当前样式。",
             "return": {"type": "string", "desc": "控件的当前样式"},
-            "remark": "getClass 方法返回控件当前使用的样式，在调用 {'alterClass'|method:'control'} 方法时，当前样式与默认样式会被添加样式后缀，从而实现控件状态的样式变更。与调用 {'getBaseClass'|method:'control'} 方法返回基本样式的区别在于，基本样式不会改变，而当前样式允许通过 {'setClass'|method:'control'} 方法来设置。",
-            "example": [
-                "<body><div ecui=\"type:control;id:ctrl1\"></div><div class=\"custom\" ecui=\"type:control;id:ctrl2\"></div></body>",
-                "//显示ec-control\nalert(ecui.get(\"ctrl1\").getClass());\n//显示custom\nalert(ecui.get(\"ctrl2\").getClass());"
-            ]
+            "remark": "getClass 方法返回控件当前使用的样式，扩展样式分别附加在类型样式与当前样式之后，从而实现控件的状态样式改变，详细的描述请参见 {'alterClass'|method:'control'} 方法。当前样式与 {'getBaseClass'|method:'control'} 方法返回的基本样式存在区别，在控件生成初期，当前样式等于基本样式，基本样式在初始化后无法改变，{'setClass'|method:'control'} 方法改变当前样式。"
         },
 
         {
             "name": "getHeight",
             "type": "control",
             "return": {"type": "number", "desc": "控件的高度"},
-            "desc": "获取控件区域的高度。",
-            "example": [
-                "<body><div ecui=\"type:control;id:ctrl1\"></div></body>",
-                "alert(ecui.get(\"ctrl1\").getHeight());"
-            ]
+            "desc": "获取控件区域的高度。"
         },
 
         {
-            "name": "getInvalidHeight",
+            "name": "getMinimumHeight",
             "type": "control",
-            "desc": "获取控件的完全无效高度，即控件外部区域与控件内部区域高度的差值。",
-            "return": {"type": "number", "desc": "控件的无效高度"},
-            "example": [
-                "<body><div ecui=\"type:control;id:ctrl1\"></div></body>",
-                "alert(ecui.get(\"ctrl1\").getInvalidHeight());"
-            ]
+            "desc": "获取控件的最小高度。",
+            "return": {"type": "number", "desc": "控件的最小高度"},
+            "remark": "{'setSize'|method:'control'} 方法不允许设置小于 getMinimumHeight 方法返回的高度值。"
         },
 
         {
-            "name": "getInvalidWidth",
+            "name": "getMinimumWidth",
             "type": "control",
-            "desc": "获取控件的完全无效宽度，即控件外部区域与控件内部区域宽度的差值。",
-            "return": {"type": "number", "desc": "控件的无效宽度"},
-            "example": [
-                "<body><div ecui=\"type:control;id:ctrl1\"></div></body>",
-                "alert(ecui.get(\"ctrl1\").getInvalidWidth());"
-            ]
+            "desc": "获取控件的最小宽度。",
+            "return": {"type": "number", "desc": "控件的最小宽度"},
+            "remark": "{'setSize'|method:'control'} 方法不允许设置小于 getMinimumWidth 方法返回的宽度值。"
         },
 
         {
             "name": "getOuter",
             "type": "control",
-            "desc": "获取控件外层的 Element 对象。",
+            "desc": "获取控件的外层元素。",
             "return": {"type": "HTMLElement", "desc": "Element 对象"},
-            "remark": "getOuter 方法返回用于控制控件自身布局的外层 Element 对象。",
-            "example": [
-                "<body><div id=\"custom\" ecui=\"type:control;id:ctrl1\"></div></body>",
-                "//显示 custom\nalert(ecui.get(\"ctrl1\").getOuter().id);"
-            ]
+            "remark": "getOuter 方法返回用于控制控件自身布局的外层元素。"
         },
 
         {
             "name": "getParent",
             "type": "control",
-            "return": {"type": "ecui.ui.Control", "desc": "父控件对象"},
             "desc": "获取父控件。",
-            "example": [
-                "<body><div id=\"parent\" ecui=\"type:control;id:ctrl1\"><div id=\"child\" ecui=\"type:control;id:ctrl2\"></div></div></body>",
-                "//显示 parent\nalert(ecui.get(\"ctrl2\").getParent().getBase().id)"
-            ]
+            "return": {"type": "ecui.ui.Control", "desc": "父控件对象"},
+            "remark": "控件接收的事件将向父控件冒泡处理，getParent 返回的结果是 ECUI 的逻辑父控件，父控件与子控件不一定存在 DOM 树层面的父子级关系。"
         },
 
         {
             "name": "getType",
             "type": "control",
-            "desc": "获取控件的默认样式。",
-            "return": {"type": "string", "desc": "控件的默认样式"},
-            "remark": "控件的默认样式也称为控件的类型样式，在调用 {'alterClass'|method:'control'} 方法时，默认样式与当前样式会被添加样式后缀，从而实现控件状态的样式变更。在调用 {'create'|method:'core'} 方法时指定，参见 {'getClass'|method:'control'} 与 {'getBaseClass'|method:'control'} 方法。",
-            "example": [
-                "<body><div ecui=\"type:control;id:ctrl1\"></div></body>",
-                "//显示ec-control\nalert(ecui.get(\"ctrl1\").getType());"
-            ]
+            "desc": "获取控件的类型样式。",
+            "return": {"type": "string", "desc": "控件的类型样式"},
+            "remark": "getType 方法返回控件生成时指定的 type 参数(参见 {'create'|method:'core'} 方法)。扩展样式分别附加在类型样式与当前样式之后，从而实现控件的状态样式改变，详细的描述请参见 {'alterClass'|method:'control'} 方法。类型样式不可以改变。"
         },
 
         {
@@ -1540,22 +1439,14 @@
             "type": "control",
             "desc": "获取控件的内部唯一标识符。",
             "return": {"type": "string", "desc": "控件 ID"},
-            "remark": "getUID 方法返回的 ID 不是标签 ecui 属性中指定的 id，而是框架为每个控件生成的内部唯一标识符。",
-            "example": [
-                "<body><div ecui=\"type:control;id:ctrl1\"></div></body>",
-                "alert(ecui.get(\"ctrl1\").getUID());"
-            ]
+            "remark": "getUID 方法返回的 ID 不是初始化参数中指定的 id，而是框架为每个控件生成的内部唯一标识符。"
         },
 
         {
             "name": "getWidth",
             "type": "control",
             "desc": "获取控件区域的宽度。",
-            "return": {"type": "number", "desc": "控件的宽度"},
-            "example": [
-                "<body><div ecui=\"type:control;id:ctrl1\"></div></body>",
-                "alert(ecui.get(\"ctrl1\").getWidth());"
-            ]
+            "return": {"type": "number", "desc": "控件的宽度"}
         },
 
         {
@@ -1563,11 +1454,7 @@
             "type": "control",
             "desc": "获取控件的相对X轴坐标。",
             "return": {"type": "number", "desc": "X轴坐标"},
-            "remark": "getX 方法返回控件的外层 Element 对象的 offsetLeft 属性值。如果需要得到控件相对于整个文档的X轴坐标，请调用 {'getOuter'|method:'control'} 方法获得外层 Element 对象，然后调用 DOM 的相关函数计算(例如 core.dom.getPosition)。",
-            "example": [
-                "<body><div ecui=\"type:control;id:ctrl1\"></div></body>",
-                "alert(ecui.get(\"ctrl1\").getX());"
-            ]
+            "remark": "getX 方法返回控件的外层元素的 offsetLeft 属性值。如果需要得到控件相对于整个文档的X轴坐标，请调用 {'getOuter'|method:'control'} 方法获得外层元素，然后调用 DOM 的相关函数计算(例如 ecui.dom.getPosition)。"
         },
 
         {
@@ -1575,83 +1462,67 @@
             "type": "control",
             "desc": "获取控件的相对Y轴坐标。",
             "return": {"type": "number", "desc": "Y轴坐标"},
-            "remark": "getY 方法返回控件的外层 Element 对象的 offsetTop 属性值。如果需要得到控件相对于整个文档的X轴坐标，请调用 {'getOuter'|method:'control'} 方法获得外层 Element 对象，然后调用 DOM 的相关函数计算(例如 core.dom.getPosition)。",
-            "example": [
-                "<body><div ecui=\"type:control;id:ctrl1\"></div></body>",
-                "alert(ecui.get(\"ctrl1\").getY());"
-            ]
+            "remark": "getY 方法返回控件的外层元素的 offsetTop 属性值。如果需要得到控件相对于整个文档的Y轴坐标，请调用 {'getOuter'|method:'control'} 方法获得外层元素，然后调用 DOM 的相关函数计算(例如 ecui.dom.getPosition)。"
         },
 
         {
             "name": "hide",
             "type": "control",
             "desc": "隐藏控件。",
-            "remark": "如果控件处于显示状态，调用 hide 方法会触发 {'onhide'|event:'control'} 事件，控件转为隐藏状态，并且控件会自动失去焦点。如果控件已经处于隐藏状态，则不执行任何操作。",
-            "example": [
-                "<body><div ecui=\"type:control;id:ctrl1\"></div></body>",
-                "//隐藏控件\necui.get(\"ctrl1\").hide();\n//显示false\necui.get(\"ctrl1\").isShow();\n//显示控件\necui.get(\"ctr1\").show();\n//显示true\necui.get(\"ctrl1\").isShow();"
-            ]
+            "remark": "如果控件处于显示状态，调用 hide 方法会触发 {'onhide'|event:'control'} 事件，控件转为隐藏状态，并且控件会自动失去激活、悬停与焦点状态。如果控件已经处于隐藏状态，则不执行任何操作。"
         },
 
         {
             "name": "init",
             "type": "control",
-            "desc": "控件渲染完成后初始化的处理。",
-            "remark": "init 方法触发 {'oninit'|event:'control'} 事件，然后调用 {'\\$init'|method:'control'} 方法，init 方法在控件渲染完成时被自动调用，不需要直接调用，参见 {'create'|method:'core'} 与 {'init'|method:'core'} 方法。"
+            "desc": "控件初始化。",
+            "remark": "init 方法在控件缓存读取后调用，有关控件生成的完整过程描述请参见 {'control'|control}。"
         },
 
         {
-            "name": "isCapture",
+            "name": "isCapturable",
             "type": "control",
-            "desc": "判断控件是否响应浏览器事件。",
+            "desc": "判断是否响应浏览器事件。",
             "return": {"type": "boolean", "desc": "控件是否响应浏览器事件"},
             "remark": "控件不响应浏览器事件时，相应的事件由父控件进行处理。"
         },
 
         {
-            "name": "isEnabled",
+            "name": "isDisabled",
             "type": "control",
-            "desc": "判断控件是否处于可操作状态。",
-            "return": {"type": "boolean", "desc": "控件是否可操作"},
-            "remark": "控件是否处于可操作状态，影响控件是否处理事件，控件的可操作状态，受父控件的可操作状态影响。可以通过 {'setEnabled'|method:'control'} 方法改变控件的可操作状态，如果控件设置为不可操作，它所有的子控件也都不可操作。",
-            "example": [
-                "<body><div ecui=\"type:control;id:ctrl1\"></div></body>",
-                "//显示true\nalert(ecui.get(\"ctrl1\").isEnabled());"
-            ]
+            "desc": "判断控件是否处于失效状态。",
+            "return": {"type": "boolean", "desc": "控件是否失效"},
+            "remark": "控件是否处于失效状态，影响控件是否处理事件，它受到父控件的失效状态的影响。可以通过 {'enable'|method:'control'} 与 {'disable'|method:'control'} 方法改变控件的失效状态，如果控件失效，它所有的子控件也会失效。"
         },
 
         {
             "name": "isFocusable",
             "type": "control",
-            "desc": "判断控件是否允许获取焦点。",
+            "desc": "判断是否允许获取焦点。",
             "return": {"type": "boolean", "desc": "控件是否允许获取焦点"},
-            "remark": "控件不允许获取焦点时，被点击时不会改变当前的焦点控件，但此时控件拥有框架处理的最高优先级。"
-        },
-
-        {
-            "name": "isSelectStart",
-            "type": "control",
-            "desc": "判断控件是否允许选中内容。",
-            "return": {"type": "boolean", "desc": "控件是否允许选中内容"}
+            "remark": "控件不允许获得焦点时，被点击时不会改变当前处于焦点状态的控件，但此时控件拥有框架事件响应的最高优先级。"
         },
 
         {
             "name": "isShow",
             "type": "control",
-            "desc": "判断控件是否处于显示状态。",
-            "return": {"type": "boolean", "desc": "控件是否显示"},
-            "example": [
-                "<body><div ecui=\"type:control;id:ctrl1\"></div></body>",
-                "//显示true\nalert(ecui.get(\"ctrl1\").isShow());"
-            ]
+            "desc": "判断是否处于显示状态。",
+            "return": {"type": "boolean", "desc": "控件是否显示"}
+        },
+
+        {
+            "name": "isUserSelect",
+            "type": "control",
+            "desc": "判断是否允许选中内容。",
+            "return": {"type": "boolean", "desc": "控件是否允许选中内容"}
         },
 
         {
             "name": "keydown",
             "type": "control",
-            "desc": "控件拥有焦点时，键盘按下。",
+            "desc": "键盘按下。",
             "params": [
-                {"name": "event", "type":"Event", "desc": "事件对象"}
+                {"name": "event", "type":"ecui.ui.Event", "desc": "事件对象"}
             ],
             "event": 10
         },
@@ -1659,9 +1530,9 @@
         {
             "name": "keypress",
             "type": "control",
-            "desc": "控件拥有焦点时，键盘按压。",
+            "desc": "键盘按住。",
             "params": [
-                {"name": "event", "type":"Event", "desc": "事件对象"}
+                {"name": "event", "type":"ecui.ui.Event", "desc": "事件对象"}
             ],
             "event": 10
         },
@@ -1669,9 +1540,9 @@
         {
             "name": "keyup",
             "type": "control",
-            "desc": "控件拥有焦点时，键盘弹起。",
+            "desc": "键盘松开。",
             "params": [
-                {"name": "event", "type":"Event", "desc": "事件对象"}
+                {"name": "event", "type":"ecui.ui.Event", "desc": "事件对象"}
             ],
             "event": 10
         },
@@ -1679,19 +1550,20 @@
         {
             "name": "mousedown",
             "type": "control",
-            "desc": "鼠标在控件区域内按下。",
+            "desc": "鼠标键按下。",
             "params": [
-                {"name": "event", "type":"Event", "desc": "事件对象"}
+                {"name": "event", "type":"ecui.ui.Event", "desc": "事件对象"}
             ],
+            "remark": "mousedown 不会改变控件的激活与焦点状态。",
             "event": 10
         },
 
         {
             "name": "mousemove",
             "type": "control",
-            "desc": "鼠标在控件区域内移动。",
+            "desc": "鼠标移动。",
             "params": [
-                {"name": "event", "type":"Event", "desc": "事件对象"}
+                {"name": "event", "type":"ecui.ui.Event", "desc": "事件对象"}
             ],
             "event": 10
         },
@@ -1699,9 +1571,9 @@
         {
             "name": "mouseout",
             "type": "control",
-            "desc": "鼠标移出控件区域。",
+            "desc": "鼠标移出。",
             "params": [
-                {"name": "event", "type":"Event", "desc": "事件对象"}
+                {"name": "event", "type":"ecui.ui.Event", "desc": "事件对象"}
             ],
             "event": 10
         },
@@ -1709,9 +1581,9 @@
         {
             "name": "mouseover",
             "type": "control",
-            "desc": "鼠标移入控件区域。",
+            "desc": "鼠标移入。",
             "params": [
-                {"name": "event", "type":"Event", "desc": "事件对象"}
+                {"name": "event", "type":"ecui.ui.Event", "desc": "事件对象"}
             ],
             "event": 10
         },
@@ -1719,9 +1591,9 @@
         {
             "name": "mouseup",
             "type": "control",
-            "desc": "鼠标在控件区域内弹起。",
+            "desc": "鼠标键松开。",
             "params": [
-                {"name": "event", "type":"Event", "desc": "事件对象"}
+                {"name": "event", "type":"ecui.ui.Event", "desc": "事件对象"}
             ],
             "event": 10
         },
@@ -1729,11 +1601,10 @@
         {
             "name": "mousewheel",
             "type": "control",
-            "desc": "鼠标在控件区域滚动滚轮。",
+            "desc": "鼠标滚轮滚动。",
             "params": [
-                {"name": "event", "type":"Event", "desc": "事件对象"}
+                {"name": "event", "type":"ecui.ui.Event", "desc": "事件对象"}
             ],
-            "return": {"type": "boolean", "desc": "是否停止冒泡"},
             "event": 10
         },
 
@@ -1741,67 +1612,14 @@
             "name": "repaint",
             "type": "control",
             "desc": "控件刷新。",
-            "params": [
-                {"name": "isCreated", "type":"boolean", "desc": "是否处于创建过程中，如果省略表示否"}
-            ],
-            "remark": "paint 方法将导致控件整体重绘，在通常情况下，建议控件改变的状态进行重绘，而不是调用 paint 方法。"
-        },
-
-        {
-            "name": "pressend",
-            "type": "control",
-            "desc": "控件按压状态结束。",
-            "params": [
-                {"name": "event", "type":"Event", "desc": "事件对象"}
-            ],
-            "event": 10
-        },
-
-        {
-            "name": "pressmove",
-            "type": "control",
-            "desc": "控件按压状态中鼠标在控件区域内移动。",
-            "params": [
-                {"name": "event", "type":"Event", "desc": "事件对象"}
-            ],
-            "event": 10
-        },
-
-        {
-            "name": "pressout",
-            "type": "control",
-            "desc": "控件按压状态中鼠标移出控件区域。",
-            "params": [
-                {"name": "event", "type":"Event", "desc": "事件对象"}
-            ],
-            "event": 10
-        },
-
-        {
-            "name": "pressover",
-            "type": "control",
-            "desc": "控件按压状态中鼠标移入控件区域。",
-            "params": [
-                {"name": "event", "type":"Event", "desc": "事件对象"}
-            ],
-            "event": 10
-        },
-
-        {
-            "name": "pressstart",
-            "type": "control",
-            "desc": "控件按压状态开始。",
-            "params": [
-                {"name": "event", "type":"Event", "desc": "事件对象"}
-            ],
-            "event": 10
+            "remark": "repaint 方法不改变控件的内容与大小进行重绘。控件如果生成后不位于文档 DOM 树中，样式无法被正常读取，控件显示后如果不是预期的效果，需要调用 repaint 方法刷新。"
         },
 
         {
             "name": "resize",
             "type": "control",
-            "desc": "控件大小发生变化的处理。",
-            "remark": "resize 方法重新计算并设置控件的大小，resize 方法触发 {'onresize'|event:'control'} 事件，如果事件返回值不为 false，则调用 {'\\$resize'|method:'control'} 方法。因为浏览器可视化区域发生变化时，可能需要改变控件大小，框架会自动调用控件的 resize 方法来刷新控件。"
+            "desc": "控件重置大小并刷新。",
+            "remark": "resize 方法重新计算并设置控件的大小，resize 方法触发 {'onresize'|event:'control'} 事件，如果事件返回值不为 false，则调用 {'\\$resize'|method:'control'} 方法按默认的方式重绘控件。因为浏览器可视化区域发生变化时，可能需要改变控件大小，框架会自动调用控件的 resize 方法。"
         },
 
         {
@@ -1811,22 +1629,7 @@
                 {"name": "width", "type": "number", "desc": "宽度"},
                 {"name": "height", "type": "number", "desc": "高度"}
             ],
-            "desc": "设置控件内层可使用区域的大小。",
-            "remark": "可使用区域的大小，与 {'getWidth'|method:'control'}、{'getHeight'|method:'control'}、{'getInvalidWidth'|method:'control'}、{'getInvalidHeight'|method:'control'} 四个方法有关。",
-            "example": [
-                "<body><div ecui=\"type:control;id:ctrl1\"></div></body>",
-                "ecui.get(\"ctrl1\").setBodySize(100, 100);"
-            ]
-        },
-
-        {
-            "name": "setCapture",
-            "type": "control",
-            "params": [
-                {"name": "status", "type": "boolean", "desc": "控件是否响应浏览器事件，默认响应事件"}
-            ],
-            "desc": "设置控件是否响应浏览器事件。",
-            "remark": "控件不响应浏览器事件时，相应的事件由父控件进行处理。"
+            "desc": "设置控件可使用区域的大小。"
         },
 
         {
@@ -1834,38 +1637,18 @@
             "type": "control",
             "desc": "设置控件的当前样式。",
             "params": [
-                {"name": "currClass", "type": "string", "desc": "控件的当前样式"}
+                {"name": "currClass", "type": "string", "desc": "控件的当前样式名称"}
             ],
-            "remark": "setClass 方法设置控件当前使用的样式，在调用 {'alterClass'|method:'control'} 方法时，当前样式与默认样式会被添加样式后缀，从而实现控件状态的样式变更。控件的当前样式通过 {'getClass'|method:'control'} 方法获取。<font color=\"red\">请注意，使用 setClass 方法不会改变控件部件的基本样式。</font>",
-            "example": [
-                "<body><div ecui=\"type:control;id:ctrl1\"></div></body>",
-                "//设置控件样式为custom\necui.get(\"ctrl1\").setClass(\"custom\");\n//显示custom\nalert(ecui.get(\"ctrl1\").getClass());"
-            ]
+            "remark": "setClass 方法改变控件的当前样式，扩展样式分别附加在类型样式与当前样式之后，从而实现控件的状态样式改变，详细的描述请参见 alterClass 方法。控件的当前样式通过 {'getClass'|method:'control'} 方法获取。"
         },
 
         {
-            "name": "setEnabled",
-            "type": "control",
-            "return": {"type": "boolean", "desc": "状态是否发生改变"},
-            "params": [
-                {"name": "status", "type": "boolean", "desc": "控件是否可操作，默认为 true"}
-            ],
-            "desc": "设置控件的可操作状态。",
-            "remark": "如果控件设置为不可操作，调用 {'alterClass'|method:'control'} 方法为控件添加扩展样式 -disabled，同时自动失去焦点；如果设置为可操作，移除控件的扩展样式 -disabled。setEnabled 方法只是设置控件自身的可操作状态，然后控件设置为可操作，并不代表调用 {'isEnabled'|method:'control'} 方法返回的值一定是 true，控件的可操作状态还受到父控件的可操作状态的影响。",
-            "example": [
-                "<body><div ecui=\"type:control;id:ctrl1\"></div></body>",
-                "ecui.get(\"ctrl1\").setEnabled(false);"
-            ]
-        },
-
-        {
-            "name": "setFocusable",
+            "name": "setContent",
             "type": "control",
             "params": [
-                {"name": "status", "type": "boolean", "desc": "控件是否允许获取焦点，默认允许"}
+                {"name": "html", "type": "string", "desc": "HTML 片断"}
             ],
-            "desc": "设置控件是否允许获取焦点。",
-            "remark": "控件不允许获取焦点时，被点击时不会改变当前的焦点控件，但此时控件拥有框架处理的最高优先级。"
+            "desc": "设置控件的内容。"
         },
 
         {
@@ -1873,13 +1656,9 @@
             "type": "control",
             "desc": "设置当前控件的父控件。",
             "params": [
-                {"name": "parent", "type": "ecui.ui.Control|HTMLElement", "desc": "父控件对象/父 Element 对象，忽略参数则将控件移出 DOM 树"}
+                {"name": "parent", "type": "ecui.ui.Control|HTMLElement", "desc": "父控件对象/父 Element 对象，忽略参数将控件移出 DOM 树"}
             ],
-            "remark": "setParent 方法设置父控件，参数是父控件对象时，将当前控件挂接到父控件对象的内层 Element 对象下，如果参数是父 Element 对象，将当前控件挂接到这个 Element 对象上并使用 {'findControl'|method:'core'} 查找父控件对象。调用 setParent 方法设置父控件，如果在设置父控件之前已经存在父控件，会触发原父控件的 {'onremove'|event:'control'} 事件并解除控件与原父控件的关联，新的父控件如果存在，会触发父控件的 {'onappend'|event:'control'} 事件，如果事件返回 false，表示父控件不允许当前控件作为它的子控件，设置失败，相当于忽略 parent 参数。",
-            "example": [
-                "<body><div id=\"newparent\" ecui=\"type:control;id:ctrl3\"></div><div id=\"parent\" ecui=\"type:control;id:ctrl1\"><div id=\"child\" ecui=\"type:control;id:ctrl2\"></div></div></body>",
-                "//显示 parent\nalert(ecui.get(\"ctrl2\").getParent().getBase().id)\n//重新设置父控件\necui.get(\"ctrl2\").setParent(ecui.get(\"ctrl3\"));\n//显示 newparent\nalert(ecui.get(\"ctrl2\").getParent().getBase().id)"
-            ]
+            "remark": "setParent 方法设置父控件，参数是父控件对象时，将当前控件挂接到父控件对象的内层元素下，如果参数是父 Element 对象，将当前控件挂接到这个 Element 对象上并使用 {'findControl'|method:'core'} 查找父控件对象。调用 setParent 方法设置父控件，如果在设置父控件之前已经存在父控件，会触发原父控件的 {'onremove'|event:'control'} 事件并解除控件与原父控件的关联，新的父控件如果存在，会触发父控件的 {'onappend'|event:'control'} 事件，如果事件返回 false，表示父控件不允许当前控件作为它的子控件，设置失败，相当于忽略 parent 参数。"
         },
 
         {
@@ -1890,11 +1669,7 @@
                 {"name": "x", "type": "number", "desc": "控件的X轴坐标"},
                 {"name": "y", "type": "number", "desc": "控件的Y轴坐标"}
             ],
-            "remark": "setPosition 方法设置的是控件的 left 与 top 样式，受到 position 样式的影响。",
-            "example": [
-                "<body><div style=\"position:absolute;\" ecui=\"type:control;id:ctrl1\"></div></body>",
-                "ecui.get(\"ctrl1\").setPosition(100, 100);"
-            ]
+            "remark": "setPosition 方法设置的是控件的 left 与 top 样式，受到 position 样式的影响。"
         },
 
         {
@@ -1905,21 +1680,14 @@
                 {"name": "width", "type": "number", "desc": "控件的宽度"},
                 {"name": "height", "type": "number", "desc": "控件的高度"}
             ],
-            "example": [
-                "<body><div ecui=\"type:control;id:ctrl1\"></div></body>",
-                "ecui.get(\"ctrl1\").setSize(100, 100);"
-            ]
+            "remark": "需要设置的控件大小如果低于控件允许的最小值，将忽略对应的宽度或高度的设置。"
         },
 
         {
             "name": "show",
             "type": "control",
             "desc": "显示控件。",
-            "remark": "如果控件处于隐藏状态，调用 show 方法会触发 {'onshow'|event:'control'} 事件，控件转为显示状态。如果控件已经处于显示状态，则不执行任何操作。",
-            "example": [
-                "<body><div ecui=\"type:control;id:ctrl1\"></div></body>",
-                "//隐藏控件\necui.get(\"ctrl1\").hide();\n//显示false\nalert(ecui.get(\"ctrl1\").isShow());//显示控件\necui.get(\"ctr1\").show();\n//显示true\nalert(ecui.get(\"ctrl1\").isShow());"
-            ]
+            "remark": "如果控件处于隐藏状态，调用 show 方法会触发 {'onshow'|event:'control'} 事件，控件转为显示状态。如果控件已经处于显示状态，则不执行任何操作。"
         }
     ],
 
@@ -1955,7 +1723,7 @@
             "name": "$create",
             "type": "scroll",
             "params": [
-                {"name": "cacheSize", "type": "boolean", "desc": "是否需要缓存控件大小，如果控件是另一个控件的部件时，不缓存大小能加快渲染速度，默认缓存"}
+                {"name": "cacheSize", "type": "boolean", "desc": "是否需要缓存控件的大小，如果控件是另一个控件的部件时，不缓存大小能加快渲染速度，默认缓存"}
             ],
             "remark": "滚动条控件建立完成后不进行任何处理。"
         },
@@ -2118,6 +1886,13 @@
             "name": "$mousewheel",
             "type": "panel",
             "remark": "如果有垂直滚动条，则垂直滚动条随滚轮滚动。"
+        },
+
+        {
+            "name": "$scroll",
+            "type": "control",
+            "desc": "滚动条滚动事件的默认处理。",
+            "remark": "如果控件包含滚动条，滚动条滚动时触发 {'onscroll'|event:'control'} 事件，如果事件返回值不为 false，则调用 $scroll 方法。"
         },
 
         {

@@ -182,8 +182,8 @@ _oInner  - 内层装饰器或者控件对象
         //__gzip_original__inner
         var style = this._eBase.style,
             inner = this._oInner,
-            invalidWidth = UI_CONTROL_CLASS.$getInvalidWidth.call(this),
-            invalidHeight = UI_CONTROL_CLASS.$getInvalidHeight.call(this),
+            invalidWidth = UI_CONTROL_CLASS.$getBasicWidth.call(this),
+            invalidHeight = UI_CONTROL_CLASS.$getBasicHeight.call(this),
             fixedSize = isFixedSize();
 
         inner.$setSize(width && width - invalidWidth, height && height - invalidHeight, true);
@@ -221,7 +221,7 @@ _oInner  - 内层装饰器或者控件对象
      * @return {number} 装饰器区域的高度
      */
     EXT_DECORATOR_CLASS.getHeight = function () {
-        return this._oInner.getHeight(true) + UI_CONTROL_CLASS.$getInvalidHeight.call(this);
+        return this._oInner.getHeight(true) + UI_CONTROL_CLASS.$getBasicHeight.call(this);
     };
 
     /**
@@ -230,8 +230,8 @@ _oInner  - 内层装饰器或者控件对象
      *
      * @return {number} 装饰器内外区域的高度差
      */
-    EXT_DECORATOR_CLASS.getInvalidHeight = function () {
-        return this._oInner.getInvalidHeight(true) + UI_CONTROL_CLASS.$getInvalidHeight.call(this);
+    EXT_DECORATOR_CLASS.getMinimumHeight = function () {
+        return this._oInner.getMinimumHeight(true) + UI_CONTROL_CLASS.$getBasicHeight.call(this);
     };
 
     /**
@@ -240,8 +240,8 @@ _oInner  - 内层装饰器或者控件对象
      *
      * @return {number} 装饰器内外区域的宽度差
      */
-    EXT_DECORATOR_CLASS.getInvalidWidth = function () {
-        return this._oInner.getInvalidWidth(true) + UI_CONTROL_CLASS.$getInvalidWidth.call(this);
+    EXT_DECORATOR_CLASS.getMinimumWidth = function () {
+        return this._oInner.getMinimumWidth(true) + UI_CONTROL_CLASS.$getBasicWidth.call(this);
     };
 
     /**
@@ -261,7 +261,7 @@ _oInner  - 内层装饰器或者控件对象
      * @return {number} 装饰器区域的宽度
      */
     EXT_DECORATOR_CLASS.getWidth = function () {
-        return this._oInner.getWidth(true) + UI_CONTROL_CLASS.$getInvalidWidth.call(this);
+        return this._oInner.getWidth(true) + UI_CONTROL_CLASS.$getBasicWidth.call(this);
     };
 
     /**
@@ -289,7 +289,7 @@ _oInner  - 内层装饰器或者控件对象
             var i = 0, names = [
                 ['$cache', 2], ['$init', 0], ['$resize', 0], ['$setSize', 2],
                 ['alterClass', 2], ['getOuter', 0],
-                ['getInvalidWidth', 0], ['getInvalidHeight', 0],
+                ['getMinimumWidth', 0], ['getMinimumHeight', 0],
                 ['getWidth', 0], ['getHeight', 0]
             ];
             i < 10;

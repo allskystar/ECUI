@@ -12,7 +12,7 @@ function before() {
 
 function after() {
     ecui.dispose(ecui.get('common'));
-    document.body.removeChild(document.getElementById('common'));
+    document.body.removeChild(baidu.dom.g('common'));
     value_of(!ecui.query().length).should_be_true();
 }
 
@@ -46,7 +46,7 @@ test('$clearState', {
         uiut.MockEvents.mousedown(el);
         uiut.MockEvents.mouseup(el);
         ecui.$clearState(parent);
-        value_of(ecui.getOvered()).should_be(common);
+        value_of(ecui.getHovered()).should_be(common);
         value_of(ecui.getFocused()).should_be(common);
     },
 
@@ -59,7 +59,7 @@ test('$clearState', {
         uiut.MockEvents.mousedown(el);
         uiut.MockEvents.mouseup(el);
         ecui.$clearState(parent);
-        value_of(ecui.getOvered()).should_be(common);
+        value_of(ecui.getHovered()).should_be(common);
         value_of(ecui.getFocused()).should_be(common);
     },
 
@@ -73,7 +73,7 @@ test('$clearState', {
         uiut.MockEvents.mousedown(el);
         uiut.MockEvents.mouseup(el);
         ecui.$clearState(control);
-        value_of(ecui.getOvered()).should_be(child);
+        value_of(ecui.getHovered()).should_be(child);
         value_of(ecui.getFocused()).should_be(child);
         ecui.dispose(control);
     },
@@ -91,7 +91,7 @@ test('$clearState', {
         uiut.MockEvents.mousedown(el);
         ecui.$clearState(parent);
         uiut.MockEvents.mouseup(el);
-        value_of(clicked).should_be(false);
+        value_of(clicked).should_be_false();
         value_of(ecui.getActived()).should_be(null);
     }
 });
@@ -152,7 +152,7 @@ test('create', {
     },
 
     '基于指定的DOM节点，自动设置样式与查找父节点': function () {
-        var el = document.getElementById('inner');
+        var el = baidu.dom.g('inner');
         el.innerHTML = '<div class="first"></div>';
         el = el.firstChild;
 
@@ -171,8 +171,8 @@ test('dispose', {
         ecui.dispose(ecui.get('parent'));
         value_of(ecui.get('parent')).should_be(null);
         value_of(ecui.get('child')).should_be(null);
-        value_of(document.getElementById('parent').getControl).should_be(void(0));
-        value_of(document.getElementById('child').getControl).should_be(void(0));
+        value_of(baidu.dom.g('parent').getControl).should_be(void(0));
+        value_of(baidu.dom.g('child').getControl).should_be(void(0));
         value_of(ecui.query().length + 2).should_be(length);
     },
 
@@ -182,8 +182,8 @@ test('dispose', {
         ecui.dispose(ecui.get('parent').getOuter());
         value_of(ecui.get('parent')).should_be(null);
         value_of(ecui.get('child')).should_be(null);
-        value_of(document.getElementById('parent').getControl).should_be(void(0));
-        value_of(document.getElementById('child').getControl).should_be(void(0));
+        value_of(baidu.dom.g('parent').getControl).should_be(void(0));
+        value_of(baidu.dom.g('child').getControl).should_be(void(0));
         value_of(ecui.query().length + 2).should_be(length);
     },
 
@@ -197,7 +197,7 @@ test('dispose', {
         uiut.MockEvents.mousedown(el);
         ecui.dispose(ecui.get('parent').getOuter());
         value_of(ecui.getActived()).should_be(common);
-        value_of(ecui.getOvered()).should_be(common);
+        value_of(ecui.getHovered()).should_be(common);
         value_of(ecui.getFocused()).should_be(common);
         value_of(ecui.query().length + 2).should_be(length);
         uiut.MockEvents.mouseup(common.getBase());
@@ -292,257 +292,24 @@ test('drag', {
     }
 });
 
-test('特殊操作测试', {
-    '强制点击拦截(intercept)': function () {
-        var result = [],
-            common = ecui.get('common'),
-            ctrl = ecui.create('Control');
-        ctrl.setParent(document.body);
-
-        common.onclick = function () {
-            result.push('common');
-        };
-        ctrl.$intercept = function () {
-            result.push('ctrl');
-        };
-
-        uiut.MockEvents.mousedown(common.getBase());
-        uiut.MockEvents.mouseup(common.getBase());
-        ecui.intercept(ctrl);
-        uiut.MockEvents.mousedown(common.getBase());
-        uiut.MockEvents.mouseup(common.getBase());
-        value_of(ecui.getFocused()).should_be(common);
-        value_of(result).should_be(['common', 'ctrl']);
-
-        ctrl.setParent();
-        ecui.dispose(ctrl);
-    },
-
-    '选择事件触发顺序(select)': function () {
-        var ctrl = ecui.get('common'),
-            el = ctrl.getBase(),
-            result = [];
-
-        ctrl.onselectstart = function () {
-            result.push('start');
-        };
-        ctrl.onselect = function () {
-            result.push('selecting');
-        };
-        ctrl.onselectend = function () {
-            result.push('end');
-        };
-        ctrl.onmousedown = function (event) {
-            ecui.select(this, event);
-        };
-        uiut.MockEvents.mousedown(el);
-        uiut.MockEvents.mousemove(el, {'clientX': 10, 'clientY': 10});
-        uiut.MockEvents.mousemove(el, {'clientX': 10, 'clientY': 10});
-        uiut.MockEvents.mouseup(el);
-        uiut.MockEvents.mousemove(el, {'clientX': 10, 'clientY': 10});
-        value_of(result).should_be(['start', 'selecting', 'selecting', 'end']);
-    },
-
-    '缩放事件触发顺序(zoom)': function () {
-        var ctrl = ecui.get('common'),
-            el = ctrl.getBase(),
-            result = [];
-
-        ctrl.setSize(10, 10);
-        ctrl.onzoomstart = function () {
-            result.push('start');
-        };
-        ctrl.onzoom = function () {
-            result.push('zooming');
-        };
-        ctrl.onzoomend = function () {
-            result.push('end');
-        };
-        ctrl.onmousedown = function (event) {
-            ecui.zoom(this, event);
-        }
-
-        uiut.MockEvents.mousedown(el);
-        uiut.MockEvents.mousemove(el, {'clientX': 10, 'clientY': 10});
-        uiut.MockEvents.mousemove(el, {'clientX': 20, 'clientY': 20});
-        uiut.MockEvents.mouseup(el);
-        uiut.MockEvents.mousemove(el, {'clientX': 10, 'clientY': 10});
-        value_of(result).should_be(['start', 'zooming', 'zooming', 'end']);
-    },
-
-    '正向缩放(zoom)': function () {
-        var ctrl = ecui.get('common'),
-            el = ctrl.getBase();
-        ctrl.setSize(10, 10);
-        ctrl.setPosition(0, 0);
-        ctrl.onmousedown = function (event) {
-            ecui.zoom(this, event);
-        };
-        uiut.MockEvents.mousedown(el);
-        uiut.MockEvents.mousemove(el, {'clientX': 50, 'clientY': 50});
-        uiut.MockEvents.mouseup(el);
-        value_of(ctrl.getHeight()).should_be(60);
-        value_of(ctrl.getWidth()).should_be(60);
-    },
-
-    '反向缩放(zoom)': function () {
-        var ctrl = ecui.get('common'),
-            el = ctrl.getBase();
-        ctrl.setSize(10, 10);
-        ctrl.setPosition(0, 0);
-        ctrl.onmousedown = function (event) {
-            ecui.zoom(this, event);
-        };
-        uiut.MockEvents.mousedown(el);
-        uiut.MockEvents.mousemove(el, {'clientX': -15, 'clientY': -15});
-        uiut.MockEvents.mouseup(el);
-        value_of(ctrl.getHeight()).should_be(5);
-        value_of(ctrl.getWidth()).should_be(5);
-    },
-
-    '缩放范围限制(zoom)': function () {
-        var ctrl = ecui.get('common'),
-            el = ctrl.getBase();
-        ctrl.setSize(10, 10);
-        ctrl.setPosition(0, 0);
-        ctrl.onmousedown = function (event) {
-            ecui.zoom(this, event, {'minWidth': 5, 'minHeight': 5, 'maxWidth': 20, 'maxHeight': 20});
-        };
-        uiut.MockEvents.mousedown(el);
-        uiut.MockEvents.mousemove(el, {'clientX': 10, 'clientY': 10});
-        value_of(ctrl.getHeight()).should_be(20);
-        value_of(ctrl.getWidth()).should_be(20);
-
-        uiut.MockEvents.mousemove(el, {'clientX': 15, 'clientY': 15});
-        value_of(ctrl.getHeight()).should_be(20);
-        value_of(ctrl.getWidth()).should_be(20);
-
-        uiut.MockEvents.mousemove(el, {'clientX': 9,'clientY': 9});
-        value_of(ctrl.getHeight()).should_be(19);
-        value_of(ctrl.getWidth()).should_be(19);
-
-        uiut.MockEvents.mousemove(el, {'clientX': -10,'clientY': -10});
-        value_of(ctrl.getHeight()).should_be(5);
-        value_of(ctrl.getWidth()).should_be(5);
-        uiut.MockEvents.mouseup(el);
-    }
-});
-
-test('dispose', {
-    '删除并释放控件(dispose/init)': function () {
-        var el = document.getElementById('inner');
-        el.innerHTML =
-            '<div id="newParent" ecui="type:control;id:newParent">'
-            + '<div id="newChild" ecui="type:control;id:newChild"></div></div>';
-        ecui.init(el);
-
-        var parent = ecui.get('parent'),
-            child = ecui.get('child');
-
-        value_of(parent).should_not_be(null);
-        value_of(child).should_not_be(null);
-        value_of(child.getParent()).should_be(parent);
-        value_of(ecui.query({type: ecui.ui.Control}).length).should_be(3);
-
-        ecui.dispose(parent);
-        value_of(ecui.get('parent')).should_be(null);
-        value_of(ecui.get('child')).should_be(null);
-        value_of(document.getElementById('parent').getControl).should_be(void(0));
-        value_of(document.getElementById('child').getControl).should_be(void(0));
-        value_of(ecui.query({type: ecui.ui.Control}).length).should_be(1);
-    },
-
-    '删除并释放DOM节点下的控件(dispose/init)': function () {
-        var el = document.getElementById('inner');
-        el.innerHTML =
-            '<div id="parent" ecui="type:control;id:parent">'
-            + '<div id="child" ecui="type:control;id:child"></div></div>';
-        ecui.init(el);
-
-        var parent = ecui.get('parent'),
-            child = ecui.get('child');
-
-        value_of(parent).should_not_be(null);
-        value_of(child).should_not_be(null);
-        value_of(child.getParent()).should_be(parent);
-        value_of(ecui.query({type: ecui.ui.Control}).length).should_be(3);
-
-        ecui.dispose(document.getElementById('parent'));
-        value_of(ecui.get('parent')).should_be(null);
-        value_of(ecui.get('child')).should_be(null);
-        value_of(document.getElementById('parent').getControl).should_be(void(0));
-        value_of(document.getElementById('child').getControl).should_be(void(0));
-        value_of(ecui.query({type: ecui.ui.Control}).length).should_be(1);
-    }
-});
-
-test('控件绑定与连接测试', {
-    '在绑定控件的DOM节点向上查找控件(findControl)': function () {
-        var el = document.getElementById('common');
+test('findControl', {
+    '在控件当前元素上查找控件': function () {
+        var el = baidu.dom.g('common');
         value_of(ecui.findControl(el)).should_be(ecui.get('common'));
     },
 
-    '在控件内部的DOM节点向上查找控件(findControl)': function () {
-        var el = document.getElementById('inner');
-        value_of(ecui.findControl(el)).should_be(ecui.get('common'));
+    '控件上级DOM元素存在控件': function () {
+        var el = baidu.dom.g('inner');
+        value_of(ecui.findControl(el)).should_be(ecui.get('child'));
     },
 
-    '在控件外部的DOM节点向上查找控件(findControl)': function () {
-        var el = document.createElement('div');
-        document.body.appendChild(el);
-        value_of(ecui.findControl(el)).should_be(null);
-    },
-
-    '根据控件ID或者DOM对象获取控件(get/getControl)': function () {
-        var ctrl = ecui.get('ctrl');
-        value_of(ctrl).should_be(null);
-        ctrl = ecui.get('common');
-        value_of(ctrl.getBase().getAttribute('id')).should_be('common');
-        value_of(document.getElementById('common').getControl()).should_be(ctrl);
+    '控件上级DOM元素不存在控件': function () {
+        var el = baidu.dom.g('common');
+        value_of(ecui.findControl(ecui.dom.getParent(el))).should_be(null);
     }
 });
 
-test('getFocused 测试', {
-    '测试': function () {
-        var common = ecui.get('common'),
-            ctrl = ecui.create('Control'),
-            el = ctrl.getBase();
-
-        ctrl.setParent(document.body);
-
-        uiut.MockEvents.mousedown(el);
-        uiut.MockEvents.mouseup(el);
-        value_of(ecui.getFocused()).should_be(ctrl);
-
-        el = common.getBase();
-        uiut.MockEvents.mousedown(el);
-        uiut.MockEvents.mouseup(el);
-        value_of(ecui.getFocused()).should_be(common);
-
-        uiut.MockEvents.mousedown(document.body);
-        uiut.MockEvents.mouseup(document.body);
-        value_of(ecui.getFocused()).should_be(null);
-
-        ctrl.setParent();
-        ecui.dispose(ctrl);
-    }
-});
-
-test('getKey 测试', {
-    '测试': function () {
-        uiut.MockEvents.keydown(document, 32);
-        uiut.MockEvents.keypress(document, 32);
-        value_of(ecui.getKey()).should_be(32);
-        uiut.MockEvents.keyup(document, 32);
-        uiut.MockEvents.keydown(document, 18);
-        // 特殊字符在keypress事件中被设置为0
-        uiut.MockEvents.keypress(document, 0);
-        value_of(ecui.getKey()).should_be(18);
-        uiut.MockEvents.keyup(document, 18);
-    }
-});
-
-test('getMouseX/getMouseY 测试', {
+test('getMouseX/getMouseY', {
     '相对于页面': function () {
         uiut.MockEvents.mousemove(document.body, {'clientX': 100, 'clientY': 100});
         value_of(ecui.getMouseX()).should_be(100);
@@ -550,75 +317,156 @@ test('getMouseX/getMouseY 测试', {
     },
 
     '相对于控件(无边框)': function () {
-        var ctrl = ecui.get('common');
-        ctrl.getBase().style.position = 'absolute';
-        ctrl.setSize(20, 20);
-        ctrl.setPosition(10, 10);
+        var common = ecui.get('common');
+        common.getBase().style.position = 'absolute';
+        common.setSize(20, 20);
+        common.setPosition(10, 10);
         uiut.MockEvents.mousemove(document.body, {'clientX': 20, 'clientY': 20});
-        value_of(ecui.getMouseX(ctrl)).should_be(10);
-        value_of(ecui.getMouseY(ctrl)).should_be(10);
+        value_of(ecui.getMouseX(common)).should_be(10);
+        value_of(ecui.getMouseY(common)).should_be(10);
     },
 
     '相对控件(有1px边框)': function () {
-        var ctrl = ecui.get('common');
-        ctrl.getBase().style.cssText = 'position:absolute;border:1px solid';
-        ctrl.setSize(20, 20);
-        ctrl.setPosition(10, 10);
+        var common = ecui.get('common');
+        common.getBase().style.cssText = 'position:absolute;border:1px solid';
+        common.setSize(20, 20);
+        common.setPosition(10, 10);
         uiut.MockEvents.mousemove(document.body, {'clientX': 20, 'clientY': 20});
-        value_of(ecui.getMouseX(ctrl)).should_be(9);
-        value_of(ecui.getMouseY(ctrl)).should_be(9);
+        value_of(ecui.getMouseX(common)).should_be(9);
+        value_of(ecui.getMouseY(common)).should_be(9);
     }
 });
 
-test('getPressed 测试', {
-    '测试': function () {
-        var ctrl = ecui.get('common');
-        value_of(ecui.getPressed()).should_be(null);
-        uiut.MockEvents.mousedown(ctrl.getBase());
-        value_of(ecui.getPressed()).should_be(ctrl);
-        uiut.MockEvents.mousemove(document, {'clientX': 100, 'clientY': 100});
-        value_of(ecui.getPressed()).should_be(ctrl);
-        uiut.MockEvents.mouseup(document.body);
-        value_of(ecui.getPressed()).should_be(null); 
+test('init', {
+    '初始化html片段': function () {
+        var length = ecui.query().length,
+            el = baidu.dom.g('inner');
+        
+        el.innerHTML =
+            '<div id="newParent" class="parent" ecui="type:control;id:newParent">'
+            + '<div id="newChild" ecui="type:control;id:newChild"></div></div>';
+        ecui.init(el);
+
+        var parent = ecui.get('newParent'),
+            child = ecui.get('newChild');
+
+        value_of(child.getParent()).should_be(parent);
+        value_of(ecui.query().length - 2).should_be(length);
+        value_of(parent.getBaseClass()).should_be('parent');
+        value_of(parent.getType()).should_be('ec-control');
+    }
+});
+
+test('intercept', {
+    '强制点击拦截': function () {
+        var result = [],
+            common = ecui.get('common'),
+            el = common.getBase(),
+            child = ecui.get('child');
+
+        common.onclick = function () {
+            result.push('common');
+        };
+        child.onintercept = function () {
+            result.push('child');
+        };
+
+        uiut.MockEvents.mousedown(el);
+        uiut.MockEvents.mouseup(el);
+        ecui.intercept(child);
+        uiut.MockEvents.mousedown(el);
+        uiut.MockEvents.mouseup(el);
+        uiut.MockEvents.mousedown(el);
+        uiut.MockEvents.mouseup(el);
+        value_of(ecui.getFocused()).should_be(common);
+        value_of(result).should_be(['common', 'child', 'common']);
+    },
+
+    '强制点击拦截(不恢复强制点击拦截)': function () {
+        var result = [],
+            common = ecui.get('common'),
+            el = ecui.get('parent').getBase();
+
+        common.onintercept = function () {
+            result.push('intercept');
+            return false;
+        };
+
+        common.onclick = function () {
+            result.push('click');
+            return false;
+        };
+
+        ecui.intercept(common);
+        uiut.MockEvents.mousedown(el);
+        uiut.MockEvents.mouseup(el);
+        uiut.MockEvents.mousedown(el);
+        uiut.MockEvents.mouseup(el);
+        value_of(result).should_be(['intercept', 'click', 'intercept', 'click']);
+        ecui.restore();
+    },
+
+    '强制点击拦截(手工处理环境的恢复)': function () {
+        var result = [],
+            common = ecui.get('common'),
+            el = common.getBase(),
+            child = ecui.get('child');
+
+        common.onclick = function () {
+            result.push('common');
+        };
+        child.onintercept = function () {
+            result.push('child');
+            ecui.restore();
+            return false;
+        };
+
+        ecui.intercept(child);
+        uiut.MockEvents.mousedown(el);
+        uiut.MockEvents.mouseup(el);
+        value_of(result).should_be(['child', 'common']);
     }
 });
 
 test('loseFocus 测试', {
-    '单独控件测试': function () {
-        var ctrl = ecui.get('common');
-        var blur = 0;
-        ctrl.onblur = function () {
-            blur = 1;
+    '控件处于焦点状态': function () {
+        var parent = ecui.get('parent');
+
+        var blur = false;
+        parent.onblur = function () {
+            blur = true;
         };
-        ecui.setFocused(ctrl);
-        ecui.loseFocus(ctrl);
-        value_of(blur).should_be(1);
-        value_of(ecui.getFocused()).should_be(null);
+
+        ecui.setFocused(parent);
+        ecui.loseFocus(parent);
+        value_of(blur).should_be_true();
+        value_of(ecui.getFocused()).should_be(ecui.get('common'));
     },
 
-    '控件多层级测试': function () {
-        var common = ecui.get('common'),
-            ctrl = ecui.create('Control'),
-            result = [];
-        ctrl.setParent(common);
+    '控件不处于焦点状态': function () {
+        var common = ecui.get('common');
 
-        common.onfocus = function () {
-            result.push('common-focus');
-        };
+        var blur = false;
         common.onblur = function () {
-            result.push('common-blur');
-        };
-        ctrl.onfocus = function () {
-            result.push('ctrl-focus');
-        };
-        ctrl.onblur = function () {
-            result.push('ctrl-blur');
+            blur = true;
         };
 
-        ecui.setFocused(ctrl);
-        ecui.loseFocus(ctrl);
-        value_of(ecui.getFocused()).should_be(common);
-        value_of(result).should_be(['ctrl-focus', 'common-focus', 'ctrl-blur']);
+        ecui.loseFocus(common);
+        value_of(blur).should_be_false();
+    },
+
+    '控件及其子控件处于焦点状态': function () {
+        var parent = ecui.get('parent');
+
+        var blur = false;
+        parent.onblur = function () {
+            blur = true;
+        };
+
+        ecui.setFocused(ecui.get('child'));
+        ecui.loseFocus(parent);
+        value_of(blur).should_be_true();
+        value_of(ecui.getFocused()).should_be(ecui.get('common'));
     }
 });
 
@@ -627,19 +475,17 @@ test('query 测试', {
         var select = ecui.create('Select'),
             checkbox = ecui.create('Checkbox');
 
-        value_of(ecui.query({'type': ecui.ui.Select}).length).should_be(1);
-        value_of(ecui.query({'type': ecui.ui.Checkbox}).length).should_be(1);
+        value_of(ecui.query({'type': ecui.ui.Select})).should_be([select]);
+        value_of(ecui.query({'type': ecui.ui.Checkbox})).should_be([checkbox]);
 
         ecui.dispose(select);
         ecui.dispose(checkbox);
     },
 
     '按父控件查找': function () {
-        var common = ecui.get('common'),
-            ctrl = ecui.create('Control', {parent: common});
+        var common = ecui.get('common');
 
-        value_of(ecui.query({parent: common}).length).should_be(1);
-        ecui.dispose(ctrl);
+        value_of(ecui.query({parent: common})).should_be([ecui.get('parent')]);
     },
 
     '自定义函数查找': function () {
@@ -661,18 +507,18 @@ test('query 测试', {
     }
 });
 
-test('setFocused 测试', {
+test('setFocused', {
     '单控件测试': function () {
-        var focus = false;
-        var ctrl = ecui.get('common');
-        ctrl.onfocus = function () {
+        var common = ecui.get('common'),
+            focus = false;
+        common.onfocus = function () {
             focus = true;
         };
-        ctrl.onblur = function () {
+        common.onblur = function () {
             focus = false;
         };
         value_of(focus).should_be_false();
-        ecui.setFocused(ctrl);
+        ecui.setFocused(common);
         value_of(focus).should_be_true();
         ecui.setFocused();
         value_of(focus).should_be_false();
@@ -680,24 +526,216 @@ test('setFocused 测试', {
 
     '控件多层级测试': function () {
         var result = [],
-            common = ecui.get('common'),
-            ctrl = ecui.create('Control', {parent: common});
+            parent = ecui.get('parent'),
+            child = ecui.get('child');
 
-        common.onfocus = function () {
-            result.push('common-focus');
+        parent.onfocus = function () {
+            result.push('parent-focus');
         };
-        common.onblur = function () {
-            result.push('common-blur');
+        parent.onblur = function () {
+            result.push('parent-blur');
         };
-        ctrl.onfocus = function () {
-            result.push('ctrl-focus');
+        child.onfocus = function () {
+            result.push('child-focus');
         };
-        ctrl.onblur = function () {
-            result.push('ctrl-blur');
+        child.onblur = function () {
+            result.push('child-blur');
         };
-        ecui.setFocused(common);
-        ecui.setFocused(ctrl);
+        ecui.setFocused(child);
         ecui.setFocused();
-        value_of(result).should_be(['common-focus', 'ctrl-focus', 'ctrl-blur', 'common-blur']);
+        value_of(result).should_be(['child-focus', 'parent-focus', 'child-blur', 'parent-blur']);
+    }
+});
+
+test('zoom', {
+    '缩放事件触发顺序': function () {
+        var common = ecui.get('common'),
+            el = common.getBase(),
+            result = [];
+
+        common.setSize(10, 10);
+        common.onzoomstart = function () {
+            result.push('start');
+        };
+        common.onzoom = function () {
+            result.push('zooming');
+        };
+        common.onzoomend = function () {
+            result.push('end');
+        };
+        common.onmousedown = function (event) {
+            ecui.zoom(this, event);
+        }
+
+        uiut.MockEvents.mousedown(el);
+        uiut.MockEvents.mousemove(el, {'clientX': 10, 'clientY': 10});
+        uiut.MockEvents.mousemove(el, {'clientX': 20, 'clientY': 20});
+        uiut.MockEvents.mouseup(el);
+        uiut.MockEvents.mousemove(el, {'clientX': 10, 'clientY': 10});
+        value_of(result).should_be(['start', 'zooming', 'zooming', 'end']);
+    },
+
+    '正向缩放': function () {
+        var common = ecui.get('common'),
+            el = common.getBase();
+        common.setSize(10, 10);
+        common.setPosition(0, 0);
+        common.onmousedown = function (event) {
+            ecui.zoom(this, event);
+        };
+        uiut.MockEvents.mousedown(el);
+        uiut.MockEvents.mousemove(el, {'clientX': 50, 'clientY': 50});
+        uiut.MockEvents.mouseup(el);
+        value_of(common.getHeight()).should_be(60);
+        value_of(common.getWidth()).should_be(60);
+    },
+
+    '反向缩放(zoom)': function () {
+        var common = ecui.get('common'),
+            el = common.getBase();
+        common.setSize(10, 10);
+        common.setPosition(0, 0);
+        common.onmousedown = function (event) {
+            ecui.zoom(this, event);
+        };
+        uiut.MockEvents.mousedown(el);
+        uiut.MockEvents.mousemove(el, {'clientX': -15, 'clientY': -15});
+        uiut.MockEvents.mouseup(el);
+        value_of(common.getHeight()).should_be(5);
+        value_of(common.getWidth()).should_be(5);
+    },
+
+    '缩放范围限制(zoom)': function () {
+        var common = ecui.get('common'),
+            el = common.getBase();
+        common.setSize(10, 10);
+        common.setPosition(0, 0);
+        common.onmousedown = function (event) {
+            ecui.zoom(this, event, {'minWidth': 5, 'minHeight': 5, 'maxWidth': 20, 'maxHeight': 20});
+        };
+        uiut.MockEvents.mousedown(el);
+        uiut.MockEvents.mousemove(el, {'clientX': 10, 'clientY': 10});
+        value_of(common.getHeight()).should_be(20);
+        value_of(common.getWidth()).should_be(20);
+
+        uiut.MockEvents.mousemove(el, {'clientX': 15, 'clientY': 15});
+        value_of(common.getHeight()).should_be(20);
+        value_of(common.getWidth()).should_be(20);
+
+        uiut.MockEvents.mousemove(el, {'clientX': 9,'clientY': 9});
+        value_of(common.getHeight()).should_be(19);
+        value_of(common.getWidth()).should_be(19);
+
+        uiut.MockEvents.mousemove(el, {'clientX': -10,'clientY': -10});
+        value_of(common.getHeight()).should_be(5);
+        value_of(common.getWidth()).should_be(5);
+        uiut.MockEvents.mouseup(el);
+    }
+});
+
+test('交互行为测试', {
+    '激活，移入/移出': function () {
+        var common = ecui.get('common'),
+            el = common.getBase();
+
+        uiut.MockEvents.mouseout(document.body);
+        uiut.MockEvents.mouseover(el);
+        value_of(ecui.getHovered()).should_be(common);
+        value_of(ecui.getActived()).should_be(null);
+        uiut.MockEvents.mousedown(el);
+        value_of(ecui.getActived()).should_be(common);
+        uiut.MockEvents.mouseout(el);
+        value_of(ecui.getHovered()).should_be(common);
+        uiut.MockEvents.mouseover(document.body);
+        value_of(ecui.getHovered()).should_be(null);
+        uiut.MockEvents.mouseup(el);
+        value_of(ecui.getActived()).should_be(null);
+    },
+
+    '焦点': function () {
+        var common = ecui.get('common'),
+            el = common.getBase();
+
+        value_of(ecui.getFocused()).should_be(null);
+        uiut.MockEvents.mousedown(el);
+        value_of(ecui.getFocused()).should_be(common);
+        uiut.MockEvents.mouseup(el);
+        value_of(ecui.getFocused()).should_be(common);
+        uiut.MockEvents.mousedown(document.body);
+        value_of(ecui.getFocused()).should_be(null);
+        uiut.MockEvents.mouseup(document.body);
+    },
+
+    '鼠标事件': function () {
+        var common = ecui.get('common'),
+            parent = ecui.get('parent'),
+            control = ecui.create('control', {id: 'control', parent: common}),
+            result = [];
+
+        function build(name) {
+            var o = ecui.get(name);
+            o.onmousedown = function () {
+                result.push(name + '-mousedown');
+            };
+
+            o.onmouseup = function () {
+                result.push(name + '-mouseup');
+            };
+
+            o.onmousemove = function () {
+                result.push(name + '-mousemove');
+            };
+
+            o.onmouseout = function () {
+                result.push(name + '-mouseout');
+            };
+
+            o.onmouseover = function () {
+                result.push(name + '-mouseover');
+            };
+
+            o.onclick = function () {
+                result.push(name + '-click');
+            };
+        }
+
+        build('common');
+        build('parent');
+        build('control');
+
+        uiut.MockEvents.mouseout(document.body);
+        uiut.MockEvents.mouseover(parent.getBase());
+        uiut.MockEvents.mousedown(parent.getBase());
+        uiut.MockEvents.mouseup(parent.getBase());
+        uiut.MockEvents.mousedown(parent.getBase());
+        uiut.MockEvents.mousemove(parent.getBase());
+        uiut.MockEvents.mouseout(parent.getBase());
+        uiut.MockEvents.mouseover(control.getBase());
+        uiut.MockEvents.mouseup(control.getBase());
+        ecui.$clearState(common);
+
+        value_of(result).should_be(['parent-mouseover', 'common-mouseover', 'parent-mousedown', 'common-mousedown', 'parent-mouseup', 'common-mouseup', 'parent-click', 'common-click', 'parent-mousedown', 'common-mousedown', 'parent-mousemove', 'common-mousemove', 'parent-mouseout', 'control-mouseover', 'control-mouseup', 'common-mouseup', 'common-click', 'control-mouseout', 'common-mouseout']);
+
+        ecui.dispose(control);
+    },
+
+    '键盘事件': function () {
+        var common = ecui.get('common'),
+            result = [];
+
+        common.onkeyup = function (event) {
+            result.push(event.which);
+            result.push(ecui.getKey());
+        };
+
+        ecui.setFocused(common);
+        uiut.MockEvents.keydown(document, 32);
+        value_of(ecui.getKey()).should_be(32);
+        uiut.MockEvents.keydown(document, 65);
+        uiut.MockEvents.keydown(document, 18);
+        uiut.MockEvents.keyup(document, 32);
+        uiut.MockEvents.keyup(document, 18);
+        uiut.MockEvents.keyup(document, 65);
+        value_of(result).should_be([32, 18, 18, 18, 65, 0]);
     }
 });

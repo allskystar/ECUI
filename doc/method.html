@@ -12,9 +12,6 @@ margin:0;
 }
 </style>
 <script language="javascript" src="../common/common.js"></script>
-<script language="javascript" src="../common/browdata.js"></script>
-<script language="javascript" src="../common/appliesto2.js"></script>
-<script language="javascript" src="../common/toolbar.js"></script>
 <script language="javascript" src="../common/prettify.js"></script>
 <link rel="stylesheet" type="text/css" href="../common/common.css" />
 <link rel="stylesheet" type="text/css" href="../common/prettify.css" />
@@ -51,7 +48,7 @@ margin:0;
       <p class="clsRef">备注</p>
       <blockquote>{foreach from=$method.remark item="item"}
         <p>{eval var=$item}</p>{/foreach}{if $method.event}{capture assign="link"}{$URI1|regex_replace:"\\$([A-Za-z]+)":"$1"}{/capture}
-		<p>{if $method.event==10}如果控件处于可操作状态(参见 {'isEnabled'|method:'control'})，{/if}{if $link!=$URI1}{$link|method:'control'}{else}{$link}{/if} 方法触发 {'on$URI1'|regex_replace:"on\\$([A-Za-z]+)":"on$1"|event:'control'} 事件，如果事件返回值不为 false，则调用 {if $link==$URI1}{'\$$link'|method:'control'}{else}${$link}{/if} 方法。</p>{/if}{if $URI1[0]=='$'}
+		<p>{if $method.event==10}如果控件处于可操作状态(参见 {'isDisabled'|method:'control'})，{/if}{if $link!=$URI1}{$link|method:'control'}{else}{$link}{/if} 方法触发 {'on$URI1'|regex_replace:"on\\$([A-Za-z]+)":"on$1"|event:'control'} 事件，如果事件返回值不为 false，则调用 {if $link==$URI1}{'\$$link'|method:'control'}{else}${$link}{/if} 方法。</p>{/if}{if $URI1[0]=='$'}
         <p><font color="red">编写自定义控件请谨慎使用此方法，普通开发请避免使用此方法。</font></p>{/if}
       </blockquote>{/if}{if $method.example}
       <p class="clsRef">示例</p>

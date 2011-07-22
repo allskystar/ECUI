@@ -185,11 +185,11 @@ _eInput  - INPUT对象
         }
         else {
             // 如果控件处于不可操作状态，不允许获得焦点
-            if (event.isEnabled()) {
-                setFocused(event);
+            if (event.isDisabled()) {
+                event._eInput.blur();
             }
             else {
-                event._eInput.blur();
+                setFocused(event);
             }
         }
         delete event['$' + type];

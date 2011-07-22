@@ -97,14 +97,15 @@
         query,
         restore,
         setFocused,
-        standardEvent,
+        wrapperEvent,
 
         eventNames = [
             'mousedown', 'mouseover', 'mousemove', 'mouseout', 'mouseup',
             'click', 'focus', 'blur', 'activate', 'deactivate',
-            'keydown', 'keypress', 'keyup', 'mousewheel',
-            'change', 'resize', 'create', 'init'
-        ];
+            'keydown', 'keypress', 'keyup', 'mousewheel'
+        ],
+
+        UI_EVENT;
 //{else}//
     (function () {
         var ecuiName = 'ecui',        // Element 中用于自动渲染的 ecui 属性名称
@@ -134,7 +135,7 @@
             selectorControl,          // 在select操作时使用此控件展现选择的部分
 
             activedControl,           // 当前环境下被激活的控件，即鼠标左键按下时对应的控件，直到左键松开后失去激活状态
-            overedControl,            // 当前鼠标移入的控件
+            hoveredControl,           // 当前环境下鼠标悬停的控件
             focusedControl,           // 当前环境下拥有焦点的控件
 
             envStack = [],            // 高优先级事件调用时，保存上一个事件环境的栈
@@ -148,10 +149,10 @@
                         activedControl = null;
                     }
 
-                    event = standardEvent(event);
+                    event = wrapperEvent(event);
 
                     //__transform__control_o
-                    var control = event.getTarget();
+                    var control = event.getControl();
 
                     if (control) {
                         if (!isScrollClick(event)) {
@@ -161,7 +162,7 @@
                         else if (ieVersion < 8) {
                             // IE8以下的版本，如果为控件添加激活样式，原生滚动条的操作会失效
                             // 常见的表现是需要点击两次才能进行滚动操作，而且中途不能离开控件区域
-                            // 以免触发移入状态的样式改变。
+                            // 以免触发悬停状态的样式改变。
                             return;
                         }
 
@@ -191,32 +192,34 @@
 
                 // 鼠标移入的处理，需要计算是不是位于当前移入的控件之外，如果是需要触发移出事件
                 mouseover: function (event) {
-                    event = standardEvent(event);
+                    event = wrapperEvent(event);
 
                     //__transform__control_o
-                    var control = event.getTarget(),
-                        parent = getCommonParent(control, overedControl);
+                    var control = event.getControl(),
+                        parent = getCommonParent(control, hoveredControl);
 
-                    bubble(overedControl, 'mouseout', event, parent);
+                    bubble(hoveredControl, 'mouseout', event, parent);
                     bubble(control, 'mouseover', event, parent);
 
-                    overedControl = control;
+                    hoveredControl = control;
                 },
 
                 mousemove: function (event) {
-                    event = standardEvent(event);
+                    event = wrapperEvent(event);
 
                     //__transform__control_o
-                    var control = event.getTarget();
+                    var control = event.getControl();
 
                     bubble(control, 'mousemove', event);
                 },
 
                 mouseup: function (event) {
-                    event = standardEvent(event);
+                    event = wrapperEvent(event);
 
                     //__transform__control_o
-                    var control = event.getTarget();
+                    var control = event.getControl();
+
+                    bubble(control, 'mouseup', event);
 
                     if (activedControl) {
                         // 点击事件在同时响应鼠标按下与弹起周期的控件上触发
@@ -225,8 +228,6 @@
                         bubble(activedControl, 'deactivate', event);
                         activedControl = null;
                     }
-
-                    bubble(control, 'mouseup', event);
                 }
             },
 
@@ -234,7 +235,7 @@
                 type: 'drag',
 
                 mousemove: function (event) {
-                    event = standardEvent(event);
+                    event = wrapperEvent(event);
 
                     //__transform__target_o
                     var target = currEnv.target,
@@ -255,7 +256,7 @@
                 },
 
                 mouseup: function (event) {
-                    event = standardEvent(event);
+                    event = wrapperEvent(event);
 
                     //__transform__target_o
                     var target = currEnv.target;
@@ -273,12 +274,12 @@
                 type: 'intercept',
 
                 mousedown: function (event) {
-                    event = standardEvent(event);
+                    event = wrapperEvent(event);
 
                     //__transform__target_o
                     var target = currEnv.target,
                         env = currEnv,
-                        control = event.getTarget();
+                        control = event.getControl();
 
                     if (!isScrollClick(event)) {
                         if (control && !control.isFocusable()) {
@@ -295,11 +296,12 @@
                                 }
                             }
                             else {
+                                // 手动释放环境会造成向外层环境的事件传递
                                 currEnv.mousedown(event);
                             }
                         }
                         else {
-                            // 默认仅拦截一次
+                            // 默认仅拦截一次，框架自动释放环境
                             restore();
                         }
                     }
@@ -310,7 +312,7 @@
                 type: 'zoom',
 
                 mousemove: function (event) {
-                    event = standardEvent(event);
+                    event = wrapperEvent(event);
 
                     //__gzip_original__minWidth
                     //__gzip_original__maxWidth
@@ -339,7 +341,7 @@
                 },
 
                 mouseup: function (event) {
-                    event = standardEvent(event);
+                    event = wrapperEvent(event);
 
                     //__transform__target_o
                     var target = currEnv.target;
@@ -368,6 +370,7 @@
             repaint = core.repaint = function () {
                 var i = 0,
                     list = [],
+                    widthList = [],
                     o;
 
                 if (ieVersion) {
@@ -406,14 +409,23 @@
                         delete o.repaint;
 
                         if (ieVersion < 8) {
-                            // 修复ie6/7下宽度自适应错误的问题，会引起反复reflow
-                            // 以下使用 j 代替主元素对象
-                            // 以下使用 controls 代替 style
-                            var controls = getStyle(j = o.getBase());
-                            if (controls.width == 'auto' && controls.display == 'block') {
+                            // 修复ie6/7下宽度自适应错误的问题
+                            o = getStyle(j = o.getBase());
+                            if (o.width == 'auto' && o.display == 'block') {
                                 j.style.width = '100%';
-                                j.style.width = j.offsetWidth - (flgFixedSize ? o.$getInvalidWidth() * 2 : 0) + 'px';
                             }
+                        }
+                    }
+
+                    if (ieVersion < 8) {
+                        // 由于强制设置了100%，因此改变ie下控件的大小必须从内部向外进行
+                        // 为避免多次reflow，增加一次循环
+                        for (i = 0; o = list[i]; ) {
+                            widthList[i++] = o.getBase().offsetWidth;
+                        }
+                        for (; o = list[i--]; ) {
+                            o.getBase().style.width =
+                                widthList[i] - (flgFixedSize ? o.$getBasicWidth() * 2 : 0) + 'px';
                         }
                     }
 
@@ -467,14 +479,14 @@
             if (control.contain(activedControl)) {
                 bubble(activedControl, 'deactivate', null, activedControl = o);
             }
-            if (control.contain(overedControl)) {
-                bubble(overedControl, 'mouseout', null, overedControl = o);
+            if (control.contain(hoveredControl)) {
+                bubble(hoveredControl, 'mouseout', null, hoveredControl = o);
             }
         };
 
         /**
          * 为两个 ECUI 控件 建立连接。
-         * 使用页面静态初始化或页面动态初始化(参见 ECUI 使用方式)方式，控件创建后，需要的关联控件也许还未创建。$connect 方法提供将指定的函数滞后到对应的控件创建后才调用的模式。如果 targetId 对应的控件还未创建，则调用会被搁置，直到需要的控件创建成功后，再自动执行，参见 create 方法。
+         * 使用页面静态初始化或页面动态初始化(参见 ECUI 使用方式)方式，控件创建时，需要的关联控件也许还未创建。$connect 方法提供将指定的函数滞后到对应的控件创建后才调用的模式。如果 targetId 对应的控件还未创建，则调用会被搁置，直到需要的控件创建成功后，再自动执行(参见 create 方法)。
          * @protected
          *
          * @param {ecui.ui.Control} caller 发起建立连接请求的 ECUI 控件
@@ -498,14 +510,14 @@
          * 创建 ECUI 控件。
          * $create 方法创建控件时不会自动渲染控件。在大批量创建控件时，为了加快渲染速度，应该首先使用 $create 方法创建所有控件完成后，再批量分别调用控件的 cache、init 与 repaint 方法渲染控件。params 参数对象支持的属性如下：
          * id        {string} 当前控件的 id，提供给 $connect 与 get 方法使用
-         * base      {string} 控件的基本样式，参见 getBaseClass 方法，如果忽略此参数将使用基本 Element 对象的 className 属性
-         * element   {HTMLElement} 与控件绑捆的 Element 对象，参见 getBase 方法，如果忽略此参数将创建 Element 对象与控件绑捆
+         * base      {string} 控件的基本样式(参见 getBaseClass 方法)，如果忽略此参数将使用基本元素的 className 属性
+         * element   {HTMLElement} 与控件绑捆的 Element 对象(参见 getBase 方法)，如果忽略此参数将创建 Element 对象与控件绑捆
          * parent    {ecui.ui.Control} 父控件对象或者父 Element 对象
-         * type      {string} 控件的默认样式，通常情况下省略此参数，使用 "ec-控件名称" 作为控件的默认样式
+         * type      {string} 控件的类型样式，通常情况下省略此参数，使用 "ec-控件名称" 作为控件的类型样式
          * @protected
          *
          * @param {string} type 控件的名称
-         * @param {Object} params 初始化参数，参见 ECUI 控件
+         * @param {Object} params 初始化参数(参见 ECUI 控件)
          * @return {ecui.ui.Control} ECUI 控件
          */
         $create = core.$create = function (type, params) {
@@ -554,7 +566,7 @@
 
             allControls.push(type);
             independentControls.push(type);
-            type.create(params);
+            type.oncreate && type.oncreate(params);
 
             if (id) {
                 namedControls[id] = type;
@@ -581,7 +593,7 @@
          * @param {Function} type 控件的构造函数
          * @param {HTMLElement} el 控件对应的 Element 对象
          * @param {ecui.ui.Control} parent 控件的父控件
-         * @param {Object} params 初始化参数，参见 ECUI 控件
+         * @param {Object} params 初始化参数(参见 ECUI 控件)
          * @return {ecui.ui.Control} ECUI 控件
          */
         $fastCreate = core.$fastCreate = function (type, el, parent, params) {
@@ -595,7 +607,6 @@
 
             type = new type(el, params);
             type.$setParent(parent);
-            type.create(params);
 
             allControls.push(type);
             return type;
@@ -674,14 +685,14 @@
          * 创建 ECUI 控件。
          * 标准的创建 ECUI 控件 的工厂方法，适用于少量创建控件，生成的控件不需要任何额外的调用即可正常的显示，对于批量创建控件，请使用 $create 方法。params 参数对象支持的属性如下：
          * id        {string} 当前控件的 id，提供给 $connect 与 get 方法使用
-         * base      {string} 控件的基本样式，参见 getBaseClass 方法，如果忽略此参数将使用基本 Element 对象的 className 属性
-         * element   {HTMLElement} 与控件绑捆的 Element 对象，参见 getBase 方法，如果忽略此参数将创建 Element 对象与控件绑捆
+         * base      {string} 控件的基本样式(参见 getBaseClass 方法)，如果忽略此参数将使用基本元素的 className 属性
+         * element   {HTMLElement} 与控件绑捆的 Element 对象(参见 getBase 方法)，如果忽略此参数将创建 Element 对象与控件绑捆
          * parent    {ecui.ui.Control} 父控件对象或者父 Element 对象
-         * type      {string} 控件的默认样式，通常情况下省略此参数，使用 "ec-控件名称" 作为控件的默认样式
+         * type      {string} 控件的类型样式，通常情况下省略此参数，使用 "ec-控件名称" 作为控件的类型样式
          * @public
          *
          * @param {string} type 控件的名称
-         * @param {Object} params 初始化参数，参见 ECUI 控件
+         * @param {Object} params 初始化参数(参见 ECUI 控件)
          * @return {ecui.ui.Control} ECUI 控件
          */
         createControl = core.create = function (type, params) {
@@ -718,8 +729,8 @@
                 if (activedControl && contain(control, activedControl.getOuter())) {
                     bubble(activedControl, 'deactivate', null, activedControl = o);
                 }
-                if (overedControl && contain(control, overedControl.getOuter())) {
-                    bubble(overedControl, 'mouseout', null, overedControl = o);
+                if (hoveredControl && contain(control, hoveredControl.getOuter())) {
+                    bubble(hoveredControl, 'mouseout', null, hoveredControl = o);
                 }
             }
 
@@ -741,7 +752,14 @@
             }
 
             for (; o = controls[++i]; ) {
-                o.dispose();
+                try {
+                    if (o.ondispose) {
+                        o.ondispose();
+                    }
+                }
+                catch (e) {
+                }
+                o.$dispose();
             }
         };
 
@@ -755,7 +773,7 @@
          * @public
          *
          * @param {ecui.ui.Control} control 需要进行拖拽的 ECUI 控件对象
-         * @param {Event} event 事件对象
+         * @param {ecui.ui.Event} event 事件对象
          * @param {Object} range 控件允许拖拽的范围，省略参数时，控件默认只允许在 offsetParent 定义的区域内拖拽，如果 
          *                       offsetParent 是 body，则只允许在当前浏览器可视范围内拖拽
          */
@@ -778,43 +796,6 @@
 
                 initDragAndZoom(control, event, dragEnv, 'drag');
             }
-        };
-
-        /**
-         * 事件对象标准化。
-         * event 方法将浏览器产生的鼠标与键盘事件标准化并添加 ECUI 框架需要的信息到事件对象中。标准化的属性如下：
-         * pageX           {number} 鼠标的X轴坐标
-         * pageY           {number} 鼠标的Y轴坐标
-         * which           {number} 触发事件的键盘代码
-         * target          {HTMLElement} 触发事件的 Element 对象
-         * stopPropagation {Function} 事件停止冒泡
-         * preventDefault  {Function} 阻止事件默认的处理
-         * getTarget       {Function} 获取事件相关的 ECUI 控件对象
-         * @public
-         *
-         * @param {Event} event 事件对象
-         * @return {Event} 标准化后的事件对象
-         */
-        standardEvent = core.event = function (event) {
-            var body = DOCUMENT.body,
-                html = getParent(body);
-
-            if (ieVersion) {
-                event = WINDOW.event;
-                event.pageX = html.scrollLeft + body.scrollLeft - html.clientLeft + event.clientX - body.clientLeft;
-                event.pageY = html.scrollTop + body.scrollTop - html.clientTop + event.clientY - body.clientTop;
-                event.target = event.srcElement;
-                event.which = event.keyCode;
-                event.stopPropagation = stopPropagation;
-                event.preventDefault = preventDefault;
-            }
-
-            event.getTarget = getTarget;
-
-            mouseX = event.pageX;
-            mouseY = event.pageY;
-
-            return event;
         };
 
         /**
@@ -860,11 +841,6 @@
                 attachEvent(WINDOW, 'unload', onunload);
                 attachEvent(WINDOW, 'scroll', onscroll);
 
-                if (ieVersion) {
-                    // 设置IE的窗体外事件捕获
-                    DOCUMENT.body.setCapture();
-                }
-
                 core.init(body);
 
                 status = NORMAL;
@@ -874,7 +850,7 @@
 
         /**
          * 获取当前处于激活状态的 ECUI 控件。
-         * 激活状态，指鼠标在控件区域左键从按下到弹起的全过程，无论鼠标移动到哪个位置，被激活的控件对象不会发生改变。
+         * 激活状态，指鼠标在控件区域左键从按下到弹起的全过程，无论鼠标移动到哪个位置，被激活的控件对象不会发生改变。处于激活状态的控件及其父控件，都具有激活状态样式。
          * @public
          *
          * @return {ecui.ui.Control} 处于激活状态的 ECUI 控件，如果不存在返回 null
@@ -896,13 +872,24 @@
 
         /**
          * 获取当前处于焦点状态的控件。
-         * 焦点状态，默认优先处理键盘/滚轮等特殊事件，同时处于焦点状态的控件及其父控件，都具有焦点状态样式。通常鼠标左键的点击将使控件获得焦点状态，之前拥有焦点状态的控件将失去焦点状态。
+         * 焦点状态，默认优先处理键盘/滚轮等特殊事件。处于焦点状态的控件及其父控件，都具有焦点状态样式。通常鼠标左键的点击将使控件获得焦点状态，之前拥有焦点状态的控件将失去焦点状态。
          * @public
          *
          * @return {ecui.ui.Control} 处于焦点状态的 ECUI 控件，如果不存在返回 null
          */
         getFocused = core.getFocused = function () {
             return focusedControl || null;
+        };
+
+        /**
+         * 获取当前处于悬停状态的控件。
+         * 悬停状态，指鼠标当前位于控件区域。处于悬停状态的控件及其父控件，都具有悬停状态样式。
+         * @public
+         *
+         * @return {ecui.ui.Control} 处于悬停状态的 ECUI 控件，如果不存在返回 null
+         */
+        getHovered = core.getHovered = function () {
+            return hoveredControl;
         };
 
         /**
@@ -946,16 +933,6 @@
                 return mouseY - getPosition(control).top - toNumber(getStyle(control, 'borderTopWidth'));
             }
             return mouseY;
-        };
-
-        /**
-         * 获取当前处于移入状态的控件。
-         * @public
-         *
-         * @return {ecui.ui.Control} 处于移入状态的 ECUI 控件，如果不存在返回 null
-         */
-        getOvered = core.getOvered = function () {
-            return overedControl;
         };
 
         /**
@@ -1186,6 +1163,12 @@
          * @public
          */
         restore = core.restore = function () {
+            if (ieVersion) {
+                if (currEnv.type == 'drag' || currEnv.type == 'zoom') {
+                    // 取消IE的窗体外事件捕获，如果普通状态也设置，会导致部分区域无法点击
+                    DOCUMENT.body.releaseCapture();
+                }
+            }
             setHandler(currEnv, true);
             setHandler(currEnv = envStack.pop());
         };
@@ -1196,7 +1179,7 @@
          * @public
          *
          * @param {ecui.ui.Control} control ECUI 控件
-         * @param {Event} event 事件对象
+         * @param {ecui.ui.Event} event 事件对象
          * @param {string} className 选择框的样式名称，如果省略将使用 ec-selector
          */
         core.select = function (control, event, className) {
@@ -1264,6 +1247,44 @@
         };
 
         /**
+         * 包装事件对象。
+         * event 方法将浏览器产生的鼠标与键盘事件标准化并添加 ECUI 框架需要的信息到事件对象中。标准化的属性如下：
+         * pageX           {number} 鼠标的X轴坐标
+         * pageY           {number} 鼠标的Y轴坐标
+         * which           {number} 触发事件的按键码
+         * target          {HTMLElement} 触发事件的 Element 对象
+         * returnValue     {boolean}  是否进行默认处理
+         * cancelBubble    {boolean}  是否取消冒泡
+         * getControl      {Function} 获取触发事件的 ECUI 控件 对象
+         * getNative       {Function} 获取原生的事件对象
+         * preventDefault  {Function} 阻止事件的默认处理
+         * stopPropagation {Function} 事件停止冒泡
+         * @public
+         *
+         * @param {Event} event 事件对象
+         * @return {ecui.ui.Event} 标准化后的事件对象
+         */
+        wrapperEvent = core.wrapperEvent = function (event) {
+            var body = DOCUMENT.body,
+                html = getParent(body);
+
+            if (ieVersion) {
+                event = WINDOW.event;
+                event.pageX = html.scrollLeft + body.scrollLeft - html.clientLeft + event.clientX - body.clientLeft;
+                event.pageY = html.scrollTop + body.scrollTop - html.clientTop + event.clientY - body.clientTop;
+                event.target = event.srcElement;
+                event.which = event.keyCode;
+                event.preventDefault = preventDefault;
+                event.stopPropagation = stopPropagation;
+            }
+
+            mouseX = event.pageX;
+            mouseY = event.pageY;
+
+            return new UI_EVENT(event.type, event);
+        };
+
+        /**
          * 将指定的 ECUI 控件 设置为缩放状态。
          * zoom 方法将控件设置为缩放，缩放的值允许负数，用于表示反向的缩放，调用它会触发控件对象的 onzoomstart 事件，在整个 zoom 的周期中，还将触发 onzoom 与 onzoomend 事件，在释放鼠标按键时缩放操作周期结束。range 参数支持的属性如下：
          * minWidth  {number} 控件允许缩放的最小宽度 
@@ -1273,7 +1294,7 @@
          * @public
          *
          * @param {ecui.ui.Control} control ECUI 控件
-         * @param {Event} event 事件对象
+         * @param {ecui.ui.Event} event 事件对象
          * @param {Object} range 控件允许的缩放范围参数
          */
         core.zoom = function (control, event, range) {
@@ -1298,7 +1319,7 @@
          * @param {Event} event 事件对象
          */
         currEnv.keydown = currEnv.keypress = currEnv.keyup = function (event) {
-            event = standardEvent(event);
+            event = wrapperEvent(event);
 
             //__gzip_original__type
             //__gzip_original__which
@@ -1308,12 +1329,7 @@
             if (type == 'keydown') {
                 keyCode = which;
             }
-            for (var o = focusedControl; o; o = o.getParent()) {
-                if (o[type](event) === false) {
-                    event.preventDefault();
-                    break;
-                }
-            }
+            bubble(focusedControl, type, event);
             if (type == 'keyup' && keyCode == which) {
                 // 一次多个键被按下，只有最后一个被按下的键松开时取消键值码
                 keyCode = 0;
@@ -1335,7 +1351,7 @@
 
             // IE下取消对文字的选择不能仅通过 mousedown 事件进行
             currEnv.selectstart = function (event) {
-                event = standardEvent(event);
+                event = wrapperEvent(event);
                 onselectstart(findControl(event.target), event);
             };
         }
@@ -1347,16 +1363,88 @@
          * @param {Event} event 事件对象
          */
         currEnv[firefoxVersion ? 'DOMMouseScroll' : 'mousewheel'] = function (event) {
-            event = standardEvent(event);
-            if (event.detail === undefined) {
-                event.detail = event.wheelDelta / -40;
+            event = wrapperEvent(event);
+            if (event._oNative.detail === undefined) {
+                event.detail = event._oNative.wheelDelta / -40;
             }
 
             // 拖拽状态下，不允许滚动
-            if (currEnv.type == 'drag' || bubble(overedControl, 'mousewheel', event) === false ||
-                    bubble(focusedControl, 'mousewheel', event) === false) {
-                event.preventDefault();
+            if (currEnv.type == 'drag') {
+                event.stopPropagation();
             }
+            else {
+                bubble(hoveredControl, 'mousewheel', event);
+            }
+        };
+
+        /**
+         * 创建 ECUI 事件对象。
+         * @public
+         *
+         * @param {string} type 事件类型
+         * @param {Event|ecui.ui.Control} object 浏览器原生事件对象或事件相关的 ECUI 控件对象，简易调用时可以忽略
+         */
+        UI_EVENT = ui.Event = function (type, object) {
+            this.type = type;
+
+            if (!object || object instanceof UI_CONTROL) {
+                this.pageX = mouseX;
+                this.pageY = mouseY;
+                this.which = keyCode;
+                this.target = object ? object.getBase() : DOCUMENT;
+            }
+            else {
+                this.pageX = object.pageX;
+                this.pageY = object.pageY;
+                this.which = object.which;
+                this.target = object.target;
+                this._oNative = object;
+            }
+        };
+
+        /**
+         * 获取触发事件的 ECUI 控件 对象
+         * @public
+         *
+         * @return {ecui.ui.Control} 控件对象
+         */
+        UI_EVENT.prototype.getControl = function () {
+            var o = findControl(this.target);
+            if (o && !o.isDisabled()) {
+                for (; o; o = o.getParent()) {
+                    if (o.isCapturable()) {
+                        return o;
+                    }
+                }
+            }
+            return null;
+        };
+
+        /**
+         * 获取原生的事件对象。
+         * @public
+         *
+         * @return {Object} 原生的事件对象
+         */
+        UI_EVENT.prototype.getNative = function () {
+            return this._oNative;
+        };
+
+        /**
+         * 阻止事件的默认处理。
+         * @public
+         */
+        UI_EVENT.prototype.preventDefault = function () {
+            this.returnValue = false;
+        };
+
+        /**
+         * 事件停止冒泡。
+         * @public
+         */
+        UI_EVENT.prototype.stopPropagation = function () {
+            this.cancelBubble = true;
+            this._oNative && this._oNative.preventDefault();
         };
 
         /**
@@ -1364,25 +1452,16 @@
          * @private
          *
          * @param {ecui.ui.Control} start 开始冒泡的控件
-         * @param {string} name 控件调用的函数名称
-         * @param {Event} 事件对象
+         * @param {string} type 事件类型
+         * @param {ecui.ui.Event} 事件对象
          * @param {ecui.ui.Control} end 终止冒泡的控件，如果不设置将一直冒泡至顶层
-         * @return {boolean} 如果返回 false 表示在中途被停止冒泡
          */
-        function bubble(start, name, event, end) {
-            if (!event) {
-                event = {
-                    pageX: mouseX,
-                    pageY: mouseY,
-                    target: DOCUMENT,
-                    which: keyCode,
-                    stopPropagation: blank,
-                    preventDefault: blank
-                };
-            }
+        function bubble(start, type, event, end) {
+            event = event || new UI_EVENT(type, start);
             for (; start != end; start = start.getParent()) {
-                if (start[name](event) === false) {
-                    return false;
+                start[type](event);
+                if (event.cancelBubble) {
+                    return;
                 }
             }
         }
@@ -1431,29 +1510,11 @@
         }
 
         /**
-         * 获取触发事件的控件对象
-         * @private
-         *
-         * @return {ecui.ui.Control} 控件对象
-         */
-        function getTarget() {
-            var o = findControl(this.target);
-            if (o && o.isEnabled()) {
-                for (; o; o = o.getParent()) {
-                    if (o.isCapture()) {
-                        return o;
-                    }
-                }
-            }
-            return null;
-        }
-
-        /**
          * 初始化拖拽与缩放操作的环境。
          * @private
          *
          * @param {ecui.ui.Control} control 需要操作的控件
-         * @param {Event} event 事件对象
+         * @param {ecui.ui.Event} event 事件对象
          * @param {Object} env 操作环境对象
          * @return {string} type 操作的类型，只能是drag或者zoom
          */
@@ -1477,13 +1538,18 @@
             if (!(control['on' + type + 'start'] && control['on' + type + 'start'](event) === false)) {
                 control['$' + type + 'start'](event);
             }
+
+            if (ieVersion) {
+                // 设置IE的窗体外事件捕获，如果普通状态也设置，会导致部分区域无法点击
+                DOCUMENT.body.setCapture();
+            }
         }
 
         /**
          * 判断点击是否发生在滚动条区域。
          * @private
          *
-         * @param {Event} event 事件对象
+         * @param {ecui.ui.Event} event 事件对象
          * @return {boolean} 点击是否发生在滚动条区域
          */
         function isScrollClick(event) {
@@ -1499,11 +1565,11 @@
          * @private
          *
          * @param {ecui.ui.Control} control 需要操作的控件
-         * @param {Event} event 事件对象
+         * @param {ecui.ui.Event} event 事件对象
          */
         function mousedown(control, event) {
             bubble(activedControl = control, 'activate', event);
-            bubble(activedControl, 'mousedown', event);
+            bubble(control, 'mousedown', event);
             onselectstart(control, event);
         }
 
@@ -1520,12 +1586,13 @@
          * @private
          *
          * @param {ecui.ui.Control} control 需要操作的控件
-         * @param {Event} event 事件对象
+         * @param {ecui.ui.Event} event 事件对象
          */
         function onselectstart(control, event) {
             for (; control; control = control.getParent()) {
-                if (!control.isSelectStart()) {
-                    event.preventDefault();
+                if (!control.isUserSelect()) {
+                    event.stopPropagation();
+                    return;
                 }
             }
         }

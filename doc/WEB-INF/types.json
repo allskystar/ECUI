@@ -35,16 +35,16 @@
         "position": "ecui.ui.Control",
         "desc": "基础控件",
         "params": [
-            {"name": "capture", "desc": "boolean，是否需要捕获鼠标事件，默认捕获"},
-            {"name": "select", "desc": "boolean，是否允许选中内容，默认允许"},
-            {"name": "focus", "desc": "boolean，是否允许获取焦点，默认允许"},
-            {"name": "enabled", "desc": "boolean，是否可用，默认可用"}
+            {"name": "capturable", "desc": "boolean，是否需要捕获鼠标事件，默认捕获"},
+            {"name": "userSelect", "desc": "boolean，是否允许选中内容，默认允许"},
+            {"name": "focusable", "desc": "boolean，是否允许获取焦点，默认允许"},
+            {"name": "disabled", "desc": "boolean，是否失效，默认有效"}
         ],
         "remark": [
             "ECUI 的核心组成部分，定义了基本的控件行为。",
-            "基础控件是 ECUI 的核心组成部分，对 DOM 树上的节点区域进行封装。基础控件扩展了 Element 节点的标准事件(例如得到与失去焦点、鼠标按压事件等)，提供了方法对控件的基本属性(例如控件大小、位置与显示状态等)进行改变，是一切控件实现的基础。基本控件支持四种状态：得到焦点(focus)、鼠标移入(over)、按压时鼠标移入(press)与失效(disabled)。"
+            "基础控件是 ECUI 的核心组成部分，对 DOM 树上的节点区域进行封装。基础控件扩展了 Element 节点的标准事件(例如得到与失去焦点、激活等)，提供了方法对控件的基本属性(例如控件大小、位置与显示状态等)进行改变，是一切控件实现的基础。基本控件拥有四种状态：焦点(focus)、悬停(hover)、激活(active)与失效(disabled)。控件在创建过程中分为三个阶段：首先是填充控件所必须的 DOM 结构，然后缓存控件的属性信息，最后进行初始化真正的渲染并显示控件。"
         ],
-        "html": "<div ecui=\"type:control\">...</div>"
+        "html": "<div ecui=\"type:control;id:demo\"><!-- 这里放控件包含的内容 -->...</div>"
     },
 
     {

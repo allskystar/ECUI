@@ -3,7 +3,13 @@
 <head>
 <title>{$control.desc}</title>
 <meta http-equiv="Content-Type" content="text/html; charset=gb2312">
+<script language="javascript" src="../common/common.js"></script>
+<script language="javascript" src="../common/browdata.js"></script>
+<script language="javascript" src="../common/appliesto2.js"></script>
+<script language="javascript" src="../common/toolbar.js"></script>
+<script language="javascript" src="../common/prettify.js"></script>
 <link rel="stylesheet" type="text/css" href="../common/common.css" />
+<link rel="stylesheet" type="text/css" href="../common/prettify.css" />
 </head>
 <body>
 <h1><a>ecui.ui.{$URI1|capitalize}</a></h1>
@@ -13,16 +19,16 @@
   <p>{$control.desc}继承自 {$super.name|control}</p>{/if}
   <p>{eval var=$control.remark[1]}</p>{if $control.interface}
   <p>此控件还继承了来自 {foreach from=$control.interface item="item" key="key"}{if $key}、{/if}{$item|control}{/foreach} 的接口方法</p>{/if}
-  <p>下面列出了{$control.name}中的所有<a href="#method">方法</a>、<a href="#event">事件</a>及<a href="#style">样式</a>，点击链接即可前往详细信息。如果需要查看全部的事件请参见 {'events'|menu}。</p>
+  <p>下面列出了{$control.name}中的所有 <a href="#method">方法</a> 与 <a href="#event">事件</a>，点击链接即可前往详细信息。如果需要查看全部的事件请参见 {'events'|menu}。</p>
 </blockquote>
 <p class="clsRef">使用方法</p>
 <blockquote>
   <ul>{if $control.html}
     <li>页面初始化示例
-      <p><pre class="clsCode">{$control.html|replace:"<":"&lt;"|replace:">":"&gt;"}</pre></p>
+      <p><pre class="prettyprint clsCode" id="htmlDemo">{$control.html}</pre></p>
     </li>
     <li>JS初始化示例
-      <p><pre class="clsCode">ecui.{'create'|method:'core'}('{$URI1}', params}</pre></p>
+      <p><pre class="prettyprint clsCode">ecui.{'create'|method:'core'}('{$URI1}', params}</pre></p>
     </li>{/if}
     <li>控件扩展的 params 参数
       <p>
@@ -76,5 +82,9 @@
   </table>
 </blockquote>-->
 <div style="text-align:right"><a href="../controls.html">返回</a></div>
+<script>
+document.getElementById('htmlDemo').innerHTML = encodeHTML(formatHTML(document.getElementById('htmlDemo').innerHTML)).toLowerCase();
+prettyPrint();
+</script>
 </body>
 </html>

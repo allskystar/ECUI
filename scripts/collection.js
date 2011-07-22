@@ -119,7 +119,7 @@ _aItem  - 子控件集合
             UI_COLLECTION_CLASS[name] = blank;
             UI_COLLECTION_ITEM_CLASS[name] = function (event) {
                 var o = this.getParent();
-                if (this.isEnabled()) {
+                if (!this.isDisabled()) {
                     if (!(o['on' + name] && o['on' + name].call(this, event) === false)) {
                         o['$' + name].call(this, event);
                     }

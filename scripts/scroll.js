@@ -513,7 +513,7 @@ _oRange         - 滑动块的合法滑动区间
             height = this.getHeight(),
             prevHeight = this._uPrev.getHeight(),
             bodyHeight = this.getBodyHeight(),
-            blockHeight = MAX(FLOOR(bodyHeight * height / (height + total)), block.getInvalidHeight() + 5);
+            blockHeight = MAX(FLOOR(bodyHeight * height / (height + total)), block.getMinimumHeight() + 5);
 
         if (total) {
             block.$setSize(0, blockHeight);
@@ -621,7 +621,7 @@ _oRange         - 滑动块的合法滑动区间
             width = this.getWidth(),
             prevWidth = this._uPrev.getWidth(),
             bodyWidth = this.getBodyWidth(),
-            blockWidth = MAX(FLOOR(bodyWidth * width / (width + total)), block.getInvalidWidth() + 5);
+            blockWidth = MAX(FLOOR(bodyWidth * width / (width + total)), block.getMinimumWidth() + 5);
 
         if (total) {
             block.$setSize(blockWidth);

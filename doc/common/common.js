@@ -776,10 +776,14 @@ toggle(oSpan);
 }
 
 
+function encodeHTML(str) {
+    return str.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>');
+}
+
 function formatHTML(html) {
 	var tagNames = [], textNode = true;
-	html = html.replace(/\s+<\s+/g, "<").replace(/\s+>\s+/g, ">").replace(/[\r\n]/g, '');
-	html = html.replace(/<(\/)?(\w+)[^>]*>/g, function ($0, $1, $2) {
+	html = html.replace(/\s+<\s+/g, '<').replace(/\s+>\s+/g, '>').replace(/[\r\n]/g, '');
+	html = html.replace(/<(\/)?([A-Za-z!\-]+)[^>]*>/g, function ($0, $1, $2) {
 		if ($1) {
 			var tagName;
 			while (tagName = tagNames.pop()) {
@@ -794,16 +798,21 @@ function formatHTML(html) {
 			}
 		}
 
-		for (var i = tagNames.length - 1, indent = "\n"; i >= 0; i--) {
-			indent += "&nbsp;&nbsp;";
-		}
+        for (var i = tagNames.length - 1, indent = '\n'; i >= 0; i--) {
+            indent += '&nbsp;&nbsp;';
+        }
 
-		if (!$1) {
-			tagNames.push($2);
-			textNode = true;
-		}
-		
-		return indent + $0;
+        if ($2 != '!--') {
+            if (!$1) {
+                tagNames.push($2);
+                textNode = true;
+            }
+    		return indent + $0;
+        }
+        else {
+            textNode = false;
+            return indent + $0 + indent;
+        }
 	});
-	return html;
+	return html.slice(1);
 }

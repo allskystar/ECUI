@@ -16,11 +16,19 @@
 
     "control": [
         {
+            "name": "onactivate",
+            "desc": "控件获得激活事件。",
+            "type": "control",
+            "params": [{"name": "event", "desc": "事件对象"}],
+            "remark": "鼠标左键按下发生在控件区域时触发事件。"
+        },
+
+        {
             "name": "onappend",
-            "desc": "控件增加子控件事件。",
+            "desc": "添加子控件事件。",
             "type": "control",
             "params": [{"name": "ecui.ui.Control", "desc": "被增加的子控件"}],
-            "remark": "子控件添加到父控件时，父控件触发本事件，如果事件返回 false，子控件不会添加到父控件下。"
+            "remark": "子控件添加到父控件时，父控件触发事件。如果返回 false，子控件不会被添加到控件容器中。"
         },
 
         {
@@ -28,21 +36,15 @@
             "desc": "控件失去焦点事件。",
             "type": "control",
             "params": [{"name": "event", "desc": "事件对象"}],
-            "remark": "控件可以通过点击控件区域外或调用 {'setFocused'|method:'core'} / {'loseFocus'|method:'core'} 方法将焦点设置到其它控件上，将触发本事件。"
-        },
-
-        {
-            "name": "onchange",
-            "desc": "控件改变事件。",
-            "type": "control",
-            "remark": "滚动条控件发生滚动时触发。输入框控件内容发生改变时触发。复选框控件选中状态发生改变时触发。日历控件发生改变时触发。"
+            "remark": "处于焦点状态的控件发生变化时触发事件，可以是鼠标左键按下发生在处于焦点状态的控件区域外，也可以通过 {'setFocused'|method:'core'} 或 {'loseFocus'|method:'core'} 方法将焦点设置到其它控件上。"
         },
 
         {
             "name": "onclick",
-            "desc": "鼠标单击控件事件。",
+            "desc": "鼠标点击事件。",
             "type": "control",
-            "params": [{"name": "event", "desc": "事件对象"}]
+            "params": [{"name": "event", "desc": "事件对象"}],
+            "remark": "鼠标点击发生在控件区域时触发事件。"
         },
 
         {
@@ -52,14 +54,22 @@
             "params": [
                 {"name": "params", "type": "Object", "desc": "初始化参数"}
             ],
-            "remark": "控件构造函数调用成功后，将触发本事件。"
+            "remark": "控件构造函数调用成功后，触发事件。"
+        },
+
+        {
+            "name": "ondeactivate",
+            "desc": "控件失去激活事件。",
+            "type": "control",
+            "params": [{"name": "event", "desc": "事件对象"}],
+            "remark": "鼠标左键松开处于激活状态的控件触发事件。"
         },
 
         {
             "name": "ondispose",
             "desc": "销毁控件事件。",
             "type": "control",
-            "remark": "业务自定义针对 DOM 节点的引用，需要在本事件中释放。"
+            "remark": "控件销毁时触发事件，业务自定义针对 DOM 节点的引用，需要在本事件中释放。"
         },
 
         {
@@ -67,7 +77,7 @@
             "desc": "控件拖拽结束事件。",
             "type": "control",
             "params": [{"name": "event", "desc": "事件对象"}],
-            "remark": "调用核心的 {'drag'|method:'core'} 方法后，释放鼠标左键触发。"
+            "remark": "调用核心的 {'drag'|method:'core'} 方法后，鼠标左键松开触发事件。"
         },
 
         {
@@ -75,7 +85,7 @@
             "desc": "控件拖拽移动事件。",
             "type": "control",
             "params": [{"name": "event", "desc": "事件对象"},{"name": "x", "desc": "X轴坐标"},{"name": "y", "desc": "Y轴坐标"}],
-            "remark": "调用核心的 {'drag'|method:'core'} 方法后，释放鼠标左键之前，在浏览器中移动时触发。如果事件返回 false，将不会调用 {'setPosition'|method:'control'}(x, y) 方法设置控件的坐标。"
+            "remark": "调用核心的 {'drag'|method:'core'} 方法后，鼠标左键松开之前，在浏览器中移动时触发事件。如果返回 false，将不会自动调用 {'setPosition'|method:'control'}(x, y) 方法设置控件的坐标。"
         },
 
         {
@@ -83,7 +93,7 @@
             "desc": "控件拖拽开始事件。",
             "type": "control",
             "params": [{"name": "event", "desc": "事件对象"}],
-            "remark": "调用核心提供的 {'drag'|method:'core'} 方法触发。"
+            "remark": "调用核心提供的 {'drag'|method:'core'} 方法触发事件。"
         },
 
         {
@@ -91,28 +101,22 @@
             "desc": "控件获得焦点事件。",
             "type": "control",
             "params": [{"name": "event", "desc": "事件对象"}],
-            "remark": "控件可以通过点击或调用 {'setFocused'|method:'core'} 方法获取焦点，将触发本事件。"
+            "remark": "控件可以通过点击或调用 {'setFocused'|method:'core'} 方法获取焦点触发事件。"
         },
 
         {
             "name": "onintercept",
             "desc": "界面点击强制拦截事件。",
             "type": "control",
-            "remark": "调用核心的 {'intercept'|method:'core'} 方法后，鼠标左键在浏览器内点击触发，this 指针是调用 {'intercept'|method:'core'} 方法时传入的控件对象。"
+            "params": [{"name": "event", "desc": "事件对象"}],
+            "remark": "调用核心的 {'intercept'|method:'core'} 方法后，鼠标左键在浏览器内点击触发事件，this 指针是调用 {'intercept'|method:'core'} 方法时传入的控件对象。"
         },
 
         {
             "name": "onhide",
             "desc": "控件隐藏事件。",
             "type": "control",
-            "remark": "控件从显示状态变为隐藏状态时触发本事件，父控件隐藏时不会触发本事件。"
-        },
-
-        {
-            "name": "oninit",
-            "desc": "控件初始化事件。",
-            "type": "control",
-            "remark": "控件生成/缓存/渲染完成后，将触发本事件。"
+            "remark": "控件从显示状态变为隐藏状态时触发事件，父控件隐藏时子控件不会触发事件。"
         },
 
         {
@@ -120,7 +124,7 @@
             "desc": "键盘按下事件。",
             "type": "control",
             "params": [{"name": "event", "desc": "事件对象"}],
-            "remark": "在控件拥有焦点时，键盘按下时触发本事件。"
+            "remark": "控件处于焦点状态时，键盘按下时触发事件。"
         },
 
         {
@@ -128,7 +132,7 @@
             "desc": "键盘按压事件。",
             "type": "control",
             "params": [{"name": "event", "desc": "事件对象"}],
-            "remark": "在控件拥有焦点时，键盘按压时触发本事件。"
+            "remark": "控件处于焦点状态时，键盘按压时触发事件。"
         },
 
         {
@@ -136,85 +140,55 @@
             "desc": "键盘弹起事件。",
             "type": "control",
             "params": [{"name": "event", "desc": "事件对象"}],
-            "remark": "在控件拥有焦点时，键盘弹起时触发本事件。"
+            "remark": "控件处于焦点状态时，键盘弹起时触发事件。"
         },
 
         {
             "name": "onmousedown",
-            "desc": "鼠标在控件区域内按下事件。",
+            "desc": "鼠标键按下事件。",
             "type": "control",
-            "params": [{"name": "event", "desc": "事件对象"}]
+            "params": [{"name": "event", "desc": "事件对象"}],
+            "remark": "鼠标键位于控件区域时按下触发事件。"
         },
 
         {
             "name": "onmousemove",
-            "desc": "鼠标在控件区域内移动事件。",
+            "desc": "鼠标移动事件。",
             "type": "control",
-            "params": [{"name": "event", "desc": "事件对象"}]
+            "params": [{"name": "event", "desc": "事件对象"}],
+            "remark": "鼠标位于控件区域时移动触发事件。"
         },
 
         {
             "name": "onmouseout",
-            "desc": "鼠标移出控件区域事件。",
+            "desc": "鼠标移出事件。",
             "type": "control",
-            "params": [{"name": "event", "desc": "事件对象"}]
+            "params": [{"name": "event", "desc": "事件对象"}],
+            "remark": "鼠标移出控件区域时触发事件。"
         },
 
         {
             "name": "onmouseover",
-            "desc": "鼠标移入控件区域事件。",
+            "desc": "鼠标移入事件。",
             "type": "control",
-            "params": [{"name": "event", "desc": "事件对象"}]
+            "params": [{"name": "event", "desc": "事件对象"}],
+            "remark": "鼠标移入控件区域时触发事件。"
         },
 
         {
             "name": "onmouseup",
-            "desc": "鼠标在控件区域内弹起事件。",
+            "desc": "鼠标键松开事件。",
             "type": "control",
-            "params": [{"name": "event", "desc": "事件对象"}]
+            "params": [{"name": "event", "desc": "事件对象"}],
+            "remark": "鼠标键位于控件区域时松开触发事件。"
         },
 
         {
             "name": "onmousewheel",
-            "desc": "鼠标滚轮事件。",
+            "desc": "鼠标滚轮滚动事件。",
             "type": "control",
             "params": [{"name": "event", "desc": "事件对象"}],
-            "remark": "如果本事件不返回 false，将依次触发父控件的本事件。"
-        },
-
-        {
-            "name": "onpressend",
-            "desc": "控件按压状态结束事件。",
-            "type": "control",
-            "params": [{"name": "event", "desc": "事件对象"}]
-        },
-
-        {
-            "name": "onpressmove",
-            "desc": "控件按压状态中鼠标在控件区域内移动事件。",
-            "type": "control",
-            "params": [{"name": "event", "desc": "事件对象"}]
-        },
-
-        {
-            "name": "onpressout",
-            "desc": "控件按压状态中鼠标移出控件区域事件。",
-            "type": "control",
-            "params": [{"name": "event", "desc": "事件对象"}]
-        },
-
-        {
-            "name": "onpressover",
-            "desc": "控件按压状态中鼠标移入控件区域事件。",
-            "type": "control",
-            "params": [{"name": "event", "desc": "事件对象"}]
-        },
-
-        {
-            "name": "onpressstart",
-            "desc": "控件按压状态开始事件。",
-            "type": "control",
-            "params": [{"name": "event", "desc": "事件对象"}]
+            "remark": "鼠标滚轮位于控件区域时滚动触发事件。"
         },
 
         {
@@ -222,14 +196,14 @@
             "desc": "控件移除子控件事件。",
             "type": "control",
             "params": [{"name": "ecui.ui.Control", "desc": "被移除的子控件"}],
-            "remark": "从父控件移除子控件时，父控件触发本事件。"
+            "remark": "从父控件移除子控件时，父控件触发事件。"
         },
 
         {
             "name": "onresize",
             "desc": "控件大小改变事件。",
             "type": "control",
-            "remark": "浏览器大小发生改变时，如果控件大小发生改变，将触发本事件。"
+            "remark": "浏览器大小发生改变时，如果控件大小需要发生改变，触发事件。"
         },
 
         {
@@ -237,7 +211,7 @@
             "type": "control",
             "desc": "区域选择事件。",
             "params": [{"name": "event", "desc": "事件对象"}],
-            "remark": "调用核心 {'select'|method:'core'} 方法后，则鼠标拖拽引起选择框大小变化时触发事件。"
+            "remark": "调用核心 {'select'|method:'core'} 方法后，鼠标左键松开之前，鼠标移动触发事件。"
         },
 
         {
@@ -245,7 +219,7 @@
             "type": "control",
             "desc": "区域选择结束事件。",
             "params": [{"name": "event", "desc": "事件对象"}],
-            "remark": "调用核心 {'select'|method:'core'} 方法后，则鼠标拖拽结束时触发事件。"
+            "remark": "调用核心 {'select'|method:'core'} 方法后，鼠标左键松开触发事件。"
         },
 
         {
@@ -253,14 +227,14 @@
             "type": "control",
             "desc": "区域选择开始事件。",
             "params": [{"name": "event", "desc": "事件对象"}],
-            "remark": "调用核心 {'select'|method:'core'} 方法后，将触发 onselectstart 事件。"
+            "remark": "调用核心 {'select'|method:'core'} 方法触发事件。"
         },
 
         {
             "name": "onshow",
             "desc": "控件显示事件。",
             "type": "control",
-            "remark": "控件从隐藏状态变为显示状态时触发本事件，父控件显示时不会触发本事件。"
+            "remark": "控件从隐藏状态变为显示状态时触发事件，父控件显示时子控件不会触发事件。"
         },
 
         {
@@ -268,7 +242,7 @@
             "desc": "缩放事件。",
             "type": "control",
             "params": [{"name": "event", "desc": "事件对象"}],
-            "remark": "调用核心 {'zoom'|method:'core'} 方法后，则鼠标拖拽过程中触发事件。"
+            "remark": "调用核心 {'zoom'|method:'core'} 方法后，鼠标左键松开之前，鼠标移动触发事件。"
         },
 
         {
@@ -276,7 +250,7 @@
             "desc": "缩放结束事件。",
             "type": "control",
             "params": [{"name": "event", "desc": "事件对象"}],
-            "remark": "调用核心 {'zoom'|method:'core'} 方法后，则鼠标拖拽结束时触发事件。"
+            "remark": "调用核心 {'zoom'|method:'core'} 方法后，鼠标左键松开触发事件。"
         },
 
         {
@@ -284,7 +258,7 @@
             "desc": "缩放开始事件。",
             "type": "control",
             "params": [{"name": "event", "desc": "事件对象"}],
-            "remark": "调用核心 {'zoom'|method:'core'} 方法后，将触发 onzoomstart 事件。"
+            "remark": "调用核心 {'zoom'|method:'core'} 方法触发事件。"
         }
     ],
 

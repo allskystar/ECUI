@@ -565,6 +565,9 @@ _aCol        - 行的列Element对象，如果当前列需要向左合并为null
      * @protected
      */
     UI_TABLE_CLASS.$init = function () {
+        insertBefore(getParent(this._uHead.getBody()), this._uHead.getBase().lastChild.lastChild.firstChild);
+        this.$cache$mainHeight -= this.$cache$paddingTop;
+
         UI_PANEL_CLASS.$init.call(this);
 
         for (var i = 0, o; o = this._aCol[i++]; ) {
@@ -573,7 +576,6 @@ _aCol        - 行的列Element对象，如果当前列需要向左合并为null
         for (i = 0; o = this._aRow[i++]; ) {
             UI_TABLE_ROW_INIT(o);
         }
-        insertBefore(getParent(this._uHead.getBody()), this._uHead.getBase().lastChild.lastChild.firstChild);
     };
 
     /**
@@ -750,7 +752,7 @@ _aCol        - 行的列Element对象，如果当前列需要向左合并为null
         el.innerHTML = html.join('');
         el = el.lastChild.lastChild.lastChild;
 
-        body.insertBefore(el, row && row.getOuter());
+        body.insertBefore(el, row ? row.getOuter() : null);
         row = $fastCreate(findConstructor(this, 'Row'), el, this);
         this._aRow.splice(index--, 0, row);
 

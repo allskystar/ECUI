@@ -7,8 +7,8 @@
 //{else}//
 //{include file="adapter.js"}//
 //{/if}//
-//{if $core_js}////{include file="core.js"}////{/if}//
-//{if $control_js}////{include file="control.js"}////{/if}//
+//{include file="core.js"}//
+//{include file="control.js"}//
 //{if $label_js}////{include file="label.js"}////{/if}//
 //{if $progress_js}////{include file="progress.js"}////{/if}//
 //{if $form_js}////{include file="form.js"}////{/if}//

@@ -147,8 +147,8 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
             var i = 0,
                 name = this._uName,
                 date = this._uDate,
-                itemWidth = FLOOR((width - this.$getInvalidWidth()) / 7),
-                itemHeight = FLOOR((height - this.$getInvalidHeight() - name.getHeight()) / 6);
+                itemWidth = FLOOR((width - this.$getBasicWidth()) / 7),
+                itemHeight = FLOOR((height - this.$getBasicHeight() - name.getHeight()) / 6);
             i < 7;
         ) {
             name.getItem(i++).$setSize(itemWidth);
@@ -220,7 +220,12 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
 
             for (; month = date.getItem(i++); ) {
                 // 以下year变量表示日期是否为当月的flag，month变量表示日期单元格控件o
-                month.setEnabled(year = day > 0 && day <= lastDayOfCurrMonth);
+                if (year = day > 0 && day <= lastDayOfCurrMonth) {
+                    month.enable();
+                }
+                else {
+                    month.disable();
+                }
                 setText(
                     month.getBody(),
                     year ? day : day > lastDayOfCurrMonth ? day - lastDayOfCurrMonth : lastDayOfLastMonth + day
@@ -228,7 +233,7 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
                 month._nDay = day++;
             }
 
-            year = date.getItem(35).isEnabled();
+            year = !date.getItem(35).isDisabled();
             for (i = 35; i < 42; ) {
                 date.getItem(i++).alterClass('extra', year);
             }
