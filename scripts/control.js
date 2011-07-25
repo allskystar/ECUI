@@ -2,7 +2,7 @@
 Control - ECUI 的核心组成部分，定义了基本的控件行为。
 基础控件是 ECUI 的核心组成部分，对 DOM 树上的节点区域进行封装。基础控件扩展了 Element 节点的标准事件(例如得到与失去焦点、激活等)，提供了方法对控件的基本属性(例如控件大小、位置与显示状态等)进行改变，是一切控件实现的基础。基本控件拥有四种状态：焦点(focus)、悬停(hover)、激活(active)与失效(disabled)。控件在创建过程中分为三个阶段：首先是填充控件所必须的 DOM 结构，然后缓存控件的属性信息，最后进行初始化真正的渲染并显示控件。
 
-基本控件直接HTML初始化的例子，id指定名称，可以通过ecui.get(id)的方式访问控件:
+基础控件直接HTML初始化的例子，id指定名称，可以通过ecui.get(id)的方式访问控件:
 <div ecui="type:control;id:demo">
     <!-- 这里放控件包含的内容 -->
     ...
@@ -16,15 +16,14 @@ _bDisabled               - 控件的状态，为true时控件不处理任何事�
 _bCached                 - 控件是否已经读入缓存
 _bInit                   - 控件是否已经完成初始化
 _sUID                    - 控件的内部ID
-_sBaseClass              - 控件定义时的基本样式
-_sClass                  - 控件当前使用的样式
-_sType                   - 控件的类型样式，通常是ec-控件类型
+_sPrimary                - 控件定义时的基本样式
 _sWidth                  - 控件的基本宽度值，可能是百分比或者空字符串
 _sHeight                 - 控件的基本高度值，可能是百分比或者空字符串
 _sDisplay                - 控件的布局方式，在hide时保存，在show时恢复
-_eBase                   - 控件的基本标签对象
+_eMain                   - 控件的基本标签对象
 _eBody                   - 控件用于承载子控件的载体标签，通过$setBody函数设置这个值，绑定当前控件
 _cParent                 - 父控件对象
+_aClasses                - 控件当前使用的全部样式，其中第一项是当前样式
 _aStatus                 - 控件当前的状态集合
 $cache$width             - 控件的宽度缓存
 $cache$height            - 控件的高度缓存
@@ -72,56 +71,99 @@ $cache$position          - 控件布局方式缓存
         calcTopRevise = core.calcTopRevise,
         disposeControl = core.dispose,
         findControl = core.findControl,
+        getActived = core.getActived,
+        getFocused = core.getFocused,
+        getHovered = core.getHovered,
         getStatus = core.getStatus,
+        inheritsControl = core.inherits,
         isFixedSize = core.isFixedSize,
 
         eventNames = [
             'mousedown', 'mouseover', 'mousemove', 'mouseout', 'mouseup',
             'click', 'focus', 'blur', 'activate', 'deactivate',
             'keydown', 'keypress', 'keyup', 'mousewheel'
-        ],
-
-        UI_EVENT = ui.Event;
+        ];
 //{/if}//
 //{if $phase == "define"}//
     /**
      * 初始化基础控件。
-     * params 参数支持的属性如下：
+     * options 对象支持的属性如下：
      * type       控件的类型样式
-     * base       控件的基本样式
+     * primary    控件的基本样式
      * capturable 是否需要捕获鼠标事件，默认捕获
      * userSelect 是否允许选中内容，默认允许
      * focusable  是否允许获取焦点，默认允许
      * disabled   是否失效，默认有效
-     * @protected
+     * @public
      *
-     * @param {HTMLElement} el 关联的 Element 对象
-     * @param {Object} params 初始化参数
+     * @param {Object} options 初始化选项
      */
     ///__gzip_original__UI_CONTROL
-    var UI_CONTROL =
-        ui.Control = function (el, params) {
-            this._bCapturable = params.capturable !== false;
-            this._bUserSelect = params.userSelect !== false;
-            this._bFocusable = params.focusable !== false;
-            this._bDisabled = !!params.disabled;
-            this._sBaseClass = this._sClass = params.base;
-            this._sUID = params.uid;
-            this._sType = params.type;
-            this._eBase = this._eBody = el;
-            this._cParent = null;
+    ///__gzip_original__UI_CONTROL_CLASS
+    var UI_CONTROL = ui.Control =
+        inheritsControl(
+            Object,
+            'ui-control',
+            function (el, options) {
+                this._bCapturable = options.capturable !== false;
+                this._bUserSelect = options.userSelect !== false;
+                this._bFocusable = options.focusable !== false;
+                this._bDisabled = !!options.disabled;
+                this._sUID = options.uid;
+                this._aClasses = [this._sPrimary = options.primary].concat(options.types);
+                this._eMain = this._eBody = el;
+                this._cParent = null;
 
-            this._sWidth = el.style.width;
-            this._sHeight = el.style.height;
+                this._sWidth = el.style.width;
+                this._sHeight = el.style.height;
 
-            this._aStatus = ['', ' '];
+                this._aStatus = ['', ' '];
 
-            $bind(el, this);
-        },
+                $bind(el, this);
+            }
+        ),
         UI_CONTROL_CLASS = UI_CONTROL.prototype,
-
         UI_CONTROL_READY_LIST;
 //{else}//
+    /**
+     * 设置控件的父对象。
+     * @private
+     *
+     * @param {ecui.ui.Control} control 需要设置的控件对象
+     * @param {HTMLElement} parent 父控件对象
+     * @param {HTMLElement} parentElement 父 Element 对象
+     */
+    function UI_CONTROL_ALTER_PARENT(control, parent, parentElement) {
+        var oldParent = control._cParent,
+            el = control.getOuter();
+
+        // 触发原来父控件的移除子控件事件
+        if (parent != oldParent) {
+            if (oldParent) {
+                if (oldParent.onremove) {
+                    oldParent.onremove(control);
+                }
+                oldParent.$remove(control);
+            }
+            if (parent) {
+                if (parent.onappend && parent.onappend(control) === false || parent.$append(control) === false) {
+                    parent = parentElement = null;
+                }
+            }
+        }
+
+        if (parentElement != getParent(el)) {
+            if (parentElement) {
+                parentElement.appendChild(el);
+            }
+            else {
+                removeDom(el);
+            }
+            // 当 DOM 树位置发生改变时，$setParent必须被执行
+            control.$setParent(parent);
+        }
+    }
+
     /**
      * 控件获得激活事件的默认处理。
      * 控件获得激活时，添加状态样式 -active。
@@ -129,7 +171,7 @@ $cache$position          - 控件布局方式缓存
      *
      * @param {ecui.ui.Event} event 事件对象
      */
-    UI_CONTROL_CLASS.$activate = function (event) {
+    UI_CONTROL_CLASS.$activate = function () {
         this.alterClass('+active');
     };
 
@@ -140,7 +182,7 @@ $cache$position          - 控件布局方式缓存
      *
      * @param {ecui.ui.Event} event 事件对象
      */
-    UI_CONTROL_CLASS.$blur = function (event) {
+    UI_CONTROL_CLASS.$blur = function () {
         this.alterClass('-focus');
     };
 
@@ -149,7 +191,7 @@ $cache$position          - 控件布局方式缓存
      * $cache 方法缓存部分控件属性的值，在初始化时避免频繁的读写交替操作，加快渲染的速度，在子控件或者应用程序开发过程中，如果需要避开控件提供的方法直接操作 Element 对象，操作完成后必须调用 clearCache 方法清除控件的属性缓存，否则将引发错误。
      * @protected
      *
-     * @param {CssStyle} style 基本元素的 Css 样式对象
+     * @param {CssStyle} style 主元素的 Css 样式对象
      * @param {boolean} cacheSize 是否需要缓存控件的大小，如果控件是另一个控件的部件时，不缓存大小能加快渲染速度，默认缓存
      */
     UI_CONTROL_CLASS.$cache = function (style, cacheSize) {
@@ -160,7 +202,7 @@ $cache$position          - 控件布局方式缓存
                     'borderTopWidth', 'borderLeftWidth', 'borderRightWidth', 'borderBottomWidth',
                     'paddingTop', 'paddingLeft', 'paddingRight', 'paddingBottom'
                 ],
-                el = this._eBase,
+                el = this._eMain,
                 fixedSize = isFixedSize(),
                 o;
             o = list[i++];
@@ -187,7 +229,7 @@ $cache$position          - 控件布局方式缓存
      *
      * @param {ecui.ui.Event} event 事件对象
      */
-    UI_CONTROL_CLASS.$deactivate = function (event) {
+    UI_CONTROL_CLASS.$deactivate = function () {
         this.alterClass('-active', true);
     };
 
@@ -197,9 +239,15 @@ $cache$position          - 控件布局方式缓存
      * @protected
      */
     UI_CONTROL_CLASS.$dispose = function () {
-        this._eBase.getControl = undefined;
-        this._eBase = this._eBody = null;
-        this.$ready = blank;
+        try {
+            if (this.ondispose) {
+                this.ondispose();
+            }
+        }
+        catch (e) {
+        }
+        this._eMain.getControl = undefined;
+        this._eMain = this._eBody = null;
     };
 
     /**
@@ -209,13 +257,13 @@ $cache$position          - 控件布局方式缓存
      *
      * @param {ecui.ui.Event} event 事件对象
      */
-    UI_CONTROL_CLASS.$focus = function (event) {
+    UI_CONTROL_CLASS.$focus = function () {
         this.alterClass('+focus');
     };
 
     /**
      * 获取控件的基本高度。
-     * 控件的基本高度指控件基本区域与用户数据存放区域的高度差值，即基本元素与内部元素(如果相同则忽略其中之一)的上下边框宽度(border-width)与上下内填充宽度(padding)之和。
+     * 控件的基本高度指控件基本区域与用户数据存放区域的高度差值，即主元素与内部元素(如果相同则忽略其中之一)的上下边框宽度(border-width)与上下内填充宽度(padding)之和。
      * @public
      *
      * @return {number} 控件的基本高度
@@ -227,7 +275,7 @@ $cache$position          - 控件布局方式缓存
 
     /**
      * 获取控件的基本宽度。
-     * 控件的基本宽度指控件基本区域与用户数据存放区域的宽度差值，即基本元素与内部元素(如果相同则忽略其中之一)的左右边框宽度(border-width)与左右内填充宽度(padding)之和。
+     * 控件的基本宽度指控件基本区域与用户数据存放区域的宽度差值，即主元素与内部元素(如果相同则忽略其中之一)的左右边框宽度(border-width)与左右内填充宽度(padding)之和。
      * @public
      *
      * @return {number} 控件的基本宽度
@@ -267,12 +315,12 @@ $cache$position          - 控件布局方式缓存
 
     /**
      * 设置控件容器支持坐标定位。
-     * $locate 方法执行后，容器内部 Element 对象的 offsetParent 将指向基本元素(参见 getBase 方法)。
+     * $locate 方法执行后，容器内部 Element 对象的 offsetParent 将指向主元素(参见 getMain 方法)。
      * @protected
      */
     UI_CONTROL_CLASS.$locate = function () {
         if (this.$cache$position == 'static') {
-            this._eBase.style.position = this.$cache$position = 'relative';
+            this._eMain.style.position = this.$cache$position = 'relative';
         }
     };
 
@@ -283,7 +331,7 @@ $cache$position          - 控件布局方式缓存
      *
      * @param {ecui.ui.Event} event 事件对象
      */
-    UI_CONTROL_CLASS.$mouseout = function (event) {
+    UI_CONTROL_CLASS.$mouseout = function () {
         this.alterClass('-hover', true);
     };
 
@@ -294,7 +342,7 @@ $cache$position          - 控件布局方式缓存
      *
      * @param {ecui.ui.Event} event 事件对象
      */
-    UI_CONTROL_CLASS.$mouseover = function (event) {
+    UI_CONTROL_CLASS.$mouseover = function () {
         this.alterClass('+hover');
     };
 
@@ -305,7 +353,7 @@ $cache$position          - 控件布局方式缓存
     UI_CONTROL_CLASS.$resize = function () {
         //__gzip_original__el
         //__gzip_original__currStyle
-        var el = this._eBase,
+        var el = this._eMain,
             currStyle = el.style;
 
         currStyle.width = this._sWidth;
@@ -323,7 +371,7 @@ $cache$position          - 控件布局方式缓存
 
     /**
      * 设置控件的内层元素。
-     * ECUI 控件 逻辑上分为外层元素、基本元素与内层元素，外层元素用于控制控件自身布局，基本元素是控件生成时捆绑的 Element 对象，而内层元素用于控制控件对象的子控件与文本布局，三者允许是同一个 Element 对象。
+     * ECUI 控件 逻辑上分为外层元素、主元素与内层元素，外层元素用于控制控件自身布局，主元素是控件生成时捆绑的 Element 对象，而内层元素用于控制控件对象的子控件与文本布局，三者允许是同一个 Element 对象。
      * @protected
      *
      * @param {HTMLElement} el Element 对象
@@ -352,7 +400,7 @@ $cache$position          - 控件布局方式缓存
      */
     UI_CONTROL_CLASS.$setSize = function (width, height) {
         //__gzip_original__style
-        var style = this._eBase.style,
+        var style = this._eMain.style,
             flgFixedSize = isFixedSize();
 
         // 负宽度IE下将出错
@@ -380,7 +428,7 @@ $cache$position          - 控件布局方式缓存
 
     /**
      * 为控件添加/移除一个扩展样式。
-     * 扩展样式分别附加在类型样式与当前样式之后(参见 getType 与 getBaseClass 方法)，使用-号进行分隔。如果类型样式为 ec-control，当前样式为 demo，扩展样式 hover 后，控件基本元素将存在四个样式，分别为 ec-control、demo、ec-control-hover 与 demo-hover。
+     * 扩展样式分别附加在类型样式与当前样式之后(参见 getTypes 与 getClass 方法)，使用-号进行分隔。如果类型样式为 ui-control，当前样式为 demo，扩展样式 hover 后，控件主元素将存在四个样式，分别为 ui-control、demo、ui-control-hover 与 demo-hover。
      * @public
      *
      * @param {string} className 扩展样式名，以+号开头表示添加扩展样式，以-号开头表示移除扩展样式
@@ -394,10 +442,7 @@ $cache$position          - 控件布局方式缓存
             className += ' ';
         }
 
-        (flag ? addClass : removeClass)(
-            this._eBase,
-            this._sType + className + ' ' + this._sClass + className
-        );
+        (flag ? addClass : removeClass)(this._eMain, this._aClasses.join(className) + className);
 
         if (flag) {
             this._aStatus.push(className);
@@ -405,6 +450,17 @@ $cache$position          - 控件布局方式缓存
         else {
             remove(this._aStatus, className);
         }
+    };
+
+    /**
+     * 将控件添加到页面元素中。
+     * appendTo 方法设置父元素，并使用 findControl 查找父控件对象。如果父控件发生变化，原有的父控件若存在，将触发移除子控件事件(onremove)，并解除控件与原有父控件的关联，新的父控件若存在，将触发添加子控件事件(onappend)，如果此事件返回 false，添加失败，相当于忽略 parentElement 参数。
+     * @public
+     *
+     * @param {HTMLElement} parentElement 父 Element 对象，忽略参数控件将移出 DOM 树
+     */
+    UI_CONTROL_CLASS.appendTo = function (parentElement) {
+        UI_CONTROL_ALTER_PARENT(this, parentElement && findControl(parentElement), parentElement);
     };
 
     /**
@@ -418,7 +474,7 @@ $cache$position          - 控件布局方式缓存
     UI_CONTROL_CLASS.cache = function (cacheSize, force) {
         if (force || !this._bCached) {
             this._bCached = true;
-            this.$cache(getStyle(this._eBase), cacheSize);
+            this.$cache(getStyle(this._eMain), cacheSize);
         }
     };
 
@@ -452,13 +508,17 @@ $cache$position          - 控件布局方式缓存
      * 控件获得失效状态。
      * 控件获得失效状态时，添加状态样式 -disabled(参见 alterClass 方法)。disable 方法导致控件失去激活、悬停、焦点状态，所有子控件的 isDisabled 方法返回 true，但不会设置子控件的失效状态样式。
      * @public
+     *
+     * @return {boolean} 控件失效状态是否变化
      */
     UI_CONTROL_CLASS.disable = function () {
         if (!this._bDisabled) {
             this.alterClass('+disabled');
             this._bDisabled = true;
             $clearState(this);
+            return true;
         }
+        return false;
     };
 
     /**
@@ -474,34 +534,16 @@ $cache$position          - 控件布局方式缓存
      * 控件解除失效状态。
      * 控件解除失效状态时，移除状态样式 -disabled(参见 alterClass 方法)。enable 方法仅解除控件自身的失效状态，如果其父控件失效，isDisabled 方法返回 true。
      * @public
+     *
+     * @return {boolean} 控件失效状态是否变化
      */
     UI_CONTROL_CLASS.enable = function () {
         if (this._bDisabled) {
             this.alterClass('-disabled', true);
             this._bDisabled = false;
+            return true;
         }
-    };
-
-    /**
-     * 获取控件的基本元素。
-     * getBase 方法返回控件生成时定义的 Element 对象(参见 create 方法)。
-     * @public
-     *
-     * @return {HTMLElement} Element 对象
-     */
-    UI_CONTROL_CLASS.getBase = function () {
-        return this._eBase;
-    };
-
-    /**
-     * 获取控件的基本样式。
-     * getBaseClass 方法返回控件生成时指定的 base 参数(参见 create 方法)。基本样式与通过 getClass 方法返回的当前样式存在区别，在控件生成初期，当前样式等于基本样式，基本样式在初始化后无法改变，setClass 方法改变当前样式。
-     * @public
-     *
-     * @return {string} 控件的基本样式
-     */
-    UI_CONTROL_CLASS.getBaseClass = function () {
-        return this._sBaseClass;
+        return false;
     };
 
     /**
@@ -539,13 +581,23 @@ $cache$position          - 控件布局方式缓存
 
     /**
      * 获取控件的当前样式。
-     * getClass 方法返回控件当前使用的样式，扩展样式分别附加在类型样式与当前样式之后，从而实现控件的状态样式改变，详细的描述请参见 alterClass 方法。当前样式与 getBaseClass 方法返回的基本样式存在区别，在控件生成初期，当前样式等于基本样式，基本样式在初始化后无法改变，setClass 方法改变当前样式。
+     * getClass 方法返回控件当前使用的样式，扩展样式分别附加在类型样式与当前样式之后，从而实现控件的状态样式改变，详细的描述请参见 alterClass 方法。当前样式与 getPrimary 方法返回的基本样式存在区别，在控件生成初期，当前样式等于基本样式，基本样式在初始化后无法改变，setClass 方法改变当前样式。
      * @public
      *
      * @return {string} 控件的当前样式
      */
     UI_CONTROL_CLASS.getClass = function () {
-        return this._sClass;
+        return this._aClasses[0];
+    };
+
+    /**
+     * 获取控件的内容。
+     * @public
+     *
+     * @return {string} HTML 片断
+     */
+    UI_CONTROL_CLASS.getContent = function () {
+        return this._eBody.innerHTML;
     };
 
     /**
@@ -557,6 +609,17 @@ $cache$position          - 控件布局方式缓存
     UI_CONTROL_CLASS.getHeight = function () {
         this.cache();
         return this.$cache$height;
+    };
+
+    /**
+     * 获取控件的主元素。
+     * getMain 方法返回控件生成时定义的 Element 对象(参见 create 方法)。
+     * @public
+     *
+     * @return {HTMLElement} Element 对象
+     */
+    UI_CONTROL_CLASS.getMain = function () {
+        return this._eMain;
     };
 
     /**
@@ -588,7 +651,7 @@ $cache$position          - 控件布局方式缓存
      * @return {HTMLElement} Element 对象
      */
     UI_CONTROL_CLASS.getOuter = function () {
-        return this._eBase;
+        return this._eMain;
     };
 
     /**
@@ -603,19 +666,30 @@ $cache$position          - 控件布局方式缓存
     };
 
     /**
-     * 获取控件的类型样式。
-     * getType 方法返回控件生成时指定的 type 参数(参见 create 方法)。扩展样式分别附加在类型样式与当前样式之后，从而实现控件的状态样式改变，详细的描述请参见 alterClass 方法。类型样式不可以改变。
+     * 获取控件的基本样式。
+     * getPrimary 方法返回控件生成时指定的 primary 参数(参见 create 方法)。基本样式与通过 getClass 方法返回的当前样式存在区别，在控件生成初期，当前样式等于基本样式，基本样式在初始化后无法改变，setClass 方法改变当前样式。
      * @public
      *
-     * @return {string} 控件的类型样式
+     * @return {string} 控件的基本样式
      */
-    UI_CONTROL_CLASS.getType = function () {
-        return this._sType;
+    UI_CONTROL_CLASS.getPrimary = function () {
+        return this._sPrimary;
+    };
+
+    /**
+     * 获取控件的类型样式组。
+     * getTypes 方法返回控件的类型样式组，类型样式在控件继承时指定。
+     * @public
+     *
+     * @return {Array} 控件的类型样式组
+     */
+    UI_CONTROL_CLASS.getTypes = function () {
+        return this._aClasses.slice(1);
     };
 
     /**
      * 获取控件的内部唯一标识符。
-     * getUID 方法返回的 ID 不是初始化参数中指定的 id，而是框架为每个控件生成的内部唯一标识符。
+     * getUID 方法返回的 ID 不是初始化选项中指定的 id，而是框架为每个控件生成的内部唯一标识符。
      * @public
      *
      * @return {string} 控件 ID
@@ -683,32 +757,42 @@ $cache$position          - 控件布局方式缓存
      */
     UI_CONTROL_CLASS.init = function () {
         if (!this._bInit) {
-            this._bDisabled && this.alterClass('+disabled');
+            if (this._bDisabled) {
+                this.alterClass('+disabled');
+            }
             this.$setSize(this.getWidth(), this.getHeight());
 
-            if (this.$ready) {
-                if (UI_CONTROL_READY_LIST === null) {
-                    // 页面已经加载完毕，直接运行 $ready 方法
-                    this.$ready();
+            if (UI_CONTROL_READY_LIST === null) {
+                // 页面已经加载完毕，直接运行 $ready 方法
+                this.$ready();
+            }
+            else {
+                if (!UI_CONTROL_READY_LIST) {
+                    // 页面未加载完成，首先将 $ready 方法的调用存放在调用序列中
+                    // 需要这么做的原因是 ie 的 input 回填机制，一定要在 onload 之后才触发
+                    // ECUI 应该避免直接使用 ecui.get(xxx) 导致初始化，所有的代码应该在 onload 之后运行
+                    UI_CONTROL_READY_LIST = [];
+                    timer(function () {
+                        for (var i = 0, o; o = UI_CONTROL_READY_LIST[i++]; ) {
+                            o.$ready();
+                        }
+                        UI_CONTROL_READY_LIST = null;
+                    });
                 }
-                else {
-                    if (!UI_CONTROL_READY_LIST) {
-                        // 页面未加载完成，首先将 $ready 方法的调用存放在调用序列中
-                        // 需要这么做的原因是 ie 的 input 回填机制，一定要在 onload 之后才触发
-                        // ECUI 应该避免直接使用 ecui.get(xxx) 导致初始化，所有的代码应该在 onload 之后运行
-                        UI_CONTROL_READY_LIST = [];
-                        timer(function () {
-                            for (var i = 0, o; o = UI_CONTROL_READY_LIST[i++]; ) {
-                                o.$ready();
-                            }
-                            UI_CONTROL_READY_LIST = null;
-                        });
-                    }
-                    UI_CONTROL_READY_LIST.push(this);
-                }
+                UI_CONTROL_READY_LIST.push(this);
             }
             this._bInit = true;
         }
+    };
+
+    /**
+     * 判断控件是否处于激活状态。
+     * @public
+     *
+     * @return {boolean} 控件是否处于激活状态
+     */
+    UI_CONTROL_CLASS.isActived = function () {
+        return this.contain(getActived());
     };
 
     /**
@@ -745,6 +829,26 @@ $cache$position          - 控件布局方式缓存
     };
 
     /**
+     * 判断控件是否处于焦点状态。
+     * @public
+     *
+     * @return {boolean} 控件是否处于焦点状态
+     */
+    UI_CONTROL_CLASS.isFocused = function () {
+        return this.contain(getFocused());
+    };
+
+    /**
+     * 判断控件是否处于悬停状态。
+     * @public
+     *
+     * @return {boolean} 控件是否处于悬停状态
+     */
+    UI_CONTROL_CLASS.isHovered = function () {
+        return this.contain(getHovered());
+    };
+
+    /**
      * 判断是否处于显示状态。
      * @public
      *
@@ -762,6 +866,15 @@ $cache$position          - 控件布局方式缓存
      */
     UI_CONTROL_CLASS.isUserSelect = function () {
         return this._bUserSelect;
+    };
+
+    /**
+     * 控件完全刷新。
+     * 对于存在数据源的控件，render 方法根据数据源重新填充控件内容，重新计算控件的大小进行完全的重绘，render 方法不会触发 onresize 事件。
+     * @public
+     */
+    UI_CONTROL_CLASS.render = function () {
+        this.$resize();
     };
 
     /**
@@ -803,21 +916,27 @@ $cache$position          - 控件布局方式缓存
      * @param {string} currClass 控件的当前样式名称
      */
     UI_CONTROL_CLASS.setClass = function (currClass) {
-        var oldClass = this._sClass,
-            type = this._sType;
+        var i = 0,
+            oldClass = this._aClasses[0],
+            classes = this._aClasses.slice(),
+            o;
 
-        currClass = currClass || this._sBaseClass;
+        currClass = currClass || this._sPrimary;
 
         // 如果基本样式没有改变不需要执行
         if (currClass != oldClass) {
-            this._eBase.className =
-                this._aStatus.join(type) + this._aStatus.join(currClass) +
-                    this._eBase.className.replace(
-                        new REGEXP('^\\s+|(' + oldClass + '|' + type + ')(-[^\\s]+)?(\\s+|$)|\\s+$', 'g'),
+            classes[0] = currClass;
+
+            for (; o = classes[i]; ) {
+                classes[i] = this._aStatus.join(classes[i++]);
+            }
+            this._eMain.className = classes.join('') + 
+                    this._eMain.className.replace(
+                        new REGEXP('^\\s+|(' + this._aClasses.join('|') + ')(-[^\\s]+)?(\\s+|$)|\\s+$', 'g'),
                         ''
                     );
 
-            this._sClass = currClass;
+            this._aClasses[0] = currClass;
         }
     };
 
@@ -833,50 +952,13 @@ $cache$position          - 控件布局方式缓存
 
     /**
      * 设置当前控件的父控件。
-     * setParent 方法设置父控件，参数是父控件对象时，将当前控件挂接到父控件对象的内层 Element 对象下，如果参数是父 Element 对象，将当前控件挂接到这个 Element 对象上并使用 findControl 查找父控件对象。调用 setParent 方法设置父控件，如果在设置父控件之前已经存在父控件，会触发原父控件的 onremove 事件并解除控件与原父控件的关联，新的父控件如果存在，会触发父控件的 onappend 事件，如果事件返回 false，表示父控件不允许当前控件作为它的子控件，设置失败，相当于忽略 parent 参数。
+     * setParent 方法设置父控件，将当前控件挂接到父控件对象的内层元素中。如果父控件发生变化，原有的父控件若存在，将触发移除子控件事件(onremove)，并解除控件与原有父控件的关联，新的父控件若存在，将触发添加子控件事件(onappend)，如果此事件返回 false，添加失败，相当于忽略 parent 参数。
      * @public
      *
-     * @param {ecui.ui.Control|HTMLElement} parent 父控件对象/父 Element 对象，忽略参数将控件移出 DOM 树
+     * @param {ecui.ui.Control} parent 父控件对象，忽略参数控件将移出 DOM 树
      */
     UI_CONTROL_CLASS.setParent = function (parent) {
-        var oldParent = this._cParent,
-            el = this.getOuter(),
-            parentEl;
-
-        // 识别父对象类型
-        if (parent) {
-            if (parent instanceof UI_CONTROL) {
-                parentEl = parent._eBody;
-            }
-            else {
-                parentEl = parent;
-                parent = findControl(parent);
-            }
-        }
-
-        // 触发原来父控件的移除子控件事件
-        if (parent != oldParent || parentEl != getParent(el)) {
-            if (oldParent) {
-                if (oldParent.onremove) {
-                    oldParent.onremove(this);
-                }
-                oldParent.$remove(this);
-            }
-            if (parent) {
-                if (parent.onappend && parent.onappend(this) === false || parent.$append(this) === false) {
-                    parent = parentEl = null;
-                }
-            }
-
-            if (parentEl) {
-                parentEl.appendChild(el);
-            }
-            else {
-                removeDom(el);
-            }
-            this.$setParent(parent);
-            this.clearCache();
-        }
+        UI_CONTROL_ALTER_PARENT(this, parent, parent && parent._eBody);
     };
 
     /**
@@ -903,7 +985,7 @@ $cache$position          - 控件布局方式缓存
      */
     UI_CONTROL_CLASS.setSize = function (width, height) {
         //__gzip_original__style
-        var style = this._eBase.style;
+        var style = this._eMain.style;
 
         // 控件新的大小不允许小于最小值
         if (width < this.getMinimumWidth()) {
@@ -960,7 +1042,8 @@ $cache$position          - 控件布局方式缓存
         UI_CONTROL_CLASS.$intercept = UI_CONTROL_CLASS.$append = UI_CONTROL_CLASS.$remove =
             UI_CONTROL_CLASS.$selectstart = UI_CONTROL_CLASS.$select = UI_CONTROL_CLASS.$selectend =
             UI_CONTROL_CLASS.$zoomstart = UI_CONTROL_CLASS.$zoom = UI_CONTROL_CLASS.$zoomend =
-            UI_CONTROL_CLASS.$dragstart = UI_CONTROL_CLASS.$dragmove = UI_CONTROL_CLASS.$dragend = blank;
+            UI_CONTROL_CLASS.$dragstart = UI_CONTROL_CLASS.$dragmove = UI_CONTROL_CLASS.$dragend =
+            UI_CONTROL_CLASS.$ready = blank;
     })();
 //{/if}//
 //{if 0}//

@@ -68,28 +68,28 @@ _cPopup      - 是否包含下级弹出菜单
 //{if $phase == "define"}//
     /**
      * 初始化弹出菜单控件。
-     * params 参数支持的属性如下：
+     * options 对象支持的属性如下：
      * optionSize 弹出菜单选项的显示数量，不设置将全部显示
      * @public
      *
      * @param {HTMLElement} el 关联的 Element 对象
-     * @param {Object} params 初始化参数
+     * @param {Object} options 初始化选项
      */
     //__gzip_original__UI_POPUP
     //__gzip_original__UI_POPUP_BUTTON
     //__gzip_original__UI_POPUP_ITEM
     var UI_POPUP =
-        ui.Popup = function (el, params) {
-            UI_CONTROL.call(this, el, params);
+        ui.Popup = function (el, options) {
+            UI_CONTROL.call(this, el, options);
 
             //__gzip_original__baseClass
             //__gzip_original__buttonParams
-            var baseClass = params.base,
+            var baseClass = options.base,
                 buttonParams = {select: false, focus: false};
 
             removeDom(el);
             el.style.cssText += ';position:absolute;overflow:hidden';
-            if (this._nOptionSize = params.optionSize) {
+            if (this._nOptionSize = options.optionSize) {
                 var o = createDom(baseClass + '-main', 'position:absolute;top:0px;left:0px');
 
                 moveElements(el, o);
@@ -115,10 +115,10 @@ _cPopup      - 是否包含下级弹出菜单
          * @public
          *
          * @param {HTMLElement} el 关联的 Element 对象
-         * @param {Object} params 初始化参数
+         * @param {Object} options 初始化选项
          */
-        UI_POPUP_BUTTON = UI_POPUP.Button = function (el, params) {
-            UI_CONTROL.call(this, el, params);
+        UI_POPUP_BUTTON = UI_POPUP.Button = function (el, options) {
+            UI_CONTROL.call(this, el, options);
         },
         UI_POPUP_BUTTON_CLASS = inherits(UI_POPUP_BUTTON, UI_CONTROL),
 
@@ -127,18 +127,18 @@ _cPopup      - 是否包含下级弹出菜单
          * @public
          *
          * @param {HTMLElement} el 关联的 Element 对象
-         * @param {Object} params 初始化参数
+         * @param {Object} options 初始化选项
          */
-        UI_POPUP_ITEM = UI_POPUP.Item = function (el, params) {
-            UI_ITEM.call(this, el, params);
+        UI_POPUP_ITEM = UI_POPUP.Item = function (el, options) {
+            UI_ITEM.call(this, el, options);
 
             var o = first(el),
                 tmpEl;
 
             if (o && o.tagName == 'LABEL') {
-                moveElements(el, tmpEl = createDom('ec-popup ' + params.parent.getBaseClass()));
+                moveElements(el, tmpEl = createDom('ec-popup ' + options.parent.getBaseClass()));
                 el.appendChild(o);
-                this._cPopup = $fastCreate(UI_POPUP, tmpEl, this, extend({}, params));
+                this._cPopup = $fastCreate(UI_POPUP, tmpEl, this, extend({}, options));
             }
 
             UI_POPUP_ITEM_FLUSH(this);

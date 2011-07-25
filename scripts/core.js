@@ -40,6 +40,7 @@
         detachEvent = util.detachEvent,
         extend = util.extend,
         getView = util.getView,
+        inherits = util.inherits,
         timer = util.timer,
         toNumber = util.toNumber;
 //{/if}//
@@ -90,6 +91,37 @@
         getActived,
         getScrollNarrow,
         getStatus,
+
+        /**
+         * 控件继承。
+         * @public
+         *
+         * @param {Function} superClass 父控件类
+         * @param {string} type 子控件的类型样式
+         * @param {Function} constructor 子控件的标准构造函数，如果忽略将直接调用父控件类的构造函数
+         * @return {Function} 新控件的构造函数
+         */
+        inheritsControl = core.inherits = function (superClass, type, constructor) {
+            var agent = function (options) {
+                return createControl(constructor, options);
+            };
+
+            if (!constructor) {
+                constructor = function (el, options) {
+                    superClass.client.call(this, el, options);
+                };
+            }
+
+            inherits(agent, superClass);
+
+            agent.types = (superClass.types || []).concat([type]);
+
+            inherits(agent.client = constructor, agent);
+            constructor.agent = agent;
+
+            return agent;
+        },
+
         intercept,
         isFixedSize,
         loseFocus,
@@ -103,12 +135,37 @@
             'mousedown', 'mouseover', 'mousemove', 'mouseout', 'mouseup',
             'click', 'focus', 'blur', 'activate', 'deactivate',
             'keydown', 'keypress', 'keyup', 'mousewheel'
-        ],
-
-        UI_EVENT;
+        ];
 //{else}//
     (function () {
-        var ecuiName = 'ecui',        // Element 中用于自动渲染的 ecui 属性名称
+        /**
+         * 创建 ECUI 事件对象。
+         * @public
+         *
+         * @param {string} type 事件类型
+         * @param {Event} event 浏览器原生事件对象，忽略将自动填充
+         */
+        ///__gzip_original__UI_EVENT_CLASS
+        var UI_EVENT = ui.Event = function (type, event) {
+                this.type = type;
+
+                if (event) {
+                    this.pageX = event.pageX;
+                    this.pageY = event.pageY;
+                    this.which = event.which;
+                    this.target = event.target;
+                    this._oNative = event;
+                }
+                else {
+                    this.pageX = mouseX;
+                    this.pageY = mouseY;
+                    this.which = keyCode;
+                    this.target = DOCUMENT;
+                }
+            },
+            UI_EVENT_CLASS = UI_EVENT.prototype,
+
+            ecuiName = 'ecui',        // Element 中用于自动渲染的 ecui 属性名称
             isGlobalId,               // 是否自动将 ecui 的标识符全局化
 
             flgFixedSize,             // 在计算宽度与高度时，是否需要修正内填充与边框样式的影响
@@ -410,7 +467,7 @@
 
                         if (ieVersion < 8) {
                             // 修复ie6/7下宽度自适应错误的问题
-                            o = getStyle(j = o.getBase());
+                            o = getStyle(j = o.getMain());
                             if (o.width == 'auto' && o.display == 'block') {
                                 j.style.width = '100%';
                             }
@@ -421,10 +478,10 @@
                         // 由于强制设置了100%，因此改变ie下控件的大小必须从内部向外进行
                         // 为避免多次reflow，增加一次循环
                         for (i = 0; o = list[i]; ) {
-                            widthList[i++] = o.getBase().offsetWidth;
+                            widthList[i++] = o.getMain().offsetWidth;
                         }
                         for (; o = list[i--]; ) {
-                            o.getBase().style.width =
+                            o.getMain().style.width =
                                 widthList[i] - (flgFixedSize ? o.$getBasicWidth() * 2 : 0) + 'px';
                         }
                     }
@@ -508,52 +565,58 @@
 
         /**
          * 创建 ECUI 控件。
-         * $create 方法创建控件时不会自动渲染控件。在大批量创建控件时，为了加快渲染速度，应该首先使用 $create 方法创建所有控件完成后，再批量分别调用控件的 cache、init 与 repaint 方法渲染控件。params 参数对象支持的属性如下：
+         * $create 方法创建控件时不会自动渲染控件。在大批量创建控件时，为了加快渲染速度，应该首先使用 $create 方法创建所有控件完成后，再批量分别调用控件的 cache、init 与 repaint 方法渲染控件。options 对象支持的属性如下：
          * id        {string} 当前控件的 id，提供给 $connect 与 get 方法使用
-         * base      {string} 控件的基本样式(参见 getBaseClass 方法)，如果忽略此参数将使用基本元素的 className 属性
-         * element   {HTMLElement} 与控件绑捆的 Element 对象(参见 getBase 方法)，如果忽略此参数将创建 Element 对象与控件绑捆
+         * main      {HTMLElement} 与控件绑捆的 Element 对象(参见 getMain 方法)，如果忽略此参数将创建 Element 对象与控件绑捆
          * parent    {ecui.ui.Control} 父控件对象或者父 Element 对象
-         * type      {string} 控件的类型样式，通常情况下省略此参数，使用 "ec-控件名称" 作为控件的类型样式
+         * primary   {string} 控件的基本样式(参见 getMainClass 方法)，如果忽略此参数将使用主元素的 className 属性
          * @protected
          *
-         * @param {string} type 控件的名称
-         * @param {Object} params 初始化参数(参见 ECUI 控件)
+         * @param {Function} type 控件的构造函数
+         * @param {Object} options 初始化选项(参见 ECUI 控件)
          * @return {ecui.ui.Control} ECUI 控件
          */
-        $create = core.$create = function (type, params) {
-            params = params || {};
+        $create = core.$create = function (type, options) {
+            type = type.client || type;
+            options = options || {};
 
             //__gzip_original__parent
             //__gzip_original__id
             //__gzip_original__typeClass
             var i = 0,
-                parent = params.parent,
-                id = params.id,
-                el = params.element || createDom(),
-                typeClass = params.type,
-                o = params.base || '';
+                parent = options.parent,
+                id = options.id,
+                el = options.main || createDom(),
+                o = options.primary || '';
 
             // 如果指定的元素已经初始化，直接返回
             if (el.getControl) {
                 return el.getControl();
             }
 
-            params.uid = 'ec-' + ++uniqueIndex;
-            el.className +=
-                ' ' + (typeClass && typeClass != type ? typeClass : params.type = 'ec-' + type.toLowerCase()) +
-                ' ' + o;
+            options.uid = 'ec-' + (++uniqueIndex);
+            options.types = type.agent.types;
+            el.className += ' ' + options.types.join(' ') + ' ' + o;
 
             // 如果没有指定基本样式，使用控件的样式作为基本样式
             if (!o) {
                 o = el.className.split(/\s+/);
-                params.base = o[0] || o[1];
+                options.primary = o[0] || o[1];
             }
 
             // 生成控件
-            type = new ui[toCamelCase(type.charAt(0).toUpperCase() + type.slice(1))](el, params);
+            type = new type(el, options);
 
             if (parent) {
-                type.setParent(parent);
+//{if 0}//
+                if (parent instanceof ui.Control) {
+//{else}//                if (parent instanceof UI_CONTROL) {
+//{/if}//
+                    type.setParent(parent);
+                }
+                else {
+                    type.appendTo(parent);
+                }
             }
             else if (o = findControl(getParent(type.getOuter()))) {
                 if (!(o.onappend && o.onappend(type) === false || o.$append(type) === false)) {
@@ -566,7 +629,9 @@
 
             allControls.push(type);
             independentControls.push(type);
-            type.oncreate && type.oncreate(params);
+            if (type.oncreate) {
+                type.oncreate(options);
+            }
 
             if (id) {
                 namedControls[id] = type;
@@ -593,19 +658,20 @@
          * @param {Function} type 控件的构造函数
          * @param {HTMLElement} el 控件对应的 Element 对象
          * @param {ecui.ui.Control} parent 控件的父控件
-         * @param {Object} params 初始化参数(参见 ECUI 控件)
+         * @param {Object} options 初始化选项(参见 ECUI 控件)
          * @return {ecui.ui.Control} ECUI 控件
          */
-        $fastCreate = core.$fastCreate = function (type, el, parent, params) {
+        $fastCreate = core.$fastCreate = function (type, el, parent, options) {
             var o = el.className.split(' ');
 
-            params = params || {};
+            type = type.client || type;
+            options = options || {};
 
-            params.uid = 'ec-' + ++uniqueIndex;
-            params.type = o[0];
-            params.base = o[1];
+            options.uid = 'ec-' + (++uniqueIndex);
+            options.primary = o[0];
+            options.types = type.agent.types;
 
-            type = new type(el, params);
+            type = new type(el, options);
             type.$setParent(parent);
 
             allControls.push(type);
@@ -616,7 +682,7 @@
          * 注册一个插件。
          * @protected
          *
-         * @param {string} name 插件的初始化参数名
+         * @param {string} name 插件的初始化选项名
          * @param {Function} func 插件的初始化函数
          */
         $register = core.$register = function (name, func) {
@@ -683,20 +749,19 @@
 
         /**
          * 创建 ECUI 控件。
-         * 标准的创建 ECUI 控件 的工厂方法，适用于少量创建控件，生成的控件不需要任何额外的调用即可正常的显示，对于批量创建控件，请使用 $create 方法。params 参数对象支持的属性如下：
+         * 标准的创建 ECUI 控件 的工厂方法，适用于少量创建控件，生成的控件不需要任何额外的调用即可正常的显示，对于批量创建控件，请使用 $create 方法。options 对象支持的属性如下：
          * id        {string} 当前控件的 id，提供给 $connect 与 get 方法使用
-         * base      {string} 控件的基本样式(参见 getBaseClass 方法)，如果忽略此参数将使用基本元素的 className 属性
-         * element   {HTMLElement} 与控件绑捆的 Element 对象(参见 getBase 方法)，如果忽略此参数将创建 Element 对象与控件绑捆
+         * main      {HTMLElement} 与控件绑捆的 Element 对象(参见 getMain 方法)，如果忽略此参数将创建 Element 对象与控件绑捆
          * parent    {ecui.ui.Control} 父控件对象或者父 Element 对象
-         * type      {string} 控件的类型样式，通常情况下省略此参数，使用 "ec-控件名称" 作为控件的类型样式
+         * primary   {string} 控件的基本样式(参见 getMainClass 方法)，如果忽略此参数将使用主元素的 className 属性
          * @public
          *
-         * @param {string} type 控件的名称
-         * @param {Object} params 初始化参数(参见 ECUI 控件)
+         * @param {string|Function} type 控件的类型名或控件的构造函数
+         * @param {Object} options 初始化选项(参见 ECUI 控件)
          * @return {ecui.ui.Control} ECUI 控件
          */
-        createControl = core.create = function (type, params) {
-            type = $create(type, params);
+        createControl = core.create = function (type, options) {
+            type = $create('string' == typeof(type) ? ui[type] : type, options);
             type.cache();
             type.init();
             return type;
@@ -752,13 +817,6 @@
             }
 
             for (; o = controls[++i]; ) {
-                try {
-                    if (o.ondispose) {
-                        o.ondispose();
-                    }
-                }
-                catch (e) {
-                }
                 o.$dispose();
             }
         };
@@ -803,7 +861,7 @@
          * 使用页面静态初始化或页面动态初始化(参见 ECUI 使用方式)创建的控件，如果在 ecui 属性中指定了 id，就可以通过 get 方法得到控件，也可以在 Element 对象上使用 getControl 方法。
          * @public
          *
-         * @param {string} id ECUI 控件的名称，通过 Element 对象的初始化参数 id 定义
+         * @param {string} id ECUI 控件的名称，通过 Element 对象的初始化选项 id 定义
          * @return {ecui.ui.Control} 指定名称的 ECUI 控件对象，如果不存在返回 null
          */
         core.get = function (id) {
@@ -936,18 +994,18 @@
         };
 
         /**
-         * 从 Element 对象中获取初始化参数对象。
+         * 从 Element 对象中获取初始化选项对象。
          * @public
          *
          * @param {HTMLElement} el Element 对象
          * @param {string} attributeName 当前的初始化属性名(参见 getAttributeName 方法)
-         * @return {Object} 初始化参数对象
+         * @return {Object} 初始化选项对象
          */
         getParameters = core.getParameters = function (el, attributeName) {
             attributeName = attributeName || ecuiName;
 
             var text = el.getAttribute(attributeName),
-                params = {};
+                options = {};
 
             if (text) {
                 for (
@@ -957,12 +1015,12 @@
                     text = REGEXP["$'"];
 
                     el = REGEXP.$3;
-                    params[toCamelCase(REGEXP.$1)] =
+                    options[toCamelCase(REGEXP.$1)] =
                         !el || el == 'true' ? true : el == 'false' ? false : ISNAN(el - 0) ? el : el - 0;
                 }
             }
 
-            return params;
+            return options;
         };
 
         /**
@@ -997,7 +1055,7 @@
         core.init = function (el) {
             var i = 0,
                 list = [],
-                params = el.all || el.getElementsByTagName('*'),
+                options = el.all || el.getElementsByTagName('*'),
                 elements = [el],
                 o;
 
@@ -1006,27 +1064,33 @@
                 detachEvent(WINDOW, 'resize', repaint);
             }
 
-            for (; o = params[i++]; ) {
+            for (; o = options[i++]; ) {
                 elements[i] = o;
             }
 
             for (i = 0; el = elements[i]; i++) {
                 if (getParent(el)) {
-                    params = getParameters(el);
-                    params.element = el;
+                    options = getParameters(el);
+                    options.main = el;
                     // 以下使用 el 替代 control
-                    if (params.type) {
-                        list.push(el = $create(params.type, params));
+                    if (o = options.type) {
+                        delete options.type;
+                        list.push(
+                            el = $create(
+                                ui[toCamelCase(o.charAt(0).toUpperCase() + o.slice(1))],
+                                options
+                            )
+                        );
                     }
                     for (o in plugins) {
-                        if (params[o]) {
-                            plugins[o](el, params[o]);
+                        if (options[o]) {
+                            plugins[o](el, options[o]);
                         }
 //{if 0}//
                         if (el instanceof ui.Control && el['$init' + o]) {
-                            el['$init' + o](params);
+                            el['$init' + o](options);
                         }
-//{else}//                        el instanceof UI_CONTROL && el['$init' + o] && el['$init' + o](params);
+//{else}//                        el instanceof UI_CONTROL && el['$init' + o] && el['$init' + o](options);
 //{/if}//
                     }
                 }
@@ -1255,6 +1319,7 @@
          * target          {HTMLElement} 触发事件的 Element 对象
          * returnValue     {boolean}  是否进行默认处理
          * cancelBubble    {boolean}  是否取消冒泡
+         * exit            {Function} 终止全部事件操作
          * getControl      {Function} 获取触发事件的 ECUI 控件 对象
          * getNative       {Function} 获取原生的事件对象
          * preventDefault  {Function} 阻止事件的默认处理
@@ -1274,8 +1339,6 @@
                 event.pageY = html.scrollTop + body.scrollTop - html.clientTop + event.clientY - body.clientTop;
                 event.target = event.srcElement;
                 event.which = event.keyCode;
-                event.preventDefault = preventDefault;
-                event.stopPropagation = stopPropagation;
             }
 
             mouseX = event.pageX;
@@ -1370,35 +1433,10 @@
 
             // 拖拽状态下，不允许滚动
             if (currEnv.type == 'drag') {
-                event.stopPropagation();
+                event.preventDefault();
             }
             else {
                 bubble(hoveredControl, 'mousewheel', event);
-            }
-        };
-
-        /**
-         * 创建 ECUI 事件对象。
-         * @public
-         *
-         * @param {string} type 事件类型
-         * @param {Event|ecui.ui.Control} object 浏览器原生事件对象或事件相关的 ECUI 控件对象，简易调用时可以忽略
-         */
-        UI_EVENT = ui.Event = function (type, object) {
-            this.type = type;
-
-            if (!object || object instanceof UI_CONTROL) {
-                this.pageX = mouseX;
-                this.pageY = mouseY;
-                this.which = keyCode;
-                this.target = object ? object.getBase() : DOCUMENT;
-            }
-            else {
-                this.pageX = object.pageX;
-                this.pageY = object.pageY;
-                this.which = object.which;
-                this.target = object.target;
-                this._oNative = object;
             }
         };
 
@@ -1408,7 +1446,7 @@
          *
          * @return {ecui.ui.Control} 控件对象
          */
-        UI_EVENT.prototype.getControl = function () {
+        UI_EVENT_CLASS.getControl = function () {
             var o = findControl(this.target);
             if (o && !o.isDisabled()) {
                 for (; o; o = o.getParent()) {
@@ -1426,7 +1464,7 @@
          *
          * @return {Object} 原生的事件对象
          */
-        UI_EVENT.prototype.getNative = function () {
+        UI_EVENT_CLASS.getNative = function () {
             return this._oNative;
         };
 
@@ -1434,17 +1472,41 @@
          * 阻止事件的默认处理。
          * @public
          */
-        UI_EVENT.prototype.preventDefault = function () {
+        UI_EVENT_CLASS.preventDefault = function () {
             this.returnValue = false;
+            if (this._oNative) {
+                if (ieVersion) {
+                    this._oNative.returnValue = false;
+                }
+                else {
+                    this._oNative.preventDefault();
+                }
+            }
         };
 
         /**
          * 事件停止冒泡。
          * @public
          */
-        UI_EVENT.prototype.stopPropagation = function () {
+        UI_EVENT_CLASS.stopPropagation = function () {
             this.cancelBubble = true;
-            this._oNative && this._oNative.preventDefault();
+            if (this._oNative) {
+                if (ieVersion) {
+                    this._oNative.cancelBubble = false;
+                }
+                else {
+                    this._oNative.stopPropagation();
+                }
+            }
+        };
+
+        /**
+         * 终止全部事件操作。
+         * @public
+         */
+        UI_EVENT_CLASS.exit = function () {
+            this.preventDefault();
+            this.stopPropagation();
         };
 
         /**
@@ -1457,7 +1519,7 @@
          * @param {ecui.ui.Control} end 终止冒泡的控件，如果不设置将一直冒泡至顶层
          */
         function bubble(start, type, event, end) {
-            event = event || new UI_EVENT(type, start);
+            event = event || new UI_EVENT(type);
             for (; start != end; start = start.getParent()) {
                 start[type](event);
                 if (event.cancelBubble) {
@@ -1491,7 +1553,7 @@
                 list2.reverse();
 
                 // 过滤父控件序列中重复的部分
-                for (; list1[i] == list2[i]; i++) {};
+                for (; list1[i] == list2[i]; i++) {}
                 control1 = list1[i - 1];
             }
 
@@ -1591,7 +1653,7 @@
         function onselectstart(control, event) {
             for (; control; control = control.getParent()) {
                 if (!control.isUserSelect()) {
-                    event.stopPropagation();
+                    event.preventDefault();
                     return;
                 }
             }
@@ -1603,23 +1665,11 @@
          */
         function onunload() {
             for (var i = 0, o; o = allControls[i++]; ) {
-                try {
-                    o.dispose();
-                }
-                catch (e) {
-                }
+                o.$dispose();
             }
 
             // 清除闭包中引用的 Element 对象
             DOCUMENT = maskElements = null;
-        }
-
-        /**
-         * 阻止事件的默认处理。
-         * @private
-         */
-        function preventDefault() {
-            this.returnValue = false;
         }
 
         /**
@@ -1655,14 +1705,6 @@
                     func(DOCUMENT, o, env[o]);
                 }
             }
-        }
-
-        /**
-         * 事件停止冒泡。
-         * @private
-         */
-        function stopPropagation() {
-            this.cancelBubble = true;
         }
 
         ready(core.get);

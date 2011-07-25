@@ -92,19 +92,19 @@ _aCol        - 行的列Element对象，如果当前列需要向左合并为null
      * @public
      *
      * @param {HTMLElement} el 关联的 Element 对象
-     * @param {Object} params 初始化参数
+     * @param {Object} options 初始化选项
      */
     //__gzip_original__UI_TABLE
     //__gzip_original__UI_TABLE_ROW
     //__gzip_original__UI_TABLE_COL
     //__gzip_original__UI_TABLE_CELL
     var UI_TABLE =
-        ui.Table = function (el, params) {
+        ui.Table = function (el, options) {
             //__gzip_original__baseClass
             //__gzip_original__typeClass
             var i = 0,
-                baseClass = params.base,
-                typeClass = params.type,
+                baseClass = options.base,
+                typeClass = options.type,
                 rows = this._aRow = [],
                 cols = this._aCol = [],
                 tableEl = first(el),
@@ -114,8 +114,8 @@ _aCol        - 行的列Element对象，如果当前列需要向左合并为null
                 o;
 
             removeDom(tableEl);
-            params.wheelDelta = 1;
-            UI_PANEL.call(this, el, params);
+            options.wheelDelta = 1;
+            UI_PANEL.call(this, el, options);
 
             // 以下使用 el 表示 head 的 body 元素
             if (head.tagName != 'THEAD') {
@@ -197,10 +197,10 @@ _aCol        - 行的列Element对象，如果当前列需要向左合并为null
          * @public
          *
          * @param {HTMLElement} el 关联的 Element 对象
-         * @param {Object} params 初始化参数
+         * @param {Object} options 初始化选项
          */
-        UI_TABLE_ROW = UI_TABLE.Row = function (el, params) {
-            UI_CONTROL.call(this, el, params);
+        UI_TABLE_ROW = UI_TABLE.Row = function (el, options) {
+            UI_CONTROL.call(this, el, options);
         },
         UI_TABLE_ROW_CLASS = inherits(UI_TABLE_ROW, UI_CONTROL),
 
@@ -209,10 +209,10 @@ _aCol        - 行的列Element对象，如果当前列需要向左合并为null
          * @public
          *
          * @param {HTMLElement} el 关联的 Element 对象
-         * @param {Object} params 初始化参数
+         * @param {Object} options 初始化选项
          */
-        UI_TABLE_COL = UI_TABLE.Col = function (el, params) {
-            UI_CONTROL.call(this, el, params);
+        UI_TABLE_COL = UI_TABLE.Col = function (el, options) {
+            UI_CONTROL.call(this, el, options);
         },
         UI_TABLE_COL_CLASS = inherits(UI_TABLE_COL, UI_CONTROL),
 
@@ -221,10 +221,10 @@ _aCol        - 行的列Element对象，如果当前列需要向左合并为null
          * @public
          *
          * @param {HTMLElement} el 关联的 Element 对象
-         * @param {Object} params 初始化参数
+         * @param {Object} options 初始化选项
          */
-        UI_TABLE_CELL = UI_TABLE.Cell = function (el, params) {
-            UI_CONTROL.call(this, el, params);
+        UI_TABLE_CELL = UI_TABLE.Cell = function (el, options) {
+            UI_CONTROL.call(this, el, options);
         },
         UI_TABLE_CELL_CLASS = inherits(UI_TABLE_CELL, UI_CONTROL),
 
@@ -634,25 +634,25 @@ _aCol        - 行的列Element对象，如果当前列需要向左合并为null
 
     /**
      * 增加一列。
-     * params 参数对象支持的属性如下：
+     * options 对象对象支持的属性如下：
      * width   {number} 列的宽度
      * base    {string} 列的基本样式
      * caption {string} 列的标题
      * @public
      *
-     * @param {Object} params 列的初始化参数
+     * @param {Object} options 列的初始化选项
      * @param {number} index 被添加的列的位置序号，如果不合法将添加在末尾
      * @return {ecui.ui.Table.Col} 列控件
      */
-    UI_TABLE_CLASS.addCol = function (params, index) {
+    UI_TABLE_CLASS.addCol = function (options, index) {
         //__gzip_original__width
         var i = 0,
             typeClass = this.getType(),
-            baseClass = params.base || this.getBaseClass(),
+            baseClass = options.base || this.getBaseClass(),
             el = createDom(typeClass + '-head ' + baseClass + '-head', '', 'th'),
             col = $fastCreate(UI_TABLE_COL, el, this),
             o = this._aCol[index],
-            width = params.width,
+            width = options.width,
             row;
 
         if (o) {
@@ -663,7 +663,7 @@ _aCol        - 行的列Element对象，如果当前列需要向左合并为null
         }
 
         this._aCol.splice(index, 0, col);
-        el.innerHTML = params.caption || '';
+        el.innerHTML = options.caption || '';
         this._uHead.getBody().insertBefore(el, o);
 
         typeClass = typeClass + '-item ' + baseClass + '-item';

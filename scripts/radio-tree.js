@@ -40,20 +40,20 @@ _cSelected - 树的根节点拥有，保存当前选中的项
 //{if $phase == "define"}//
     /**
      * 初始化单选树控件。
-     * params 参数支持的属性如下：
+     * options 对象支持的属性如下：
      * name 单选框的表单项的默认名称
      * value 单选框的表单项的值
      * @public
      *
      * @param {Element} el 关联的 Element 对象
-     * @param {Object} params 初始化参数
+     * @param {Object} options 初始化选项
      */
     //__gzip_original__UI_RADIO_TREE
     var UI_RADIO_TREE = 
-        ui.RadioTree = function (el, params) {
-            UI_TREE.call(this, el, params);
-            this._sName = params.name;
-            this._sValue = params.value;
+        ui.RadioTree = function (el, options) {
+            UI_TREE.call(this, el, options);
+            this._sName = options.name;
+            this._sValue = options.value;
         },
         UI_RADIO_TREE_CLASS = inherits(UI_RADIO_TREE, UI_TREE);
 //{else}//

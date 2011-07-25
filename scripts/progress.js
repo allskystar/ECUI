@@ -30,27 +30,27 @@ _eMask - 完成的进度比例内容区域
 //{if $phase == "define"}//
     /**
      * 初始化进度条控件。
-     * params 参数支持的属性如下：
+     * options 对象支持的属性如下：
      * rate 初始的百分比
      * @public
      *
      * @param {Element} el 关联的 Element 对象
-     * @param {Object} params 初始化参数
+     * @param {Object} options 初始化选项
      */
     //__gzip_original__UI_PROGRESS
     var UI_PROGRESS =
-        ui.Progress = function (el, params) {
-            UI_CONTROL.call(this, el, params);
+        ui.Progress = function (el, options) {
+            UI_CONTROL.call(this, el, options);
 
             var text = el.innerHTML;
 
-            el.innerHTML = '<div class="' + params.base +
-                '-text" style="position:absolute;top:0px;left:0px"></div><div class="' + params.base +
+            el.innerHTML = '<div class="' + options.base +
+                '-text" style="position:absolute;top:0px;left:0px"></div><div class="' + options.base +
                 '-mask" style="position:absolute;top:0px;left:0px"></div>';
             this._eText = el.firstChild;
             this._eMask = el.lastChild;
 
-            this.setText(params.rate || 0, text);
+            this.setText(options.rate || 0, text);
         },
         UI_PROGRESS_CLASS = inherits(UI_PROGRESS, UI_CONTROL);
 //{else}//

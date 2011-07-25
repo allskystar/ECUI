@@ -78,29 +78,29 @@ _uOptions     - 下拉选择框
 //{if $phase == "define"}//
     /**
      * 初始化下拉框控件。
-     * params 参数支持的属性如下：
+     * options 对象支持的属性如下：
      * browser    是否使用浏览器原生的滚动条，默认使用模拟的滚动条
      * optionSize 下拉框最大允许显示的选项数量，默认为5
      * @public
      *
      * @param {Element} el 关联的 Element 对象
-     * @param {Object} params 初始化参数
+     * @param {Object} options 初始化选项
      */
     //__gzip_original__UI_SELECT
     //__gzip_original__UI_SELECT_OPTIONS
     //__gzip_original__UI_SELECT_ITEM
     var UI_SELECT =
-        ui.Select = function (el, params) {
-            params.hidden = true;
+        ui.Select = function (el, options) {
+            options.hidden = true;
 
             //__gzip_original__baseClass
             //__gzip_original__partParams
             var i = 0,
                 list = [],
-                baseClass = params.base,
+                baseClass = options.base,
                 partParams = {capture: false},
-                name = el.name || params.name || '',
-                value = el.value || params.value || '',
+                name = el.name || options.name || '',
+                value = el.value || options.value || '',
                 elements = el.options,
                 optionsEl = createDom(
                     'ec-panel ' + baseClass + '-options',
@@ -129,13 +129,13 @@ _uOptions     - 下拉选择框
                 '<div class="ec-item ' + baseClass + '-text"></div><div class="ec-control ' + baseClass +
                     '-button" style="position:absolute"></div><input name="' + name + '">';
 
-            UI_EDIT.call(this, el, params);
+            UI_EDIT.call(this, el, options);
 
             // 初始化下拉区域，下拉区域需要强制置顶
             ;
             this.$setBody(
                 (this._uOptions =
-                    $fastCreate(UI_SELECT_OPTIONS, optionsEl, this, {hScroll: false, browser: params.browser}))
+                    $fastCreate(UI_SELECT_OPTIONS, optionsEl, this, {hScroll: false, browser: options.browser}))
                 .getBody());
 
             el = children(el);
@@ -145,7 +145,7 @@ _uOptions     - 下拉选择框
             el[2].defaultValue = el[2].value = value;
 
             // 初始化下拉区域最多显示的选项数量
-            this._nOptionSize = params.optionSize || 5;
+            this._nOptionSize = options.optionSize || 5;
 
             this.$initItems();
         },
@@ -156,10 +156,10 @@ _uOptions     - 下拉选择框
          * @public
          *
          * @param {Element} el 关联的 Element 对象
-         * @param {Object} params 初始化参数
+         * @param {Object} options 初始化选项
          */
-        UI_SELECT_OPTIONS = UI_SELECT.Options = function (el, params) {
-            UI_PANEL.call(this, el, params);
+        UI_SELECT_OPTIONS = UI_SELECT.Options = function (el, options) {
+            UI_PANEL.call(this, el, options);
         },
         UI_SELECT_OPTIONS_CLASS = inherits(UI_SELECT_OPTIONS, UI_PANEL),
 
@@ -168,11 +168,11 @@ _uOptions     - 下拉选择框
          * @public
          *
          * @param {Element} el 关联的 Element 对象
-         * @param {Object} params 初始化参数
+         * @param {Object} options 初始化选项
          */
-        UI_SELECT_ITEM = UI_SELECT.Item = function (el, params) {
-            UI_ITEM.call(this, el, params);
-            this._sValue = params.value === undefined ? getText(el) : '' + params.value;
+        UI_SELECT_ITEM = UI_SELECT.Item = function (el, options) {
+            UI_ITEM.call(this, el, options);
+            this._sValue = options.value === undefined ? getText(el) : '' + options.value;
         },
         UI_SELECT_ITEM_CLASS = inherits(UI_SELECT_ITEM, UI_ITEM);
 //{else}//

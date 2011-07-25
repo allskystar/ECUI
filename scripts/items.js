@@ -38,18 +38,18 @@ Item/Items - 定义选项操作相关的基本操作。
 //{if $phase == "define"}//
     /**
      * 初始化选项控件。
-     * params 参数支持的属性如下：
+     * options 对象支持的属性如下：
      * parent 父控件对象
      * @public
      *
      * @param {Element} el 关联的 Element 对象
-     * @param {string|Object} params 参数
+     * @param {string|Object} options 对象
      */
     //__gzip_original__UI_ITEM
     ///__gzip_original__UI_ITEMS
     var UI_ITEM =
-        ui.Item = function (el, params) {
-            UI_CONTROL.call(this, el, params);
+        ui.Item = function (el, options) {
+            UI_CONTROL.call(this, el, options);
 
             el.style.overflow = 'hidden';
         },
@@ -237,10 +237,10 @@ Item/Items - 定义选项操作相关的基本操作。
      *
      * @param {string|HTMLElement|ecui.ui.Item} item 控件的 html 内容/控件对应的 Element 对象/选项控件
      * @param {number} index 子选项控件需要添加的位置序号
-     * @param {Object} params 子控件初始化参数
+     * @param {Object} options 子控件初始化选项
      * @return {ecui.ui.Item} 子选项控件
      */
-    UI_ITEMS.add = function (item, index, params) {
+    UI_ITEMS.add = function (item, index, options) {
         var list = UI_ITEMS[this.getUID()],
             o;
 
@@ -258,10 +258,10 @@ Item/Items - 定义选项操作相关的基本操作。
 
             item.className = 'ec-item ' + (trim(item.className) || this.getBaseClass() + '-item');
 
-            params = params || getParameters(item);
-            params.parent = this;
-            params.select = false;
-            list.push(item = $fastCreate(findConstructor(this, 'Item') || UI_ITEM, item, this, params));
+            options = options || getParameters(item);
+            options.parent = this;
+            options.select = false;
+            list.push(item = $fastCreate(findConstructor(this, 'Item') || UI_ITEM, item, this, options));
             this.$alterItems();
         }
 
@@ -280,11 +280,11 @@ Item/Items - 定义选项操作相关的基本操作。
      * @public
      *
      * @param {string|Element|ecui.ui.Item} item 控件的 html 内容/控件对应的 Element 对象/选项控件
-     * @param {Object} 子控件初始化参数
+     * @param {Object} 子控件初始化选项
      * @return {ecui.ui.Item} 子选项控件
      */
-    UI_ITEMS.append = function (item, params) {
-        this.add(item, undefined, params);
+    UI_ITEMS.append = function (item, options) {
+        this.add(item, undefined, options);
     };
 
     /**

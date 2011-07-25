@@ -32,7 +32,6 @@ _oRange         - 滑动块的合法滑动区间
 
         children = dom.children,
         extend = util.extend,
-        inherits = util.inherits,
         timer = util.timer,
 
         $fastCreate = core.$fastCreate,
@@ -40,6 +39,7 @@ _oRange         - 滑动块的合法滑动区间
         getActived = core.getActived,
         getMouseX = core.getMouseX,
         getMouseY = core.getMouseY,
+        inheritsControl = core.inherits,
 
         UI_CONTROL = ui.Control,
         UI_CONTROL_CLASS = UI_CONTROL.prototype;
@@ -49,70 +49,72 @@ _oRange         - 滑动块的合法滑动区间
      * 初始化滚动条控件。
      * @protected
      *
-     * @param {Element} el 关联的 Element 对象
-     * @param {Object} params 初始化参数
+     * @param {Object} options 初始化选项
      */
-    //__gzip_original__UI_SCROLL
-    //__gzip_original__UI_SCROLL_BLOCK
-    //__gzip_original__UI_SCROLL_BUTTON
-    //__gzip_original__UI_VSCROLL
-    //__gzip_original__UI_HSCROLL
-    var UI_SCROLL =
-        ui.Scroll = function (el, params) {
-            //__gzip_original__baseClass
-            //__gzip_original__typeClass
-            //__gzip_original__partParams
-            var baseClass = params.base,
-                typeClass = params.type,
-                partParams = {select: false, focus: false};
+    ///__gzip_original__UI_SCROLL
+    ///__gzip_original__UI_SCROLLBAR_CLASS
+    ///__gzip_original__UI_SCROLLBAR_BLOCK
+    ///__gzip_original__UI_SCROLLBAR_BLOCK_CLASS
+    ///__gzip_original__UI_SCROLLBAR_BUTTON
+    ///__gzip_original__UI_SCROLLBAR_BUTTON_CLASS
+    ///__gzip_original__UI_VSCROLL
+    ///__gzip_original__UI_VSCROLL_CLASS
+    ///__gzip_original__UI_HSCROLL
+    ///__gzip_original__UI_HSCROLL_CLASS
+    var UI_SCROLLBAR = ui.Scrollbar =
+        inheritsControl(
+            UI_CONTROL,
+            'ui-scrollbar',
+            function (el, options) {
+                //__gzip_original__primary
+                //__gzip_original__type
+                //__gzip_original__unitOptions
+                var type = options.type,
+                    primary = options.primary,
+                    unitOptions = {userSelect: false, focusable: false};
 
-            UI_CONTROL.call(this, el, extend(params, partParams));
+                UI_CONTROL.client.call(this, el, extend(options, unitOptions));
 
-            el.innerHTML =
-                '<div class="' + typeClass + '-prev ' +
-                    baseClass + '-prev" style="position:absolute;top:0px;left:0px"></div><div class="' +
-                    typeClass + '-next ' +
-                    baseClass + '-next" style="position:absolute;top:0px;left:0px"></div><div class="' +
-                    typeClass + '-block ' +
-                    baseClass + '-block" style="position:absolute"></div>';
+                el.innerHTML =
+                    '<div class="' + type + '-prev ' +
+                        primary + '-prev" style="position:absolute;top:0px;left:0px"></div><div class="' +
+                        type + '-next ' +
+                        primary + '-next" style="position:absolute;top:0px;left:0px"></div><div class="' +
+                        type + '-block ' +
+                        primary + '-block" style="position:absolute"></div>';
 
-            // 使用 el 代替 children
-            el = children(el);
+                // 使用 el 代替 children
+                el = children(el);
 
-            // 初始化滚动条控件
-            this._nValue = this._nTotal = 0;
-            this._nStep = 1;
+                // 初始化滚动条控件
+                this._nValue = this._nTotal = 0;
+                this._nStep = 1;
 
-            // 创建向前/向后滚动按钮与滑动块
-            this._uPrev = $fastCreate(UI_SCROLL_BUTTON, el[0], this, partParams);
-            this._uNext = $fastCreate(UI_SCROLL_BUTTON, el[1], this, partParams);
-            this._uBlock = $fastCreate(UI_SCROLL_BLOCK, el[2], this, partParams);
-        },
-        UI_SCROLL_CLASS = inherits(UI_SCROLL, UI_CONTROL),
+                // 创建向前/向后滚动按钮与滑动块
+                this._uPrev = $fastCreate(UI_SCROLLBAR_BUTTON, el[0], this, unitOptions);
+                this._uNext = $fastCreate(UI_SCROLLBAR_BUTTON, el[1], this, unitOptions);
+                this._uBlock = $fastCreate(UI_SCROLLBAR_BLOCK, el[2], this, unitOptions);
+            }
+        ),
+        UI_SCROLLBAR_CLASS = UI_SCROLLBAR.prototype,
 
         /**
          * 初始化滚动条控件的滑动块部件。
          * @protected
          *
-         * @param {Element} el 关联的 Element 对象
-         * @param {Object} params 初始化参数
+         * @param {Object} options 初始化选项
          */
-        UI_SCROLL_BLOCK = UI_SCROLL.Block = function (el, params) {
-            UI_CONTROL.call(this, el, params);
-        },
-        UI_SCROLL_BLOCK_CLASS = inherits(UI_SCROLL_BLOCK, UI_CONTROL),
+        UI_SCROLLBAR_BLOCK = UI_SCROLLBAR.Block = inheritsControl(UI_CONTROL, 'ui-scrollbar-thumb'),
+        UI_SCROLLBAR_BLOCK_CLASS = UI_SCROLLBAR_BLOCK.prototype,
 
         /**
          * 初始化滚动条控件的按钮部件。
          * @protected
          *
-         * @param {Element} el 关联的 Element 对象
-         * @param {Object} params 初始化参数
+         * @param {Object} options 初始化选项
          */
-        UI_SCROLL_BUTTON = UI_SCROLL.Button = function (el, params) {
-            UI_CONTROL.call(this, el, params);
-        },
-        UI_SCROLL_BUTTON_CLASS = inherits(UI_SCROLL_BUTTON, UI_CONTROL);
+        UI_SCROLLBAR_BUTTON = UI_SCROLLBAR.Button = inheritsControl(UI_CONTROL, 'ui-scrollbar-button'),
+        UI_SCROLLBAR_BUTTON_CLASS = UI_SCROLLBAR_BUTTON.prototype;
 //{else}//
     /**
      * 控扭控件自动滚动。
@@ -122,7 +124,7 @@ _oRange         - 滑动块的合法滑动区间
      * @param {number} step 单次滚动步长
      * @param {number} interval 触发时间间隔，默认50ms
      */
-    function UI_SCROLL_MOVE(button, step, interval) {
+    function UI_SCROLLBAR_MOVE(button, step, interval) {
         //__gzip_original__value
         var scroll = button.getParent(),
             value = scroll._nValue,
@@ -143,7 +145,7 @@ _oRange         - 滑动块的合法滑动区间
                     scroll.setValue(value + step);
                 }
             }
-            scroll._oStop = timer(UI_SCROLL_MOVE, interval || 200, null, button, step, 40);
+            scroll._oStop = timer(UI_SCROLLBAR_MOVE, interval || 200, null, button, step, 40);
         }
     }
 
@@ -155,7 +157,7 @@ _oRange         - 滑动块的合法滑动区间
      * @param {number} x 滑动块实际到达的X轴坐标
      * @param {number} y 滑动块实际到达的Y轴坐标
      */
-    UI_SCROLL_BLOCK_CLASS.$dragmove = function (event, x, y) {
+    UI_SCROLLBAR_BLOCK_CLASS.$dragmove = function (event, x, y) {
         UI_CONTROL_CLASS.$dragmove.call(this, event, x, y);
 
         var parent = this.getParent(),
@@ -172,7 +174,7 @@ _oRange         - 滑动块的合法滑动区间
      *
      * @param {Event} event 事件对象
      */
-    UI_SCROLL_BLOCK_CLASS.$activate = function (event) {
+    UI_SCROLLBAR_BLOCK_CLASS.$activate = function (event) {
         UI_CONTROL_CLASS.$activate.call(this, event);
 
         drag(this, event, this._oRange);
@@ -187,7 +189,7 @@ _oRange         - 滑动块的合法滑动区间
      * @param {number} bottom 允许拖拽的最下部区域
      * @param {number} left 允许拖拽的最左部区域
      */
-    UI_SCROLL_BLOCK_CLASS.setRange = function (top, right, bottom, left) {
+    UI_SCROLLBAR_BLOCK_CLASS.setRange = function (top, right, bottom, left) {
         this._oRange = {
             top: top,
             right: right,
@@ -202,12 +204,12 @@ _oRange         - 滑动块的合法滑动区间
      *
      * @param {Event} event 事件对象
      */
-    UI_SCROLL_BUTTON_CLASS.$deactivate = function (event) {
+    UI_SCROLLBAR_BUTTON_CLASS.$deactivate = function (event) {
         UI_CONTROL_CLASS.$deactivate.call(this, event);
         this.getParent()._oStop();
     };
 
-    UI_SCROLL_BUTTON_CLASS.$mouseout = function (event) {
+    UI_SCROLLBAR_BUTTON_CLASS.$mouseout = function (event) {
         UI_CONTROL_CLASS.$mouseout.call(this, event);
         if (getActived() == this) {
             this.getParent()._oStop();
@@ -220,15 +222,15 @@ _oRange         - 滑动块的合法滑动区间
      *
      * @param {Event} event 事件对象
      */
-    UI_SCROLL_BUTTON_CLASS.$activate = function (event) {
+    UI_SCROLLBAR_BUTTON_CLASS.$activate = function (event) {
         UI_CONTROL_CLASS.$activate.call(this, event);
-        UI_SCROLL_MOVE(this, MAX(this.getParent()._nStep, 5));
+        UI_SCROLLBAR_MOVE(this, MAX(this.getParent()._nStep, 5));
     };
 
-    UI_SCROLL_BUTTON_CLASS.$mouseover = function (event) {
+    UI_SCROLLBAR_BUTTON_CLASS.$mouseover = function (event) {
         UI_CONTROL_CLASS.$mouseover.call(this, event);
         if (getActived() == this) {
-            UI_SCROLL_MOVE(this, MAX(this.getParent()._nStep, 5));
+            UI_SCROLLBAR_MOVE(this, MAX(this.getParent()._nStep, 5));
         }
     };
 
@@ -240,7 +242,7 @@ _oRange         - 滑动块的合法滑动区间
      * @param {CssStyle} style 基本 Element 对象的 Css 样式对象
      * @param {boolean} cacheSize 是否需要缓存控件大小，如果控件是另一个控件的部件时，不缓存大小能加快渲染速度，默认缓存
      */
-    UI_SCROLL_CLASS.$cache = function (style, cacheSize) {
+    UI_SCROLLBAR_CLASS.$cache = function (style, cacheSize) {
         UI_CONTROL_CLASS.$cache.call(this, style, cacheSize);
 
         this._uPrev.cache(true, true);
@@ -253,9 +255,9 @@ _oRange         - 滑动块的合法滑动区间
      * 隐藏滚动条控件时，滚动条控件的当前值需要复位为0，参见 setValue 与 setTotal 方法。
      * @protected
      */
-    UI_SCROLL_CLASS.$hide = function () {
+    UI_SCROLLBAR_CLASS.$hide = function () {
         UI_CONTROL_CLASS.$hide.call(this);
-        UI_SCROLL_CLASS.setValue.call(this, 0);
+        UI_SCROLLBAR_CLASS.setValue.call(this, 0);
     };
 
     /**
@@ -263,7 +265,7 @@ _oRange         - 滑动块的合法滑动区间
      * $init 方法在控件渲染完成后调用，参见 create 与 init 方法。
      * @protected
      */
-    UI_SCROLL_CLASS.$init = function () {
+    UI_SCROLLBAR_CLASS.$init = function () {
         UI_CONTROL_CLASS.$init.call(this);
         this._uPrev.$init();
         this._uNext.$init();
@@ -276,12 +278,12 @@ _oRange         - 滑动块的合法滑动区间
      *
      * @param {Event} event 事件对象
      */
-    UI_SCROLL_CLASS.$deactivate = function (event) {
+    UI_SCROLLBAR_CLASS.$deactivate = function (event) {
         UI_CONTROL_CLASS.$deactivate.call(this, event);
         this._oStop();
     };
 
-    UI_SCROLL_CLASS.$mouseout = function (event) {
+    UI_SCROLLBAR_CLASS.$mouseout = function (event) {
         UI_CONTROL_CLASS.$mouseout.call(this, event);
         if (getActived() == this) {
             this._oStop();
@@ -294,18 +296,18 @@ _oRange         - 滑动块的合法滑动区间
      *
      * @param {Event} event 事件对象
      */
-    UI_SCROLL_CLASS.$activate = function (event) {
+    UI_SCROLLBAR_CLASS.$activate = function (event) {
         UI_CONTROL_CLASS.$activate.call(this, event);
-        UI_SCROLL_MOVE(
+        UI_SCROLLBAR_MOVE(
             this._cButton = this.$allowPrev() ? this._uPrev : this._uNext,
             this.$getPageStep()
         );
     };
 
-    UI_SCROLL_CLASS.$mouseover = function (event) {
+    UI_SCROLLBAR_CLASS.$mouseover = function (event) {
         UI_CONTROL_CLASS.$mouseover.call(this, event);
         if (getActived() == this) {
-            UI_SCROLL_MOVE(this._cButton, this.$getPageStep());
+            UI_SCROLLBAR_MOVE(this._cButton, this.$getPageStep());
         }
     };
 
@@ -315,7 +317,7 @@ _oRange         - 滑动块的合法滑动区间
      *
      * @param {number} value 单页滚动距离
      */
-    UI_SCROLL_CLASS.$setPageStep = function (value) {
+    UI_SCROLLBAR_CLASS.$setPageStep = function (value) {
         this._nPageStep = value;
     };
 
@@ -326,7 +328,7 @@ _oRange         - 滑动块的合法滑动区间
      * @param {number} width 控件区域的宽度
      * @param {number} height 控件区域的高度
      */
-    UI_SCROLL_CLASS.$setSize = function (width, height) {
+    UI_SCROLLBAR_CLASS.$setSize = function (width, height) {
         UI_CONTROL_CLASS.$setSize.call(this, width, height);
         this.$locate();
     };
@@ -338,7 +340,7 @@ _oRange         - 滑动块的合法滑动区间
      *
      * @param {number} value 控件的当前值
      */
-    UI_SCROLL_CLASS.$setValue = function (value) {
+    UI_SCROLLBAR_CLASS.$setValue = function (value) {
         this._nValue = value;
     };
 
@@ -349,7 +351,7 @@ _oRange         - 滑动块的合法滑动区间
      *
      * @return {number} 单次滚动距离
      */
-    UI_SCROLL_CLASS.getStep = function () {
+    UI_SCROLLBAR_CLASS.getStep = function () {
         return this._nStep;
     };
 
@@ -360,7 +362,7 @@ _oRange         - 滑动块的合法滑动区间
      *
      * @return {number} 控件的最大值
      */
-    UI_SCROLL_CLASS.getTotal = function () {
+    UI_SCROLLBAR_CLASS.getTotal = function () {
         return this._nTotal;
     };
 
@@ -371,7 +373,7 @@ _oRange         - 滑动块的合法滑动区间
      *
      * @return {number} 滚动条控件的当前值
      */
-    UI_SCROLL_CLASS.getValue = function () {
+    UI_SCROLLBAR_CLASS.getValue = function () {
         return this._nValue;
     };
 
@@ -380,7 +382,7 @@ _oRange         - 滑动块的合法滑动区间
      * scroll 方法首先调用 change 方法，之后触发父控件的 onscroll 事件，如果事件返回值不为 false，则调用父控件的 $scroll 方法。
      * @public
      */
-    UI_SCROLL_CLASS.scroll = function () {
+    UI_SCROLLBAR_CLASS.scroll = function () {
         var parent = this.getParent();
         if (parent) {
             if (!(parent.onscroll && parent.onscroll() === false)) {
@@ -396,7 +398,7 @@ _oRange         - 滑动块的合法滑动区间
      *
      * @param {number} value 单次滚动距离
      */
-    UI_SCROLL_CLASS.setStep = function (value) {
+    UI_SCROLLBAR_CLASS.setStep = function (value) {
         if (value > 0) {
             this._nStep = value;
         }
@@ -409,7 +411,7 @@ _oRange         - 滑动块的合法滑动区间
      *
      * @param {number} value 控件的最大值
      */
-    UI_SCROLL_CLASS.setTotal = function (value) {
+    UI_SCROLLBAR_CLASS.setTotal = function (value) {
         if (value >= 0 && this._nTotal != value) {
             this._nTotal = value;
             // 检查滚动条控件的当前值是否已经越界
@@ -429,7 +431,7 @@ _oRange         - 滑动块的合法滑动区间
      *
      * @param {number} value 控件的当前值
      */
-    UI_SCROLL_CLASS.setValue = function (value) {
+    UI_SCROLLBAR_CLASS.setValue = function (value) {
         value = MIN(MAX(0, value), this._nTotal);
         if (this._nValue != value) {
             // 值发生改变时触发相应的事件
@@ -446,7 +448,7 @@ _oRange         - 滑动块的合法滑动区间
      *
      * @param {number} n 移动的步长次数
      */
-    UI_SCROLL_CLASS.skip = function (n) {
+    UI_SCROLLBAR_CLASS.skip = function (n) {
         this.setValue(this._nValue + n * this._nStep);
     };
 //{/if}//
@@ -455,14 +457,10 @@ _oRange         - 滑动块的合法滑动区间
      * 初始化垂直滚动条控件。
      * @public
      *
-     * @param {Element} el 关联的 Element 对象
-     * @param {Object} params 初始化参数
+     * @param {Object} options 初始化选项
      */
-    var UI_VSCROLL = ui.VScroll = function (el, params) {
-            UI_SCROLL.call(this, el, params);
-        },
-
-        UI_VSCROLL_CLASS = inherits(UI_VSCROLL, UI_SCROLL);
+    var UI_VSCROLL = ui.VScroll = inheritsControl(UI_SCROLLBAR, 'ui-v-scrollbar'),
+        UI_VSCROLL_CLASS = UI_VSCROLL.prototype;
 //{else}//
     /**
      * 判断是否允许当前值向最大值方向移动。
@@ -542,7 +540,7 @@ _oRange         - 滑动块的合法滑动区间
      * @param {number} height 控件区域的高度
      */
     UI_VSCROLL_CLASS.$setSize = function (width, height) {
-        UI_SCROLL_CLASS.$setSize.call(this, width, height);
+        UI_SCROLLBAR_CLASS.$setSize.call(this, width, height);
 
         //__gzip_original__next
         var bodyWidth = this.getBodyWidth(),
@@ -563,14 +561,10 @@ _oRange         - 滑动块的合法滑动区间
      * 初始化水平滚动条控件。
      * @public
      *
-     * @param {Element} el 关联的 Element 对象
-     * @param {Object} params 初始化参数
+     * @param {Object} options 初始化选项
      */
-    var UI_HSCROLL = ui.HScroll = function (el, params) {
-            UI_SCROLL.call(this, el, params);
-        },
-
-        UI_HSCROLL_CLASS = inherits(UI_HSCROLL, UI_SCROLL);
+    var UI_HSCROLL = ui.HScroll = inheritsControl(UI_SCROLLBAR, 'ui-h-scroll'),
+        UI_HSCROLL_CLASS = UI_HSCROLL.prototype;
 //{else}//
     /**
      * 判断是否允许当前值向最大值方向移动。
@@ -650,7 +644,7 @@ _oRange         - 滑动块的合法滑动区间
      * @param {number} height 控件区域的高度
      */
     UI_HSCROLL_CLASS.$setSize = function (width, height) {
-        UI_SCROLL_CLASS.$setSize.call(this, width, height);
+        UI_SCROLLBAR_CLASS.$setSize.call(this, width, height);
 
         //__gzip_original__next
         var bodyHeight = this.getBodyHeight(),

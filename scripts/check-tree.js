@@ -39,21 +39,21 @@ _uCheckbox - 复选框控件
 //{if $phase == "define"}//
     /**
      * 初始化复选树控件。
-     * params 参数支持的属性如下：
+     * options 对象支持的属性如下：
      * name 复选框的表单项的默认名称
      * value 复选框的表单项的值
      * superior 父复选框的标识，如果为true表示自动使用上级树节点作为父复选框，其它等价false的值表示不联动
      * @public
      *
      * @param {Element} el 关联的 Element 对象
-     * @param {Object} params 初始化参数
+     * @param {Object} options 初始化选项
      */
     //__gzip_original__UI_CHECK_TREE
     var UI_CHECK_TREE =
-        ui.CheckTree = function (el, params) {
-            UI_TREE.call(this, el, params);
+        ui.CheckTree = function (el, options) {
+            UI_TREE.call(this, el, options);
 
-            this._oSuperior = params.superior;
+            this._oSuperior = options.superior;
 
             for (
                 var i = 0,
@@ -61,18 +61,18 @@ _uCheckbox - 复选框控件
                         UI_CHECKBOX,
                         el.insertBefore(createDom('ec-checkbox ' + this.getBaseClass() + '-checkbox'), el.firstChild),
                         this,
-                        params
+                        options
                     ),
                     list = this.getChildTrees();
                 el = list[i++];
             ) {
-                if (params = el._oSuperior) {
+                if (options = el._oSuperior) {
                     el = el._uCheckbox;
-                    if (params === true) {
+                    if (options === true) {
                         el.setSuperior(checkbox);
                     }
                     else {
-                        $connect(el, el.setSuperior, params);
+                        $connect(el, el.setSuperior, options);
                     }
                 }
             }

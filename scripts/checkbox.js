@@ -13,10 +13,10 @@ Checkbox - 定义单个设置项选择状态的基本操作。
 </div>
 
 属性
-_bDefault  - 默认的选中状态
-_nStatus   - 复选框当前的状态，0--全选，1--未选，2--半选
-_cSuperior - 复选框的上级管理者
-_aInferior - 所有的下级复选框
+_bDefault        - 默认的选中状态
+_nStatus         - 复选框当前的状态，0--全选，1--未选，2--半选
+_cParentCheckbox - 父复选框
+_aChildCheckboxs - 所有的子复选框
 */
 //{if 0}//
 (function () {
@@ -24,52 +24,52 @@ _aInferior - 所有的下级复选框
     var core = ecui,
         array = core.array,
         ui = core.ui,
-        util = core.util,
 
         remove = array.remove,
-        inherits = util.inherits,
-
-        LOADING = core.LOADING,
 
         $connect = core.$connect,
         getKey = core.getKey,
-        getStatus = core.getStatus,
+        inheritsControl = core.inherits,
 
-        UI_EDIT = ui.Edit,
-        UI_EDIT_CLASS = UI_EDIT.prototype;
+        UI_INPUT_CONTROL = ui.InputControl,
+        UI_INPUT_CONTROL_CLASS = UI_INPUT_CONTROL.prototype;
 //{/if}//
 //{if $phase == "define"}//
     /**
      * 初始化复选框控件。
-     * params 参数支持的属性如下：
-     * checked  控件是否默认选中
-     * superior 管理复选框的 id
+     * options 对象支持的属性如下：
+     * checked        控件是否默认选中
+     * parentCheckbox 管理复选框的 id
      * @public
      *
-     * @param {Element} el 关联的 Element 对象
-     * @param {Object} params 初始化参数
+     * @param {Object} options 初始化选项
      */
-    //__gzip_original__UI_CHECKBOX
-    var UI_CHECKBOX =
-        ui.Checkbox = function (el, params) {
-            params.hidden = true;
-            params.input = 'checkbox';
+    ///__gzip_original__UI_CHECKBOX
+    ///__gzip_original__UI_CHECKBOX_CLASS
+    var UI_CHECKBOX = ui.Checkbox =
+        inheritsControl(
+            UI_INPUT_CONTROL,
+            'ui-checkbox',
+            function (el, options) {
+                options.hidden = true;
+                options.input = 'checkbox';
 
-            UI_EDIT.call(this, el, params);
+                UI_INPUT_CONTROL.client.call(this, el, options);
 
-            el = this.getInput();
+                el = this.getInput();
 
-            if (params.checked) {
-                el.defaultChecked = el.checked = true;
+                if (options.checked) {
+                    el.defaultChecked = el.checked = true;
+                }
+
+                // 保存节点选中状态，用于修复IE6/7下移动DOM节点时选中状态发生改变的问题
+                this._bDefault = el.defaultChecked;
+                this._aChildCheckboxs = [];
+
+                $connect(this, this.setParentCheckbox, options.parentCheckbox);
             }
-
-            // 修复IE6/7下移动DOM节点时选中状态发生改变的问题
-            this._bDefault = el.defaultChecked;
-            this._aInferior = [];
-
-            $connect(this, this.setSuperior, params.superior);
-        },
-        UI_CHECKBOX_CLASS = inherits(UI_CHECKBOX, UI_EDIT);
+        ),
+        UI_CHECKBOX_CLASS = UI_CHECKBOX.prototype;
 //{else}//
     /**
      * 改变复选框状态。
@@ -88,12 +88,10 @@ _aInferior - 所有的下级复选框
             var el = control.getInput();
             el.defaultChecked = el.checked = !status;
 
-            // 如果有上级复选框，刷新上级复选框的状态
-            if (control._cSuperior) {
-                UI_CHECKBOX_FLUSH(control._cSuperior);
+            // 如果有父复选框，刷新父复选框的状态
+            if (control._cParentCheckbox) {
+                UI_CHECKBOX_FLUSH(control._cParentCheckbox);
             }
-
-            control.change();
         }
     }
 
@@ -104,7 +102,7 @@ _aInferior - 所有的下级复选框
      * @param {ecui.ui.Checkbox} control 复选框控件
      */
     function UI_CHECKBOX_FLUSH(control) {
-        for (var i = 0, status, o; o = control._aInferior[i++]; ) {
+        for (var i = 0, status, o; o = control._aChildCheckboxs[i++]; ) {
             if (status !== undefined && status != o._nStatus) {
                 status = 2;
                 break;
@@ -125,7 +123,7 @@ _aInferior - 所有的下级复选框
      * @param {Event} event 事件对象
      */
     UI_CHECKBOX_CLASS.$click = function (event) {
-        UI_EDIT_CLASS.$click.call(this, event);
+        UI_INPUT_CONTROL_CLASS.$click.call(this, event);
         this.setChecked(!!this._nStatus);
     };
 
@@ -137,12 +135,13 @@ _aInferior - 所有的下级复选框
      * @param {Event} event 事件对象
      */
     UI_CHECKBOX_CLASS.$keydown = UI_CHECKBOX_CLASS.$keypress = UI_CHECKBOX_CLASS.$keyup = function (event) {
-        UI_EDIT_CLASS['$' + event.type].call(this, event);
-        if (event.which == 32) {
-            if (event.type == 'keyup' && getKey() == 32) {
+        UI_INPUT_CONTROL_CLASS['$' + event.type].call(this, event);
+        if (getKey() == 32) {
+            // 屏蔽空格键，防止屏幕发生滚动
+            if (event.type == 'keyup') {
                 this.setChecked(!!this._nStatus);
             }
-            return false;
+            event.exit();
         }
     };
 
@@ -152,7 +151,8 @@ _aInferior - 所有的下级复选框
      * @protected
      */
     UI_CHECKBOX_CLASS.$ready = function () {
-        if (!this._aInferior.length) {
+        if (!this._aChildCheckboxs.length) {
+            // 如果控件是父复选框，应该直接根据子复选框的状态来显示自己的状态
             UI_CHECKBOX_CHANGE(this, this.getInput().checked ? 0 : 1);
         }
     };
@@ -166,29 +166,29 @@ _aInferior - 所有的下级复选框
     UI_CHECKBOX_CLASS.$reset = function (event) {
         // 修复IE6/7下移动DOM节点时选中状态发生改变的问题
         this.getInput().checked = this._bDefault;
-        UI_EDIT_CLASS.$reset.call(this, event);
+        UI_INPUT_CONTROL_CLASS.$reset.call(this, event);
     };
 
     /**
-     * 获取全部的从属复选框。
-     * 复选框控件调用 setSuperior 方法指定了上级复选框控件后，它就是上级复选框控件的从属复选框控件之一。
+     * 获取全部的子复选框。
+     * 复选框控件调用 setParentCheckbox 方法指定了父复选框后，它就是父复选框的子复选框之一。
      * @public
      *
      * @return {Array} 复选框控件数组
      */
-    UI_CHECKBOX_CLASS.getInferiors = function () {
-        return this._aInferior.slice();
+    UI_CHECKBOX_CLASS.getChildCheckboxs = function () {
+        return this._aChildCheckboxs.slice();
     };
 
     /**
-     * 获取上级复选框。
-     * getSuperior 方法返回调用 setSuperior 方法指定的上级复选框控件。
+     * 获取父复选框。
+     * getParentCheckbox 方法返回调用 setParentCheckbox 方法指定的父复选框控件。
      * @public
      *
      * @return {ecui.ui.Checkbox} 复选框控件
      */
-    UI_CHECKBOX_CLASS.getSuperior = function () {
-        return this._cSuperior || null;
+    UI_CHECKBOX_CLASS.getParentCheckbox = function () {
+        return this._cParentCheckbox || null;
     };
 
     /**
@@ -205,37 +205,37 @@ _aInferior - 所有的下级复选框
      * 设置复选框控件选中状态。
      * @public
      *
-     * @param {boolean} status 是否选中，默认选中
+     * @param {boolean} checked 是否选中，默认选中
      */
-    UI_CHECKBOX_CLASS.setChecked = function (status) {
-        UI_CHECKBOX_CHANGE(this, status !== false ? 0 : 1);
-        // 如果有下级复选框，全部改为与当前复选框相同的状态
-        for (var i = 0, o; o = this._aInferior[i++]; ) {
-            o.setChecked(status);
+    UI_CHECKBOX_CLASS.setChecked = function (checked) {
+        UI_CHECKBOX_CHANGE(this, checked !== false ? 0 : 1);
+        // 如果有子复选框，全部改为与当前复选框相同的状态
+        for (var i = 0, o; o = this._aChildCheckboxs[i++]; ) {
+            o.setChecked(checked);
         }
     };
 
     /**
-     * 设置上级复选框。
-     * setSuperior 方法指定上级复选框控件后，可以通过访问上级复选框控件的 getInferiors 方法获取列表，列表中即包含了当前的控件。
+     * 设置父复选框。
+     * setParentCheckbox 方法指定父复选框控件后，可以通过访问父复选框控件的 getChildCheckboxs 方法获取列表，列表中即包含了当前的控件。
      * @public
      *
-     * @param {ecui.ui.Checkbox} superior 上级复选框控件
+     * @param {ecui.ui.Checkbox} parent 父复选框
      */
-    UI_CHECKBOX_CLASS.setSuperior = function (superior) {
-        var oldSuperior = this._cSuperior;
-        if (oldSuperior != superior) {
-            this._cSuperior = superior;
+    UI_CHECKBOX_CLASS.setParentCheckbox = function (parent) {
+        var oldParent = this._cParentCheckbox;
+        if (oldParent != parent) {
+            this._cParentCheckbox = parent;
 
-            // 已经设置过上级复选框，需要先释放
-            if (oldSuperior) {
-                remove(oldSuperior._aInferior, this);
-                UI_CHECKBOX_FLUSH(oldSuperior);
+            if (oldParent) {
+                // 已经设置过父复选框，需要先释放引用
+                remove(oldParent._aChildCheckboxs, this);
+                UI_CHECKBOX_FLUSH(oldParent);
             }
 
-            if (superior) {
-                superior._aInferior.push(this);
-                UI_CHECKBOX_FLUSH(superior);
+            if (parent) {
+                parent._aChildCheckboxs.push(this);
+                UI_CHECKBOX_FLUSH(parent);
             }
         }
     };

@@ -57,7 +57,7 @@ _eInput  - INPUT对象
 //{if $phase == "define"}//
     /**
      * 初始化输入框控件。
-     * params 参数支持的属性如下：
+     * options 对象支持的属性如下：
      * name  输入框的名称
      * value 输入框的默认值
      * input 输入框的类型，默认为 text
@@ -65,19 +65,19 @@ _eInput  - INPUT对象
      * @public
      *
      * @param {Element} el 关联的 Element 对象
-     * @param {Object} params 初始化参数
+     * @param {Object} options 初始化选项
      */
     //__gzip_original__UI_EDIT
     var UI_EDIT =
-        ui.Edit = function (el, params) {
+        ui.Edit = function (el, options) {
             var input = el;
-            if (params.value === 0) {
-                params.value = '0';
+            if (options.value === 0) {
+                options.value = '0';
             }
 
             if (el.tagName == 'INPUT') {
                 // 检查是否存在Input，如果没有生成一个Input
-                input = setInput(input, params.name, params.input);
+                input = setInput(input, options.name, options.input);
 
                 el = createDom(input.className, input.style.cssText + ';overflow:hidden');
 
@@ -88,13 +88,13 @@ _eInput  - INPUT对象
             else {
                 el.style.overflow = 'hidden';
                 if (!(input = el.getElementsByTagName('input')[0])) {
-                    input = setInput(null, params.name, params.input);
-                    input.defaultValue = input.value = params.value || '';
+                    input = setInput(null, options.name, options.input);
+                    input.defaultValue = input.value = options.value || '';
                     el.appendChild(input);
                 }
                 input.style.border = '0px';
             }
-            if (this._bHidden = params.hidden) {
+            if (this._bHidden = options.hidden) {
                 input.style.display = 'none';
             }
             setStyle(el, 'display', 'inline-block');
@@ -102,7 +102,7 @@ _eInput  - INPUT对象
             this._eInput = input;
             UI_EDIT_BIND_EVENT(this);
 
-            UI_CONTROL.call(this, el, params);
+            UI_CONTROL.call(this, el, options);
         },
         UI_EDIT_CLASS = inherits(UI_EDIT, UI_CONTROL),
 

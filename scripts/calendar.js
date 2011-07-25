@@ -41,24 +41,24 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
 //{if $phase == "define"}//
     /**
      * 初始化日历控件。
-     * params 参数支持的属性如下：
+     * options 对象支持的属性如下：
      * year    日历控件的年份
      * month   日历控件的月份(1-12)
      * @public
      *
      * @param {Element} el 关联的 Element 对象
-     * @param {Object} params 初始化参数
+     * @param {Object} options 初始化选项
      */
     //__gzip_original__UI_CALENDAR
     //__gzip_original__UI_CALENDAR_DATE_COLLECTION
     var UI_CALENDAR =
-        ui.Calendar = function (el, params) {
-            UI_CONTROL.call(this, el, params);
+        ui.Calendar = function (el, options) {
+            UI_CONTROL.call(this, el, options);
 
             el.style.overflow = 'auto';
 
             // 分别插入日期网格与星期名称网格需要使用的层，星期名称网格初始化
-            for (var i = 0, list = [], baseClass = params.base; i < 7; ) {
+            for (var i = 0, list = [], baseClass = options.base; i < 7; ) {
                 list[i] =
                     '<div class="ec-collection-item ' + baseClass + '-name-item" style="float:left">' +
                         ['日', '一', '二', '三', '四', '五', '六'][i++] + '</div>';
@@ -76,7 +76,7 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
             this._uName = $fastCreate(UI_COLLECTION, el.firstChild, this);
             this._uDate = $fastCreate(UI_CALENDAR_DATE_COLLECTION, el.lastChild, this);
 
-            this.setDate(params.year, params.month);
+            this.setDate(options.year, options.month);
         },
         UI_CALENDAR_CLASS = inherits(UI_CALENDAR, UI_CONTROL),
 
@@ -85,10 +85,10 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
          * @public
          *
          * @param {Element} el 关联的 Element 对象
-         * @param {Object} params 初始化参数
+         * @param {Object} options 初始化选项
          */
-         UI_CALENDAR_DATE_COLLECTION = UI_CALENDAR.Date = function (el, params) {
-            UI_COLLECTION.call(this, el, params);
+         UI_CALENDAR_DATE_COLLECTION = UI_CALENDAR.Date = function (el, options) {
+            UI_COLLECTION.call(this, el, options);
         },
         UI_CALENDAR_DATE_COLLECTION_CLASS = inherits(UI_CALENDAR_DATE_COLLECTION, UI_COLLECTION);
 //{else}//

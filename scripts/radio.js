@@ -16,58 +16,60 @@ _bDefault  - 默认的选中状态
 
     var core = ecui,
         ui = core.ui,
-        util = core.util,
-
-        inherits = util.inherits,
 
         getKey = core.getKey,
+        inheritsControl = core.inherits,
         query = core.query,
 
-        UI_EDIT = ui.Edit,
-        UI_EDIT_CLASS = UI_EDIT.prototype;
+        UI_INPUT_CONTROL = ui.InputControl,
+        UI_INPUT_CONTROL_CLASS = UI_INPUT_CONTROL.prototype;
 //{/if}//
 //{if $phase == "define"}//
     /**
      * 初始化单选框控件。
-     * params 参数支持的属性如下：
+     * options 对象支持的属性如下：
      * checked 控件是否默认选中
      * name    控件所属组的名称
      * value   控件的值
      * @public
      *
-     * @param {Element} el 关联的 Element 对象
-     * @param {Object} params 初始化参数
+     * @param {Object} options 初始化选项
      */
-    //__gzip_original__UI_RADIO
-    var UI_RADIO =
-        ui.Radio = function (el, params) {
-            params.hidden = true;
-            params.input = 'radio';
+    ///__gzip_original__UI_RADIO
+    ///__gzip_original__UI_RADIO_CLASS
+    var UI_RADIO = ui.Radio =
+        inheritsControl(
+            UI_INPUT_CONTROL,
+            'ui-radio',
+            function (el, options) {
+                options.hidden = true;
+                options.input = 'radio';
 
-            UI_EDIT.call(this, el, params);
+                UI_INPUT_CONTROL.client.call(this, el, options);
 
-            el = this.getInput();
+                el = this.getInput();
 
-            if (params.checked) {
-                el.defaultChecked = el.checked = true;
+                if (options.checked) {
+                    el.defaultChecked = el.checked = true;
+                }
+
+                // 保存节点选中状态，用于修复IE6/7下移动DOM节点时选中状态发生改变的问题
+                this._bDefault = el.defaultChecked;
             }
-
-            // 修复IE6/7下移动DOM节点时选中状态发生改变的问题
-            this._bDefault = el.defaultChecked;
-        },
-        UI_RADIO_CLASS = inherits(UI_RADIO, UI_EDIT);
+        ),
+        UI_RADIO_CLASS = UI_RADIO.prototype;
 //{else}//
     /**
      * 单选框控件刷新
      * @private
      *
      * @param {ecui.ui.Radio} control 单选框控件
-     * @param {boolean|undefined} status 新的状态，如果忽略表示不改变当前状态
+     * @param {boolean|undefined} checked 新的状态，如果忽略表示不改变当前状态
      */
-    function UI_RADIO_FLUSH(control, status) {
-        if (status !== undefined) {
+    function UI_RADIO_FLUSH(control, checked) {
+        if (checked !== undefined) {
             var el = control.getInput();
-            el.defaultChecked = el.checked = status;
+            el.defaultChecked = el.checked = checked;
         }
         control.setClass(control.getBaseClass() + (control.isChecked() ? '-checked' : ''));
     }
@@ -80,8 +82,8 @@ _bDefault  - 默认的选中状态
      * @param {Event} event 事件对象
      */
     UI_RADIO_CLASS.$click = function (event) {
-        UI_EDIT_CLASS.$click.call(this, event);
-        this.checked();
+        UI_INPUT_CONTROL_CLASS.$click.call(this, event);
+        this.setChecked(true);
     };
 
     /**
@@ -92,12 +94,12 @@ _bDefault  - 默认的选中状态
      * @param {Event} event 事件对象
      */
     UI_RADIO_CLASS.$keydown = UI_RADIO_CLASS.$keypress = UI_RADIO_CLASS.$keyup = function (event) {
-        UI_EDIT_CLASS['$' + event.type].call(this, event);
+        UI_INPUT_CONTROL_CLASS['$' + event.type].call(this, event);
         if (event.which == 32) {
             if (event.type == 'keyup' && getKey() == 32) {
                 this.checked();
             }
-            return false;
+            event.exit();
         }
     };
 
@@ -119,20 +121,7 @@ _bDefault  - 默认的选中状态
     UI_RADIO_CLASS.$reset = function (event) {
         // 修复IE6/7下移动DOM节点时选中状态发生改变的问题
         this.getInput().checked = this._bDefault;
-        UI_EDIT_CLASS.$reset.call(this, event);
-    };
-
-    /**
-     * 设置单选框控件为选中状态。
-     * 将控件设置成为选中状态，同时取消同一个单选框控件组的其它控件的选中状态。
-     * @public
-     */
-    UI_RADIO_CLASS.checked = function () {
-        if (!this.isChecked()) {
-            for (var i = 0, list = this.getItems(), o; o = list[i++]; ) {
-                UI_RADIO_FLUSH(o, o == this);
-            }
-        }
+        UI_INPUT_CONTROL_CLASS.$reset.call(this, event);
     };
 
     /**
@@ -176,6 +165,24 @@ _bDefault  - 默认的选中状态
      */
     UI_RADIO_CLASS.isChecked = function () {
         return this.getInput().checked;
+    };
+
+    /**
+     * 设置单选框控件为选中状态。
+     * 将控件设置成为选中状态，同时取消同一个单选框控件组的其它控件的选中状态。
+     * @public
+     */
+    UI_RADIO_CLASS.setChecked = function (checked) {
+        if (this.isChecked() != checked) {
+            if (checked) {
+                for (var i = 0, list = this.getItems(), o; o = list[i++]; ) {
+                    UI_RADIO_FLUSH(o, o == this);
+                }
+            }
+            else {
+                UI_RADIO_FLUSH(this, false);
+            }
+        }
     };
 //{/if}//
 //{if 0}//

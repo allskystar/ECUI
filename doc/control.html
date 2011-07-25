@@ -12,14 +12,14 @@
 <link rel="stylesheet" type="text/css" href="../common/prettify.css" />
 </head>
 <body>
-<h1><a>ecui.ui.{$URI1|capitalize}</a></h1>
+<h1><a>{$control.position}</a></h1>
 <hr size="1">
 <p class="clsRef">{$control.desc}</p>
 <blockquote>{if $super}
   <p>{$control.desc}继承自 {$super.name|control}</p>{/if}
   <p>{eval var=$control.remark[1]}</p>{if $control.interface}
   <p>此控件还继承了来自 {foreach from=$control.interface item="item" key="key"}{if $key}、{/if}{$item|control}{/foreach} 的接口方法</p>{/if}
-  <p>下面列出了{$control.name}中的所有 <a href="#method">方法</a> 与 <a href="#event">事件</a>，点击链接即可前往详细信息。如果需要查看全部的事件请参见 {'events'|menu}。</p>
+  <p>下面列出了{$control.desc}中的所有 <a href="#method">方法</a> 与 <a href="#event">事件</a>，点击链接即可前往详细信息。如果需要查看全部的事件请参见 {'events'|menu}。</p>
 </blockquote>
 <p class="clsRef">使用方法</p>
 <blockquote>
@@ -28,9 +28,10 @@
       <p><pre class="prettyprint clsCode" id="htmlDemo">{$control.html}</pre></p>
     </li>
     <li>JS初始化示例
-      <p><pre class="prettyprint clsCode">ecui.{'create'|method:'core'}('{$URI1}', params}</pre></p>
+      <p><pre class="prettyprint clsCode">ecui.{'create'|method:'core'}({$control.position}, options}
+new {$control.position}(options)</pre></p>
     </li>{/if}
-    <li>控件扩展的 params 参数
+    <li>控件扩展的 options 选项
       <p>
         <table class="clsSTD">{assign var="controlName" value=$URI1}{while $controlName}{foreach from=$types item="item"}{if $item.name==$controlName}{foreach from=$item.params item="param"}
           <tr>
@@ -55,16 +56,17 @@
 <p class="clsRef"><a name="method" id="method"></a>方法</p>
 <blockquote>
   <table class="clsSTD">{foreach item="item" from=$sortedMethods}{if $lastName!=$item.name}{capture assign="link"}{eval var='{\$item.name|method:"$URI1"|default}'}{/capture}{capture assign="type"}{$link|regex_replace:'.+type=(.+)".+':"$1"}{/capture}{assign var="lastName" value=$item.name}{/if}{if $item.type==$type}
+{if $type==$URI1}
     <tr>
       <td>{$link}</td>
       <td>{$item.desc}{if $type!=$URI1} (From：{$type|control}){/if}</td>
-    </tr>{/if}{/foreach}
+    </tr>{/if}{/if}{/foreach}
   </table>
 </blockquote>
 <p class="clsRef"><a name="method" id="method"></a>事件</p>
 <blockquote>
   <table class="clsSTD">{foreach item="item" from=$sortedEvents}{if $lastName!=$item.name}{capture assign="link"}{eval var='{\$item.name|event:"$URI1"|default}'}{/capture}{capture assign="type"}{$link|regex_replace:'.+type=(.+)".+':"$1"}{/capture}{assign var="lastName" value=$item.name}{/if}{if $item.type==$type}
-    <tr>
+    <tr {if $type!=$URI1}style="display:none"{/if}>
       <td>{$link}</td>
       <td>{$item.desc}{if $type!=$URI1} (From：{$type|control}){/if}</td>
     </tr>{/if}{/foreach}

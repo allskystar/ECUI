@@ -41,13 +41,13 @@ _aItem  - 子控件集合
      * @public
      *
      * @param {Element} el 关联的 Element 对象
-     * @param {Object} params 初始化参数
+     * @param {Object} options 初始化选项
      */
     //__gzip_original__UI_COLLECTION
     //__gzip_original__UI_COLLECTION_ITEM
     var UI_COLLECTION =
-        ui.Collection = function (el, params) {
-            UI_CONTROL.call(this, el, params);
+        ui.Collection = function (el, options) {
+            UI_CONTROL.call(this, el, options);
 
             this._aItem = [];
             for (var i = 0, list = children(el), o; o = list[i]; ) {
@@ -62,10 +62,10 @@ _aItem  - 子控件集合
          * @public
          *
          * @param {Element} el 关联的 Element 对象
-         * @param {Object} params 初始化参数
+         * @param {Object} options 初始化选项
          */
-        UI_COLLECTION_ITEM = UI_COLLECTION.Item = function (el, params) {
-            UI_CONTROL.call(this, el, params);
+        UI_COLLECTION_ITEM = UI_COLLECTION.Item = function (el, options) {
+            UI_CONTROL.call(this, el, options);
         },
         UI_COLLECTION_ITEM_CLASS = inherits(UI_COLLECTION_ITEM, UI_CONTROL);
 //{else}//

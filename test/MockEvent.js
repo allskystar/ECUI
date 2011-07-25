@@ -437,6 +437,26 @@ uiut.MockEvents._fireKeyEvent = function (target /*:HTMLElement*/, type /*:Strin
                                  options.shiftKey /*:Boolean*/,   options.metaKey /*:Boolean*/,
                                  keycode /*:int*/,        keycode /*:int*/);
 }
+uiut.MockEvents.focus = function(/*DOM*/target,/*Object*/options){
+    if (target.fireEvent) {
+        target.fireEvent("onfocus");
+    }
+    else {
+        var evt = document.createEvent('HTMLEvents');
+        evt.initEvent('focus', true, true);
+        target.dispatchEvent(evt);  
+    }
+}
+uiut.MockEvents.blur = function(/*DOM*/target,/*Object*/options){
+    if (target.fireEvent) {
+        target.fireEvent("onblur");
+    }
+    else {
+        var evt = document.createEvent('HTMLEvents');
+        evt.initEvent('blur', true, true);
+        target.dispatchEvent(evt);  
+    }
+}
 uiut.MockEvents.click = function(/*DOM*/target,/*Object*/options){
 	uiut.MockEvents._fireMouseEvent(target,"click",options);
 }

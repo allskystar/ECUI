@@ -60,7 +60,7 @@ _aButton          - 按钮数组
      * @public
      *
      * @param {Element} el 关联的 Element 对象
-     * @param {Object} params 初始化参数
+     * @param {Object} options 初始化选项
      */
     //__gzip_original__UI_PALETTE
     //__gzip_original__UI_PALETTE_AREA
@@ -68,13 +68,13 @@ _aButton          - 按钮数组
     //__gzip_original__UI_PALETTE_EDIT
     //__gzip_original__UI_PALETTE_BUTTON
     var UI_PALETTE =
-        ui.Palette = function (el, params) {
-            UI_CONTROL.call(this, el, params);
+        ui.Palette = function (el, options) {
+            UI_CONTROL.call(this, el, options);
 
             //__gzip_original__baseClass
             //__gzip_original__areaParams
             var i = 0,
-                baseClass = params.base,
+                baseClass = options.base,
                 areaParams = {capture: false},
                 list = [
                     '<div class="' + baseClass + '-left" style="float:left"><div class="ec-control ' +
@@ -119,13 +119,13 @@ _aButton          - 按钮数组
 
             // 初始化色彩选择区
             el = el.firstChild;
-            params = this._uMain = $fastCreate(UI_PALETTE_AREA, list = el.firstChild, this);
-            params._uIcon = $fastCreate(UI_PALETTE_AREA, list.lastChild, params, areaParams);
+            options = this._uMain = $fastCreate(UI_PALETTE_AREA, list = el.firstChild, this);
+            options._uIcon = $fastCreate(UI_PALETTE_AREA, list.lastChild, options, areaParams);
 
             // 初始化亮度条选择区
             el = el.nextSibling;
-            params = this._uLightbar = $fastCreate(UI_PALETTE_AREA, list = el.firstChild, this);
-            params._uIcon = $fastCreate(UI_PALETTE_AREA, list.lastChild, params, areaParams);
+            options = this._uLightbar = $fastCreate(UI_PALETTE_AREA, list = el.firstChild, this);
+            options._uIcon = $fastCreate(UI_PALETTE_AREA, list.lastChild, options, areaParams);
 
             // 初始化基本颜色区
             list = children(el.nextSibling);
@@ -158,10 +158,10 @@ _aButton          - 按钮数组
          * @public
          *
          * @param {Element} el 关联的 Element 对象
-         * @param {Object} params 初始化参数
+         * @param {Object} options 初始化选项
          */
-        UI_PALETTE_AREA = UI_PALETTE.Area = function (el, params) {
-            UI_CONTROL.call(this, el, params);
+        UI_PALETTE_AREA = UI_PALETTE.Area = function (el, options) {
+            UI_CONTROL.call(this, el, options);
         },
         UI_PALETTE_AREA_CLASS = inherits(UI_PALETTE_AREA, UI_CONTROL),
 
@@ -170,10 +170,10 @@ _aButton          - 按钮数组
          * @public
          *
          * @param {Element} el 关联的 Element 对象
-         * @param {Object} params 初始化参数
+         * @param {Object} options 初始化选项
          */
-        UI_PALETTE_COLLECTION = UI_PALETTE.Collection = function (el, params) {
-            UI_COLLECTION.call(this, el, params);
+        UI_PALETTE_COLLECTION = UI_PALETTE.Collection = function (el, options) {
+            UI_COLLECTION.call(this, el, options);
         },
         UI_PALETTE_COLLECTION_CLASS = inherits(UI_PALETTE_COLLECTION, UI_COLLECTION),
 
@@ -182,10 +182,10 @@ _aButton          - 按钮数组
          * @public
          *
          * @param {Element} el 关联的 Element 对象
-         * @param {Object} params 初始化参数
+         * @param {Object} options 初始化选项
          */
-        UI_PALETTE_EDIT = UI_PALETTE.Edit = function (el, params) {
-            UI_FORMAT_EDIT.call(this, el, params);
+        UI_PALETTE_EDIT = UI_PALETTE.Edit = function (el, options) {
+            UI_FORMAT_EDIT.call(this, el, options);
         },
         UI_PALETTE_EDIT_CLASS = inherits(UI_PALETTE_EDIT, UI_FORMAT_EDIT),
 
@@ -194,10 +194,10 @@ _aButton          - 按钮数组
          * @public
          *
          * @param {Element} el 关联的 Element 对象
-         * @param {Object} params 初始化参数
+         * @param {Object} options 初始化选项
          */
-        UI_PALETTE_BUTTON = UI_PALETTE.Button = function (el, params) {
-            UI_CONTROL.call(this, el, params);
+        UI_PALETTE_BUTTON = UI_PALETTE.Button = function (el, options) {
+            UI_CONTROL.call(this, el, options);
         },
         UI_PALETTE_BUTTON_CLASS = inherits(UI_PALETTE_BUTTON, UI_CONTROL),
 

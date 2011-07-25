@@ -74,19 +74,19 @@ _cJoint      - 行(锁定行)对应的锁定行(行)控件
 //{if $phase == "define"}//
     /**
      * 初始化高级表格控件。
-     * params 参数支持的属性如下：
+     * options 对象支持的属性如下：
      * left-lock  左边需要锁定的列数
      * right-lock 右边需要锁定的列数
      * @public
      *
      * @param {HTMLElement} el 关联的 Element 对象
-     * @param {Object} params 初始化参数
+     * @param {Object} options 初始化选项
      */
     //__gzip_original__UI_LOCKED_TABLE
     //__gzip_original__UI_LOCKED_TABLE_ROW
     var UI_LOCKED_TABLE =
-        ui.LockedTable = function (el, params) {
-            UI_TABLE.call(this, el, params);
+        ui.LockedTable = function (el, options) {
+            UI_TABLE.call(this, el, options);
 
             var i = 0,
                 rows = this.getRows(),
@@ -95,10 +95,10 @@ _cJoint      - 行(锁定行)对应的锁定行(行)控件
                 lockedRows = this._aLockedRow = [],
                 o;
 
-            this._nLeft = params.leftLock || 0;
-            this._nRight = this.getColCount() - (params.rightLock || 0);
+            this._nLeft = options.leftLock || 0;
+            this._nRight = this.getColCount() - (options.rightLock || 0);
 
-            // 以下使用 params 代替 rows
+            // 以下使用 options 代替 rows
             for (; el = rows[i]; ) {
                 el = el.getBase();
                 list[i++] =
@@ -107,8 +107,8 @@ _cJoint      - 行(锁定行)对应的锁定行(行)控件
             }
 
             lockedEl.innerHTML =
-                '<div class="' + params.type + '-area ' + params.base +
-                    '-area"><div style="white-space:nowrap;position:absolute"><table cellspacing="0"><thead><tr><td style="padding:0px;border:0px"></td></tr></thead></table></div></div><div class="' + params.type + '-layout ' + params.base +
+                '<div class="' + options.type + '-area ' + options.base +
+                    '-area"><div style="white-space:nowrap;position:absolute"><table cellspacing="0"><thead><tr><td style="padding:0px;border:0px"></td></tr></thead></table></div></div><div class="' + options.type + '-layout ' + options.base +
                     '-layout" style="position:relative;overflow:hidden"><div style="white-space:nowrap;position:absolute;top:0px;left:0px"><table cellspacing="0"><tbody>' + list.join('') + '</tbody></table></div></div>';
             // 初始化锁定的表头区域，以下使用 list 表示临时变量
             o = this._uLockedHead = $fastCreate(UI_CONTROL, lockedEl.firstChild, this);
@@ -131,10 +131,10 @@ _cJoint      - 行(锁定行)对应的锁定行(行)控件
          * @public
          *
          * @param {HTMLElement} el 关联的 Element 对象
-         * @param {Object} params 初始化参数
+         * @param {Object} options 初始化选项
          */
-        UI_LOCKED_TABLE_ROW = UI_LOCKED_TABLE.Row = function (el, params) {
-            UI_TABLE_ROW.call(this, el, params);
+        UI_LOCKED_TABLE_ROW = UI_LOCKED_TABLE.Row = function (el, options) {
+            UI_TABLE_ROW.call(this, el, options);
         },
         UI_LOCKED_TABLE_ROW_CLASS = inherits(UI_LOCKED_TABLE_ROW, UI_TABLE_ROW);
 //{else}//
@@ -336,17 +336,17 @@ _cJoint      - 行(锁定行)对应的锁定行(行)控件
 
     /**
      * 增加一列。
-     * params 参数对象支持的属性如下：
+     * options 对象对象支持的属性如下：
      * width   {number}  列的宽度
      * base    {string}  列的基本样式
      * title   {string}  列的标题
      * @public
      *
-     * @param {Object} params 列的初始化参数
+     * @param {Object} options 列的初始化选项
      * @param {number} index 被添加的列的位置序号，如果不合法将添加在末尾
      * @return {ecui.ui.Table.Col} 列控件
      */
-    UI_LOCKED_TABLE_CLASS.addCol = function (params, index) {
+    UI_LOCKED_TABLE_CLASS.addCol = function (options, index) {
         if (index >= 0) {
             if (index < this._nLeft) {
                 this._nLeft++;
@@ -355,7 +355,7 @@ _cJoint      - 行(锁定行)对应的锁定行(行)控件
                 this._nRight++;
             }
         }
-        return UI_TABLE_CLASS.addCol.call(this, params, index);
+        return UI_TABLE_CLASS.addCol.call(this, options, index);
     };
 
     /**

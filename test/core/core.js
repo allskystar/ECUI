@@ -5,9 +5,9 @@ function before() {
                 + '</div></div>';
     el.id = 'common';
     document.body.appendChild(el);
-    ecui.create('control', {id: 'common', element: el});
-    ecui.create('control', {id: 'parent', element: el.firstChild});
-    ecui.create('control', {id: 'child', element: el.firstChild.firstChild});
+    ecui.create(ecui.ui.Control, {id: 'common', main: el});
+    ecui.create(ecui.ui.Control, {id: 'parent', main: el.firstChild});
+    ecui.create(ecui.ui.Control, {id: 'child', main: el.firstChild.firstChild});
 }
 
 function after() {
@@ -28,7 +28,7 @@ test('$bind', {
     '同一个DOM多次绑定ECUI控件': function () {
         var el = document.createElement('div'),
             common = ecui.get('common'),
-            control = ecui.create('Control');
+            control = ecui.create(ecui.ui.Control);
         ecui.$bind(el, common);
         value_of(el.getControl()).should_be(common);
         ecui.$bind(el, control);
@@ -41,7 +41,7 @@ test('$clearState', {
     '控件自身存在状态': function () {
         var parent = ecui.get('parent'),
             common = ecui.get('common'),
-            el = parent.getBase();
+            el = parent.getMain();
         uiut.MockEvents.mouseover(el);
         uiut.MockEvents.mousedown(el);
         uiut.MockEvents.mouseup(el);
@@ -54,7 +54,7 @@ test('$clearState', {
         var parent = ecui.get('parent'),
             child = ecui.get('child'),
             common = ecui.get('common'),
-            el = child.getBase();
+            el = child.getMain();
         uiut.MockEvents.mouseover(el);
         uiut.MockEvents.mousedown(el);
         uiut.MockEvents.mouseup(el);
@@ -67,8 +67,8 @@ test('$clearState', {
         var parent = ecui.get('parent'),
             child = ecui.get('child'),
             common = ecui.get('common'),
-            control = ecui.create('control', {parent: common}),
-            el = child.getBase();
+            control = ecui.create(ecui.ui.Control, {parent: common}),
+            el = child.getMain();
         uiut.MockEvents.mouseover(el);
         uiut.MockEvents.mousedown(el);
         uiut.MockEvents.mouseup(el);
@@ -80,7 +80,7 @@ test('$clearState', {
 
     '在mousedown中清除状态': function () {
         var parent = ecui.get('parent'),
-            el = parent.getBase(),
+            el = parent.getMain(),
             clicked = false;
 
         parent.onclick = function () {
@@ -99,7 +99,7 @@ test('$clearState', {
 test('$connect', {
     '控件连接已经生成的控件': function () {
         var caller, connected,
-            control = ecui.create('Control');
+            control = ecui.create(ecui.ui.Control);
         function test(target) {
             caller = this;
             connected = target;
@@ -120,7 +120,7 @@ test('$connect', {
         ecui.$connect(common, test, 'control');
         value_of(caller).should_be(void(0));
         value_of(connected).should_be(void(0));
-        var control = ecui.create('Control', {id: 'control'});
+        var control = ecui.create(ecui.ui.Control, {id: 'control'});
         value_of(caller).should_be(common);
         value_of(connected).should_be(control);
         ecui.dispose(control);
@@ -129,9 +129,9 @@ test('$connect', {
 
 test('create', {
     '不设置参数': function () {
-        var control = ecui.create('Control');
-        value_of(control.getType()).should_be('ec-control');
-        value_of(control.getBaseClass()).should_be('ec-control');
+        var control = ecui.create(ecui.ui.Control);
+        value_of(control.getTypes()).should_be(['ui-control']);
+        value_of(control.getPrimary()).should_be('ui-control');
         ecui.dispose(control);
     },
 
@@ -139,14 +139,13 @@ test('create', {
         var el = document.createElement('div'),
             common = ecui.get('common'),
             control = ecui.create(
-                'Control',
-                {id:'create', 'base': 'custom', 'element': el, 'parent': common, 'type': 'customType'}
+                ecui.ui.Control,
+                {id: 'create', primary: 'custom', main: el, parent: common}
             );
 
         value_of(control).should_be(ecui.get('create'));
-        value_of(control.getType()).should_be('customType');
-        value_of(control.getBaseClass()).should_be('custom');
-        value_of(control.getBase()).should_be(el);
+        value_of(control.getPrimary()).should_be('custom');
+        value_of(control.getMain()).should_be(el);
         value_of(control.getParent()).should_be(common);
         ecui.dispose(control);
     },
@@ -156,9 +155,9 @@ test('create', {
         el.innerHTML = '<div class="first"></div>';
         el = el.firstChild;
 
-        var control = ecui.create('Control', {'element': el});
-        value_of(control.getType()).should_be('ec-control');
-        value_of(control.getBaseClass()).should_be('first');
+        var control = ecui.create(ecui.ui.Control, {main: el});
+        value_of(control.getTypes()).should_be(['ui-control']);
+        value_of(control.getPrimary()).should_be('first');
         value_of(control.getParent()).should_be(ecui.get('child'));
         ecui.dispose(control);
     }
@@ -191,7 +190,7 @@ test('dispose', {
         var length = ecui.query().length,
             common = ecui.get('common'),
             child = ecui.get('child'),
-            el = child.getBase();
+            el = child.getMain();
 
         uiut.MockEvents.mouseover(el);
         uiut.MockEvents.mousedown(el);
@@ -200,14 +199,14 @@ test('dispose', {
         value_of(ecui.getHovered()).should_be(common);
         value_of(ecui.getFocused()).should_be(common);
         value_of(ecui.query().length + 2).should_be(length);
-        uiut.MockEvents.mouseup(common.getBase());
+        uiut.MockEvents.mouseup(common.getMain());
     }
 });
 
 test('drag', {
     '拖拽事件触发顺序': function () {
         var common = ecui.get('common'),
-            el = common.getBase();
+            el = common.getMain();
 
         var result = [];
         common.ondragstart = function () {
@@ -233,7 +232,7 @@ test('drag', {
 
     '拖拽范围设置': function () {
         var common = ecui.get('common'),
-            el = common.getBase();
+            el = common.getMain();
 
         el.style.position = 'absolute';
         el.style.overflow = 'hidden';
@@ -262,10 +261,10 @@ test('drag', {
 
     '拖拽范围默认设置': function () {
         var common = ecui.get('common'),
-            control = ecui.create('Control', {parent: common}),
-            el = control.getBase();
+            control = ecui.create(ecui.ui.Control, {parent: common}),
+            el = control.getMain();
 
-        common.getBase().style.cssText = 'position:absolute;overflow:hidden';
+        common.getMain().style.cssText = 'position:absolute;overflow:hidden';
         common.setPosition(0, 0);
         common.setSize(400, 400);
         control.getOuter().style.position = 'absolute';
@@ -318,7 +317,7 @@ test('getMouseX/getMouseY', {
 
     '相对于控件(无边框)': function () {
         var common = ecui.get('common');
-        common.getBase().style.position = 'absolute';
+        common.getMain().style.position = 'absolute';
         common.setSize(20, 20);
         common.setPosition(10, 10);
         uiut.MockEvents.mousemove(document.body, {'clientX': 20, 'clientY': 20});
@@ -328,7 +327,7 @@ test('getMouseX/getMouseY', {
 
     '相对控件(有1px边框)': function () {
         var common = ecui.get('common');
-        common.getBase().style.cssText = 'position:absolute;border:1px solid';
+        common.getMain().style.cssText = 'position:absolute;border:1px solid';
         common.setSize(20, 20);
         common.setPosition(10, 10);
         uiut.MockEvents.mousemove(document.body, {'clientX': 20, 'clientY': 20});
@@ -352,8 +351,8 @@ test('init', {
 
         value_of(child.getParent()).should_be(parent);
         value_of(ecui.query().length - 2).should_be(length);
-        value_of(parent.getBaseClass()).should_be('parent');
-        value_of(parent.getType()).should_be('ec-control');
+        value_of(parent.getPrimary()).should_be('parent');
+        value_of(parent.getTypes()).should_be(['ui-control']);
     }
 });
 
@@ -361,7 +360,7 @@ test('intercept', {
     '强制点击拦截': function () {
         var result = [],
             common = ecui.get('common'),
-            el = common.getBase(),
+            el = common.getMain(),
             child = ecui.get('child');
 
         common.onclick = function () {
@@ -385,7 +384,7 @@ test('intercept', {
     '强制点击拦截(不恢复强制点击拦截)': function () {
         var result = [],
             common = ecui.get('common'),
-            el = ecui.get('parent').getBase();
+            el = ecui.get('parent').getMain();
 
         common.onintercept = function () {
             result.push('intercept');
@@ -409,7 +408,7 @@ test('intercept', {
     '强制点击拦截(手工处理环境的恢复)': function () {
         var result = [],
             common = ecui.get('common'),
-            el = common.getBase(),
+            el = common.getMain(),
             child = ecui.get('child');
 
         common.onclick = function () {
@@ -428,7 +427,7 @@ test('intercept', {
     }
 });
 
-test('loseFocus 测试', {
+test('loseFocus', {
     '控件处于焦点状态': function () {
         var parent = ecui.get('parent');
 
@@ -470,16 +469,13 @@ test('loseFocus 测试', {
     }
 });
 
-test('query 测试', {
+test('query', {
     '按控件类型查找': function () {
-        var select = ecui.create('Select'),
-            checkbox = ecui.create('Checkbox');
+        var button = ecui.create(ecui.ui.Button);
 
-        value_of(ecui.query({'type': ecui.ui.Select})).should_be([select]);
-        value_of(ecui.query({'type': ecui.ui.Checkbox})).should_be([checkbox]);
+        value_of(ecui.query({type: ecui.ui.Button})).should_be([button]);
 
-        ecui.dispose(select);
-        ecui.dispose(checkbox);
+        ecui.dispose(button);
     },
 
     '按父控件查找': function () {
@@ -490,11 +486,11 @@ test('query 测试', {
 
     '自定义函数查找': function () {
         var el = document.createElement('div'),
-            ctrl = ecui.create('Control', {element: el});
+            ctrl = ecui.create(ecui.ui.Control, {main: el});
         el.id = 'query';
 
         var result = ecui.query({'custom': function(ctrl) {
-            if (ctrl.getBase().id == 'query') {
+            if (ctrl.getMain().id == 'query') {
                 return true;
             }
             else {
@@ -550,7 +546,7 @@ test('setFocused', {
 test('zoom', {
     '缩放事件触发顺序': function () {
         var common = ecui.get('common'),
-            el = common.getBase(),
+            el = common.getMain(),
             result = [];
 
         common.setSize(10, 10);
@@ -577,7 +573,7 @@ test('zoom', {
 
     '正向缩放': function () {
         var common = ecui.get('common'),
-            el = common.getBase();
+            el = common.getMain();
         common.setSize(10, 10);
         common.setPosition(0, 0);
         common.onmousedown = function (event) {
@@ -592,7 +588,7 @@ test('zoom', {
 
     '反向缩放(zoom)': function () {
         var common = ecui.get('common'),
-            el = common.getBase();
+            el = common.getMain();
         common.setSize(10, 10);
         common.setPosition(0, 0);
         common.onmousedown = function (event) {
@@ -607,7 +603,7 @@ test('zoom', {
 
     '缩放范围限制(zoom)': function () {
         var common = ecui.get('common'),
-            el = common.getBase();
+            el = common.getMain();
         common.setSize(10, 10);
         common.setPosition(0, 0);
         common.onmousedown = function (event) {
@@ -636,7 +632,7 @@ test('zoom', {
 test('交互行为测试', {
     '激活，移入/移出': function () {
         var common = ecui.get('common'),
-            el = common.getBase();
+            el = common.getMain();
 
         uiut.MockEvents.mouseout(document.body);
         uiut.MockEvents.mouseover(el);
@@ -654,7 +650,7 @@ test('交互行为测试', {
 
     '焦点': function () {
         var common = ecui.get('common'),
-            el = common.getBase();
+            el = common.getMain();
 
         value_of(ecui.getFocused()).should_be(null);
         uiut.MockEvents.mousedown(el);
@@ -669,7 +665,7 @@ test('交互行为测试', {
     '鼠标事件': function () {
         var common = ecui.get('common'),
             parent = ecui.get('parent'),
-            control = ecui.create('control', {id: 'control', parent: common}),
+            control = ecui.create(ecui.ui.Control, {id: 'control', parent: common}),
             result = [];
 
         function build(name) {
@@ -704,14 +700,14 @@ test('交互行为测试', {
         build('control');
 
         uiut.MockEvents.mouseout(document.body);
-        uiut.MockEvents.mouseover(parent.getBase());
-        uiut.MockEvents.mousedown(parent.getBase());
-        uiut.MockEvents.mouseup(parent.getBase());
-        uiut.MockEvents.mousedown(parent.getBase());
-        uiut.MockEvents.mousemove(parent.getBase());
-        uiut.MockEvents.mouseout(parent.getBase());
-        uiut.MockEvents.mouseover(control.getBase());
-        uiut.MockEvents.mouseup(control.getBase());
+        uiut.MockEvents.mouseover(parent.getMain());
+        uiut.MockEvents.mousedown(parent.getMain());
+        uiut.MockEvents.mouseup(parent.getMain());
+        uiut.MockEvents.mousedown(parent.getMain());
+        uiut.MockEvents.mousemove(parent.getMain());
+        uiut.MockEvents.mouseout(parent.getMain());
+        uiut.MockEvents.mouseover(control.getMain());
+        uiut.MockEvents.mouseup(control.getMain());
         ecui.$clearState(common);
 
         value_of(result).should_be(['parent-mouseover', 'common-mouseover', 'parent-mousedown', 'common-mousedown', 'parent-mouseup', 'common-mouseup', 'parent-click', 'common-click', 'parent-mousedown', 'common-mousedown', 'parent-mousemove', 'common-mousemove', 'parent-mouseout', 'control-mouseover', 'control-mouseup', 'common-mouseup', 'common-click', 'control-mouseout', 'common-mouseout']);

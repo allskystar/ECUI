@@ -48,6 +48,41 @@
     },
 
     {
+        "name": "input-control",
+        "type": "ui",
+        "position": "ecui.ui.InputControl",
+        "super": "control",
+        "desc": "输入控件",
+        "params": [
+            {"name": "name", "desc": "string，输入框的表单项名称"},
+            {"name": "value", "desc": "string，输入框的表单项的值"},
+            {"name": "inputType", "desc": "string，输入框的类型，默认为 text"},
+            {"name": "hidden", "desc": "boolean，输入框是否隐藏，隐藏状态下将不会绑定键盘事件"}
+        ],
+        "html": "<input ecui=\"type:input-control\" type=\"password\" name=\"passwd\" value=\"1111\"><div ecui=\"type:input-control;name:passwd;value:1111;inputType:password\"></div><div ecui=\"type:input-control\"><input type=\"password\" name=\"passwd\" value=\"1111\"></div>",
+        "remark": [
+            "定义输入数据的基本操作。",
+            "输入控件，实现了对原生 InputElement 的功能扩展，包括光标的控制、输入事件的实时响应(每次改变均触发事件)，以及 IE 下不能动态改变输入框的表单项名称的模拟处理。"
+        ]
+    },
+
+    {
+        "name": "button",
+        "type": "ui",
+        "position": "ecui.ui.Button",
+        "super": "control",
+        "desc": "按钮控件",
+        "params": [
+            {"name": "text", "desc": "string，按钮的文字"}
+        ],
+        "remark": [
+            "定义按钮的控件行为。",
+            "按钮控件在激活(active)状态下鼠标移出控件区域会失去激活样式，移入控件区域再次获得激活样式。"
+        ],
+        "html": "<div ecui=\"type:button;id:demo\"><!-- 这里放按钮的文字 -->...</div>"
+    }/*,
+
+    {
         "name": "scroll",
         "type": "ui",
         "position": "ecui.ui.Scroll",
@@ -125,25 +160,6 @@
         "remark": [
             "定义事件转发的基本操作。",
             "标签控件，将事件转发到指定的控件上，通常与 Radio、Checkbox 等控件联合使用，扩大点击响应区域。"
-        ]
-    },
-
-    {
-        "name": "edit",
-        "type": "ui",
-        "position": "ecui.ui.Edit",
-        "super": "control",
-        "desc": "输入框控件",
-        "params": [
-            {"name": "name", "desc": "string，输入框的表单项名称"},
-            {"name": "value", "desc": "string，输入框的表单项的值"},
-            {"name": "input", "desc": "string，输入框的类型，默认为 text"},
-            {"name": "hidden", "desc": "boolean，输入框是否隐藏，隐藏状态下将不会绑定键盘事件"}
-        ],
-        "html": "<div ecui=\"type:edit;id:ctrl1\"></div>",
-        "remark": [
-            "定义输入数据的基本操作。",
-            "输入框控件，实现了对原生 InputElement 的功能扩展，包括光标的控制、输入事件的实时响应(每次改变均触发事件)，以及 IE 下不能动态改变输入框的表单项名称的模拟处理。输入框控件默认使用文本输入框，对于需要使用加密框的场景，可以使用 &lt;input type=\"password\" ecui=\"type:edit\"&gt; 的方式初始化。"
         ]
     },
 
@@ -458,5 +474,5 @@
             "定义分页选项卡的操作。",
             "选项卡控件，继承自基础控件，实现了选项组接口。每一个选项卡都包含一个头部区域与内容区域，选项卡控件存在互斥性，只有唯一的一个选项卡能被选中显卡内容区域。"
         ]
-    }
+    }*/
 ]
