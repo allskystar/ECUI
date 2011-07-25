@@ -50,7 +50,7 @@ _oRange         - 滑动块的合法滑动区间
      * @protected
      *
      * @param {Element} el 关联的 Element 对象
-     * @param {Object} params 初始化参数
+     * @param {Object} options 初始化选项
      */
     //__gzip_original__UI_SCROLL
     //__gzip_original__UI_SCROLL_BLOCK
@@ -58,15 +58,15 @@ _oRange         - 滑动块的合法滑动区间
     //__gzip_original__UI_VSCROLL
     //__gzip_original__UI_HSCROLL
     var UI_SCROLL =
-        ui.Scroll = function (el, params) {
+        ui.Scroll = function (el, options) {
             //__gzip_original__baseClass
             //__gzip_original__typeClass
             //__gzip_original__partParams
-            var baseClass = params.base,
-                typeClass = params.type,
+            var baseClass = options.base,
+                typeClass = options.type,
                 partParams = {select: false, focus: false};
 
-            UI_CONTROL.call(this, el, extend(params, partParams));
+            UI_CONTROL.call(this, el, extend(options, partParams));
 
             el.innerHTML =
                 '<div class="' + typeClass + '-prev ' +
@@ -95,10 +95,10 @@ _oRange         - 滑动块的合法滑动区间
          * @protected
          *
          * @param {Element} el 关联的 Element 对象
-         * @param {Object} params 初始化参数
+         * @param {Object} options 初始化选项
          */
-        UI_SCROLL_BLOCK = UI_SCROLL.Block = function (el, params) {
-            UI_CONTROL.call(this, el, params);
+        UI_SCROLL_BLOCK = UI_SCROLL.Block = function (el, options) {
+            UI_CONTROL.call(this, el, options);
         },
         UI_SCROLL_BLOCK_CLASS = inherits(UI_SCROLL_BLOCK, UI_CONTROL),
 
@@ -107,10 +107,10 @@ _oRange         - 滑动块的合法滑动区间
          * @protected
          *
          * @param {Element} el 关联的 Element 对象
-         * @param {Object} params 初始化参数
+         * @param {Object} options 初始化选项
          */
-        UI_SCROLL_BUTTON = UI_SCROLL.Button = function (el, params) {
-            UI_CONTROL.call(this, el, params);
+        UI_SCROLL_BUTTON = UI_SCROLL.Button = function (el, options) {
+            UI_CONTROL.call(this, el, options);
         },
         UI_SCROLL_BUTTON_CLASS = inherits(UI_SCROLL_BUTTON, UI_CONTROL);
 //{else}//
@@ -456,10 +456,10 @@ _oRange         - 滑动块的合法滑动区间
      * @public
      *
      * @param {Element} el 关联的 Element 对象
-     * @param {Object} params 初始化参数
+     * @param {Object} options 初始化选项
      */
-    var UI_VSCROLL = ui.VScroll = function (el, params) {
-            UI_SCROLL.call(this, el, params);
+    var UI_VSCROLL = ui.VScroll = function (el, options) {
+            UI_SCROLL.call(this, el, options);
         },
 
         UI_VSCROLL_CLASS = inherits(UI_VSCROLL, UI_SCROLL);
@@ -564,10 +564,10 @@ _oRange         - 滑动块的合法滑动区间
      * @public
      *
      * @param {Element} el 关联的 Element 对象
-     * @param {Object} params 初始化参数
+     * @param {Object} options 初始化选项
      */
-    var UI_HSCROLL = ui.HScroll = function (el, params) {
-            UI_SCROLL.call(this, el, params);
+    var UI_HSCROLL = ui.HScroll = function (el, options) {
+            UI_SCROLL.call(this, el, options);
         },
 
         UI_HSCROLL_CLASS = inherits(UI_HSCROLL, UI_SCROLL);

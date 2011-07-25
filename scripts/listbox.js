@@ -49,15 +49,15 @@ _eInput - 选项对应的input，form提交时使用
      * @public
      *
      * @param {Element} el 关联的 Element 对象
-     * @param {Object} params 初始化参数
+     * @param {Object} options 初始化选项
      */
     //__gzip_original__UI_LISTBOX
     //__gzip_original__UI_LISTBOX_ITEM
     var UI_LISTBOX =
-        ui.Listbox = function (el, params) {
-            params.hScroll = false;
-            UI_PANEL.call(this, el, params);
-            this._sName = params.name || '';
+        ui.Listbox = function (el, options) {
+            options.hScroll = false;
+            UI_PANEL.call(this, el, options);
+            this._sName = options.name || '';
 
             this.$initItems();
         },
@@ -68,13 +68,13 @@ _eInput - 选项对应的input，form提交时使用
          * @public
          *
          * @param {Element} el 关联的 Element 对象
-         * @param {Object} params 初始化参数
+         * @param {Object} options 初始化选项
          */
-        UI_LISTBOX_ITEM = UI_LISTBOX.Item = function (el, params) {
-            UI_ITEM.call(this, el, params);
-            el.appendChild(this._eInput = setInput(null, params.parent._sName, 'hidden')).value =
-                params.value === undefined ? getText(el) : params.value;
-            this.setSelected(!!params.selected);
+        UI_LISTBOX_ITEM = UI_LISTBOX.Item = function (el, options) {
+            UI_ITEM.call(this, el, options);
+            el.appendChild(this._eInput = setInput(null, options.parent._sName, 'hidden')).value =
+                options.value === undefined ? getText(el) : options.value;
+            this.setSelected(!!options.selected);
         },
         UI_LISTBOX_ITEM_CLASS = inherits(UI_LISTBOX_ITEM, UI_ITEM);
 //{else}//

@@ -474,13 +474,13 @@
             "type": "core",
             "desc": "创建 {'controls'|menu}。",
             "params": [
-                {"name": "type", "type": "string", "desc": "控件的名称"},
-                {"name": "params", "type": "Object", "desc": "初始化参数(参见 {'controls'|menu})"}
+                {"name": "type", "type": "Function", "desc": "控件的构造函数"},
+                {"name": "options", "type": "Object", "desc": "初始化选项(参见 {'controls'|menu})"}
             ],
             "return": {"type": "ecui.ui.Control", "desc": "{'controls'|menu}"},
             "remark": [
-                "$create 方法创建控件时不会自动渲染控件。在大批量创建控件时，为了加快渲染速度，应该首先使用 $create 方法创建所有控件完成后，再批量分别调用控件的 {'cache'|method:'control'}、{'init'|method:'control'} 与 {'repaint'|method:'control'} 方法渲染控件。params 参数对象支持的属性如下：",
-                "<table class=\"clsSTD\"><tr><td>id</td><td>string，当前控件的 id，提供给 {'\\$connect'|method:'core'} 与 {'get'|method:'core'} 使用</td></tr><tr><td>base</td><td>string，控件的基本样式(参见 {'getBaseClass'|method:'control'} 方法)，有关样式的描述参见 {'styles'|menu}，如果忽略此参数将使用基本元素的 className 属性</td></tr><tr><td>element</td><td>HTMLElement，与控件绑捆的 Element 对象(参见 {'getBase'|method:'control'} 方法)，如果忽略此参数将创建 Element 对象与控件绑捆</td></tr><tr><td>parent</td><td>ecui.ui.Control 或者 HTMLElement，父控件对象或者父 Element 对象</td></tr><tr><td>type</td><td>string，控件的类型样式，通常情况下省略此参数，使用 \"ec-控件名称\" 作为控件的类型样式</td></tr></table>"
+                "$create 方法创建控件时不会自动渲染控件。在大批量创建控件时，为了加快渲染速度，应该首先使用 $create 方法创建所有控件完成后，再批量分别调用控件的 {'cache'|method:'control'}、{'init'|method:'control'} 与 {'repaint'|method:'control'} 方法渲染控件。options 对象支持的属性如下：",
+                "<table class=\"clsSTD\"><tr><td>id</td><td>string，当前控件的 id，提供给 {'\\$connect'|method:'core'} 与 {'get'|method:'core'} 使用</td></tr><tr><td>main</td><td>HTMLElement，与控件绑捆的 Element 对象(参见 {'getMain'|method:'control'} 方法)，如果忽略此参数将创建 Element 对象与控件绑捆</td></tr><tr><td>parent</td><td>ecui.ui.Control 或者 HTMLElement，父控件对象或者父 Element 对象</td></tr><tr><td>type</td><td>string，控件的类型样式，通常情况下省略此参数，使用 \"ec-控件名称\" 作为控件的类型样式</td></tr><tr><td>primary</td><td>string，控件的基本样式(参见 {'getPrimary'|method:'control'} 方法)，有关样式的描述参见 {'styles'|menu}，如果忽略此参数将使用主元素的 className 属性</td></tr></table>"
             ]
         },
 
@@ -492,7 +492,7 @@
                 {"name": "type", "type": "Function", "desc": "控件的构造函数"},
                 {"name": "el", "type": "HTMLElement", "desc": "控件对应的 Element 对象"},
                 {"name": "parent", "type": "ecui.ui.Control", "desc": "控件的父控件"},
-                {"name": "params", "type": "Object", "desc": "初始化参数(参见 {'controls'|menu})"}
+                {"name": "options", "type": "Object", "desc": "初始化选项(参见 {'controls'|menu})"}
             ],
             "return": {"type": "ecui.ui.Control", "desc": "{'controls'|menu}"},
             "remark": "$fastCreate 方法仅供控件生成自己的部件使用，生成的控件不在控件列表中注册，不自动刷新也不能通过 {'query'|method:'core'} 方法查询(参见 {'\\$create'|method:'core'} 方法)。$fastCreate 方法通过分解 Element 对象的 className 属性得到样式信息，其中第一个样式为类型样式，第二个样式为基本样式。"
@@ -503,7 +503,7 @@
             "type": "core",
             "desc": "注册一个插件。",
             "params": [
-                {"name": "name", "type": "string", "desc": "插件的初始化参数名"},
+                {"name": "name", "type": "string", "desc": "插件的初始化选项名"},
                 {"name": "func", "type": "Function", "desc": "插件的初始化函数"}
             ]
         },
@@ -557,13 +557,13 @@
             "type": "core",
             "desc": "创建 {'controls'|menu}。",
             "params": [
-                {"name": "type", "type": "string", "desc": "控件的名称"},
-                {"name": "params", "type": "Object", "desc": "初始化参数(参见 {'controls'|menu})"}
+                {"name": "type", "type": "Function", "desc": "控件的构造函数"},
+                {"name": "options", "type": "Object", "desc": "初始化选项(参见 {'controls'|menu})"}
             ],
             "return": {"type": "ecui.ui.Control", "desc": "{'controls'|menu}"},
             "remark": [
-                "标准的创建 {'controls'|menu} 的工厂方法，适用于少量创建控件，生成的控件不需要任何额外的调用即可正常的显示，对于批量创建控件，请使用 {'\\$create'|method:'core'} 方法。params 参数对象支持的属性如下：",
-                "<table class=\"clsSTD\"><tr><td>id</td><td>string，当前控件的 id，提供给 {'\\$connect'|method:'core'} 与 {'get'|method:'core'} 使用</td></tr><tr><td>base</td><td>string，控件的基本样式(参见 {'getBaseClass'|method:'control'} 方法)，有关样式的描述参见 {'styles'|menu}，如果忽略此参数将使用基本元素的 className 属性</td></tr><tr><td>element</td><td>HTMLElement，与控件绑捆的 Element 对象(参见 {'getBase'|method:'control'} 方法)，如果忽略此参数将创建 Element 对象与控件绑捆</td></tr><tr><td>parent</td><td>ecui.ui.Control 或者 HTMLElement，父控件对象或者父 Element 对象</td></tr><tr><td>type</td><td>string，控件的类型样式，通常情况下省略此参数，使用 \"ec-控件名称\" 作为控件的类型样式</td></tr></table>"
+                "标准的创建 {'controls'|menu} 的工厂方法，适用于少量创建控件，生成的控件不需要任何额外的调用即可正常的显示，对于批量创建控件，请使用 {'\\$create'|method:'core'} 方法。options 对象支持的属性如下：",
+                "<table class=\"clsSTD\"><tr><td>id</td><td>string，当前控件的 id，提供给 {'\\$connect'|method:'core'} 与 {'get'|method:'core'} 使用</td></tr><tr><td>main</td><td>HTMLElement，与控件绑捆的 Element 对象(参见 {'getMain'|method:'control'} 方法)，如果忽略此参数将创建 Element 对象与控件绑捆</td></tr><tr><td>parent</td><td>ecui.ui.Control 或者 HTMLElement，父控件对象或者父 Element 对象</td></tr><tr><td>type</td><td>string，控件的类型样式，通常情况下省略此参数，使用 \"ec-控件名称\" 作为控件的类型样式</td></tr><tr><td>primary</td><td>string，控件的基本样式(参见 {'getPrimary'|method:'control'} 方法)，有关样式的描述参见 {'styles'|menu}，如果忽略此参数将使用主元素的 className 属性</td></tr></table>"
             ]
         },
 
@@ -607,7 +607,7 @@
             "type": "core",
             "desc": "获取指定名称的 {'controls'|menu}。",
             "params": [
-                {"name": "id", "type": "string", "desc": "{'controls'|menu} 的名称，通过 Element 对象的初始化参数 id 定义"}
+                {"name": "id", "type": "string", "desc": "{'controls'|menu} 的名称，通过 Element 对象的初始化选项 id 定义"}
             ],
             "return": {"type": "ecui.ui.Control", "desc": "指定名称的 {'controls'|menu} 对象，如果不存在返回 null"},
             "remark": "使用页面静态初始化或页面动态初始化(参见 {'ecui'|menu})创建的控件，如果在 ecui 属性中指定了 id，就可以通过 get 方法得到控件，也可以在 Element 对象上使用 {'getControl'|method:'core'} 方法。"
@@ -698,12 +698,12 @@
         {
             "name": "getParameters",
             "type": "core",
-            "desc": "从 Element 对象中获取初始化参数对象。",
+            "desc": "从 Element 对象中获取初始化选项对象。",
             "params": [
                 {"name": "el", "type": "HTMLElement", "desc": "Element 对象"},
                 {"name": "attributeName", "type": "string", "desc": "当前的初始化属性名(参见 {'getAttributeName'|method:'core'} 方法)"}
             ],
-            "return": {"type": "Object", "desc": "初始化参数对象"}
+            "return": {"type": "Object", "desc": "初始化选项对象"}
         },
 
         {
@@ -893,7 +893,7 @@
             "type": "control",
             "desc": "缓存控件的属性。",
             "params": [
-                {"name": "style", "type": "CssStyle", "desc": "基本元素的 Css 样式对象"},
+                {"name": "style", "type": "CssStyle", "desc": "主元素的 Css 样式对象"},
                 {"name": "cacheSize", "type": "boolean", "desc": "是否需要缓存控件的大小，如果控件是另一个控件的部件时，不缓存大小能加快渲染速度，默认缓存"}
             ],
             "remark": "$cache 方法缓存部分控件属性的值，在初始化时避免频繁的读写交替操作，加快渲染的速度，在子控件或者应用程序开发过程中，如果需要避开控件提供的方法直接操作 Element 对象，<font color=\"red\">操作完成后必须调用 {'clearCache'|method:'control'} 方法清除控件的属性缓存，否则将引发错误。</font>"
@@ -976,7 +976,7 @@
             "type": "control",
             "desc": "获取控件的基本高度。",
             "return": {"type": "number", "desc": "控件的基本高度"},
-            "remark": "控件的基本高度指控件基本区域与用户数据存放区域的高度差值，即基本元素与内部元素(如果相同则忽略其中之一)的上下边框宽度(border-width)与上下内填充宽度(padding)之和。"
+            "remark": "控件的基本高度指控件基本区域与用户数据存放区域的高度差值，即主元素与内部元素(如果相同则忽略其中之一)的上下边框宽度(border-width)与上下内填充宽度(padding)之和。"
         },
 
         {
@@ -984,7 +984,7 @@
             "type": "control",
             "desc": "获取控件的基本宽度。",
             "return": {"type": "number", "desc": "控件的基本宽度"},
-            "remark": "控件的基本宽度指控件基本区域与用户数据存放区域的宽度差值，即基本元素与内部元素(如果相同则忽略其中之一)的左右边框宽度(border-width)与左右内填充宽度(padding)之和。"
+            "remark": "控件的基本宽度指控件基本区域与用户数据存放区域的宽度差值，即主元素与内部元素(如果相同则忽略其中之一)的左右边框宽度(border-width)与左右内填充宽度(padding)之和。"
         },
 
         {
@@ -1049,7 +1049,7 @@
             "name": "$locate",
             "type": "control",
             "desc": "设置控件容器支持坐标定位。",
-            "return": {"type": "boolean", "desc": "$locate 方法执行后，容器内部 Element 对象的 offsetParent 将指向基本元素(参见 {'getBase'|method:'control'} 方法)"}
+            "return": {"type": "boolean", "desc": "$locate 方法执行后，容器内部 Element 对象的 offsetParent 将指向主元素(参见 {'getMain'|method:'control'} 方法)"}
         },
 
         {
@@ -1174,7 +1174,7 @@
             "params": [
                 {"name": "el", "type": "HTMLElement", "desc": "Element 对象"}
             ],
-            "remark": "{'controls'|menu} 逻辑上分为外层元素、基本元素与内层元素，外层元素用于控制控件自身布局，基本元素是控件生成时捆绑的 Element 对象，而内层元素用于控制控件对象的子控件与文本布局，三者允许是同一个 Element 对象。"
+            "remark": "{'controls'|menu} 逻辑上分为外层元素、主元素与内层元素，外层元素用于控制控件自身布局，主元素是控件生成时捆绑的 Element 对象，而内层元素用于控制控件对象的子控件与文本布局，三者允许是同一个 Element 对象。"
         },
 
         {
@@ -1253,7 +1253,7 @@
             "params": [
                 {"name": "className", "type": "string", "desc": "扩展样式名，以+号开头表示添加扩展样式，以-号开头表示移除扩展样式"}
             ],
-            "remark": "扩展样式分别附加在类型样式与当前样式之后(参见 {'getType'|method:'control'} 与 {'getBaseClass'|method:'control'} 方法)，使用-号进行分隔。如果类型样式为 ec-control，当前样式为 demo，扩展样式 hover 后，控件基本元素将存在四个样式，分别为 ec-control、demo、ec-control-hover 与 demo-hover。"
+            "remark": "扩展样式分别附加在类型样式与当前样式之后(参见 {'getType'|method:'control'} 与 {'getPrimary'|method:'control'} 方法)，使用-号进行分隔。如果类型样式为 ec-control，当前样式为 demo，扩展样式 hover 后，控件主元素将存在四个样式，分别为 ec-control、demo、ec-control-hover 与 demo-hover。"
         },
 
         {
@@ -1314,6 +1314,7 @@
             "name": "disable",
             "type": "control",
             "desc": "控件获得失效状态。",
+            "return": {"type": "boolean", "desc": "控件失效状态是否变化"},
             "remark": "控件获得失效状态时，添加状态样式 -disabled(参见 alterClass 方法)。disable 方法导致控件失去激活、悬停、焦点状态，所有子控件的 {'isDisabled'|method:'control'} 方法返回 true，但不会设置子控件的失效状态样式。"
         },
 
@@ -1328,6 +1329,7 @@
             "name": "enable",
             "type": "control",
             "desc": "控件解除失效状态。",
+            "return": {"type": "boolean", "desc": "控件失效状态是否变化"},
             "remark": "控件解除失效状态时，移除状态样式 -disabled(参见 alterClass 方法)。enable 方法仅解除控件自身的失效状态，如果其父控件失效，{'isDisabled'|method:'control'} 方法返回 true。"
         },
 
@@ -1340,19 +1342,19 @@
         },
 
         {
-            "name": "getBase",
+            "name": "getMain",
             "type": "control",
-            "desc": "获取控件的基本元素。",
+            "desc": "获取控件的主元素。",
             "return": {"type": "HTMLElement", "desc": "Element 对象"},
-            "remark": "getBase 方法返回控件生成时定义的 Element 对象(参见 {'create'|method:'core'} 方法)。"
+            "remark": "getMain 方法返回控件生成时定义的 Element 对象(参见 {'create'|method:'core'} 方法)。"
         },
 
         {
-            "name": "getBaseClass",
+            "name": "getPrimary",
             "type": "control",
             "desc": "获取控件的基本样式。",
             "return": {"type": "string", "desc": "控件的基本样式"},
-            "remark": "getBaseClass 方法返回控件生成时指定的 base 参数(参见 {'create'|method:'core'} 方法)。基本样式与通过 {'getClass'|method:'control'} 方法返回的当前样式存在区别，在控件生成初期，当前样式等于基本样式，基本样式在初始化后无法改变，{'setClass'|method:'control'} 方法改变当前样式。"
+            "remark": "getPrimary 方法返回控件生成时指定的 primary 参数(参见 {'create'|method:'core'} 方法)。基本样式与通过 {'getClass'|method:'control'} 方法返回的当前样式存在区别，在控件生成初期，当前样式等于基本样式，基本样式在初始化后无法改变，{'setClass'|method:'control'} 方法改变当前样式。"
         },
 
         {
@@ -1384,7 +1386,14 @@
             "type": "control",
             "desc": "获取控件的当前样式。",
             "return": {"type": "string", "desc": "控件的当前样式"},
-            "remark": "getClass 方法返回控件当前使用的样式，扩展样式分别附加在类型样式与当前样式之后，从而实现控件的状态样式改变，详细的描述请参见 {'alterClass'|method:'control'} 方法。当前样式与 {'getBaseClass'|method:'control'} 方法返回的基本样式存在区别，在控件生成初期，当前样式等于基本样式，基本样式在初始化后无法改变，{'setClass'|method:'control'} 方法改变当前样式。"
+            "remark": "getClass 方法返回控件当前使用的样式，扩展样式分别附加在类型样式与当前样式之后，从而实现控件的状态样式改变，详细的描述请参见 {'alterClass'|method:'control'} 方法。当前样式与 {'getPrimary'|method:'control'} 方法返回的基本样式存在区别，在控件生成初期，当前样式等于基本样式，基本样式在初始化后无法改变，{'setClass'|method:'control'} 方法改变当前样式。"
+        },
+
+        {
+            "name": "getContent",
+            "type": "control",
+            "return": {"type": "string", "desc": "html 片断"},
+            "desc": "获取控件的内容。"
         },
 
         {
@@ -1439,7 +1448,7 @@
             "type": "control",
             "desc": "获取控件的内部唯一标识符。",
             "return": {"type": "string", "desc": "控件 ID"},
-            "remark": "getUID 方法返回的 ID 不是初始化参数中指定的 id，而是框架为每个控件生成的内部唯一标识符。"
+            "remark": "getUID 方法返回的 ID 不是初始化选项中指定的 id，而是框架为每个控件生成的内部唯一标识符。"
         },
 
         {
@@ -1480,6 +1489,13 @@
         },
 
         {
+            "name": "isActived",
+            "type": "control",
+            "desc": "判断控件是否处于激活状态。",
+            "return": {"type": "boolean", "desc": "控件是否处于激活状态"}
+        },
+
+        {
             "name": "isCapturable",
             "type": "control",
             "desc": "判断是否响应浏览器事件。",
@@ -1501,6 +1517,20 @@
             "desc": "判断是否允许获取焦点。",
             "return": {"type": "boolean", "desc": "控件是否允许获取焦点"},
             "remark": "控件不允许获得焦点时，被点击时不会改变当前处于焦点状态的控件，但此时控件拥有框架事件响应的最高优先级。"
+        },
+
+        {
+            "name": "isFocused",
+            "type": "control",
+            "desc": "判断控件是否处于焦点状态。",
+            "return": {"type": "boolean", "desc": "控件是否处于焦点状态"}
+        },
+
+        {
+            "name": "isHovered",
+            "type": "control",
+            "desc": "判断控件是否处于悬停状态。",
+            "return": {"type": "boolean", "desc": "控件是否处于悬停状态"}
         },
 
         {
@@ -1609,6 +1639,13 @@
         },
 
         {
+            "name": "render",
+            "type": "control",
+            "desc": "控件完全刷新。",
+            "remark": "对于存在数据源的控件，render 方法根据数据源重新填充控件内容，重新计算控件的大小进行完全的重绘，render 方法不会触发 {'onresize'|event:'control'} 事件。"
+        },
+
+        {
             "name": "repaint",
             "type": "control",
             "desc": "控件刷新。",
@@ -1652,13 +1689,23 @@
         },
 
         {
+            "name": "appendTo",
+            "type": "control",
+            "desc": "将控件添加到页面元素中。",
+            "params": [
+                {"name": "parentElement", "type": "HTMLElement", "desc": "父 Element 对象，忽略参数控件将移出 DOM 树"}
+            ],
+            "remark": "appendTo 方法设置父元素，并使用 {'findControl'|method:'core'} 查找父控件对象。如果父控件发生变化，原有的父控件若存在，将触发移除子控件事件({'onremove'|event:'control'})，并解除控件与原有父控件的关联，新的父控件若存在，将触发添加子控件事件({'onappend'|event:'control'})，如果此事件返回 false，添加失败，相当于忽略 parentElement 参数。"
+        },
+
+        {
             "name": "setParent",
             "type": "control",
             "desc": "设置当前控件的父控件。",
             "params": [
-                {"name": "parent", "type": "ecui.ui.Control|HTMLElement", "desc": "父控件对象/父 Element 对象，忽略参数将控件移出 DOM 树"}
+                {"name": "parent", "type": "ecui.ui.Control", "desc": "父控件对象，忽略参数控件将移出 DOM 树"}
             ],
-            "remark": "setParent 方法设置父控件，参数是父控件对象时，将当前控件挂接到父控件对象的内层元素下，如果参数是父 Element 对象，将当前控件挂接到这个 Element 对象上并使用 {'findControl'|method:'core'} 查找父控件对象。调用 setParent 方法设置父控件，如果在设置父控件之前已经存在父控件，会触发原父控件的 {'onremove'|event:'control'} 事件并解除控件与原父控件的关联，新的父控件如果存在，会触发父控件的 {'onappend'|event:'control'} 事件，如果事件返回 false，表示父控件不允许当前控件作为它的子控件，设置失败，相当于忽略 parent 参数。"
+            "remark": "setParent 方法设置父控件，将当前控件挂接到父控件对象的内层元素中。如果父控件发生变化，原有的父控件若存在，将触发移除子控件事件({'onremove'|event:'control'})，并解除控件与原有父控件的关联，新的父控件若存在，将触发添加子控件事件({'onappend'|event:'control'})，如果此事件返回 false，添加失败，相当于忽略 parent 参数。"
         },
 
         {
@@ -1688,6 +1735,137 @@
             "type": "control",
             "desc": "显示控件。",
             "remark": "如果控件处于隐藏状态，调用 show 方法会触发 {'onshow'|event:'control'} 事件，控件转为显示状态。如果控件已经处于显示状态，则不执行任何操作。"
+        }
+    ],
+
+    "input-control": [
+        {
+            "name": "$reset",
+            "type": "input-control",
+            "desc": "输入重置事件的默认处理。",
+            "params": [
+                {"name": "event", "type": "Event", "desc": "事件对象"}
+            ]
+        },
+
+        {
+            "name": "$submit",
+            "type": "input-control",
+            "desc": "输入提交事件的默认处理。",
+            "params": [
+                {"name": "event", "type": "Event", "desc": "事件对象"}
+            ]
+        },
+
+        {
+            "name": "disable",
+            "type": "input-control",
+            "desc": "控件获得失效状态。",
+            "return": {"type": "boolean", "desc": "控件失效状态是否变化"},
+            "remark": [
+                "控件获得失效状态时，添加状态样式 -disabled(参见 alterClass 方法)。disable 方法导致控件失去激活、悬停、焦点状态，所有子控件的 {'isDisabled'|method:'control'} 方法返回 true，但不会设置子控件的失效状态样式。",
+                "输入控件获得失效需要设置输入框不提交。"
+            ]
+        },
+
+        {
+            "name": "enable",
+            "type": "input-control",
+            "desc": "控件解除失效状态。",
+            "return": {"type": "boolean", "desc": "控件失效状态是否变化"},
+            "remark": [
+                "控件解除失效状态时，移除状态样式 -disabled(参见 alterClass 方法)。enable 方法仅解除控件自身的失效状态，如果其父控件失效，{'isDisabled'|method:'control'} 方法返回 true。",
+                "输入控件解除失效需要设置输入框可提交。"
+            ]
+        },
+
+        {
+            "name": "getInput",
+            "type": "input-control",
+            "desc": "获取控件的输入元素。",
+            "return": {"type": "HTMLElement", "desc": "InputElement 对象"}
+        },
+
+        {
+            "name": "getName",
+            "type": "input-control",
+            "desc": "获取控件的名称。",
+            "return": {"type": "string", "desc": "表单项名称"},
+            "remark": "输入控件可以在表单中被提交，getName 方法返回提交时用的表单项名称，表单项名称可以使用 {'setName'|method:'input-control'} 方法改变。"
+        },
+
+        {
+            "name": "getSelectionEnd",
+            "type": "input-control",
+            "desc": "获取当前选区的结束位置。",
+            "return": {"type": "number", "desc": "输入框当前选区的结束位置"}
+        },
+
+        {
+            "name": "getSelectionStart",
+            "type": "input-control",
+            "desc": "获取当前选区的起始位置。",
+            "return": {"type": "number", "desc": "输入框当前选区的起始位置，即输入框当前光标的位置"}
+        },
+
+        {
+            "name": "getValue",
+            "type": "input-control",
+            "desc": "获取控件的值。",
+            "return": {"type": "string", "desc": "控件的值"},
+            "remark": "getValue 方法返回提交时表单项的值，使用 {'setValue'|method:'input-control'} 方法设置。"
+        },
+
+        {
+            "name": "setCaret",
+            "type": "input-control",
+            "desc": "设置输入框光标的位置。",
+            "params": [
+                {"name": "pos", "type": "number", "desc": "位置索引"}
+            ]
+        },
+
+        {
+            "name": "setName",
+            "type": "input-control",
+            "desc": "设置控件的名称。",
+            "params": [
+                {"name": "name", "type": "string", "desc": "表单项名称"}
+            ],
+            "remark": "输入控件可以在表单中被提交，setName 方法设置提交时用的表单项名称，表单项名称可以使用 {'getName'|method:'input-control'} 方法获取。"
+        },
+
+        {
+            "name": "setValue",
+            "type": "input-control",
+            "desc": "设置控件的值。",
+            "params": [
+                {"name": "value", "type": "string", "desc": "控件的值"}
+            ],
+            "remark": "setValue 方法设置提交时表单项的值，使用 {'getValue'|method:'input-control'} 方法获取设置的值。"
+        }
+    ],
+
+    "button": [
+        {
+            "name": "$mouseout",
+            "type": "button",
+            "remark": "鼠标移出控件区域时，控件失去悬停状态，移除状态样式 -hover，如果控件处于激活状态，移除状态样式 -active，移除状态样式不失去激活状态。"
+        },
+
+        {
+            "name": "$mouseover",
+            "type": "button",
+            "remark": "鼠标移入控件区域时，控件获得悬停状态，添加状态样式 -hover，如果控件处于激活状态，添加状态样式 -active。"
+        },
+
+        {
+            "name": "setText",
+            "type": "button",
+            "desc": "设置控件的文字。",
+            "params": [
+                {"name": "text", "type": "string", "desc": "控件的文字"}
+            ]
         }
     ],
 
@@ -1983,7 +2161,7 @@
             "params": [
                 {"name": "item", "type": "string|HTMLElement|ecui.ui.Item", "desc": "控件的 html 内容/控件对应的 Element 对象/选项控件"},
                 {"name": "index", "type": "number", "desc": "子选项控件需要添加的位置序号"},
-                {"name": "params", "type": "Object", "desc": "子控件初始化参数"}
+                {"name": "options", "type": "Object", "desc": "子控件初始化选项"}
             ],
             "return": {"type": "ecui.ui.Item", "desc": "子选项控件"},
             "remark": "add 方法中如果位置序号不合法，子选项控件将添加在末尾的位置。"
@@ -1995,7 +2173,7 @@
             "desc": "向选项组最后添加子选项控件。",
             "params": [
                 {"name": "item", "type": "string|HTMLElement|ecui.ui.Item", "desc": "控件的 html 内容/控件对应的 Element 对象/选项控件"},
-                {"name": "params", "type": "Object", "desc": "子控件初始化参数"}
+                {"name": "options", "type": "Object", "desc": "子控件初始化选项"}
             ],
             "return": {"type": "ecui.ui.Item", "desc": "子选项控件"},
             "remark": "append 方法是 {'add'|method:'items'} 方法去掉第二个 index 参数的版本。<font color=\"red\">具体的参数请参见实现了接口的控件的说明。</font>"
@@ -2054,98 +2232,12 @@
         }
     ],
 
-    "edit": [
-        {
-            "name": "$reset",
-            "type": "edit",
-            "desc": "输入框控件重置的默认处理。",
-            "params": [
-                {"name": "event", "type": "Event", "desc": "事件对象"}
-            ]
-        },
-
-        {
-            "name": "$submit",
-            "type": "edit",
-            "desc": "输入框控件提交前的默认处理。",
-            "params": [
-                {"name": "event", "type": "Event", "desc": "事件对象"}
-            ]
-        },
-
-        {
-            "name": "getInput",
-            "type": "edit",
-            "desc": "获取控件外层的 InputElement 对象。",
-            "return": {"type": "HTMLElement", "desc": "InputElement 对象"}
-        },
-
-        {
-            "name": "getName",
-            "type": "edit",
-            "desc": "获取控件的表单项名称。",
-            "return": {"type": "string", "desc": "表单项名称"},
-            "remark": "输入控件可以在表单中被提交，getName 方法返回提交时用的表单项名称，表单项名称可以使用 {'setName'|method:'edit'} 方法改变。"
-        },
-
-        {
-            "name": "getValue",
-            "type": "edit",
-            "desc": "获取控件的值。",
-            "return": {"type": "string", "desc": "控件的值"},
-            "remark": "getValue 方法返回提交时用的表单项的值，使用 {'setValue'|method:'edit'} 方法设置。"
-        },
-
-        {
-            "name": "setCaret",
-            "type": "edit",
-            "desc": "设置输入框光标的位置。",
-            "params": [
-                {"name": "pos", "type": "number", "desc": "位置索引"}
-            ]
-        },
-
-        {
-            "name": "setName",
-            "type": "edit",
-            "desc": "设置控件的表单项名称。",
-            "params": [
-                {"name": "name", "type": "string", "desc": "表单项名称"}
-            ],
-            "remark": "输入控件可以在表单中被提交，setName 方法设置提交时用的表单项名称，表单项名称可以使用 {'getName'|method:'edit'} 方法获取。"
-        },
-
-        {
-            "name": "setValue",
-            "type": "edit",
-            "desc": "设置控件的值。",
-            "params": [
-                {"name": "value", "type": "string", "desc": "控件的值"}
-            ],
-            "remark": "setValue 方法设置提交时用的表单项的值，使用 {'getValue'|method:'edit'} 方法获取设置的值。"
-        }
-    ],
-
     "format-edit": [
         {
             "name": "$getInputText",
             "type": "format-edit",
             "desc": "获取当前输入的内容，如果是粘贴操作是一个长度超过1的字符串。",
             "return": {"type": "string", "desc": "当前输入的内容"}
-        },
-
-        {
-            "name": "getSelectionStart",
-            "type": "format-edit",
-            "desc": "获得当前选区的起始位置，即当前光标的位置。",
-            "return": {"type": "number", "desc": "输入框当前选区的起始位置，即输入框当前光标的位置"}
-        },
-
-        {
-            "name": "getSelectionEnd",
-            "type": "format-edit",
-            "desc": "获得当前选区的结束位置。",
-            "return": {"type": "number", "desc": "输入框当前选区的结束位置"}
         },
 
         {
@@ -2819,13 +2911,13 @@
             "type": "table",
             "desc": "新增一列。",
             "params": [
-                {"name": "params", "type": "列的初始化参数"},
+                {"name": "options", "type": "列的初始化选项"},
                 {"name": "index", "type": "number", "desc": "被添加的列的位置序号，如果不合法将添加在末尾"}
             ],
             "return": {"type": "ecui.ui.Table.Col", "desc": "列控件"},
             "remark": [
-                "params 参数对象支持的属性如下：",
-                "<table class=\"clsSTD\"><tr><td>width</td><td>number，列的宽度</td></tr><tr><td>base</td><td>string，列的基本样式</td></tr><tr><td>title</td><td>string，列的标题</td></tr></table>"
+                "options 对象支持的属性如下：",
+                "<table class=\"clsSTD\"><tr><td>width</td><td>number，列的宽度</td></tr><tr><td>primary</td><td>string，列的基本样式</td></tr><tr><td>title</td><td>string，列的标题</td></tr></table>"
             ]
         },
 

@@ -46,7 +46,7 @@ _oFormat    - 允许提交的格式正则表达式
 //{if $phase == "define"}//
     /**
      * 初始化格式化输入框控件。
-     * params 参数支持的属性如下：
+     * options 对象支持的属性如下：
      * symbol 是否进行全角转半角操作，默认为 true
      * trim 是否进行前后空格过滤，默认为 true (注：粘贴内容也会进行前后空格过滤)
      * charset 字符编码，允许 utf8 与 gbk，如果不设置表示基于字符验证长度
@@ -60,22 +60,22 @@ _oFormat    - 允许提交的格式正则表达式
      * @public
      *
      * @param {Element} el 关联的 Element 对象
-     * @param {Object} params 初始化参数
+     * @param {Object} options 初始化选项
      */
     //__gzip_original__UI_FORMAT_EDIT
     var UI_FORMAT_EDIT =
-        ui.FormatEdit = function (el, params) {
-            UI_EDIT.call(this, el, params);
+        ui.FormatEdit = function (el, options) {
+            UI_EDIT.call(this, el, options);
 
-            this._bSymbol = params.symbol !== false;
-            this._bTrim = params.trim !== false;
-            this._sCharset = params.charset;
-            this._oKeyMask = params.keyMask ? new REGEXP(params.keyMask, 'g') : null;
-            this._nMinLength = params.minLength;
-            this._nMaxLength = params.maxLength;
-            this._nMinValue = params.minValue;
-            this._nMaxValue = params.maxValue;
-            this._oFormat = params.format ? new REGEXP('^' + params.format + '$') : null;
+            this._bSymbol = options.symbol !== false;
+            this._bTrim = options.trim !== false;
+            this._sCharset = options.charset;
+            this._oKeyMask = options.keyMask ? new REGEXP(options.keyMask, 'g') : null;
+            this._nMinLength = options.minLength;
+            this._nMaxLength = options.maxLength;
+            this._nMinValue = options.minValue;
+            this._nMaxValue = options.maxValue;
+            this._oFormat = options.format ? new REGEXP('^' + options.format + '$') : null;
 
             this._aSegment = ['', '', ''];
         },

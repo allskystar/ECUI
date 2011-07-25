@@ -29,26 +29,26 @@ _bDefault  - 默认的选中状态
 //{if $phase == "define"}//
     /**
      * 初始化单选框控件。
-     * params 参数支持的属性如下：
+     * options 对象支持的属性如下：
      * checked 控件是否默认选中
      * name    控件所属组的名称
      * value   控件的值
      * @public
      *
      * @param {Element} el 关联的 Element 对象
-     * @param {Object} params 初始化参数
+     * @param {Object} options 初始化选项
      */
     //__gzip_original__UI_RADIO
     var UI_RADIO =
-        ui.Radio = function (el, params) {
-            params.hidden = true;
-            params.input = 'radio';
+        ui.Radio = function (el, options) {
+            options.hidden = true;
+            options.input = 'radio';
 
-            UI_EDIT.call(this, el, params);
+            UI_EDIT.call(this, el, options);
 
             el = this.getInput();
 
-            if (params.checked) {
+            if (options.checked) {
                 el.defaultChecked = el.checked = true;
             }
 

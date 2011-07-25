@@ -35,16 +35,16 @@ Combox - 定义可输入下拉框行为的基本操作。
 //{if $phase == "define"}//
     /**
      * 初始化可输入下拉框控件。
-     * params 参数支持的属性如下：
+     * options 对象支持的属性如下：
      * @public
      *
      * @param {Element} el 关联的 Element 对象
-     * @param {Object} params 初始化参数
+     * @param {Object} options 初始化选项
      */
     //__gzip_original__UI_COMBOX
     var UI_COMBOX =
-        ui.Combox = function (el, params) {
-            UI_SELECT.call(this, el, params);
+        ui.Combox = function (el, options) {
+            UI_SELECT.call(this, el, options);
             this.getInput().style.display = '';
             this.$getSection('Text').getOuter().style.display = 'none';
         },

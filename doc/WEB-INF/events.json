@@ -262,6 +262,34 @@
         }
     ],
 
+    "input-control": [
+        {
+            "name": "onchange",
+            "type": "input-control",
+            "desc": "内容改变事件。",
+            "remark": "输入框内容变化时触发事件。"
+        },
+
+        {
+            "name": "onreset",
+            "type": "input-control",
+            "desc": "输入重置事件。",
+            "params": [{"name": "event", "desc": "事件对象"}],
+            "remark": "表单重置时，表单下所有的输入控件触发事件。"
+        },
+
+        {
+            "name": "onsubmit",
+            "type": "input-control",
+            "desc": "输入提交事件。",
+            "params": [{"name": "event", "desc": "事件对象"}],
+            "remark": "表单提交前，表单下所有的输入控件触发事件。"
+        }
+    ],
+
+    "button": [
+    ],
+
     "scroll": [
         {
             "name": "onscroll",

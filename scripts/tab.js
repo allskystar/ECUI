@@ -62,29 +62,29 @@ _eContent        - 内容 DOM 元素
 //{if $phase == "define"}//
     /**
      * 初始化选项卡控件。
-     * params 参数支持的特定属性如下：
+     * options 对象支持的特定属性如下：
      * selected 选中的选项序号，默认为0
      * @protected
      *
      * @param {HTMLElement} el 关联的 Element 对象
-     * @param {Object} params 初始化参数
+     * @param {Object} options 初始化选项
      */
     //__gzip_original__UI_TAB
     //__gzip_original__UI_TAB_BUTTON
     //__gzip_original__UI_TAB_ITEM
     var UI_TAB =
-        ui.Tab = function (el, params) {
-            UI_CONTROL.call(this, el, params);
+        ui.Tab = function (el, options) {
+            UI_CONTROL.call(this, el, options);
 
             //__gzip_original__baseClass
             //__gzip_original__typeClass
             //__gzip_original__buttonParams
-            var typeClass = params.type,
-                baseClass = params.base,
+            var typeClass = options.type,
+                baseClass = options.base,
                 buttonParams = {select: false},
                 o = createDom(typeClass + '-title ' + baseClass + '-title', 'position:relative;overflow:hidden');
 
-            this._oSelected = params.selected || 0;
+            this._oSelected = options.selected || 0;
 
             // 生成选项卡头的的DOM结构
             o.innerHTML = '<div class="' + typeClass + '-title-prev ' + baseClass +
@@ -93,15 +93,15 @@ _eContent        - 内容 DOM 元素
                 '-title-next" style="position:absolute;display:none"></div><div class="' +
                 baseClass + '-title-main" style="position:absolute;white-space:nowrap"></div>';
 
-            moveElements(el, params = o.lastChild);
+            moveElements(el, options = o.lastChild);
             el.appendChild(o);
-            this.$setBody(params);
+            this.$setBody(options);
 
             this.$initItems();
 
             // 滚动按钮
-            this._uNext = $fastCreate(UI_TAB_BUTTON, params = params.previousSibling, this, buttonParams);
-            this._uPrev = $fastCreate(UI_TAB_BUTTON, params.previousSibling, this, buttonParams);
+            this._uNext = $fastCreate(UI_TAB_BUTTON, options = options.previousSibling, this, buttonParams);
+            this._uPrev = $fastCreate(UI_TAB_BUTTON, options.previousSibling, this, buttonParams);
         },
         UI_TAB_CLASS = inherits(UI_TAB, UI_CONTROL),
 
@@ -110,40 +110,40 @@ _eContent        - 内容 DOM 元素
          * @protected
          *
          * @param {HTMLElement} el 关联的 Element 对象
-         * @param {Object} params 初始化参数
+         * @param {Object} options 初始化选项
          */
-        UI_TAB_BUTTON = UI_TAB.Button = function (el, params) {
-            UI_CONTROL.call(this, el, params);
+        UI_TAB_BUTTON = UI_TAB.Button = function (el, options) {
+            UI_CONTROL.call(this, el, options);
         },
         UI_TAB_BUTTON_CLASS = inherits(UI_TAB_BUTTON, UI_CONTROL),
 
         /**
          * 初始化选项卡控件的选项部件。
-         * params 参数支持的特定属性如下：
+         * options 对象支持的特定属性如下：
          * selected 当前项是否被选中
          * @protected
          *
          * @param {HTMLElement} el 关联的 Element 对象
-         * @param {Object} params 初始化参数
+         * @param {Object} options 初始化选项
          */
-        UI_TAB_ITEM = UI_TAB.Item = function (el, params) {
-            UI_ITEM.call(this, el, params);
+        UI_TAB_ITEM = UI_TAB.Item = function (el, options) {
+            UI_ITEM.call(this, el, options);
 
             //__gzip_original__parent
-            var parent = params.parent;
+            var parent = options.parent;
 
             if (el.tagName != 'LABEL') {
                 var o = first(el),
                     tmpEl;
 
-                moveElements(el, tmpEl = createDom(params.base + '-content'), true);
+                moveElements(el, tmpEl = createDom(options.base + '-content'), true);
                 el.appendChild(o);
                 this.setContent(tmpEl);
             }
 
             setStyle(el, 'display', 'inline-block');
 
-            if (parent && params.selected) {
+            if (parent && options.selected) {
                 parent._oSelected = this;
             }
         },

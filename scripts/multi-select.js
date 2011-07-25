@@ -51,18 +51,18 @@ _eInput - 多选项的INPUT对象
 //{if $phase == "define"}//
     /**
      * 初始化多选下拉框控件。
-     * params 参数支持的属性如下：
+     * options 对象支持的属性如下：
      * optionSize 下拉框最大允许显示的选项数量，默认为5
      * @public
      *
      * @param {Element} el 关联的 Element 对象
-     * @param {Object} params 初始化参数
+     * @param {Object} options 初始化选项
      */
     //__gzip_original__UI_MULTI_SELECT
     //__gzip_original__UI_MULTI_SELECT_ITEM
     var UI_MULTI_SELECT =
-        ui.MultiSelect = function (el, params) {
-            UI_SELECT.call(this, el, params);
+        ui.MultiSelect = function (el, options) {
+            UI_SELECT.call(this, el, options);
             removeDom(this.getInput());
         },
         UI_MULTI_SELECT_CLASS = inherits(UI_MULTI_SELECT, UI_EDIT),
@@ -72,15 +72,15 @@ _eInput - 多选项的INPUT对象
          * @public
          *
          * @param {Element} el 关联的 Element 对象
-         * @param {Object} params 初始化参数
+         * @param {Object} options 初始化选项
          */
-        UI_MULTI_SELECT_ITEM = UI_MULTI_SELECT.Item = function (el, params) {
-            UI_SELECT_ITEM.call(this, el, params);
+        UI_MULTI_SELECT_ITEM = UI_MULTI_SELECT.Item = function (el, options) {
+            UI_SELECT_ITEM.call(this, el, options);
 
             el = this._eInput =
-                params.parent.getBase().appendChild(setInput(null, params.parent.getName(), 'checkbox'));
+                options.parent.getBase().appendChild(setInput(null, options.parent.getName(), 'checkbox'));
 
-            el.value = params.value || '';
+            el.value = options.value || '';
             el.style.display = 'none';
         },
         UI_MULTI_SELECT_ITEM_CLASS = inherits(UI_MULTI_SELECT_ITEM, UI_SELECT_ITEM);

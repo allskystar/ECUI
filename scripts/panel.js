@@ -67,11 +67,11 @@ $cache$mainHeight         - layout区域的实际高度
      * @protected
      *
      * @param {Element} el 关联的 Element 对象
-     * @param {Object} params 初始化参数
+     * @param {Object} options 初始化选项
      */
     var UI_BROWSER_SCROLL =
-        function (el, params) {
-            UI_CONTROL.call(this, el, params);
+        function (el, options) {
+            UI_CONTROL.call(this, el, options);
             detachEvent(el, 'scroll', this.scroll);
             attachEvent(el, 'scroll', this.scroll);
         },
@@ -191,11 +191,11 @@ $cache$mainHeight         - layout区域的实际高度
      * @public
      *
      * @param {Element} el 关联的 Element 对象
-     * @param {Object} params 初始化参数
+     * @param {Object} options 初始化选项
      */
     var UI_BROWSER_VSCROLL =
-        function (el, params) {
-            UI_BROWSER_SCROLL.call(this, el, params);
+        function (el, options) {
+            UI_BROWSER_SCROLL.call(this, el, options);
             this._aProperty = ['overflowY', 'scrollTop', 'height', null, 'offsetHeight'];
         };
 //{else}//
@@ -207,11 +207,11 @@ $cache$mainHeight         - layout区域的实际高度
      * @public
      *
      * @param {Element} el 关联的 Element 对象
-     * @param {Object} params 初始化参数
+     * @param {Object} options 初始化选项
      */
     var UI_BROWSER_HSCROLL =
-        function (el, params) {
-            UI_BROWSER_SCROLL.call(this, el, params);
+        function (el, options) {
+            UI_BROWSER_SCROLL.call(this, el, options);
             this._aProperty = ['overflowX', 'scrollLeft', 'width', 'offsetWidth', null];
         };
 //{else}//
@@ -223,7 +223,7 @@ $cache$mainHeight         - layout区域的实际高度
      * @public
      *
      * @param {Element} el 关联的 Element 对象
-     * @param {Object} params 初始化参数
+     * @param {Object} options 初始化选项
      */
     var UI_BROWSER_CORNER = blank,
         UI_BROWSER_CORNER_CLASS = inherits(UI_BROWSER_CORNER, UI_CONTROL);
@@ -237,7 +237,7 @@ $cache$mainHeight         - layout区域的实际高度
 //{if $phase == "define"}//
     /**
      * 初始化层控件，层控件支持自动展现滚动条控件，允许指定需要自动展现的垂直或水平滚动条。
-     * params 参数支持的属性如下：
+     * options 对象支持的属性如下：
      * vScroll    是否自动展现垂直滚动条，默认展现
      * hScroll    是否自动展现水平滚动条，默认展现
      * browser    是否使用浏览器原生的滚动条，默认使用模拟的滚动条
@@ -246,19 +246,19 @@ $cache$mainHeight         - layout区域的实际高度
      * @public
      *
      * @param {Element} el 关联的 Element 对象
-     * @param {Object} params 初始化参数
+     * @param {Object} options 初始化选项
      */
     //__gzip_original__UI_PANEL
     var UI_PANEL =
-        ui.Panel = function (el, params) {
-            UI_CONTROL.call(this, el, params);
+        ui.Panel = function (el, options) {
+            UI_CONTROL.call(this, el, options);
 
             //__gzip_original__baseClass
             var i = 0,
-                baseClass = params.base,
-                browser = params.browser,
-                vscroll = params.vScroll !== false,
-                hscroll = params.hScroll !== false,
+                baseClass = options.base,
+                browser = options.browser,
+                vscroll = options.vScroll !== false,
+                hscroll = options.hScroll !== false,
                 list = [
                     [vscroll, '_uVScroll', browser ? UI_BROWSER_VSCROLL : UI_VSCROLL],
                     [hscroll, '_uHScroll', browser ? UI_BROWSER_HSCROLL : UI_HSCROLL],
@@ -282,15 +282,15 @@ $cache$mainHeight         - layout区域的实际高度
                             '<div class="ec-hscroll ' + baseClass + '-hscroll" style="position:absolute"></div>'
                             : '') +
                         (vscroll && hscroll ?
-                            '<div class="' + params.type + '-corner ' + baseClass +
+                            '<div class="' + options.type + '-corner ' + baseClass +
                                 '-corner" style="position:absolute"></div>'
                             : '')
                 ) + '<div class="' + baseClass + '-layout" style="position:relative;overflow:hidden"></div>';
 
             this.$setBody(el.lastChild.appendChild(o));
 
-            this._bAbsolute = params.absolute;
-            this._nWheelDelta = params.wheelDelta;
+            this._bAbsolute = options.absolute;
+            this._nWheelDelta = options.wheelDelta;
 
             el = el.firstChild;
             if (browser) {

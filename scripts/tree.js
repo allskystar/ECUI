@@ -50,20 +50,20 @@ _aTree         - 子控件集合
 //{if $phase == "define"}//
     /**
      * 初始化树控件。
-     * params 参数支持的属性如下：
+     * options 对象支持的属性如下：
      * fold 子树是否收缩，默认为展开
      * @public
      *
      * @param {Element} el 关联的 Element 对象
-     * @param {Object} params 初始化参数
+     * @param {Object} options 初始化选项
      */
     //__gzip_original__UI_TREE
     var UI_TREE =
-        ui.Tree = function (el, params) {
+        ui.Tree = function (el, options) {
             var o = first(el),
                 childTrees = this._aTree = [];
 
-            UI_CONTROL.call(this, el, params);
+            UI_CONTROL.call(this, el, options);
             this._bFold = false;
 
             // 检查是否存在label标签，如果是需要自动初始化树的子结点
@@ -76,12 +76,12 @@ _aTree         - 子控件集合
                     o = list[i];
                 ) {
                     el.appendChild(o);
-                    (childTrees[i++] = UI_TREE_CREATE_CHILD(o, this, params)).$setParent(this);
+                    (childTrees[i++] = UI_TREE_CREATE_CHILD(o, this, options)).$setParent(this);
                 }
             }
 
             // 改变默认的展开状态
-            if (params.fold) {
+            if (options.fold) {
                 this.setFold();
             }
             else {
@@ -123,12 +123,12 @@ _aTree         - 子控件集合
      *
      * @param {HTMLElement} el 子树的 Element 对象
      * @param {ecui.ui.Tree} parent 父树控件
-     * @param {Object} params 初始化参数，参见 create 方法
+     * @param {Object} options 初始化选项，参见 create 方法
      * @return {ecui.ui.Tree} 子树控件
      */
-    function UI_TREE_CREATE_CHILD(el, parent, params) {
+    function UI_TREE_CREATE_CHILD(el, parent, options) {
         el.className = parent.getType() + ' ' + (trim(el.className) || parent.getBaseClass());
-        return $fastCreate(parent.constructor, el, null, extend(extend({}, params), getParameters(el)));
+        return $fastCreate(parent.constructor, el, null, extend(extend({}, options), getParameters(el)));
     }
 
     /**
@@ -241,17 +241,17 @@ _aTree         - 子控件集合
      *
      * @param {string|ecui.ui.Tree} item 子树控件的 html 内容/树控件
      * @param {number} index 子树控件需要添加的位置序号，不指定将添加在最后
-     * @param {Object} params 子树控件初始化参数
+     * @param {Object} options 子树控件初始化选项
      * @return {ecui.ui.Tree} 树控件
      */
-    UI_TREE_CLASS.add = function (item, index, params) {
+    UI_TREE_CLASS.add = function (item, index, options) {
         var list = this._aTree,
             o;
 
         if ('string' == typeof item) {
             o = createDom();
             o.innerHTML = item;
-            item = UI_TREE_CREATE_CHILD(o, this, params);
+            item = UI_TREE_CREATE_CHILD(o, this, options);
         }
 
         if (o = list[index]) {

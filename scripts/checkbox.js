@@ -41,25 +41,25 @@ _aInferior - 所有的下级复选框
 //{if $phase == "define"}//
     /**
      * 初始化复选框控件。
-     * params 参数支持的属性如下：
+     * options 对象支持的属性如下：
      * checked  控件是否默认选中
      * superior 管理复选框的 id
      * @public
      *
      * @param {Element} el 关联的 Element 对象
-     * @param {Object} params 初始化参数
+     * @param {Object} options 初始化选项
      */
     //__gzip_original__UI_CHECKBOX
     var UI_CHECKBOX =
-        ui.Checkbox = function (el, params) {
-            params.hidden = true;
-            params.input = 'checkbox';
+        ui.Checkbox = function (el, options) {
+            options.hidden = true;
+            options.input = 'checkbox';
 
-            UI_EDIT.call(this, el, params);
+            UI_EDIT.call(this, el, options);
 
             el = this.getInput();
 
-            if (params.checked) {
+            if (options.checked) {
                 el.defaultChecked = el.checked = true;
             }
 
@@ -67,7 +67,7 @@ _aInferior - 所有的下级复选框
             this._bDefault = el.defaultChecked;
             this._aInferior = [];
 
-            $connect(this, this.setSuperior, params.superior);
+            $connect(this, this.setSuperior, options.superior);
         },
         UI_CHECKBOX_CLASS = inherits(UI_CHECKBOX, UI_EDIT);
 //{else}//

@@ -803,11 +803,16 @@ function formatHTML(html) {
         }
 
         if ($2 != '!--') {
-            if (!$1) {
-                tagNames.push($2);
-                textNode = true;
+            if ($2.toUpperCase() == 'INPUT') {
+                textNode = false;
             }
-    		return indent + $0;
+            else {
+                if (!$1) {
+                    tagNames.push($2);
+                    textNode = true;
+                }
+            }
+            return indent + $0;
         }
         else {
             textNode = false;

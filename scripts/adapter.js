@@ -492,21 +492,31 @@
          */
         setInput = dom.setInput = function (el, name, type) {
             if (!el) {
-                if (ieVersion < 9) {
-                    return createDom('', '', '<input type="' + (type || '') + '" name="' + (name || '') + '">');
+                if (type == 'textarea') {
+                    el = createDom('', '', 'textarea');
                 }
-
-                el = createDom('', '', 'input');
+                else {
+                    if (ieVersion < 9) {
+                        return createDom('', '', '<input type="' + (type || '') + '" name="' + (name || '') + '">');
+                    }
+                    el = createDom('', '', 'input');
+                    el.type = type;
+                }
+                el.name = name;
+                return el;
             }
 
             name = name === undefined ? el.name : name;
             type = type === undefined ? el.type : type;
+
             if (el.name != name || el.type != type) {
-                if (ieVersion) {
+                if ((ieVersion && type != 'textarea') ||
+                        el.type != type && (el.type == 'textarea' || type == 'textarea')) {
                     insertHTML(
                         el,
                         'AFTEREND',
-                        '<input type="' + type + '" name="' + name + '" class="' + el.className +
+                        '<' + (type == 'textarea' ? 'textarea' : 'input type="' + type + '"') +
+                            ' name="' + name + '" class="' + el.className +
                             '" style="' + el.style.cssText + '" ' + (el.disabled ? 'disabled' : '') +
                             (el.readOnly ? ' readOnly' : '') + '>'
                     );

@@ -25,19 +25,19 @@ _cFor - 被转发的控件对象
 //{if $phase == "define"}//
     /**
      * 初始化标签控件。
-     * params 参数支持的属性如下：
+     * options 对象支持的属性如下：
      * for 被转发的控件 id
      * @public
      *
      * @param {Element} el 关联的 Element 对象
-     * @param {Object} params 初始化参数
+     * @param {Object} options 初始化选项
      */
     //__gzip_original__UI_LABEL
     var UI_LABEL =
-        ui.Label = function (el, params) {
-            UI_CONTROL.call(this, el, params);
+        ui.Label = function (el, options) {
+            UI_CONTROL.call(this, el, options);
 
-            $connect(this, this.setFor, params['for']);
+            $connect(this, this.setFor, options['for']);
         },
         UI_LABEL_CLASS = inherits(UI_LABEL, UI_CONTROL);
 //{else}//

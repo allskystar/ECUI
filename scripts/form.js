@@ -55,25 +55,25 @@ _uClose     - 关闭按钮
 //{if $phase == "define"}//
     /**
      * 初始化窗体控件。
-     * params 参数支持的属性如下：
+     * options 对象支持的属性如下：
      * hide 初始是否自动隐藏
      * titleAuto title 是否自适应宽度，默认自适应宽度
      * @public
      *
      * @param {Element} el 关联的 Element 对象
-     * @param {Object} params 初始化参数
+     * @param {Object} options 初始化选项
      */
     //__gzip_original__UI_FORM
     //__gzip_original__UI_FORM_TITLE
     //__gzip_original__UI_FORM_CLOSE
     var UI_FORM =
-        ui.Form = function (el, params) {
-            UI_CONTROL.call(this, el, params);
+        ui.Form = function (el, options) {
+            UI_CONTROL.call(this, el, options);
 
             // 生成标题控件与内容区域控件对应的Element对象
             //__gzip_original__baseClass
             //__gzip_original__partParams
-            var baseClass = params.base,
+            var baseClass = options.base,
                 partParams = {select: false},
                 o = createDom(baseClass + '-main', 'position:relative;overflow:auto'),
                 titleEl = first(el);
@@ -97,8 +97,8 @@ _uClose     - 关闭按钮
             el.appendChild(o);
             this.$setBody(o);
 
-            this._bFlag = params.hide;
-            this._bAuto = params.titleAuto !== false;
+            this._bFlag = options.hide;
+            this._bAuto = options.titleAuto !== false;
 
             // 初始化标题区域
             this._uTitle = $fastCreate(UI_FORM_TITLE, titleEl, this, partParams);
@@ -113,10 +113,10 @@ _uClose     - 关闭按钮
          * @public
          *
          * @param {Element} el 关联的 Element 对象
-         * @param {Object} params 初始化参数
+         * @param {Object} options 初始化选项
          */
-        UI_FORM_TITLE = UI_FORM.Title = function (el, params) {
-            UI_CONTROL.call(this, el, params);
+        UI_FORM_TITLE = UI_FORM.Title = function (el, options) {
+            UI_CONTROL.call(this, el, options);
         },
         UI_FORM_TITLE_CLASS = inherits(UI_FORM_TITLE, UI_CONTROL),
 
@@ -125,10 +125,10 @@ _uClose     - 关闭按钮
          * @public
          *
          * @param {Element} el 关联的 Element 对象
-         * @param {Object} params 初始化参数
+         * @param {Object} options 初始化选项
          */
-        UI_FORM_CLOSE = UI_FORM.Close = function (el, params) {
-            UI_CONTROL.call(this, el, params);
+        UI_FORM_CLOSE = UI_FORM.Close = function (el, options) {
+            UI_CONTROL.call(this, el, options);
         },
         UI_FORM_CLOSE_CLASS = inherits(UI_FORM_CLOSE, UI_CONTROL),
 
