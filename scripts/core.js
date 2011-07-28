@@ -115,6 +115,7 @@
             inherits(agent, superClass);
 
             agent.types = (superClass.types || []).concat([type]);
+            agent.TYPES = agent.types.join(' ');
 
             inherits(agent.client = constructor, agent);
             constructor.agent = agent;
@@ -595,8 +596,7 @@
             }
 
             options.uid = 'ec-' + (++uniqueIndex);
-            options.types = type.agent.types;
-            el.className += ' ' + options.types.join(' ') + ' ' + o;
+            el.className += ' ' + type.agent.TYPES + ' ' + o;
 
             // 如果没有指定基本样式，使用控件的样式作为基本样式
             if (!o) {
@@ -669,7 +669,6 @@
 
             options.uid = 'ec-' + (++uniqueIndex);
             options.primary = o[0];
-            options.types = type.agent.types;
 
             type = new type(el, options);
             type.$setParent(parent);

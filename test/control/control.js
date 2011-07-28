@@ -1662,6 +1662,18 @@ test('getClass/getPrimary/getTypes/setClass', {
     }
 });
 
+test('getContent/setContent', {
+    '检测函数是否存在': function () {
+        var el = document.createElement('div');
+        el.style.cssText = 'border:1px solid;padding:2px;height:100px;display:block';
+        el.innerHTML = '<font>Test</font>';
+        var control = ecui.create(ecui.ui.Control, {parent: baidu.dom.g('inner'), main: el});
+        value_of(el.getControl().getContent()).should_be('<font>Test</font>');
+        el.getControl().setContent('Test');
+        value_of(el.getControl().getContent()).should_be('Test');
+    }
+});
+
 test('getX/getY/setPosition', {
     '设置控件的位置': function () {
         var el = document.createElement('div');

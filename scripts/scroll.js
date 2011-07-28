@@ -12,7 +12,7 @@ _oStop          - 定时器的句柄，用于连续滚动处理
 _cButton        - 当前正在执行动作的按钮，用于连续滚动的控制
 _uPrev          - 向前滚动按钮
 _uNext          - 向后滚动按钮
-_uBlock         - 滑动块
+_uThumb         - 滑动块
 
 滑动块属性
 _oRange         - 滑动块的合法滑动区间
@@ -42,7 +42,9 @@ _oRange         - 滑动块的合法滑动区间
         inheritsControl = core.inherits,
 
         UI_CONTROL = ui.Control,
-        UI_CONTROL_CLASS = UI_CONTROL.prototype;
+        UI_CONTROL_CLASS = UI_CONTROL.prototype,
+        UI_BUTTON = ui.Button,
+        UI_BUTTON_CLASS = UI_BUTTON.prototype;
 //{/if}//
 //{if $phase == "define"}//
     /**
@@ -53,8 +55,8 @@ _oRange         - 滑动块的合法滑动区间
      */
     ///__gzip_original__UI_SCROLL
     ///__gzip_original__UI_SCROLLBAR_CLASS
-    ///__gzip_original__UI_SCROLLBAR_BLOCK
-    ///__gzip_original__UI_SCROLLBAR_BLOCK_CLASS
+    ///__gzip_original__UI_SCROLLBAR_THUMB
+    ///__gzip_original__UI_SCROLLBAR_THUMB_CLASS
     ///__gzip_original__UI_SCROLLBAR_BUTTON
     ///__gzip_original__UI_SCROLLBAR_BUTTON_CLASS
     ///__gzip_original__UI_VSCROLL
@@ -76,12 +78,13 @@ _oRange         - 滑动块的合法滑动区间
                 UI_CONTROL.client.call(this, el, extend(options, unitOptions));
 
                 el.innerHTML =
-                    '<div class="' + type + '-prev ' +
-                        primary + '-prev" style="position:absolute;top:0px;left:0px"></div><div class="' +
-                        type + '-next ' +
-                        primary + '-next" style="position:absolute;top:0px;left:0px"></div><div class="' +
-                        type + '-block ' +
-                        primary + '-block" style="position:absolute"></div>';
+                    '<div class="' +
+                        primary + '-prev ' + UI_SCROLLBAR_BUTTON.TYPES +
+                        '" style="position:absolute;top:0px;left:0px"></div><div class="' +
+                        primary + '-next ' + UI_SCROLLBAR_BUTTON.TYPES +
+                        '" style="position:absolute;top:0px;left:0px"></div><div class="' +
+                        primary + '-thumb ' + UI_SCROLLBAR_THUMB.TYPES +
+                        '" style="position:absolute"></div>';
 
                 // 使用 el 代替 children
                 el = children(el);
@@ -93,7 +96,7 @@ _oRange         - 滑动块的合法滑动区间
                 // 创建向前/向后滚动按钮与滑动块
                 this._uPrev = $fastCreate(UI_SCROLLBAR_BUTTON, el[0], this, unitOptions);
                 this._uNext = $fastCreate(UI_SCROLLBAR_BUTTON, el[1], this, unitOptions);
-                this._uBlock = $fastCreate(UI_SCROLLBAR_BLOCK, el[2], this, unitOptions);
+                this._uThumb = $fastCreate(UI_SCROLLBAR_THUMB, el[2], this, unitOptions);
             }
         ),
         UI_SCROLLBAR_CLASS = UI_SCROLLBAR.prototype,
@@ -104,8 +107,8 @@ _oRange         - 滑动块的合法滑动区间
          *
          * @param {Object} options 初始化选项
          */
-        UI_SCROLLBAR_BLOCK = UI_SCROLLBAR.Block = inheritsControl(UI_CONTROL, 'ui-scrollbar-thumb'),
-        UI_SCROLLBAR_BLOCK_CLASS = UI_SCROLLBAR_BLOCK.prototype,
+        UI_SCROLLBAR_THUMB = UI_SCROLLBAR.Thumb = inheritsControl(UI_BUTTON, 'ui-scrollbar-thumb'),
+        UI_SCROLLBAR_THUMB_CLASS = UI_SCROLLBAR_THUMB.prototype,
 
         /**
          * 初始化滚动条控件的按钮部件。
@@ -113,7 +116,7 @@ _oRange         - 滑动块的合法滑动区间
          *
          * @param {Object} options 初始化选项
          */
-        UI_SCROLLBAR_BUTTON = UI_SCROLLBAR.Button = inheritsControl(UI_CONTROL, 'ui-scrollbar-button'),
+        UI_SCROLLBAR_BUTTON = UI_SCROLLBAR.Button = inheritsControl(UI_BUTTON, 'ui-scrollbar-button'),
         UI_SCROLLBAR_BUTTON_CLASS = UI_SCROLLBAR_BUTTON.prototype;
 //{else}//
     /**
@@ -157,7 +160,7 @@ _oRange         - 滑动块的合法滑动区间
      * @param {number} x 滑动块实际到达的X轴坐标
      * @param {number} y 滑动块实际到达的Y轴坐标
      */
-    UI_SCROLLBAR_BLOCK_CLASS.$dragmove = function (event, x, y) {
+    UI_SCROLLBAR_THUMB_CLASS.$dragmove = function (event, x, y) {
         UI_CONTROL_CLASS.$dragmove.call(this, event, x, y);
 
         var parent = this.getParent(),
@@ -174,7 +177,7 @@ _oRange         - 滑动块的合法滑动区间
      *
      * @param {Event} event 事件对象
      */
-    UI_SCROLLBAR_BLOCK_CLASS.$activate = function (event) {
+    UI_SCROLLBAR_THUMB_CLASS.$activate = function (event) {
         UI_CONTROL_CLASS.$activate.call(this, event);
 
         drag(this, event, this._oRange);
@@ -189,7 +192,7 @@ _oRange         - 滑动块的合法滑动区间
      * @param {number} bottom 允许拖拽的最下部区域
      * @param {number} left 允许拖拽的最左部区域
      */
-    UI_SCROLLBAR_BLOCK_CLASS.setRange = function (top, right, bottom, left) {
+    UI_SCROLLBAR_THUMB_CLASS.setRange = function (top, right, bottom, left) {
         this._oRange = {
             top: top,
             right: right,
@@ -247,7 +250,7 @@ _oRange         - 滑动块的合法滑动区间
 
         this._uPrev.cache(true, true);
         this._uNext.cache(true, true);
-        this._uBlock.cache(true, true);
+        this._uThumb.cache(true, true);
     };
 
     /**
@@ -269,7 +272,7 @@ _oRange         - 滑动块的合法滑动区间
         UI_CONTROL_CLASS.$init.call(this);
         this._uPrev.$init();
         this._uNext.$init();
-        this._uBlock.$init();
+        this._uThumb.$init();
     };
 
     /**
@@ -470,7 +473,7 @@ _oRange         - 滑动块的合法滑动区间
      * @return {boolean} 是否允许向最大值方向移动
      */
     UI_VSCROLL_CLASS.$allowNext = function () {
-        return getMouseY(this) > this._uBlock.getY() + this._uBlock.getHeight();
+        return getMouseY(this) > this._uThumb.getY() + this._uThumb.getHeight();
     };
 
     /**
@@ -481,7 +484,7 @@ _oRange         - 滑动块的合法滑动区间
      * @return {boolean} 是否允许向0方向移动
      */
     UI_VSCROLL_CLASS.$allowPrev = function () {
-        return getMouseY(this) < this._uBlock.getY();
+        return getMouseY(this) < this._uThumb.getY();
     };
 
     /**
@@ -494,7 +497,7 @@ _oRange         - 滑动块的合法滑动区间
      */
     UI_VSCROLL_CLASS.$calcDragValue = function (x, y) {
         //__gzip_original__range
-        var block = this._uBlock,
+        var block = this._uThumb,
             range = block._oRange;
         return (y - range.top) / (range.bottom - this._uPrev.getHeight() - block.getHeight()) * this._nTotal;
     };
@@ -506,7 +509,7 @@ _oRange         - 滑动块的合法滑动区间
      */
     UI_VSCROLL_CLASS.$flush = function () {
         // 计算滑动块高度与位置
-        var block = this._uBlock,
+        var block = this._uThumb,
             total = this._nTotal,
             height = this.getHeight(),
             prevHeight = this._uPrev.getHeight(),
@@ -550,7 +553,7 @@ _oRange         - 滑动块的合法滑动区间
         // 设置滚动按钮与滑动块的信息
         this._uPrev.$setSize(bodyWidth, prevHeight);
         next.$setSize(bodyWidth, this.$cache$paddingBottom);
-        this._uBlock.$setSize(bodyWidth);
+        this._uThumb.$setSize(bodyWidth);
         next.setPosition(0, this.getBodyHeight() + prevHeight);
 
         this.$flush();
@@ -574,7 +577,7 @@ _oRange         - 滑动块的合法滑动区间
      * @return {boolean} 是否允许向最大值方向移动
      */
     UI_HSCROLL_CLASS.$allowNext = function () {
-        return getMouseX(this) > this._uBlock.getX() + this._uBlock.getWidth();
+        return getMouseX(this) > this._uThumb.getX() + this._uThumb.getWidth();
     };
 
     /**
@@ -585,7 +588,7 @@ _oRange         - 滑动块的合法滑动区间
      * @return {boolean} 是否允许向0方向移动
      */
     UI_HSCROLL_CLASS.$allowPrev = function () {
-        return getMouseX(this) < this._uBlock.getX();
+        return getMouseX(this) < this._uThumb.getX();
     };
 
     /**
@@ -598,7 +601,7 @@ _oRange         - 滑动块的合法滑动区间
      */
     UI_HSCROLL_CLASS.$calcDragValue = function (x, y) {
         //__gzip_original__range
-        var block = this._uBlock,
+        var block = this._uThumb,
             range = block._oRange;
         return (x - range.left) / (range.right - this._uPrev.getWidth() - block.getWidth()) * this._nTotal;
     };
@@ -610,7 +613,7 @@ _oRange         - 滑动块的合法滑动区间
      */
     UI_HSCROLL_CLASS.$flush = function () {
         // 计算滑动块高度与位置
-        var block = this._uBlock,
+        var block = this._uThumb,
             total = this._nTotal,
             width = this.getWidth(),
             prevWidth = this._uPrev.getWidth(),
@@ -654,7 +657,7 @@ _oRange         - 滑动块的合法滑动区间
         // 设置滚动按钮与滑动块的信息
         this._uPrev.$setSize(prevWidth, bodyHeight);
         next.$setSize(this.$cache$paddingRight, bodyHeight);
-        this._uBlock.$setSize(0, bodyHeight);
+        this._uThumb.$setSize(0, bodyHeight);
         next.setPosition(this.getBodyWidth() + prevWidth, 0);
 
         this.$flush();

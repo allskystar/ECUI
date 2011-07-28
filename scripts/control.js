@@ -17,13 +17,13 @@ _bCached                 - 控件是否已经读入缓存
 _bInit                   - 控件是否已经完成初始化
 _sUID                    - 控件的内部ID
 _sPrimary                - 控件定义时的基本样式
+_sClass                  - 控件的当前样式
 _sWidth                  - 控件的基本宽度值，可能是百分比或者空字符串
 _sHeight                 - 控件的基本高度值，可能是百分比或者空字符串
 _sDisplay                - 控件的布局方式，在hide时保存，在show时恢复
 _eMain                   - 控件的基本标签对象
 _eBody                   - 控件用于承载子控件的载体标签，通过$setBody函数设置这个值，绑定当前控件
 _cParent                 - 父控件对象
-_aClasses                - 控件当前使用的全部样式，其中第一项是当前样式
 _aStatus                 - 控件当前的状态集合
 $cache$width             - 控件的宽度缓存
 $cache$height            - 控件的高度缓存
@@ -110,7 +110,7 @@ $cache$position          - 控件布局方式缓存
                 this._bFocusable = options.focusable !== false;
                 this._bDisabled = !!options.disabled;
                 this._sUID = options.uid;
-                this._aClasses = [this._sPrimary = options.primary].concat(options.types);
+                this._sPrimary = this._sClass = options.primary;
                 this._eMain = this._eBody = el;
                 this._cParent = null;
 
@@ -435,6 +435,7 @@ $cache$position          - 控件布局方式缓存
      */
     UI_CONTROL_CLASS.alterClass = function (className) {
         var flag = className.charAt(0) == '+';
+
         if (flag) {
             className = '-' + className.slice(1) + ' ';
         }
@@ -442,7 +443,7 @@ $cache$position          - 控件布局方式缓存
             className += ' ';
         }
 
-        (flag ? addClass : removeClass)(this._eMain, this._aClasses.join(className) + className);
+        (flag ? addClass : removeClass)(this._eMain, this.getTypes().concat([this._sClass, '']).join(className));
 
         if (flag) {
             this._aStatus.push(className);
@@ -587,7 +588,7 @@ $cache$position          - 控件布局方式缓存
      * @return {string} 控件的当前样式
      */
     UI_CONTROL_CLASS.getClass = function () {
-        return this._aClasses[0];
+        return this._sClass;
     };
 
     /**
@@ -684,7 +685,7 @@ $cache$position          - 控件布局方式缓存
      * @return {Array} 控件的类型样式组
      */
     UI_CONTROL_CLASS.getTypes = function () {
-        return this._aClasses.slice(1);
+        return this.constructor.agent.types.slice();
     };
 
     /**
@@ -917,26 +918,26 @@ $cache$position          - 控件布局方式缓存
      */
     UI_CONTROL_CLASS.setClass = function (currClass) {
         var i = 0,
-            oldClass = this._aClasses[0],
-            classes = this._aClasses.slice(),
+            oldClass = this._sClass,
+            classes = this.getTypes(),
             o;
 
         currClass = currClass || this._sPrimary;
 
         // 如果基本样式没有改变不需要执行
         if (currClass != oldClass) {
-            classes[0] = currClass;
-
-            for (; o = classes[i]; ) {
+            classes.splice(0, 0, this._sClass = currClass);
+            for (; classes[i]; ) {
                 classes[i] = this._aStatus.join(classes[i++]);
             }
-            this._eMain.className = classes.join('') + 
+            currClass = classes.join('');
+            classes[0] = oldClass;
+            this._eMain.className =
+                currClass +
                     this._eMain.className.replace(
-                        new REGEXP('^\\s+|(' + this._aClasses.join('|') + ')(-[^\\s]+)?(\\s+|$)|\\s+$', 'g'),
+                        new REGEXP('^\\s+|(' + classes.join('|') + ')(-[^\\s]+)?(\\s+|$)|\\s+$', 'g'),
                         ''
                     );
-
-            this._aClasses[0] = currClass;
         }
     };
 
