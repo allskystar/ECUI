@@ -1,5 +1,5 @@
 /*
-Button - 定义按钮的控件行为。
+Button - 定义按钮的基本操作。
 按钮控件在激活(active)状态下鼠标移出控件区域会失去激活样式，移入控件区域再次获得激活样式。
 
 按钮控件直接HTML初始化的例子，id指定名称，可以通过ecui.get(id)的方式访问控件:
@@ -46,6 +46,18 @@ Button - 定义按钮的控件行为。
         ),
         UI_BUTTON_CLASS = UI_BUTTON.prototype;
 //{else}//
+    /**
+     * 控件获得激活事件的默认处理。
+     * 按钮控件获得激活时需要阻止事件的冒泡。
+     * @protected
+     *
+     * @param {ecui.ui.Event} event 事件对象
+     */
+    UI_BUTTON_CLASS.$activate = function (event) {
+        UI_CONTROL_CLASS.$activate.call(this, event);
+        event.stopPropagation();
+    };
+
     /**
      * 鼠标移出事件的默认处理。
      * 鼠标移出控件区域时，控件失去悬停状态，移除状态样式 -hover，如果控件处于激活状态，移除状态样式 -active，移除状态样式不失去激活状态。

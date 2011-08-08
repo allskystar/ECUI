@@ -1860,6 +1860,12 @@
 
     "button": [
         {
+            "name": "$activate",
+            "type": "button",
+            "remark": "按钮控件获得激活时需要阻止事件的冒泡。"
+        },
+
+        {
             "name": "$mouseout",
             "type": "button",
             "remark": "鼠标移出控件区域时，控件失去悬停状态，移除状态样式 -hover，如果控件处于激活状态，移除状态样式 -active，移除状态样式不失去激活状态。"
@@ -1881,176 +1887,148 @@
         }
     ],
 
-    "scroll": [
+    "scrollbar": [
         {
-            "name": "$allowNext",
-            "type": "scroll",
-            "desc": "判断是否允许当前值向最大值方向移动。",
-            "return": {"type": "boolean", "desc": "判断是否允许向最大值方向移动"},
-            "remark": "受当前鼠标位置的影响，在当前值向最大值方向移动的过程中需要先判断移动是否得到许可。"
+            "name": "$activate",
+            "type": "scrollbar",
+            "remark": "滚动条获得激活时，将开始自动滚动。"
         },
 
         {
-            "name": "$allowPrev",
-            "type": "scroll",
-            "desc": "判断是否允许当前值向0方向移动。",
-            "return": {"type": "boolean", "desc": "判断是否允许向0方向移动"},
-            "remark": "受当前鼠标位置的影响，在当前值向0方向移动的过程中需要先判断移动是否得到许可。"
-        },
-
-        {
-            "name": "$calcDragValue",
-            "type": "scroll",
-            "desc": "计算滑动块拖拽时滚动条的当前值。",
+            "name": "$calculateValue",
+            "type": "scrollbar",
+            "desc": "计算滑动按钮拖拽时的当前值。",
             "params": [
-                {"name": "x", "type": "number", "desc": "滑动块实际到达的X轴坐标"},
-                {"name": "y", "type": "number", "desc": "滑动块实际到达的Y轴坐标"}
+                {"name": "x", "type": "number", "desc": "滑动按钮实际到达的X轴坐标"},
+                {"name": "y", "type": "number", "desc": "滑动按钮实际到达的Y轴坐标"}
             ],
-            "remark": "虚方法，继承自滚动条控件的控件必须实现。"
+            "remark": "滑动按钮拖拽时，根据位置计算对应的当前值，然后通过 {'\\$setValue'|method:'scroll'} 方法直接设置。<font color=\"red\">虚方法，子控件必须实现。</font>"
         },
 
         {
-            "name": "$create",
-            "type": "scroll",
-            "params": [
-                {"name": "cacheSize", "type": "boolean", "desc": "是否需要缓存控件的大小，如果控件是另一个控件的部件时，不缓存大小能加快渲染速度，默认缓存"}
-            ],
-            "remark": "滚动条控件建立完成后不进行任何处理。"
+            "name": "$deactivate",
+            "type": "scrollbar",
+            "remark": "滚动条失去激活时，将停止自动滚动。"
         },
 
         {
-            "name": "$flush",
-            "type": "scroll",
-            "desc": "滚动条控件刷新。",
-            "remark": "滚动条控件的大小，最大值/当前值发生变化时，调用 $flash 方法刷新滑动块的大小与位置。"
+            "name": "$flushThumb",
+            "type": "scrollbar",
+            "desc": "滑动按钮刷新。",
+            "remark": "当滚动条控件的大小或最大值/当前值发生变化时，滑动按钮的大小与位置需要同步改变，参见 {'setSize'|method:'scroll'}、{'setValue'|method:'scroll'} 与 {'setTotal'|method:'scroll'} 方法。<font color=\"red\">虚方法，子控件必须实现。</font>"
         },
 
         {
             "name": "$getPageStep",
-            "type": "scroll",
-            "desc": "获取一页的步长。",
-            "return": {"type": "number", "desc": "一页的步长"},
-            "remark": "$getPageStep 方法根据 {'getStep'|method:'scroll'} 方法获取的步长，计算父控件一页的步长的大小，一页的步长一定是滚动条控件步长的整数倍。"
+            "type": "scrollbar",
+            "desc": "获取单页的步长。",
+            "return": {"type": "number", "desc": "单页的步长"},
+            "remark": "如果使用 {'\\$setPageStep'|method:'scroll'} 方法设置了单页的步长，$getPageStep 方法直接返回设置的步长，否则 $getPageStep 返回最接近滚动条控件长度的步长的整数倍。<font color=\"red\">虚方法，子控件必须实现。</font>"
         },
 
         {
-            "name": "$pressend",
-            "type": "scroll",
-            "remark": "鼠标左键按压控件结束时停止自动滚动，恢复控件状态。"
+            "name": "$hide",
+            "type": "scrollbar",
+            "remark": "隐藏滚动条控件时，滚动条控件的当前值需要复位为0，参见 {'setValue'|method:'scroll'} 方法。"
         },
 
         {
-            "name": "$pressout",
-            "type": "scroll",
-            "remark": "控件按压状态中鼠标移出控件区域时停止自动滚动，恢复控件状态。"
+            "name": "$mouseout",
+            "type": "scrollbar",
+            "remark": "滚动条鼠标移出时，如果控件处于直接激活状态，将暂停自动滚动。"
         },
 
         {
-            "name": "$pressover",
-            "type": "scroll",
-            "remark": "控件按压状态中鼠标移入控件区域开始自动滚动。"
-        },
-
-        {
-            "name": "$pressstart",
-            "type": "scroll",
-            "remark": "鼠标左键按压控件开始时计算自动滚动的方向，并开始自动滚动。"
+            "name": "$mouseover",
+            "type": "scrollbar",
+            "remark": "滚动条鼠标移出时，如果控件处于直接激活状态，将恢复自动滚动。"
         },
 
         {
             "name": "$setPageStep",
-            "type": "scroll",
-            "desc": "设置滚动条控件的单页滚动距离。",
+            "type": "scrollbar",
+            "desc": "设置滚动条控件的单页步长。",
             "params": [
-                {"name": "value", "type": "number", "desc": "单页滚动距离"}
-            ]
+                {"name": "step", "type": "number", "desc": "单页步长"}
+            ],
+            "remark": "滚动条控件的单页步长决定在点击滚动条空白区域(即非按钮区域)时滚动一页移动的距离，如果不设置单页步长，默认使用最接近滚动条长度的合理步长(即单项步长最接近总长度的整数倍)。"
         },
 
         {
             "name": "$setValue",
-            "type": "scroll",
+            "type": "scrollbar",
             "desc": "直接设置控件的当前值。",
             "params": [
                 {"name": "value", "type": "number", "desc": "控件的当前值"}
             ],
-            "remark": "$setValue 仅仅设置控件的参数值，不进行合法性验证，也不改变滑动块的位置信息，用于滑动块滚动时同步设置当前值。"
+            "remark": "$setValue 仅仅设置控件的参数值，不进行合法性验证，也不改变滑动按钮的位置信息，用于滑动按钮拖拽时同步设置当前值。"
         },
 
         {
-            "name": "focus",
-            "type": "scroll",
-            "desc": "父控件获取焦点。",
-            "remark": "在父控件没有焦点时，focus 方法将焦点设置到父控件上。"
+            "name": "getMouseDirection",
+            "type": "scrollbar",
+            "desc": "获取鼠标相对于滑动按钮的方向。",
+            "return": {"type": "number", "desc": "鼠标相对于滑动按钮的方向数值"},
+            "remark": "鼠标如果在滑动按钮之前，返回 -1，鼠标如果在滑动按钮之后，返回 1，否则返回 0。<font color=\"red\">虚方法，子控件必须实现。</font>"
         },
 
         {
             "name": "getStep",
-            "type": "scroll",
-            "desc": "获取滚动条控件的单次滚动距离。",
-            "return": {"type": "number", "desc": "单次滚动距离"},
+            "type": "scrollbar",
+            "desc": "获取滚动条控件的单次滚动步长。",
+            "return": {"type": "number", "desc": "单次滚动步长"},
             "remark": "getStep 方法返回滚动条控件发生滚动时，移动的最小步长值，通过 {'setStep'|method:'scroll'} 设置。"
         },
 
         {
             "name": "getTotal",
-            "type": "scroll",
+            "type": "scrollbar",
             "desc": "获取滚动条控件的最大值。",
             "return": {"type": "number", "desc": "控件的最大值"},
-            "remark": "getTotal 方法返回滚动条控件允许滚动的最大值，最大值、当前值与滑动块控件的实际位置互相影响，通过 {'setTotal'|method:'scroll'} 设置。"
+            "remark": "getTotal 方法返回滚动条控件允许滚动的最大值，最大值、当前值与滑动按钮控件的实际位置互相影响，通过 {'setTotal'|method:'scroll'} 设置。"
         },
 
         {
             "name": "getValue",
-            "type": "scroll",
+            "type": "scrollbar",
             "desc": "获取滚动条控件的当前值。",
             "return": {"type": "number", "desc": "控件的当前值"},
-            "remark": "getValue 方法返回滚动条控件的当前值，最大值、当前值与滑动块控件的实际位置互相影响，但是当前值不允许超过最大值，通过 {'setValue'|method:'scroll'} 方法设置。"
-        },
-
-        {
-            "name": "hide",
-            "type": "scroll",
-            "remark": "隐藏滚动条控件时，滚动条控件的当前值需要复位为0，参见 {'setValue'|method:'scroll'} 与 {'setTotal'|method:'scroll'} 方法。"
-        },
-
-        {
-            "name": "scroll",
-            "type": "scroll",
-            "desc": "滚动条滚动。",
-            "remark": "scroll 方法首先调用 {'change'|method:'scroll'} 方法，之后触发父控件的 {'onscroll'|event:'control'} 事件，如果事件返回值不为 false，则调用父控件的 {'\\$scroll'|method:'control'} 方法。"
+            "remark": "getValue 方法返回滚动条控件的当前值，最大值、当前值与滑动按钮控件的实际位置互相影响，但是当前值不允许超过最大值，通过 {'setValue'|method:'scroll'} 方法设置。"
         },
 
         {
             "name": "setStep",
-            "type": "scroll",
-            "desc": "设置滚动条控件的单次滚动距离。",
+            "type": "scrollbar",
+            "desc": "设置滚动条控件的单次滚动步长。",
             "params": [
-                {"name": "value", "type": "number", "desc": "单次滚动距离"}
+                {"name": "value", "type": "number", "desc": "单次滚动步长"}
             ],
             "remark": "setStep 方法设置的值必须大于0，否则不会进行操作。"
         },
 
         {
             "name": "setTotal",
-            "type": "scroll",
+            "type": "scrollbar",
             "desc": "设置滚动条控件的最大值。",
             "params": [
                 {"name": "value", "type": "number", "desc": "控件的最大值"}
             ],
-            "remark": "setTotal 方法设置的值不能为负数，并且当前值如果大于最大值，将改变当前值，并调用 {'scroll'|method:'scroll'} 方法，最大值发生改变将导致滚动条控件刷新。"
+            "remark": "setTotal 方法设置的值不能为负数，当前值如果大于最大值，设置当前值为新的最大值，最大值发生改变将导致滚动按钮刷新。"
         },
 
         {
             "name": "setValue",
-            "type": "scroll",
+            "type": "scrollbar",
             "desc": "设置滚动条控件的当前值。",
-            "params": [{"name": "value", "desc": "控件的当前值"}],
-            "remark": "setValue 方法设置的值不能为负数，也不允许超过使用 {'setTotal'|method:'scroll'} 方法设置的控件的最大值，如果当前值不合法，将自动设置为最接近合法值的数值，如果当前值发生改变将导致滚动条控件刷新，并调用 {'scroll'|method:'scroll'} 方法。"
+            "params": [
+                {"name": "value", "type": "number", "desc": "控件的当前值"}
+            ],
+            "remark": "setValue 方法设置的值不能为负数，也不允许超过使用 {'setTotal'|method:'scroll'} 方法设置的控件的最大值，如果当前值不合法，将自动设置为最接近合法值的数值，当前值发生改变将导致滑动按钮控件刷新。"
         },
 
         {
             "name": "skip",
-            "type": "scroll",
+            "type": "scrollbar",
             "desc": "滚动条控件当前值移动指定的步长次数。",
             "params": [
                 {"name": "n", "type": "number", "desc": "移动的步长次数"}

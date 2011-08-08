@@ -9,7 +9,7 @@
 //{include file="input-control.js"}//
 //{include file="button.js"}//
 
-//{include file="scroll.js"}//
+//{include file="scrollbar.js"}//
 //*{include file="panel.js"}//
 //{include file="checkbox.js"}//
 //{include file="radio.js"}//

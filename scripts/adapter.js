@@ -803,22 +803,37 @@
          * @return {Function} 用于关闭定时器的方法
          */
         timer = util.timer = function (func, delay, caller) {
-            var args = Array.prototype.slice.call(arguments, 3),
-                handle = (delay < 0 ? setInterval : setTimeout)(function () {
+            function build() {
+                return (delay < 0 ? setInterval : setTimeout)(function () {
                     func.apply(caller, args);
                     // 使用delay<0而不是delay>=0，是防止delay没有值的时候，不进入分支
                     if (!(delay < 0)) {
                         func = caller = args = null;
                     }
                 }, ABS(delay));
+            }
+
+            var args = Array.prototype.slice.call(arguments, 3),
+                handle = build(),
+                pausing;
 
             /**
-             * 中止定时调用操作
+             * 中止定时调用。
              * @public
+             *
+             * @param {boolean} pause 是否暂时停止定时器，如果参数是 true，再次调用函数并传入参数 true 恢复运行。
              */
-            return function () {
+            return function (pause) {
                 (delay < 0 ? clearInterval : clearTimeout)(handle);
-                func = caller = args = null;
+                if (pause) {
+                    if (pausing) {
+                        handle = build();
+                    }
+                    pausing = !pausing;
+                }
+                else {
+                    func = caller = args = null;
+                }
             };
         },
 

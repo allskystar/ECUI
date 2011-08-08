@@ -290,12 +290,12 @@
     "button": [
     ],
 
-    "scroll": [
+    "scrollbar": [
         {
             "name": "onscroll",
-            "type": "scroll",
+            "type": "scrollbar",
             "desc": "滚动条滚动事件。",
-            "params": [{"name": "scroll", "desc": "滚动条控件"}],
+            "params": [{"name": "scrollbar", "desc": "滚动条控件"}],
             "remark": "滚动条控件滚动时将触发父控件的本事件，scroll 参数是滚动条控件，用于区分是由哪个滚动条触发的本事件。"
         }
     ],

@@ -85,8 +85,10 @@ new {$control.position}(options)</pre></p>
 </blockquote>-->
 <div style="text-align:right"><a href="../controls.html">·µ»Ø</a></div>
 <script>
-document.getElementById('htmlDemo').innerHTML = encodeHTML(formatHTML(document.getElementById('htmlDemo').innerHTML)).toLowerCase();
-prettyPrint();
+if (document.getElementById('htmlDemo')) {
+    document.getElementById('htmlDemo').innerHTML = encodeHTML(formatHTML(document.getElementById('htmlDemo').innerHTML)).toLowerCase();
+    prettyPrint();
+}
 </script>
 </body>
 </html>
