@@ -72,7 +72,6 @@ _cPopup      - 是否包含下级弹出菜单
      * optionSize 弹出菜单选项的显示数量，不设置将全部显示
      * @public
      *
-     * @param {HTMLElement} el 关联的 Element 对象
      * @param {Object} options 初始化选项
      */
     //__gzip_original__UI_POPUP
@@ -114,7 +113,6 @@ _cPopup      - 是否包含下级弹出菜单
          * 初始化弹出菜单控件的按钮部件。
          * @public
          *
-         * @param {HTMLElement} el 关联的 Element 对象
          * @param {Object} options 初始化选项
          */
         UI_POPUP_BUTTON = UI_POPUP.Button = function (el, options) {
@@ -126,7 +124,6 @@ _cPopup      - 是否包含下级弹出菜单
          * 初始化弹出菜单控件的选项部件。
          * @public
          *
-         * @param {HTMLElement} el 关联的 Element 对象
          * @param {Object} options 初始化选项
          */
         UI_POPUP_ITEM = UI_POPUP.Item = function (el, options) {

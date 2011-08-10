@@ -45,7 +45,6 @@ _uCheckbox - 复选框控件
      * superior 父复选框的标识，如果为true表示自动使用上级树节点作为父复选框，其它等价false的值表示不联动
      * @public
      *
-     * @param {Element} el 关联的 Element 对象
      * @param {Object} options 初始化选项
      */
     //__gzip_original__UI_CHECK_TREE

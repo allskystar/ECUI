@@ -1,5 +1,6 @@
 function before() {
     var el = document.createElement('div');
+    el.innerHTML = 'Demo';
     el.id = 'common';
     document.body.appendChild(el);
 }
@@ -11,10 +12,16 @@ function after() {
 
 test('控件初始化', {
     '检测控件类型样式': function () {
-        var button = ecui.create(ecui.ui.Button, {parent: baidu.dom.g('common')}),
-            el = button.getMain();
+        var button = ecui.create(ecui.ui.Button, {parent: baidu.dom.g('common')});
 
-        value_of(button.getTypes()).should_be(['ui-control', 'ui-button']);
+        value_of(button.getTypes()).should_be(['ui-button', 'ui-control']);
+        value_of(button.getPrimary()).should_be('ui-button');
+    },
+
+    '控件的文本': function () {
+        var button = ecui.create(ecui.ui.Button, {main: baidu.dom.g('common')});
+
+        value_of(button.getContent()).should_be('Demo');
     }
 });
 

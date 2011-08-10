@@ -59,7 +59,6 @@ _aButton          - 按钮数组
      * 初始化拾色器控件。
      * @public
      *
-     * @param {Element} el 关联的 Element 对象
      * @param {Object} options 初始化选项
      */
     //__gzip_original__UI_PALETTE
@@ -157,7 +156,6 @@ _aButton          - 按钮数组
          * 初始化拾色器控件的区域部件。
          * @public
          *
-         * @param {Element} el 关联的 Element 对象
          * @param {Object} options 初始化选项
          */
         UI_PALETTE_AREA = UI_PALETTE.Area = function (el, options) {
@@ -169,7 +167,6 @@ _aButton          - 按钮数组
          * 初始化拾色器控件的基本色彩区域集合部件。
          * @public
          *
-         * @param {Element} el 关联的 Element 对象
          * @param {Object} options 初始化选项
          */
         UI_PALETTE_COLLECTION = UI_PALETTE.Collection = function (el, options) {
@@ -181,7 +178,6 @@ _aButton          - 按钮数组
          * 初始化拾色器控件的输入框部件。
          * @public
          *
-         * @param {Element} el 关联的 Element 对象
          * @param {Object} options 初始化选项
          */
         UI_PALETTE_EDIT = UI_PALETTE.Edit = function (el, options) {
@@ -193,7 +189,6 @@ _aButton          - 按钮数组
          * 初始化拾色器控件的按钮部件。
          * @public
          *
-         * @param {Element} el 关联的 Element 对象
          * @param {Object} options 初始化选项
          */
         UI_PALETTE_BUTTON = UI_PALETTE.Button = function (el, options) {

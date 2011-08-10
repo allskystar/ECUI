@@ -83,7 +83,6 @@ _uOptions     - 下拉选择框
      * optionSize 下拉框最大允许显示的选项数量，默认为5
      * @public
      *
-     * @param {Element} el 关联的 Element 对象
      * @param {Object} options 初始化选项
      */
     //__gzip_original__UI_SELECT
@@ -155,7 +154,6 @@ _uOptions     - 下拉选择框
          * 初始化下拉框控件的下拉选项框部件。
          * @public
          *
-         * @param {Element} el 关联的 Element 对象
          * @param {Object} options 初始化选项
          */
         UI_SELECT_OPTIONS = UI_SELECT.Options = function (el, options) {
@@ -167,7 +165,6 @@ _uOptions     - 下拉选择框
          * 初始化下拉框控件的选项部件。
          * @public
          *
-         * @param {Element} el 关联的 Element 对象
          * @param {Object} options 初始化选项
          */
         UI_SELECT_ITEM = UI_SELECT.Item = function (el, options) {

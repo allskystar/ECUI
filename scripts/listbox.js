@@ -48,7 +48,6 @@ _eInput - 选项对应的input，form提交时使用
      * 初始化多选框控件。
      * @public
      *
-     * @param {Element} el 关联的 Element 对象
      * @param {Object} options 初始化选项
      */
     //__gzip_original__UI_LISTBOX
@@ -67,7 +66,6 @@ _eInput - 选项对应的input，form提交时使用
          * 初始化多选框控件的选项部件。
          * @public
          *
-         * @param {Element} el 关联的 Element 对象
          * @param {Object} options 初始化选项
          */
         UI_LISTBOX_ITEM = UI_LISTBOX.Item = function (el, options) {

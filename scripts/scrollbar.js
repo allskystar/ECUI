@@ -29,7 +29,7 @@ _oRange         - 滑动按钮的合法滑动区间
 
         children = dom.children,
         blank = util.blank,
-        extend = util.extend,
+        findConstructor = util.findConstructor,
         timer = util.timer,
 
         $fastCreate = core.$fastCreate,
@@ -45,40 +45,35 @@ _oRange         - 滑动按钮的合法滑动区间
         UI_BUTTON_CLASS = UI_BUTTON.prototype;
 //{/if}//
 //{if $phase == "define"}//
-    /**
-     * 初始化滚动条控件。
-     * @protected
-     *
-     * @param {Object} options 初始化选项
-     */
     ///__gzip_original__UI_SCROLLBAR
     ///__gzip_original__UI_SCROLLBAR_CLASS
     ///__gzip_original__UI_VSCROLLBAR
     ///__gzip_original__UI_VSCROLLBAR_CLASS
     ///__gzip_original__UI_HSCROLLBAR
     ///__gzip_original__UI_HSCROLLBAR_CLASS
+    /**
+     * 初始化滚动条控件。
+     * @protected
+     *
+     * @param {Object} options 初始化选项
+     */
     var UI_SCROLLBAR = ui.Scrollbar =
         inheritsControl(
             UI_CONTROL,
             'ui-scrollbar',
             function (el, options) {
-                //__gzip_original__primary
-                //__gzip_original__type
                 //__gzip_original__unitOptions
-                var primary = options.primary,
-                    unitOptions = {userSelect: false, focusable: false},
+                var unitOptions = {userSelect: false, focusable: false},
                     buttonClass = findConstructor(this, 'Button'),
                     thumbClass = findConstructor(this, 'Thumb');
 
-                UI_CONTROL.client.call(this, el, extend(options, unitOptions));
-
                 el.innerHTML =
-                    '<div class="' +
-                        primary + '-prev ui-scrollbar-prev ' + buttonClass.TYPES +
+                    '<div class="ui-scrollbar-prev ' +
+                        buttonClass.TYPES +
+                        '" style="position:absolute;top:0px;left:0px"></div><div class="ui-scrollbar-next ' +
+                        buttonClass.TYPES +
                         '" style="position:absolute;top:0px;left:0px"></div><div class="' +
-                        primary + '-next ui-scrollbar-next ' + buttonClass.TYPES +
-                        '" style="position:absolute;top:0px;left:0px"></div><div class="' +
-                        primary + '-thumb ' + thumbClass.TYPES +
+                        thumbClass.TYPES +
                         '" style="position:absolute"></div>';
 
                 // 使用 el 代替 children
@@ -94,6 +89,9 @@ _oRange         - 滑动按钮的合法滑动区间
                 this._uThumb = $fastCreate(thumbClass, el[2], this, unitOptions);
 
                 this._oStop = blank;
+            },
+            function (el, options) {
+                options.userSelect = options.focusable = false;
             }
         ),
         UI_SCROLLBAR_CLASS = UI_SCROLLBAR.prototype,
@@ -146,7 +144,7 @@ _oRange         - 滑动按钮的合法滑动区间
 
     /**
      * 滚动条值发生改变后的处理。
-     * 滚动条的值发生后，将触发父控件的 onscroll 事件，如果事件返回值不为 false，则调用父控件的 $scroll 方法。
+     * 滚动条的值发生改变后，将触发父控件的 onscroll 事件，如果事件返回值不为 false，则调用父控件的 $scroll 方法。
      * @private
      *
      * @param {ecui.ui.Scrollbar} scrollbar 滚动条控件
@@ -162,11 +160,8 @@ _oRange         - 滑动按钮的合法滑动区间
     }
 
     /**
-     * 控件获得激活事件的默认处理。
      * 滑动按钮获得激活时，触发滑动按钮进入拖拽状态。
-     * @protected
-     *
-     * @param {ecui.ui.Event} event 事件对象
+     * @override
      */
     UI_SCROLLBAR_THUMB_CLASS.$activate = function (event) {
         UI_BUTTON_CLASS.$activate.call(this, event);
@@ -175,12 +170,7 @@ _oRange         - 滑动按钮的合法滑动区间
     };
 
     /**
-     * 控件拖拽移动事件的默认处理。
-     * @protected
-     *
-     * @param {ecui.ui.Event} event 事件对象
-     * @param {number} x X轴坐标
-     * @param {number} y Y轴坐标
+     * @override
      */
     UI_SCROLLBAR_THUMB_CLASS.$dragmove = function (event, x, y) {
         UI_BUTTON_CLASS.$dragmove.call(this, event, x, y);
@@ -212,11 +202,8 @@ _oRange         - 滑动按钮的合法滑动区间
     };
 
     /**
-     * 控件获得激活事件的默认处理。
      * 滚动条按钮获得激活时，将开始自动滚动。
-     * @protected
-     *
-     * @param {ecui.ui.Event} event 事件对象
+     * @override
      */
     UI_SCROLLBAR_BUTTON_CLASS.$activate = function (event) {
         UI_BUTTON_CLASS.$activate.call(this, event);
@@ -226,11 +213,8 @@ _oRange         - 滑动按钮的合法滑动区间
     };
 
     /**
-     * 控件失去激活事件的默认处理。
      * 滚动条按钮失去激活时，将停止自动滚动。
-     * @protected
-     *
-     * @param {ecui.ui.Event} event 事件对象
+     * @override
      */
     UI_SCROLLBAR_BUTTON_CLASS.$deactivate = function (event) {
         UI_BUTTON_CLASS.$deactivate.call(this, event);
@@ -238,11 +222,8 @@ _oRange         - 滑动按钮的合法滑动区间
     };
 
     /**
-     * 鼠标移出事件的默认处理。
      * 滚动条按钮鼠标移出时，如果控件处于直接激活状态，将暂停自动滚动。
-     * @protected
-     *
-     * @param {ecui.ui.Event} event 事件对象
+     * @override
      */
     UI_SCROLLBAR_BUTTON_CLASS.$mouseout = function (event) {
         UI_BUTTON_CLASS.$mouseout.call(this, event);
@@ -252,11 +233,8 @@ _oRange         - 滑动按钮的合法滑动区间
     };
 
     /**
-     * 鼠标移入事件的默认处理。
-     * 滚动条按钮鼠标移出时，如果控件处于直接激活状态，将恢复自动滚动。
-     * @protected
-     *
-     * @param {ecui.ui.Event} event 事件对象
+     * 滚动条按钮鼠标移入时，如果控件处于直接激活状态，将恢复自动滚动。
+     * @override
      */
     UI_SCROLLBAR_BUTTON_CLASS.$mouseover = function (event) {
         UI_BUTTON_CLASS.$mouseover.call(this, event);
@@ -266,11 +244,8 @@ _oRange         - 滑动按钮的合法滑动区间
     };
 
     /**
-     * 控件获得激活事件的默认处理。
      * 滚动条获得激活时，将开始自动滚动。
-     * @protected
-     *
-     * @param {ecui.ui.Event} event 事件对象
+     * @override
      */
     UI_SCROLLBAR_CLASS.$activate = function (event) {
         UI_CONTROL_CLASS.$activate.call(this, event);
@@ -278,11 +253,7 @@ _oRange         - 滑动按钮的合法滑动区间
     };
 
     /**
-     * 缓存控件的属性。
-     * @protected
-     *
-     * @param {CssStyle} style 主元素的 Css 样式对象
-     * @param {boolean} cacheSize 是否需要缓存控件的大小，如果控件是另一个控件的部件时，不缓存大小能加快渲染速度，默认缓存
+     * @override
      */
     UI_SCROLLBAR_CLASS.$cache = function (style, cacheSize) {
         UI_CONTROL_CLASS.$cache.call(this, style, cacheSize);
@@ -293,11 +264,8 @@ _oRange         - 滑动按钮的合法滑动区间
     };
 
     /**
-     * 控件失去激活事件的默认处理。
      * 滚动条失去激活时，将停止自动滚动。
-     * @protected
-     *
-     * @param {ecui.ui.Event} event 事件对象
+     * @override
      */
     UI_SCROLLBAR_CLASS.$deactivate = function (event) {
         UI_CONTROL_CLASS.$deactivate.call(this, event);
@@ -305,9 +273,8 @@ _oRange         - 滑动按钮的合法滑动区间
     };
 
     /**
-     * 隐藏控件。
      * 隐藏滚动条控件时，滚动条控件的当前值需要复位为0，参见 setValue 方法。
-     * @protected
+     * @override
      */
     UI_SCROLLBAR_CLASS.$hide = function () {
         UI_CONTROL_CLASS.$hide.call(this);
@@ -315,11 +282,8 @@ _oRange         - 滑动按钮的合法滑动区间
     };
 
     /**
-     * 鼠标移出事件的默认处理。
      * 滚动条鼠标移出时，如果控件处于直接激活状态，将暂停自动滚动。
-     * @protected
-     *
-     * @param {ecui.ui.Event} event 事件对象
+     * @override
      */
     UI_SCROLLBAR_CLASS.$mouseout = function (event) {
         UI_CONTROL_CLASS.$mouseout.call(this, event);
@@ -329,11 +293,8 @@ _oRange         - 滑动按钮的合法滑动区间
     };
 
     /**
-     * 鼠标移入事件的默认处理。
-     * 滚动条鼠标移出时，如果控件处于直接激活状态，将恢复自动滚动。
-     * @protected
-     *
-     * @param {ecui.ui.Event} event 事件对象
+     * 滚动条鼠标移入时，如果控件处于直接激活状态，将恢复自动滚动。
+     * @override
      */
     UI_SCROLLBAR_CLASS.$mouseover = function (event) {
         UI_CONTROL_CLASS.$mouseover.call(this, event);
@@ -354,11 +315,7 @@ _oRange         - 滑动按钮的合法滑动区间
     };
 
     /**
-     * 设置控件的大小。
-     * @protected
-     *
-     * @param {number} width 宽度，如果不需要设置则将参数设置为等价于逻辑非的值
-     * @param {number} height 高度，如果不需要设置则省略此参数
+     * @override
      */
     UI_SCROLLBAR_CLASS.$setSize = function (width, height) {
         UI_CONTROL_CLASS.$setSize.call(this, width, height);
@@ -410,8 +367,7 @@ _oRange         - 滑动按钮的合法滑动区间
     };
 
     /**
-     * 控件初始化。
-     * @public
+     * @override
      */
     UI_SCROLLBAR_CLASS.init = function () {
         UI_CONTROL_CLASS.init.call(this);
@@ -488,7 +444,7 @@ _oRange         - 滑动按钮的合法滑动区间
      *
      * @param {Object} options 初始化选项
      */
-    var UI_VSCROLLBAR = ui.VScrollbar = inheritsControl(UI_SCROLLBAR, 'ui-v-scrollbar'),
+    var UI_VSCROLLBAR = ui.VScrollbar = inheritsControl(UI_SCROLLBAR, 'ui-vscrollbar'),
         UI_VSCROLLBAR_CLASS = UI_VSCROLLBAR.prototype;
 //{else}//
     /**
@@ -540,11 +496,7 @@ _oRange         - 滑动按钮的合法滑动区间
     };
 
     /**
-     * 设置控件的大小。
-     * @protected
-     *
-     * @param {number} width 宽度，如果不需要设置则将参数设置为等价于逻辑非的值
-     * @param {number} height 高度，如果不需要设置则省略此参数
+     * @override
      */
     UI_VSCROLLBAR_CLASS.$setSize = function (width, height) {
         UI_SCROLLBAR_CLASS.$setSize.call(this, width, height);
@@ -582,7 +534,7 @@ _oRange         - 滑动按钮的合法滑动区间
      *
      * @param {Object} options 初始化选项
      */
-    var UI_HSCROLLBAR = ui.HScrollbar = inheritsControl(UI_SCROLLBAR, 'ui-h-scrollbar'),
+    var UI_HSCROLLBAR = ui.HScrollbar = inheritsControl(UI_SCROLLBAR, 'ui-hscrollbar'),
         UI_HSCROLLBAR_CLASS = UI_HSCROLLBAR.prototype;
 //{else}//
     /**
@@ -634,11 +586,7 @@ _oRange         - 滑动按钮的合法滑动区间
     };
 
     /**
-     * 设置控件的大小。
-     * @protected
-     *
-     * @param {number} width 宽度，如果不需要设置则将参数设置为等价于逻辑非的值
-     * @param {number} height 高度，如果不需要设置则省略此参数
+     * @override
      */
     UI_HSCROLLBAR_CLASS.$setSize = function (width, height) {
         UI_SCROLLBAR_CLASS.$setSize.call(this, width, height);

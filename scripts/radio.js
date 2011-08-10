@@ -42,11 +42,6 @@ _bDefault  - 默认的选中状态
             UI_INPUT_CONTROL,
             'ui-radio',
             function (el, options) {
-                options.hidden = true;
-                options.input = 'radio';
-
-                UI_INPUT_CONTROL.client.call(this, el, options);
-
                 el = this.getInput();
 
                 if (options.checked) {
@@ -55,6 +50,10 @@ _bDefault  - 默认的选中状态
 
                 // 保存节点选中状态，用于修复IE6/7下移动DOM节点时选中状态发生改变的问题
                 this._bDefault = el.defaultChecked;
+            },
+            function (el, options) {
+                options.hidden = true;
+                options.input = 'radio';
             }
         ),
         UI_RADIO_CLASS = UI_RADIO.prototype;

@@ -38,7 +38,6 @@ Combox - 定义可输入下拉框行为的基本操作。
      * options 对象支持的属性如下：
      * @public
      *
-     * @param {Element} el 关联的 Element 对象
      * @param {Object} options 初始化选项
      */
     //__gzip_original__UI_COMBOX

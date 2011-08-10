@@ -1,4 +1,4 @@
-.ec-vscroll {
+.ui-vscrollbar {
 	position:absolute;
 	top:0px;
 	left:0px;
@@ -6,7 +6,7 @@
 	padding:15px 0px 15px 0px;
 	font-size:1px
 }
-.ec-hscroll {
+.ui-hscrollbar {
 	position:absolute;
 	top:0px;
 	left:0px;

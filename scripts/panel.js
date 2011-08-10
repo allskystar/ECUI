@@ -1,13 +1,9 @@
 ﻿/*
 Panel - 定义在一个小区域内截取显示大区域内容的基本操作。
-截面控件，继承自基础控件，内部包含三个部件，分别是垂直滚动条、水平滚动条与两个滚动条之间的夹角(基础控件)。截面控件的内
-容区域可以超过控件实际大小，通过拖拽滚动条显示完整的内容，截面控件可以设置参数决定是否自动显示水平/垂直滚动条，如果设
-置不显示水平/垂直滚动条，水平/垂直内容超出的部分将直接被截断，当设置两个滚动条都不显示时，层控件从显示效果上等同于基础
-控件。在层控件上滚动鼠标滑轮，将控制层控件往垂直方向(如果没有垂直滚动条则在水平方向)前移或者后移滚动条，在获得焦点后，
-通过键盘的方向键也可以操作层控件的滚动条。
+截面控件，继承自基础控件。截面控件的内容区域可以超过控件实际大小，通过拖拽滚动条显示完整的内容，截面控件可以设置参数决定是否自动显示水平/垂直滚动条，如果设置不显示水平/垂直滚动条，水平/垂直内容超出的部分将直接被截断，当设置两个滚动条都不显示时，截面控件从显示效果上等同于基础控件。在截面控件上滚动鼠标滑轮，将控制截面控件往垂直方向(如果没有垂直滚动条则在水平方向)前移或者后移滚动条，在获得焦点后，通过键盘的方向键也可以操作截面控件的滚动条。
 
-层控件直接HTML初始化的例子:
-<div ecui="type:panel;vertical-scroll:true;horizontal-scroll:true;wheel-delta:20;absolute:true">
+截面控件直接HTML初始化的例子:
+<div ecui="type:panel">
     <!-- 这里放内容 -->
     ...
 </div>
@@ -45,7 +41,7 @@ $cache$mainHeight         - layout区域的实际高度
         attachEvent = util.attachEvent,
         blank = util.blank,
         detachEvent = util.detachEvent,
-        inherits = util.inherits,
+        findConstructor = util.findConstructor,
         toNumber = util.toNumber,
 
         $fastCreate = core.$fastCreate,
@@ -54,36 +50,62 @@ $cache$mainHeight         - layout区域的实际高度
         findControl = core.findControl,
         getKey = core.getKey,
         getScrollNarrow = core.getScrollNarrow,
-        standardEvent = core.event,
+        inheritsControl = core.inherits,
+        wrapEvent = core.wrapEvent,
 
         UI_CONTROL = ui.Control,
         UI_CONTROL_CLASS = UI_CONTROL.prototype,
-        UI_VSCROLL = ui.VScroll,
-        UI_HSCROLL = ui.HScroll;
+        UI_VSCROLLBAR = ui.VScroll,
+        UI_HSCROLLBAR = ui.HScroll;
 //{/if}//
 //{if $phase == "define"}//
     /**
      * 初始化浏览器原生滚动条控件。
      * @protected
      *
-     * @param {Element} el 关联的 Element 对象
      * @param {Object} options 初始化选项
      */
-    var UI_BROWSER_SCROLL =
-        function (el, options) {
-            UI_CONTROL.call(this, el, options);
-            detachEvent(el, 'scroll', this.scroll);
-            attachEvent(el, 'scroll', this.scroll);
-        },
-        UI_BROWSER_SCROLL_CLASS = inherits(UI_BROWSER_SCROLL, UI_CONTROL);
+    ///__gzip_original__UI_BROWSER_SCROLLBAR
+    ///__gzip_original__UI_BROWSER_SCROLLBAR_CLASS
+    ///__gzip_original__UI_BROWSER_VSCROLLBAR
+    ///__gzip_original__UI_BROWSER_VSCROLLBAR_CLASS
+    ///__gzip_original__UI_BROWSER_HSCROLLBAR
+    ///__gzip_original__UI_BROWSER_HSCROLLBAR_CLASS
+    ///__gzip_original__UI_BROWSER_CORNER
+    ///__gzip_original__UI_BROWSER_CORNER_CLASS
+    ///__gzip_original__UI_PANEL
+    ///__gzip_original__UI_PANEL_CLASS
+    var UI_BROWSER_SCROLLBAR =
+        inheritsControl(
+            UI_CONTROL,
+            null,
+            function (el, options) {
+                detachEvent(el, 'scroll', UI_BROWSER_SCROLLBAR_SCROLL);
+                attachEvent(el, 'scroll', UI_BROWSER_SCROLLBAR_SCROLL);
+            }
+        ),
+        UI_BROWSER_SCROLLBAR_CLASS = UI_BROWSER_SCROLLBAR.prototype;
 //{else}//
     /**
-     * 隐藏控件。
-     * @protected
+     * 原生滚动条滚动处理。
+     * 滚动条滚动后，将触发父控件的 onscroll 事件，如果事件返回值不为 false，则调用父控件的 $scroll 方法。
+     * @private
+     *
+     * @param {ecui.ui.Event} event 事件对象
      */
-    UI_BROWSER_SCROLL_CLASS.$hide = UI_BROWSER_SCROLL_CLASS.hide = function () {
-        this.getBase().style[this._aProperty[0]] = 'hidden';
-        UI_BROWSER_SCROLL_CLASS.setValue.call(this, 0);
+    function UI_BROWSER_SCROLLBAR_SCROLL(event) {
+        event = findControl(wrapEvent(event).target).getParent();
+        if (!(event.onscroll && event.onscroll() === false)) {
+            event.$scroll();
+        }
+    }
+
+    /**
+     * @override
+     */
+    UI_BROWSER_SCROLLBAR_CLASS.$hide = UI_BROWSER_SCROLLBAR_CLASS.hide = function () {
+        this.getMain().style[this._aProperty[0]] = 'hidden';
+        UI_BROWSER_SCROLLBAR_CLASS.setValue.call(this, 0);
     };
 
     /**
@@ -92,26 +114,22 @@ $cache$mainHeight         - layout区域的实际高度
      *
      * @param {number} value 控件的当前值
      */
-    UI_BROWSER_SCROLL_CLASS.$setValue = UI_BROWSER_SCROLL_CLASS.setValue = function (value) {
-        this.getBase()[this._aProperty[1]] = MIN(MAX(0, value), this.getTotal());
+    UI_BROWSER_SCROLLBAR_CLASS.$setValue = UI_BROWSER_SCROLLBAR_CLASS.setValue = function (value) {
+        this.getMain()[this._aProperty[1]] = MIN(MAX(0, value), this.getTotal());
     };
 
     /**
-     * 显示控件。
-     * @protected
+     * @override
      */
-    UI_BROWSER_SCROLL_CLASS.$show = UI_BROWSER_SCROLL_CLASS.show = function () {
-        this.getBase().style[this._aProperty[0]] = 'scroll';
+    UI_BROWSER_SCROLLBAR_CLASS.$show = UI_BROWSER_SCROLLBAR_CLASS.show = function () {
+        this.getMain().style[this._aProperty[0]] = 'scroll';
     };
 
     /**
-     * 获取控件区域的高度。
-     * @public
-     *
-     * @return {number} 控件的高度
+     * @override
      */
-    UI_BROWSER_SCROLL_CLASS.getHeight = function () {
-        return this._aProperty[4] ? this.getBase()[this._aProperty[4]] : getScrollNarrow();
+    UI_BROWSER_SCROLLBAR_CLASS.getHeight = function () {
+        return this._aProperty[4] ? this.getMain()[this._aProperty[4]] : getScrollNarrow();
     };
 
     /**
@@ -121,112 +139,97 @@ $cache$mainHeight         - layout区域的实际高度
      *
      * @return {number} 控件的最大值
      */
-    UI_BROWSER_SCROLL_CLASS.getTotal = function () {
-        return toNumber(this.getBase().lastChild.style[this._aProperty[2]]);
+    UI_BROWSER_SCROLLBAR_CLASS.getTotal = function () {
+        return toNumber(this.getMain().lastChild.style[this._aProperty[2]]);
     };
 
     /**
      * 获取滚动条控件的当前值。
-     * getValue 方法返回滚动条控件的当前值，最大值、当前值与滑动块控件的实际位置互相影响，但是当前值不允许超过最大值，通过 setValue 方法设置。
+     * getValue 方法返回滚动条控件的当前值，最大值、当前值与滑动按钮控件的实际位置互相影响，但是当前值不允许超过最大值，通过 setValue 方法设置。
      * @public
      *
      * @return {number} 滚动条控件的当前值
      */
-    UI_BROWSER_SCROLL_CLASS.getValue = function () {
-        return this.getBase()[this._aProperty[1]];
+    UI_BROWSER_SCROLLBAR_CLASS.getValue = function () {
+        return this.getMain()[this._aProperty[1]];
     };
 
     /**
-     * 获取控件区域的宽度。
-     * @public
-     *
-     * @return {number} 控件的宽度
+     * @override
      */
-    UI_BROWSER_SCROLL_CLASS.getWidth = function () {
-        return this._aProperty[3] ? this.getBase()[this._aProperty[3]] : getScrollNarrow();
+    UI_BROWSER_SCROLLBAR_CLASS.getWidth = function () {
+        return this._aProperty[3] ? this.getMain()[this._aProperty[3]] : getScrollNarrow();
     };
 
     /**
-     * 判断控件是否处于显示状态。
-     * @public
-     *
-     * @return {boolean} 控件是否显示
+     * @override
      */
-    UI_BROWSER_SCROLL_CLASS.isShow = function () {
-        return this.getBase().style[this._aProperty[0]] != 'hidden';
-    };
-
-    /**
-     * 滚动条滚动。
-     * scroll 方法首先调用 change 方法，之后触发父控件的 onscroll 事件，如果事件返回值不为 false，则调用父控件的 $scroll 方法。
-     * @public
-     */
-    UI_BROWSER_SCROLL_CLASS.scroll = function (event) {
-        event = findControl(standardEvent(event).target).getParent();
-        if (!(event.onscroll && event.onscroll() === false)) {
-            event.$scroll();
-        }
+    UI_BROWSER_SCROLLBAR_CLASS.isShow = function () {
+        return this.getMain().style[this._aProperty[0]] != 'hidden';
     };
 
     /**
      * 设置滚动条控件的最大值。
-     * setTotal 方法设置的值不能为负数，并且当前值如果大于最大值，将改变当前值，并调用 scroll 方法，最大值发生改变将导致滚动条控件刷新。
+     * setTotal 方法设置的值不能为负数，当前值如果大于最大值，设置当前值为新的最大值，最大值发生改变将导致滑动按钮刷新。
      * @public
      *
      * @param {number} value 控件的最大值
      */
-    UI_BROWSER_SCROLL_CLASS.setTotal = function (value) {
-        this.getBase().lastChild.style[this._aProperty[2]] = value + 'px';
+    UI_BROWSER_SCROLLBAR_CLASS.setTotal = function (value) {
+        this.getMain().lastChild.style[this._aProperty[2]] = value + 'px';
     };
 
-    UI_BROWSER_SCROLL_CLASS.$cache = UI_BROWSER_SCROLL_CLASS.$getPageStep =
-        UI_BROWSER_SCROLL_CLASS.$init = UI_BROWSER_SCROLL_CLASS.$setPageStep =
-        UI_BROWSER_SCROLL_CLASS.$setSize = UI_BROWSER_SCROLL_CLASS.alterClass = UI_BROWSER_SCROLL_CLASS.cache =
-        UI_BROWSER_SCROLL_CLASS.getStep = UI_BROWSER_SCROLL_CLASS.setPosition =
-        UI_BROWSER_SCROLL_CLASS.setStep = UI_BROWSER_SCROLL_CLASS.skip = blank;
+    UI_BROWSER_SCROLLBAR_CLASS.$cache =
+        UI_BROWSER_SCROLLBAR_CLASS.$getPageStep = UI_BROWSER_SCROLLBAR_CLASS.$setPageStep =
+        UI_BROWSER_SCROLLBAR_CLASS.$setSize = UI_BROWSER_SCROLLBAR_CLASS.alterClass =
+        UI_BROWSER_SCROLLBAR_CLASS.cache = UI_BROWSER_SCROLLBAR_CLASS.getStep =
+        UI_BROWSER_SCROLLBAR_CLASS.init = UI_BROWSER_SCROLLBAR_CLASS.setPosition =
+        UI_BROWSER_SCROLLBAR_CLASS.setStep = UI_BROWSER_SCROLLBAR_CLASS.skip = blank;
 //{/if}//
 //{if $phase == "define"}//
     /**
      * 初始化浏览器原生垂直滚动条控件。
      * @public
      *
-     * @param {Element} el 关联的 Element 对象
      * @param {Object} options 初始化选项
      */
-    var UI_BROWSER_VSCROLL =
-        function (el, options) {
-            UI_BROWSER_SCROLL.call(this, el, options);
-            this._aProperty = ['overflowY', 'scrollTop', 'height', null, 'offsetHeight'];
-        };
-//{else}//
-    inherits(UI_BROWSER_VSCROLL, UI_BROWSER_SCROLL);
+    var UI_BROWSER_VSCROLLBAR =
+        inheritsControl(
+            UI_BROWSER_SCROLLBAR,
+            null,
+            function (el, options) {
+                this._aProperty = ['overflowY', 'scrollTop', 'height', null, 'offsetHeight'];
+            }
+        );
 //{/if}//
 //{if $phase == "define"}//
     /**
      * 初始化浏览器原生水平滚动条控件。
      * @public
      *
-     * @param {Element} el 关联的 Element 对象
      * @param {Object} options 初始化选项
      */
-    var UI_BROWSER_HSCROLL =
-        function (el, options) {
-            UI_BROWSER_SCROLL.call(this, el, options);
-            this._aProperty = ['overflowX', 'scrollLeft', 'width', 'offsetWidth', null];
-        };
-//{else}//
-    inherits(UI_BROWSER_HSCROLL, UI_BROWSER_SCROLL);
+    var UI_BROWSER_HSCROLLBAR =
+        inheritsControl(
+            UI_BROWSER_SCROLLBAR,
+            null,
+            function (el, options) {
+                this._aProperty = ['overflowX', 'scrollLeft', 'width', 'offsetWidth', null];
+            }
+        );
 //{/if}//
 //{if $phase == "define"}//
     /**
      * 初始化夹角控件。
      * @public
      *
-     * @param {Element} el 关联的 Element 对象
      * @param {Object} options 初始化选项
      */
-    var UI_BROWSER_CORNER = blank,
-        UI_BROWSER_CORNER_CLASS = inherits(UI_BROWSER_CORNER, UI_CONTROL);
+    var UI_BROWSER_CORNER =
+        inheritsControl(
+            UI_CONTROL
+        ),
+        UI_BROWSER_CORNER_CLASS = UI_BROWSER_CORNER.prototype;
 //{else}//
     (function () {
         for (var name in UI_CONTROL_CLASS) {
@@ -236,7 +239,7 @@ $cache$mainHeight         - layout区域的实际高度
 //{/if}//
 //{if $phase == "define"}//
     /**
-     * 初始化层控件，层控件支持自动展现滚动条控件，允许指定需要自动展现的垂直或水平滚动条。
+     * 初始化截面控件，截面控件支持自动展现滚动条控件，允许指定需要自动展现的垂直或水平滚动条。
      * options 对象支持的属性如下：
      * vScroll    是否自动展现垂直滚动条，默认展现
      * hScroll    是否自动展现水平滚动条，默认展现
@@ -245,77 +248,74 @@ $cache$mainHeight         - layout区域的实际高度
      * wheelDelta 鼠标滚轮的步长，即滚动一次移动的最小步长单位，默认总步长(差值*步长)为不大于20像素的最大值
      * @public
      *
-     * @param {Element} el 关联的 Element 对象
      * @param {Object} options 初始化选项
      */
-    //__gzip_original__UI_PANEL
-    var UI_PANEL =
-        ui.Panel = function (el, options) {
-            UI_CONTROL.call(this, el, options);
+    var UI_PANEL = ui.Panel =
+        inheritsControl(
+            UI_CONTROL,
+            'ui-panel',
+            function (el, options) {
+                var i = 0,
+                    browser = options.browser,
+                    vscroll = options.vScroll !== false,
+                    hscroll = options.hScroll !== false,
+                    list = [
+                        [vscroll, '_uVScroll', browser ? UI_BROWSER_VSCROLLBAR : findConstructor(this, 'VScrollbar')],
+                        [hscroll, '_uHScroll', browser ? UI_BROWSER_HSCROLLBAR : findConstructor(this, 'HScrollbar')],
+                        [vscroll && hscroll, '_uCorner', browser ? UI_BROWSER_CORNER : UI_CONTROL]
+                    ],
+                    o = createDom(
+                        'ui-panel-main',
+                        'position:absolute;top:0px;left:0px' + (hscroll ? ';white-space:nowrap' : '')
+                    );
 
-            //__gzip_original__baseClass
-            var i = 0,
-                baseClass = options.base,
-                browser = options.browser,
-                vscroll = options.vScroll !== false,
-                hscroll = options.hScroll !== false,
-                list = [
-                    [vscroll, '_uVScroll', browser ? UI_BROWSER_VSCROLL : UI_VSCROLL],
-                    [hscroll, '_uHScroll', browser ? UI_BROWSER_HSCROLL : UI_HSCROLL],
-                    [vscroll && hscroll, '_uCorner', browser ? UI_BROWSER_CORNER : UI_CONTROL]
-                ],
-                o = createDom(
-                    baseClass + '-main',
-                    'position:absolute;top:0px;left:0px' + (hscroll ? ';white-space:nowrap' : '')
-                );
+                el.style.overflow = 'hidden';
+                moveElements(el, o, true);
 
-            el.style.overflow = 'hidden';
-            moveElements(el, o, true);
+                el.innerHTML =
+                    (browser ?
+                        '<div style="position:absolute;top:0px;left:0px;overflow:auto;padding:0px;border:0px">' +
+                            '<div style="width:1px;height:1px;padding:0px;border:0px"></div></div>'
+                        : (vscroll ?
+                            '<div class="ui-panel-vscrollbar ' + list[0][2].TYPES +
+                                '" style="position:absolute"></div>' : '') +
+                                (hscroll ?
+                                    '<div class="ui-panel-hscrollbar ' + list[1][2].TYPES +
+                                        '" style="position:absolute"></div>' : '') +
+                                (vscroll && hscroll ?
+                                    '<div class="ui-panel-corner ' + UI_CONTROL.TYPES +
+                                        '" style="position:absolute"></div>' : '')
+                    ) + '<div class="ui-panel-layout" style="position:relative;overflow:hidden;padding:0px"></div>';
 
-            el.innerHTML =
-                (browser ?
-                    '<div style="position:absolute;top:0px;left:0px;overflow:auto;padding:0px;border:0px">' +
-                        '<div style="width:1px;height:1px;padding:0px;border:0px"></div></div>'
-                    : (vscroll ?
-                        '<div class="ec-vscroll ' + baseClass + '-vscroll" style="position:absolute"></div>' : '') +
-                        (hscroll ?
-                            '<div class="ec-hscroll ' + baseClass + '-hscroll" style="position:absolute"></div>'
-                            : '') +
-                        (vscroll && hscroll ?
-                            '<div class="' + options.type + '-corner ' + baseClass +
-                                '-corner" style="position:absolute"></div>'
-                            : '')
-                ) + '<div class="' + baseClass + '-layout" style="position:relative;overflow:hidden"></div>';
+                this.$setBody(el.lastChild.appendChild(o));
 
-            this.$setBody(el.lastChild.appendChild(o));
+                this._bAbsolute = options.absolute;
+                this._nWheelDelta = options.wheelDelta;
 
-            this._bAbsolute = options.absolute;
-            this._nWheelDelta = options.wheelDelta;
+                el = el.firstChild;
+                if (browser) {
+                    this._eBrowser = el;
+                }
 
-            el = el.firstChild;
-            if (browser) {
-                this._eBrowser = el;
-            }
-
-            // 生成中心区域的Element层容器，滚动是通过改变容器的left与top属性实现
-            for (; o = list[i++]; ) {
-                if (o[0]) {
-                    this[o[1]] = $fastCreate(o[2], el, this);
-                    if (!browser) {
-                        el = el.nextSibling;
+                // 生成中心区域的Element层容器，滚动是通过改变容器的left与top属性实现
+                for (; o = list[i++]; ) {
+                    if (o[0]) {
+                        this[o[1]] = $fastCreate(o[2], el, this);
+                        if (!browser) {
+                            el = el.nextSibling;
+                        }
                     }
                 }
             }
-        },
-        UI_PANEL_CLASS = inherits(UI_PANEL, UI_CONTROL);
+        ),
+        UI_PANEL_CLASS = UI_PANEL.prototype;
 //{else}//
+
+    UI_PANEL.VScrollbar = UI_VSCROLLBAR;
+    UI_PANEL.HScrollbar = UI_HSCROLLBAR;
+
     /**
-     * 计算控件的缓存。
-     * 控件缓存部分核心属性的值，提高控件属性的访问速度，在子控件或者应用程序开发过程中，如果需要避开控件提供的方法(setSize、alterClass 等)直接操作 Element 对象，操作完成后必须调用 clearCache 方法清除控件的属性缓存，否则将引发错误。
-     * @protected
-     *
-     * @param {CssStyle} style 基本 Element 对象的 Css 样式对象
-     * @param {boolean} cacheSize 是否需要缓存控件大小，如果控件是另一个控件的部件时，不缓存大小能加快渲染速度，默认缓存
+     * @override
      */
     UI_PANEL_CLASS.$cache = function (style, cacheSize) {
         UI_CONTROL_CLASS.$cache.call(this, style, cacheSize);
@@ -360,9 +360,7 @@ $cache$mainHeight         - layout区域的实际高度
     };
 
     /**
-     * 销毁控件的默认处理。
-     * 页面卸载时将销毁所有的控件，释放循环引用，防止在 IE 下发生内存泄漏，$dispose 方法的调用不会受到 ondispose 事件返回值的影响。
-     * @protected
+     * @override
      */
     UI_PANEL_CLASS.$dispose = function () {
         this._eBrowser = null;
@@ -370,29 +368,8 @@ $cache$mainHeight         - layout区域的实际高度
     };
 
     /**
-     * 控件渲染完成后初始化的默认处理。
-     * $init 方法在控件渲染完成后调用，参见 create 与 init 方法。
-     * @protected
-     */
-    UI_PANEL_CLASS.$init = function () {
-        if (this._uVScroll) {
-            this._uVScroll.$init();
-        }
-        if (this._uHScroll) {
-            this._uHScroll.$init();
-        }
-        if (this._uCorner) {
-            this._uCorner.$init();
-        }
-        UI_CONTROL_CLASS.$init.call(this);
-    };
-
-    /**
      * 控件拥有焦点时，键盘按压事件的默认处理。Opera 下仅用 keydown 不能屏蔽方向键事件，还需要在 keypress 中屏蔽。
-     * 如果控件处于可操作状态(参见 isEnabled)，keydown/keypress 方法触发 onkeydown/onkeypress 事件，如果事件返回值不为 false，则调用 $keydown/$keypress 方法。
-     * @protected
-     *
-     * @param {Event} event 事件对象
+     * @override
      */
     UI_PANEL_CLASS.$keydown = UI_PANEL_CLASS.$keypress = function (event) {
         var which = getKey(),
@@ -407,11 +384,8 @@ $cache$mainHeight         - layout区域的实际高度
     };
 
     /**
-     * 鼠标在控件区域滚动滚轮事件的默认处理。
-     * 如果有垂直滚动条，则垂直滚动条随滚轮滚动。如果控件处于可操作状态(参见 isEnabled)，mousewheel 方法触发 onmousewheel 事件，如果事件返回值不为 false，则调用 $mousewheel 方法。
-     * @protected
-     *
-     * @param {Event} event 事件对象
+     * 如果有垂直滚动条，则垂直滚动条随滚轮滚动。
+     * @override
      */
     UI_PANEL_CLASS.$mousewheel = function (event) {
         scroll = this._uVScroll;
@@ -439,12 +413,7 @@ $cache$mainHeight         - layout区域的实际高度
     };
 
     /**
-     * 设置控件的大小。
-     * $setSize 方法设置控件实际的大小，不改变其它的如缓存等信息。
-     * @protected
-     *
-     * @param {number} width 宽度，如果不需要设置则将参数设置为等价于逻辑非的值
-     * @param {number} height 高度，如果不需要设置则省略此参数
+     * @override
      */
     UI_PANEL_CLASS.$setSize = function (width, height) {
         UI_CONTROL_CLASS.$setSize.call(this, width, height);
@@ -479,7 +448,7 @@ $cache$mainHeight         - layout区域的实际高度
         }
 
         if (mainWidth <= bodyWidth && mainHeight <= bodyHeight) {
-            // 宽度与高度都没有超过层控件的宽度与高度，不需要显示滚动条
+            // 宽度与高度都没有超过截面控件的宽度与高度，不需要显示滚动条
             if (vscroll) {
                 vscroll.$hide();
             }
@@ -570,7 +539,7 @@ $cache$mainHeight         - layout区域的实际高度
      * getScrollLeft 方法提供了对水平滚动条当前值的快捷访问方式，参见 getValue。
      * @public
      *
-     * @return {number} 水平滚动条的当前值，如果没有水平滚动条返回-1
+     * @return {number} 水平滚动条的当前值，如果没有水平滚动条返回 -1
      */
     UI_PANEL_CLASS.getScrollLeft = function () {
         var scroll = this._uHScroll;
@@ -582,11 +551,27 @@ $cache$mainHeight         - layout区域的实际高度
      * getScrollTop 方法提供了对水平滚动条当前值的快捷访问方式，参见 getValue。
      * @public
      *
-     * @return {number} 垂直滚动条的当前值，如果没有垂直滚动条返回-1
+     * @return {number} 垂直滚动条的当前值，如果没有垂直滚动条返回 -1
      */
     UI_PANEL_CLASS.getScrollTop = function () {
         var scroll = this._uVScroll;
         return scroll ? scroll.getValue() : -1;
+    };
+
+    /**
+     * @override
+     */
+    UI_PANEL_CLASS.init = function () {
+        UI_CONTROL_CLASS.init.call(this);
+        if (this._uVScroll) {
+            this._uVScroll.init();
+        }
+        if (this._uHScroll) {
+            this._uHScroll.init();
+        }
+        if (this._uCorner) {
+            this._uCorner.init();
+        }
     };
 //{/if}//
 //{if 0}//

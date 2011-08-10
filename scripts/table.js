@@ -91,7 +91,6 @@ _aCol        - 行的列Element对象，如果当前列需要向左合并为null
      * 初始化表格控件。
      * @public
      *
-     * @param {HTMLElement} el 关联的 Element 对象
      * @param {Object} options 初始化选项
      */
     //__gzip_original__UI_TABLE
@@ -196,7 +195,6 @@ _aCol        - 行的列Element对象，如果当前列需要向左合并为null
          * 初始化表格控件的行部件。
          * @public
          *
-         * @param {HTMLElement} el 关联的 Element 对象
          * @param {Object} options 初始化选项
          */
         UI_TABLE_ROW = UI_TABLE.Row = function (el, options) {
@@ -208,7 +206,6 @@ _aCol        - 行的列Element对象，如果当前列需要向左合并为null
          * 初始化表格控件的列部件。
          * @public
          *
-         * @param {HTMLElement} el 关联的 Element 对象
          * @param {Object} options 初始化选项
          */
         UI_TABLE_COL = UI_TABLE.Col = function (el, options) {
@@ -220,7 +217,6 @@ _aCol        - 行的列Element对象，如果当前列需要向左合并为null
          * 初始化表格控件的单元格部件。
          * @public
          *
-         * @param {HTMLElement} el 关联的 Element 对象
          * @param {Object} options 初始化选项
          */
         UI_TABLE_CELL = UI_TABLE.Cell = function (el, options) {

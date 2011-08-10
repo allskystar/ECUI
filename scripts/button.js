@@ -25,6 +25,8 @@ Button - 定义按钮的基本操作。
         UI_CONTROL_CLASS = UI_CONTROL.prototype;
 //{/if}//
 //{if $phase == "define"}//
+    ///__gzip_original__UI_BUTTON
+    ///__gzip_original__UI_BUTTON_CLASS
     /**
      * 初始化基础控件。
      * options 对象支持的属性如下：
@@ -33,25 +35,21 @@ Button - 定义按钮的基本操作。
      *
      * @param {Object} options 初始化选项
      */
-    ///__gzip_original__UI_BUTTON
-    ///__gzip_original__UI_BUTTON_CLASS
     var UI_BUTTON = ui.Button =
         inheritsControl(
             UI_CONTROL,
             'ui-button',
             function (el, options) {
-                UI_CONTROL.client.call(this, el, options);
-                this.setText(options.text);
+                if (options.text) {
+                    this.setText(options.text);
+                }
             }
         ),
         UI_BUTTON_CLASS = UI_BUTTON.prototype;
 //{else}//
     /**
-     * 控件获得激活事件的默认处理。
      * 按钮控件获得激活时需要阻止事件的冒泡。
-     * @protected
-     *
-     * @param {ecui.ui.Event} event 事件对象
+     * @override
      */
     UI_BUTTON_CLASS.$activate = function (event) {
         UI_CONTROL_CLASS.$activate.call(this, event);
@@ -59,11 +57,8 @@ Button - 定义按钮的基本操作。
     };
 
     /**
-     * 鼠标移出事件的默认处理。
-     * 鼠标移出控件区域时，控件失去悬停状态，移除状态样式 -hover，如果控件处于激活状态，移除状态样式 -active，移除状态样式不失去激活状态。
-     * @protected
-     *
-     * @param {ecui.ui.Event} event 事件对象
+     * 如果控件处于激活状态，移除状态样式 -active，移除状态样式不失去激活状态。
+     * @override
      */
     UI_BUTTON_CLASS.$mouseout = function (event) {
         UI_CONTROL_CLASS.$mouseout.call(this, event);
@@ -73,11 +68,8 @@ Button - 定义按钮的基本操作。
     };
 
     /**
-     * 鼠标移入事件的默认处理。
-     * 鼠标移入控件区域时，控件获得悬停状态，添加状态样式 -hover，如果控件处于激活状态，添加状态样式 -active。
-     * @protected
-     *
-     * @param {ecui.ui.Event} event 事件对象
+     * 如果控件处于激活状态，添加状态样式 -active。
+     * @override
      */
     UI_BUTTON_CLASS.$mouseover = function (event) {
         UI_CONTROL_CLASS.$mouseover.call(this, event);

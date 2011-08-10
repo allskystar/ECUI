@@ -51,11 +51,6 @@ _aChildCheckboxs - 所有的子复选框
             UI_INPUT_CONTROL,
             'ui-checkbox',
             function (el, options) {
-                options.hidden = true;
-                options.input = 'checkbox';
-
-                UI_INPUT_CONTROL.client.call(this, el, options);
-
                 el = this.getInput();
 
                 if (options.checked) {
@@ -67,6 +62,10 @@ _aChildCheckboxs - 所有的子复选框
                 this._aChildCheckboxs = [];
 
                 $connect(this, this.setParentCheckbox, options.parentCheckbox);
+            },
+            function (el, options) {
+                options.hidden = true;
+                options.input = 'checkbox';
             }
         ),
         UI_CHECKBOX_CLASS = UI_CHECKBOX.prototype;

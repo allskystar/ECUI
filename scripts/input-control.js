@@ -44,12 +44,14 @@ _eInput  - INPUT对象
         inheritsControl = core.inherits,
         loseFocus = core.loseFocus,
         setFocused = core.setFocused,
-        wrapperEvent = core.wrapperEvent,
+        wrapEvent = core.wrapEvent,
 
         UI_CONTROL = ui.Control,
         UI_CONTROL_CLASS = UI_CONTROL.prototype;
 //{/if}//
 //{if $phase == "define"}//
+    ///__gzip_original__UI_INPUT_CONTROL
+    ///__gzip_original__UI_INPUT_CONTROL_CLASS
     /**
      * 初始化输入控件。
      * options 对象支持的属性如下：
@@ -61,12 +63,11 @@ _eInput  - INPUT对象
      *
      * @param {Object} options 初始化选项
      */
-    ///__gzip_original__UI_INPUT_CONTROL
-    ///__gzip_original__UI_INPUT_CONTROL_CLASS
     var UI_INPUT_CONTROL = ui.InputControl =
         inheritsControl(
             UI_CONTROL,
             'ui-input-control',
+            null,
             function (el, options) {
                 var input = el;
 
@@ -98,7 +99,7 @@ _eInput  - INPUT对象
                 this._eInput = input;
                 UI_INPUT_CONTROL_BIND_EVENT(this);
 
-                UI_CONTROL.client.call(this, el, options);
+                return el;
             }
         ),
         UI_INPUT_CONTROL_CLASS = UI_INPUT_CONTROL.prototype,
@@ -111,7 +112,7 @@ _eInput  - INPUT对象
      * @param {Event} event 事件对象
      */
     function UI_INPUT_CONTROL_FORM_SUBMIT(event) {
-        event = wrapperEvent(event);
+        event = wrapEvent(event);
 
         //__transform__elements_list
         //__transform__el_o
@@ -132,7 +133,7 @@ _eInput  - INPUT对象
      * @param {Event} event 事件对象
      */
     function UI_INPUT_CONTROL_FORM_RESET(event) {
-        event = wrapperEvent(event);
+        event = wrapEvent(event);
 
         // 复位的处理延后执行，是为了能读取复位后的值
         timer(function () {
@@ -174,7 +175,7 @@ _eInput  - INPUT对象
         //__gzip_original__type
         var type = event.type;
 
-        event = findControl(wrapperEvent(event).target);
+        event = findControl(wrapEvent(event).target);
         // 设置默认失去焦点事件，阻止在blur/focus事件中再次回调
         event['$' + type] = UI_CONTROL_CLASS['$' + type];
         if (type == 'blur') {
@@ -200,7 +201,7 @@ _eInput  - INPUT对象
      * @param {Event} event 事件对象
      */
     UI_INPUT_CONTROL_INPUT.dragover = UI_INPUT_CONTROL_INPUT.drop = function (event) {
-        wrapperEvent(event).exit();
+        wrapEvent(event).exit();
     };
 
     /**
@@ -212,7 +213,7 @@ _eInput  - INPUT对象
     if (ieVersion) {
         UI_INPUT_CONTROL_INPUT.propertychange = function (event) {
             if (event.propertyName == 'value') {
-                event = findControl(wrapperEvent(event).target);
+                event = findControl(wrapEvent(event).target);
                 if (event.onchange) {
                     event.onchange();
                 }
@@ -229,9 +230,7 @@ _eInput  - INPUT对象
     }
 
     /**
-     * 销毁控件的默认处理。
-     * 页面卸载时将销毁所有的控件，释放循环引用，防止在 IE 下发生内存泄漏，$dispose 方法的调用不会受到 ondispose 事件返回值的影响。
-     * @protected
+     * @override
      */
     UI_INPUT_CONTROL_CLASS.$dispose = function () {
         this._eInput.getControl = undefined;
@@ -250,11 +249,7 @@ _eInput  - INPUT对象
     };
 
     /**
-     * 直接设置父控件。
-     * 相对于 setParent 方法，$setParent 方法仅设置控件对象逻辑上的父对象，不进行任何逻辑上的检查，用于某些特殊情况下的设定，如下拉框控件中的选项框子控件需要使用 $setParent 方法设置它的逻辑父控件为下拉框控件。
-     * @protected
-     *
-     * @param {ecui.ui.Control} parent ECUI 控件对象
+     * @override
      */
     UI_INPUT_CONTROL_CLASS.$setParent = function (parent) {
         UI_CONTROL_CLASS.$setParent.call(this, parent);
@@ -268,11 +263,7 @@ _eInput  - INPUT对象
     };
 
     /**
-     * 设置控件的大小。
-     * @protected
-     *
-     * @param {number} width 宽度，如果不需要设置则将参数设置为等价于逻辑非的值
-     * @param {number} height 高度，如果不需要设置则省略此参数
+     * @override
      */
     UI_INPUT_CONTROL_CLASS.$setSize = function (width, height) {
         UI_CONTROL_CLASS.$setSize.call(this, width, height);
@@ -289,11 +280,8 @@ _eInput  - INPUT对象
     UI_INPUT_CONTROL_CLASS.$submit = blank;
 
     /**
-     * 控件获得失效状态。
-     * 控件获得失效状态时，添加状态样式 -disabled(参见 alterClass 方法)。disable 方法导致控件失去激活、悬停、焦点状态，所有子控件的 isDisabled 方法返回 true，但不会设置子控件的失效状态样式。
-     * @public
-     *
-     * @return {boolean} 控件失效状态是否变化
+     * 输入控件获得失效需要设置输入框不提交。
+     * @override
      */
     UI_INPUT_CONTROL_CLASS.disable = function () {
         if (UI_CONTROL_CLASS.disable.call(this)) {
@@ -316,11 +304,8 @@ _eInput  - INPUT对象
     };
 
     /**
-     * 控件解除失效状态。
-     * 控件解除失效状态时，移除状态样式 -disabled(参见 alterClass 方法)。enable 方法仅解除控件自身的失效状态，如果其父控件失效，isDisabled 方法返回 true。
-     * @public
-     *
-     * @return {boolean} 控件失效状态是否变化
+     * 输入控件解除失效需要设置输入框可提交。
+     * @override
      */
     UI_INPUT_CONTROL_CLASS.enable = function () {
         if (UI_CONTROL_CLASS.enable.call(this)) {

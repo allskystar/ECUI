@@ -742,7 +742,8 @@
             "params": [
                 {"name": "superClass", "type": "Function", "desc": "父控件类"},
                 {"name": "type", "type": "string", "desc": "子控件的类型样式"},
-                {"name": "constructor", "type": "Function", "desc": "子控件的标准构造函数，如果忽略将直接调用父控件类的构造函数"}
+                {"name": "constructor", "type": "Function", "desc": "子控件的标准构造函数，如果忽略将直接调用父控件类的构造函数"},
+                {"name": "before", "type": "Function", "desc": "子控件构造函数调用之前的设置函数，用于设置缺省的 options 值或根据条件转换主元素，before 的返回值是新的控件主元素，如果没有返回值，控件主元素不改变"}
             ],
             "return": {"type": "Function", "desc": "新控件的构造函数"}
         },
@@ -838,7 +839,7 @@
         },
 
         {
-            "name": "wrapperEvent",
+            "name": "wrapEvent",
             "type": "core",
             "desc": "包装事件对象。",
             "params": [
@@ -846,7 +847,7 @@
             ],
             "return": {"type": "ecui.ui.Event", "desc": "包装后的事件对象"},
             "remark": [
-                "wrapperEvent 方法将浏览器产生的鼠标与键盘事件包装并使原生对象符合 W3C 标准。属性如下：",
+                "wrapEvent 方法将浏览器产生的鼠标与键盘事件包装并使原生对象符合 W3C 标准。属性如下：",
                 "<table class=\"clsSTD\"><tr><td>pageX</td><td>number，鼠标的X轴坐标</td></tr><tr><td>pageY</td><td>number，鼠标的Y轴坐标</td></tr><tr><td>which</td><td>number，触发事件的按键码</td></tr><tr><td>target</td><td>HTMLElement，触发事件的 Element 对象</td></tr><tr><td>returnValue</td><td>boolean，是否进行默认处理</td></tr><tr><td>cancelBubble</td><td>boolean，是否取消冒泡</td></tr><tr><td>exit</td><td>Function，终止全部事件操作</td></tr><tr><td>getControl</td><td>Function，获取触发事件的 {'controls'|menu} 对象</td></tr><tr><td>getNative</td><td>Function，获取原生的事件对象</td></tr><tr><td>preventDefault</td><td>Function，阻止事件的默认处理</td></tr><tr><td>stopPropagation</td><td>Function，事件停止冒泡</td></tr></table>"
             ]
         },
@@ -1772,23 +1773,13 @@
         {
             "name": "disable",
             "type": "input-control",
-            "desc": "控件获得失效状态。",
-            "return": {"type": "boolean", "desc": "控件失效状态是否变化"},
-            "remark": [
-                "控件获得失效状态时，添加状态样式 -disabled(参见 alterClass 方法)。disable 方法导致控件失去激活、悬停、焦点状态，所有子控件的 {'isDisabled'|method:'control'} 方法返回 true，但不会设置子控件的失效状态样式。",
-                "输入控件获得失效需要设置输入框不提交。"
-            ]
+            "remark": "输入控件获得失效需要设置输入框不提交。"
         },
 
         {
             "name": "enable",
             "type": "input-control",
-            "desc": "控件解除失效状态。",
-            "return": {"type": "boolean", "desc": "控件失效状态是否变化"},
-            "remark": [
-                "控件解除失效状态时，移除状态样式 -disabled(参见 alterClass 方法)。enable 方法仅解除控件自身的失效状态，如果其父控件失效，{'isDisabled'|method:'control'} 方法返回 true。",
-                "输入控件解除失效需要设置输入框可提交。"
-            ]
+            "remark": "输入控件解除失效需要设置输入框可提交。"
         },
 
         {
@@ -1868,13 +1859,13 @@
         {
             "name": "$mouseout",
             "type": "button",
-            "remark": "鼠标移出控件区域时，控件失去悬停状态，移除状态样式 -hover，如果控件处于激活状态，移除状态样式 -active，移除状态样式不失去激活状态。"
+            "remark": "如果控件处于激活状态，移除状态样式 -active，移除状态样式不失去激活状态。"
         },
 
         {
             "name": "$mouseover",
             "type": "button",
-            "remark": "鼠标移入控件区域时，控件获得悬停状态，添加状态样式 -hover，如果控件处于激活状态，添加状态样式 -active。"
+            "remark": "如果控件处于激活状态，添加状态样式 -active。"
         },
 
         {
@@ -1902,7 +1893,7 @@
                 {"name": "x", "type": "number", "desc": "滑动按钮实际到达的X轴坐标"},
                 {"name": "y", "type": "number", "desc": "滑动按钮实际到达的Y轴坐标"}
             ],
-            "remark": "滑动按钮拖拽时，根据位置计算对应的当前值，然后通过 {'\\$setValue'|method:'scroll'} 方法直接设置。<font color=\"red\">虚方法，子控件必须实现。</font>"
+            "remark": "滑动按钮拖拽时，根据位置计算对应的当前值，然后通过 {'\\$setValue'|method:'scrollbar'} 方法直接设置。<font color=\"red\">虚方法，子控件必须实现。</font>"
         },
 
         {
@@ -1915,7 +1906,7 @@
             "name": "$flushThumb",
             "type": "scrollbar",
             "desc": "滑动按钮刷新。",
-            "remark": "当滚动条控件的大小或最大值/当前值发生变化时，滑动按钮的大小与位置需要同步改变，参见 {'setSize'|method:'scroll'}、{'setValue'|method:'scroll'} 与 {'setTotal'|method:'scroll'} 方法。<font color=\"red\">虚方法，子控件必须实现。</font>"
+            "remark": "当滚动条控件的大小或最大值/当前值发生变化时，滑动按钮的大小与位置需要同步改变，参见 {'setSize'|method:'scrollbar'}、{'setValue'|method:'scrollbar'} 与 {'setTotal'|method:'scrollbar'} 方法。<font color=\"red\">虚方法，子控件必须实现。</font>"
         },
 
         {
@@ -1923,13 +1914,13 @@
             "type": "scrollbar",
             "desc": "获取单页的步长。",
             "return": {"type": "number", "desc": "单页的步长"},
-            "remark": "如果使用 {'\\$setPageStep'|method:'scroll'} 方法设置了单页的步长，$getPageStep 方法直接返回设置的步长，否则 $getPageStep 返回最接近滚动条控件长度的步长的整数倍。<font color=\"red\">虚方法，子控件必须实现。</font>"
+            "remark": "如果使用 {'\\$setPageStep'|method:'scrollbar'} 方法设置了单页的步长，$getPageStep 方法直接返回设置的步长，否则 $getPageStep 返回最接近滚动条控件长度的步长的整数倍。<font color=\"red\">虚方法，子控件必须实现。</font>"
         },
 
         {
             "name": "$hide",
             "type": "scrollbar",
-            "remark": "隐藏滚动条控件时，滚动条控件的当前值需要复位为0，参见 {'setValue'|method:'scroll'} 方法。"
+            "remark": "隐藏滚动条控件时，滚动条控件的当前值需要复位为0，参见 {'setValue'|method:'scrollbar'} 方法。"
         },
 
         {
@@ -1941,7 +1932,7 @@
         {
             "name": "$mouseover",
             "type": "scrollbar",
-            "remark": "滚动条鼠标移出时，如果控件处于直接激活状态，将恢复自动滚动。"
+            "remark": "滚动条鼠标移入时，如果控件处于直接激活状态，将恢复自动滚动。"
         },
 
         {
@@ -1977,7 +1968,7 @@
             "type": "scrollbar",
             "desc": "获取滚动条控件的单次滚动步长。",
             "return": {"type": "number", "desc": "单次滚动步长"},
-            "remark": "getStep 方法返回滚动条控件发生滚动时，移动的最小步长值，通过 {'setStep'|method:'scroll'} 设置。"
+            "remark": "getStep 方法返回滚动条控件发生滚动时，移动的最小步长值，通过 {'setStep'|method:'scrollbar'} 设置。"
         },
 
         {
@@ -1985,7 +1976,7 @@
             "type": "scrollbar",
             "desc": "获取滚动条控件的最大值。",
             "return": {"type": "number", "desc": "控件的最大值"},
-            "remark": "getTotal 方法返回滚动条控件允许滚动的最大值，最大值、当前值与滑动按钮控件的实际位置互相影响，通过 {'setTotal'|method:'scroll'} 设置。"
+            "remark": "getTotal 方法返回滚动条控件允许滚动的最大值，最大值、当前值与滑动按钮控件的实际位置互相影响，通过 {'setTotal'|method:'scrollbar'} 设置。"
         },
 
         {
@@ -1993,7 +1984,7 @@
             "type": "scrollbar",
             "desc": "获取滚动条控件的当前值。",
             "return": {"type": "number", "desc": "控件的当前值"},
-            "remark": "getValue 方法返回滚动条控件的当前值，最大值、当前值与滑动按钮控件的实际位置互相影响，但是当前值不允许超过最大值，通过 {'setValue'|method:'scroll'} 方法设置。"
+            "remark": "getValue 方法返回滚动条控件的当前值，最大值、当前值与滑动按钮控件的实际位置互相影响，但是当前值不允许超过最大值，通过 {'setValue'|method:'scrollbar'} 方法设置。"
         },
 
         {
@@ -2023,7 +2014,7 @@
             "params": [
                 {"name": "value", "type": "number", "desc": "控件的当前值"}
             ],
-            "remark": "setValue 方法设置的值不能为负数，也不允许超过使用 {'setTotal'|method:'scroll'} 方法设置的控件的最大值，如果当前值不合法，将自动设置为最接近合法值的数值，当前值发生改变将导致滑动按钮控件刷新。"
+            "remark": "setValue 方法设置的值不能为负数，也不允许超过使用 {'setTotal'|method:'scrollbar'} 方法设置的控件的最大值，如果当前值不合法，将自动设置为最接近合法值的数值，当前值发生改变将导致滑动按钮控件刷新。"
         },
 
         {
@@ -2033,7 +2024,7 @@
             "params": [
                 {"name": "n", "type": "number", "desc": "移动的步长次数"}
             ],
-            "remark": "参数 value 必须是整数, 正数则向最大值方向移动，负数则向0方向移动，允许移动的区间在0-最大值之间，参见 {'setStep'|method:'scroll'}、{'setTotal'|method:'scroll'} 与 {'setValue'|method:'scroll'} 方法。"
+            "remark": "参数 value 必须是整数, 正数则向最大值方向移动，负数则向0方向移动，允许移动的区间在0-最大值之间，参见 {'setStep'|method:'scrollbar'}、{'setTotal'|method:'scrollbar'} 与 {'setValue'|method:'scrollbar'} 方法。"
         }
     ],
 
@@ -2058,6 +2049,13 @@
 
         {
             "name": "$scroll",
+            "type": "panel",
+            "desc": "控件的滚动条发生滚动的默认处理。",
+            "remark": "如果控件包含滚动条，滚动条滚动时触发 {'onscroll'|event:'panel'} 事件，如果事件返回值不为 false，则调用 $scroll 方法。"
+        },
+
+        {
+            "name": "$scroll",
             "type": "control",
             "desc": "滚动条滚动事件的默认处理。",
             "remark": "如果控件包含滚动条，滚动条滚动时触发 {'onscroll'|event:'control'} 事件，如果事件返回值不为 false，则调用 $scroll 方法。"
@@ -2067,16 +2065,16 @@
             "name": "getScrollLeft",
             "type": "panel",
             "desc": "获取水平滚动条的当前值。",
-            "return": {"type": "number", "desc": "水平滚动条的当前值，如果没有水平滚动条返回-1"},
-            "remark": "getScrollLeft 方法提供了对水平滚动条当前值的快捷访问方式，参见 {'getValue'|method:'scroll'} 方法。"
+            "return": {"type": "number", "desc": "水平滚动条的当前值，如果没有水平滚动条返回 -1"},
+            "remark": "getScrollLeft 方法提供了对水平滚动条当前值的快捷访问方式，参见 {'getValue'|method:'scrollbar'} 方法。"
         },
 
         {
             "name": "getScrollTop",
             "type": "panel",
             "desc": "获取垂直滚动条的当前值。",
-            "return": {"type": "number", "desc": "垂直滚动条的当前值，如果没有垂直滚动条返回-1"},
-            "remark": "getScrollTop 方法提供了对水平滚动条当前值的快捷访问方式，参见 {'getValue'|method:'scroll'} 方法。"
+            "return": {"type": "number", "desc": "垂直滚动条的当前值，如果没有垂直滚动条返回 -1"},
+            "remark": "getScrollTop 方法提供了对水平滚动条当前值的快捷访问方式，参见 {'getValue'|method:'scrollbar'} 方法。"
         }
     ],
 

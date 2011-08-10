@@ -60,7 +60,6 @@ _uClose     - 关闭按钮
      * titleAuto title 是否自适应宽度，默认自适应宽度
      * @public
      *
-     * @param {Element} el 关联的 Element 对象
      * @param {Object} options 初始化选项
      */
     //__gzip_original__UI_FORM
@@ -112,7 +111,6 @@ _uClose     - 关闭按钮
          * 初始化窗体控件的标题栏部件。
          * @public
          *
-         * @param {Element} el 关联的 Element 对象
          * @param {Object} options 初始化选项
          */
         UI_FORM_TITLE = UI_FORM.Title = function (el, options) {
@@ -124,7 +122,6 @@ _uClose     - 关闭按钮
          * 初始化窗体控件的关闭按钮部件。
          * @public
          *
-         * @param {Element} el 关联的 Element 对象
          * @param {Object} options 初始化选项
          */
         UI_FORM_CLOSE = UI_FORM.Close = function (el, options) {

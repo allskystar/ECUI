@@ -59,7 +59,6 @@ _oFormat    - 允许提交的格式正则表达式
      *
      * @public
      *
-     * @param {Element} el 关联的 Element 对象
      * @param {Object} options 初始化选项
      */
     //__gzip_original__UI_FORMAT_EDIT

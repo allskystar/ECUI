@@ -85,6 +85,8 @@ $cache$position          - 控件布局方式缓存
         ];
 //{/if}//
 //{if $phase == "define"}//
+    ///__gzip_original__UI_CONTROL
+    ///__gzip_original__UI_CONTROL_CLASS
     /**
      * 初始化基础控件。
      * options 对象支持的属性如下：
@@ -98,8 +100,6 @@ $cache$position          - 控件布局方式缓存
      *
      * @param {Object} options 初始化选项
      */
-    ///__gzip_original__UI_CONTROL
-    ///__gzip_original__UI_CONTROL_CLASS
     var UI_CONTROL = ui.Control =
         inheritsControl(
             Object,

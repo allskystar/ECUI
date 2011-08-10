@@ -99,26 +99,38 @@
          * @param {Function} superClass 父控件类
          * @param {string} type 子控件的类型样式
          * @param {Function} constructor 子控件的标准构造函数，如果忽略将直接调用父控件类的构造函数
+         * @param {Function} before 子控件构造函数调用之前的设置函数，用于设置缺省的 options 值或根据条件转换主元素，before 的返回值是新的控件主元素，如果没有返回值，控件主元素不改变
          * @return {Function} 新控件的构造函数
          */
-        inheritsControl = core.inherits = function (superClass, type, constructor) {
+        inheritsControl = core.inherits = function (superClass, type, constructor, before) {
             var agent = function (options) {
-                return createControl(constructor, options);
-            };
-
-            if (!constructor) {
-                constructor = function (el, options) {
-                    superClass.client.call(this, el, options);
+                    return createControl(agent.client, options);
                 };
-            }
 
             inherits(agent, superClass);
 
-            agent.types = (superClass.types || []).concat([type]);
+            agent.types = type ? [type].concat(superClass.types || []) : [];
             agent.TYPES = agent.types.join(' ');
 
-            inherits(agent.client = constructor, agent);
-            constructor.agent = agent;
+            superClass = superClass.client;
+            inherits(
+                agent.client =
+                    constructor || before ? function (el, options) {
+                        if (before) {
+                            el = before.call(this, el, options) || el;
+                        }
+                        if (superClass) {
+                            superClass.call(this, el, options);
+                        }
+                        if (constructor) {
+                            constructor.call(this, el, options);
+                        }
+                    } : function (el, options) {
+                        superClass.call(this, el, options);
+                    },
+                agent
+            );
+            agent.client.agent = agent;
 
             return agent;
         },
@@ -130,7 +142,7 @@
         query,
         restore,
         setFocused,
-        wrapperEvent,
+        wrapEvent,
 
         eventNames = [
             'mousedown', 'mouseover', 'mousemove', 'mouseout', 'mouseup',
@@ -207,7 +219,7 @@
                         activedControl = null;
                     }
 
-                    event = wrapperEvent(event);
+                    event = wrapEvent(event);
 
                     //__transform__control_o
                     var control = event.getControl();
@@ -250,7 +262,7 @@
 
                 // 鼠标移入的处理，需要计算是不是位于当前移入的控件之外，如果是需要触发移出事件
                 mouseover: function (event) {
-                    event = wrapperEvent(event);
+                    event = wrapEvent(event);
 
                     //__transform__control_o
                     var control = event.getControl(),
@@ -263,7 +275,7 @@
                 },
 
                 mousemove: function (event) {
-                    event = wrapperEvent(event);
+                    event = wrapEvent(event);
 
                     //__transform__control_o
                     var control = event.getControl();
@@ -272,7 +284,7 @@
                 },
 
                 mouseup: function (event) {
-                    event = wrapperEvent(event);
+                    event = wrapEvent(event);
 
                     //__transform__control_o
                     var control = event.getControl();
@@ -293,7 +305,7 @@
                 type: 'drag',
 
                 mousemove: function (event) {
-                    event = wrapperEvent(event);
+                    event = wrapEvent(event);
 
                     //__transform__target_o
                     var target = currEnv.target,
@@ -314,7 +326,7 @@
                 },
 
                 mouseup: function (event) {
-                    event = wrapperEvent(event);
+                    event = wrapEvent(event);
 
                     //__transform__target_o
                     var target = currEnv.target;
@@ -332,7 +344,7 @@
                 type: 'intercept',
 
                 mousedown: function (event) {
-                    event = wrapperEvent(event);
+                    event = wrapEvent(event);
 
                     //__transform__target_o
                     var target = currEnv.target,
@@ -370,7 +382,7 @@
                 type: 'zoom',
 
                 mousemove: function (event) {
-                    event = wrapperEvent(event);
+                    event = wrapEvent(event);
 
                     //__gzip_original__minWidth
                     //__gzip_original__maxWidth
@@ -399,7 +411,7 @@
                 },
 
                 mouseup: function (event) {
-                    event = wrapperEvent(event);
+                    event = wrapEvent(event);
 
                     //__transform__target_o
                     var target = currEnv.target;
@@ -583,7 +595,6 @@
 
             //__gzip_original__parent
             //__gzip_original__id
-            //__gzip_original__typeClass
             var i = 0,
                 parent = options.parent,
                 id = options.id,
@@ -1328,7 +1339,7 @@
          * @param {Event} event 事件对象
          * @return {ecui.ui.Event} 标准化后的事件对象
          */
-        wrapperEvent = core.wrapperEvent = function (event) {
+        wrapEvent = core.wrapEvent = function (event) {
             var body = DOCUMENT.body,
                 html = getParent(body);
 
@@ -1381,7 +1392,7 @@
          * @param {Event} event 事件对象
          */
         currEnv.keydown = currEnv.keypress = currEnv.keyup = function (event) {
-            event = wrapperEvent(event);
+            event = wrapEvent(event);
 
             //__gzip_original__type
             //__gzip_original__which
@@ -1413,7 +1424,7 @@
 
             // IE下取消对文字的选择不能仅通过 mousedown 事件进行
             currEnv.selectstart = function (event) {
-                event = wrapperEvent(event);
+                event = wrapEvent(event);
                 onselectstart(findControl(event.target), event);
             };
         }
@@ -1425,10 +1436,9 @@
          * @param {Event} event 事件对象
          */
         currEnv[firefoxVersion ? 'DOMMouseScroll' : 'mousewheel'] = function (event) {
-            event = wrapperEvent(event);
-            if (event._oNative.detail === undefined) {
-                event.detail = event._oNative.wheelDelta / -40;
-            }
+            event = wrapEvent(event);
+            event.detail =
+                event._oNative.detail === undefined ? event._oNative.wheelDelta / -40 : event._oNative.detail;
 
             // 拖拽状态下，不允许滚动
             if (currEnv.type == 'drag') {

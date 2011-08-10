@@ -45,7 +45,6 @@ _cSelected - 树的根节点拥有，保存当前选中的项
      * value 单选框的表单项的值
      * @public
      *
-     * @param {Element} el 关联的 Element 对象
      * @param {Object} options 初始化选项
      */
     //__gzip_original__UI_RADIO_TREE

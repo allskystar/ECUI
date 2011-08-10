@@ -66,7 +66,6 @@ _eContent        - 内容 DOM 元素
      * selected 选中的选项序号，默认为0
      * @protected
      *
-     * @param {HTMLElement} el 关联的 Element 对象
      * @param {Object} options 初始化选项
      */
     //__gzip_original__UI_TAB
@@ -109,7 +108,6 @@ _eContent        - 内容 DOM 元素
          * 初始化选项卡控件的按钮部件。
          * @protected
          *
-         * @param {HTMLElement} el 关联的 Element 对象
          * @param {Object} options 初始化选项
          */
         UI_TAB_BUTTON = UI_TAB.Button = function (el, options) {
@@ -123,7 +121,6 @@ _eContent        - 内容 DOM 元素
          * selected 当前项是否被选中
          * @protected
          *
-         * @param {HTMLElement} el 关联的 Element 对象
          * @param {Object} options 初始化选项
          */
         UI_TAB_ITEM = UI_TAB.Item = function (el, options) {

@@ -40,7 +40,6 @@ _aItem  - 子控件集合
      * 初始化网格控件。
      * @public
      *
-     * @param {Element} el 关联的 Element 对象
      * @param {Object} options 初始化选项
      */
     //__gzip_original__UI_COLLECTION
@@ -61,7 +60,6 @@ _aItem  - 子控件集合
          * 初始化网格控件的选项部件。
          * @public
          *
-         * @param {Element} el 关联的 Element 对象
          * @param {Object} options 初始化选项
          */
         UI_COLLECTION_ITEM = UI_COLLECTION.Item = function (el, options) {

@@ -34,7 +34,6 @@ _eMask - 完成的进度比例内容区域
      * rate 初始的百分比
      * @public
      *
-     * @param {Element} el 关联的 Element 对象
      * @param {Object} options 初始化选项
      */
     //__gzip_original__UI_PROGRESS

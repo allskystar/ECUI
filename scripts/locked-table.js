@@ -79,7 +79,6 @@ _cJoint      - 行(锁定行)对应的锁定行(行)控件
      * right-lock 右边需要锁定的列数
      * @public
      *
-     * @param {HTMLElement} el 关联的 Element 对象
      * @param {Object} options 初始化选项
      */
     //__gzip_original__UI_LOCKED_TABLE
@@ -130,7 +129,6 @@ _cJoint      - 行(锁定行)对应的锁定行(行)控件
          * 初始化高级表格控件的行部件。
          * @public
          *
-         * @param {HTMLElement} el 关联的 Element 对象
          * @param {Object} options 初始化选项
          */
         UI_LOCKED_TABLE_ROW = UI_LOCKED_TABLE.Row = function (el, options) {

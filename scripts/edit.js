@@ -64,7 +64,6 @@ _eInput  - INPUT对象
      * hidden 输入框是否隐藏，隐藏状态下将不会绑定键盘事件
      * @public
      *
-     * @param {Element} el 关联的 Element 对象
      * @param {Object} options 初始化选项
      */
     //__gzip_original__UI_EDIT

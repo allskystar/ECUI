@@ -42,7 +42,6 @@ Item/Items - 定义选项操作相关的基本操作。
      * parent 父控件对象
      * @public
      *
-     * @param {Element} el 关联的 Element 对象
      * @param {string|Object} options 对象
      */
     //__gzip_original__UI_ITEM

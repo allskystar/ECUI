@@ -29,7 +29,6 @@ _cFor - 被转发的控件对象
      * for 被转发的控件 id
      * @public
      *
-     * @param {Element} el 关联的 Element 对象
      * @param {Object} options 初始化选项
      */
     //__gzip_original__UI_LABEL

@@ -46,7 +46,6 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
      * month   日历控件的月份(1-12)
      * @public
      *
-     * @param {Element} el 关联的 Element 对象
      * @param {Object} options 初始化选项
      */
     //__gzip_original__UI_CALENDAR
@@ -84,7 +83,6 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
          * 初始化日历控件的日期集合部件。
          * @public
          *
-         * @param {Element} el 关联的 Element 对象
          * @param {Object} options 初始化选项
          */
          UI_CALENDAR_DATE_COLLECTION = UI_CALENDAR.Date = function (el, options) {

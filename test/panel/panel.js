@@ -27,7 +27,7 @@ describe('截面控件初始化测试', {
             + '<div style="position:absolute;left:81px;top:81px;width:20px;height:20px"></div></div>';
         document.body.appendChild(el);
 
-        var ctrl = ecui.create('Panel', {element: el}),
+        var ctrl = ecui.create('Panel', {main: el}),
             hscroll = ctrl.$getSection('HScroll'),
             vscroll = ctrl.$getSection('VScroll'),
             corner = ctrl.$getSection('Corner');
@@ -48,7 +48,7 @@ describe('截面控件初始化测试', {
             + '<div style="position:absolute;left:81px;top:81px;width:20px;height:20px"></div></div>';
         document.body.appendChild(el);
 
-        var ctrl = ecui.create('Panel', {element: el, absolute: true}),
+        var ctrl = ecui.create('Panel', {main: el, absolute: true}),
             hscroll = ctrl.$getSection('HScroll'),
             vscroll = ctrl.$getSection('VScroll'),
             corner = ctrl.$getSection('Corner');
@@ -70,7 +70,7 @@ describe('功能测试', {
         el.style.cssText = 'width:100px;height:100px;position:absolute';
         el.innerHTML = '<div style="width:100px;height:100px"></div>';
         document.body.appendChild(el);
-        ecui.create('Panel', {id: 'panel', element: el, wheelDelta: 20});
+        ecui.create('Panel', {id: 'panel', main: el, wheelDelta: 20});
     },
 
     'after': function () {
@@ -114,10 +114,8 @@ describe('功能测试', {
     '截面控件结构' : function () {
         var ctrl = ecui.get('panel'),
             el = ctrl.getBody();
-        value_of(el.className).should_be('custom-main');
-        value_of(el.parentNode.className).should_be('custom-layout');
-        value_of(el.parentNode.parentNode).should_be(ctrl.getBase());
-        value_of(ctrl.getBase()).should_be(ctrl.getOuter());
+        value_of(el.parentNode.parentNode).should_be(ctrl.getMain());
+        value_of(ctrl.getMain()).should_be(ctrl.getOuter());
     },
 
     '滚动条自动复位': function () {
@@ -138,6 +136,7 @@ describe('功能测试', {
 
         ecui.setFocused(ctrl);
         ctrl.setSize(50, 50);
+        uiut.MockEvents.mouseover(ctrl.getMain());
         uiut.MockEvents.mousewheel(document, {detail: 3});
         value_of(ctrl.getScrollTop()).should_be(20);
     }
