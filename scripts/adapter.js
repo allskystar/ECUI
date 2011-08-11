@@ -674,6 +674,52 @@
         blank = util.blank = function () {
         },
 
+        /**
+         * 调用指定对象超类的指定方法。
+         * callSuper 用于不确定超类类型时的访问，例如接口内定义的方法。请注意，接口不允许被子类实现两次，否则将会引发死循环。
+         * @public
+         *
+         * @param {Object} object 需要操作的对象
+         * @param {string} name 方法名称
+         * @return {Object} 超类方法的返回值
+         */
+        callSuper = util.callSuper = function (object, name) {
+            /**
+             * 查找指定的方法对应的超类方法。
+             * @private
+             *
+             * @param {Object} clazz 查找的起始类对象
+             * @param {Function} caller 基准方法，即查找 caller 对应的超类方法
+             * @return {Function} 基准方法对应的超类方法，没有找到基准方法返回 undefined，基准方法没有超类方法返回 null
+             */
+            function findPrototype(clazz, caller) {
+                for (; clazz; clazz = clazz.constructor.superClass) {
+                    if (clazz[name] == caller) {
+                        for (; clazz = clazz.constructor.superClass; ) {
+                            if (clazz[name] != caller) {
+                                return clazz[name];
+                            }
+                        }
+                        return null;
+                    }
+                }
+            }
+
+            //__gzip_original__clazz
+            var clazz = object.constructor.prototype,
+                caller = callSuper.caller,
+                func = findPrototype(clazz, caller);
+
+            if (func === undefined) {
+                // 如果Items的方法直接位于prototype链上，是caller，如果是间接被别的方法调用Items.xxx.call，是caller.caller
+                func = findPrototype(clazz, caller.caller);
+            }
+
+            if (func) {
+                return func.apply(object, caller.arguments);
+            }
+        },
+
         /*
          * 返回 false。
          * cancel 方法不应该被执行，它每次返回 false，用于提供给需要返回逻辑假操作的事件方法进行赋值，例如需要取消默认事件操作的情况，与 cancel 类似的用于给事件方法进行赋值，而不直接被执行的方法还有 blank。

@@ -248,6 +248,8 @@ $cache$position          - 控件布局方式缓存
         }
         this._eMain.getControl = undefined;
         this._eMain = this._eBody = null;
+        // 取消 $ready 的操作，防止控件在 onload 结束前被 dispose，从而引发 $ready 访问的信息错误的问题
+        this.$ready = blank;
     };
 
     /**

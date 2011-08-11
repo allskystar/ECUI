@@ -2,9 +2,9 @@ describe('控件初始化测试', {
     '通过<input>初始化': function () {
         var el = document.createElement('input');
         el.style.cssText = 'width:20px;height:20px;display:none';
-        var ctrl = ecui.create('Radio', {element: el});
+        var ctrl = ecui.create('Radio', {main: el});
 
-        value_of(ctrl.getBase()).should_be(el.parentNode);
+        value_of(ctrl.getMain()).should_be(el.parentNode);
         value_of(ctrl.getInput()).should_be(el);
         value_of(ctrl.getWidth()).should_be(20);
         value_of(ctrl.getHeight()).should_be(20);
@@ -16,9 +16,9 @@ describe('控件初始化测试', {
     '通过<div>初始化': function () {
         var el = document.createElement('div');
         el.style.cssText = 'width:20px;height:20px;display:none';
-        var ctrl = ecui.create('Radio', {element: el});
+        var ctrl = ecui.create('Radio', {main: el});
 
-        value_of(ctrl.getBase()).should_be(el);
+        value_of(ctrl.getMain()).should_be(el);
         value_of(ctrl.getInput()).should_be(el.firstChild);
         value_of(ctrl.getWidth()).should_be(20);
         value_of(ctrl.getHeight()).should_be(20);
@@ -32,9 +32,9 @@ describe('控件初始化测试', {
             input = document.createElement('input');
         el.style.cssText = 'width:20px;height:20px;display:none';
         el.appendChild(input);
-        var ctrl = ecui.create('Radio', {element: el});
+        var ctrl = ecui.create('Radio', {main: el});
 
-        value_of(ctrl.getBase()).should_be(el);
+        value_of(ctrl.getMain()).should_be(el);
         value_of(ctrl.getInput()).should_be(input);
         value_of(ctrl.getWidth()).should_be(20);
         value_of(ctrl.getHeight()).should_be(20);
@@ -43,21 +43,43 @@ describe('控件初始化测试', {
         ecui.dispose(ctrl);
     },
 
-    '指定checked为true': function () {
+    '指定checked为true(input)': function () {
         var el = document.createElement('div');
         el.id = 'group';
-        el.innerHTML = '<div ecui="type:radio;id:item1;name:old"></div>'
-            + '<div ecui="type:radio;id:item2;checked:true;name:old"></div>'
-            + '<div ecui="type:radio;id:item3;checked:true;name:old"></div>'
+        el.innerHTML = '<form><input ecui="type:radio;id:item1" name="old" type="radio">'
+            + '<input ecui="type:radio;id:item2" type="radio" name="old" checked>'
+            + '<input ecui="type:radio;id:item3" type="radio" name="old" checked></form>'
         document.body.appendChild(el);
         ecui.init(el);
 
         value_of(ecui.get('item1').isChecked()).should_be_false();
-        value_of(ecui.get('item1').getClass()).should_be('ec-radio');
+        value_of(ecui.get('item1').getClass()).should_be('ui-radio');
         value_of(ecui.get('item2').isChecked()).should_be_false();
-        value_of(ecui.get('item2').getClass()).should_be('ec-radio');
+        value_of(ecui.get('item2').getClass()).should_be('ui-radio');
         value_of(ecui.get('item3').isChecked()).should_be_true();
-        value_of(ecui.get('item3').getClass()).should_be('ec-radio-checked');
+        value_of(ecui.get('item3').getClass()).should_be('ui-radio-checked');
+
+        var el = document.getElementById('group');
+        ecui.setFocused();
+        ecui.dispose(el);
+        document.body.removeChild(el);
+    },
+
+    '指定checked为true(options)': function () {
+        var el = document.createElement('div');
+        el.id = 'group';
+        el.innerHTML = '<form><div ecui="type:radio;id:item1;name:old"></div>'
+            + '<div ecui="type:radio;id:item2;checked:true;name:old"></div>'
+            + '<div ecui="type:radio;id:item3;checked:true;name:old"></div></form>'
+        document.body.appendChild(el);
+        ecui.init(el);
+
+        value_of(ecui.get('item1').isChecked()).should_be_false();
+        value_of(ecui.get('item1').getClass()).should_be('ui-radio');
+        value_of(ecui.get('item2').isChecked()).should_be_false();
+        value_of(ecui.get('item2').getClass()).should_be('ui-radio');
+        value_of(ecui.get('item3').isChecked()).should_be_true();
+        value_of(ecui.get('item3').getClass()).should_be('ui-radio-checked');
 
         var el = document.getElementById('group');
         ecui.setFocused();
@@ -70,11 +92,11 @@ describe('单选框功能测试', {
     'before': function () {
         var el = document.createElement('div');
         el.id = 'group';
-        el.innerHTML = '<div ecui="type:radio;id:item1;name:old" style="width:10px;height:10px"></div>'
+        el.innerHTML = '<form><div ecui="type:radio;id:item1;name:old" style="width:10px;height:10px"></div>'
             + '<div ecui="type:radio;id:item2;name:old" style="width:10px;height:10px"></div>'
             + '<div ecui="type:radio;id:item3;name:old" style="width:10px;height:10px"></div>'
             + '<div ecui="type:radio;id:item4;name:old" style="width:10px;height:10px"></div>'
-            + '<div ecui="type:radio;id:item5;name:old" style="width:10px;height:10px"></div>';
+            + '<div ecui="type:radio;id:item5;name:old" style="width:10px;height:10px"></div></form>';
         document.body.appendChild(el);
         ecui.init(el);
     },
@@ -136,29 +158,29 @@ describe('单选框功能测试', {
         value_of(item5.isChecked()).should_be_false();
     },
 
-    '选中状态控制(checked/isChecked)': function () {
+    '选中状态控制(setChecked/isChecked)': function () {
         var item1 = ecui.get('item1'),
             item2 = ecui.get('item2');
 
-        item2.checked();
+        item2.setChecked(true);
         value_of(item2.isChecked()).should_be_true();
         value_of(item1.isChecked()).should_be_false();
-        value_of(baidu.dom.hasClass(item2.getBase(), 'ec-radio-checked')).should_be_true();
-        value_of(baidu.dom.hasClass(item1.getBase(), 'ec-radio-checked')).should_be_false();
+        value_of(baidu.dom.hasClass(item2.getMain(), 'ui-radio-checked')).should_be_true();
+        value_of(baidu.dom.hasClass(item1.getMain(), 'ui-radio-checked')).should_be_false();
 
-        uiut.MockEvents.mousedown(item1.getBase());
-        uiut.MockEvents.mouseup(item1.getBase());
+        uiut.MockEvents.mousedown(item1.getMain());
+        uiut.MockEvents.mouseup(item1.getMain());
         value_of(item1.isChecked()).should_be_true();
         value_of(item2.isChecked()).should_be_false();
-        value_of(baidu.dom.hasClass(item1.getBase(), 'ec-radio-checked')).should_be_true();
-        value_of(baidu.dom.hasClass(item2.getBase(), 'ec-radio-checked')).should_be_false();
+        value_of(baidu.dom.hasClass(item1.getMain(), 'ui-radio-checked')).should_be_true();
+        value_of(baidu.dom.hasClass(item2.getMain(), 'ui-radio-checked')).should_be_false();
 
         ecui.setFocused(item2);
-        uiut.MockEvents.keydown(item2.getBase(), 32);
-        uiut.MockEvents.keyup(item2.getBase(), 32);
+        uiut.MockEvents.keydown(item2.getMain(), 32);
+        uiut.MockEvents.keyup(item2.getMain(), 32);
         value_of(item2.isChecked()).should_be_true();
         value_of(item1.isChecked()).should_be_false();
-        value_of(baidu.dom.hasClass(item2.getBase(), 'ec-radio-checked')).should_be_true();
-        value_of(baidu.dom.hasClass(item1.getBase(), 'ec-radio-checked')).should_be_false();
+        value_of(baidu.dom.hasClass(item2.getMain(), 'ui-radio-checked')).should_be_true();
+        value_of(baidu.dom.hasClass(item1.getMain(), 'ui-radio-checked')).should_be_false();
     }
 });

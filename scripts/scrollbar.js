@@ -1,6 +1,6 @@
 /*
 Scrollbar - 定义在区间轴内移动的基本操作。
-滚动条控件，继承自基础控件。滚动条控件，内部包含三个部件，分别是向前(滚动条的当前值变小)滚动按钮、向后(滚动条的当前值变大)滚动按钮与滑动按钮。滚动条控件是滚动行为的虚拟实现，不允许直接初始化，它的子类通常情况下也不会被直接初始化，而是作为控件的一部分用于控制父控件的行为。
+滚动条控件，继承自基础控件，是滚动行为的虚拟实现，不允许直接初始化，它的子类通常情况下也不会被直接初始化，而是作为控件的一部分用于控制父控件的行为。
 
 属性
 _nTotal         - 滚动条区域允许设置的最大值
@@ -68,9 +68,9 @@ _oRange         - 滑动按钮的合法滑动区间
                     thumbClass = findConstructor(this, 'Thumb');
 
                 el.innerHTML =
-                    '<div class="ui-scrollbar-prev ' +
+                    '<div class="ui-scrollbar-prev' +
                         buttonClass.TYPES +
-                        '" style="position:absolute;top:0px;left:0px"></div><div class="ui-scrollbar-next ' +
+                        '" style="position:absolute;top:0px;left:0px"></div><div class="ui-scrollbar-next' +
                         buttonClass.TYPES +
                         '" style="position:absolute;top:0px;left:0px"></div><div class="' +
                         thumbClass.TYPES +

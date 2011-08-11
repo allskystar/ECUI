@@ -10,6 +10,7 @@
 //{include file="button.js"}//
 //{include file="scrollbar.js"}//
 //{include file="panel.js"}//
+//{include file="items.js"}//
 //{include file="checkbox.js"}//
 //{include file="radio.js"}//
 
@@ -18,7 +19,6 @@
 //*{include file="form.js"}//
 //*{include file="collection.js"}//
 //*{include file="calendar.js"}//
-//*{include file="items.js"}//
 //*{include file="popup.js"}//
 //*{include file="tab.js"}//
 //*{include file="format-edit.js"}//

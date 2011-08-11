@@ -1,6 +1,6 @@
 ﻿/*
 Panel - 定义在一个小区域内截取显示大区域内容的基本操作。
-截面控件，继承自基础控件。截面控件的内容区域可以超过控件实际大小，通过拖拽滚动条显示完整的内容，截面控件可以设置参数决定是否自动显示水平/垂直滚动条，如果设置不显示水平/垂直滚动条，水平/垂直内容超出的部分将直接被截断，当设置两个滚动条都不显示时，截面控件从显示效果上等同于基础控件。在截面控件上滚动鼠标滑轮，将控制截面控件往垂直方向(如果没有垂直滚动条则在水平方向)前移或者后移滚动条，在获得焦点后，通过键盘的方向键也可以操作截面控件的滚动条。
+截面控件，继承自基础控件，用于显示实际的内容区域超过控件显示区域的信息，通过拖拽滚动条显示完整的内容，截面控件可以设置参数决定是否自动显示水平/垂直滚动条，如果设置不显示水平/垂直滚动条，水平/垂直内容超出的部分将直接被截断，当设置两个滚动条都不显示时，截面控件从显示效果上等同于基础控件。在截面控件上滚动鼠标滑轮，将控制截面控件往垂直方向(如果没有垂直滚动条则在水平方向)前移或者后移滚动条，在获得焦点后，通过键盘的方向键也可以操作截面控件的滚动条。
 
 截面控件直接HTML初始化的例子:
 <div ecui="type:panel">
@@ -277,13 +277,13 @@ $cache$mainHeight         - layout区域的实际高度
                         '<div style="position:absolute;top:0px;left:0px;overflow:auto;padding:0px;border:0px">' +
                             '<div style="width:1px;height:1px;padding:0px;border:0px"></div></div>'
                         : (vscroll ?
-                            '<div class="ui-panel-vscrollbar ' + list[0][2].TYPES +
+                            '<div class="ui-panel-vscrollbar' + list[0][2].TYPES +
                                 '" style="position:absolute"></div>' : '') +
                                 (hscroll ?
-                                    '<div class="ui-panel-hscrollbar ' + list[1][2].TYPES +
+                                    '<div class="ui-panel-hscrollbar' + list[1][2].TYPES +
                                         '" style="position:absolute"></div>' : '') +
                                 (vscroll && hscroll ?
-                                    '<div class="ui-panel-corner ' + UI_CONTROL.TYPES +
+                                    '<div class="ui-panel-corner' + UI_CONTROL.TYPES +
                                         '" style="position:absolute"></div>' : '')
                     ) + '<div class="ui-panel-layout" style="position:relative;overflow:hidden;padding:0px"></div>';
 
@@ -368,7 +368,7 @@ $cache$mainHeight         - layout区域的实际高度
     };
 
     /**
-     * 控件拥有焦点时，键盘按压事件的默认处理。Opera 下仅用 keydown 不能屏蔽方向键事件，还需要在 keypress 中屏蔽。
+     * 接管对方向键的处理。
      * @override
      */
     UI_PANEL_CLASS.$keydown = UI_PANEL_CLASS.$keypress = function (event) {
@@ -379,7 +379,7 @@ $cache$mainHeight         - layout区域的实际高度
             if (scroll) {
                 scroll.skip(which + which % 2 - 39);
             }
-            return false;
+            event.preventDefault();
         }
     };
 

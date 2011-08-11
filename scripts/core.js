@@ -110,7 +110,7 @@
             inherits(agent, superClass);
 
             agent.types = type ? [type].concat(superClass.types || []) : [];
-            agent.TYPES = agent.types.join(' ');
+            agent.TYPES = ' ' + agent.types.join(' ');
 
             superClass = superClass.client;
             inherits(
@@ -606,8 +606,8 @@
                 return el.getControl();
             }
 
-            options.uid = 'ec-' + (++uniqueIndex);
-            el.className += ' ' + type.agent.TYPES + ' ' + o;
+            options.uid = 'ecui-' + (++uniqueIndex);
+            el.className += type.agent.TYPES + ' ' + o;
 
             // 如果没有指定基本样式，使用控件的样式作为基本样式
             if (!o) {
@@ -678,7 +678,7 @@
             type = type.client || type;
             options = options || {};
 
-            options.uid = 'ec-' + (++uniqueIndex);
+            options.uid = 'ecui-' + (++uniqueIndex);
             options.primary = o[0];
 
             type = new type(el, options);
@@ -1254,7 +1254,7 @@
          *
          * @param {ecui.ui.Control} control ECUI 控件
          * @param {ecui.ui.Event} event 事件对象
-         * @param {string} className 选择框的样式名称，如果省略将使用 ec-selector
+         * @param {string} className 选择框的样式名称，如果省略将使用 ui-selector
          */
         core.select = function (control, event, className) {
             function build(name) {
@@ -1271,7 +1271,7 @@
                     insertHTML(
                         DOCUMENT.body,
                         'BEFOREEND',
-                        '<div class="ec-control ec-selector" style="overflow:hidden"><div class="ec-selector-box">' +
+                        '<div class="ui-selector ui-control" style="overflow:hidden"><div class="ui-selector-box">' +
                             '</div></div>'
                     );
 //{if 0}//
@@ -1297,7 +1297,7 @@
 
                 selectorControl.setPosition(mouseX, mouseY);
                 selectorControl.setSize(1, 1);
-                selectorControl.setClass(className || 'ec-selector');
+                selectorControl.setClass(className || 'ui-selector');
                 selectorControl.show();
 
                 core.zoom(selectorControl, event);
@@ -1529,6 +1529,7 @@
          */
         function bubble(start, type, event, end) {
             event = event || new UI_EVENT(type);
+            event.cancelBubble = false;
             for (; start != end; start = start.getParent()) {
                 start[type](event);
                 if (event.cancelBubble) {

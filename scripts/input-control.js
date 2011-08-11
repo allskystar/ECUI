@@ -7,7 +7,9 @@ InputControl - 定义输入数据的基本操作。
 或:
 <div ecui="type:input-control;name:passwd;value:1111;inputType:password"></div>
 或:
-<div ecui="type:input-control"><input type="password" name="passwd" value="1111"></div>
+<div ecui="type:input-control">
+    <input type="password" name="passwd" value="1111">
+</div>
 
 属性
 _bHidden - 输入框是否隐藏

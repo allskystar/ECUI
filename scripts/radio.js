@@ -1,12 +1,15 @@
 /*
 Radio - 定义一组选项中选择唯一选项的基本操作。
-单选框控件，继承自输入框控件，实现了对原生 InputElement 单选框的功能扩展，支持对选中的图案的选择。单选框控件需要分组后
-使用，在表单项提交中，一组单选框控件中的第一个单选框保存提交用的表单内容。
+单选框控件，继承自输入框控件，实现了对原生 InputElement 单选框的功能扩展，支持对选中的图案的选择。单选框控件需要分组后使用，在表单项提交中，一组单选框控件中的第一个单选框保存提交用的表单内容。
 
 单选框控件直接HTML初始化的例子:
-<input ecui="type:radio" type="radio" name="test" checked="checked" />
-也可以使用其它标签初始化:
-<div ecui="type:radio;name:test;checked:true"></div>
+<input ecui="type:radio" name="city" value="beijing" checked="checked" type="radio">
+或
+<div ecui="type:radio;name:city;value:beijing;checked:true"></div>
+或
+<div ecui="type:radio">
+  <input name="city" value="beijing" checked="checked" type="radio">
+</div>
 
 属性
 _bDefault  - 默认的选中状态
@@ -53,13 +56,13 @@ _bDefault  - 默认的选中状态
             },
             function (el, options) {
                 options.hidden = true;
-                options.input = 'radio';
+                options.inputType = 'radio';
             }
         ),
         UI_RADIO_CLASS = UI_RADIO.prototype;
 //{else}//
     /**
-     * 单选框控件刷新
+     * 单选框控件刷新。
      * @private
      *
      * @param {ecui.ui.Radio} control 单选框控件
@@ -70,15 +73,12 @@ _bDefault  - 默认的选中状态
             var el = control.getInput();
             el.defaultChecked = el.checked = checked;
         }
-        control.setClass(control.getBaseClass() + (control.isChecked() ? '-checked' : ''));
+        control.setClass(control.getPrimary() + (control.isChecked() ? '-checked' : ''));
     }
 
     /**
-     * 鼠标单击控件事件的默认处理。
-     * 控件点击时将控件设置成为选中状态，同时取消同一个单选框控件组的其它控件的选中状态。如果控件处于可操作状态(参见 isEnabled)，click 方法触发 onclick 事件，如果事件返回值不为 false，则调用 $click 方法。
-     * @protected
-     *
-     * @param {Event} event 事件对象
+     * 控件点击时将控件设置成为选中状态，同时取消同一个单选框控件组的其它控件的选中状态。
+     * @override
      */
     UI_RADIO_CLASS.$click = function (event) {
         UI_INPUT_CONTROL_CLASS.$click.call(this, event);
@@ -86,36 +86,28 @@ _bDefault  - 默认的选中状态
     };
 
     /**
-     * 控件拥有焦点时，键盘事件的默认处理。
-     * 屏蔽空格键按下事件。Opera 下仅用 keydown 不能屏蔽空格键事件，还需要在 keypress 中屏蔽。如果控件处于可操作状态(参见 isEnabled)，keydown/keypress/keyup 方法触发 onkeydown/onkeypress/onkeyup 事件，如果事件返回值不为 false，则调用 $keydown/$keypress/$keyup 方法。
-     * @protected
-     *
-     * @param {Event} event 事件对象
+     * 接管对空格键的处理。
+     * @override
      */
     UI_RADIO_CLASS.$keydown = UI_RADIO_CLASS.$keypress = UI_RADIO_CLASS.$keyup = function (event) {
         UI_INPUT_CONTROL_CLASS['$' + event.type].call(this, event);
         if (event.which == 32) {
             if (event.type == 'keyup' && getKey() == 32) {
-                this.checked();
+                this.setChecked(true);
             }
-            event.exit();
+            event.preventDefault();
         }
     };
 
     /**
-     * 控件自动渲染全部完成后的处理。
-     * 页面刷新时，部分浏览器会回填输入框的值，需要在回填结束后触发设置控件的状态。
-     * @protected
+     * @override
      */
     UI_RADIO_CLASS.$ready = function () {
         UI_RADIO_FLUSH(this);
     };
 
     /**
-     * 输入框控件重置的默认处理。
-     * @protected
-     *
-     * @param {Event} event 事件对象
+     * @override
      */
     UI_RADIO_CLASS.$reset = function (event) {
         // 修复IE6/7下移动DOM节点时选中状态发生改变的问题
@@ -138,7 +130,11 @@ _bDefault  - 默认的选中状态
             o = list.name,
             result = [];
 
-        if (form) {
+        if (!o) {
+            return [this];
+        }
+        else if (form) {
+            // 必须 name 也不为空，否则 form[o] 的值在部分浏览器下将是空
             for (list = form[o]; o = list[i++]; ) {
                 if (o.getControl) {
                     result.push(o.getControl());
@@ -146,13 +142,10 @@ _bDefault  - 默认的选中状态
             }
             return result;
         }
-        else if (o) {
+        else {
             return query({type: UI_RADIO, custom: function (control) {
                 return !control.getInput().form && control.getName() == o;
             }});
-        }
-        else {
-            return [this];
         }
     };
 
@@ -167,9 +160,11 @@ _bDefault  - 默认的选中状态
     };
 
     /**
-     * 设置单选框控件为选中状态。
-     * 将控件设置成为选中状态，同时取消同一个单选框控件组的其它控件的选中状态。
+     * 设置单选框控件选中状态。
+     * 将控件设置成为选中状态，会取消同一个单选框控件组的其它控件的选中状态。
      * @public
+     *
+     * @param {boolean} checked 是否选中
      */
     UI_RADIO_CLASS.setChecked = function (checked) {
         if (this.isChecked() != checked) {
