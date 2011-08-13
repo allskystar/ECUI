@@ -1,23 +1,55 @@
-describe('截面控件初始化测试', {
-    '默认初始化显示两个滚动条': function () {
-        var ctrl = ecui.create('Panel');
-        value_of(ctrl.$getSection('HScroll')).should_not_be(void(0));
-        value_of(ctrl.$getSection('VScroll')).should_not_be(void(0));
-        ecui.dispose(ctrl);
+function before() {
+    var el = document.createElement('div');
+    el.style.cssText = 'width:100px;height:100px;position:absolute';
+    el.innerHTML = '<div style="width:100px;height:100px"></div>';
+    document.body.appendChild(el);
+    ecui.create('Panel', {id: 'panel', main: el, wheelDelta: 20});
+}
+
+function after() {
+    ecui.get('panel').appendTo();
+    ecui.dispose(ecui.get('panel'));
+}
+
+describe('控件初始化', {
+    '基本属性与部件属性': function () {
+        var el = ecui.dom.create('custom'),
+            control = ecui.create('Panel', {main: el}),
+            hscrollbar = control.$getSection('HScrollbar'),
+            vscrollbar = control.$getSection('VScrollbar'),
+            corner = control.$getSection('Corner'),
+            body = control.getBody(),
+            main = control.getMain();
+
+        el.setAttribute('flag', '1');
+
+        value_of(control.getTypes()).should_be(['ui-panel', 'ui-control']);
+        value_of(control.getClass()).should_be('custom');
+        value_of(hscrollbar.getTypes()).should_be(['ui-hscrollbar', 'ui-scrollbar', 'ui-control']);
+        value_of(hscrollbar.getClass()).should_be('ui-panel-hscrollbar');
+        value_of(vscrollbar.getTypes()).should_be(['ui-vscrollbar', 'ui-scrollbar', 'ui-control']);
+        value_of(vscrollbar.getClass()).should_be('ui-panel-vscrollbar');
+        value_of(corner.getTypes()).should_be(['ui-control']);
+        value_of(corner.getClass()).should_be('ui-panel-corner');
+
+        value_of(body.parentNode.parentNode).should_be(main);
+        value_of(main.getAttribute('flag')).should_be('1');
+        value_of(body.className).should_be('ui-panel-content');
+        value_of(body.parentNode.className).should_be('ui-panel-layout');
     },
 
-    '不产生水平方向滚动条': function () {
-        var ctrl = ecui.create('Panel', {hScroll: false});
-        value_of(ctrl.$getSection('HScroll')).should_be(void(0));
-        value_of(ctrl.$getSection('VScroll')).should_not_be(void(0));
-        ecui.dispose(ctrl);
-    },
+    '滚动条初始化': function () {
+        var control = ecui.create('Panel', {hScroll: false});
+        value_of(control.$getSection('HScrollbar')).should_be(void(0));
+        value_of(control.$getSection('VScrollbar')).should_not_be(void(0));
+        value_of(control.$getSection('Corner')).should_be(void(0));
+        ecui.dispose(control);
 
-    '不产生垂直方向滚动条': function () {
-        var ctrl = ecui.create('Panel', {vScroll: false});
-        value_of(ctrl.$getSection('VScroll')).should_be(void(0));
-        value_of(ctrl.$getSection('HScroll')).should_not_be(void(0));
-        ecui.dispose(ctrl);
+        var control = ecui.create('Panel', {vScroll: false});
+        value_of(control.$getSection('VScrollbar')).should_be(void(0));
+        value_of(control.$getSection('HScrollbar')).should_not_be(void(0));
+        value_of(control.$getSection('Corner')).should_be(void(0));
+        ecui.dispose(control);
     },
 
     '包含绝对定位的元素，不指定绝对定位参数': function () {
@@ -28,8 +60,8 @@ describe('截面控件初始化测试', {
         document.body.appendChild(el);
 
         var ctrl = ecui.create('Panel', {main: el}),
-            hscroll = ctrl.$getSection('HScroll'),
-            vscroll = ctrl.$getSection('VScroll'),
+            hscroll = ctrl.$getSection('HScrollbar'),
+            vscroll = ctrl.$getSection('VScrollbar'),
             corner = ctrl.$getSection('Corner');
 
         ctrl.setSize(100, 100);
@@ -49,8 +81,8 @@ describe('截面控件初始化测试', {
         document.body.appendChild(el);
 
         var ctrl = ecui.create('Panel', {main: el, absolute: true}),
-            hscroll = ctrl.$getSection('HScroll'),
-            vscroll = ctrl.$getSection('VScroll'),
+            hscroll = ctrl.$getSection('HScrollbar'),
+            vscroll = ctrl.$getSection('VScrollbar'),
             corner = ctrl.$getSection('Corner');
 
         ctrl.setSize(100, 100);
@@ -63,81 +95,80 @@ describe('截面控件初始化测试', {
     }
 });
 
-describe('功能测试', {
-    'before': function () {
-        var el = document.createElement('div');
-        el.className = 'custom';
-        el.style.cssText = 'width:100px;height:100px;position:absolute';
-        el.innerHTML = '<div style="width:100px;height:100px"></div>';
-        document.body.appendChild(el);
-        ecui.create('Panel', {id: 'panel', main: el, wheelDelta: 20});
-    },
-
-    'after': function () {
-        var ctrl = ecui.get('panel');
-        ctrl.setParent();
-        ecui.dispose(ctrl);
-    },
-
+test('setSize', {
     '控件大小改变隐藏或显示滚动条': function () {
-        var ctrl = ecui.get('panel'),
-            hscroll = ctrl.$getSection('HScroll'),
-            vscroll = ctrl.$getSection('VScroll'),
-            corner = ctrl.$getSection('Corner');
+        var control = ecui.get('panel'),
+            hscroll = control.$getSection('HScrollbar'),
+            vscroll = control.$getSection('VScrollbar'),
+            corner = control.$getSection('Corner');
 
-        ctrl.setSize(100, 100);
+        control.setSize(100, 100);
         value_of(hscroll.isShow()).should_be_false();
         value_of(vscroll.isShow()).should_be_false();
         value_of(corner.isShow()).should_be_false();
 
-        ctrl.setSize(115, 99);
+        control.setSize(115, 99);
         value_of(hscroll.isShow()).should_be_false();
         value_of(vscroll.isShow()).should_be_true();
         value_of(corner.isShow()).should_be_false();
 
-        ctrl.setSize(99, 115);
+        control.setSize(99, 115);
         value_of(hscroll.isShow()).should_be_true();
         value_of(vscroll.isShow()).should_be_false();
         value_of(corner.isShow()).should_be_false();
 
-        ctrl.setSize(99, 114);
+        control.setSize(99, 114);
         value_of(hscroll.isShow()).should_be_true();
         value_of(vscroll.isShow()).should_be_true();
         value_of(corner.isShow()).should_be_true();
 
-        ctrl.setSize(114, 99);
+        control.setSize(114, 99);
         value_of(hscroll.isShow()).should_be_true();
         value_of(vscroll.isShow()).should_be_true();
         value_of(corner.isShow()).should_be_true();
-    },
+    }
+});
 
-    '截面控件结构' : function () {
-        var ctrl = ecui.get('panel'),
-            el = ctrl.getBody();
-        value_of(el.parentNode.parentNode).should_be(ctrl.getMain());
-        value_of(ctrl.getMain()).should_be(ctrl.getOuter());
-    },
-
+test('hide', {
     '滚动条自动复位': function () {
-        var ctrl = ecui.get('panel'),
-            hscroll = ctrl.$getSection('HScroll');
+        var control = ecui.get('panel'),
+            hscroll = control.$getSection('HScrollbar');
 
-        ctrl.setSize(50, 50);
+        control.setSize(50, 50);
         hscroll.setValue(20);
-        value_of(ctrl.getBody().style.left).should_be('-20px');
+        value_of(control.getBody().style.left).should_be('-20px');
 
-        ctrl.setSize(100, 100);
-        value_of(ctrl.getBody().style.left).should_be('0px');
+        control.setSize(100, 100);
+        value_of(control.getBody().style.left).should_be('0px');
+    }
+});
+
+test('交互行为模拟', {
+    '键盘支持': function () {
+        var control = ecui.get('panel');
+
+        ecui.setFocused(control);
+        control.setSize(50, 50);
+        uiut.MockEvents.keydown(document, 40);
+        uiut.MockEvents.keydown(document, 40);
+        value_of(control.getScrollTop()).should_be(2);
+        uiut.MockEvents.keydown(document, 38);
+        value_of(control.getScrollTop()).should_be(1);
+        uiut.MockEvents.keydown(document, 39);
+        uiut.MockEvents.keydown(document, 39);
+        value_of(control.getScrollLeft()).should_be(2);
+        uiut.MockEvents.keydown(document, 37);
+        value_of(control.getScrollLeft()).should_be(1);
     },
 
     '鼠标滚轮支持': function () {
-        var ctrl = ecui.get('panel'),
-            vscroll = ctrl.$getSection('VScroll');
+        var control = ecui.get('panel'),
+            vscroll = control.$getSection('VScrollbar');
 
-        ecui.setFocused(ctrl);
-        ctrl.setSize(50, 50);
-        uiut.MockEvents.mouseover(ctrl.getMain());
+        ecui.setFocused(control);
+        control.setSize(50, 50);
+        uiut.MockEvents.mouseover(control.getMain());
         uiut.MockEvents.mousewheel(document, {detail: 3});
-        value_of(ctrl.getScrollTop()).should_be(20);
+        value_of(control.getScrollTop()).should_be(20);
     }
 });

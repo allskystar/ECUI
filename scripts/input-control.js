@@ -46,6 +46,7 @@ _eInput  - INPUT对象
         inheritsControl = core.inherits,
         loseFocus = core.loseFocus,
         setFocused = core.setFocused,
+        triggerEvent = core.triggerEvent,
         wrapEvent = core.wrapEvent,
 
         UI_CONTROL = ui.Control,
@@ -120,10 +121,7 @@ _eInput  - INPUT对象
         //__transform__el_o
         for (var i = 0, elements = event.target.elements, el; el = elements[i++]; ) {
             if (el.getControl) {
-                el = el.getControl();
-                if (!(el.onsubmit && el.onsubmit(event) === false)) {
-                    el.$submit(event);
-                }
+                triggerEvent(el.getControl(), 'submit', event);
             }
         }
     }
@@ -143,10 +141,7 @@ _eInput  - INPUT对象
             //__transform__el_o
             for (var i = 0, elements = event.target.elements, el; el = elements[i++]; ) {
                 if (el.getControl) {
-                    el = el.getControl();
-                    if (!(el.onreset && el.onreset(event) === false)) {
-                        el.$reset(event);
-                    }
+                    triggerEvent(el.getControl(), 'reset', event);
                 }
             }
         });
@@ -178,20 +173,16 @@ _eInput  - INPUT对象
         var type = event.type;
 
         event = findControl(wrapEvent(event).target);
+
         // 设置默认失去焦点事件，阻止在blur/focus事件中再次回调
         event['$' + type] = UI_CONTROL_CLASS['$' + type];
-        if (type == 'blur') {
-            loseFocus(event);
+        event[type]();
+
+        // 如果控件处于失效状态，不允许获得焦点
+        if (event.isDisabled()) {
+            event._eInput.blur();
         }
-        else {
-            // 如果控件处于失效状态，不允许获得焦点
-            if (event.isDisabled()) {
-                event._eInput.blur();
-            }
-            else {
-                setFocused(event);
-            }
-        }
+
         delete event['$' + type];
     };
 

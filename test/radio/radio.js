@@ -1,30 +1,50 @@
-describe('控件初始化测试', {
+function before() {
+    var el = document.createElement('div');
+    el.id = 'group';
+    el.innerHTML = '<form><div ecui="type:radio;id:item1;name:old" style="width:10px;height:10px"></div>'
+        + '<div ecui="type:radio;id:item2;name:old" style="width:10px;height:10px"></div>'
+        + '<div ecui="type:radio;id:item3;name:old" style="width:10px;height:10px"></div>'
+        + '<div ecui="type:radio;id:item4;name:old" style="width:10px;height:10px"></div>'
+        + '<div ecui="type:radio;id:item5;name:old" style="width:10px;height:10px"></div></form>';
+    document.body.appendChild(el);
+    ecui.init(el);
+}
+
+function after() {
+    var el = document.getElementById('group');
+    ecui.dispose(el);
+    document.body.removeChild(el);
+}
+
+describe('控件初始化', {
     '通过<input>初始化': function () {
         var el = document.createElement('input');
         el.style.cssText = 'width:20px;height:20px;display:none';
-        var ctrl = ecui.create('Radio', {main: el});
+        var control = ecui.create('Radio', {main: el});
 
-        value_of(ctrl.getMain()).should_be(el.parentNode);
-        value_of(ctrl.getInput()).should_be(el);
-        value_of(ctrl.getWidth()).should_be(20);
-        value_of(ctrl.getHeight()).should_be(20);
-        value_of(ctrl.getInput().offsetWidth).should_be(0);
+        value_of(control.getMain()).should_be(el.parentNode);
+        value_of(control.getInput()).should_be(el);
+        value_of(control.getWidth()).should_be(20);
+        value_of(control.getHeight()).should_be(20);
+        value_of(control.getInput().offsetWidth).should_be(0);
+        value_of(control.getTypes()).should_be(['ui-radio', 'ui-input-control', 'ui-control']);
 
-        ecui.dispose(ctrl);
+        ecui.dispose(control);
     },
 
     '通过<div>初始化': function () {
         var el = document.createElement('div');
         el.style.cssText = 'width:20px;height:20px;display:none';
-        var ctrl = ecui.create('Radio', {main: el});
+        var control = ecui.create('Radio', {main: el});
 
-        value_of(ctrl.getMain()).should_be(el);
-        value_of(ctrl.getInput()).should_be(el.firstChild);
-        value_of(ctrl.getWidth()).should_be(20);
-        value_of(ctrl.getHeight()).should_be(20);
-        value_of(ctrl.getInput().offsetWidth).should_be(0);
+        value_of(control.getMain()).should_be(el);
+        value_of(control.getInput()).should_be(el.firstChild);
+        value_of(control.getWidth()).should_be(20);
+        value_of(control.getHeight()).should_be(20);
+        value_of(control.getInput().offsetWidth).should_be(0);
+        value_of(control.getTypes()).should_be(['ui-radio', 'ui-input-control', 'ui-control']);
 
-        ecui.dispose(ctrl);
+        ecui.dispose(control);
     },
 
     '通过<div><input>初始化': function () {
@@ -32,15 +52,16 @@ describe('控件初始化测试', {
             input = document.createElement('input');
         el.style.cssText = 'width:20px;height:20px;display:none';
         el.appendChild(input);
-        var ctrl = ecui.create('Radio', {main: el});
+        var control = ecui.create('Radio', {main: el});
 
-        value_of(ctrl.getMain()).should_be(el);
-        value_of(ctrl.getInput()).should_be(input);
-        value_of(ctrl.getWidth()).should_be(20);
-        value_of(ctrl.getHeight()).should_be(20);
-        value_of(ctrl.getInput().offsetWidth).should_be(0);
+        value_of(control.getMain()).should_be(el);
+        value_of(control.getInput()).should_be(input);
+        value_of(control.getWidth()).should_be(20);
+        value_of(control.getHeight()).should_be(20);
+        value_of(control.getInput().offsetWidth).should_be(0);
+        value_of(control.getTypes()).should_be(['ui-radio', 'ui-input-control', 'ui-control']);
 
-        ecui.dispose(ctrl);
+        ecui.dispose(control);
     },
 
     '指定checked为true(input)': function () {
@@ -88,26 +109,39 @@ describe('控件初始化测试', {
     }
 });
 
-describe('单选框功能测试', {
-    'before': function () {
-        var el = document.createElement('div');
-        el.id = 'group';
-        el.innerHTML = '<form><div ecui="type:radio;id:item1;name:old" style="width:10px;height:10px"></div>'
-            + '<div ecui="type:radio;id:item2;name:old" style="width:10px;height:10px"></div>'
-            + '<div ecui="type:radio;id:item3;name:old" style="width:10px;height:10px"></div>'
-            + '<div ecui="type:radio;id:item4;name:old" style="width:10px;height:10px"></div>'
-            + '<div ecui="type:radio;id:item5;name:old" style="width:10px;height:10px"></div></form>';
-        document.body.appendChild(el);
-        ecui.init(el);
+test('交互行为模拟', {
+    '鼠标点击操作': function () {
+        var item1 = ecui.get('item1'),
+            item2 = ecui.get('item2');
+
+        uiut.MockEvents.mousedown(item1.getMain());
+        uiut.MockEvents.mouseup(item1.getMain());
+        value_of(item1.isChecked()).should_be_true();
+        uiut.MockEvents.mousedown(item2.getMain());
+        uiut.MockEvents.mouseup(item2.getMain());
+        value_of(item1.isChecked()).should_be_false();
+        value_of(item2.isChecked()).should_be_true();
     },
 
-    'after': function () {
-        var el = document.getElementById('group');
-        ecui.setFocused();
-        ecui.dispose(el);
-        document.body.removeChild(el);
-    },
+    '键盘操作': function () {
+        var item1 = ecui.get('item1'),
+            item2 = ecui.get('item2');
 
+        ecui.setFocused(item1);
+        uiut.MockEvents.keydown(document, 32);
+        value_of(item1.isChecked()).should_be_false();
+        uiut.MockEvents.keyup(document, 32);
+        value_of(item1.isChecked()).should_be_true();
+        ecui.setFocused(item2);
+        uiut.MockEvents.keydown(document, 32);
+        value_of(item1.isChecked()).should_be_true();
+        uiut.MockEvents.keyup(document, 32);
+        value_of(item1.isChecked()).should_be_false();
+        value_of(item2.isChecked()).should_be_true();
+    }
+});
+
+test('单选框组', {
     '获取同组单选框': function () {
         var item1 = ecui.get('item1'),
             item2 = ecui.get('item2'),

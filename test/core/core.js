@@ -386,12 +386,12 @@ test('intercept', {
             common = ecui.get('common'),
             el = ecui.get('parent').getMain();
 
-        common.onintercept = function () {
+        common.onintercept = function (event) {
             result.push('intercept');
             return false;
         };
 
-        common.onclick = function () {
+        common.onclick = function (event) {
             result.push('click');
             return false;
         };
@@ -414,7 +414,7 @@ test('intercept', {
         common.onclick = function () {
             result.push('common');
         };
-        child.onintercept = function () {
+        child.onintercept = function (event) {
             result.push('child');
             ecui.restore();
             return false;
@@ -540,6 +540,12 @@ test('setFocused', {
         ecui.setFocused(child);
         ecui.setFocused();
         value_of(result).should_be(['child-focus', 'parent-focus', 'child-blur', 'parent-blur']);
+
+        parent.focus();
+        child.disable();
+        value_of(ecui.getFocused()).should_be(parent);
+        ecui.setFocused(child);
+        value_of(ecui.getFocused()).should_be(null);
     }
 });
 
@@ -629,7 +635,7 @@ test('zoom', {
     }
 });
 
-test('交互行为测试', {
+test('交互行为模拟', {
     '激活，移入/移出': function () {
         var common = ecui.get('common'),
             el = common.getMain();
@@ -650,6 +656,7 @@ test('交互行为测试', {
 
     '焦点': function () {
         var common = ecui.get('common'),
+            child = ecui.get('child'),
             el = common.getMain();
 
         value_of(ecui.getFocused()).should_be(null);
@@ -660,6 +667,11 @@ test('交互行为测试', {
         uiut.MockEvents.mousedown(document.body);
         value_of(ecui.getFocused()).should_be(null);
         uiut.MockEvents.mouseup(document.body);
+        common.focus();
+        child.disable();
+        uiut.MockEvents.mousedown(child.getMain());
+        uiut.MockEvents.mouseup(child.getMain());
+        value_of(ecui.getFocused()).should_be(null);
     },
 
     '鼠标事件': function () {

@@ -81,7 +81,6 @@
 
             return null;
         },
-
         getAttributeName,
         getFocused,
         getKey,
@@ -109,7 +108,13 @@
 
             inherits(agent, superClass);
 
-            agent.types = type ? [type].concat(superClass.types || []) : [];
+            if (type && type.charAt(0) == '*') {
+                (agent.types = superClass.types.slice())[0] = type.slice(1);
+            }
+            else {
+                type = type ? [type] : [];
+                agent.types = type.concat(superClass.types || []);
+            }
             agent.TYPES = ' ' + agent.types.join(' ');
 
             superClass = superClass.client;
@@ -134,7 +139,6 @@
 
             return agent;
         },
-
         intercept,
         isFixedSize,
         loseFocus,
@@ -142,6 +146,7 @@
         query,
         restore,
         setFocused,
+        triggerEvent,
         wrapEvent,
 
         eventNames = [
@@ -222,30 +227,33 @@
                     event = wrapEvent(event);
 
                     //__transform__control_o
-                    var control = event.getControl();
+                    var control = event.getControl(),
+                        flag = isScrollClick(event),
+                        target = control;
 
                     if (control) {
-                        if (!isScrollClick(event)) {
-                            // 如果不是在原生滚动条区域，进行左键按下的处理
-                            mousedown(control, event);
-                        }
-                        else if (ieVersion < 8) {
+                        if (flag && ieVersion < 8) {
                             // IE8以下的版本，如果为控件添加激活样式，原生滚动条的操作会失效
                             // 常见的表现是需要点击两次才能进行滚动操作，而且中途不能离开控件区域
                             // 以免触发悬停状态的样式改变。
                             return;
                         }
 
-                        for (; control; control = control.getParent()) {
-                            if (control.isFocusable()) {
-                                if (!(control != activedControl && control.contain(focusedControl))) {
+                        for (; target; target = target.getParent()) {
+                            if (target.isFocusable()) {
+                                if (!(target != control && target.contain(focusedControl))) {
                                     // 允许获得焦点的控件必须是当前激活的控件，或者它没有焦点的时候才允许获得
                                     // 典型的用例是滚动条，滚动条不需要获得焦点，如果滚动条的父控件没有焦点
                                     // 父控件获得焦点，否则焦点不发生变化
-                                    setFocused(control);
+                                    setFocused(target);
                                 }
                                 break;
                             }
+                        }
+
+                        if (!flag) {
+                            // 如果不是在原生滚动条区域，进行左键按下的处理
+                            mousedown(control, event);
                         }
                     }
                     else {
@@ -253,10 +261,8 @@
                             // 如果点击的是失效状态的控件，检查是否需要取消文本选择
                             onselectstart(control, event);
                         }
-                        else {
-                            // 点击到了空白区域，取消控件的焦点
-                            setFocused();
-                        }
+                        // 点击到了空白区域，取消控件的焦点
+                        setFocused();
                     }
                 },
 
@@ -316,8 +322,7 @@
                         x = MIN(MAX(expectX, currEnv.left), currEnv.right),
                         y = MIN(MAX(expectY, currEnv.top), currEnv.bottom);
 
-                    if (!(target.ondragmove && target.ondragmove(event, x, y) === false ||
-                            target.$dragmove(event, x, y) === false)) {
+                    if (triggerEvent(target, 'dragmove', event, [x, y])) {
                         target.setPosition(x, y);
                     }
 
@@ -330,9 +335,7 @@
 
                     //__transform__target_o
                     var target = currEnv.target;
-                    if (!(target.ondragend && target.ondragend(event) === false)) {
-                        target.$dragend(event);
-                    }
+                    triggerEvent(target, 'dragend', event);
                     activedControl = currEnv.actived;
                     restore();
 
@@ -356,8 +359,11 @@
                             // 需要捕获但不激活的控件是最高优先级处理的控件，例如滚动条
                             mousedown(control, event);
                         }
-                        else if (target.onintercept && target.onintercept(event) === false ||
-                                    target.$intercept(event) === false) {
+                        else if (triggerEvent(target, 'intercept', event)) {
+                            // 默认仅拦截一次，框架自动释放环境
+                            restore();
+                        }
+                        else if (!event.cancelBubble) {
                             if (env == currEnv) {
                                 // 不改变当前操作环境表示希望继续进行点击拦截操作
                                 // 例如弹出菜单点击到选项上时，不自动关闭并对下一次点击继续拦截
@@ -369,10 +375,6 @@
                                 // 手动释放环境会造成向外层环境的事件传递
                                 currEnv.mousedown(event);
                             }
-                        }
-                        else {
-                            // 默认仅拦截一次，框架自动释放环境
-                            restore();
                         }
                     }
                 }
@@ -405,7 +407,7 @@
 
                     // 如果宽度或高度是负数，需要重新计算定位
                     target.setPosition(currEnv.left + MIN(width, 0), currEnv.top + MIN(height, 0));
-                    if (!(target.onzoom && target.onzoom(event) === false || target.$zoom(event) === false)) {
+                    if (triggerEvent(target, 'zoom', event)) {
                         target.setSize(ABS(width), ABS(height));
                     }
                 },
@@ -415,9 +417,7 @@
 
                     //__transform__target_o
                     var target = currEnv.target;
-                    if (!(target.onzoomend && target.onzoomend(event) === false)) {
-                        target.$zoomend(event);
-                    }
+                    triggerEvent(target, 'zoomend', event);
                     activedControl = currEnv.actived;
                     restore();
 
@@ -630,7 +630,7 @@
                 }
             }
             else if (o = findControl(getParent(type.getOuter()))) {
-                if (!(o.onappend && o.onappend(type) === false || o.$append(type) === false)) {
+                if (triggerEvent(o, 'append', null, [type])) {
                     type.$setParent(o);
                 }
             }
@@ -679,7 +679,7 @@
             options = options || {};
 
             options.uid = 'ecui-' + (++uniqueIndex);
-            options.primary = o[0];
+            options.primary = o[0] || o[1];
 
             type = new type(el, options);
             type.$setParent(parent);
@@ -1120,7 +1120,7 @@
 
         /**
          * 设置框架拦截之后的一次点击，并将点击事件发送给指定的 ECUI 控件。
-         * intercept 方法将下一次的鼠标点击事件转给指定控件的 $intercept 方法处理，相当于拦截了一次框架的鼠标事件点击操作，框架其它的状态不会自动改变，例如拥有焦点的控件不会改变。如果 $intercept 方法不返回 false，将自动调用 restore 方法。
+         * intercept 方法将下一次的鼠标点击事件转给指定控件的 $intercept 方法处理，相当于拦截了一次框架的鼠标事件点击操作，框架其它的状态不会自动改变，例如拥有焦点的控件不会改变。如果 $intercept 方法不阻止冒泡，将自动调用 restore 方法。
          * @public
          *
          * @param {ecui.ui.Control} control ECUI 控件
@@ -1259,9 +1259,7 @@
         core.select = function (control, event, className) {
             function build(name) {
                 selectorControl['$zoom' + name] = function (event) {
-                    if (!(control['onselect' + name] && control['onselect' + name](event) === false)) {
-                        control['$select' + name](event);
-                    }
+                    triggerEvent(control, 'select' + name, event);
                 };
             }
 
@@ -1308,16 +1306,52 @@
 
         /**
          * 使 ECUI 控件 得到焦点。
-         * setFocused 方法将指定的控件设置为焦点状态，允许不指定需要获得焦点的控件，则当前处于焦点状态的控件将失去焦点，需要将处于焦点状态的控件失去焦点还可以调用 loseFocus 方法。需要注意的是，如果控件处于焦点状态，当通过 setFocused 方法设置它的子控件获得焦点状态时，虽然处于焦点状态的控件对象发生了变化，但是控件不会触发 onblur 方法，此时控件逻辑上仍然处于焦点状态。
+         * setFocused 方法将指定的控件设置为焦点状态，允许不指定需要获得焦点的控件，则当前处于焦点状态的控件将失去焦点，需要将处于焦点状态的控件失去焦点还可以调用 loseFocus 方法。如果控件处于失效状态，设置它获得焦点状态将使所有控件失去焦点状态。需要注意的是，如果控件处于焦点状态，当通过 setFocused 方法设置它的子控件获得焦点状态时，虽然处于焦点状态的控件对象发生了变化，但是控件不会触发 onblur 方法，此时控件逻辑上仍然处于焦点状态。
          * @public
          *
          * @param {ecui.ui.Control} control ECUI 控件
          */
         setFocused = core.setFocused = function (control) {
+            if (control && control.isDisabled()) {
+                // 处于失效状态的控件不允许获得焦点状态
+                control = null;
+            }
+
             var parent = getCommonParent(focusedControl, control);
 
             bubble(focusedControl, 'blur', null, parent);
             bubble(focusedControl = control, 'focus', null, parent);
+        };
+
+        /**
+         * 触发事件。
+         * triggerEvent 会根据事件返回值或 event 的新状态决定是否触发默认事件处理。
+         * @public
+         *
+         * @param {ecui.ui.Control} control 控件对象
+         * @param {string} name 事件名
+         * @param {ecui.ui.Event} event 事件对象
+         * @param {Array} args 事件的其它参数
+         * @return {boolean} 是否阻止默认事件处理
+         */
+        triggerEvent = core.triggerEvent = function (control, name, event, args) {
+            if (args && event) {
+                args.splice(0, 0, event);
+            }
+            else if (event) {
+                args = [event];
+            }
+            else {
+                event = {preventDefault: UI_EVENT_CLASS.preventDefault};
+            }
+
+            if ((control['on' + name] &&
+                        (control['on' + name].apply(control, args) === false || event.returnValue === false)) ||
+                    control['$' + name].apply(control, args) === false) {
+                event.preventDefault();
+            }
+
+            return event.returnValue !== false;
         };
 
         /**
@@ -1446,6 +1480,9 @@
             }
             else {
                 bubble(hoveredControl, 'mousewheel', event);
+                if (!event.cancelBubble) {
+                    bubble(focusedControl, 'mousewheel', event);
+                }
             }
         };
 
@@ -1531,7 +1568,8 @@
             event = event || new UI_EVENT(type);
             event.cancelBubble = false;
             for (; start != end; start = start.getParent()) {
-                start[type](event);
+                triggerEvent(start, type, event);
+                event.returnValue = undefined;
                 if (event.cancelBubble) {
                     return;
                 }
@@ -1607,9 +1645,7 @@
             // 清除激活的控件，在drag中不需要针对激活控件移入移出的处理
             activedControl = null;
 
-            if (!(control['on' + type + 'start'] && control['on' + type + 'start'](event) === false)) {
-                control['$' + type + 'start'](event);
-            }
+            triggerEvent(control, type + 'start', event);
 
             if (ieVersion) {
                 // 设置IE的窗体外事件捕获，如果普通状态也设置，会导致部分区域无法点击

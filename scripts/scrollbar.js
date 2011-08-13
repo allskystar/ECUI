@@ -38,6 +38,7 @@ _oRange         - 滑动按钮的合法滑动区间
         getMouseX = core.getMouseX,
         getMouseY = core.getMouseY,
         inheritsControl = core.inherits,
+        triggerEvent = core.triggerEvent,
 
         UI_CONTROL = ui.Control,
         UI_CONTROL_CLASS = UI_CONTROL.prototype,
@@ -64,14 +65,15 @@ _oRange         - 滑动按钮的合法滑动区间
             function (el, options) {
                 //__gzip_original__unitOptions
                 var unitOptions = {userSelect: false, focusable: false},
+                    type = this.getType(),
                     buttonClass = findConstructor(this, 'Button'),
                     thumbClass = findConstructor(this, 'Thumb');
 
                 el.innerHTML =
-                    '<div class="ui-scrollbar-prev' +
-                        buttonClass.TYPES +
-                        '" style="position:absolute;top:0px;left:0px"></div><div class="ui-scrollbar-next' +
-                        buttonClass.TYPES +
+                    '<div class="' +
+                        type + '-prev' + buttonClass.TYPES +
+                        '" style="position:absolute;top:0px;left:0px"></div><div class="' +
+                        type + '-next' + buttonClass.TYPES +
                         '" style="position:absolute;top:0px;left:0px"></div><div class="' +
                         thumbClass.TYPES +
                         '" style="position:absolute"></div>';
@@ -153,9 +155,7 @@ _oRange         - 滑动按钮的合法滑动区间
         // 这里使用 scrollbar 代表滚动条控件的父控件
         scrollbar = scrollbar.getParent();
         if (scrollbar) {
-            if (!(scrollbar.onscroll && scrollbar.onscroll() === false)) {
-                scrollbar.$scroll();
-            }
+            triggerEvent(scrollbar, 'scroll');
         }
     }
 

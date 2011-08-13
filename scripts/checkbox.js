@@ -34,6 +34,8 @@ _aDependents     - 所有的从属复选框
         UI_INPUT_CONTROL_CLASS = UI_INPUT_CONTROL.prototype;
 //{/if}//
 //{if $phase == "define"}//
+    ///__gzip_original__UI_CHECKBOX
+    ///__gzip_original__UI_CHECKBOX_CLASS
     /**
      * 初始化复选框控件。
      * options 对象支持的属性如下：
@@ -43,8 +45,6 @@ _aDependents     - 所有的从属复选框
      *
      * @param {Object} options 初始化选项
      */
-    ///__gzip_original__UI_CHECKBOX
-    ///__gzip_original__UI_CHECKBOX_CLASS
     var UI_CHECKBOX = ui.Checkbox =
         inheritsControl(
             UI_INPUT_CONTROL,

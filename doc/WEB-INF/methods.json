@@ -697,7 +697,7 @@
             "params": [
                 {"name": "control", "type": "ecui.ui.Control", "desc": "{'controls'|menu}"}
             ],
-            "remark": "intercept 方法将下一次的鼠标点击事件转给指定控件的 {'\\$intercept'|method:'control'} 方法处理，相当于拦截了一次框架的鼠标事件点击操作，框架其它的状态不会自动改变，例如拥有焦点的控件不会改变。如果 {'\\$intercept'|method:'control'} 方法不返回 false，将自动调用 {'restore'|method:'core'} 方法。"
+            "remark": "intercept 方法将下一次的鼠标点击事件转给指定控件的 {'\\$intercept'|method:'control'} 方法处理，相当于拦截了一次框架的鼠标事件点击操作，框架其它的状态不会自动改变，例如拥有焦点的控件不会改变。如果 {'\\$intercept'|method:'control'} 方法不阻止冒泡，将自动调用 {'restore'|method:'core'} 方法。"
         },
 
         {
@@ -769,7 +769,20 @@
             "params": [
                 {"name": "control", "type": "ecui.ui.Control", "desc": "{'controls'|menu}"}
             ],
-            "remark": "setFocused 方法将指定的控件设置为焦点状态，允许不指定需要获得焦点的控件，则当前处于焦点状态的控件将失去焦点，需要将处于焦点状态的控件失去焦点还可以调用 {'loseFocus'|method:'core'} 方法。<font color=\"red\">需要注意的是，如果控件处于焦点状态，当通过 setFocused 方法设置它的子控件获得焦点状态时，虽然处于焦点状态的控件对象发生了变化，但是控件不会触发 {'onblur'|event:'control'} 方法，此时控件逻辑上仍然处于焦点状态。</font>"
+            "remark": "setFocused 方法将指定的控件设置为焦点状态，允许不指定需要获得焦点的控件，则当前处于焦点状态的控件将失去焦点，需要将处于焦点状态的控件失去焦点还可以调用 {'loseFocus'|method:'core'} 方法。如果控件处于失效状态，设置它获得焦点状态将使所有控件失去焦点状态。<font color=\"red\">需要注意的是，如果控件处于焦点状态，当通过 setFocused 方法设置它的子控件获得焦点状态时，虽然处于焦点状态的控件对象发生了变化，但是控件不会触发 {'onblur'|event:'control'} 方法，此时控件逻辑上仍然处于焦点状态。</font>"
+        },
+
+        {
+            "name": "triggerEvent",
+            "desc": "触发事件。",
+            "return": {"type": "boolean", "desc": "是否阻止默认事件处理"},
+            "params": [
+                {"name": "control", "type": "ecui.ui.Control", "desc": "控件对象"},
+                {"name": "name", "type": "string", "desc": "事件名"},
+                {"name": "event", "type": "ecui.ui.Event", "desc": "事件对象"},
+                {"name": "args", "type": "Array", "desc": "事件的其它参数"}
+            ],
+            "remark": "triggerEvent 会根据事件返回值或 event 的新状态决定是否触发默认事件处理。"
         },
 
         {
@@ -1142,16 +1155,6 @@
         },
 
         {
-            "name": "activate",
-            "desc": "控件获得激活。",
-            "params": [
-                {"name": "event", "type": "ecui.ui.Event", "desc": "事件对象"}
-            ],
-            "remark": "activate 方法不会导致控件获得激活状态，只是添加控件的激活状态样式。",
-            "event": 10
-        },
-
-        {
             "name": "alterClass",
             "desc": "为控件添加/移除一个扩展样式。",
             "params": [
@@ -1162,9 +1165,8 @@
 
         {
             "name": "blur",
-            "desc": "控件失去焦点。",
-            "remark": "blur 方法不会导致控件失去焦点状态，只是移除控件的焦点状态样式，如果需要使控件失去焦点，请使用 {'loseFocus'|method:'core'} 或 {'setFocused'|method:'core'} 方法。",
-            "event": 10
+            "desc": "控件失去焦点状态。",
+            "remark": "blur 方法将使控件失去焦点状态，参见 {'loseFocus'|method:'core'} 方法。"
         },
 
         {
@@ -1184,28 +1186,12 @@
         },
 
         {
-            "name": "click",
-            "desc": "控件点击。",
-            "event": 10
-        },
-
-        {
             "name": "contain",
             "desc": "判断是否包含指定的控件。",
             "params": [
                 {"name": "control", "type": "ecui.ui.Control", "desc": "{'controls'|menu}"}],
             "return": {"type": "boolean", "desc": "是否包含指定的控件"},
             "remark": "contain 方法判断指定的控件是否逻辑上属于当前控件的内部区域，即当前控件是指定的控件的某一级父控件。"
-        },
-
-        {
-            "name": "deactivate",
-            "desc": "控件失去激活。",
-            "params": [
-                {"name": "event", "type": "ecui.ui.Event", "desc": "事件对象"}
-            ],
-            "remark": "deactivate 方法不会导致控件失去激活状态，只是移除控件的激活状态样式。",
-            "event": 10
         },
 
         {
@@ -1230,9 +1216,8 @@
 
         {
             "name": "focus",
-            "desc": "控件获得焦点。",
-            "remark": "focus 方法不会导致控件获得焦点状态，只是添加控件的焦点状态样式，如果需要使控件获得焦点，请使用 {'setFocused'|method:'core'} 方法。",
-            "event": 10
+            "desc": "控件获得焦点状态。",
+            "remark": "如果控件没有处于焦点状态，focus 方法将设置控件获取焦点状态，参见 {'isFocused'|method:'control'} 与 {'setFocused'|method:'core'} 方法。"
         },
 
         {
@@ -1315,6 +1300,12 @@
             "desc": "获取父控件。",
             "return": {"type": "ecui.ui.Control", "desc": "父控件对象"},
             "remark": "控件接收的事件将向父控件冒泡处理，getParent 返回的结果是 ECUI 的逻辑父控件，父控件与子控件不一定存在 DOM 树层面的父子级关系。"
+        },
+
+        {
+            "name": "getType",
+            "desc": "获取控件的类型。",
+            "return": {"type": "string", "desc": "控件的类型"}
         },
 
         {
@@ -1412,88 +1403,6 @@
             "name": "isUserSelect",
             "desc": "判断是否允许选中内容。",
             "return": {"type": "boolean", "desc": "控件是否允许选中内容"}
-        },
-
-        {
-            "name": "keydown",
-            "desc": "键盘按下。",
-            "params": [
-                {"name": "event", "type":"ecui.ui.Event", "desc": "事件对象"}
-            ],
-            "event": 10
-        },
-
-        {
-            "name": "keypress",
-            "desc": "键盘按住。",
-            "params": [
-                {"name": "event", "type":"ecui.ui.Event", "desc": "事件对象"}
-            ],
-            "event": 10
-        },
-
-        {
-            "name": "keyup",
-            "desc": "键盘松开。",
-            "params": [
-                {"name": "event", "type":"ecui.ui.Event", "desc": "事件对象"}
-            ],
-            "event": 10
-        },
-
-        {
-            "name": "mousedown",
-            "desc": "鼠标键按下。",
-            "params": [
-                {"name": "event", "type":"ecui.ui.Event", "desc": "事件对象"}
-            ],
-            "remark": "mousedown 不会改变控件的激活与焦点状态。",
-            "event": 10
-        },
-
-        {
-            "name": "mousemove",
-            "desc": "鼠标移动。",
-            "params": [
-                {"name": "event", "type":"ecui.ui.Event", "desc": "事件对象"}
-            ],
-            "event": 10
-        },
-
-        {
-            "name": "mouseout",
-            "desc": "鼠标移出。",
-            "params": [
-                {"name": "event", "type":"ecui.ui.Event", "desc": "事件对象"}
-            ],
-            "event": 10
-        },
-
-        {
-            "name": "mouseover",
-            "desc": "鼠标移入。",
-            "params": [
-                {"name": "event", "type":"ecui.ui.Event", "desc": "事件对象"}
-            ],
-            "event": 10
-        },
-
-        {
-            "name": "mouseup",
-            "desc": "鼠标键松开。",
-            "params": [
-                {"name": "event", "type":"ecui.ui.Event", "desc": "事件对象"}
-            ],
-            "event": 10
-        },
-
-        {
-            "name": "mousewheel",
-            "desc": "鼠标滚轮滚动。",
-            "params": [
-                {"name": "event", "type":"ecui.ui.Event", "desc": "事件对象"}
-            ],
-            "event": 10
         },
 
         {
@@ -1836,7 +1745,7 @@
 
         {
             "name": "$keypress",
-            "remark": "Opera 下仅用 keydown 不能屏蔽方向键事件，还需要在 keypress 中屏蔽。"
+            "remark": "Opera 下仅用 keydown 不能屏蔽按键事件，还需要在 keypress 中屏蔽。"
         },
 
         {
@@ -1965,7 +1874,7 @@
 
         {
             "name": "$keypress",
-            "remark": "Opera 下仅用 keydown 不能屏蔽空格键事件，还需要在 keypress 中屏蔽。"
+            "remark": "Opera 下仅用 keydown 不能屏蔽按键事件，还需要在 keypress 中屏蔽。"
         },
 
         {
@@ -2024,7 +1933,7 @@
 
         {
             "name": "$keypress",
-            "remark": "Opera 下仅用 keydown 不能屏蔽空格键事件，还需要在 keypress 中屏蔽。"
+            "remark": "Opera 下仅用 keydown 不能屏蔽按键事件，还需要在 keypress 中屏蔽。"
         },
 
         {
@@ -2053,6 +1962,104 @@
             ],
             "remark": "将控件设置成为选中状态，会取消同一个单选框控件组的其它控件的选中状态。"
         }
+    ],
+
+    "select": [
+        {
+            "name": "$activate",
+            "remark": "下拉框控件激活时，显示选项框，产生遮罩层阻止对页面内 DOM 节点的点击，并设置框架进入强制点击拦截状态。"
+        },
+
+        {
+            "name": "$intercept",
+            "remark": "控件在下拉框展开时，需要拦截浏览器的点击事件，如果点击在下拉选项区域，则选中当前项，否则直接隐藏下拉选项框。"
+        },
+
+        {
+            "name": "$keydown",
+            "remark": "接管对上下键与回车/ESC键的处理，在选项框没有显示时，上下键改变下拉框的选择，选项框显示时，上下键仅改变焦点，回车键选择，ESC键关闭选项框。"
+        },
+
+        {
+            "name": "$keypress",
+            "remark": "Opera 下仅用 keydown 不能屏蔽按键事件，还需要在 keypress 中屏蔽。"
+        },
+
+        {
+            "name": "$mousewheel",
+            "remark": "如果控件拥有焦点，则当前选中项随滚轮滚动而自动指向前一项或者后一项。"
+        },
+
+        {
+            "name": "$remove",
+            "remark": "下拉框移除子选项时，如果选项是否被选中，需要先取消选中。"
+        },
+
+        {
+            "name": "add",
+            "desc": "添加子选项控件。",
+            "params": [
+                {"name": "item", "type": "string|HTMLElement|ecui.ui.Item", "desc": "选项控件的 html 内容/控件对应的 Element 对象/选项控件"},
+                {"name": "index", "type": "number", "desc": "子选项控件需要添加的位置序号"},
+                {"name": "value", "type": "string", "desc": "选项对应的表单项提交值，如果忽略将使用控件的文本内容作为提交值"}
+            ],
+            "return": {"type": "ecui.ui.Item", "desc": "子选项控件"}
+        },
+
+        {
+            "name": "append",
+            "desc": "向下拉框中最后添加子选项控件。",
+            "params": [
+                {"name": "item", "type": "string|HTMLElement|ecui.ui.Item", "desc": "选项控件的 html 内容/控件对应的 Element 对象/选项控件"},
+                {"name": "value", "type": "string", "desc": "选项对应的表单项提交值，如果忽略将使用控件的文本内容作为提交值"}
+            ],
+            "return": {"type": "ecui.ui.Item", "desc": "子选项控件"},
+            "remark": "append 方法是 {'add'|method:'select'} 方法去掉第二个 index 参数的版本。"
+        },
+
+        {
+            "name": "getSelected",
+            "desc": "获取被选中的选项控件。",
+            "return": {"type": "ecui.ui.Item", "desc": "选项控件"}
+        },
+
+        {
+            "name": "getValue",
+            "desc": "获取控件的值。",
+            "syntax": "<i>string</i> = <i>ecui.ui.Edit.</i><b>getValue()</b></pre><pre class=\"clsSyntax\"><i>string</i> = <i>ecui.ui.Select.Item.</i><b>getValue()</b>",
+            "return": {"type": "string", "desc": "控件的值"},
+            "remark": "ecui.ui.Edit.{'getValue'|method:'edit'} 方法参见编辑框控件的说明，ecui.ui.Select.Item.getValue 方法返回选项控件的值，即选项选中时整个下拉框控件的值。"
+        },
+
+        {
+            "name": "setOptionSize",
+            "desc": "设置下拉框允许显示的选项数量。",
+            "params": [
+                {"name": "value", "type": "number", "desc": "显示的选项数量，必须大于 1"}
+            ],
+            "remark": "如果实际选项数量小于这个数量，没有影响，否则将出现垂直滚动条，通过滚动条控制其它选项的显示。"
+        },
+
+        {
+            "name": "setSelected",
+            "desc": "选中选项。",
+            "params": [
+                {"name": "item", "type": "number|ecui.ui.Item", "desc": "选项的序号/选项控件"}
+            ]
+        },
+
+        {
+            "name": "setValue",
+            "desc": "设置控件的值。",
+            "syntax": "<i>string</i> = <i>ecui.ui.Edit.</i><b>setValue(</b><i>value</i><b>)</b></pre><pre class=\"clsSyntax\"><i>string</i> = <i>ecui.ui.Select.Item.</i><b>setValue(</b><i>value</i><b>)</b>",
+            "params": [
+                {"name": "value", "type": "string", "desc": "控件的值"}
+            ],
+            "remark": "setValue 方法设置控件的值，设置的值必须与一个子选项的值相等，否则将被设置为空，使用 {'getValue'|method:'select'} 方法获取设置的值。"
+        }
+    ],
+
+    "combox": [
     ],
 
 
@@ -2122,112 +2129,6 @@
             "desc": "检测输入框当前的值是否合法。",
             "return": {"type": "boolean", "desc": "当前值是否合法"}
         }
-    ],
-
-    "select": [
-        {
-            "name": "$intercept",
-            "remark": "控件在下拉框展开时，需要拦截浏览器的点击事件，如果点击在下拉选项区域，则选中当前项，否则直接隐藏下拉选项框，但不会改变控件激活状态。"
-        },
-
-        {
-            "name": "$keydown",
-            "remark": "接管上下键与回车键的处理，在下拉框展开时，通过上下键选择当前移入项，如果没有展开，通过下键与回车键会将下拉框展开。"
-        },
-
-        {
-            "name": "$keypress",
-            "remark": "Opera 下仅用 keydown 不能屏蔽空格键事件，还需要在 keypress 中屏蔽。"
-        },
-
-        {
-            "name": "$mousewheel",
-            "remark": "如果控件拥有焦点，则当前选中项随滚轮滚动而自动指向前一项或者后一项。"
-        },
-
-        {
-            "name": "$pressend",
-            "remark": "鼠标左键按压控件结束时设置下一次点击事件被拦截，需要根据点击的位置选择是关闭展开的下拉框还是选中选项。"
-        },
-
-        {
-            "name": "$pressstart",
-            "remark": "鼠标左键按压控件开始时显示下拉框。"
-        },
-
-        {
-            "name": "$remove",
-            "params": [
-                {"name": "item", "type": "ecui.ui.Item", "desc": "选项控件"}
-            ],
-            "remark": "下拉框移除子选项时需要检查选项是否被选中，如果被选中需要清除状态。"
-        },
-
-        {
-            "name": "add",
-            "desc": "添加子选项控件。",
-            "params": [
-                {"name": "item", "type": "string|HTMLElement|ecui.ui.Item", "desc": "选项控件的 html 内容/控件对应的 Element 对象/选项控件"},
-                {"name": "index", "type": "number", "desc": "子选项控件需要添加的位置序号"},
-                {"name": "value", "type": "string", "desc": "选项对应的表单项提交值，如果忽略将使用控件的文本内容作为提交值"}
-            ],
-            "return": {"type": "ecui.ui.Item", "desc": "子选项控件"}
-        },
-
-        {
-            "name": "append",
-            "desc": "向下拉框中最后添加子选项控件。",
-            "params": [
-                {"name": "item", "type": "string|HTMLElement|ecui.ui.Item", "desc": "选项控件的 html 内容/控件对应的 Element 对象/选项控件"},
-                {"name": "value", "type": "string", "desc": "选项对应的表单项提交值，如果忽略将使用控件的文本内容作为提交值"}
-            ],
-            "return": {"type": "ecui.ui.Item", "desc": "子选项控件"},
-            "remark": "append 方法是 {'add'|method:'select'} 方法去掉第二个 index 参数的版本。"
-        },
-
-        {
-            "name": "getSelected",
-            "desc": "获取被选中的选项控件。",
-            "return": {"type": "ecui.ui.Item", "desc": "选项控件"}
-        },
-
-        {
-            "name": "getValue",
-            "desc": "获取控件的值。",
-            "syntax": "<i>string</i> = <i>ecui.ui.Edit.</i><b>getValue()</b></pre><pre class=\"clsSyntax\"><i>string</i> = <i>ecui.ui.Select.Item.</i><b>getValue()</b>",
-            "return": {"type": "string", "desc": "控件的值"},
-            "remark": "ecui.ui.Edit.{'getValue'|method:'edit'} 方法参见编辑框控件的说明，ecui.ui.Select.Item.getValue 方法返回选项控件的值，即选项选中时整个下拉框控件的值。"
-        },
-
-        {
-            "name": "setOptionSize",
-            "desc": "设置下拉框允许显示的选项数量。",
-            "params": [
-                {"name": "value", "type": "number", "desc": "显示的选项数量，必须大于 1"}
-            ],
-            "remark": "如果实际选项数量小于这个数量，没有影响，否则将出现垂直滚动条，通过滚动条控制其它选项的显示。"
-        },
-
-        {
-            "name": "setSelected",
-            "desc": "选中选项。",
-            "params": [
-                {"name": "item", "type": "number|ecui.ui.Item", "desc": "选项的序号/选项控件"}
-            ]
-        },
-
-        {
-            "name": "setValue",
-            "desc": "设置控件的值。",
-            "syntax": "<i>string</i> = <i>ecui.ui.Edit.</i><b>setValue(</b><i>value</i><b>)</b></pre><pre class=\"clsSyntax\"><i>string</i> = <i>ecui.ui.Select.Item.</i><b>setValue(</b><i>value</i><b>)</b>",
-            "params": [
-                {"name": "value", "type": "string", "desc": "控件的值"}
-            ],
-            "remark": "setValue 方法设置控件的值，设置的值必须与一个子选项的值相等，否则将被设置为空，使用 {'getValue'|method:'select'} 方法获取设置的值。"
-        }
-    ],
-
-    "combox": [
     ],
 
     "multi-select": [

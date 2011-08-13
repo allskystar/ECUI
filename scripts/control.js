@@ -77,6 +77,8 @@ $cache$position          - 控件布局方式缓存
         getStatus = core.getStatus,
         inheritsControl = core.inherits,
         isFixedSize = core.isFixedSize,
+        loseFocus = core.loseFocus,
+        triggerEvent = core.triggerEvent,
 
         eventNames = [
             'mousedown', 'mouseover', 'mousemove', 'mouseout', 'mouseup',
@@ -146,7 +148,7 @@ $cache$position          - 控件布局方式缓存
                 oldParent.$remove(control);
             }
             if (parent) {
-                if (parent.onappend && parent.onappend(control) === false || parent.$append(control) === false) {
+                if (!triggerEvent(parent, 'append', null, [control])) {
                     parent = parentElement = null;
                 }
             }
@@ -467,6 +469,15 @@ $cache$position          - 控件布局方式缓存
     };
 
     /**
+     * 控件失去焦点状态。
+     * blur 方法将使控件失去焦点状态，参见 loseFocus 方法。
+     * @public
+     */
+    UI_CONTROL_CLASS.blur = function () {
+        loseFocus(this);
+    };
+
+    /**
      * 缓存控件的属性。
      * cache 方法验证控件是否已经缓存，如果未缓存将调用 $cache 方法缓存控件属性的值。在子控件或者应用程序开发过程中，如果需要避开控件提供的方法直接操作 Element 对象，操作完成后必须调用 clearCache 方法清除控件的属性缓存，否则将引发错误。
      * @public
@@ -547,6 +558,17 @@ $cache$position          - 控件布局方式缓存
             return true;
         }
         return false;
+    };
+
+    /**
+     * 控件获得焦点状态。
+     * 如果控件没有处于焦点状态，focus 方法将设置控件获取焦点状态，参见 isFocused 与 setFocused 方法。
+     * @public
+     */
+    UI_CONTROL_CLASS.focus = function () {
+        if (!this.isFocused()) {
+            setFocused(this);
+        }
     };
 
     /**
@@ -680,6 +702,16 @@ $cache$position          - 控件布局方式缓存
     };
 
     /**
+     * 获取控件的类型。
+     * @public
+     *
+     * @return {string} 控件的类型
+     */
+    UI_CONTROL_CLASS.getType = function () {
+        return this.constructor.agent.types[0];
+    };
+
+    /**
      * 获取控件的类型样式组。
      * getTypes 方法返回控件的类型样式组，类型样式在控件继承时指定。
      * @public
@@ -747,9 +779,7 @@ $cache$position          - 控件布局方式缓存
      */
     UI_CONTROL_CLASS.hide = function () {
         if (this.isShow()) {
-            if (!(this.onhide && this.onhide() === false)) {
-                this.$hide();
-            }
+            triggerEvent(this, 'hide');
         }
     };
 
@@ -895,9 +925,7 @@ $cache$position          - 控件布局方式缓存
      * resize 方法重新计算并设置控件的大小，resize 方法触发 onresize 事件，如果事件返回值不为 false，则调用 $resize 方法按默认的方式重绘控件。因为浏览器可视化区域发生变化时，可能需要改变控件大小，框架会自动调用控件的 resize 方法。
      */
     UI_CONTROL_CLASS.resize = function () {
-        if (!(this.onresize && this.onresize() === false)) {
-            this.$resize();
-        }
+        triggerEvent(this, 'resize');
     };
 
     /**
@@ -921,8 +949,7 @@ $cache$position          - 控件布局方式缓存
     UI_CONTROL_CLASS.setClass = function (currClass) {
         var i = 0,
             oldClass = this._sClass,
-            classes = this.getTypes(),
-            o;
+            classes = this.getTypes();
 
         currClass = currClass || this._sPrimary;
 
@@ -1015,30 +1042,14 @@ $cache$position          - 控件布局方式缓存
      */
     UI_CONTROL_CLASS.show = function () {
         if (!this.isShow()) {
-            if (!(this.onshow && this.onshow() === false)) {
-                this.$show();
-            }
+            triggerEvent(this, 'show');
         }
     };
 
     (function () {
-        function build(name) {
-            UI_CONTROL_CLASS[name] = function (event) {
-                if (!this.isDisabled()) {
-                    if (!(this['on' + name] &&
-                        (this['on' + name](event) === false || event.returnValue === false))) {
-                        this['$' + name](event);
-                    }
-                    event.returnValue = undefined;
-                }
-            };
-
-            UI_CONTROL_CLASS['$' + name] = UI_CONTROL_CLASS['$' + name] || blank;
-        }
-
         // 初始化事件处理函数，以事件名命名，这些函数行为均是判断控件是否可操作/是否需要调用事件/是否需要执行缺省的事件处理，对应的缺省事件处理函数名以$开头后接事件名，处理函数以及缺省事件处理函数参数均为事件对象，仅执行一次。
         for (var i = 0, o; o = eventNames[i++]; ) {
-            build(o);
+            UI_CONTROL_CLASS['$' + o] = UI_CONTROL_CLASS['$' + o] || blank;
         }
 
         // 初始化空操作的一些缺省处理

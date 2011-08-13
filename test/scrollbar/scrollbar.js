@@ -1,4 +1,4 @@
-describe('水平滚动条(HScrollbar)测试',{
+describe('水平滚动条(HScrollbar)',{
     'before': function () {
         var el = document.createElement('div');
         el.id = 'hscrollbar';
@@ -11,10 +11,23 @@ describe('水平滚动条(HScrollbar)测试',{
         document.body.removeChild(document.getElementById('hscrollbar'));
     },
 
-    '前后按钮基本属性': function () {
-        var scrollbar = ecui.get('hscrollbar');
-        value_of(scrollbar.$getSection('Prev').getWidth()).should_be(15);
-        value_of(scrollbar.$getSection('Next').getWidth()).should_be(15);
+    '基本属性与部件属性': function () {
+        var scrollbar = ecui.get('hscrollbar'),
+            prev = scrollbar.$getSection('Prev'),
+            next = scrollbar.$getSection('Next'),
+            thumb = scrollbar.$getSection('Thumb');
+
+        value_of(scrollbar.getTypes()).should_be(['ui-hscrollbar', 'ui-scrollbar', 'ui-control']);
+        value_of(scrollbar.getClass()).should_be('ui-hscrollbar');
+        value_of(prev.getWidth()).should_be(15);
+        value_of(prev.getTypes()).should_be(['ui-scrollbar-button', 'ui-button', 'ui-control']);
+        value_of(prev.getClass()).should_be('ui-hscrollbar-prev');
+        value_of(next.getWidth()).should_be(15);
+        value_of(next.getTypes()).should_be(['ui-scrollbar-button', 'ui-button', 'ui-control']);
+        value_of(next.getClass()).should_be('ui-hscrollbar-next');
+        value_of(thumb).should_not_be(void(0));
+        value_of(thumb.getTypes()).should_be(['ui-scrollbar-thumb', 'ui-button', 'ui-control']);
+        value_of(thumb.getClass()).should_be('ui-scrollbar-thumb');
     },
 
     '点击前后按钮': function () {
@@ -159,7 +172,7 @@ describe('水平滚动条(HScrollbar)测试',{
     }
 });
 
-describe('垂直滚动条(VScrollbar)测试',{
+describe('垂直滚动条(VScrollbar)',{
     'before': function () {
         var el = document.createElement('div');
         el.id = 'vscrollbar';
@@ -172,10 +185,23 @@ describe('垂直滚动条(VScrollbar)测试',{
         document.body.removeChild(document.getElementById('vscrollbar'));
     },
 
-    '前后按钮基本属性': function () {
-        var scrollbar = ecui.get('vscrollbar');
-        value_of(scrollbar.$getSection('Prev').getHeight()).should_be(15);
-        value_of(scrollbar.$getSection('Next').getHeight()).should_be(15);
+    '基本属性与部件属性': function () {
+        var scrollbar = ecui.get('vscrollbar'),
+            prev = scrollbar.$getSection('Prev'),
+            next = scrollbar.$getSection('Next'),
+            thumb = scrollbar.$getSection('Thumb');
+
+        value_of(scrollbar.getTypes()).should_be(['ui-vscrollbar', 'ui-scrollbar', 'ui-control']);
+        value_of(scrollbar.getClass()).should_be('ui-vscrollbar');
+        value_of(prev.getWidth()).should_be(15);
+        value_of(prev.getTypes()).should_be(['ui-scrollbar-button', 'ui-button', 'ui-control']);
+        value_of(prev.getClass()).should_be('ui-vscrollbar-prev');
+        value_of(next.getWidth()).should_be(15);
+        value_of(next.getTypes()).should_be(['ui-scrollbar-button', 'ui-button', 'ui-control']);
+        value_of(next.getClass()).should_be('ui-vscrollbar-next');
+        value_of(thumb).should_not_be(void(0));
+        value_of(thumb.getTypes()).should_be(['ui-scrollbar-thumb', 'ui-button', 'ui-control']);
+        value_of(thumb.getClass()).should_be('ui-scrollbar-thumb');
     },
 
     '点击前后按钮': function () {

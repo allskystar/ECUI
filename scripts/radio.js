@@ -28,6 +28,8 @@ _bDefault  - 默认的选中状态
         UI_INPUT_CONTROL_CLASS = UI_INPUT_CONTROL.prototype;
 //{/if}//
 //{if $phase == "define"}//
+    ///__gzip_original__UI_RADIO
+    ///__gzip_original__UI_RADIO_CLASS
     /**
      * 初始化单选框控件。
      * options 对象支持的属性如下：
@@ -38,8 +40,6 @@ _bDefault  - 默认的选中状态
      *
      * @param {Object} options 初始化选项
      */
-    ///__gzip_original__UI_RADIO
-    ///__gzip_original__UI_RADIO_CLASS
     var UI_RADIO = ui.Radio =
         inheritsControl(
             UI_INPUT_CONTROL,

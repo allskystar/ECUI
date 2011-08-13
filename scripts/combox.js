@@ -33,6 +33,8 @@ Combox - 定义可输入下拉框行为的基本操作。
         UI_SELECT_CLASS = UI_SELECT.prototype;
 //{/if}//
 //{if $phase == "define"}//
+    ///__gzip_original__UI_COMBOX
+    ///__gzip_original__UI_COMBOX_CLASS
     /**
      * 初始化可输入下拉框控件。
      * options 对象支持的属性如下：
@@ -40,14 +42,18 @@ Combox - 定义可输入下拉框行为的基本操作。
      *
      * @param {Object} options 初始化选项
      */
-    //__gzip_original__UI_COMBOX
-    var UI_COMBOX =
-        ui.Combox = function (el, options) {
-            UI_SELECT.call(this, el, options);
-            this.getInput().style.display = '';
-            this.$getSection('Text').getOuter().style.display = 'none';
-        },
-        UI_COMBOX_CLASS = inherits(UI_COMBOX, UI_SELECT);
+    var UI_COMBOX = ui.Combox =
+        inheritsControl(
+            UI_SELECT,
+            '*ui-combox',
+            function (el, options) {
+                this.$getSection('Text').getOuter().style.display = 'none';
+            },
+            function (el, options) {
+                options.hidden = false;
+            }
+        ),
+        UI_COMBOX_CLASS = UI_COMBOX.prototype;
 //{else}//
     /**
      * 设置控件的大小。

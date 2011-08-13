@@ -13,6 +13,8 @@
 //{include file="items.js"}//
 //{include file="checkbox.js"}//
 //{include file="radio.js"}//
+//{include file="select.js"}//
+//{include file="combox.js"}//
 
 //*{include file="label.js"}//
 //*{include file="progress.js"}//
@@ -28,8 +30,6 @@
 //*{include file="color.js"}//
 //*{include file="palette.js"}//
 //*{include file="listbox.js"}//
-//*{include file="select.js"}//
-//*{include file="combox.js"}//
 //*{include file="multi-select.js"}//
 //*{include file="table.js"}//
 //*{include file="locked-table.js"}//

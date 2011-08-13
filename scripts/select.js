@@ -56,26 +56,31 @@ _uOptions     - 下拉选择框
         removeDom = dom.remove,
         encodeHTML = string.encodeHTML,
         extend = util.extend,
+        findConstructor = util.findConstructor,
         getView = util.getView,
-        inherits = util.inherits,
 
         $fastCreate = core.$fastCreate,
         findControl = core.findControl,
-        getActived = core.getActived,
         getAttributeName = core.getAttributeName,
+        getFocused = core.getFocused,
+        inheritsControl = core.inherits,
         intercept = core.intercept,
         mask = core.mask,
         restore = core.restore,
+        setFocused = core.setFocused,
 
-        UI_EDIT = ui.Edit,
-        UI_EDIT_CLASS = UI_EDIT.prototype,
-        UI_CONTROL = ui.Control,
+        UI_INPUT_CONTROL = ui.InputControl,
+        UI_INPUT_CONTROL_CLASS = UI_INPUT_CONTROL.prototype,
+        UI_BUTTON = ui.Button,
         UI_PANEL = ui.Panel,
         UI_PANEL_CLASS = UI_PANEL.prototype,
         UI_ITEM = ui.Item,
+        UI_ITEM_CLASS = UI_ITEM.prototype,
         UI_ITEMS = ui.Items;
 //{/if}//
 //{if $phase == "define"}//
+    ///__gzip_original__UI_SELECT
+    ///__gzip_original__UI_SELECT_CLASS
     /**
      * 初始化下拉框控件。
      * options 对象支持的属性如下：
@@ -85,70 +90,76 @@ _uOptions     - 下拉选择框
      *
      * @param {Object} options 初始化选项
      */
-    //__gzip_original__UI_SELECT
-    //__gzip_original__UI_SELECT_OPTIONS
-    //__gzip_original__UI_SELECT_ITEM
-    var UI_SELECT =
-        ui.Select = function (el, options) {
-            options.hidden = true;
+    var UI_SELECT = ui.Select =
+        inheritsControl(
+            UI_INPUT_CONTROL,
+            'ui-select',
+            function (el, options) {
+                this.$setBody(this._uOptions.getBody());
 
-            //__gzip_original__baseClass
-            //__gzip_original__partParams
-            var i = 0,
-                list = [],
-                baseClass = options.base,
-                partParams = {capture: false},
-                name = el.name || options.name || '',
-                value = el.value || options.value || '',
-                elements = el.options,
-                optionsEl = createDom(
-                    'ec-panel ' + baseClass + '-options',
-                    'position:absolute;z-index:65535;display:none'
-                ),
-                o = el;
+                el = children(el);
 
-            if (elements) {
-                // 移除select标签
-                el = insertBefore(createDom(el.className, el.style.cssText), el);
-                removeDom(o);
+                this._uText = $fastCreate(UI_ITEM, el[0], this, {capturable: false});
+                this._uButton = $fastCreate(UI_BUTTON, el[1], this, {capturable: false});
+                el[2].defaultValue = el[2].value = options.value || '';
 
-                // 转化select标签
-                for (; o = elements[i]; ) {
-                    // 这里的text不进行转义，特殊字符不保证安全
-                    list[i++] =
-                        '<div ' + getAttributeName() + '="value:' + encodeHTML(o.value) + '">' + o.text + '</div>';
+                // 初始化下拉区域最多显示的选项数量
+                this._nOptionSize = options.optionSize || 5;
+
+                this.$initItems();
+            },
+            function (el, options) {
+                var i = 0,
+                    list = [],
+                    name = el.name || options.name || '',
+                    elements = el.options,
+                    type = this.getType(),
+                    optionsClass = findConstructor(this, 'Options'),
+                    optionsEl = createDom(
+                        type + '-options' + optionsClass.TYPES,
+                        'position:absolute;z-index:65535;display:none'
+                    ),
+                    o = el;
+
+                if (options.hidden === undefined) {
+                    options.hidden = true;
                 }
-                optionsEl.innerHTML = list.join('');
+
+                if (elements) {
+                    options.value = el.value;
+
+                    // 移除select标签
+                    el = insertBefore(createDom(el.className, el.style.cssText), el);
+                    removeDom(o);
+
+                    // 转化select标签
+                    for (; o = elements[i]; ) {
+                        // 这里的text不进行转义，特殊字符不保证安全
+                        list[i++] =
+                            '<div ' + getAttributeName() + '="value:' + encodeHTML(o.value) + '">' +
+                                o.text + '</div>';
+                    }
+                    optionsEl.innerHTML = list.join('');
+                }
+                else {
+                    moveElements(el, optionsEl);
+                }
+
+                this._uOptions = $fastCreate(
+                    optionsClass,
+                    optionsEl,
+                    this,
+                    {hScroll: false, browser: options.browser}
+                );
+    
+                el.innerHTML =
+                    '<div class="' + type + '-text' + UI_ITEM.TYPES + '"></div><div class="' + type + '-button' +
+                        UI_BUTTON.TYPES + '" style="position:absolute"></div><input name="' + name + '">';
+
+                return el;
             }
-            else {
-                moveElements(el, optionsEl);
-            }
-
-            el.innerHTML =
-                '<div class="ec-item ' + baseClass + '-text"></div><div class="ec-control ' + baseClass +
-                    '-button" style="position:absolute"></div><input name="' + name + '">';
-
-            UI_EDIT.call(this, el, options);
-
-            // 初始化下拉区域，下拉区域需要强制置顶
-            ;
-            this.$setBody(
-                (this._uOptions =
-                    $fastCreate(UI_SELECT_OPTIONS, optionsEl, this, {hScroll: false, browser: options.browser}))
-                .getBody());
-
-            el = children(el);
-
-            this._uText = $fastCreate(UI_ITEM, el[0], this, partParams);
-            this._uButton = $fastCreate(UI_CONTROL, el[1], this, partParams);
-            el[2].defaultValue = el[2].value = value;
-
-            // 初始化下拉区域最多显示的选项数量
-            this._nOptionSize = options.optionSize || 5;
-
-            this.$initItems();
-        },
-        UI_SELECT_CLASS = inherits(UI_SELECT, UI_EDIT),
+        ),
+        UI_SELECT_CLASS = UI_SELECT.prototype,
 
         /**
          * 初始化下拉框控件的下拉选项框部件。
@@ -156,10 +167,7 @@ _uOptions     - 下拉选择框
          *
          * @param {Object} options 初始化选项
          */
-        UI_SELECT_OPTIONS = UI_SELECT.Options = function (el, options) {
-            UI_PANEL.call(this, el, options);
-        },
-        UI_SELECT_OPTIONS_CLASS = inherits(UI_SELECT_OPTIONS, UI_PANEL),
+        UI_SELECT_OPTIONS_CLASS = (UI_SELECT.Options = inheritsControl(UI_PANEL)).prototype,
 
         /**
          * 初始化下拉框控件的选项部件。
@@ -167,11 +175,14 @@ _uOptions     - 下拉选择框
          *
          * @param {Object} options 初始化选项
          */
-        UI_SELECT_ITEM = UI_SELECT.Item = function (el, options) {
-            UI_ITEM.call(this, el, options);
-            this._sValue = options.value === undefined ? getText(el) : '' + options.value;
-        },
-        UI_SELECT_ITEM_CLASS = inherits(UI_SELECT_ITEM, UI_ITEM);
+        UI_SELECT_ITEM_CLASS =
+            (UI_SELECT.Item = inheritsControl(
+                UI_ITEM,
+                'ui-select-item',
+                function (el, options) {
+                    this._sValue = options.value === undefined ? getText(el) : '' + options.value;
+                }
+            )).prototype;
 //{else}//
     /**
      * 下拉框刷新。
@@ -180,23 +191,24 @@ _uOptions     - 下拉选择框
      * @param {ecui.ui.Select} control 下拉框控件
      */
     function UI_SELECT_FLUSH(control) {
-        //__gzip_original__options
         var options = control._uOptions,
-            scroll = options.$getSection('VScroll'),
+            scrollbar = options.$getSection('VScrollbar'),
             el = options.getOuter(),
             pos = getPosition(control.getOuter()),
             selected = control._cSelected,
             optionTop = pos.top + control.getHeight();
 
-        // 第一次显示时需要进行下拉选项部分的初始化
         if (!getParent(el)) {
+            // 第一次显示时需要进行下拉选项部分的初始化，将其挂载到 DOM 树中
             DOCUMENT.body.appendChild(el);
             control.$alterItems();
         }
 
         if (options.isShow()) {
-            control.$setActived(selected);
-            scroll.setValue(scroll.getStep() * indexOf(control.getItems(), selected));
+            if (selected) {
+                setFocused(selected);
+            }
+            scrollbar.setValue(scrollbar.getStep() * indexOf(control.getItems(), selected));
 
             // 以下使用control代替optionHeight
             control = options.getHeight();
@@ -212,17 +224,31 @@ _uOptions     - 下拉选择框
     extend(UI_SELECT_CLASS, UI_ITEMS);
 
     /**
-     * 销毁控件的默认处理。
-     * 页面卸载时将销毁所有的控件，释放循环引用，防止在 IE 下发生内存泄漏，$dispose 方法的调用不会受到 ondispose 事件返回值的影响。
-     * @protected
+     * 销毁选项框部件时需要检查是否展开，如果展开需要先关闭。
+     * @override
      */
     UI_SELECT_OPTIONS_CLASS.$dispose = function () {
-        // 下拉选项框处于显示状态，需要先恢复状态
-        if (this.isShow()) {
-            mask();
-            restore();
-        }
+        this.hide();
         UI_PANEL_CLASS.$dispose.call(this);
+    };
+
+    /**
+     * 关闭选项框部件时，需要恢复强制拦截的环境。
+     * @override
+     */
+    UI_SELECT_OPTIONS_CLASS.$hide = function () {
+        UI_PANEL_CLASS.$hide.call(this);
+        mask();
+        restore();
+    };
+
+    /**
+     * 对于下拉框选项，鼠标移入即自动获得焦点。
+     * @override
+     */
+    UI_SELECT_ITEM_CLASS.$mouseover = function (event) {
+        UI_ITEM_CLASS.$mouseover.call(this, event);
+        setFocused(this);
     };
 
     /**
@@ -247,19 +273,33 @@ _uOptions     - 下拉选择框
         var parent = this.getParent();
         this._sValue = value;
         if (parent && this == parent._cSelected) {
-            UI_EDIT_CLASS.setValue.call(parent, value);
+            // 当前被选中项的值发生变更需要同步更新控件的值
+            UI_INPUT_CONTROL_CLASS.setValue.call(parent, value);
         }
     };
 
     /**
+     * 下拉框控件激活时，显示选项框，产生遮罩层阻止对页面内 DOM 节点的点击，并设置框架进入强制点击拦截状态。
+     * @override
+     */
+    UI_SELECT_CLASS.$activate = function (event) {
+        UI_INPUT_CONTROL_CLASS.$activate.call(this, event);
+        this._uOptions.show();
+        // 拦截之后的点击，同时屏蔽所有的控件点击事件
+        intercept(this);
+        mask(0, 65534);
+        UI_SELECT_FLUSH(this);
+        event.stopPropagation();
+    };
+
+    /**
      * 选项控件发生变化的处理。
-     * 在 选项组接口 中，选项控件发生增加/减少操作时调用此方法。
+     * 在 选项组接口 中，选项控件发生添加/移除操作时调用此方法。虚方法，子控件必须实现。
      * @protected
      */
     UI_SELECT_CLASS.$alterItems = function () {
-        //__gzip_original__options
         var options = this._uOptions,
-            scroll = options.$getSection('VScroll'),
+            scrollbar = options.$getSection('VScrollbar'),
             optionSize = this._nOptionSize,
             step = this.getBodyHeight(),
             width = this.getWidth(),
@@ -267,82 +307,73 @@ _uOptions     - 下拉选择框
 
         if (getParent(options.getOuter())) {
             // 设置选项框
-            scroll.setStep(step);
+            scrollbar.setStep(step);
 
             // 为了设置激活状态样式, 因此必须控制下拉框中的选项必须在滚动条以内
             this.setItemSize(
-                width - options.getInvalidWidth() - (itemLength > optionSize ? scroll.getWidth() : 0),
+                width - options.getMinimumWidth() - (itemLength > optionSize ? scrollbar.getWidth() : 0),
                 step
             );
 
             // 设置options框的大小，如果没有元素，至少有一个单位的高度
             options.cache(false);
-            options.$setSize(width, (MIN(itemLength, optionSize) || 1) * step + options.getInvalidHeight());
+            options.$setSize(width, (MIN(itemLength, optionSize) || 1) * step + options.getMinimumHeight());
         }
     };
 
     /**
-     * 计算控件的缓存。
-     * 控件缓存部分核心属性的值，提高控件属性的访问速度，在子控件或者应用程序开发过程中，如果需要避开控件提供的方法(setSize、alterClass 等)直接操作 Element 对象，操作完成后必须调用 clearCache 方法清除控件的属性缓存，否则将引发错误。
-     * @protected
-     *
-     * @param {CssStyle} style 基本 Element 对象的 Css 样式对象
-     * @param {boolean} cacheSize 是否需要缓存控件大小，如果控件是另一个控件的部件时，不缓存大小能加快渲染速度，默认缓存
+     * @override
      */
     UI_SELECT_CLASS.$cache = function (style, cacheSize) {
-        (getParent(this._uOptions.getOuter()) ? UI_ITEMS : UI_EDIT_CLASS).$cache.call(this, style, cacheSize);
+        (getParent(this._uOptions.getOuter()) ? UI_ITEMS : UI_INPUT_CONTROL_CLASS)
+            .$cache.call(this, style, cacheSize);
         this._uText.cache(false, true);
         this._uButton.cache(false, true);
     };
 
     /**
-     * 界面点击强制拦截事件的默认处理。
-     * 控件在下拉框展开时，需要拦截浏览器的点击事件，如果点击在下拉选项区域，则选中当前项，否则直接隐藏下拉选项框，但不会改变控件激活状态。
-     * @protected
-     *
-     * @param {Event} event 事件对象
+     * 控件在下拉框展开时，需要拦截浏览器的点击事件，如果点击在下拉选项区域，则选中当前项，否则直接隐藏下拉选项框。
+     * @override
      */
     UI_SELECT_CLASS.$intercept = function (event) {
         //__transform__control_o
         var control = findControl(event.target);
         this._uOptions.hide();
-        mask();
 
         // 检查点击是否在当前下拉框的选项上
-        if (control instanceof UI_SELECT_ITEM && control != this._cSelected) {
+        if (control instanceof UI_SELECT.Item && control != this._cSelected) {
             this.setSelected(control);
-            this.change();
+            if (this.onchange) {
+                this.onchange(event);
+            }
         }
+
+        event.exit();
     };
 
     /**
-     * 控件拥有焦点时，键盘事件的默认处理。
-     * 屏蔽空格键按下事件。Opera 下仅用 keydown 不能屏蔽空格键事件，还需要在 keypress 中屏蔽。如果控件处于可操作状态(参见 isEnabled)，keydown/keypress 方法触发 onkeydown/onkeypress 事件，如果事件返回值不为 false，则调用 $keydown/$keypress 方法。
-     * @protected
-     *
-     * @param {Event} event 事件对象
+     * 接管对上下键与回车/ESC键的处理。
+     * @override
      */
     UI_SELECT_CLASS.$keydown = UI_SELECT_CLASS.$keypress = function (event) {
-        UI_EDIT_CLASS['$' + event.type](event);
+        UI_INPUT_CONTROL_CLASS['$' + event.type](event);
 
-        //__gzip_original__options
-        //__gzip_original__length
         var options = this._uOptions,
-            scroll = options.$getSection('VScroll'),
+            scrollbar = options.$getSection('VScrollbar'),
             optionSize = this._nOptionSize,
             which = event.which,
             list = this.getItems(),
             length = list.length,
-            active = this.getActived();
+            focus = getFocused();
 
-        if (getActived() != this) {
+        if (this.isFocused()) {
             // 当前不能存在鼠标操作，否则屏蔽按键
             if (which == 40 || which == 38) {
                 if (length) {
                     if (options.isShow()) {
-                        this.$setActived(list[which = MIN(MAX(0, indexOf(list, active) + which - 39), length - 1)]);
-                        which -= scroll.getValue() / scroll.getStep();
-                        scroll.skip(which < 0 ? which : which >= optionSize ? which - optionSize + 1 : 0);
+                        setFocused(list[which = MIN(MAX(0, indexOf(list, focus) + which - 39), length - 1)]);
+                        which -= scrollbar.getValue() / scrollbar.getStep();
+                        scrollbar.skip(which < 0 ? which : which >= optionSize ? which - optionSize + 1 : 0);
                     }
                     else {
                         this.setSelected(MIN(MAX(0, indexOf(list, this._cSelected) + which - 39), length - 1));
@@ -353,71 +384,48 @@ _uOptions     - 下拉选择框
             else if (which == 27 || which == 13 && options.isShow()) {
                 // 回车键选中，ESC键取消
                 if (which == 13) {
-                    this.setSelected(active);
+                    this.setSelected(focus);
                 }
                 options.hide();
-                mask();
-                restore();
                 return false;
             }
         }
     };
 
     /**
-     * 鼠标在控件区域滚动滚轮事件的默认处理。
-     * 如果控件拥有焦点，则当前选中项随滚轮滚动而自动指向前一项或者后一项。如果控件处于可操作状态(参见 isEnabled)，mousewheel 方法触发 onmousewheel 事件，如果事件返回值不为 false，则调用 $mousewheel 方法。
-     * @protected
-     *
-     * @param {Event} event 事件对象
+     * 如果控件拥有焦点，则当前选中项随滚轮滚动而自动指向前一项或者后一项。
+     * @override
      */
     UI_SELECT_CLASS.$mousewheel = function (event) {
-        //__gzip_original__options
-        //__gzip_original__length
-        var options = this._uOptions,
-            list = this.getItems(),
-            length = list.length;
+        if (this.isFocused()) {
+            var options = this._uOptions,
+                list = this.getItems(),
+                length = list.length;
 
-        if (options.isShow()) {
-            options.$mousewheel(event);
+            if (options.isShow()) {
+                options.$mousewheel(event);
+            }
+            else {
+                this.setSelected(
+                    length ?
+                        MIN(MAX(0, indexOf(list, this._cSelected) + (event.detail > 0 ? 1 : -1)), length - 1) : null
+                );
+            }
+
+            event.exit();
         }
-        else {
-            this.setSelected(
-                length ? MIN(MAX(0, indexOf(list, this._cSelected) + (event.detail > 0 ? 1 : -1)), length - 1) : null
-            );
-        }
-        return false;
     };
 
     /**
-     * 控件激活状态开始事件的默认处理。
-     * @protected
-     *
-     * @param {Event} event 事件对象
-     */
-    UI_SELECT_CLASS.$activate = function (event) {
-        UI_EDIT_CLASS.$activate.call(this, event);
-        this._uOptions.show();
-        // 拦截之后的点击，同时屏蔽所有的控件点击事件
-        intercept(this);
-        mask(0, 65534);
-        UI_SELECT_FLUSH(this);
-    };
-
-    /**
-     * 控件自动渲染全部完成后的处理。
-     * 页面刷新时，部分浏览器会回填输入框的值，需要在回填结束后触发设置控件的状态。
-     * @protected
+     * @override
      */
     UI_SELECT_CLASS.$ready = function () {
         this.setValue(this.getValue());
     };
 
     /**
-     * 控件移除子控件事件的默认处理。
-     * 下拉框移除子选项时需要检查选项是否被选中，如果被选中需要清除状态。
-     * @protected
-     *
-     * @param {Item} item 选项控件
+     * 下拉框移除子选项时，如果选项是否被选中，需要先取消选中。
+     * @override
      */
     UI_SELECT_CLASS.$remove = function (item) {
         if (item == this._cSelected) {
@@ -427,14 +435,10 @@ _uOptions     - 下拉选择框
     };
 
     /**
-     * 设置控件的大小。
-     * @protected
-     *
-     * @param {number} width 宽度，如果不需要设置则将参数设置为等价于逻辑非的值
-     * @param {number} height 高度，如果不需要设置则省略此参数
+     * @override
      */
     UI_SELECT_CLASS.$setSize = function (width, height) {
-        UI_EDIT_CLASS.$setSize.call(this, width, height);
+        UI_INPUT_CONTROL_CLASS.$setSize.call(this, width, height);
         this.$locate();
         height = this.getBodyHeight();
 
@@ -480,11 +484,11 @@ _uOptions     - 下拉选择框
         item = 'number' == typeof item ? this.getItems()[item] : item || null;
 
         if (item !== this._cSelected) {
-            this._uText.$setBodyHTML(item ? item.getBody().innerHTML : '');
-            UI_EDIT_CLASS.setValue.call(this, item ? item._sValue : '');
+            this._uText.setContent(item ? item.getBody().innerHTML : '');
+            UI_INPUT_CONTROL_CLASS.setValue.call(this, item ? item._sValue : '');
             this._cSelected = item;
             if (this._uOptions.isShow()) {
-                this.$setActived(item);
+                setFocused(item);
             }
         }
     };

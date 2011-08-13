@@ -180,6 +180,38 @@
             "定义一组选项中选择唯一选项的基本操作。",
             "单选框控件，实现了对原生 InputElement 单选框的功能扩展，支持对选中的图案的选择。单选框控件需要分组后使用，一组内只有一个单选框能被选中。"
         ]
+    },
+
+    {
+        "name": "select",
+        "type": "ui",
+        "position": "ecui.ui.Select",
+        "super": "input-control",
+        "interface": ["items"],
+        "desc": "下拉框控件",
+        "params": [
+            {"name": "browser", "desc": "boolean，是否使用浏览器原生的滚动条，默认使用模拟的滚动条"},
+            {"name": "optionSize", "desc": "number，下拉框最大允许显示的选项数量，默认为5"}
+        ],
+        "html": "<select ecui=\"type:select;id:ctrl1\"><option value=\"1\">Hello</option></select>",
+        "remark": [
+            "定义模拟下拉框行为的基本操作。",
+            "下拉框控件，内部包含了三个部件，分别是下拉框显示的文本(选项控件)、下拉框的按钮(基础控件)与下拉选项框(截面控件，只使用垂直滚动条)。下拉框控件扩展了原生 SelectElement 的功能，允许指定下拉选项框的最大选项数量，在屏幕显示不下的时候，会自动显示在下拉框的上方。在没有选项时，下拉选项框有一个选项的高度。下拉框控件允许使用键盘与滚轮操作，在下拉选项框打开时，可以通过回车键或鼠标点击选择，上下键选择选项的当前条目，在关闭下拉选项框后，只要拥有焦点，就可以通过滚轮上下选择选项。"
+        ]
+    },
+
+    {
+        "name": "combox",
+        "type": "ui",
+        "position": "ecui.ui.Combox",
+        "super": "select",
+        "interface": ["items"],
+        "desc": "输入式下拉框控件",
+        "html": "<select ecui=\"type:combox;id:ctrl1\"><option value=\"1\">Hello</option></select>",
+        "remark": [
+            "定义可输入下拉框行为的基本操作。",
+            "可输入下拉框控件，在下拉框控件的基础上允许选项框可输入内容。"
+        ]
     }/*,
 
     {
@@ -219,38 +251,6 @@
         "remark": [
             "定义格式化输入数据的基本操作。",
             "格式化输入框控件，对输入的数据内容格式进行限制。"
-        ]
-    },
-
-    {
-        "name": "select",
-        "type": "ui",
-        "position": "ecui.ui.Select",
-        "super": "edit",
-        "interface": ["items"],
-        "desc": "下拉框控件",
-        "params": [
-            {"name": "browser", "desc": "boolean，是否使用浏览器原生的滚动条，默认使用模拟的滚动条"},
-            {"name": "optionSize", "desc": "number，下拉框最大允许显示的选项数量，默认为5"}
-        ],
-        "html": "<select ecui=\"type:select;id:ctrl1\"><option value=\"1\">Hello</option></select>",
-        "remark": [
-            "定义模拟下拉框行为的基本操作。",
-            "下拉框控件，内部包含了三个部件，分别是下拉框显示的文本(选项控件)、下拉框的按钮(基础控件)与下拉选项框(截面控件，只使用垂直滚动条)。下拉框控件扩展了原生 SelectElement 的功能，允许指定下拉选项框的最大选项数量，在屏幕显示不下的时候，会自动显示在下拉框的上方。在没有选项时，下拉选项框有一个选项的高度。下拉框控件允许使用键盘与滚轮操作，在下拉选项框打开时，可以通过回车键或鼠标点击选择，上下键选择选项的当前条目，在关闭下拉选项框后，只要拥有焦点，就可以通过滚轮上下选择选项。"
-        ]
-    },
-
-    {
-        "name": "combox",
-        "type": "ui",
-        "position": "ecui.ui.Combox",
-        "super": "select",
-        "interface": ["items"],
-        "desc": "输入式下拉框控件",
-        "html": "<select ecui=\"type:combox;id:ctrl1\"><option value=\"1\">Hello</option></select>",
-        "remark": [
-            "定义可输入下拉框行为的基本操作。",
-            "可输入下拉框控件，在下拉框控件的基础上允许选项框可输入内容。"
         ]
     },
 

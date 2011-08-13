@@ -16,7 +16,7 @@ function after() {
     document.body.removeChild(document.getElementById('common'));
 }
 
-test('$activate/activate/onactivate', {
+test('$activate/onactivate', {
     '通过鼠标事件激活': function () {
         var childEl = ecui.get('child').getMain(),
             parentEl = ecui.get('parent').getMain(),
@@ -54,17 +54,17 @@ test('$activate/activate/onactivate', {
         uiut.MockEvents.mouseup(childEl);
     },
 
-    '直接函数调用，未自定义事件处理': function () {
+    '直接发送事件，未自定义事件处理': function () {
         var child = ecui.get('child'),
             el = child.getMain();
 
-        child.activate(new ecui.ui.Event('activate'));
+        ecui.triggerEvent(child, 'activate');
         value_of(baidu.dom.hasClass(el, 'ui-control-active')).should_be_true();
         value_of(baidu.dom.hasClass(ecui.get('parent').getMain(), 'ui-control-active')).should_be_false();
         value_of(baidu.dom.hasClass(ecui.get('common').getMain(), 'ui-control-active')).should_be_false();
     },
 
-    '直接函数调用，自定义事件处理': function () {
+    '直接发送事件，自定义事件处理': function () {
         var child = ecui.get('child'),
             el = child.getMain(),
             flag = false;
@@ -73,12 +73,12 @@ test('$activate/activate/onactivate', {
             flag = true;
         };
 
-        child.activate(new ecui.ui.Event('activate'));
+        ecui.triggerEvent(child, 'activate');
         value_of(flag).should_be_true();
         value_of(baidu.dom.hasClass(el, 'ui-control-active')).should_be_true();
     },
 
-    '直接函数调用，阻止默认行为': function () {
+    '直接发送事件，阻止默认行为': function () {
         var child = ecui.get('child'),
             el = child.getMain();
 
@@ -86,13 +86,13 @@ test('$activate/activate/onactivate', {
             return false;
         };
 
-        child.activate(new ecui.ui.Event('activate'));
+        ecui.triggerEvent(child, 'activate');
         value_of(baidu.dom.hasClass(el, 'ui-control-active')).should_be_false();
     }
 });
 
 test('$append/onappend', {
-    '直接函数调用，未自定义事件处理': function () {
+    '未自定义事件处理': function () {
         var parent = ecui.get('parent'),
             child = ecui.get('child');
 
@@ -104,7 +104,7 @@ test('$append/onappend', {
         value_of(ecui.query({parent: parent}).length).should_be(1);
     },
 
-    '直接函数调用，自定义事件处理': function () {
+    '自定义事件处理': function () {
         var parent = ecui.get('parent'),
             child = ecui.get('child'),
             flag = false;
@@ -118,7 +118,7 @@ test('$append/onappend', {
         value_of(flag).should_be_true();
     },
 
-    '直接函数调用，阻止默认行为': function () {
+    '阻止默认行为': function () {
         var parent = ecui.get('parent'),
             child = ecui.get('child');
 
@@ -174,18 +174,34 @@ test('$blur/blur/onblur', {
         uiut.MockEvents.mouseup(document.body);
     },
 
-    '直接函数调用，未自定义事件处理': function () {
+    '直接调用方法失去焦点': function () {
+        var child = ecui.get('child'),
+            childEl = child.getMain(),
+            parentEl = ecui.get('parent').getMain(),
+            commonEl = ecui.get('common').getMain();
+
+        ecui.setFocused(child);
+        value_of(baidu.dom.hasClass(childEl, 'ui-control-focus')).should_be_true();
+        value_of(baidu.dom.hasClass(parentEl, 'ui-control-focus')).should_be_true();
+        value_of(baidu.dom.hasClass(commonEl, 'ui-control-focus')).should_be_true();
+        child.blur();
+        value_of(baidu.dom.hasClass(childEl, 'ui-control-focus')).should_be_false();
+        value_of(baidu.dom.hasClass(parentEl, 'ui-control-focus')).should_be_true();
+        value_of(baidu.dom.hasClass(commonEl, 'ui-control-focus')).should_be_true();
+    },
+
+    '直接发送事件，未自定义事件处理': function () {
         var child = ecui.get('child'),
             el = child.getMain();
 
         ecui.setFocused(child);
-        child.blur(new ecui.ui.Event('blur'));
+        ecui.triggerEvent(child, 'blur');
         value_of(baidu.dom.hasClass(el, 'ui-control-focus')).should_be_false();
         value_of(baidu.dom.hasClass(ecui.get('parent').getMain(), 'ui-control-focus')).should_be_true();
         value_of(baidu.dom.hasClass(ecui.get('common').getMain(), 'ui-control-focus')).should_be_true();
     },
 
-    '直接函数调用，自定义事件处理': function () {
+    '直接发送事件，自定义事件处理': function () {
         var child = ecui.get('child'),
             el = child.getMain(),
             flag = false;
@@ -195,12 +211,12 @@ test('$blur/blur/onblur', {
         };
 
         ecui.setFocused(child);
-        child.blur(new ecui.ui.Event('blur'));
+        ecui.triggerEvent(child, 'blur');
         value_of(flag).should_be_true();
         value_of(baidu.dom.hasClass(el, 'ui-control-focus')).should_be_false();
     },
 
-    '直接函数调用，阻止默认行为': function () {
+    '直接发送事件，阻止默认行为': function () {
         var child = ecui.get('child'),
             el = child.getMain();
 
@@ -209,7 +225,7 @@ test('$blur/blur/onblur', {
         };
 
         ecui.setFocused(child);
-        child.blur(new ecui.ui.Event('blur'));
+        ecui.triggerEvent(child, 'blur');
         value_of(baidu.dom.hasClass(el, 'ui-control-focus')).should_be_true();
     }
 });
@@ -248,7 +264,7 @@ test('$cache/cache/clearCache/getMinimumWidth/getMinimumHeight/$getBasicWidth/$g
     }
 });
 
-test('$click/click/onclick', {
+test('$click/onclick', {
     '通过鼠标事件点击': function () {
         var child = ecui.get('child'),
             el = child.getMain(),
@@ -298,7 +314,7 @@ test('$click/click/onclick', {
         value_of(result).should_be(['child-click', 'parent-click']);
     },
 
-    '直接函数调用，自定义事件处理': function () {
+    '直接发送事件，自定义事件处理': function () {
         var child = ecui.get('child'),
             el = child.getMain(),
             parent = ecui.get('parent'),
@@ -317,12 +333,12 @@ test('$click/click/onclick', {
             result.push('common-click');
         };
 
-        child.click(new ecui.ui.Event('click'));
+        ecui.triggerEvent(child, 'click');
         value_of(result).should_be(['child-click']);
     }
 });
 
-test('$deactivate/deactivate/ondeactivate', {
+test('$deactivate/ondeactivate', {
     '通过鼠标事件失去激活': function () {
         var child = ecui.get('child'),
             childEl = child.getMain(),
@@ -361,19 +377,19 @@ test('$deactivate/deactivate/ondeactivate', {
         value_of(baidu.dom.hasClass(commonEl, 'ui-control-active')).should_be_true();
     },
 
-    '直接函数调用，未自定义事件处理': function () {
+    '直接发送事件，未自定义事件处理': function () {
         var child = ecui.get('child'),
             el = child.getMain();
 
         uiut.MockEvents.mousedown(el);
-        child.deactivate(new ecui.ui.Event('deactivate'));
+        ecui.triggerEvent(child, 'deactivate');
         value_of(baidu.dom.hasClass(el, 'ui-control-active')).should_be_false();
         value_of(baidu.dom.hasClass(ecui.get('parent').getMain(), 'ui-control-active')).should_be_true();
         value_of(baidu.dom.hasClass(ecui.get('common').getMain(), 'ui-control-active')).should_be_true();
         uiut.MockEvents.mouseup(el);
     },
 
-    '直接函数调用，自定义事件处理': function () {
+    '直接发送事件，自定义事件处理': function () {
         var child = ecui.get('child'),
             el = child.getMain(),
             flag = false;
@@ -383,13 +399,13 @@ test('$deactivate/deactivate/ondeactivate', {
         };
 
         uiut.MockEvents.mousedown(el);
-        child.deactivate(new ecui.ui.Event('deactivate'));
+        ecui.triggerEvent(child, 'deactivate');
         value_of(flag).should_be_true();
         value_of(baidu.dom.hasClass(el, 'ui-control-active')).should_be_false();
         uiut.MockEvents.mouseup(el);
     },
 
-    '直接函数调用，阻止默认行为': function () {
+    '直接发送事件，阻止默认行为': function () {
         var child = ecui.get('child'),
             el = child.getMain();
 
@@ -398,7 +414,7 @@ test('$deactivate/deactivate/ondeactivate', {
         };
 
         uiut.MockEvents.mousedown(el);
-        child.deactivate(new ecui.ui.Event('deactivate'));
+        ecui.triggerEvent(child, 'deactivate');
         value_of(baidu.dom.hasClass(el, 'ui-control-active')).should_be_true();
         uiut.MockEvents.mouseup(el);
     }
@@ -442,17 +458,31 @@ test('$focus/focus/onfocus', {
         uiut.MockEvents.mouseup(childEl);
     },
 
-    '直接函数调用，未自定义事件处理': function () {
+    '直接调用方法获得焦点': function () {
+        var childEl = ecui.get('child').getMain(),
+            parentEl = ecui.get('parent').getMain(),
+            commonEl = ecui.get('common').getMain();
+
+        value_of(baidu.dom.hasClass(childEl, 'ui-control-focus')).should_be_false();
+        value_of(baidu.dom.hasClass(parentEl, 'ui-control-focus')).should_be_false();
+        value_of(baidu.dom.hasClass(commonEl, 'ui-control-focus')).should_be_false();
+        ecui.get('child').focus();
+        value_of(baidu.dom.hasClass(childEl, 'ui-control-focus')).should_be_true();
+        value_of(baidu.dom.hasClass(parentEl, 'ui-control-focus')).should_be_true();
+        value_of(baidu.dom.hasClass(commonEl, 'ui-control-focus')).should_be_true();
+    },
+
+    '直接发送事件，未自定义事件处理': function () {
         var child = ecui.get('child'),
             el = child.getMain();
 
-        child.focus(new ecui.ui.Event('focus'));
+        ecui.triggerEvent(child, 'focus');
         value_of(baidu.dom.hasClass(el, 'ui-control-focus')).should_be_true();
         value_of(baidu.dom.hasClass(ecui.get('parent').getMain(), 'ui-control-focus')).should_be_false();
         value_of(baidu.dom.hasClass(ecui.get('common').getMain(), 'ui-control-focus')).should_be_false();
     },
 
-    '直接函数调用，自定义事件处理': function () {
+    '直接发送事件，自定义事件处理': function () {
         var child = ecui.get('child'),
             el = child.getMain(),
             flag = false;
@@ -461,12 +491,12 @@ test('$focus/focus/onfocus', {
             flag = true;
         };
 
-        child.focus(new ecui.ui.Event('focus'));
+        ecui.triggerEvent(child, 'focus');
         value_of(flag).should_be_true();
         value_of(baidu.dom.hasClass(el, 'ui-control-focus')).should_be_true();
     },
 
-    '直接函数调用，阻止默认行为': function () {
+    '直接发送事件，阻止默认行为': function () {
         var child = ecui.get('child'),
             el = child.getMain();
 
@@ -474,7 +504,7 @@ test('$focus/focus/onfocus', {
             return false;
         };
 
-        child.focus(new ecui.ui.Event('focus'));
+        ecui.triggerEvent(child, 'focus');
         value_of(baidu.dom.hasClass(el, 'ui-control-focus')).should_be_false();
     }
 });
@@ -552,7 +582,7 @@ test('$hide/$show/hide/isShow/show 测试', {
     }
 });
 
-test('$keydown/keydown/onkeydown', {
+test('$keydown/onkeydown', {
     '通过键盘事件触发': function () {
         var child = ecui.get('child'),
             parent = ecui.get('parent'),
@@ -604,7 +634,7 @@ test('$keydown/keydown/onkeydown', {
         value_of(result).should_be(['child-keydown', 'parent-keydown']);
     },
 
-    '直接函数调用，自定义事件处理': function () {
+    '直接发送事件，自定义事件处理': function () {
         var child = ecui.get('child'),
             parent = ecui.get('parent'),
             common = ecui.get('common'),
@@ -622,12 +652,12 @@ test('$keydown/keydown/onkeydown', {
             result.push('common-keydown');
         };
 
-        child.keydown(new ecui.ui.Event('keydown'));
+        ecui.triggerEvent(child, 'keydown');
         value_of(result).should_be(['child-keydown']);
     }
 });
 
-test('$keypress/keypress/onkeypress', {
+test('$keypress/onkeypress', {
     '通过键盘事件触发': function () {
         var child = ecui.get('child'),
             parent = ecui.get('parent'),
@@ -681,7 +711,7 @@ test('$keypress/keypress/onkeypress', {
         value_of(result).should_be(['child-keypress', 'parent-keypress']);
     },
 
-    '直接函数调用，自定义事件处理': function () {
+    '直接发送事件，自定义事件处理': function () {
         var child = ecui.get('child'),
             parent = ecui.get('parent'),
             common = ecui.get('common'),
@@ -699,12 +729,12 @@ test('$keypress/keypress/onkeypress', {
             result.push('common-keypress');
         };
 
-        child.keypress(new ecui.ui.Event('keypress'));
+        ecui.triggerEvent(child, 'keypress');
         value_of(result).should_be(['child-keypress']);
     }
 });
 
-test('$keyup/keyup/onkeyup', {
+test('$keyup/onkeyup', {
     '通过键盘事件触发': function () {
         var child = ecui.get('child'),
             parent = ecui.get('parent'),
@@ -756,7 +786,7 @@ test('$keyup/keyup/onkeyup', {
         value_of(result).should_be(['child-keyup', 'parent-keyup']);
     },
 
-    '直接函数调用，自定义事件处理': function () {
+    '直接发送事件，自定义事件处理': function () {
         var child = ecui.get('child'),
             parent = ecui.get('parent'),
             common = ecui.get('common'),
@@ -774,12 +804,12 @@ test('$keyup/keyup/onkeyup', {
             result.push('common-keyup');
         };
 
-        child.keyup(new ecui.ui.Event('keyup'));
+        ecui.triggerEvent(child, 'keyup');
         value_of(result).should_be(['child-keyup']);
     }
 });
 
-test('$mousedown/mousedown/onmousedown', {
+test('$mousedown/onmousedown', {
     '通过鼠标事件触发': function () {
         var child = ecui.get('child'),
             el = child.getMain(),
@@ -829,7 +859,7 @@ test('$mousedown/mousedown/onmousedown', {
         value_of(result).should_be(['child-mousedown', 'parent-mousedown']);
     },
 
-    '直接函数调用，自定义事件处理': function () {
+    '直接发送事件，自定义事件处理': function () {
         var child = ecui.get('child'),
             el = child.getMain(),
             parent = ecui.get('parent'),
@@ -848,12 +878,12 @@ test('$mousedown/mousedown/onmousedown', {
             result.push('common-mousedown');
         };
 
-        child.mousedown(new ecui.ui.Event('mousedown'));
+        ecui.triggerEvent(child, 'mousedown');
         value_of(result).should_be(['child-mousedown']);
     }
 });
 
-test('$mousemove/mousemove/onmousemove', {
+test('$mousemove/onmousemove', {
     '通过鼠标事件触发': function () {
         var child = ecui.get('child'),
             el = child.getMain(),
@@ -903,7 +933,7 @@ test('$mousemove/mousemove/onmousemove', {
         value_of(result).should_be(['child-mousemove', 'parent-mousemove']);
     },
 
-    '直接函数调用，自定义事件处理': function () {
+    '直接发送事件，自定义事件处理': function () {
         var child = ecui.get('child'),
             el = child.getMain(),
             parent = ecui.get('parent'),
@@ -922,12 +952,167 @@ test('$mousemove/mousemove/onmousemove', {
             result.push('common-mousemove');
         };
 
-        child.mousemove(new ecui.ui.Event('mousemove'));
+        ecui.triggerEvent(child, 'mousemove');
         value_of(result).should_be(['child-mousemove']);
     }
 });
 
-test('$mouseup/mouseup/onmouseup', {
+test('$mouseout/onmouseout', {
+    '通过鼠标事件失去激活': function () {
+        var child = ecui.get('child'),
+            childEl = child.getMain(),
+            parentEl = ecui.get('parent').getMain(),
+            commonEl = ecui.get('common').getMain();
+
+        uiut.MockEvents.mouseover(childEl);
+        value_of(baidu.dom.hasClass(childEl, 'ui-control-hover')).should_be_true();
+        value_of(baidu.dom.hasClass(parentEl, 'ui-control-hover')).should_be_true();
+        value_of(baidu.dom.hasClass(commonEl, 'ui-control-hover')).should_be_true();
+        uiut.MockEvents.mouseout(childEl);
+        uiut.MockEvents.mouseover(document.body);
+        value_of(baidu.dom.hasClass(childEl, 'ui-control-hover')).should_be_false();
+        value_of(baidu.dom.hasClass(parentEl, 'ui-control-hover')).should_be_false();
+        value_of(baidu.dom.hasClass(commonEl, 'ui-control-hover')).should_be_false();
+    },
+
+    '通过鼠标事件失去激活，阻止默认行为/阻止冒泡': function () {
+        var child = ecui.get('child'),
+            childEl = child.getMain(),
+            parent = ecui.get('parent'),
+            parentEl = parent.getMain(),
+            commonEl = ecui.get('common').getMain();
+
+        child.onmouseout = function (event) {
+            event.preventDefault();
+        };
+
+        parent.onmouseout = function (event) {
+            event.stopPropagation();
+        };
+
+        uiut.MockEvents.mouseover(childEl);
+        uiut.MockEvents.mouseout(childEl);
+        uiut.MockEvents.mouseover(document.body);
+        value_of(baidu.dom.hasClass(childEl, 'ui-control-hover')).should_be_true();
+        value_of(baidu.dom.hasClass(parentEl, 'ui-control-hover')).should_be_false();
+        value_of(baidu.dom.hasClass(commonEl, 'ui-control-hover')).should_be_true();
+    },
+
+    '直接发送事件，未自定义事件处理': function () {
+        var child = ecui.get('child'),
+            el = child.getMain();
+
+        uiut.MockEvents.mouseover(el);
+        ecui.triggerEvent(child, 'mouseout');
+        value_of(baidu.dom.hasClass(el, 'ui-control-hover')).should_be_false();
+        value_of(baidu.dom.hasClass(ecui.get('parent').getMain(), 'ui-control-hover')).should_be_true();
+        value_of(baidu.dom.hasClass(ecui.get('common').getMain(), 'ui-control-hover')).should_be_true();
+        uiut.MockEvents.mouseup(el);
+    },
+
+    '直接发送事件，自定义事件处理': function () {
+        var child = ecui.get('child'),
+            el = child.getMain(),
+            flag = false;
+
+        child.onmouseout = function () {
+            flag = true;
+        };
+
+        uiut.MockEvents.mouseover(el);
+        ecui.triggerEvent(child, 'mouseout');
+        value_of(flag).should_be_true();
+        value_of(baidu.dom.hasClass(el, 'ui-control-hover')).should_be_false();
+    },
+
+    '直接发送事件，阻止默认行为': function () {
+        var child = ecui.get('child'),
+            el = child.getMain();
+
+        child.onmouseout = function (event) {
+            return false;
+        };
+
+        uiut.MockEvents.mouseover(el);
+        ecui.triggerEvent(child, 'mouseout');
+        value_of(baidu.dom.hasClass(el, 'ui-control-hover')).should_be_true();
+    }
+});
+
+test('$mouseover/onmouseover', {
+    '通过鼠标事件激活': function () {
+        var childEl = ecui.get('child').getMain(),
+            parentEl = ecui.get('parent').getMain(),
+            commonEl = ecui.get('common').getMain();
+
+        value_of(baidu.dom.hasClass(childEl, 'ui-control-hover')).should_be_false();
+        value_of(baidu.dom.hasClass(parentEl, 'ui-control-hover')).should_be_false();
+        value_of(baidu.dom.hasClass(commonEl, 'ui-control-hover')).should_be_false();
+        uiut.MockEvents.mouseover(childEl);
+        value_of(baidu.dom.hasClass(childEl, 'ui-control-hover')).should_be_true();
+        value_of(baidu.dom.hasClass(parentEl, 'ui-control-hover')).should_be_true();
+        value_of(baidu.dom.hasClass(commonEl, 'ui-control-hover')).should_be_true();
+    },
+
+    '通过鼠标事件激活，阻止默认行为/阻止冒泡': function () {
+        var child = ecui.get('child'),
+            childEl = child.getMain(),
+            parent = ecui.get('parent'),
+            parentEl = parent.getMain(),
+            commonEl = ecui.get('common').getMain();
+
+        child.onmouseover = function (event) {
+            event.preventDefault();
+        };
+
+        parent.onmouseover = function (event) {
+            event.stopPropagation();
+        };
+
+        uiut.MockEvents.mouseover(childEl);
+        value_of(baidu.dom.hasClass(childEl, 'ui-control-hover')).should_be_false();
+        value_of(baidu.dom.hasClass(parentEl, 'ui-control-hover')).should_be_true();
+        value_of(baidu.dom.hasClass(commonEl, 'ui-control-hover')).should_be_false();
+    },
+
+    '直接发送事件，未自定义事件处理': function () {
+        var child = ecui.get('child'),
+            el = child.getMain();
+
+        ecui.triggerEvent(child, 'mouseover');
+        value_of(baidu.dom.hasClass(el, 'ui-control-hover')).should_be_true();
+        value_of(baidu.dom.hasClass(ecui.get('parent').getMain(), 'ui-control-hover')).should_be_false();
+        value_of(baidu.dom.hasClass(ecui.get('common').getMain(), 'ui-control-hover')).should_be_false();
+    },
+
+    '直接发送事件，自定义事件处理': function () {
+        var child = ecui.get('child'),
+            el = child.getMain(),
+            flag = false;
+
+        child.onmouseover = function () {
+            flag = true;
+        };
+
+        ecui.triggerEvent(child, 'mouseover');
+        value_of(flag).should_be_true();
+        value_of(baidu.dom.hasClass(el, 'ui-control-hover')).should_be_true();
+    },
+
+    '直接发送事件，阻止默认行为': function () {
+        var child = ecui.get('child'),
+            el = child.getMain();
+
+        child.onmouseover = function (event) {
+            return false;
+        };
+
+        ecui.triggerEvent(child, 'mouseover');
+        value_of(baidu.dom.hasClass(el, 'ui-control-hover')).should_be_false();
+    }
+});
+
+test('$mouseup/onmouseup', {
     '通过鼠标事件触发': function () {
         var child = ecui.get('child'),
             el = child.getMain(),
@@ -977,7 +1162,7 @@ test('$mouseup/mouseup/onmouseup', {
         value_of(result).should_be(['child-mouseup', 'parent-mouseup']);
     },
 
-    '直接函数调用，自定义事件处理': function () {
+    '直接发送事件，自定义事件处理': function () {
         var child = ecui.get('child'),
             el = child.getMain(),
             parent = ecui.get('parent'),
@@ -996,168 +1181,13 @@ test('$mouseup/mouseup/onmouseup', {
             result.push('common-mouseup');
         };
 
-        child.mouseup(new ecui.ui.Event('mouseup'));
+        ecui.triggerEvent(child, 'mouseup');
         value_of(result).should_be(['child-mouseup']);
     }
 });
 
-test('$mouseover/mouseover/onmouseover', {
-    '通过鼠标事件激活': function () {
-        var childEl = ecui.get('child').getMain(),
-            parentEl = ecui.get('parent').getMain(),
-            commonEl = ecui.get('common').getMain();
-
-        value_of(baidu.dom.hasClass(childEl, 'ui-control-hover')).should_be_false();
-        value_of(baidu.dom.hasClass(parentEl, 'ui-control-hover')).should_be_false();
-        value_of(baidu.dom.hasClass(commonEl, 'ui-control-hover')).should_be_false();
-        uiut.MockEvents.mouseover(childEl);
-        value_of(baidu.dom.hasClass(childEl, 'ui-control-hover')).should_be_true();
-        value_of(baidu.dom.hasClass(parentEl, 'ui-control-hover')).should_be_true();
-        value_of(baidu.dom.hasClass(commonEl, 'ui-control-hover')).should_be_true();
-    },
-
-    '通过鼠标事件激活，阻止默认行为/阻止冒泡': function () {
-        var child = ecui.get('child'),
-            childEl = child.getMain(),
-            parent = ecui.get('parent'),
-            parentEl = parent.getMain(),
-            commonEl = ecui.get('common').getMain();
-
-        child.onmouseover = function (event) {
-            event.preventDefault();
-        };
-
-        parent.onmouseover = function (event) {
-            event.stopPropagation();
-        };
-
-        uiut.MockEvents.mouseover(childEl);
-        value_of(baidu.dom.hasClass(childEl, 'ui-control-hover')).should_be_false();
-        value_of(baidu.dom.hasClass(parentEl, 'ui-control-hover')).should_be_true();
-        value_of(baidu.dom.hasClass(commonEl, 'ui-control-hover')).should_be_false();
-    },
-
-    '直接函数调用，未自定义事件处理': function () {
-        var child = ecui.get('child'),
-            el = child.getMain();
-
-        child.mouseover(new ecui.ui.Event('mouseover'));
-        value_of(baidu.dom.hasClass(el, 'ui-control-hover')).should_be_true();
-        value_of(baidu.dom.hasClass(ecui.get('parent').getMain(), 'ui-control-hover')).should_be_false();
-        value_of(baidu.dom.hasClass(ecui.get('common').getMain(), 'ui-control-hover')).should_be_false();
-    },
-
-    '直接函数调用，自定义事件处理': function () {
-        var child = ecui.get('child'),
-            el = child.getMain(),
-            flag = false;
-
-        child.onmouseover = function () {
-            flag = true;
-        };
-
-        child.mouseover(new ecui.ui.Event('mouseover'));
-        value_of(flag).should_be_true();
-        value_of(baidu.dom.hasClass(el, 'ui-control-hover')).should_be_true();
-    },
-
-    '直接函数调用，阻止默认行为': function () {
-        var child = ecui.get('child'),
-            el = child.getMain();
-
-        child.onmouseover = function (event) {
-            return false;
-        };
-
-        child.mouseover(new ecui.ui.Event('mouseover'));
-        value_of(baidu.dom.hasClass(el, 'ui-control-hover')).should_be_false();
-    }
-});
-
-test('$mouseout/mouseout/onmouseout', {
-    '通过鼠标事件失去激活': function () {
-        var child = ecui.get('child'),
-            childEl = child.getMain(),
-            parentEl = ecui.get('parent').getMain(),
-            commonEl = ecui.get('common').getMain();
-
-        uiut.MockEvents.mouseover(childEl);
-        value_of(baidu.dom.hasClass(childEl, 'ui-control-hover')).should_be_true();
-        value_of(baidu.dom.hasClass(parentEl, 'ui-control-hover')).should_be_true();
-        value_of(baidu.dom.hasClass(commonEl, 'ui-control-hover')).should_be_true();
-        uiut.MockEvents.mouseout(childEl);
-        uiut.MockEvents.mouseover(document.body);
-        value_of(baidu.dom.hasClass(childEl, 'ui-control-hover')).should_be_false();
-        value_of(baidu.dom.hasClass(parentEl, 'ui-control-hover')).should_be_false();
-        value_of(baidu.dom.hasClass(commonEl, 'ui-control-hover')).should_be_false();
-    },
-
-    '通过鼠标事件失去激活，阻止默认行为/阻止冒泡': function () {
-        var child = ecui.get('child'),
-            childEl = child.getMain(),
-            parent = ecui.get('parent'),
-            parentEl = parent.getMain(),
-            commonEl = ecui.get('common').getMain();
-
-        child.onmouseout = function (event) {
-            event.preventDefault();
-        };
-
-        parent.onmouseout = function (event) {
-            event.stopPropagation();
-        };
-
-        uiut.MockEvents.mouseover(childEl);
-        uiut.MockEvents.mouseout(childEl);
-        uiut.MockEvents.mouseover(document.body);
-        value_of(baidu.dom.hasClass(childEl, 'ui-control-hover')).should_be_true();
-        value_of(baidu.dom.hasClass(parentEl, 'ui-control-hover')).should_be_false();
-        value_of(baidu.dom.hasClass(commonEl, 'ui-control-hover')).should_be_true();
-    },
-
-    '直接函数调用，未自定义事件处理': function () {
-        var child = ecui.get('child'),
-            el = child.getMain();
-
-        uiut.MockEvents.mouseover(el);
-        child.mouseout(new ecui.ui.Event('mouseout'));
-        value_of(baidu.dom.hasClass(el, 'ui-control-hover')).should_be_false();
-        value_of(baidu.dom.hasClass(ecui.get('parent').getMain(), 'ui-control-hover')).should_be_true();
-        value_of(baidu.dom.hasClass(ecui.get('common').getMain(), 'ui-control-hover')).should_be_true();
-        uiut.MockEvents.mouseup(el);
-    },
-
-    '直接函数调用，自定义事件处理': function () {
-        var child = ecui.get('child'),
-            el = child.getMain(),
-            flag = false;
-
-        child.onmouseout = function () {
-            flag = true;
-        };
-
-        uiut.MockEvents.mouseover(el);
-        child.mouseout(new ecui.ui.Event('mouseout'));
-        value_of(flag).should_be_true();
-        value_of(baidu.dom.hasClass(el, 'ui-control-hover')).should_be_false();
-    },
-
-    '直接函数调用，阻止默认行为': function () {
-        var child = ecui.get('child'),
-            el = child.getMain();
-
-        child.onmouseout = function (event) {
-            return false;
-        };
-
-        uiut.MockEvents.mouseover(el);
-        child.mouseout(new ecui.ui.Event('mouseout'));
-        value_of(baidu.dom.hasClass(el, 'ui-control-hover')).should_be_true();
-    }
-});
-
-test('$mousewheel/mousewheel/onmousewheel', {
-    '在空白区域内滚动不触发控件事件': function () {
+test('$mousewheel/onmousewheel', {
+    '在空白区域内滚动触发焦点状态控件事件': function () {
         var common = ecui.get('common'),
             result = [];
 
@@ -1169,7 +1199,7 @@ test('$mousewheel/mousewheel/onmousewheel', {
 
         uiut.MockEvents.mouseover(document.body);
         uiut.MockEvents.mousewheel(document.body);
-        value_of(result).should_be([]);
+        value_of(result).should_be(['common-mousewheel']);
     },
 
     '通过鼠标事件触发': function () {
@@ -1194,6 +1224,12 @@ test('$mousewheel/mousewheel/onmousewheel', {
         uiut.MockEvents.mouseover(el);
         uiut.MockEvents.mousewheel(el);
         value_of(result).should_be(['child-mousewheel', 'parent-mousewheel', 'common-mousewheel']);
+        uiut.MockEvents.mouseover(document.body);
+        uiut.MockEvents.mousewheel(el);
+        value_of(result).should_be(['child-mousewheel', 'parent-mousewheel', 'common-mousewheel']);
+        child.focus();
+        uiut.MockEvents.mousewheel(el);
+        value_of(result).should_be(['child-mousewheel', 'parent-mousewheel', 'common-mousewheel','child-mousewheel', 'parent-mousewheel', 'common-mousewheel']);
     },
 
     '通过鼠标事件点击，阻止默认行为/阻止冒泡': function () {
@@ -1221,7 +1257,7 @@ test('$mousewheel/mousewheel/onmousewheel', {
         value_of(result).should_be(['child-mousewheel', 'parent-mousewheel']);
     },
 
-    '直接函数调用，自定义事件处理': function () {
+    '直接发送事件，自定义事件处理': function () {
         var child = ecui.get('child'),
             el = child.getMain(),
             parent = ecui.get('parent'),
@@ -1241,13 +1277,13 @@ test('$mousewheel/mousewheel/onmousewheel', {
         };
 
         uiut.MockEvents.mouseover(el);
-        child.mousewheel(new ecui.ui.Event('mousewheel'));
+        ecui.triggerEvent(child, 'mousewheel');
         value_of(result).should_be(['child-mousewheel']);
     }
 });
 
 test('$remove/onremove', {
-    '直接函数调用，未自定义事件处理': function () {
+    '直接发送事件，未自定义事件处理': function () {
         var parent = ecui.get('parent'),
             child = ecui.get('child');
 
@@ -1256,7 +1292,7 @@ test('$remove/onremove', {
         value_of(ecui.query({parent: parent}).length).should_be(0);
     },
 
-    '直接函数调用，自定义事件处理': function () {
+    '直接发送事件，自定义事件处理': function () {
         var parent = ecui.get('parent'),
             child = ecui.get('child'),
             flag = false;
@@ -1270,7 +1306,7 @@ test('$remove/onremove', {
         value_of(flag).should_be_true();
     },
 
-    '直接函数调用，阻止默认行为': function () {
+    '直接发送事件，阻止默认行为': function () {
         var parent = ecui.get('parent'),
             child = ecui.get('child');
 
