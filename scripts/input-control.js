@@ -8,7 +8,7 @@ InputControl - 定义输入数据的基本操作。
 <div ecui="type:input-control;name:passwd;value:1111;inputType:password"></div>
 或:
 <div ecui="type:input-control">
-    <input type="password" name="passwd" value="1111">
+  <input type="password" name="passwd" value="1111">
 </div>
 
 属性
@@ -69,7 +69,7 @@ _eInput  - INPUT对象
     var UI_INPUT_CONTROL = ui.InputControl =
         inheritsControl(
             UI_CONTROL,
-            'ui-input-control',
+            'ui-input',
             null,
             function (el, options) {
                 var input = el;
@@ -206,19 +206,13 @@ _eInput  - INPUT对象
     if (ieVersion) {
         UI_INPUT_CONTROL_INPUT.propertychange = function (event) {
             if (event.propertyName == 'value') {
-                event = findControl(wrapEvent(event).target);
-                if (event.onchange) {
-                    event.onchange();
-                }
+                triggerEvent(findControl(wrapEvent(event).target), 'change');
             }
         };
     }
     else {
         UI_INPUT_CONTROL_INPUT.input = function (event) {
-            event = findControl(this);
-            if (event.onchange) {
-                event.onchange();
-            }
+            triggerEvent(findControl(this), 'change');
         };
     }
 

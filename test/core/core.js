@@ -160,6 +160,26 @@ test('create', {
         value_of(control.getPrimary()).should_be('first');
         value_of(control.getParent()).should_be(ecui.get('child'));
         ecui.dispose(control);
+    },
+
+    'oncreate事件触发': function () {
+        var el = baidu.dom.g('inner'),
+            result = [];
+        el.innerHTML = '<div class="first"></div>';
+        el = el.firstChild;
+
+        ecui.ui.Control.prototype.oncreate = function () {
+            result.push('create');
+        };
+
+        var control = ecui.create(ecui.ui.Control, {main: el});
+        value_of(control.getTypes()).should_be(['ui-control']);
+        value_of(control.getPrimary()).should_be('first');
+        value_of(control.getParent()).should_be(ecui.get('child'));
+        value_of(result).should_be(['create']);
+        ecui.dispose(control);
+
+        delete ecui.ui.Control.prototype.oncreate;
     }
 });
 

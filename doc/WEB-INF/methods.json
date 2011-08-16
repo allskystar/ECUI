@@ -2041,10 +2041,10 @@
         },
 
         {
-            "name": "setSelected",
+            "name": "setSelectedIndex",
             "desc": "选中选项。",
             "params": [
-                {"name": "item", "type": "number|ecui.ui.Item", "desc": "选项的序号/选项控件"}
+                {"name": "index", "type": "number", "desc": "选项的序号"}
             ]
         },
 
@@ -2060,6 +2060,161 @@
     ],
 
     "combox": [
+    ],
+
+    "form": [
+        {
+            "name": "$dispose",
+            "remark": "销毁窗体时需要先关闭窗体，并不再保留窗体的索引。"
+        },
+
+        {
+            "name": "$focus",
+            "remark": "窗体控件获得焦点时需要将自己置于所有窗体控件的顶部。"
+        },
+
+        {
+            "name": "$hide",
+            "remark": "窗体隐藏时将失去焦点状态，如果窗体是以 {'showModal'|method:'form'} 方式打开的，隐藏窗体时，需要恢复页面的状态。"
+        },
+
+        {
+            "name": "$show",
+            "remark": "窗体显示时将获得焦点状态。"
+        },
+
+        {
+            "name": "center",
+            "desc": "窗体居中显示。"
+        },
+
+        {
+            "name": "hide",
+            "remark": "如果窗体是以 {'showModal'|method:'form'} 方式打开的，只有位于最顶层的窗体才允许关闭。"
+        },
+
+        {
+            "name": "setTitle",
+            "desc": "设置窗体控件标题。",
+            "params": [
+                {"name": "text", "type": "string", "desc": "窗体标题"}
+            ]
+        },
+
+        {
+            "name": "showModal",
+            "desc": "窗体控件以独占方式显示。",
+            "params": [
+                {"name": "opacity", "type": "number", "desc": "遮罩层透明度，默认为0.05"}
+            ],
+            "remark": "showModal 方法将窗体控件以独占方式显示，此时鼠标点击窗体以外的内容无效，关闭窗体后自动恢复。"
+        }
+    ],
+
+    "tree-view": [
+        {
+            "name": "$cache",
+            "desc": "无效，树视图控件禁止设置大小。"
+        },
+
+        {
+            "name": "$click",
+            "remark": "控件点击时改变子树视图控件的显示/隐藏状态。"
+        },
+
+        {
+            "name": "$hide",
+            "remark": "隐藏树视图控件的同时需要将子树区域也隐藏。"
+        },
+
+        {
+            "name": "$resize",
+            "desc": "无效，树视图控件禁止设置大小。"
+        },
+
+        {
+            "name": "$setParent",
+            "remark": "树视图控件改变位置时，需要将自己的子树区域显示在主元素之后。"
+        },
+
+        {
+            "name": "$setSize",
+            "desc": "无效，树视图控件禁止设置大小。"
+        },
+
+        {
+            "name": "$show",
+            "remark": "显示树视图控件的同时需要将子树区域也显示。"
+        },
+
+        {
+            "name": "add",
+            "desc": "添加子树视图控件。",
+            "params": [
+                {"name": "item", "type": "string|ecui.ui.TreeView", "desc": "子树视图控件的 html 内容/树视图控件"},
+                {"name": "index", "type": "number", "desc": "子树视图控件需要添加的位置序号，不指定将添加在最后"},
+                {"name": "options", "type": "Object", "desc": "子树视图控件初始化选项"}
+            ],
+            "return": {"type": "ecui.ui.TreeView", "desc": "添加的树视图控件"}
+        },
+
+        {
+            "name": "collapse",
+            "desc": "收缩当前树视图控件的子树区域。"
+        },
+
+        {
+            "name": "expand",
+            "desc": "展开当前树视图控件的子树区域。"
+        },
+
+        {
+            "name": "getChildren",
+            "desc": "获取当前树视图控件的所有子树视图控件。",
+            "return": {"type": "Array", "desc": "树视图控件列表"}
+        },
+
+        {
+            "name": "getFirst",
+            "desc": "获取当前树视图控件的第一个子树视图控件。",
+            "return": {"type": "ecui.ui.TreeView", "desc": "树视图控件，如果没有，返回 null"}
+        },
+
+        {
+            "name": "getLast",
+            "desc": "获取当前树视图控件的最后一个子树视图控件。",
+            "return": {"type": "ecui.ui.TreeView", "desc": "树视图控件，如果没有，返回 null"}
+        },
+
+        {
+            "name": "getNext",
+            "desc": "获取当前树视图控件的后一个同级树视图控件。",
+            "return": {"type": "ecui.ui.TreeView", "desc": "树视图控件，如果没有，返回 null"}
+        },
+
+        {
+            "name": "getPrev",
+            "desc": "获取当前树视图控件的前一个同级树视图控件。",
+            "return": {"type": "ecui.ui.TreeView", "desc": "树视图控件，如果没有，返回 null"}
+        },
+
+        {
+            "name": "getRoot",
+            "desc": "获取当前树视图控件的根控件。",
+            "return": {"type": "ecui.ui.TreeView", "desc": "树视图控件的根控件"}
+        },
+
+        {
+            "name": "getSelected",
+            "desc": "获取当前树视图控件选中的项。",
+            "return": {"type": "ecui.ui.TreeView", "desc": "树视图控件选中的项"}
+        },
+
+        {
+            "name": "isCollapsed",
+            "desc": "当前子树区域是否收缩。",
+            "return": {"type": "boolean", "desc": "true 表示子树区域收缩，false 表示子树区域展开"}
+        }
     ],
 
 
@@ -2247,151 +2402,6 @@
         }
     ],
 
-    "form": [
-        {
-            "name": "$focus",
-            "remark": "窗体控件获得焦点时需要将自己置于所有窗体控件的顶部。"
-        },
-
-        {
-            "name": "center",
-            "remark": "窗体居中显示。"
-        },
-
-        {
-            "name": "hide",
-            "remark": "如果窗体是以 {'showModal'|method:'form'} 方式打开的，隐藏窗体时，需要恢复页面的状态。"
-        },
-
-        {
-            "name": "setTitle",
-            "desc": "设置窗体控件标题。",
-            "params": [
-                {"name": "text", "type": "string", "desc": "窗体标题"}
-            ]
-        },
-
-        {
-            "name": "show",
-            "remark": "显示窗体控件时，需要将窗体控件设置为获得焦点状态，即窗体控件或者子控件拥有焦点。"
-        },
-
-        {
-            "name": "showModal",
-            "desc": "窗体控件以独占方式显示。",
-            "params": [
-                {"name": "opacity", "type": "number", "desc": "遮罩层透明度，默认为0.05"}
-            ],
-            "remark": "showModal 方法将窗体控件以独占方式显示，此时鼠标点击窗体以外的内容无效，关闭窗体后自动恢复。"
-        }
-    ],
-
-    "tree": [
-        {
-            "name": "$cache",
-            "desc": "无效，树控件禁止设置大小。"
-        },
-
-        {
-            "name": "$click",
-            "remark": "控件点击时改变子树控件的显示/隐藏状态。"
-        },
-
-        {
-            "name": "$resize",
-            "desc": "无效，树控件禁止设置大小。"
-        },
-
-        {
-            "name": "$setSize",
-            "desc": "无效，树控件禁止设置大小。"
-        },
-
-        {
-            "name": "add",
-            "desc": "添加子树控件。",
-            "params": [
-                {"name": "item", "type": "string|ecui.ui.Tree", "desc": "子树控件的 html 内容/树控件"},
-                {"name": "index", "type": "number", "desc": "子树控件需要添加的位置序号，不指定将添加在最后"}
-            ],
-            "return": {"type": "ecui.ui.Tree", "desc": "树控件"}
-        },
-
-        {
-            "name": "collapse",
-            "desc": "收缩当前树控件的所有子树控件。",
-            "remark": "collapse 方法将递归的调用子树控件的 collapse 方法。"
-        },
-
-        {
-            "name": "expand",
-            "desc": "展开当前树控件的所有子树控件。",
-            "remark": "expand 方法将递归的调用子树控件的 expand 方法。"
-        },
-
-        {
-            "name": "getChildTrees",
-            "desc": "获取当前树控件的所有子树控件。",
-            "return": {"type": "Array", "desc": "树控件列表"},
-            "remark": "getChildTrees 方法返回使用 {'add'|method:'tree'} 方法或 {'setParent'|method:'tree'} 方法调用声明父子关系的树控件。"
-        },
-
-        {
-            "name": "getFirst",
-            "desc": "获取当前树控件的第一个子树控件。",
-            "return": {"type": "ecui.ui.Tree", "desc": "树控件，如果没有，返回 null"}
-        },
-
-        {
-            "name": "getLast",
-            "desc": "获取当前树控件的最后一个子树控件。",
-            "return": {"type": "ecui.ui.Tree", "desc": "树控件，如果没有，返回 null"}
-        },
-
-        {
-            "name": "getNext",
-            "desc": "获取当前树控件的后一个同级树控件。",
-            "return": {"type": "ecui.ui.Tree", "desc": "树控件，如果没有，返回 null"}
-        },
-
-        {
-            "name": "getPrev",
-            "desc": "获取当前树控件的前一个同级树控件。",
-            "return": {"type": "ecui.ui.Tree", "desc": "树控件，如果没有，返回 null"}
-        },
-
-        {
-            "name": "getRoot",
-            "desc": "获取当前树控件的根。",
-            "return": {"type": "ecui.ui.Tree", "desc": "树控件的根"}
-        },
-
-        {
-            "name": "isFold",
-            "desc": "当前子控件区域是否显示/隐藏。",
-            "return": {"type": "boolean", "desc": "表示子控件区域隐藏，false 表示子控件区域显示"}
-        },
-
-        {
-            "name": "hide",
-            "remark": "隐藏树控件的同时需要将子树区域也隐藏。"
-        },
-
-        {
-            "name": "setFold",
-            "desc": "显示/隐藏子控件区域。",
-            "remark": "setFold 方法将触发各级父树控件的 {'onchange'|event:'tree'} 事件。",
-            "params": [
-                {"name": "status", "type": "boolean", "desc": "如果为 false 表示显示子树控件，否则为隐藏子树控件"}
-            ]
-        },
-
-        {
-            "name": "show",
-            "remark": "显示树控件的同时需要将子树区域也显示。"
-        }
-    ],
-
     "radio-tree": [
         {
             "name": "getName",
@@ -2401,8 +2411,8 @@
 
         {
             "name": "getSelected",
-            "desc": "获取当前树控件选中的项。",
-            "return": {"type": "ecui.ui.Tree", "desc": "树控件选中的项"}
+            "desc": "获取当前树视图控件选中的项。",
+            "return": {"type": "ecui.ui.TreeView", "desc": "树视图控件选中的项"}
         },
 
         {
@@ -2415,24 +2425,24 @@
     "check-tree": [
         {
             "name": "getChecked",
-            "desc": "获取包括当前树控件在内的全部选中的子树控件。",
-            "return": {"type": "Array", "desc": "全部选中的树控件列表"}
+            "desc": "获取包括当前树视图控件在内的全部选中的子树视图控件。",
+            "return": {"type": "Array", "desc": "全部选中的树视图控件列表"}
         },
         {
             "name": "getValue",
-            "desc": "获取当前树控件复选框的表单项的值。",
+            "desc": "获取当前树视图控件复选框的表单项的值。",
             "return": {"type": "string", "desc": "表单项的值"}
         },
         {
             "name": "isChecked",
-            "desc": "判断树控件是否选中。",
+            "desc": "判断树视图控件是否选中。",
             "return": {"type": "boolean", "desc": "是否选中"}
         },
         {
             "name": "setChecked",
-            "desc": "设置当前树控件复选框选中状态。",
+            "desc": "设置当前树视图控件复选框选中状态。",
             "params": [
-                {"name": "status", "type": "boolean", "desc": "是否选中当前树控件复选框"}
+                {"name": "status", "type": "boolean", "desc": "是否选中当前树视图控件复选框"}
             ]
         }
     ],

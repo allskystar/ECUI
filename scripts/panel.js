@@ -4,16 +4,16 @@ Panel - 定义在一个小区域内截取显示大区域内容的基本操作。
 
 截面控件直接HTML初始化的例子:
 <div ecui="type:panel">
-    <!-- 这里放内容 -->
-    ...
+  <!-- 这里放内容 -->
+  ...
 </div>
 
 属性
 _bAbsolute                - 是否包含绝对定位的Element
 _nWheelDelta              - 鼠标滚轮滚动一次的差值
 _eBrowser                 - 用于浏览器原生的滚动条实现的Element
-_uVScrollbar                 - 垂直滚动条控件
-_uHScrollbar                 - 水平滚动条控件
+_uVScrollbar              - 垂直滚动条控件
+_uHScrollbar              - 水平滚动条控件
 _uCorner                  - 夹角控件
 $cache$layoutWidthRevise  - layout区域的宽度修正值
 $cache$layoutHeightRevise - layout区域的高度修正值
@@ -223,10 +223,7 @@ $cache$mainHeight         - layout区域的实际高度
      *
      * @param {Object} options 初始化选项
      */
-    var UI_BROWSER_CORNER =
-        inheritsControl(
-            UI_CONTROL
-        ),
+    var UI_BROWSER_CORNER = inheritsControl(UI_CONTROL),
         UI_BROWSER_CORNER_CLASS = UI_BROWSER_CORNER.prototype;
 //{else}//
     (function () {

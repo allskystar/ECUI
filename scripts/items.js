@@ -60,8 +60,8 @@ Item/Items - 定义选项操作相关的基本操作。
         UI_CONTROL_CLASS.$click.call(this, event);
 
         var parent = this.getParent();
-        if (parent && parent.onitemclick) {
-            parent.onitemclick(event, indexOf(UI_ITEMS[parent.getUID()], this));
+        if (parent) {
+            triggerEvent(parent, 'itemclick', event, [indexOf(UI_ITEMS[parent.getUID()], this)]);
         }
     };
 
@@ -145,7 +145,7 @@ Item/Items - 定义选项操作相关的基本操作。
             }
 
             o = findConstructor(this, 'Item') || UI_ITEM;
-            item.className = (trim(item.className) || this.getPrimary() + '-item') + o.TYPES;
+            item.className = trim(item.className) + ' ' + this.getType() + '-item' + o.TYPES;
 
             options = options || getParameters(item);
             options.parent = this;

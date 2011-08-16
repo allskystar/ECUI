@@ -4,8 +4,8 @@ Control - ECUI 的核心组成部分，定义所有控件的基本操作。
 
 基础控件直接HTML初始化的例子，id指定名称，可以通过ecui.get(id)的方式访问控件:
 <div ecui="type:control;id:demo">
-    <!-- 这里放控件包含的内容 -->
-    ...
+  <!-- 这里放控件包含的内容 -->
+  ...
 </div>
 
 属性
@@ -137,7 +137,8 @@ $cache$position          - 控件布局方式缓存
      */
     function UI_CONTROL_ALTER_PARENT(control, parent, parentElement) {
         var oldParent = control._cParent,
-            el = control.getOuter();
+            el = control.getOuter(),
+            flag = control._bInit && control.isShow();
 
         // 触发原来父控件的移除子控件事件
         if (parent != oldParent) {
@@ -163,6 +164,10 @@ $cache$position          - 控件布局方式缓存
             }
             // 当 DOM 树位置发生改变时，$setParent必须被执行
             control.$setParent(parent);
+        }
+
+        if (flag != (control._bInit && control.isShow())) {
+            triggerEvent(control, flag ? 'hide' : 'show');
         }
     }
 

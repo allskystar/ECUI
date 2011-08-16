@@ -15,16 +15,16 @@
 //{include file="radio.js"}//
 //{include file="select.js"}//
 //{include file="combox.js"}//
+//{include file="form.js"}//
+//{include file="tree-view.js"}//
 
 //*{include file="label.js"}//
 //*{include file="progress.js"}//
-//*{include file="form.js"}//
 //*{include file="collection.js"}//
 //*{include file="calendar.js"}//
 //*{include file="popup.js"}//
 //*{include file="tab.js"}//
 //*{include file="format-edit.js"}//
-//*{include file="tree.js"}//
 //*{include file="radio-tree.js"}//
 //*{include file="check-tree.js"}//
 //*{include file="color.js"}//

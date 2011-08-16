@@ -594,10 +594,8 @@
             options = options || {};
 
             //__gzip_original__parent
-            //__gzip_original__id
             var i = 0,
                 parent = options.parent,
-                id = options.id,
                 el = options.main || createDom(),
                 o = options.primary || '';
 
@@ -638,22 +636,12 @@
                 type.$setParent();
             }
 
-            allControls.push(type);
+            oncreate(type, options);
             independentControls.push(type);
-            if (type.oncreate) {
-                type.oncreate(options);
-            }
-
-            if (id) {
-                namedControls[id] = type;
-                if (isGlobalId) {
-                    WINDOW[id] = type;
-                }
-            }
 
             // 处理所有的关联操作
-            if (el = connectedControls[id]) {
-                for (connectedControls[id] = null; o = el[i++]; ) {
+            if (el = connectedControls[options.id]) {
+                for (connectedControls[options.id] = null; o = el[i++]; ) {
                     o.func.call(o.caller, type);
                 }
             }
@@ -684,7 +672,8 @@
             type = new type(el, options);
             type.$setParent(parent);
 
-            allControls.push(type);
+            oncreate(type, options);
+
             return type;
         };
 
@@ -1347,7 +1336,7 @@
 
             if ((control['on' + name] &&
                         (control['on' + name].apply(control, args) === false || event.returnValue === false)) ||
-                    control['$' + name].apply(control, args) === false) {
+                    (control['$' + name] && control['$' + name].apply(control, args) === false)) {
                 event.preventDefault();
             }
 
@@ -1679,6 +1668,25 @@
             bubble(activedControl = control, 'activate', event);
             bubble(control, 'mousedown', event);
             onselectstart(control, event);
+        }
+
+        /**
+         * 设置document节点上的鼠标事件。
+         * @private
+         *
+         * @param {ecui.ui.Control} control 
+         * @param {Object} options 控件初始化选项
+         */
+        function oncreate(control, options) {
+            triggerEvent(control, 'create', null, [options]);
+            allControls.push(control);
+
+            if (options.id) {
+                namedControls[options.id] = control;
+                if (isGlobalId) {
+                    WINDOW[options.id] = control;
+                }
+            }
         }
 
         /**

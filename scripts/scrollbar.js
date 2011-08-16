@@ -63,9 +63,7 @@ _oRange         - 滑动按钮的合法滑动区间
             UI_CONTROL,
             'ui-scrollbar',
             function (el, options) {
-                //__gzip_original__unitOptions
-                var unitOptions = {userSelect: false, focusable: false},
-                    type = this.getType(),
+                var type = this.getType(),
                     buttonClass = findConstructor(this, 'Button'),
                     thumbClass = findConstructor(this, 'Thumb');
 
@@ -86,9 +84,9 @@ _oRange         - 滑动按钮的合法滑动区间
                 this._nStep = 1;
 
                 // 创建向前/向后滚动按钮与滑动按钮
-                this._uPrev = $fastCreate(buttonClass, el[0], this, unitOptions);
-                this._uNext = $fastCreate(buttonClass, el[1], this, unitOptions);
-                this._uThumb = $fastCreate(thumbClass, el[2], this, unitOptions);
+                this._uPrev = $fastCreate(buttonClass, el[0], this, {focusable: false});
+                this._uNext = $fastCreate(buttonClass, el[1], this, {focusable: false});
+                this._uThumb = $fastCreate(thumbClass, el[2], this, {focusable: false});
 
                 this._oStop = blank;
             },

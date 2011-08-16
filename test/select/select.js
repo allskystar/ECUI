@@ -17,7 +17,7 @@ function check(control) {
     var text = control.$getSection('Text'),
         button = control.$getSection('Button'),
         options = control.$getSection('Options');
-    value_of(control.getTypes()).should_be(['ui-select', 'ui-input-control', 'ui-control']);
+    value_of(control.getTypes()).should_be(['ui-select', 'ui-input', 'ui-control']);
     value_of(text.getTypes()).should_be(['ui-item', 'ui-control']);
     value_of(text.getClass()).should_be('ui-select-text');
     value_of(button.getTypes()).should_be(['ui-button', 'ui-control']);
@@ -47,7 +47,7 @@ describe('控件初始化', {
 
     '通过<div>初始化': function () {
         var el = document.createElement('div');
-        el.innerHTML = '<div style="width:100px;height:20px"><div ecui="value:1">1</div><div>2</div></div>';
+        el.innerHTML = '<div style="width:100px;height:20px"><div class="custom" ecui="value:1">1</div><div>2</div></div>';
         var control = ecui.create('Select', {main: el.firstChild});
 
         value_of(control.getWidth()).should_be(100);
@@ -59,6 +59,9 @@ describe('控件初始化', {
         value_of(items === control.getItems()).should_be_false();
         value_of(items[0].getValue()).should_be('1');
         value_of(items[1].getValue()).should_be('2');
+        value_of(items[0].getTypes()).should_be(['ui-item', 'ui-control']);
+        value_of(items[0].getClass()).should_be('custom');
+        value_of(items[1].getClass()).should_be('ui-select-item');
 
         ecui.dispose(control);
     },

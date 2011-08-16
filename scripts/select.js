@@ -1,25 +1,16 @@
 ﻿/*
 Select - 定义模拟下拉框行为的基本操作。
-下拉框控件，继承自输入框控件，实现了选项组接口，内部包含了三个部件，分别是下拉框显示的文本(选项控件)、下拉框的按钮(基
-础控件)与下拉选项框(截面控件，只使用垂直滚动条)。下拉框控件扩展了原生 SelectElement 的功能，允许指定下拉选项框的最大选
-项数量，在屏幕显示不下的时候，会自动显示在下拉框的上方。在没有选项时，下拉选项框有一个选项的高度。下拉框控件允许使用键
-盘与滚轮操作，在下拉选项框打开时，可以通过回车键或鼠标点击选择，上下键选择选项的当前条目，在关闭下拉选项框后，只要拥有
-焦点，就可以通过滚轮上下选择选项。
+下拉框控件，继承自输入控件，实现了选项组接口，扩展了原生 SelectElement 的功能，允许指定下拉选项框的最大选项数量，在屏幕显示不下的时候，会自动显示在下拉框的上方。在没有选项时，下拉选项框有一个选项的高度。下拉框控件允许使用键盘与滚轮操作，在下拉选项框打开时，可以通过回车键或鼠标点击选择，上下键选择选项的当前条目，在关闭下拉选项框后，只要拥有焦点，就可以通过滚轮上下选择选项。
 
 下拉框控件直接HTML初始化的例子:
-<select ecui="type:select;option-size:3" name="test">
-    <!-- 这里放选项内容 -->
-    <option value="值">文本</option>
-    ...
-    <option value="值" selected>文本</option>
-    ...
+<select ecui="type:select" name="sex">
+  <option value="male" selected="selected">男</option>
+  <option value="female">女</option>
 </select>
-
-如果需要自定义特殊的选项效果，请按下列方法初始化:
-<div ecui="type:select;name:test;option-size:3">
-    <!-- 这里放选项内容 -->
-    <li ecui="value:值">文本</li>
-    ...
+或
+<div ecui="type:select;name:sex;value:male">
+  <div ecui="value:male">男</div>
+  <div ecui="value:female">女</div>
 </div>
 
 属性
@@ -178,7 +169,7 @@ _uOptions     - 下拉选择框
         UI_SELECT_ITEM_CLASS =
             (UI_SELECT.Item = inheritsControl(
                 UI_ITEM,
-                'ui-select-item',
+                null,
                 function (el, options) {
                     this._sValue = options.value === undefined ? getText(el) : '' + options.value;
                 }
@@ -218,6 +209,24 @@ _uOptions     - 下拉选择框
                 pos.left,
                 optionTop + control <= getView().bottom ? optionTop : pos.top - control
             );
+        }
+    }
+
+    /**
+     * 改变下拉框当前选中的项。
+     * @private
+     *
+     * @param {ecui.ui.Select} control 下拉框控件
+     * @param {ecui.ui.Select.Item} item 新选中的项
+     */
+    function UI_SELECT_CHANGE_SELECTED(control, item) {
+        if (item !== control._cSelected) {
+            control._uText.setContent(item ? item.getBody().innerHTML : '');
+            UI_INPUT_CONTROL_CLASS.setValue.call(control, item ? item._sValue : '');
+            control._cSelected = item;
+            if (control._uOptions.isShow()) {
+                setFocused(item);
+            }
         }
     }
 
@@ -342,10 +351,8 @@ _uOptions     - 下拉选择框
 
         // 检查点击是否在当前下拉框的选项上
         if (control instanceof UI_SELECT.Item && control != this._cSelected) {
-            this.setSelected(control);
-            if (this.onchange) {
-                this.onchange(event);
-            }
+            UI_SELECT_CHANGE_SELECTED(this, control);
+            triggerEvent(this, 'change');
         }
 
         event.exit();
@@ -376,7 +383,7 @@ _uOptions     - 下拉选择框
                         scrollbar.skip(which < 0 ? which : which >= optionSize ? which - optionSize + 1 : 0);
                     }
                     else {
-                        this.setSelected(MIN(MAX(0, indexOf(list, this._cSelected) + which - 39), length - 1));
+                        this.setSelectedIndex(MIN(MAX(0, indexOf(list, this._cSelected) + which - 39), length - 1));
                     }
                 }
                 return false;
@@ -384,7 +391,7 @@ _uOptions     - 下拉选择框
             else if (which == 27 || which == 13 && options.isShow()) {
                 // 回车键选中，ESC键取消
                 if (which == 13) {
-                    this.setSelected(focus);
+                    UI_SELECT_CHANGE_SELECTED(this, focus);
                 }
                 options.hide();
                 return false;
@@ -406,7 +413,7 @@ _uOptions     - 下拉选择框
                 options.$mousewheel(event);
             }
             else {
-                this.setSelected(
+                this.setSelectedIndex(
                     length ?
                         MIN(MAX(0, indexOf(list, this._cSelected) + (event.detail > 0 ? 1 : -1)), length - 1) : null
                 );
@@ -429,7 +436,7 @@ _uOptions     - 下拉选择框
      */
     UI_SELECT_CLASS.$remove = function (item) {
         if (item == this._cSelected) {
-            this.setSelected();
+            UI_SELECT_CHANGE_SELECTED(this);
         }
         UI_ITEMS.$remove.call(this, item);
     };
@@ -474,23 +481,13 @@ _uOptions     - 下拉选择框
     };
 
     /**
-     * 选中选项。
+     * 根据序号选中选项。
      * @public
      *
-     * @param {number|ecui.ui.Item} item 选项的序号/选项控件
+     * @param {number} index 选项的序号
      */
-    UI_SELECT_CLASS.setSelected = function (item) {
-        // 将选项序号转换成选项
-        item = 'number' == typeof item ? this.getItems()[item] : item || null;
-
-        if (item !== this._cSelected) {
-            this._uText.setContent(item ? item.getBody().innerHTML : '');
-            UI_INPUT_CONTROL_CLASS.setValue.call(this, item ? item._sValue : '');
-            this._cSelected = item;
-            if (this._uOptions.isShow()) {
-                setFocused(item);
-            }
-        }
+    UI_SELECT_CLASS.setSelectedIndex = function (index) {
+        UI_SELECT_CHANGE_SELECTED(this, this.getItems()[index]);
     };
 
     /**
@@ -503,13 +500,13 @@ _uOptions     - 下拉选择框
     UI_SELECT_CLASS.setValue = function (value) {
         for (var i = 0, list = this.getItems(), o; o = list[i++]; ) {
             if (o._sValue == value) {
-                this.setSelected(o);
+                UI_SELECT_CHANGE_SELECTED(this, o);
                 return;
             }
         }
 
         // 找不到满足条件的项，将选中的值清除
-        this.setSelected();
+        UI_SELECT_CHANGE_SELECTED(this);
     };
 //{/if}//
 //{if 0}//

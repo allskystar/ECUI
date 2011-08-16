@@ -815,8 +815,14 @@ function formatHTML(html) {
             return indent + $0;
         }
         else {
-            textNode = false;
-            return indent + $0 + indent;
+            if (RegExp.rightContext.charAt(0) == '<') {
+                textNode = true;
+                return indent + $0;
+            }
+            else {
+                textNode = false;
+                return indent + $0 + indent;
+            }
         }
 	});
 	return html.slice(1);

@@ -1,109 +1,128 @@
-describe('窗体控件初始化测试', {
+function before() {
+    var el = document.createElement('div');
+    el.style.cssText = 'width:200px;height:200px';
+    el.innerHTML = '<label>标题</label>';
+    var control = ecui.create('Form', {id:'form', main: el, parent: document.body});
+}
+
+function after() {
+    var control = ecui.get('form');
+    ecui.dispose(control);
+}
+
+function check(control) {
+    var title = control.$getSection('Title'),
+        close = control.$getSection('Close');
+
+    value_of(control.getTypes()).should_be(['ui-form', 'ui-control']);
+    value_of(control.getClass()).should_be('ui-form');
+    value_of(title.getTypes()).should_be(['ui-control']);
+    value_of(title.getClass()).should_be('ui-form-title');
+    value_of(close.getTypes()).should_be(['ui-button', 'ui-control']);
+    value_of(close.getClass()).should_be('ui-form-close');
+}
+
+describe('控件初始化', {
     '空标题': function () {
         var el = document.createElement('div');
         el.style.cssText = 'width:200px;height:200px';
-        var ctrl = ecui.create('Form', {element: el, parent: document.body});
+        var control = ecui.create('Form', {main: el, parent: document.body});
 
-        value_of(ctrl.getWidth()).should_be(200);
-        value_of(ctrl.getHeight()).should_be(200);
-        value_of(ctrl.$getSection('Title').getBody().innerHTML).should_be('');
+        value_of(control.getWidth()).should_be(200);
+        value_of(control.getHeight()).should_be(200);
+        value_of(control.$getSection('Title').getBody().innerHTML).should_be('');
+        value_of(control.getMain()).should_be(el);
+        check(control);
 
-        ctrl.setParent();
-        ecui.dispose(ctrl);
+        control.setParent();
+        ecui.dispose(control);
     },
 
     '包含标题': function () {
         var el = document.createElement('div');
         el.style.cssText = 'width:200px;height:200px';
         el.innerHTML = '<label>标题</label>';
-        var ctrl = ecui.create('Form', {element: el, parent: document.body});
+        el.firstChild.setAttribute('flag', '1');
+        var control = ecui.create('Form', {main: el, parent: document.body});
 
-        value_of(ctrl.getWidth()).should_be(200);
-        value_of(ctrl.getHeight()).should_be(200);
-        value_of(ctrl.$getSection('Title').getBody().innerHTML).should_be('标题');
+        value_of(control.getWidth()).should_be(200);
+        value_of(control.getHeight()).should_be(200);
+        value_of(control.$getSection('Title').getBody().innerHTML).should_be('标题');
+        value_of(control.getMain()).should_be(el);
+        value_of(control.$getSection('Title').getMain().getAttribute('flag')).should_be('1');
+        check(control);
 
-        ctrl.setParent();
-        ecui.dispose(ctrl);
+        control.setParent();
+        ecui.dispose(control);
     },
 
     '设置隐藏，标题使用默认宽度自适应': function () {
         var el = document.createElement('div');
         el.style.cssText = 'width:200px;height:200px';
         el.innerHTML = '<label>标题</label>';
-        var ctrl = ecui.create('Form', {element: el, parent: document.body, hide: true});
+        var control = ecui.create('Form', {main: el, parent: document.body, hide: true});
 
-        value_of(ctrl.isShow()).should_be_false();
-        value_of(ctrl.$getSection('Title').getWidth() == 200).should_be_true();
-        value_of(ctrl.$getSection('Title').getHeight() < 200).should_be_true();
+        value_of(control.isShow()).should_be_false();
+        value_of(control.$getSection('Title').getWidth() == 200).should_be_true();
+        value_of(control.$getSection('Title').getHeight() < 200).should_be_true();
 
-        ctrl.setParent();
-        ecui.dispose(ctrl);
+        control.setParent();
+        ecui.dispose(control);
     },
 
     '标题使用不自适应': function () {
         var el = document.createElement('div');
         el.style.cssText = 'width:200px;height:200px';
         el.innerHTML = '<label>标题</label>';
-        var ctrl = ecui.create('Form', {element: el, parent: document.body, titleAuto: false});
+        var control = ecui.create('Form', {main: el, parent: document.body, titleAuto: false});
 
-        value_of(ctrl.isShow()).should_be_true();
-        value_of(ctrl.$getSection('Title').getWidth() < 200).should_be_true();
-        value_of(ctrl.$getSection('Title').getHeight() < 200).should_be_true();
+        value_of(control.isShow()).should_be_true();
+        value_of(control.$getSection('Title').getWidth() < 200).should_be_true();
+        value_of(control.$getSection('Title').getHeight() < 200).should_be_true();
 
-        ctrl.setParent();
-        ecui.dispose(ctrl);
+        control.setParent();
+        ecui.dispose(control);
     }
 });
 
-describe('窗体控件功能测试', {
-    'before': function () {
-        var el = document.createElement('div');
-        el.style.cssText = 'width:200px;height:200px';
-        el.innerHTML = '<label>标题</label>';
-        var ctrl = ecui.create('Form', {id:'form', element: el, parent: document.body});
-    },
+test('setTitle', {
+    '设置标题': function () {
+        var control = ecui.get('form');
+        control.setTitle('新标题');
+        value_of(control.$getSection('Title').getBody().innerHTML).should_be('新标题');
+    }
+});
 
-    'after': function () {
-        var ctrl = ecui.get('form');
-        ctrl.setParent();
-        ecui.dispose(ctrl);
-        var result = ecui.query({type: ecui.ui.Control});
-        value_of(!result.len || (result.len == 1 && result[0].getBase() == 'ec-selector')).should_be_true();
-    },
-
-    '设置标题(setTitle)': function () {
-        var ctrl = ecui.get('form');
-        ctrl.setTitle('新标题');
-        value_of(ctrl.$getSection('Title').getBody().innerHTML).should_be('新标题');
-    },
-
-    '窗体叠加显示(hide/show)': function () {
-        var ctrl = ecui.get('form'),
+test('hide/show', {
+    '窗体叠加显示': function () {
+        var control = ecui.get('form'),
             newForm = ecui.create('Form', {parent: document.body});
 
-        value_of(parseInt(newForm.getOuter().style.zIndex) > parseInt(ctrl.getOuter().style.zIndex)).should_be_true();
-        uiut.MockEvents.mousedown(ctrl.getBase());
-        uiut.MockEvents.mouseup(ctrl.getBase());
-        value_of(parseInt(newForm.getOuter().style.zIndex) < parseInt(ctrl.getOuter().style.zIndex)).should_be_true();
+        value_of(parseInt(newForm.getOuter().style.zIndex) > parseInt(control.getOuter().style.zIndex)).should_be_true();
+        uiut.MockEvents.mousedown(control.getMain());
+        uiut.MockEvents.mouseup(control.getMain());
+        value_of(parseInt(newForm.getOuter().style.zIndex) < parseInt(control.getOuter().style.zIndex)).should_be_true();
         ecui.setFocused(newForm);
-        value_of(parseInt(newForm.getOuter().style.zIndex) > parseInt(ctrl.getOuter().style.zIndex)).should_be_true();
+        value_of(parseInt(newForm.getOuter().style.zIndex) > parseInt(control.getOuter().style.zIndex)).should_be_true();
 
         newForm.setParent();
         ecui.dispose(newForm);
-    },
+    }
+});
 
+test('交互行为模拟', {
     '窗体拖动': function () {
-        var ctrl = ecui.get('form'),
-            title = ctrl.$getSection('Title');
+        var control = ecui.get('form'),
+            title = control.$getSection('Title');
 
-        ctrl.getOuter().style.position = 'absolute';
-        ctrl.setPosition(10, 10);
+        control.getOuter().style.position = 'absolute';
+        control.setPosition(10, 10);
 
-        uiut.MockEvents.mousedown(title.getBase(), {clientX: 15, clientY: 15});
+        uiut.MockEvents.mousedown(title.getMain(), {clientX: 15, clientY: 15});
         uiut.MockEvents.mousemove(document.body, {clientX: 25, clientY: 25});
         uiut.MockEvents.mouseup(document.body);
 
-        value_of(ctrl.getX()).should_be(20);
-        value_of(ctrl.getY()).should_be(20);
+        value_of(control.getX()).should_be(20);
+        value_of(control.getY()).should_be(20);
     }
 });
