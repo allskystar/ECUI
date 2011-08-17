@@ -309,34 +309,6 @@
     "items": [
     ],
 
-    "label": [
-    ],
-
-    "edit": [
-        {
-            "name": "onreset",
-            "type": "edit",
-            "desc": "数据重置事件。",
-            "params": [{"name": "event", "desc": "事件对象"}]
-        },
-
-        {
-            "name": "onsubmit",
-            "type": "edit",
-            "desc": "数据提交事件。",
-            "params": [{"name": "event", "desc": "事件对象"}]
-        }
-    ],
-
-    "format-edit": [
-        {
-            "name": "onerror",
-            "type": "format-edit",
-            "desc": "数据格式错误事件。",
-            "params": [{"name": "err", "desc": "错误格式信息"}]
-        }
-    ],
-
     "checkbox": [
     ],
 
@@ -349,25 +321,44 @@
     "combox": [
     ],
 
-    "multi-select": [
-    ],
-
-    "collection": [
-    ],
-
-    "calendar": [
-        {
-            "name": "ondateclick",
-            "desc": "日历控件内鼠标单击日期项事件。",
-            "type": "calendar",
-            "params": [{"name": "date", "desc": "日期对象"}]
-        }
-    ],
-
     "form": [
     ],
 
     "tree-view": [
+    ],
+
+    "month-view": [
+        {
+            "name": "ontitleclick",
+            "desc": "日历控件内鼠标单击表头项事件。",
+            "params": [
+                {"name": "event", "desc": "事件对象"},
+                {"name": "index", "desc": "表头项序号"}
+            ]
+        },
+
+        {
+            "name": "ondateclick",
+            "desc": "日历控件内鼠标单击日期项事件。",
+            "params": [
+                {"name": "event", "desc": "事件对象"},
+                {"name": "date", "desc": "日期对象"}
+            ]
+        }
+    ],
+
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    "multi-select": [
     ],
 
     "check-tree": [

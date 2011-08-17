@@ -130,9 +130,7 @@ test('交互行为模拟', {
         uiut.MockEvents.mousedown(control.getMain());
         uiut.MockEvents.mouseup(control.getMain());
         value_of(control.getClass()).should_be('custom-expand');
-        value_of(baidu.dom.hasClass(control.getMain(), 'ui-treeview-selected')).should_be_true();
         uiut.MockEvents.mousedown(document.body);
         uiut.MockEvents.mouseup(document.body);
-        value_of(baidu.dom.hasClass(control.getMain(), 'ui-treeview-selected')).should_be_true();
     }
 });

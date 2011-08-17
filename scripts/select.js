@@ -59,6 +59,7 @@ _uOptions     - 下拉选择框
         mask = core.mask,
         restore = core.restore,
         setFocused = core.setFocused,
+        triggerEvent = core.triggerEvent,
 
         UI_INPUT_CONTROL = ui.InputControl,
         UI_INPUT_CONTROL_CLASS = UI_INPUT_CONTROL.prototype,

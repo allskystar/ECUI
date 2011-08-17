@@ -753,17 +753,6 @@
         },
 
         {
-            "name": "select",
-            "desc": "将指定的控件设置为选择状态。",
-            "params": [
-                {"name": "control", "type": "ecui.ui.Control", "desc": "{'controls'|menu}"},
-                {"name": "event", "type": "ecui.ui.Event", "desc": "事件对象"},
-                {"name": "className", "type": "string", "desc": "选择框的样式名称，如果省略将使用 ec-selector"}
-            ],
-            "remark": "select 方法将控件设置为选择，显示选择框并对选择框调用 {'zoom'|method:'core'} 方法。调用它会触发控件对象的 {'onselectstart'|event:'control'} 事件，在整个 select 的周期中，还将触发 {'onselect'|event:'control'} 与 {'onselectend'|event:'control'} 事件，在释放鼠标按键时选择操作周期结束。"
-        },
-
-        {
             "name": "setFocused",
             "desc": "使 {'controls'|menu} 得到焦点。",
             "params": [
@@ -1064,33 +1053,6 @@
             "name": "$resize",
             "desc": "控件大小变化事件的默认处理。",
             "event": 1
-        },
-
-        {
-            "name": "$select",
-            "desc": "区域选择移动事件的默认处理。",
-            "params": [
-                {"name": "event", "type": "ecui.ui.Event", "desc": "事件对象"}
-            ],
-            "remark": "控件在区域选择周期中鼠标移动时，如果 {'onselect'|event:'control'} 事件返回值不为 false，则调用 $select 方法，详细的描述请参见 {'select'|method:'core'} 方法。"
-        },
-
-        {
-            "name": "$selectend",
-            "desc": "区域选择结束事件的默认处理。",
-            "params": [
-                {"name": "event", "type": "ecui.ui.Event", "desc": "事件对象"}
-            ],
-            "remark": "控件在区域选择周期结束时，如果 {'onselectend'|event:'control'} 事件返回值不为 false，则调用 $selectend 方法，详细的描述请参见 {'select'|method:'core'} 方法。"
-        },
-
-        {
-            "name": "$selectstart",
-            "desc": "区域选择开始事件的默认处理。",
-            "params": [
-                {"name": "event", "type": "ecui.ui.Event", "desc": "事件对象"}
-            ],
-            "remark": "控件在区域选择周期开始时，如果 {'onselectstart'|event:'control'} 事件返回值不为 false，则调用 $selectstart 方法，详细的描述请参见 {'select'|method:'core'} 方法。"
         },
 
         {
@@ -2206,14 +2168,55 @@
 
         {
             "name": "getSelected",
-            "desc": "获取当前树视图控件选中的项。",
-            "return": {"type": "ecui.ui.TreeView", "desc": "树视图控件选中的项"}
+            "desc": "获取当前树视图控件选中的节点。",
+            "return": {"type": "ecui.ui.TreeView", "desc": "选中的节点"}
         },
 
         {
             "name": "isCollapsed",
             "desc": "当前子树区域是否收缩。",
             "return": {"type": "boolean", "desc": "true 表示子树区域收缩，false 表示子树区域展开"}
+        },
+
+        {
+            "name": "setSelected",
+            "desc": "设置当前树视图控件选中的节点。",
+            "params": [
+                {"type": "ecui.ui.TreeView", "desc": "选中的节点"}
+            ],
+            "remark": "setSelected 方法只有根节点才能执行，其它节点执行无效。"
+        }
+    ],
+
+    "month-view": [
+        {
+            "name": "getMonth",
+            "desc": "获取日历控件当前显示的月份。",
+            "return": {"type": "number", "desc": "月份(1-12)"}
+        },
+
+        {
+            "name": "getYear",
+            "desc": "获取日历控件当前显示的年份。",
+            "return": {"type": "number", "desc": "年份(19xx-20xx)"}
+        },
+
+        {
+            "name": "move",
+            "desc": "日历显示移动指定的月份数。",
+            "params": [
+                {"name": "offsetMonth", "type": "number", "desc": "日历移动的月份数"}
+            ],
+            "remark": "参数为正整数则表示向当前月份之后的月份移动，负数则表示向当前月份之前的月份移动，设置后日历控件会刷新以显示新的日期。"
+        },
+
+        {
+            "name": "setDate",
+            "desc": "设置日历控件当前显示的日期。",
+            "params": [
+                {"name": "year", "type": "number", "desc": "年份(19xx-20xx)，如果省略使用浏览器的当前年份"},
+                {"name": "month", "type": "number", "desc": "月份(1-12)，如果省略使用浏览器的当前月份"}
+            ]
         }
     ],
 
@@ -2264,25 +2267,6 @@
                 {"name": "control", "type": "ecui.ui.Control", "desc": "事件转发接收控件"}
             ],
             "remark": "setFor 方法设置事件转发的被动接收者，如果没有设置，则事件不会被转发。"
-        }
-    ],
-
-    "format-edit": [
-        {
-            "name": "$getInputText",
-            "desc": "获取当前输入的内容，如果是粘贴操作是一个长度超过1的字符串。",
-            "return": {"type": "string", "desc": "当前输入的内容"}
-        },
-
-        {
-            "name": "restore",
-            "desc": "恢复输入框的值。"
-        },
-
-        {
-            "name": "validate",
-            "desc": "检测输入框当前的值是否合法。",
-            "return": {"type": "boolean", "desc": "当前值是否合法"}
         }
     ],
 
@@ -2337,68 +2321,6 @@
                 {"name": "values", "type": "Array", "desc": "控件被选中的值列表"}
             ],
             "remark": "setValue 方法批量设置控件的值，如果设置的某个值与所有子选项的值不相等，将忽略这个值的设置。"
-        }
-    ],
-
-    "collection": [
-        {
-            "name": "$setSize",
-            "remark": "网格控件的 $setSize 方法设置的大小不一定是实际控件的大小，为了保证子控件宽度与高度完全相等，内部可用区域的宽度与高度需要自动适应成各个子控件的大小的整数倍。"
-        },
-
-        {
-            "name": "getIndex",
-            "owner": "ecui.ui.Collection.Item",
-            "desc": "获取网格子控件在网格控件中的序号。",
-            "return": {"type": "number", "desc": "子控件的序号"},
-            "remark": "在网格控件的事件中，事件对应的 this 是真正产生事件的网格子控件，通过 getIndex 方法能知道当前的网格子控件在网格控件中的序号，参见 {'getItem'|method:'collection'} 方法。"
-        },
-
-        {
-            "name": "getItem",
-            "desc": "获取指定的网格子控件。",
-            "params": [
-                {"name": "index", "type": "number", "desc": "子控件的总序号"}
-            ],
-            "return": {"type": "ecui.ui.Control", "desc": "子控件对象"},
-            "remark": "子控件的序号从行到列，逐一累加，例如，一个 3*3 的网格控件，第一行第一列序号为 0，第一行第二列序号为 1，第一行第三列序号为 2，第二行第一列序号为3，行二行第二列序号为 4，依此类推。"
-        }
-    ],
-
-    "calendar": [
-        {
-            "name": "$setSize",
-            "remark": "日历控件与 {'collection'|control} 类似，$setSize 方法设置的大小不一定是实际控件的大小，受到了内部部件的影响。"
-        },
-
-        {
-            "name": "getMonth",
-            "desc": "获取日历控件当前显示的月份。",
-            "return": {"type": "number", "desc": "月份(1-12)"}
-        },
-
-        {
-            "name": "getYear",
-            "desc": "获取日历控件当前显示的年份。",
-            "return": {"type": "number", "desc": "年份(19xx-20xx)"}
-        },
-
-        {
-            "name": "move",
-            "desc": "日历显示移动指定的月份数。",
-            "params": [
-                {"name": "offsetMonth", "type": "number", "desc": "日历移动的月份数"}
-            ],
-            "remark": "参数为正整数则表示向当前月份之后的月份移动，负数则表示向当前月份之前的月份移动，设置后日历控件会刷新以显示新的日期。"
-        },
-
-        {
-            "name": "setDate",
-            "desc": "设置日历控件当前显示的日期。",
-            "params": [
-                {"name": "year", "type": "number", "desc": "年份(19xx-20xx)，如果省略使用浏览器的当前年份"},
-                {"name": "month", "type": "number", "desc": "月份(1-12)，如果省略使用浏览器的当前月份"}
-            ]
         }
     ],
 

@@ -40,14 +40,18 @@ _aChildren     - 子控件集合
         children = dom.children,
         createDom = dom.create,
         first = dom.first,
+        getStyle = dom.getStyle,
         insertAfter = dom.insertAfter,
         trim = string.trim,
         blank = util.blank,
         extend = util.extend,
-        inherits = util.inherits,
+        toNumber = util.toNumber,
 
         $fastCreate = core.$fastCreate,
+        getMouseX = core.getMouseX,
         getParameters = core.getParameters,
+        inheritsControl = core.inherits,
+        triggerEvent = core.triggerEvent,
 
         UI_CONTROL = ui.Control,
         UI_CONTROL_CLASS = UI_CONTROL.prototype;
@@ -151,7 +155,7 @@ _aChildren     - 子控件集合
      */
     function UI_TREE_VIEW_SET_FOLD(control, status) {
         if (control._eChildren && control._bCollapsed != status) {
-            control._eChildren.style.display = (control._bCollapsed = status) ? 'none' : 'block';
+            control._eChildren.style.display = (control._bCollapsed = status) ? 'none' : '';
             UI_TREE_VIEW_FLUSH(control);
             return true;
         }
@@ -169,21 +173,15 @@ _aChildren     - 子控件集合
      * @override
      */
     UI_TREE_VIEW_CLASS.$click = function (event) {
-        UI_CONTROL_CLASS.$click.call(this, event);
+        if (event.getControl() == this) {
+            UI_CONTROL_CLASS.$click.call(this, event);
 
-        var root = this.getRoot(),
-            selected = root._cSelected;
-
-        if (selected != this) {
-            if (selected) {
-                selected.alterClass('-selected');
+            if (getMouseX(this) <= toNumber(getStyle(this.getBody(), 'paddingLeft'))) {
+                this[this.isCollapsed() ? 'expand' : 'collapse']();
             }
-            this.alterClass('+selected');
-            root._cSelected = this;
-        }
-
-        if (this._bExpandSelected || getMouseX(this) <= toNumber(getStyle(this.getBody(), 'paddingLeft'))) {
-            this[this.isCollapsed() ? 'expand' : 'collapse']();
+            else {
+                this.getRoot().setSelected(this);
+            }
         }
     };
 
@@ -213,31 +211,27 @@ _aChildren     - 子控件集合
      */
     UI_TREE_VIEW_CLASS.$setParent = function (parent) {
         var root = this.getRoot(),
-            selected = root._cSelected,
-            oldParent = this.getParent();
+            o = this.getParent();
+
+        // 如果当前节点被选中，需要先释放选中
+        if (this == root._cSelected) {
+            root.setSelected();
+        }
+
+        if (this == root) {
+            // 如果当前节点是根节点，需要释放选中
+            this.setSelected();
+        }
+        else {
+            remove(o._aChildren, this);
+            UI_TREE_VIEW_FLUSH(o);
+        }
 
         UI_CONTROL_CLASS.$setParent.call(this, parent);
-
-        if (oldParent instanceof UI_TREE_VIEW) {
-            remove(oldParent._aChildren, this);
-            UI_TREE_VIEW_FLUSH(oldParent);
-        }
 
         // 将子树区域显示在主元素之后
         if (this._eChildren) {
             insertAfter(this._eChildren, this.getOuter());
-        }
-
-        // 如果当前控件被选中，需要先释放选中
-        if (this == selected) {
-            selected.alterClass('-selected');
-            root._cSelected = null;
-        }
-
-        // 如果当前控件存在被选中的控件，因为移动到新的父树控件中，需要先释放选中
-        if (parent instanceof UI_TREE_VIEW && (selected = this._cSelected)) {
-            selected.alterClass('-selected');
-            this._cSelected = null;
         }
     };
 
@@ -249,7 +243,7 @@ _aChildren     - 子控件集合
         UI_CONTROL_CLASS.$show.call(this);
 
         if (this._eChildren && !this._bCollapsed) {
-            this._eChildren.style.display = 'block';
+            this._eChildren.style.display = '';
         }
     };
 
@@ -279,10 +273,16 @@ _aChildren     - 子控件集合
             index = list.length;
             o = null;
         }
-        list.splice(index, 0, item);
-        (this._eChildren || UI_TREE_VIEW_SETITEMS(this, createDom())).insertBefore(item.getOuter(), o);
 
+        // 这里需要先 setParent，否则 getRoot 的值将不正确
         item.$setParent(this);
+        list.splice(index, 0, item);
+        if (!this._eChildren) {
+            UI_TREE_VIEW_SETITEMS(this, createDom());
+            insertAfter(this._eChildren, this.getOuter());
+        }
+        this._eChildren.insertBefore(item.getOuter(), o);
+
         UI_TREE_VIEW_FLUSH(this);
 
         return item;
@@ -377,13 +377,13 @@ _aChildren     - 子控件集合
     };
 
     /**
-     * 获取当前树视图控件选中的项。
+     * 获取当前树视图控件选中的节点。
      * @public
      *
-     * @return {ecui.ui.TreeView} 选中的树视图控件
+     * @return {ecui.ui.TreeView} 选中的节点
      */
     UI_TREE_VIEW_CLASS.getSelected = function () {
-        return this.getRoot()._cSelected;
+        return this.getRoot()._cSelected || null;
     };
 
     /**
@@ -404,6 +404,29 @@ _aChildren     - 子控件集合
      */
     UI_TREE_VIEW_CLASS.isCollapsed = function () {
         return !this._eChildren || this._bCollapsed;
+    };
+
+    /**
+     * 设置当前树视图控件选中的节点。
+     * setSelected 方法只有根节点才能执行，其它节点执行无效。
+     * @public
+     *
+     * @params {ecui.ui.TreeView} node 选中的节点
+     */
+    UI_TREE_VIEW_CLASS.setSelected = function (node) {
+        if (this == this.getRoot()) {
+            if (this._cSelected != node) {
+                if (this._cSelected) {
+                    this._cSelected.alterClass('-selected');
+                }
+                node.alterClass('+selected');
+                this._cSelected = node;
+            }
+
+            if (node && this._bExpandSelected) {
+                node.expand();
+            }
+        }
     };
 //{/if}//
 //{if 0}//

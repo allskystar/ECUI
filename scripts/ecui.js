@@ -17,6 +17,8 @@
 //{include file="combox.js"}//
 //{include file="form.js"}//
 //{include file="tree-view.js"}//
+//{include file="month-view.js"}//
+//{include file="table.js"}//
 
 //*{include file="label.js"}//
 //*{include file="progress.js"}//
@@ -31,7 +33,6 @@
 //*{include file="palette.js"}//
 //*{include file="listbox.js"}//
 //*{include file="multi-select.js"}//
-//*{include file="table.js"}//
 //*{include file="locked-table.js"}//
 //*{include file="messagebox.js"}//
 //*{include file="decorator.js"}//

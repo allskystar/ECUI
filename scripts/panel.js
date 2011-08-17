@@ -269,7 +269,7 @@ $cache$mainHeight         - layout区域的实际高度
                         [vscroll && hscroll, '_uCorner', browser ? UI_BROWSER_CORNER : UI_CONTROL]
                     ],
                     o = createDom(
-                        type + '-content',
+                        type + '-body',
                         'position:absolute;top:0px;left:0px' + (hscroll ? ';white-space:nowrap' : '')
                     );
 

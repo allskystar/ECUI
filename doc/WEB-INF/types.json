@@ -246,16 +246,33 @@
             "定义树形视图的基本操作。",
             "树视图控件，不可以被改变大小，可以包含普通子控件或者子树视图控件，普通子控件显示在它的文本区域，如果是子树视图控件，将在专门的子树视图控件区域显示。子树视图控件区域可以被收缩隐藏或是展开显示，默认情况下点击树视图控件就改变子树视图控件区域的状态。"
         ]
+    },
+
+    {
+        "name": "month-view",
+        "type": "ui",
+        "position": "ecui.ui.MonthView",
+        "super": "control",
+        "desc": "日历控件",
+        "params": [
+            {"name": "year", "desc": "number，日历控件的年份，默认为当前年份"},
+            {"name": "month", "desc": "number，日历控件的月份(1-12)，默认为当前月份"}
+        ],
+        "html": "<div ecui=\"type:month-view;year:2009;month:11\"></div>",
+        "remark": [
+            "定义日历显示的基本操作。",
+            "日历控件，不包含年/月/日的快速选择与切换，如果需要实现这些功能，请将下拉框(选择月份)、输入框(输入年份)等组合使用建立新的控件或直接在页面上布局并调用接口。"
+        ]
     }
 
 
-    
-    
-    
-    
-    
-    
-    
+
+
+
+
+
+
+
     /*,
 
     {
@@ -275,30 +292,6 @@
     },
 
     {
-        "name": "format-edit",
-        "type": "ui",
-        "position": "ecui.ui.FormatEdit",
-        "super": "edit",
-        "desc": "格式化输入框控件",
-        "params": [
-            {"name": "symbol", "desc": "boolean，是否进行全角转半角操作，默认为 true"},
-            {"name": "trim", "desc": "boolean，是否进行前后空格过滤，默认为 true (注：粘贴内容也会进行前后空格过滤)"},
-            {"name": "charset", "desc": "string，字符编码，允许 utf8 与 gbk，如果不设置表示基于字符验证长度"},
-            {"name": "keyMask", "desc": "string，允许的字符集正则表达式"},
-            {"name": "minLength", "desc": "number，最小长度限制"},
-            {"name": "maxLength", "desc": "number，最大长度限制"},
-            {"name": "minValue", "desc": "number，数字允许的最小值"},
-            {"name": "maxLength", "desc": "number，数字允许的最大值"},
-            {"name": "format", "desc": "string，字符串的正则表达式，自动添加正则表达式的^$"}
-        ],
-        "html": "<div ecui=\"type:format-edit;id:ctrl1\"></div>",
-        "remark": [
-            "定义格式化输入数据的基本操作。",
-            "格式化输入框控件，对输入的数据内容格式进行限制。"
-        ]
-    },
-
-    {
         "name": "multi-select",
         "type": "ui",
         "position": "ecui.ui.MultiSelect",
@@ -312,36 +305,6 @@
         "remark": [
             "定义多选下拉框行为的基本操作。",
             "多选下拉框控件，继承自输入框控件，实现了选项组接口，参见 {'select'|control}。"
-        ]
-    },
-
-    {
-        "name": "collection",
-        "type": "ui",
-        "position": "ecui.ui.Collection",
-        "super": "control",
-        "desc": "集合控件",
-        "html": "<div ecui=\"type:collection\"></div>",
-        "remark": [
-            "定义批量控件集的事件与基本操作。",
-            "集合控件，继承自基础控件，将大量子控件组合而成的控件。集合控件统一管理，所有子控件的事件允许调用统一的事件方法，可用于日历、调色板等。"
-        ]
-    },
-
-    {
-        "name": "calendar",
-        "type": "ui",
-        "position": "ecui.ui.Calendar",
-        "super": "control",
-        "desc": "日历控件",
-        "params": [
-            {"name": "year", "desc": "number，日历控件的年份，默认为当前年份"},
-            {"name": "month", "desc": "number，日历控件的月份(1-12)，默认为当前月份"}
-        ],
-        "html": "<div ecui=\"type:calendar;id:ctrl1\"></div>",
-        "remark": [
-            "定义日历显示的基本操作。",
-            "日历控件，内部包含了两个部件，分别是星期名称(网格控件)与日期(网格控件)。在日期网格控件里，第一行包含上个月最后几天的信息，最后一行包含下个月最前几天的信息。日历控件不包含年/月/日的快速选择与切换，如果需要实现这些功能，请将下拉框(选择月份)、输入框(输入年份)等组合使用建立新的控件或直接在页面上布局并调用接口。"
         ]
     },
 

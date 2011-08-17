@@ -105,7 +105,7 @@ $cache$position          - 控件布局方式缓存
     var UI_CONTROL = ui.Control =
         inheritsControl(
             Object,
-            'ui-control',
+            null,
             function (el, options) {
                 this._bCapturable = options.capturable !== false;
                 this._bUserSelect = options.userSelect !== false;
@@ -1059,7 +1059,6 @@ $cache$position          - 控件布局方式缓存
 
         // 初始化空操作的一些缺省处理
         UI_CONTROL_CLASS.$intercept = UI_CONTROL_CLASS.$append = UI_CONTROL_CLASS.$remove =
-            UI_CONTROL_CLASS.$selectstart = UI_CONTROL_CLASS.$select = UI_CONTROL_CLASS.$selectend =
             UI_CONTROL_CLASS.$zoomstart = UI_CONTROL_CLASS.$zoom = UI_CONTROL_CLASS.$zoomend =
             UI_CONTROL_CLASS.$dragstart = UI_CONTROL_CLASS.$dragmove = UI_CONTROL_CLASS.$dragend =
             UI_CONTROL_CLASS.$ready = blank;

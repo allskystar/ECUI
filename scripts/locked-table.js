@@ -60,9 +60,8 @@ _cJoint      - 行(锁定行)对应的锁定行(行)控件
         eventNames = [
             'mousedown', 'mouseover', 'mousemove', 'mouseout', 'mouseup',
             'click', 'focus', 'blur', 'activate', 'deactivate',
-            'keydown', 'keypress', 'keyup', 'mousewheel',
-            'change', 'resize', 'create', 'init'
-        ],
+            'keydown', 'keypress', 'keyup', 'mousewheel'
+        ];
 
         UI_CONTROL = ui.Control,
         UI_CONTROL_CLASS = UI_CONTROL.prototype,

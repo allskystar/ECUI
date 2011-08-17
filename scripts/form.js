@@ -68,7 +68,7 @@ _uClose     - 关闭按钮
                 var type = this.getType(),
                     titleClass = findConstructor(this, 'Title'),
                     closeClass = findConstructor(this, 'Close'),
-                    o = createDom(type + '-content', 'position:relative;overflow:auto'),
+                    o = createDom(type + '-body', 'position:relative;overflow:auto'),
                     titleEl = first(el);
 
                 moveElements(el, o, true);

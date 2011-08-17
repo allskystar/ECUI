@@ -207,8 +207,6 @@
             uniqueIndex = 0,          // 控件的唯一序号
             connectedControls = {},   // 等待关联的控件集合
 
-            selectorControl,          // 在select操作时使用此控件展现选择的部分
-
             activedControl,           // 当前环境下被激活的控件，即鼠标左键按下时对应的控件，直到左键松开后失去激活状态
             hoveredControl,           // 当前环境下鼠标悬停的控件
             focusedControl,           // 当前环境下拥有焦点的控件
@@ -421,13 +419,7 @@
                     activedControl = currEnv.actived;
                     restore();
 
-                    // 如果是选择框需要关闭
-                    if (target == selectorControl) {
-                        target.hide();
-                    }
-                    else {
-                        repaint();
-                    }
+                    repaint();
                     currEnv.mouseup(event);
                 }
             },
@@ -1234,63 +1226,6 @@
             }
             setHandler(currEnv, true);
             setHandler(currEnv = envStack.pop());
-        };
-
-        /**
-         * 将指定的控件设置为选择状态。
-         * select 方法将控件设置为选择，显示选择框并对选择框调用 zoom 方法。调用它会触发控件对象的 onselectstart 事件，在整个 select 的周期中，还将触发 onselect 与 onselectend 事件，在释放鼠标按键时选择操作周期结束。
-         * @public
-         *
-         * @param {ecui.ui.Control} control ECUI 控件
-         * @param {ecui.ui.Event} event 事件对象
-         * @param {string} className 选择框的样式名称，如果省略将使用 ui-selector
-         */
-        core.select = function (control, event, className) {
-            function build(name) {
-                selectorControl['$zoom' + name] = function (event) {
-                    triggerEvent(control, 'select' + name, event);
-                };
-            }
-
-            if (event.type == 'mousedown') {
-
-                if (!selectorControl) {
-                    insertHTML(
-                        DOCUMENT.body,
-                        'BEFOREEND',
-                        '<div class="ui-selector ui-control" style="overflow:hidden"><div class="ui-selector-box">' +
-                            '</div></div>'
-                    );
-//{if 0}//
-                    selectorControl = $fastCreate(ui.Control, DOCUMENT.body.lastChild);
-//{else}//                    selectorControl = $fastCreate(UI_CONTROL, DOCUMENT.body.lastChild);
-//{/if}//
-                    selectorControl.$setSize = function (width, height) {
-                        //__gzip_original__style
-                        var el = this.getOuter().firstChild,
-                            style = el.style;
-//{if 0}//
-                        ui.Control.prototype.$setSize.call(this, width, height);
-//{else}//                        UI_CONTROL_CLASS.$setSize.call(this, width, height);
-//{/if}//
-                        style.width = MAX(1, width - calcWidthRevise(el)) + 'px';
-                        style.height = MAX(1, height - calcHeightRevise(el)) + 'px';
-                    };
-                }
-
-                build('start');
-                build('');
-                build('end');
-
-                selectorControl.setPosition(mouseX, mouseY);
-                selectorControl.setSize(1, 1);
-                selectorControl.setClass(className || 'ui-selector');
-                selectorControl.show();
-
-                core.zoom(selectorControl, event);
-            }
-
-            event = null;
         };
 
         /**

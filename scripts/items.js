@@ -28,6 +28,7 @@ Item/Items - 定义选项操作相关的基本操作。
         $fastCreate = core.$fastCreate,
         getParameters = core.getParameters,
         inheritsControl = core.inherits,
+        triggerEvent = core.triggerEvent,
 
         UI_CONTROL = ui.Control,
         UI_CONTROL_CLASS = UI_CONTROL.prototype;
