@@ -82,7 +82,7 @@ $cache$position          - 控件布局方式缓存
 
         eventNames = [
             'mousedown', 'mouseover', 'mousemove', 'mouseout', 'mouseup',
-            'click', 'focus', 'blur', 'activate', 'deactivate',
+            'click', 'dblclick', 'focus', 'blur', 'activate', 'deactivate',
             'keydown', 'keypress', 'keyup', 'mousewheel'
         ];
 //{/if}//
@@ -97,6 +97,7 @@ $cache$position          - 控件布局方式缓存
      * capturable 是否需要捕获鼠标事件，默认捕获
      * userSelect 是否允许选中内容，默认允许
      * focusable  是否允许获取焦点，默认允许
+     * resizable  是否允许改变大小，默认允许
      * disabled   是否失效，默认有效
      * @public
      *
@@ -110,6 +111,7 @@ $cache$position          - 控件布局方式缓存
                 this._bCapturable = options.capturable !== false;
                 this._bUserSelect = options.userSelect !== false;
                 this._bFocusable = options.focusable !== false;
+                this._bResizable = options.resizable !== false;
                 this._bDisabled = !!options.disabled;
                 this._sUID = options.uid;
                 this._sPrimary = this._sClass = options.primary;
@@ -908,11 +910,11 @@ $cache$position          - 控件布局方式缓存
 
     /**
      * 控件完全刷新。
-     * 对于存在数据源的控件，render 方法根据数据源重新填充控件内容，重新计算控件的大小进行完全的重绘，render 方法不会触发 onresize 事件。
+     * 对于存在数据源的控件，render 方法根据数据源重新填充控件内容，重新计算控件的大小进行完全的重绘。
      * @public
      */
     UI_CONTROL_CLASS.render = function () {
-        this.$resize();
+        this.resize();
     };
 
     /**
@@ -927,10 +929,15 @@ $cache$position          - 控件布局方式缓存
 
     /**
      * 控件重置大小并刷新。
-     * resize 方法重新计算并设置控件的大小，resize 方法触发 onresize 事件，如果事件返回值不为 false，则调用 $resize 方法按默认的方式重绘控件。因为浏览器可视化区域发生变化时，可能需要改变控件大小，框架会自动调用控件的 resize 方法。
+     * resize 方法重新计算并设置控件的大小，浏览器可视化区域发生变化时，可能需要改变控件大小，框架会自动调用控件的 resize 方法。
      */
     UI_CONTROL_CLASS.resize = function () {
-        triggerEvent(this, 'resize');
+        if (this._bResizable) {
+            if (this.onresize) {
+                this.onresize();
+            }
+            this.$resize();
+        }
     };
 
     /**
@@ -1019,24 +1026,26 @@ $cache$position          - 控件布局方式缓存
      * @param {number} height 控件的高度
      */
     UI_CONTROL_CLASS.setSize = function (width, height) {
-        //__gzip_original__style
-        var style = this._eMain.style;
+        if (this._bResizable) {
+            //__gzip_original__style
+            var style = this._eMain.style;
 
-        // 控件新的大小不允许小于最小值
-        if (width < this.getMinimumWidth()) {
-            width = 0;
-        }
-        if (height < this.getMinimumHeight()) {
-            height = 0;
-        }
+            // 控件新的大小不允许小于最小值
+            if (width < this.getMinimumWidth()) {
+                width = 0;
+            }
+            if (height < this.getMinimumHeight()) {
+                height = 0;
+            }
 
-        this.$setSize(width, height);
+            this.$setSize(width, height);
 
-        if (width) {
-            this._sWidth = style.width;
-        }
-        if (height) {
-            this._sHeight = style.height;
+            if (width) {
+                this._sWidth = style.width;
+            }
+            if (height) {
+                this._sHeight = style.height;
+            }
         }
     };
 
@@ -1061,7 +1070,7 @@ $cache$position          - 控件布局方式缓存
         UI_CONTROL_CLASS.$intercept = UI_CONTROL_CLASS.$append = UI_CONTROL_CLASS.$remove =
             UI_CONTROL_CLASS.$zoomstart = UI_CONTROL_CLASS.$zoom = UI_CONTROL_CLASS.$zoomend =
             UI_CONTROL_CLASS.$dragstart = UI_CONTROL_CLASS.$dragmove = UI_CONTROL_CLASS.$dragend =
-            UI_CONTROL_CLASS.$ready = blank;
+            UI_CONTROL_CLASS.$ready = UI_CONTROL_CLASS.$pagescroll = blank;
     })();
 //{/if}//
 //{if 0}//

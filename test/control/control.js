@@ -1,7 +1,7 @@
 function before() {
     var el = document.createElement('div');
     el.className = 'demo common';
-    el.innerHTML = '<div id="parent"><div id="child">'
+    el.innerHTML = '<div id="parent" class="parent"><div id="child" class="child">'
                 + '<div id="inner" style="width:400px;height:400px;padding:2px;border:1px solid black;font-size:1px"></div>'
                 + '</div></div>';
     el.id = 'common';
@@ -22,13 +22,13 @@ test('$activate/onactivate', {
             parentEl = ecui.get('parent').getMain(),
             commonEl = ecui.get('common').getMain();
 
-        value_of(baidu.dom.hasClass(childEl, 'ui-control-active')).should_be_false();
-        value_of(baidu.dom.hasClass(parentEl, 'ui-control-active')).should_be_false();
-        value_of(baidu.dom.hasClass(commonEl, 'ui-control-active')).should_be_false();
+        value_of(baidu.dom.hasClass(childEl, 'child-active')).should_be_false();
+        value_of(baidu.dom.hasClass(parentEl, 'parent-active')).should_be_false();
+        value_of(baidu.dom.hasClass(commonEl, 'demo-active')).should_be_false();
         uiut.MockEvents.mousedown(childEl);
-        value_of(baidu.dom.hasClass(childEl, 'ui-control-active')).should_be_true();
-        value_of(baidu.dom.hasClass(parentEl, 'ui-control-active')).should_be_true();
-        value_of(baidu.dom.hasClass(commonEl, 'ui-control-active')).should_be_true();
+        value_of(baidu.dom.hasClass(childEl, 'child-active')).should_be_true();
+        value_of(baidu.dom.hasClass(parentEl, 'parent-active')).should_be_true();
+        value_of(baidu.dom.hasClass(commonEl, 'demo-active')).should_be_true();
         uiut.MockEvents.mouseup(childEl);
     },
 
@@ -48,9 +48,9 @@ test('$activate/onactivate', {
         };
 
         uiut.MockEvents.mousedown(childEl);
-        value_of(baidu.dom.hasClass(childEl, 'ui-control-active')).should_be_false();
-        value_of(baidu.dom.hasClass(parentEl, 'ui-control-active')).should_be_true();
-        value_of(baidu.dom.hasClass(commonEl, 'ui-control-active')).should_be_false();
+        value_of(baidu.dom.hasClass(childEl, 'child-active')).should_be_false();
+        value_of(baidu.dom.hasClass(parentEl, 'parent-active')).should_be_true();
+        value_of(baidu.dom.hasClass(commonEl, 'demo-active')).should_be_false();
         uiut.MockEvents.mouseup(childEl);
     },
 
@@ -59,9 +59,9 @@ test('$activate/onactivate', {
             el = child.getMain();
 
         ecui.triggerEvent(child, 'activate');
-        value_of(baidu.dom.hasClass(el, 'ui-control-active')).should_be_true();
-        value_of(baidu.dom.hasClass(ecui.get('parent').getMain(), 'ui-control-active')).should_be_false();
-        value_of(baidu.dom.hasClass(ecui.get('common').getMain(), 'ui-control-active')).should_be_false();
+        value_of(baidu.dom.hasClass(el, 'child-active')).should_be_true();
+        value_of(baidu.dom.hasClass(ecui.get('parent').getMain(), 'parent-active')).should_be_false();
+        value_of(baidu.dom.hasClass(ecui.get('common').getMain(), 'demo-active')).should_be_false();
     },
 
     '直接发送事件，自定义事件处理': function () {
@@ -75,7 +75,7 @@ test('$activate/onactivate', {
 
         ecui.triggerEvent(child, 'activate');
         value_of(flag).should_be_true();
-        value_of(baidu.dom.hasClass(el, 'ui-control-active')).should_be_true();
+        value_of(baidu.dom.hasClass(el, 'child-active')).should_be_true();
     },
 
     '直接发送事件，阻止默认行为': function () {
@@ -87,7 +87,7 @@ test('$activate/onactivate', {
         };
 
         ecui.triggerEvent(child, 'activate');
-        value_of(baidu.dom.hasClass(el, 'ui-control-active')).should_be_false();
+        value_of(baidu.dom.hasClass(el, 'child-active')).should_be_false();
     }
 });
 
@@ -141,13 +141,13 @@ test('$blur/blur/onblur', {
             commonEl = ecui.get('common').getMain();
 
         ecui.setFocused(child);
-        value_of(baidu.dom.hasClass(childEl, 'ui-control-focus')).should_be_true();
-        value_of(baidu.dom.hasClass(parentEl, 'ui-control-focus')).should_be_true();
-        value_of(baidu.dom.hasClass(commonEl, 'ui-control-focus')).should_be_true();
+        value_of(baidu.dom.hasClass(childEl, 'child-focus')).should_be_true();
+        value_of(baidu.dom.hasClass(parentEl, 'parent-focus')).should_be_true();
+        value_of(baidu.dom.hasClass(commonEl, 'demo-focus')).should_be_true();
         uiut.MockEvents.mousedown(document.body);
-        value_of(baidu.dom.hasClass(childEl, 'ui-control-focus')).should_be_false();
-        value_of(baidu.dom.hasClass(parentEl, 'ui-control-focus')).should_be_false();
-        value_of(baidu.dom.hasClass(commonEl, 'ui-control-focus')).should_be_false();
+        value_of(baidu.dom.hasClass(childEl, 'child-focus')).should_be_false();
+        value_of(baidu.dom.hasClass(parentEl, 'parent-focus')).should_be_false();
+        value_of(baidu.dom.hasClass(commonEl, 'demo-focus')).should_be_false();
         uiut.MockEvents.mouseup(document.body);
     },
 
@@ -168,9 +168,9 @@ test('$blur/blur/onblur', {
 
         ecui.setFocused(child);
         uiut.MockEvents.mousedown(document.body);
-        value_of(baidu.dom.hasClass(childEl, 'ui-control-focus')).should_be_true();
-        value_of(baidu.dom.hasClass(parentEl, 'ui-control-focus')).should_be_false();
-        value_of(baidu.dom.hasClass(commonEl, 'ui-control-focus')).should_be_true();
+        value_of(baidu.dom.hasClass(childEl, 'child-focus')).should_be_true();
+        value_of(baidu.dom.hasClass(parentEl, 'parent-focus')).should_be_false();
+        value_of(baidu.dom.hasClass(commonEl, 'demo-focus')).should_be_true();
         uiut.MockEvents.mouseup(document.body);
     },
 
@@ -181,13 +181,13 @@ test('$blur/blur/onblur', {
             commonEl = ecui.get('common').getMain();
 
         ecui.setFocused(child);
-        value_of(baidu.dom.hasClass(childEl, 'ui-control-focus')).should_be_true();
-        value_of(baidu.dom.hasClass(parentEl, 'ui-control-focus')).should_be_true();
-        value_of(baidu.dom.hasClass(commonEl, 'ui-control-focus')).should_be_true();
+        value_of(baidu.dom.hasClass(childEl, 'child-focus')).should_be_true();
+        value_of(baidu.dom.hasClass(parentEl, 'parent-focus')).should_be_true();
+        value_of(baidu.dom.hasClass(commonEl, 'demo-focus')).should_be_true();
         child.blur();
-        value_of(baidu.dom.hasClass(childEl, 'ui-control-focus')).should_be_false();
-        value_of(baidu.dom.hasClass(parentEl, 'ui-control-focus')).should_be_true();
-        value_of(baidu.dom.hasClass(commonEl, 'ui-control-focus')).should_be_true();
+        value_of(baidu.dom.hasClass(childEl, 'child-focus')).should_be_false();
+        value_of(baidu.dom.hasClass(parentEl, 'parent-focus')).should_be_true();
+        value_of(baidu.dom.hasClass(commonEl, 'demo-focus')).should_be_true();
     },
 
     '直接发送事件，未自定义事件处理': function () {
@@ -196,9 +196,9 @@ test('$blur/blur/onblur', {
 
         ecui.setFocused(child);
         ecui.triggerEvent(child, 'blur');
-        value_of(baidu.dom.hasClass(el, 'ui-control-focus')).should_be_false();
-        value_of(baidu.dom.hasClass(ecui.get('parent').getMain(), 'ui-control-focus')).should_be_true();
-        value_of(baidu.dom.hasClass(ecui.get('common').getMain(), 'ui-control-focus')).should_be_true();
+        value_of(baidu.dom.hasClass(el, 'child-focus')).should_be_false();
+        value_of(baidu.dom.hasClass(ecui.get('parent').getMain(), 'parent-focus')).should_be_true();
+        value_of(baidu.dom.hasClass(ecui.get('common').getMain(), 'demo-focus')).should_be_true();
     },
 
     '直接发送事件，自定义事件处理': function () {
@@ -213,7 +213,7 @@ test('$blur/blur/onblur', {
         ecui.setFocused(child);
         ecui.triggerEvent(child, 'blur');
         value_of(flag).should_be_true();
-        value_of(baidu.dom.hasClass(el, 'ui-control-focus')).should_be_false();
+        value_of(baidu.dom.hasClass(el, 'child-focus')).should_be_false();
     },
 
     '直接发送事件，阻止默认行为': function () {
@@ -226,7 +226,7 @@ test('$blur/blur/onblur', {
 
         ecui.setFocused(child);
         ecui.triggerEvent(child, 'blur');
-        value_of(baidu.dom.hasClass(el, 'ui-control-focus')).should_be_true();
+        value_of(baidu.dom.hasClass(el, 'child-focus')).should_be_true();
     }
 });
 
@@ -264,7 +264,7 @@ test('$cache/cache/clearCache/getMinimumWidth/getMinimumHeight/$getBasicWidth/$g
     }
 });
 
-test('$click/onclick', {
+test('$click/$dblclick/onclick/ondblclick', {
     '通过鼠标事件点击': function () {
         var child = ecui.get('child'),
             el = child.getMain(),
@@ -335,6 +335,27 @@ test('$click/onclick', {
 
         ecui.triggerEvent(child, 'click');
         value_of(result).should_be(['child-click']);
+    },
+
+    '双击操作': function () {
+        var child = ecui.get('child'),
+            el = child.getMain(),
+            result = [];
+
+        child.onclick = function () {
+            result.push('click');
+        };
+
+        child.ondblclick = function () {
+            result.push('dblclick');
+        };
+
+        uiut.MockEvents.mousedown(el);
+        uiut.MockEvents.mouseup(el);
+        uiut.MockEvents.mousedown(el);
+        uiut.MockEvents.mouseup(el);
+
+        value_of(result).should_be(['click', 'dblclick']);
     }
 });
 
@@ -346,13 +367,13 @@ test('$deactivate/ondeactivate', {
             commonEl = ecui.get('common').getMain();
 
         uiut.MockEvents.mousedown(childEl);
-        value_of(baidu.dom.hasClass(childEl, 'ui-control-active')).should_be_true();
-        value_of(baidu.dom.hasClass(parentEl, 'ui-control-active')).should_be_true();
-        value_of(baidu.dom.hasClass(commonEl, 'ui-control-active')).should_be_true();
+        value_of(baidu.dom.hasClass(childEl, 'child-active')).should_be_true();
+        value_of(baidu.dom.hasClass(parentEl, 'parent-active')).should_be_true();
+        value_of(baidu.dom.hasClass(commonEl, 'demo-active')).should_be_true();
         uiut.MockEvents.mouseup(childEl);
-        value_of(baidu.dom.hasClass(childEl, 'ui-control-active')).should_be_false();
-        value_of(baidu.dom.hasClass(parentEl, 'ui-control-active')).should_be_false();
-        value_of(baidu.dom.hasClass(commonEl, 'ui-control-active')).should_be_false();
+        value_of(baidu.dom.hasClass(childEl, 'child-active')).should_be_false();
+        value_of(baidu.dom.hasClass(parentEl, 'parent-active')).should_be_false();
+        value_of(baidu.dom.hasClass(commonEl, 'demo-active')).should_be_false();
     },
 
     '通过鼠标事件失去激活，阻止默认行为/阻止冒泡': function () {
@@ -372,9 +393,9 @@ test('$deactivate/ondeactivate', {
 
         uiut.MockEvents.mousedown(childEl);
         uiut.MockEvents.mouseup(childEl);
-        value_of(baidu.dom.hasClass(childEl, 'ui-control-active')).should_be_true();
-        value_of(baidu.dom.hasClass(parentEl, 'ui-control-active')).should_be_false();
-        value_of(baidu.dom.hasClass(commonEl, 'ui-control-active')).should_be_true();
+        value_of(baidu.dom.hasClass(childEl, 'child-active')).should_be_true();
+        value_of(baidu.dom.hasClass(parentEl, 'parent-active')).should_be_false();
+        value_of(baidu.dom.hasClass(commonEl, 'demo-active')).should_be_true();
     },
 
     '直接发送事件，未自定义事件处理': function () {
@@ -383,9 +404,9 @@ test('$deactivate/ondeactivate', {
 
         uiut.MockEvents.mousedown(el);
         ecui.triggerEvent(child, 'deactivate');
-        value_of(baidu.dom.hasClass(el, 'ui-control-active')).should_be_false();
-        value_of(baidu.dom.hasClass(ecui.get('parent').getMain(), 'ui-control-active')).should_be_true();
-        value_of(baidu.dom.hasClass(ecui.get('common').getMain(), 'ui-control-active')).should_be_true();
+        value_of(baidu.dom.hasClass(el, 'child-active')).should_be_false();
+        value_of(baidu.dom.hasClass(ecui.get('parent').getMain(), 'parent-active')).should_be_true();
+        value_of(baidu.dom.hasClass(ecui.get('common').getMain(), 'demo-active')).should_be_true();
         uiut.MockEvents.mouseup(el);
     },
 
@@ -401,7 +422,7 @@ test('$deactivate/ondeactivate', {
         uiut.MockEvents.mousedown(el);
         ecui.triggerEvent(child, 'deactivate');
         value_of(flag).should_be_true();
-        value_of(baidu.dom.hasClass(el, 'ui-control-active')).should_be_false();
+        value_of(baidu.dom.hasClass(el, 'child-active')).should_be_false();
         uiut.MockEvents.mouseup(el);
     },
 
@@ -415,7 +436,7 @@ test('$deactivate/ondeactivate', {
 
         uiut.MockEvents.mousedown(el);
         ecui.triggerEvent(child, 'deactivate');
-        value_of(baidu.dom.hasClass(el, 'ui-control-active')).should_be_true();
+        value_of(baidu.dom.hasClass(el, 'child-active')).should_be_true();
         uiut.MockEvents.mouseup(el);
     }
 });
@@ -426,13 +447,13 @@ test('$focus/focus/onfocus', {
             parentEl = ecui.get('parent').getMain(),
             commonEl = ecui.get('common').getMain();
 
-        value_of(baidu.dom.hasClass(childEl, 'ui-control-focus')).should_be_false();
-        value_of(baidu.dom.hasClass(parentEl, 'ui-control-focus')).should_be_false();
-        value_of(baidu.dom.hasClass(commonEl, 'ui-control-focus')).should_be_false();
+        value_of(baidu.dom.hasClass(childEl, 'child-focus')).should_be_false();
+        value_of(baidu.dom.hasClass(parentEl, 'parent-focus')).should_be_false();
+        value_of(baidu.dom.hasClass(commonEl, 'demo-focus')).should_be_false();
         uiut.MockEvents.mousedown(childEl);
-        value_of(baidu.dom.hasClass(childEl, 'ui-control-focus')).should_be_true();
-        value_of(baidu.dom.hasClass(parentEl, 'ui-control-focus')).should_be_true();
-        value_of(baidu.dom.hasClass(commonEl, 'ui-control-focus')).should_be_true();
+        value_of(baidu.dom.hasClass(childEl, 'child-focus')).should_be_true();
+        value_of(baidu.dom.hasClass(parentEl, 'parent-focus')).should_be_true();
+        value_of(baidu.dom.hasClass(commonEl, 'demo-focus')).should_be_true();
         uiut.MockEvents.mouseup(childEl);
     },
 
@@ -452,9 +473,9 @@ test('$focus/focus/onfocus', {
         };
 
         uiut.MockEvents.mousedown(childEl);
-        value_of(baidu.dom.hasClass(childEl, 'ui-control-focus')).should_be_false();
-        value_of(baidu.dom.hasClass(parentEl, 'ui-control-focus')).should_be_true();
-        value_of(baidu.dom.hasClass(commonEl, 'ui-control-focus')).should_be_false();
+        value_of(baidu.dom.hasClass(childEl, 'child-focus')).should_be_false();
+        value_of(baidu.dom.hasClass(parentEl, 'parent-focus')).should_be_true();
+        value_of(baidu.dom.hasClass(commonEl, 'demo-focus')).should_be_false();
         uiut.MockEvents.mouseup(childEl);
     },
 
@@ -463,13 +484,13 @@ test('$focus/focus/onfocus', {
             parentEl = ecui.get('parent').getMain(),
             commonEl = ecui.get('common').getMain();
 
-        value_of(baidu.dom.hasClass(childEl, 'ui-control-focus')).should_be_false();
-        value_of(baidu.dom.hasClass(parentEl, 'ui-control-focus')).should_be_false();
-        value_of(baidu.dom.hasClass(commonEl, 'ui-control-focus')).should_be_false();
+        value_of(baidu.dom.hasClass(childEl, 'child-focus')).should_be_false();
+        value_of(baidu.dom.hasClass(parentEl, 'parent-focus')).should_be_false();
+        value_of(baidu.dom.hasClass(commonEl, 'demo-focus')).should_be_false();
         ecui.get('child').focus();
-        value_of(baidu.dom.hasClass(childEl, 'ui-control-focus')).should_be_true();
-        value_of(baidu.dom.hasClass(parentEl, 'ui-control-focus')).should_be_true();
-        value_of(baidu.dom.hasClass(commonEl, 'ui-control-focus')).should_be_true();
+        value_of(baidu.dom.hasClass(childEl, 'child-focus')).should_be_true();
+        value_of(baidu.dom.hasClass(parentEl, 'parent-focus')).should_be_true();
+        value_of(baidu.dom.hasClass(commonEl, 'demo-focus')).should_be_true();
     },
 
     '直接发送事件，未自定义事件处理': function () {
@@ -477,9 +498,9 @@ test('$focus/focus/onfocus', {
             el = child.getMain();
 
         ecui.triggerEvent(child, 'focus');
-        value_of(baidu.dom.hasClass(el, 'ui-control-focus')).should_be_true();
-        value_of(baidu.dom.hasClass(ecui.get('parent').getMain(), 'ui-control-focus')).should_be_false();
-        value_of(baidu.dom.hasClass(ecui.get('common').getMain(), 'ui-control-focus')).should_be_false();
+        value_of(baidu.dom.hasClass(el, 'child-focus')).should_be_true();
+        value_of(baidu.dom.hasClass(ecui.get('parent').getMain(), 'parent-focus')).should_be_false();
+        value_of(baidu.dom.hasClass(ecui.get('common').getMain(), 'demo-focus')).should_be_false();
     },
 
     '直接发送事件，自定义事件处理': function () {
@@ -493,7 +514,7 @@ test('$focus/focus/onfocus', {
 
         ecui.triggerEvent(child, 'focus');
         value_of(flag).should_be_true();
-        value_of(baidu.dom.hasClass(el, 'ui-control-focus')).should_be_true();
+        value_of(baidu.dom.hasClass(el, 'child-focus')).should_be_true();
     },
 
     '直接发送事件，阻止默认行为': function () {
@@ -505,7 +526,7 @@ test('$focus/focus/onfocus', {
         };
 
         ecui.triggerEvent(child, 'focus');
-        value_of(baidu.dom.hasClass(el, 'ui-control-focus')).should_be_false();
+        value_of(baidu.dom.hasClass(el, 'child-focus')).should_be_false();
     }
 });
 
@@ -965,14 +986,14 @@ test('$mouseout/onmouseout', {
             commonEl = ecui.get('common').getMain();
 
         uiut.MockEvents.mouseover(childEl);
-        value_of(baidu.dom.hasClass(childEl, 'ui-control-hover')).should_be_true();
-        value_of(baidu.dom.hasClass(parentEl, 'ui-control-hover')).should_be_true();
-        value_of(baidu.dom.hasClass(commonEl, 'ui-control-hover')).should_be_true();
+        value_of(baidu.dom.hasClass(childEl, 'child-hover')).should_be_true();
+        value_of(baidu.dom.hasClass(parentEl, 'parent-hover')).should_be_true();
+        value_of(baidu.dom.hasClass(commonEl, 'demo-hover')).should_be_true();
         uiut.MockEvents.mouseout(childEl);
         uiut.MockEvents.mouseover(document.body);
-        value_of(baidu.dom.hasClass(childEl, 'ui-control-hover')).should_be_false();
-        value_of(baidu.dom.hasClass(parentEl, 'ui-control-hover')).should_be_false();
-        value_of(baidu.dom.hasClass(commonEl, 'ui-control-hover')).should_be_false();
+        value_of(baidu.dom.hasClass(childEl, 'child-hover')).should_be_false();
+        value_of(baidu.dom.hasClass(parentEl, 'parent-hover')).should_be_false();
+        value_of(baidu.dom.hasClass(commonEl, 'demo-hover')).should_be_false();
     },
 
     '通过鼠标事件失去激活，阻止默认行为/阻止冒泡': function () {
@@ -993,9 +1014,9 @@ test('$mouseout/onmouseout', {
         uiut.MockEvents.mouseover(childEl);
         uiut.MockEvents.mouseout(childEl);
         uiut.MockEvents.mouseover(document.body);
-        value_of(baidu.dom.hasClass(childEl, 'ui-control-hover')).should_be_true();
-        value_of(baidu.dom.hasClass(parentEl, 'ui-control-hover')).should_be_false();
-        value_of(baidu.dom.hasClass(commonEl, 'ui-control-hover')).should_be_true();
+        value_of(baidu.dom.hasClass(childEl, 'child-hover')).should_be_true();
+        value_of(baidu.dom.hasClass(parentEl, 'parent-hover')).should_be_false();
+        value_of(baidu.dom.hasClass(commonEl, 'demo-hover')).should_be_true();
     },
 
     '直接发送事件，未自定义事件处理': function () {
@@ -1004,9 +1025,9 @@ test('$mouseout/onmouseout', {
 
         uiut.MockEvents.mouseover(el);
         ecui.triggerEvent(child, 'mouseout');
-        value_of(baidu.dom.hasClass(el, 'ui-control-hover')).should_be_false();
-        value_of(baidu.dom.hasClass(ecui.get('parent').getMain(), 'ui-control-hover')).should_be_true();
-        value_of(baidu.dom.hasClass(ecui.get('common').getMain(), 'ui-control-hover')).should_be_true();
+        value_of(baidu.dom.hasClass(el, 'child-hover')).should_be_false();
+        value_of(baidu.dom.hasClass(ecui.get('parent').getMain(), 'parent-hover')).should_be_true();
+        value_of(baidu.dom.hasClass(ecui.get('common').getMain(), 'demo-hover')).should_be_true();
         uiut.MockEvents.mouseup(el);
     },
 
@@ -1022,7 +1043,7 @@ test('$mouseout/onmouseout', {
         uiut.MockEvents.mouseover(el);
         ecui.triggerEvent(child, 'mouseout');
         value_of(flag).should_be_true();
-        value_of(baidu.dom.hasClass(el, 'ui-control-hover')).should_be_false();
+        value_of(baidu.dom.hasClass(el, 'child-hover')).should_be_false();
     },
 
     '直接发送事件，阻止默认行为': function () {
@@ -1035,7 +1056,7 @@ test('$mouseout/onmouseout', {
 
         uiut.MockEvents.mouseover(el);
         ecui.triggerEvent(child, 'mouseout');
-        value_of(baidu.dom.hasClass(el, 'ui-control-hover')).should_be_true();
+        value_of(baidu.dom.hasClass(el, 'child-hover')).should_be_true();
     }
 });
 
@@ -1045,13 +1066,13 @@ test('$mouseover/onmouseover', {
             parentEl = ecui.get('parent').getMain(),
             commonEl = ecui.get('common').getMain();
 
-        value_of(baidu.dom.hasClass(childEl, 'ui-control-hover')).should_be_false();
-        value_of(baidu.dom.hasClass(parentEl, 'ui-control-hover')).should_be_false();
-        value_of(baidu.dom.hasClass(commonEl, 'ui-control-hover')).should_be_false();
+        value_of(baidu.dom.hasClass(childEl, 'child-hover')).should_be_false();
+        value_of(baidu.dom.hasClass(parentEl, 'parent-hover')).should_be_false();
+        value_of(baidu.dom.hasClass(commonEl, 'demo-hover')).should_be_false();
         uiut.MockEvents.mouseover(childEl);
-        value_of(baidu.dom.hasClass(childEl, 'ui-control-hover')).should_be_true();
-        value_of(baidu.dom.hasClass(parentEl, 'ui-control-hover')).should_be_true();
-        value_of(baidu.dom.hasClass(commonEl, 'ui-control-hover')).should_be_true();
+        value_of(baidu.dom.hasClass(childEl, 'child-hover')).should_be_true();
+        value_of(baidu.dom.hasClass(parentEl, 'parent-hover')).should_be_true();
+        value_of(baidu.dom.hasClass(commonEl, 'demo-hover')).should_be_true();
     },
 
     '通过鼠标事件激活，阻止默认行为/阻止冒泡': function () {
@@ -1070,9 +1091,9 @@ test('$mouseover/onmouseover', {
         };
 
         uiut.MockEvents.mouseover(childEl);
-        value_of(baidu.dom.hasClass(childEl, 'ui-control-hover')).should_be_false();
-        value_of(baidu.dom.hasClass(parentEl, 'ui-control-hover')).should_be_true();
-        value_of(baidu.dom.hasClass(commonEl, 'ui-control-hover')).should_be_false();
+        value_of(baidu.dom.hasClass(childEl, 'child-hover')).should_be_false();
+        value_of(baidu.dom.hasClass(parentEl, 'parent-hover')).should_be_true();
+        value_of(baidu.dom.hasClass(commonEl, 'demo-hover')).should_be_false();
     },
 
     '直接发送事件，未自定义事件处理': function () {
@@ -1080,9 +1101,9 @@ test('$mouseover/onmouseover', {
             el = child.getMain();
 
         ecui.triggerEvent(child, 'mouseover');
-        value_of(baidu.dom.hasClass(el, 'ui-control-hover')).should_be_true();
-        value_of(baidu.dom.hasClass(ecui.get('parent').getMain(), 'ui-control-hover')).should_be_false();
-        value_of(baidu.dom.hasClass(ecui.get('common').getMain(), 'ui-control-hover')).should_be_false();
+        value_of(baidu.dom.hasClass(el, 'child-hover')).should_be_true();
+        value_of(baidu.dom.hasClass(ecui.get('parent').getMain(), 'parent-hover')).should_be_false();
+        value_of(baidu.dom.hasClass(ecui.get('common').getMain(), 'demo-hover')).should_be_false();
     },
 
     '直接发送事件，自定义事件处理': function () {
@@ -1096,7 +1117,7 @@ test('$mouseover/onmouseover', {
 
         ecui.triggerEvent(child, 'mouseover');
         value_of(flag).should_be_true();
-        value_of(baidu.dom.hasClass(el, 'ui-control-hover')).should_be_true();
+        value_of(baidu.dom.hasClass(el, 'child-hover')).should_be_true();
     },
 
     '直接发送事件，阻止默认行为': function () {
@@ -1108,7 +1129,7 @@ test('$mouseover/onmouseover', {
         };
 
         ecui.triggerEvent(child, 'mouseover');
-        value_of(baidu.dom.hasClass(el, 'ui-control-hover')).should_be_false();
+        value_of(baidu.dom.hasClass(el, 'child-hover')).should_be_false();
     }
 });
 
@@ -1483,14 +1504,10 @@ test('alterClass 测试', {
     '添加样式': function () {
         var common = ecui.get('common'),
             el = common.getMain();
-        value_of(baidu.dom.hasClass(el, 'ui-control')).should_be_true();
         value_of(baidu.dom.hasClass(el, 'demo')).should_be_true();
-        value_of(baidu.dom.hasClass(el, 'ui-control-test')).should_be_false();
         value_of(baidu.dom.hasClass(el, 'demo-test')).should_be_false();
         common.alterClass('+test');
-        value_of(baidu.dom.hasClass(el, 'ui-control')).should_be_true();
         value_of(baidu.dom.hasClass(el, 'demo')).should_be_true();
-        value_of(baidu.dom.hasClass(el, 'ui-control-test')).should_be_true();
         value_of(baidu.dom.hasClass(el, 'demo-test')).should_be_true();
     },
 
@@ -1498,14 +1515,10 @@ test('alterClass 测试', {
         var common = ecui.get('common'),
             el = common.getMain();
         common.alterClass('+test');
-        value_of(baidu.dom.hasClass(el, 'ui-control')).should_be_true();
         value_of(baidu.dom.hasClass(el, 'demo')).should_be_true();
-        value_of(baidu.dom.hasClass(el, 'ui-control-test')).should_be_true();
         value_of(baidu.dom.hasClass(el, 'demo-test')).should_be_true();
         common.alterClass('-test');
-        value_of(baidu.dom.hasClass(el, 'ui-control')).should_be_true();
         value_of(baidu.dom.hasClass(el, 'demo')).should_be_true();
-        value_of(baidu.dom.hasClass(el, 'ui-control-test')).should_be_false();
         value_of(baidu.dom.hasClass(el, 'demo-test')).should_be_false();
     }
 });
@@ -1556,14 +1569,14 @@ test('disable/enable/isDisabled', {
         uiut.MockEvents.mousedown(el);
         uiut.MockEvents.mouseup(el);
         value_of(result).should_be([]);
-        value_of(baidu.dom.hasClass(el, 'ui-control-disabled')).should_be_true();
+        value_of(baidu.dom.hasClass(el, 'demo-disabled')).should_be_true();
 
         common.enable();
         uiut.MockEvents.mousemove(el);
         uiut.MockEvents.mousedown(el);
         uiut.MockEvents.mouseup(el);
         value_of(result).should_be(['mousemove', 'mousedown', 'mouseup', 'click']);
-        value_of(baidu.dom.hasClass(el, 'ui-control-disabled')).should_be_false();
+        value_of(baidu.dom.hasClass(el, 'demo-disabled')).should_be_false();
     },
 
     '控件失效，子控件自动失效': function () {
@@ -1594,7 +1607,7 @@ test('disable/enable/isDisabled', {
         uiut.MockEvents.mouseup(el);
         value_of(child.isDisabled()).should_be_true();
         value_of(result).should_be([]);
-        value_of(baidu.dom.hasClass(el, 'ui-control-disabled')).should_be_false();
+        value_of(baidu.dom.hasClass(el, 'child-disabled')).should_be_false();
 
         common.enable();
         uiut.MockEvents.mousemove(el);
@@ -1643,14 +1656,14 @@ test('getClass/getPrimary/getTypes/setClass', {
             parent = ecui.get('parent'),
             control = ecui.create(ecui.ui.Control, {primary: 'demo2', types: 'ec-demo2', parent: common});
         value_of(common.getPrimary()).should_be('demo');
-        value_of(parent.getPrimary()).should_be('ui-control');
+        value_of(parent.getPrimary()).should_be('parent');
         value_of(control.getPrimary()).should_be('demo2');
         value_of(common.getClass()).should_be('demo');
-        value_of(parent.getClass()).should_be('ui-control');
+        value_of(parent.getClass()).should_be('parent');
         value_of(control.getClass()).should_be('demo2');
-        value_of(common.getTypes()).should_be(['ui-control']);
-        value_of(parent.getTypes()).should_be(['ui-control']);
-        value_of(control.getTypes()).should_be(['ui-control']);
+        value_of(common.getTypes()).should_be([]);
+        value_of(parent.getTypes()).should_be([]);
+        value_of(control.getTypes()).should_be([]);
     },
 
     '改变控件的当前样式': function () {
@@ -1662,9 +1675,6 @@ test('getClass/getPrimary/getTypes/setClass', {
         common.setClass('custom');
 
         value_of(baidu.dom.hasClass(el, 'common')).should_be_true();
-        value_of(baidu.dom.hasClass(el, 'ui-control')).should_be_true();
-        value_of(baidu.dom.hasClass(el, 'ui-control-test')).should_be_true();
-        value_of(baidu.dom.hasClass(el, 'ui-control-test2')).should_be_true();
         value_of(baidu.dom.hasClass(el, 'custom')).should_be_true();
         value_of(baidu.dom.hasClass(el, 'custom-test')).should_be_true();
         value_of(baidu.dom.hasClass(el, 'custom-test2')).should_be_true();
@@ -1674,9 +1684,6 @@ test('getClass/getPrimary/getTypes/setClass', {
 
         common.alterClass('-test');
         value_of(baidu.dom.hasClass(el, 'common')).should_be_true();
-        value_of(baidu.dom.hasClass(el, 'ui-control')).should_be_true();
-        value_of(baidu.dom.hasClass(el, 'ui-control-test')).should_be_false();
-        value_of(baidu.dom.hasClass(el, 'ui-control-test2')).should_be_true();
         value_of(baidu.dom.hasClass(el, 'custom')).should_be_true();
         value_of(baidu.dom.hasClass(el, 'custom-test')).should_be_false();
         value_of(baidu.dom.hasClass(el, 'custom-test2')).should_be_true();
@@ -1686,9 +1693,6 @@ test('getClass/getPrimary/getTypes/setClass', {
 
         common.setClass('demo');
         value_of(baidu.dom.hasClass(el, 'common')).should_be_true();
-        value_of(baidu.dom.hasClass(el, 'ui-control')).should_be_true();
-        value_of(baidu.dom.hasClass(el, 'ui-control-test')).should_be_false();
-        value_of(baidu.dom.hasClass(el, 'ui-control-test2')).should_be_true();
         value_of(baidu.dom.hasClass(el, 'custom')).should_be_false();
         value_of(baidu.dom.hasClass(el, 'custom-test')).should_be_false();
         value_of(baidu.dom.hasClass(el, 'custom-test2')).should_be_false();

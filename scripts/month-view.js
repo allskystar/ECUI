@@ -1,8 +1,8 @@
 /*
 MonthView - 定义日历显示的基本操作。
-日历控件，继承自基础控件，不包含年/月/日的快速选择与切换，如果需要实现这些功能，请将下拉框(选择月份)、输入框(输入年份)等组合使用建立新的控件或直接在页面上布局并调用接口。
+日历视图控件，继承自基础控件，不包含年/月/日的快速选择与切换，如果需要实现这些功能，请将下拉框(选择月份)、输入框(输入年份)等组合使用建立新的控件或直接在页面上布局并调用接口。
 
-日历控件直接HTML初始化的例子:
+日历视图控件直接HTML初始化的例子:
 <div ecui="type:month-view;year:2009;month:11"></div>
 
 属性
@@ -81,7 +81,8 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
                 this._aCells = [];
                 list = el.getElementsByTagName('td');
                 for (i = 0; o = list[i]; ) {
-                    this._aCells[i++] = $fastCreate(cellClass, o, this);
+                    // 日历视图单元格禁止改变大小
+                    this._aCells[i++] = $fastCreate(cellClass, o, this, {resizable: false});
                 }
 
                 this.setDate(options.year, options.month);
@@ -114,12 +115,6 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
             index < 7 ? [index] : [new DATE(parent._nYear, parent._nMonth, this._nDay)]
         );
     };
-
-    /**
-     * 无效，树视图控件禁止设置大小。
-     * @override
-     */
-    UI_MONTH_VIEW_CELL_CLASS.$setSize = UI_MONTH_VIEW_CELL_CLASS.$resize = blank;
 
     /**
      * 获取日历控件当前显示的月份。

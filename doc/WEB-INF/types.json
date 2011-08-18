@@ -253,7 +253,7 @@
         "type": "ui",
         "position": "ecui.ui.MonthView",
         "super": "control",
-        "desc": "日历控件",
+        "desc": "日历视图控件",
         "params": [
             {"name": "year", "desc": "number，日历控件的年份，默认为当前年份"},
             {"name": "month", "desc": "number，日历控件的月份(1-12)，默认为当前月份"}
@@ -261,7 +261,20 @@
         "html": "<div ecui=\"type:month-view;year:2009;month:11\"></div>",
         "remark": [
             "定义日历显示的基本操作。",
-            "日历控件，不包含年/月/日的快速选择与切换，如果需要实现这些功能，请将下拉框(选择月份)、输入框(输入年份)等组合使用建立新的控件或直接在页面上布局并调用接口。"
+            "日历视图控件，不包含年/月/日的快速选择与切换，如果需要实现这些功能，请将下拉框(选择月份)、输入框(输入年份)等组合使用建立新的控件或直接在页面上布局并调用接口。"
+        ]
+    },
+
+    {
+        "name": "table",
+        "type": "ui",
+        "position": "ecui.ui.Table",
+        "super": "panel",
+        "desc": "表格控件",
+        "html": "<div ecui=\"type:table\"><table><!-- 表头区域 --><thead><tr><th style=\"width:200px;\">公司名</th><th style=\"width:200px;\">url</th><th style=\"width:250px;\">地址</th><th style=\"width:100px;\">创办时间</th></tr></thead><!-- 内容行区域 --><tr><td>百度</td><td>www.baidu.com</td><td>中国北京中关村</td><td>1999</td></tr></table></div>",
+        "remark": [
+            "定义由行列构成的表格的基本操作。",
+            "表格控件，对基本的 TableElement 功能进行了扩展，表头固定，不会随表格的垂直滚动条滚动而滚动，在行列滚动时，支持整行整列移动，允许直接对表格的数据进行增加/删除/修改操作。"
         ]
     }
 
@@ -340,19 +353,6 @@
         "remark": [
             "定义包含复选框的树形结构的基本操作。",
             "包含复选框的树控件，继承自树控件。每一个选项包含一个复选框进行选择，除非特别的指定，否则子节点的复选框与父节点的复选框自动联动。"
-        ]
-    },
-
-    {
-        "name": "table",
-        "type": "ui",
-        "position": "ecui.ui.Table",
-        "super": "panel",
-        "desc": "表格控件",
-        "html": "<div ecui=\"type:table;id:ctrl1\"><table><!-- 表头区域 --><thead><tr><th style=\"width:200px;\">公司名</th><th style=\"width:200px;\">url</th><th style=\"width:250px;\">地址</th><th style=\"width:100px;\">创办时间</th></tr></thead><!-- 内容行区域 --><tr><td>百度</td><td>www.baidu.com</td><td>中国北京中关村</td><td>1999</td></tr></table></div>",
-        "remark": [
-            "定义由行列构成的表格的基本操作。",
-            "表格控件，内部包含一个部件——标题区(基础控件)。表格控件对基本的 TableElement 功能进行了扩展，表头固定，不会随表格的垂直滚动条滚动而滚动，在行列滚动时，支持整行整列移动，允许直接对表格的数据进行增加/删除/修改操作。"
         ]
     },
 

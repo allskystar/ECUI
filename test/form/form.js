@@ -14,11 +14,11 @@ function check(control) {
     var title = control.$getSection('Title'),
         close = control.$getSection('Close');
 
-    value_of(control.getTypes()).should_be(['ui-form', 'ui-control']);
+    value_of(control.getTypes()).should_be(['ui-form']);
     value_of(control.getClass()).should_be('ui-form');
-    value_of(title.getTypes()).should_be(['ui-control']);
+    value_of(title.getTypes()).should_be([]);
     value_of(title.getClass()).should_be('ui-form-title');
-    value_of(close.getTypes()).should_be(['ui-button', 'ui-control']);
+    value_of(close.getTypes()).should_be(['ui-button']);
     value_of(close.getClass()).should_be('ui-form-close');
 }
 

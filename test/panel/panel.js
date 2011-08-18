@@ -23,18 +23,18 @@ describe('控件初始化', {
 
         el.setAttribute('flag', '1');
 
-        value_of(control.getTypes()).should_be(['ui-panel', 'ui-control']);
+        value_of(control.getTypes()).should_be(['ui-panel']);
         value_of(control.getClass()).should_be('custom');
-        value_of(hscrollbar.getTypes()).should_be(['ui-hscrollbar', 'ui-scrollbar', 'ui-control']);
+        value_of(hscrollbar.getTypes()).should_be(['ui-hscrollbar', 'ui-scrollbar']);
         value_of(hscrollbar.getClass()).should_be('ui-panel-hscrollbar');
-        value_of(vscrollbar.getTypes()).should_be(['ui-vscrollbar', 'ui-scrollbar', 'ui-control']);
+        value_of(vscrollbar.getTypes()).should_be(['ui-vscrollbar', 'ui-scrollbar']);
         value_of(vscrollbar.getClass()).should_be('ui-panel-vscrollbar');
-        value_of(corner.getTypes()).should_be(['ui-control']);
+        value_of(corner.getTypes()).should_be([]);
         value_of(corner.getClass()).should_be('ui-panel-corner');
 
         value_of(body.parentNode.parentNode).should_be(main);
         value_of(main.getAttribute('flag')).should_be('1');
-        value_of(body.className).should_be('ui-panel-content');
+        value_of(body.className).should_be('ui-panel-body');
         value_of(body.parentNode.className).should_be('ui-panel-layout');
     },
 

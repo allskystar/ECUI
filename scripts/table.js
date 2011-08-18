@@ -1,32 +1,34 @@
 /*
 Table - 定义由行列构成的表格的基本操作。
-表格控件，继承自截面控件，内部包含一个部件——标题区(基础控件)。表格控件对基本的 TableElement 功能进行了扩展，表头固定，
-不会随表格的垂直滚动条滚动而滚动，在行列滚动时，支持整行整列移动，允许直接对表格的数据进行增加/删除/修改操作。
+表格控件，继承自截面控件，对基本的 TableElement 功能进行了扩展，表头固定，不会随表格的垂直滚动条滚动而滚动，在行列滚动时，支持整行整列移动，允许直接对表格的数据进行增加/删除/修改操作。
 
 表格控件直接HTML初始化的例子:
 <div ecui="type:table">
-    <table>
-        <!-- 当前节点的列定义，如果有特殊格式，需要使用width样式 -->
-        <thead>
-            <tr>
-                <th>标题</th>
-                ...
-            </tr>
-        </thead>
-        <tbody>
-            <!-- 这里放单元格序列 -->
-            <tr>
-                <td>单元格一</td>
-                ...
-            </tr>
-            ...
-        </tbody>
-    </table>
+  <table>
+    <!-- 表头区域 -->
+    <thead>
+      <tr>
+        <th style="width:200px;">公司名</th>
+        <th style="width:200px;">url</th>
+        <th style="width:250px;">地址</th>
+        <th style="width:100px;">创办时间</th>
+      </tr>
+    </thead>
+    <!-- 内容行区域 -->
+    <tbody>
+      <tr>
+        <td>百度</td>
+        <td>www.baidu.com</td>
+        <td>中国北京中关村</td>
+        <td>1999</td>
+      </tr>
+    </tbody>
+  </table>
 </div>
 
 属性
-_aCols        - 表头的列控件对象
-_aRows        - 表格数据行对象
+_aColumns    - 列控件对象
+_aRows       - 表格数据行对象
 _uHead       - 表头区域
 
 表头列属性
@@ -34,7 +36,7 @@ $cache$pos   - 列的坐标
 
 行属性
 $cache$pos   - 行的坐标
-_aCols        - 行的列Element对象，如果当前列需要向左合并为null，需要向上合并为false
+_aElements   - 行的列Element对象，如果当前列需要向左合并为null，需要向上合并为false
 */
 //{if 0}//
 (function () {
@@ -74,7 +76,7 @@ _aCols        - 行的列Element对象，如果当前列需要向左合并为nul
 
         eventNames = [
             'mousedown', 'mouseover', 'mousemove', 'mouseout', 'mouseup',
-            'click', 'focus', 'blur', 'activate', 'deactivate',
+            'click', 'dblclick', 'focus', 'blur', 'activate', 'deactivate',
             'keydown', 'keypress', 'keyup', 'mousewheel'
         ];
 
@@ -86,10 +88,8 @@ _aCols        - 行的列Element对象，如果当前列需要向左合并为nul
         UI_PANEL_CLASS = UI_PANEL.prototype;
 //{/if}//
 //{if $phase == "define"}//
-    //__gzip_original__UI_TABLE
-    //__gzip_original__UI_TABLE_ROW
-    //__gzip_original__UI_TABLE_COL
-    //__gzip_original__UI_TABLE_CELL
+    ///__gzip_original__UI_TABLE
+    ///__gzip_original__UI_TABLE_CLASS
     /**
      * 初始化表格控件。
      * @public
@@ -104,28 +104,27 @@ _aCols        - 行的列Element对象，如果当前列需要向左合并为nul
                 var i = 0,
                     type = this.getType(),
                     rowClass = findConstructor(this, 'Row'),
-                    hcellClass = findConstructor(this, 'HCell'),
+                    hcellClass = findConstructor(this, 'Column'),
                     cellClass = findConstructor(this, 'Cell'),
                     rows = this._aRows = [],
-                    cols = this._aCols = [],
-                    tableEl = el.getElementsByTagName('table')[0],
-                    list = children(tableEl),
-                    head = list[0],
-                    headRowCount = 1,
-                    j,
-                    o;
+                    cols = this._aColumns = [],
+                    colspans = [],
+                    o = el.getElementsByTagName('table')[0],
+                    list = children(o),
+                    j = list[0],
+                    headRowCount = 1;
 
-                if (head.tagName != 'THEAD') {
-                    insertBefore(head = createDom('', '', 'thead'), list[0])
+                o.setAttribute('cellSpacing', '0');
+
+                if (j.tagName != 'THEAD') {
+                    insertBefore(j = createDom('', '', 'thead'), list[0])
                         .appendChild((list = children(list[0]))[0]);
                 }
                 else {
-                    j = children(list[0]);
-                    headRowCount = j.length;
-                    list = j.concat(children(list[1]));
+                    o = children(list[0]);
+                    headRowCount = o.length;
+                    list = o.concat(children(list[1]));
                 }
-
-                tableEl.setAttribute('cellSpacing', '0');
 
                 // 设置滚动条操作
                 if (o = this.$getSection('VScrollbar')) {
@@ -140,58 +139,65 @@ _aCols        - 行的列Element对象，如果当前列需要向左合并为nul
                 o.innerHTML =
                     '<div style="white-space:nowrap;position:absolute"><table cellspacing="0"><tbody>' +
                         '</tbody></table></div>';
-                (this._uHead = $fastCreate(UI_CONTROL, this.getMain().appendChild(o), this)).$setBody(head);
+                (this._uHead = $fastCreate(UI_CONTROL, this.getMain().appendChild(o), this)).$setBody(j);
 
                 // 以下初始化所有的行控件
                 for (; o = list[i]; i++) {
                     o.className = trim(o.className) + rowClass.TYPES;
                     // list[i] 保存每一行的当前需要处理的列元素
                     list[i] = first(o);
-                    (rows[i] = $fastCreate(rowClass, o, this))._aCols = [];
+                    colspans[i] = 1;
+                    (rows[i] = $fastCreate(rowClass, o, this))._aElements = [];
                 }
 
                 for (j = 0; ; j++) {
                     for (i = 0; o = rows[i]; i++) {
+                        if (colspans[i]-- > 1) {
+                            continue;
+                        }
                         if (el = list[i]) {
-                            if (o._aCols[j] === undefined) {
-                                o._aCols[j] = el;
+                            if (o._aElements[j] === undefined) {
+                                o._aElements[j] = el;
                                 // 当前元素处理完成，将list[i]指向下一个列元素
                                 list[i] = next(el);
 
                                 var rowspan = toNumber(el.getAttribute('rowSpan')) || 1,
-                                    colspan = toNumber(el.getAttribute('colSpan')) || 1;
+                                    colspan = colspans[i] = toNumber(el.getAttribute('colSpan')) || 1;
 
                                 while (rowspan--) {
                                     if (!rowspan) {
                                         colspan--;
                                     }
                                     for (o = colspan; o--; ) {
-                                        rows[i + rowspan]._aCols.push(rowspan ? false : null);
+                                        rows[i + rowspan]._aElements.push(rowspan ? false : null);
                                     }
                                 }
                             }
                         }
                         else {
                             for (j = 0; ; j++) {
+                                // 以下使用 type 临时表示列的初始化参数
+                                type = {};
                                 for (i = 0; o = rows[i]; i++) {
-                                    el = o._aCols[j];
+                                    el = o._aElements[j];
                                     if (el === undefined) {
                                         this._aHeadRows = this._aRows.splice(0, headRowCount);
                                         return;
                                     }
                                     else if (el) {
                                         if (i < headRowCount) {
+                                            extend(type, getParameters(el));
                                             el.className = trim(el.className) + hcellClass.TYPES;
                                             cols[j] = $fastCreate(hcellClass, el, this);
                                         }
                                         else {
-                                            el.className = trim(el.className) + cellClass.TYPES;
-                                            el.getControl =
-                                                ieVersion == 8 ?
-                                                    UI_TABLE_INIT_GETCONTROL() : UI_TABLE_INIT_GETCONTROL;
+                                            el.className =
+                                                (trim(el.className) || type.primary || '') + cellClass.TYPES;
+                                            el.getControl = UI_TABLE_GETCONTROL();
                                         }
                                     }
                                 }
+                                cols[j]._oOptions = type;
                             }
                         }
                     }
@@ -217,7 +223,7 @@ _aCols        - 行的列Element对象，如果当前列需要向左合并为nul
          *
          * @param {Object} options 初始化选项
          */
-        UI_TABLE_HCELL_CLASS = (UI_TABLE.HCell = inheritsControl(UI_CONTROL, 'ui-table-hcell')).prototype,
+        UI_TABLE_COLUMN_CLASS = (UI_TABLE.Column = inheritsControl(UI_CONTROL, 'ui-table-hcell')).prototype,
 
         /**
          * 初始化表格控件的单元格部件。
@@ -225,40 +231,75 @@ _aCols        - 行的列Element对象，如果当前列需要向左合并为nul
          *
          * @param {Object} options 初始化选项
          */
-        UI_TABLE_CELL_CLASS = (UI_TABLE.Cell = inheritsControl(UI_CONTROL, 'ui-table-cell')).prototype,
+        UI_TABLE_CELL_CLASS = (UI_TABLE.Cell = inheritsControl(
+            UI_CONTROL,
+            'ui-table-cell',
+            null,
+            function (el, options) {
+                // 单元格控件不能改变大小
+                options.resizable = false;
+            }
+        )).prototype,
 
         /**
          * 在需要时初始化单元格控件。
          * 表格控件的单元格控件不是在初始阶段生成，而是在单元格控件第一次被调用时生成，参见核心的 getControl 方法。
          * @private
          *
-         * @return {ecui.ui.Control} 单元格控件
+         * @return {Function} 初始化单元格函数
          */
-        UI_TABLE_INIT_GETCONTROL = ieVersion == 8 ? function () {
+        UI_TABLE_GETCONTROL = ieVersion == 8 ? function () {
             // 为了防止写入getControl属性而导致的reflow如此处理
             var control;
             return function () {
-                if (!control) {
-                    control = $fastCreate(UI_TABLE.Cell, this, getParent(this).getControl());
-                }
-                return control;
+                return control = control || UI_TABLE_CREATE_CELL(this);
             };
         } : function () {
-            this.getControl = null;
-            return $fastCreate(UI_TABLE.Cell, this, getParent(this).getControl());
+            return UI_TABLE_INIT_CELL;
         };
 //{else}//
     /**
-     * 表格控件初始化一行的宽度。
+     * 初始化单元格。
+     * @private
+     *
+     * @return {ecui.ui.Table.Cell} 单元格控件
+     */
+    function UI_TABLE_INIT_CELL() {
+        this.getControl = null;
+        return UI_TABLE_CREATE_CELL(this);
+    }
+
+    /**
+     * 建立单元格控件。
+     * @private
+     *
+     * @param {HTMLElement} main 单元格控件主元素
+     * @return {ecui.ui.Table.Cell} 单元格控件
+     */
+    function UI_TABLE_CREATE_CELL(main) {
+        // 获取单元格所属的行控件
+        var row = getParent(main).getControl(),
+            table = row.getParent();
+
+        return $fastCreate(
+            findConstructor(table, 'Cell'),
+            main,
+            row,
+            extend({}, table._aColumns[indexOf(row._aElements, main)]._oOptions)
+        );
+    }
+
+    /**
+     * 表格控件初始化一行。
      * @private
      *
      * @param {ecui.ui.Table.Row} row 行控件
      */
-    function UI_TABLE_ROW_INIT(row) {
-        for (var i = 0, list = row.getParent()._aCols, el, o; o = list[i]; ) {
-            if ((el = row._aCols[i++]) && el != o.getMain()) {
+    function UI_TABLE_INIT_ROW(row) {
+        for (var i = 0, list = row.getParent()._aColumns, el, o; o = list[i]; ) {
+            if ((el = row._aElements[i++]) && el != o.getMain()) {
                 o = o.getWidth() - o.getMinimumWidth();
-                while (row._aCols[i] === null) {
+                while (row._aElements[i] === null) {
                     o += list[i++].getWidth();
                 }
                 el.style.width = o + 'px';
@@ -276,7 +317,7 @@ _aCols        - 行的列Element对象，如果当前列需要向左合并为nul
     function UI_TABLE_SCROLL_SETVALUE(value) {
         //__gzip_original__length
         var i = 1,
-            list = this.getParent()[this instanceof UI_VSCROLLBAR ? '_aRows' : '_aCols'],
+            list = this.getParent()[this instanceof UI_VSCROLLBAR ? '_aRows' : '_aColumns'],
             length = list.length,
             oldValue = this.getValue();
 
@@ -288,7 +329,7 @@ _aCols        - 行的列Element对象，如果当前列需要向左合并为nul
 
         if (value > oldValue) {
             if (length == 1) {
-                UI_SCROLL_CLASS.setValue.call(this, this.getTotal());
+                UI_SCROLLBAR_CLASS.setValue.call(this, this.getTotal());
                 return;
             }
             for (; ; i++) {
@@ -317,68 +358,146 @@ _aCols        - 行的列Element对象，如果当前列需要向左合并为nul
     }
 
     /**
-     * 鼠标单击控件事件的默认处理。
-     * 如果控件处于可操作状态(参见 isEnabled)，click 方法触发 onclick 事件，如果事件返回值不为 false，则调用 $click 方法。
-     * @protected
-     *
-     * @param {Event} event 事件对象
-     */
-    UI_TABLE_ROW_CLASS.$click = function (event) {
-        var table = this.getParent();
-        if (!(table.onrowclick && table.onrowclick(event) === false)) {
-            UI_CONTROL_CLASS.$click.call(this, event);
-        }
-    };
-
-    /**
-     * 销毁控件的默认处理。
-     * 页面卸载时将销毁所有的控件，释放循环引用，防止在 IE 下发生内存泄漏，$dispose 方法的调用不会受到 ondispose 事件返回值的影响。
-     * @protected
+     * @override
      */
     UI_TABLE_ROW_CLASS.$dispose = function () {
-        this._aCols = null;
+        this._aElements = null;
         UI_CONTROL_CLASS.$dispose.call(this);
     };
 
     /**
-     * 获取一行中单元格的 Element 对象数组。
+     * 获取一行内所有单元格的主元素。
+     * $getElement 方法返回的主元素数组可能包含 false/null 值，分别表示当前单元格被向上或者向左合并。
      * @protected
      *
-     * @return {Array} 单元格的 Element 对象数组
+     * @return {Array} 主元素数组
      */
-    UI_TABLE_ROW_CLASS.$getCols = function () {
-        return this._aCols.slice();
+    UI_TABLE_ROW_CLASS.$getElements = function () {
+        return this._aElements.slice();
     };
 
     /**
-     * 获取一行中的单元格控件。
+     * @override
+     */
+    UI_TABLE_ROW_CLASS.$hide = function () {
+        var i = 0,
+            table = this.getParent(),
+            index = indexOf(table._aRows, this),
+            nextRow = table._aRows[index + 1],
+            j,
+            cell,
+            o;
+
+        for (; table._aColumns[i]; i++) {
+            o = this._aElements[i];
+            if (o === false) {
+                o = table.$getElement(index - 1, i);
+                // 如果单元格向左被合并，cell == o
+                if (cell != o) {
+                    o.setAttribute('rowSpan', toNumber(o.getAttribute('rowSpan')) - 1);
+                    cell = o;
+                }
+            }
+            else if (o && (j = toNumber(o.getAttribute('rowSpan'))) > 1) {
+                // 如果单元格包含rowSpan属性，需要将属性添加到其它行去
+                o.setAttribute('rowSpan', j - 1);
+                for (j = i + 1; ; ) {
+                    cell = nextRow._aElements[j++];
+                    if (cell || cell === undefined) {
+                        break;
+                    }
+                }
+
+                o.getControl().$setParent(nextRow);
+                nextRow.getBody().insertBefore(o, cell || null);
+            }
+        }
+
+        UI_CONTROL_CLASS.$hide.call(this);
+        table.repaint();
+    };
+
+    /**
+     * @override
+     */
+    UI_TABLE_ROW_CLASS.$show = function () {
+        var i = 0,
+            table = this.getParent(),
+            index = indexOf(table._aRows, this),
+            nextRow = table._aRows[index + 1],
+            j,
+            cell,
+            o;
+
+        for (; table._aColumns[i]; i++) {
+            o = this._aElements[i];
+            if (o === false) {
+                o = table.$getElement(index - 1, i);
+                // 如果单元格向左被合并，cell == o
+                if (cell != o) {
+                    o.setAttribute('rowSpan', toNumber(o.getAttribute('rowSpan')) + 1);
+                    cell = o;
+                }
+            }
+            else if (o && nextRow && nextRow._aElements[i] === false) {
+                // 如果单元格包含rowSpan属性，需要从其它行恢复
+                o.setAttribute('rowSpan', toNumber(o.getAttribute('rowSpan')) + 1);
+                for (j = i + 1; ; ) {
+                    cell = this._aElements[j++];
+                    if (cell || cell === undefined) {
+                        break;
+                    }
+                }
+
+                o.getControl().$setParent(this);
+                this.getBody().insertBefore(o, cell || null);
+            }
+        }
+
+        UI_CONTROL_CLASS.$show.call(this);
+        table.resize();
+    };
+
+    /**
+     * 获取单元格控件。
      * @public
      *
-     * @return {ecui.ui.Control} 单元格控件
+     * @param {number} colIndex 列序号，从0开始
+     * @return {ecui.ui.Table.Cell} 单元格控件
      */
-    UI_TABLE_ROW_CLASS.getCol = function (index) {
-        return this._aCols[index] ? this._aCols[index].getControl() : null;
+    UI_TABLE_ROW_CLASS.getCell = function (colIndex) {
+        return this._aElements[colIndex] ? this._aElements[colIndex].getControl() : null;
     };
 
     /**
-     * 获取一行中的全部单元格控件。
+     * 获取全部单元格控件。
      * @public
      *
      * @return {Array} 单元格控件数组
      */
-    UI_TABLE_ROW_CLASS.getCols = function () {
-        for (var i = this._aCols.length, result = []; i--; ) {
-            result[i] = this.getCol(i);
+    UI_TABLE_ROW_CLASS.getCells = function () {
+        for (var i = this._aElements.length, result = []; i--; ) {
+            result[i] = this.getCell(i);
         }
-
         return result;
     };
 
     /**
-     * 隐藏整列。
-     * @protected
+     * @override
      */
-    UI_TABLE_HCELL_CLASS.$hide = function () {
+    UI_TABLE_ROW_CLASS.setSize = function (width, height) {
+        for (var i = this._aElements.length, oldHeight = this.getHeight(); i--; ) {
+            if (this._aElements[i]) {
+                this._aElements[i].getControl().$setSize(null, height);
+            }
+        }
+        this.getParent()[height > oldHeight ? 'resize' : 'repaint']();
+    };
+
+    /**
+     * @override
+     */
+    UI_TABLE_COLUMN_CLASS.$hide = function () {
         this.$setStyles('display', 'none', -this.getWidth());
     };
 
@@ -391,13 +510,13 @@ _aCols        - 行的列Element对象，如果当前列需要向左合并为nul
      * @param {string} value 样式的值
      * @param {number} widthRevise 改变样式后表格宽度的变化，如果省略表示没有变化
      */
-    UI_TABLE_HCELL_CLASS.$setStyles = function (name, value, widthRevise) {
+    UI_TABLE_COLUMN_CLASS.$setStyles = function (name, value, widthRevise) {
         //__gzip_original__cols
         var i = 0,
             table = this.getParent(),
             rows = table._aHeadRows.concat(table._aRows),
             body = this.getBody(),
-            cols = table._aCols,
+            cols = table._aColumns,
             index = indexOf(cols, this),
             o = getParent(getParent(getParent(body))).style,
             j;
@@ -409,7 +528,7 @@ _aCols        - 行的列Element对象，如果当前列需要向左合并为nul
 
         for (; o = rows[i++]; ) {
             // 以下使用 body 表示列元素列表
-            body = o._aCols;
+            body = o._aElements;
             o = body[index];
             if (o) {
                 o.style[name] = value;
@@ -447,67 +566,62 @@ _aCols        - 行的列Element对象，如果当前列需要向左合并为nul
     };
 
     /**
-     * 显示整列。
-     * @protected
+     * @override
      */
-    UI_TABLE_HCELL_CLASS.$show = function () {
+    UI_TABLE_COLUMN_CLASS.$show = function () {
         this.$setStyles('display', '', this.getWidth());
     };
 
     /**
-     * 设置整列的宽度。
+     * 获取单元格控件。
      * @public
      *
-     * @param {number} width 列的宽度
+     * @param {number} rowIndex 行序号，从0开始
+     * @return {ecui.ui.Table.Cell} 单元格控件
      */
-    UI_TABLE_HCELL_CLASS.setSize = function (width) {
-        var oldWidth = this.getWidth();
+    UI_TABLE_COLUMN_CLASS.getCell = function (rowIndex) {
+        return this.getParent().getCell(rowIndex, indexOf(this._aColumns, this));
+    };
 
+    /**
+     * 获取全部单元格控件。
+     * @public
+     *
+     * @return {Array} 单元格控件数组
+     */
+    UI_TABLE_COLUMN_CLASS.getCells = function () {
+        for (var i = 0, index = indexOf(this._aColumns, this), o, result = []; o = this._aRows[i]; ) {
+            result[i++] = o.getCell(index);
+        }
+        return result;
+    };
+
+    /**
+     * @override
+     */
+    UI_TABLE_COLUMN_CLASS.setSize = function (width) {
+        var oldWidth = this.getWidth();
+        // 首先对列表头控件设置宽度，否则在计算合并单元格时宽度可能错误
         this.$setSize(width);
         this.$setStyles('width', width - this.$getBasicWidth() + 'px', width - oldWidth);
     };
 
     /**
-     * 鼠标单击控件事件的默认处理。
-     * 如果控件处于可操作状态(参见 isEnabled)，click 方法触发 onclick 事件，如果事件返回值不为 false，则调用 $click 方法。
-     * @protected
-     *
-     * @param {Event} event 事件对象
-     */
-    UI_TABLE_CELL_CLASS.$click = function (event) {
-        var table = this.getParent().getParent();
-        if (!(table.oncellclick && table.oncellclick(event) !== false)) {
-            UI_CONTROL_CLASS.$click.call(this, event);
-        }
-    };
-
-    /**
-     * 获取控件区域的高度。
-     * @public
-     *
-     * @return {number} 控件的高度
+     * @override
      */
     UI_TABLE_CELL_CLASS.getHeight = function () {
         return this.getOuter().offsetHeight;
     };
 
     /**
-     * 获取控件区域的宽度。
-     * @public
-     *
-     * @return {number} 控件的宽度
+     * @override
      */
     UI_TABLE_CELL_CLASS.getWidth = function () {
         return this.getOuter().offsetWidth;
     };
 
     /**
-     * 计算控件的缓存。
-     * 控件缓存部分核心属性的值，提高控件属性的访问速度，在子控件或者应用程序开发过程中，如果需要避开控件提供的方法(setSize、alterClass 等)直接操作 Element 对象，操作完成后必须调用 clearCache 方法清除控件的属性缓存，否则将引发错误。
-     * @protected
-     *
-     * @param {CssStyle} style 基本 Element 对象的 Css 样式对象
-     * @param {boolean} cacheSize 是否需要缓存控件大小，如果控件是另一个控件的部件时，不缓存大小能加快渲染速度，默认缓存
+     * @override
      */
     UI_TABLE_CLASS.$cache = function (style, cacheSize) {
         UI_PANEL_CLASS.$cache.call(this, style, cacheSize);
@@ -525,7 +639,7 @@ _aCols        - 行的列Element对象，如果当前列需要向左合并为nul
                 pos += style.getHeight();
             }
         }
-        for (i = 0, pos = 0; style = this._aCols[i++]; ) {
+        for (i = 0, pos = 0; style = this._aColumns[i++]; ) {
             style.$cache$pos = pos;
             style.cache(true, true);
             if (!style.getOuter().style.display) {
@@ -536,50 +650,32 @@ _aCols        - 行的列Element对象，如果当前列需要向左合并为nul
     };
 
     /**
-     * 获取单元格元素。
-     * $getCell 方法在合法的行列序号内一定会返回一个 Element 对象，如果当前单元格被合并，将返回合并后的 Element 对象。
+     * 获取单元格主元素。
+     * $getElement 方法在合法的行列序号内一定会返回一个 Element 对象，如果当前单元格被合并，将返回合并后的 Element 对象。
      * @protected
      *
      * @param {number} rowIndex 单元格的行数，从0开始
      * @param {number} colIndex 单元格的列数，从0开始
-     * @return {HTMLElement} 单元格 Element 对象
+     * @return {HTMLElement} 单元格主元素对象
      */
-    UI_TABLE_CLASS.$getCell = function (rowIndex, colIndex) {
+    UI_TABLE_CLASS.$getElement = function (rowIndex, colIndex) {
         //__gzip_original__rows
         var rows = this._aRows,
-            cols = rows[rowIndex] && rows[rowIndex]._aCols,
+            cols = rows[rowIndex] && rows[rowIndex]._aElements,
             col = cols && cols[colIndex];
 
         if (col === undefined) {
             col = null;
         }
         else if (!col) {
-            for (; col === false; col = (cols = rows[--rowIndex]._aCols)[colIndex]) {};
+            for (; col === false; col = (cols = rows[--rowIndex]._aElements)[colIndex]) {};
             for (; !col; col = cols[--colIndex]) {};
         }
         return col;
     };
 
-    UI_TABLE_CLASS.init = function () {
-        insertBefore(this._uHead.getBody(), this._uHead.getMain().lastChild.lastChild.firstChild);
-        this.$cache$mainHeight -= this.$cache$paddingTop;
-
-        UI_PANEL_CLASS.init.call(this);
-
-        for (var i = 0, o; o = this._aCols[i++]; ) {
-            o.$setSize(o.getWidth());
-        }
-        for (i = 0; o = this._aHeadRows[i++]; ) {
-            UI_TABLE_ROW_INIT(o);
-        }
-        for (i = 0; o = this._aRows[i++]; ) {
-            UI_TABLE_ROW_INIT(o);
-        }
-    };
-
     /**
-     * 表格控件对显示记录滚动。
-     * @protected
+     * @override
      */
     UI_TABLE_CLASS.$scroll = function () {
         UI_PANEL_CLASS.$scroll.call(this);
@@ -587,11 +683,7 @@ _aCols        - 行的列Element对象，如果当前列需要向左合并为nul
     };
 
     /**
-     * 设置控件的大小。
-     * @protected
-     *
-     * @param {number} width 宽度，如果不需要设置则将参数设置为等价于逻辑非的值
-     * @param {number} height 高度，如果不需要设置则省略此参数
+     * @override
      */
     UI_TABLE_CLASS.$setSize = function (width, height) {
         var body = this.getBody(),
@@ -635,58 +727,58 @@ _aCols        - 行的列Element对象，如果当前列需要向左合并为nul
      * 增加一列。
      * options 对象对象支持的属性如下：
      * width   {number} 列的宽度
-     * base    {string} 列的基本样式
-     * caption {string} 列的标题
+     * primary {string} 列的基本样式
+     * title   {string} 列的标题
      * @public
      *
      * @param {Object} options 列的初始化选项
      * @param {number} index 被添加的列的位置序号，如果不合法将添加在末尾
-     * @return {ecui.ui.Table.Col} 列控件
+     * @return {ecui.ui.Table.Column} 表头单元格控件
      */
-    UI_TABLE_CLASS.addCol = function (options, index) {
+    UI_TABLE_CLASS.addColumn = function (options, index) {
         var i = 0,
             headRowCount = this._aHeadRows.length,
-            rows = this._aHeadRows.concat(this._aRows),
+            rows = this._aRows = this._aHeadRows.concat(this._aRows),
             type = this.getType(),
             primary = options.primary || '',
-            hcellClass = findConstructor(this, 'HCell'),
+            hcellClass = findConstructor(this, 'Column'),
             el = createDom(primary + hcellClass.TYPES, '', 'td'),
             col = $fastCreate(hcellClass, el, this),
             row;
 
-        el.innerHTML = options.caption || '';
+        el.innerHTML = options.title || '';
 
         primary += findConstructor(this, 'Cell').TYPES;
         for (; row = rows[i]; i++) {
-            o = row._aCols[index];
+            o = row._aElements[index];
             if (o !== null) {
                 // 没有出现跨列的插入列操作
                 for (j = index; !o; ) {
-                    o = row._aCols[++j];
+                    o = row._aElements[++j];
                     if (o === undefined) {
                         break;
                     }
                 }
                 if (i < headRowCount) {
-                    row._aCols.splice(index, 0, row.getBody().insertBefore(el, o));
+                    row._aElements.splice(index, 0, row.getBody().insertBefore(el, o));
                     el.setAttribute('rowSpan', headRowCount - i);
-                    this._aCols.splice(index, 0, col);
+                    this._aColumns.splice(index, 0, col);
                     i = headRowCount - 1;
                 }
                 else {
-                    row._aCols.splice(index, 0, o = row.getBody().insertBefore(createDom(primary, '', 'td'), o));
-                    o.getControl = UI_TABLE_INIT_GETCONTROL;
+                    row._aElements.splice(index, 0, o = row.getBody().insertBefore(createDom(primary, '', 'td'), o));
+                    o.getControl = UI_TABLE_GETCONTROL();
                 }
             }
             else {
                 // 出现跨列的插入列操作，需要修正colspan的属性值
-                var cell = this.$getCell(i, index),
+                var cell = this.$getElement(i, index),
                     j = toNumber(cell.getAttribute('rowspan')) || 1;
 
                 cell.setAttribute('colSpan', toNumber(cell.getAttribute('colSpan')) + 1);
-                row._aCols.splice(index, 0, o);
+                row._aElements.splice(index, 0, o);
                 for (; --j; ) {
-                    rows[++i]._aCols.splice(index, 0, false);
+                    rows[++i]._aElements.splice(index, 0, false);
                 }
             }
         }
@@ -694,6 +786,9 @@ _aCols        - 行的列Element对象，如果当前列需要向左合并为nul
         col.cache();
         col.$setSize(options.width);
         col.$setStyles('width', el.style.width, options.width);
+        col._oOptions = extend({}, options);
+
+        this._aRows.splice(0, headRowCount);
 
         return col;
     };
@@ -722,8 +817,8 @@ _aCols        - 行的列Element对象，如果当前列需要向左合并为nul
             index = this._aRows.length;
         }
 
-        for (; col = this._aCols[i]; ) {
-            if (row && row._aCols[i] === false || data[i] === false) {
+        for (; col = this._aColumns[i]; ) {
+            if (row && row._aElements[i] === false || data[i] === false) {
                 rowCols[i++] = false;
             }
             else {
@@ -734,7 +829,7 @@ _aCols        - 行的列Element对象，如果当前列需要向左合并为nul
                     var o = i,
                         colspan = col.isShow() ? 1 : 0,
                         width = col.getWidth() - col.getMinimumWidth();
-                    (col = this._aCols[++i]) && data[i] === null;
+                    (col = this._aColumns[++i]) && data[i] === null;
                 ) {
                     rowCols[i] = null;
                     if (col.isShow()) {
@@ -744,7 +839,7 @@ _aCols        - 行的列Element对象，如果当前列需要向左合并为nul
                 }
                 rowCols[o] = true;
                 html[j++] = (colspan ? 'width:' + width + 'px" colSpan="' + colspan : 'display:none') + '">' +
-                    data[o] + '</td>';
+                    (data[o] || '') + '</td>';
             }
         }
 
@@ -757,14 +852,14 @@ _aCols        - 行的列Element对象，如果当前列需要向左合并为nul
         this._aRows.splice(index--, 0, row);
 
         // 以下使用 col 表示上一次执行了rowspan++操作的单元格，同一个单元格只需要增加一次
-        for (i = 0, el = el.firstChild, col = null; this._aCols[i]; i++) {
+        for (i = 0, el = el.firstChild, col = null; this._aColumns[i]; i++) {
             if (o = rowCols[i]) {
                 rowCols[i] = el;
-                el.getControl = UI_TABLE_INIT_GETCONTROL;
+                el.getControl = UI_TABLE_GETCONTROL();
                 el = el.nextSibling;
             }
             else if (o === false) {
-                o = this.$getCell(index, i);
+                o = this.$getElement(index, i);
                 if (o != col) {
                     o.setAttribute('rowSpan', (toNumber(o.getAttribute('rowSpan')) || 1) + 1);
                     col = o;
@@ -772,7 +867,7 @@ _aCols        - 行的列Element对象，如果当前列需要向左合并为nul
             }
         }
 
-        row._aCols = rowCols;
+        row._aElements = rowCols;
         this.resize();
         return row;
     };
@@ -781,25 +876,25 @@ _aCols        - 行的列Element对象，如果当前列需要向左合并为nul
      * 获取单元格控件。
      * @public
      *
-     * @param {number} rowIndex 单元格的行数，从0开始
-     * @param {number} colIndex 单元格的列数，从0开始
-     * @return {ecui.ui.Control} 单元格控件
+     * @param {number} rowIndex 行序号，从0开始
+     * @param {number} colIndex 列序号，从0开始
+     * @return {ecui.ui.Table.Cell} 单元格控件
      */
     UI_TABLE_CLASS.getCell = function (rowIndex, colIndex) {
         rowIndex = this._aRows[rowIndex];
-        return rowIndex && rowIndex.getCol(colIndex) || null;
+        return rowIndex && rowIndex.getCell(colIndex) || null;
     };
 
     /**
-     * 获取列控件/列 Element 对象。
+     * 获取列控件。
      * 列控件只是通常的称呼，实际上就是普通的基础控件，提供了一些针对整列进行操作的方法，包括 hide、setSize(仅能设置宽度) 与 show 方法等。
      * @public
      *
-     * @param {number} index 列数，从0开始
-     * @return {ecui.ui.Table.Col} 列控件
+     * @param {number} index 列序号，从0开始
+     * @return {ecui.ui.Table.Column} 表头单元格控件
      */
-    UI_TABLE_CLASS.getCol = function (index) {
-        return this._aCols[index] || null;
+    UI_TABLE_CLASS.getColumn = function (index) {
+        return this._aColumns[index] || null;
     };
 
     /**
@@ -808,8 +903,8 @@ _aCols        - 行的列Element对象，如果当前列需要向左合并为nul
      *
      * @return {number} 列控件数量
      */
-    UI_TABLE_CLASS.getColCount = function () {
-        return this._aCols.length;
+    UI_TABLE_CLASS.getColumnCount = function () {
+        return this._aColumns.length;
     };
 
     /**
@@ -818,8 +913,8 @@ _aCols        - 行的列Element对象，如果当前列需要向左合并为nul
      *
      * @return {Array} 列控件数组
      */
-    UI_TABLE_CLASS.getCols = function () {
-        return this._aCols.slice();
+    UI_TABLE_CLASS.getColumns = function () {
+        return this._aColumns.slice();
     };
 
     /**
@@ -844,7 +939,7 @@ _aCols        - 行的列Element对象，如果当前列需要向左合并为nul
     };
 
     /**
-     * 获取表格中所有的行控件。
+     * 获取全部的行控件。
      * @public
      *
      * @return {Array} 行控件列表
@@ -854,14 +949,34 @@ _aCols        - 行的列Element对象，如果当前列需要向左合并为nul
     };
 
     /**
+     * @override
+     */
+    UI_TABLE_CLASS.init = function () {
+        insertBefore(this._uHead.getBody(), this._uHead.getMain().lastChild.lastChild.firstChild);
+        this.$cache$mainHeight -= this.$cache$paddingTop;
+
+        UI_PANEL_CLASS.init.call(this);
+
+        for (var i = 0, o; o = this._aColumns[i++]; ) {
+            o.$setSize(o.getWidth());
+        }
+        for (i = 0; o = this._aHeadRows[i++]; ) {
+            UI_TABLE_INIT_ROW(o);
+        }
+        for (i = 0; o = this._aRows[i++]; ) {
+            UI_TABLE_INIT_ROW(o);
+        }
+    };
+
+    /**
      * 移除一列并释放占用的空间。
      * @public
      *
-     * @param {number} index 列的序号，从0开始计数
+     * @param {number} index 列序号，从0开始计数
      */
-    UI_TABLE_CLASS.removeCol = function (index) {
+    UI_TABLE_CLASS.removeColumn = function (index) {
         var i = 0,
-            cols = this._aCols,
+            cols = this._aColumns,
             o = cols[index];
 
         if (o) {
@@ -872,7 +987,7 @@ _aCols        - 行的列Element对象，如果当前列需要向左合并为nul
             cols.splice(index, 1);
 
             for (; o = this._aRows[i++]; ) {
-                cols = o._aCols;
+                cols = o._aElements;
                 if (o = cols[index]) {
                     if (cols[index + 1] === null) {
                         // 如果是被合并的列，需要保留
@@ -880,7 +995,7 @@ _aCols        - 行的列Element对象，如果当前列需要向左合并为nul
                         continue;
                     }
                     removeDom(o);
-                    if (o.getControl != UI_TABLE_INIT_GETCONTROL) {
+                    if (o.getControl != UI_TABLE_GETCONTROL()) {
                         disposeControl(o.getControl());
                     }
                 }
@@ -893,50 +1008,32 @@ _aCols        - 行的列Element对象，如果当前列需要向左合并为nul
      * 移除一行并释放占用的空间。
      * @public
      *
-     * @param {number} index 行的序号，从0开始计数
+     * @param {number} index 行序号，从0开始计数
      */
     UI_TABLE_CLASS.removeRow = function (index) {
-        //__gzip_original__cols
         var i = 0,
-            remove = this._aRows[index],
-            cols = remove._aCols,
-            row = this._aRows[index + 1],
-            cell,
+            row = this._aRows[index],
+            rowNext = this._aRows[index + 1],
+            body = row.getBody(),
             j,
             o;
 
-        if (remove) {
-            for (; this._aCols[i]; i++) {
-                o = cols[i];
-                if (o === false) {
-                    o = this.$getCell(index - 1, i);
-                    if (cell != o) {
-                        o.setAttribute('rowSpan', toNumber(o.getAttribute('rowSpan')) - 1);
-                        cell = o;
-                    }
-                }
-                else if (o && (j = toNumber(o.getAttribute('rowSpan'))) > 1) {
-                    o.setAttribute('rowSpan', j - 1);
-                    row._aCols[i++] = o;
-                    for (; cols[i] === null; ) {
-                        row._aCols[i++] = null;
-                    }
-                    for (j = i--; ; ) {
-                        cell = row._aCols[j++];
-                        if (cell || cell === undefined) {
-                            break;
+        if (row) {
+            row.hide();
+            for (; this._aColumns[i]; i++) {
+                if (o = row._aElements[i]) {
+                    if (getParent(o) != body) {
+                        rowNext._aElements[i] = o;
+                        for (; row._aElements[++i] === null; ) {
+                            rowNext._aElements[i] = null;
                         }
-                    }
-
-                    row.getBody().insertBefore(o, cell);
-                    if (o.getControl != UI_TABLE_INIT_GETCONTROL) {
-                        o.getControl().$setParent(row);
+                        i--;
                     }
                 }
             }
 
-            removeDom(remove.getOuter());
-            disposeControl(remove);
+            removeDom(row.getOuter());
+            disposeControl(row);
             this._aRows.splice(index, 1);
 
             this.repaint();
@@ -946,18 +1043,22 @@ _aCols        - 行的列Element对象，如果当前列需要向左合并为nul
     // 初始化事件转发信息
     (function () {
         function build(name) {
-            var type = name.slice(5);
+            var type = name.replace('mouse', '');
+
+            name = '$' + name;
 
             UI_TABLE_ROW_CLASS[name] = function (event) {
+                UI_CONTROL_CLASS[name].call(this, event);
                 triggerEvent(this.getParent(), 'row' + type, event);
             };
 
             UI_TABLE_CELL_CLASS[name] = function (event) {
+                UI_CONTROL_CLASS[name].call(this, event);
                 triggerEvent(this.getParent().getParent(), 'cell' + type, event);
             };
         }
 
-        for (var i = 0; i < 6; ) {
+        for (var i = 0; i < 7; ) {
             build(eventNames[i++]);
         }
     })();

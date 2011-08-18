@@ -14,7 +14,7 @@ test('控件初始化', {
     '检测控件类型样式': function () {
         var button = ecui.create(ecui.ui.Button, {parent: baidu.dom.g('common')});
 
-        value_of(button.getTypes()).should_be(['ui-button', 'ui-control']);
+        value_of(button.getTypes()).should_be(['ui-button']);
         value_of(button.getPrimary()).should_be('ui-button');
     },
 

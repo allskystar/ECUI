@@ -17,12 +17,12 @@ function check(control) {
     var text = control.$getSection('Text'),
         button = control.$getSection('Button'),
         options = control.$getSection('Options');
-    value_of(control.getTypes()).should_be(['ui-combox', 'ui-input', 'ui-control']);
-    value_of(text.getTypes()).should_be(['ui-item', 'ui-control']);
+    value_of(control.getTypes()).should_be(['ui-combox']);
+    value_of(text.getTypes()).should_be(['ui-item']);
     value_of(text.getClass()).should_be('ui-combox-text');
-    value_of(button.getTypes()).should_be(['ui-button', 'ui-control']);
+    value_of(button.getTypes()).should_be(['ui-button']);
     value_of(button.getClass()).should_be('ui-combox-button');
-    value_of(options.getTypes()).should_be(['ui-panel', 'ui-control']);
+    value_of(options.getTypes()).should_be(['ui-panel']);
     value_of(options.getClass()).should_be('ui-combox-options');
     value_of(control.getInput().style.display != 'none' && control.getInput().type != 'hidden').should_be_true();
 }
@@ -60,7 +60,7 @@ describe('控件初始化', {
         value_of(items === control.getItems()).should_be_false();
         value_of(items[0].getValue()).should_be('1');
         value_of(items[1].getValue()).should_be('2');
-        value_of(items[0].getTypes()).should_be(['ui-item', 'ui-control']);
+        value_of(items[0].getTypes()).should_be(['ui-item']);
         value_of(items[0].getClass()).should_be('custom');
         value_of(items[1].getClass()).should_be('ui-combox-item');
 

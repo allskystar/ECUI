@@ -5,11 +5,11 @@ describe('表格控件初始化测试', {
         el.innerHTML = '<table cellspacing="0" cellpadding="0" border="0"><tr><td style="width:80px"></td>'
             + '<td style="width:120px"></td></tr></table>';
 
-        var ctrl = ecui.create('Table', {element: el, parent: document.body});
-        value_of(ctrl.getCol(0).getWidth()).should_be(80);
-        value_of(ctrl.getCol(1).getWidth()).should_be(120);
-        ctrl.setParent();
-        ecui.dispose(ctrl);
+        var control = ecui.create('Table', {main: el, parent: document.body});
+        value_of(control.getColumn(0).getWidth()).should_be(80);
+        value_of(control.getColumn(1).getWidth()).should_be(120);
+        control.setParent();
+        ecui.dispose(control);
     },
 
     '表头多行': function () {
@@ -19,12 +19,12 @@ describe('表格控件初始化测试', {
             + '<td style="width:120px" colspan="2"></td></tr><tr><td></td>'
             + '<td style="width:80px"></td><td style="width:40px"></td></tr></thead><tbody></tbody></table>';
 
-        var ctrl = ecui.create('Table', {element: el, parent: document.body});
-        value_of(ctrl.getCol(0).getWidth()).should_be(80);
-        value_of(ctrl.getCol(1).getWidth()).should_be(80);
-        value_of(ctrl.getCol(2).getWidth()).should_be(40);
-        ctrl.setParent();
-        ecui.dispose(ctrl);
+        var control = ecui.create('Table', {main: el, parent: document.body});
+        value_of(control.getColumn(0).getWidth()).should_be(80);
+        value_of(control.getColumn(1).getWidth()).should_be(80);
+        value_of(control.getColumn(2).getWidth()).should_be(40);
+        control.setParent();
+        ecui.dispose(control);
     },
 
     '内容跨行列': function () {
@@ -37,31 +37,31 @@ describe('表格控件初始化测试', {
             + '<tr><td></td><td></td></tr>'
             + '<tr><td></td><td></td><td></td><td></td></tr></table>';
 
-        var ctrl = ecui.create('Table', {element: el, parent: document.body, crossCell: true});
-        value_of(ctrl.getRow(0).getCols().length).should_be(4);
-        value_of(ctrl.getRow(0).getCol(0).getWidth()).should_be(120);
-        value_of(ctrl.getRow(0).getCol(1)).should_be(null);
-        value_of(ctrl.getRow(0).getCol(2).getWidth()).should_be(80);
-        value_of(ctrl.getRow(0).getCol(3)).should_be(null);
-        value_of(ctrl.getRow(1).getCol(0).getWidth()).should_be(80);
-        value_of(ctrl.getRow(1).getCol(1).getWidth()).should_be(80);
-        value_of(ctrl.getRow(1).getCol(2)).should_be(null);
-        value_of(ctrl.getRow(1).getCol(3).getWidth()).should_be(40);
-        value_of(ctrl.getRow(2).getCol(0).getWidth()).should_be(80);
-        value_of(ctrl.getRow(2).getCol(1)).should_be(null);
-        value_of(ctrl.getRow(2).getCol(2)).should_be(null);
-        value_of(ctrl.getRow(2).getCol(3).getWidth()).should_be(40);
-        value_of(ctrl.getRow(3).getCol(0).getWidth()).should_be(80);
-        value_of(ctrl.getRow(3).getCol(1).getWidth()).should_be(40);
-        value_of(ctrl.getRow(3).getCol(2).getWidth()).should_be(40);
-        value_of(ctrl.getRow(3).getCol(3).getWidth()).should_be(40);
-        ctrl.setParent();
-        ecui.dispose(ctrl);
+        var control = ecui.create('Table', {main: el, parent: document.body, crossCell: true});
+        value_of(control.getRow(0).getCells().length).should_be(4);
+        value_of(control.getRow(0).getCell(0).getWidth()).should_be(120);
+        value_of(control.getRow(0).getCell(1)).should_be(null);
+        value_of(control.getRow(0).getCell(2).getWidth()).should_be(80);
+        value_of(control.getRow(0).getCell(3)).should_be(null);
+        value_of(control.getRow(1).getCell(0).getWidth()).should_be(80);
+        value_of(control.getRow(1).getCell(1).getWidth()).should_be(80);
+        value_of(control.getRow(1).getCell(2)).should_be(null);
+        value_of(control.getRow(1).getCell(3).getWidth()).should_be(40);
+        value_of(control.getRow(2).getCell(0).getWidth()).should_be(80);
+        value_of(control.getRow(2).getCell(1)).should_be(null);
+        value_of(control.getRow(2).getCell(2)).should_be(null);
+        value_of(control.getRow(2).getCell(3).getWidth()).should_be(40);
+        value_of(control.getRow(3).getCell(0).getWidth()).should_be(80);
+        value_of(control.getRow(3).getCell(1).getWidth()).should_be(40);
+        value_of(control.getRow(3).getCell(2).getWidth()).should_be(40);
+        value_of(control.getRow(3).getCell(3).getWidth()).should_be(40);
+        control.setParent();
+        ecui.dispose(control);
     }
 });
 
 describe('表格功能测试', {
-    '访问行/列/单元格(getCell/getCol/getCols/getRow/getRows)': function () {
+    '访问行/列/单元格(getCell/getColumn/getColumns/getRow/getRows)': function () {
         var el = document.createElement('div');
         el.style.cssText = 'height:300px';
         el.innerHTML = '<table cellspacing="0" cellpadding="0"><tr><td style="width:80px"></td>'
@@ -70,16 +70,16 @@ describe('表格功能测试', {
             + '<tr><td></td><td colspan="2" rowspan="2"></td><td></td></tr>'
             + '<tr><td></td><td></td></tr>'
             + '<tr><td></td><td></td><td></td><td></td></tr></table>';
-        var ctrl = ecui.create('Table', {element: el, parent: document.body, crossCell: true}),
-            row = ctrl.getRow(3);
+        var control = ecui.create('Table', {main: el, parent: document.body, crossCell: true}),
+            row = control.getRow(3);
 
-        value_of(ctrl.getRows() !== ctrl.getRows()).should_be_true();
-        value_of(ctrl.getCols() !== ctrl.getCols()).should_be_true();
-        value_of(row.getCols() !== row.getCols()).should_be_true();
-        value_of(ctrl.getCell(3, 0)).should_be(row.getCol(0));
+        value_of(control.getRows() !== control.getRows()).should_be_true();
+        value_of(control.getColumns() !== control.getColumns()).should_be_true();
+        value_of(row.getCells() !== row.getCells()).should_be_true();
+        value_of(control.getCell(3, 0)).should_be(row.getCell(0));
 
-        ctrl.setParent();
-        ecui.dispose(ctrl);
+        control.setParent();
+        ecui.dispose(control);
     },
 
     '列宽度变化，自适应大小(hide/setSize/show)': function () {
@@ -91,69 +91,69 @@ describe('表格功能测试', {
             + '<tr><td></td><td colspan="2" rowspan="2"></td><td></td></tr>'
             + '<tr><td></td><td></td></tr>'
             + '<tr><td></td><td></td><td></td><td></td></tr></table>';
-        var ctrl = ecui.create('Table', {element: el, parent: document.body, crossCell: true});
+        var control = ecui.create('Table', {main: el, parent: document.body, crossCell: true});
 
-        ctrl.getCol(1).hide();
-        value_of(ctrl.getRow(0).getCol(0).getWidth()).should_be(80);
-        value_of(ctrl.getRow(0).getCol(2).getWidth()).should_be(80);
-        value_of(ctrl.getRow(1).getCol(0).getWidth()).should_be(80);
-        value_of(ctrl.getRow(1).getCol(1).getWidth()).should_be(40);
-        value_of(ctrl.getRow(1).getCol(3).getWidth()).should_be(40);
-        value_of(ctrl.getRow(2).getCol(0).getWidth()).should_be(80);
-        value_of(ctrl.getRow(2).getCol(3).getWidth()).should_be(40);
-        value_of(ctrl.getRow(3).getCol(0).getWidth()).should_be(80);
-        value_of(ctrl.getRow(3).getCol(1).getWidth()).should_be(0);
-        value_of(ctrl.getRow(3).getCol(2).getWidth()).should_be(40);
-        value_of(ctrl.getRow(3).getCol(3).getWidth()).should_be(40);
-        value_of(ctrl.getWidth()).should_be(160);
+        control.getColumn(1).hide();
+        value_of(control.getRow(0).getCell(0).getWidth()).should_be(80);
+        value_of(control.getRow(0).getCell(2).getWidth()).should_be(80);
+        value_of(control.getRow(1).getCell(0).getWidth()).should_be(80);
+        value_of(control.getRow(1).getCell(1).getWidth()).should_be(40);
+        value_of(control.getRow(1).getCell(3).getWidth()).should_be(40);
+        value_of(control.getRow(2).getCell(0).getWidth()).should_be(80);
+        value_of(control.getRow(2).getCell(3).getWidth()).should_be(40);
+        value_of(control.getRow(3).getCell(0).getWidth()).should_be(80);
+        value_of(control.getRow(3).getCell(1).getWidth()).should_be(0);
+        value_of(control.getRow(3).getCell(2).getWidth()).should_be(40);
+        value_of(control.getRow(3).getCell(3).getWidth()).should_be(40);
+        value_of(control.getWidth()).should_be(160);
 
-        ctrl.getCol(2).hide();
-        value_of(ctrl.getRow(0).getCol(0).getWidth()).should_be(80);
-        value_of(ctrl.getRow(0).getCol(2).getWidth()).should_be(40);
-        value_of(ctrl.getRow(1).getCol(0).getWidth()).should_be(80);
-        value_of(ctrl.getRow(1).getCol(1).getWidth()).should_be(0);
-        value_of(ctrl.getRow(1).getCol(3).getWidth()).should_be(40);
-        value_of(ctrl.getRow(2).getCol(0).getWidth()).should_be(80);
-        value_of(ctrl.getRow(2).getCol(3).getWidth()).should_be(40);
-        value_of(ctrl.getRow(3).getCol(0).getWidth()).should_be(80);
-        value_of(ctrl.getRow(3).getCol(1).getWidth()).should_be(0);
-        value_of(ctrl.getRow(3).getCol(2).getWidth()).should_be(0);
-        value_of(ctrl.getRow(3).getCol(3).getWidth()).should_be(40);
-        value_of(ctrl.getWidth()).should_be(120);
+        control.getColumn(2).hide();
+        value_of(control.getRow(0).getCell(0).getWidth()).should_be(80);
+        value_of(control.getRow(0).getCell(2).getWidth()).should_be(40);
+        value_of(control.getRow(1).getCell(0).getWidth()).should_be(80);
+        value_of(control.getRow(1).getCell(1).getWidth()).should_be(0);
+        value_of(control.getRow(1).getCell(3).getWidth()).should_be(40);
+        value_of(control.getRow(2).getCell(0).getWidth()).should_be(80);
+        value_of(control.getRow(2).getCell(3).getWidth()).should_be(40);
+        value_of(control.getRow(3).getCell(0).getWidth()).should_be(80);
+        value_of(control.getRow(3).getCell(1).getWidth()).should_be(0);
+        value_of(control.getRow(3).getCell(2).getWidth()).should_be(0);
+        value_of(control.getRow(3).getCell(3).getWidth()).should_be(40);
+        value_of(control.getWidth()).should_be(120);
 
-        ctrl.getCol(1).show();
-        value_of(ctrl.getRow(0).getCol(0).getWidth()).should_be(120);
-        value_of(ctrl.getRow(0).getCol(2).getWidth()).should_be(40);
-        value_of(ctrl.getRow(1).getCol(0).getWidth()).should_be(80);
-        value_of(ctrl.getRow(1).getCol(1).getWidth()).should_be(40);
-        value_of(ctrl.getRow(1).getCol(3).getWidth()).should_be(40);
-        value_of(ctrl.getRow(2).getCol(0).getWidth()).should_be(80);
-        value_of(ctrl.getRow(2).getCol(3).getWidth()).should_be(40);
-        value_of(ctrl.getRow(3).getCol(0).getWidth()).should_be(80);
-        value_of(ctrl.getRow(3).getCol(1).getWidth()).should_be(40);
-        value_of(ctrl.getRow(3).getCol(2).getWidth()).should_be(0);
-        value_of(ctrl.getRow(3).getCol(3).getWidth()).should_be(40);
-        value_of(ctrl.getWidth()).should_be(160);
+        control.getColumn(1).show();
+        value_of(control.getRow(0).getCell(0).getWidth()).should_be(120);
+        value_of(control.getRow(0).getCell(2).getWidth()).should_be(40);
+        value_of(control.getRow(1).getCell(0).getWidth()).should_be(80);
+        value_of(control.getRow(1).getCell(1).getWidth()).should_be(40);
+        value_of(control.getRow(1).getCell(3).getWidth()).should_be(40);
+        value_of(control.getRow(2).getCell(0).getWidth()).should_be(80);
+        value_of(control.getRow(2).getCell(3).getWidth()).should_be(40);
+        value_of(control.getRow(3).getCell(0).getWidth()).should_be(80);
+        value_of(control.getRow(3).getCell(1).getWidth()).should_be(40);
+        value_of(control.getRow(3).getCell(2).getWidth()).should_be(0);
+        value_of(control.getRow(3).getCell(3).getWidth()).should_be(40);
+        value_of(control.getWidth()).should_be(160);
 
-        ctrl.getCol(1).setSize(80);
-        value_of(ctrl.getRow(0).getCol(0).getWidth()).should_be(160);
-        value_of(ctrl.getRow(0).getCol(2).getWidth()).should_be(40);
-        value_of(ctrl.getRow(1).getCol(0).getWidth()).should_be(80);
-        value_of(ctrl.getRow(1).getCol(1).getWidth()).should_be(80);
-        value_of(ctrl.getRow(1).getCol(3).getWidth()).should_be(40);
-        value_of(ctrl.getRow(2).getCol(0).getWidth()).should_be(80);
-        value_of(ctrl.getRow(2).getCol(3).getWidth()).should_be(40);
-        value_of(ctrl.getRow(3).getCol(0).getWidth()).should_be(80);
-        value_of(ctrl.getRow(3).getCol(1).getWidth()).should_be(80);
-        value_of(ctrl.getRow(3).getCol(2).getWidth()).should_be(0);
-        value_of(ctrl.getRow(3).getCol(3).getWidth()).should_be(40);
-        value_of(ctrl.getWidth()).should_be(200);
+        control.getColumn(1).setSize(80);
+        value_of(control.getRow(0).getCell(0).getWidth()).should_be(160);
+        value_of(control.getRow(0).getCell(2).getWidth()).should_be(40);
+        value_of(control.getRow(1).getCell(0).getWidth()).should_be(80);
+        value_of(control.getRow(1).getCell(1).getWidth()).should_be(80);
+        value_of(control.getRow(1).getCell(3).getWidth()).should_be(40);
+        value_of(control.getRow(2).getCell(0).getWidth()).should_be(80);
+        value_of(control.getRow(2).getCell(3).getWidth()).should_be(40);
+        value_of(control.getRow(3).getCell(0).getWidth()).should_be(80);
+        value_of(control.getRow(3).getCell(1).getWidth()).should_be(80);
+        value_of(control.getRow(3).getCell(2).getWidth()).should_be(0);
+        value_of(control.getRow(3).getCell(3).getWidth()).should_be(40);
+        value_of(control.getWidth()).should_be(200);
 
-        ctrl.setParent();
-        ecui.dispose(ctrl);
+        control.setParent();
+        ecui.dispose(control);
     },
 
-    '增加/删除列(addCol/removeCol)': function () {
+    '增加/删除列(addColumn/removeColumn)': function () {
         var el = document.createElement('div');
         el.style.cssText = 'width:200px;height:300px';
         el.innerHTML = '<table cellspacing="0" cellpadding="0"><tr><td style="width:80px"></td>'
@@ -162,83 +162,81 @@ describe('表格功能测试', {
             + '<tr><td></td><td colspan="2" rowspan="2"></td><td></td></tr>'
             + '<tr><td></td><td></td></tr>'
             + '<tr><td></td><td></td><td></td><td></td></tr></table>';
-        var ctrl = ecui.create('Table', {element: el, parent: document.body, crossCell: true});
+        var control = ecui.create('Table', {main: el, parent: document.body, crossCell: true});
 
-        ctrl.addCol({width: 40, base: 'custom', title: 'new'}, 1);
-        value_of(ctrl.getCol(1).getClass()).should_be('custom-head');
-        value_of(ctrl.getCell(1, 1).getClass()).should_be('custom-item');
-        value_of(ctrl.getRow(0).getCol(0).getWidth()).should_be(160);
-        value_of(ctrl.getRow(0).getCol(3).getWidth()).should_be(80);
-        value_of(ctrl.getRow(1).getCol(0).getWidth()).should_be(80);
-        value_of(ctrl.getRow(1).getCol(1).getWidth()).should_be(40);
-        value_of(ctrl.getRow(1).getCol(2).getWidth()).should_be(80);
-        value_of(ctrl.getRow(1).getCol(4).getWidth()).should_be(40);
-        value_of(ctrl.getRow(2).getCol(0).getWidth()).should_be(80);
-        value_of(ctrl.getRow(1).getCol(1).getWidth()).should_be(40);
-        value_of(ctrl.getRow(2).getCol(4).getWidth()).should_be(40);
-        value_of(ctrl.getRow(3).getCol(0).getWidth()).should_be(80);
-        value_of(ctrl.getRow(3).getCol(1).getWidth()).should_be(40);
-        value_of(ctrl.getRow(3).getCol(2).getWidth()).should_be(40);
-        value_of(ctrl.getRow(3).getCol(3).getWidth()).should_be(40);
-        value_of(ctrl.getRow(3).getCol(4).getWidth()).should_be(40);
+        control.addColumn({width: 40, base: 'custom', title: 'new'}, 1);
+        value_of(control.getRow(0).getCell(0).getWidth()).should_be(160);
+        value_of(control.getRow(0).getCell(3).getWidth()).should_be(80);
+        value_of(control.getRow(1).getCell(0).getWidth()).should_be(80);
+        value_of(control.getRow(1).getCell(1).getWidth()).should_be(40);
+        value_of(control.getRow(1).getCell(2).getWidth()).should_be(80);
+        value_of(control.getRow(1).getCell(4).getWidth()).should_be(40);
+        value_of(control.getRow(2).getCell(0).getWidth()).should_be(80);
+        value_of(control.getRow(1).getCell(1).getWidth()).should_be(40);
+        value_of(control.getRow(2).getCell(4).getWidth()).should_be(40);
+        value_of(control.getRow(3).getCell(0).getWidth()).should_be(80);
+        value_of(control.getRow(3).getCell(1).getWidth()).should_be(40);
+        value_of(control.getRow(3).getCell(2).getWidth()).should_be(40);
+        value_of(control.getRow(3).getCell(3).getWidth()).should_be(40);
+        value_of(control.getRow(3).getCell(4).getWidth()).should_be(40);
 
-        ctrl.removeCol(1);
-        value_of(ctrl.getRow(0).getCol(0).getWidth()).should_be(120);
-        value_of(ctrl.getRow(0).getCol(2).getWidth()).should_be(80);
-        value_of(ctrl.getRow(1).getCol(0).getWidth()).should_be(80);
-        value_of(ctrl.getRow(1).getCol(1).getWidth()).should_be(80);
-        value_of(ctrl.getRow(1).getCol(3).getWidth()).should_be(40);
-        value_of(ctrl.getRow(2).getCol(0).getWidth()).should_be(80);
-        value_of(ctrl.getRow(2).getCol(3).getWidth()).should_be(40);
-        value_of(ctrl.getRow(3).getCol(0).getWidth()).should_be(80);
-        value_of(ctrl.getRow(3).getCol(1).getWidth()).should_be(40);
-        value_of(ctrl.getRow(3).getCol(2).getWidth()).should_be(40);
-        value_of(ctrl.getRow(3).getCol(3).getWidth()).should_be(40);
+        control.removeColumn(1);
+        value_of(control.getRow(0).getCell(0).getWidth()).should_be(120);
+        value_of(control.getRow(0).getCell(2).getWidth()).should_be(80);
+        value_of(control.getRow(1).getCell(0).getWidth()).should_be(80);
+        value_of(control.getRow(1).getCell(1).getWidth()).should_be(80);
+        value_of(control.getRow(1).getCell(3).getWidth()).should_be(40);
+        value_of(control.getRow(2).getCell(0).getWidth()).should_be(80);
+        value_of(control.getRow(2).getCell(3).getWidth()).should_be(40);
+        value_of(control.getRow(3).getCell(0).getWidth()).should_be(80);
+        value_of(control.getRow(3).getCell(1).getWidth()).should_be(40);
+        value_of(control.getRow(3).getCell(2).getWidth()).should_be(40);
+        value_of(control.getRow(3).getCell(3).getWidth()).should_be(40);
 
-        ctrl.addCol({width: 40, base: 'custom', title: 'new'}, 2);
-        value_of(ctrl.getRow(0).getCol(0).getWidth()).should_be(120);
-        value_of(ctrl.getRow(0).getCol(2).getWidth()).should_be(40);
-        value_of(ctrl.getRow(0).getCol(3).getWidth()).should_be(80);
-        value_of(ctrl.getRow(1).getCol(0).getWidth()).should_be(80);
-        value_of(ctrl.getRow(1).getCol(1).getWidth()).should_be(120);
-        value_of(ctrl.getRow(1).getCol(4).getWidth()).should_be(40);
-        value_of(ctrl.getRow(2).getCol(0).getWidth()).should_be(80);
-        value_of(ctrl.getRow(2).getCol(2)).should_be(null);
-        value_of(ctrl.getRow(2).getCol(4).getWidth()).should_be(40);
-        value_of(ctrl.getRow(3).getCol(0).getWidth()).should_be(80);
-        value_of(ctrl.getRow(3).getCol(1).getWidth()).should_be(40);
-        value_of(ctrl.getRow(3).getCol(2).getWidth()).should_be(40);
-        value_of(ctrl.getRow(3).getCol(3).getWidth()).should_be(40);
-        value_of(ctrl.getRow(3).getCol(4).getWidth()).should_be(40);
+        control.addColumn({width: 40, base: 'custom', title: 'new'}, 2);
+        value_of(control.getRow(0).getCell(0).getWidth()).should_be(120);
+        value_of(control.getRow(0).getCell(2).getWidth()).should_be(40);
+        value_of(control.getRow(0).getCell(3).getWidth()).should_be(80);
+        value_of(control.getRow(1).getCell(0).getWidth()).should_be(80);
+        value_of(control.getRow(1).getCell(1).getWidth()).should_be(120);
+        value_of(control.getRow(1).getCell(4).getWidth()).should_be(40);
+        value_of(control.getRow(2).getCell(0).getWidth()).should_be(80);
+        value_of(control.getRow(2).getCell(2)).should_be(null);
+        value_of(control.getRow(2).getCell(4).getWidth()).should_be(40);
+        value_of(control.getRow(3).getCell(0).getWidth()).should_be(80);
+        value_of(control.getRow(3).getCell(1).getWidth()).should_be(40);
+        value_of(control.getRow(3).getCell(2).getWidth()).should_be(40);
+        value_of(control.getRow(3).getCell(3).getWidth()).should_be(40);
+        value_of(control.getRow(3).getCell(4).getWidth()).should_be(40);
 
-        ctrl.removeCol(1);
-        value_of(ctrl.getRow(0).getCol(0).getWidth()).should_be(80);
-        value_of(ctrl.getRow(0).getCol(1).getWidth()).should_be(40);
-        value_of(ctrl.getRow(0).getCol(2).getWidth()).should_be(80);
-        value_of(ctrl.getRow(1).getCol(0).getWidth()).should_be(80);
-        value_of(ctrl.getRow(1).getCol(1).getWidth()).should_be(80);
-        value_of(ctrl.getRow(1).getCol(3).getWidth()).should_be(40);
-        value_of(ctrl.getRow(2).getCol(0).getWidth()).should_be(80);
-        value_of(ctrl.getRow(2).getCol(3).getWidth()).should_be(40);
-        value_of(ctrl.getRow(3).getCol(0).getWidth()).should_be(80);
-        value_of(ctrl.getRow(3).getCol(1).getWidth()).should_be(40);
-        value_of(ctrl.getRow(3).getCol(2).getWidth()).should_be(40);
-        value_of(ctrl.getRow(3).getCol(3).getWidth()).should_be(40);
+        control.removeColumn(1);
+        value_of(control.getRow(0).getCell(0).getWidth()).should_be(80);
+        value_of(control.getRow(0).getCell(1).getWidth()).should_be(40);
+        value_of(control.getRow(0).getCell(2).getWidth()).should_be(80);
+        value_of(control.getRow(1).getCell(0).getWidth()).should_be(80);
+        value_of(control.getRow(1).getCell(1).getWidth()).should_be(80);
+        value_of(control.getRow(1).getCell(3).getWidth()).should_be(40);
+        value_of(control.getRow(2).getCell(0).getWidth()).should_be(80);
+        value_of(control.getRow(2).getCell(3).getWidth()).should_be(40);
+        value_of(control.getRow(3).getCell(0).getWidth()).should_be(80);
+        value_of(control.getRow(3).getCell(1).getWidth()).should_be(40);
+        value_of(control.getRow(3).getCell(2).getWidth()).should_be(40);
+        value_of(control.getRow(3).getCell(3).getWidth()).should_be(40);
 
-        ctrl.removeCol(1);
-        value_of(ctrl.getRow(0).getCol(0).getWidth()).should_be(80);
-        value_of(ctrl.getRow(0).getCol(1).getWidth()).should_be(80);
-        value_of(ctrl.getRow(1).getCol(0).getWidth()).should_be(80);
-        value_of(ctrl.getRow(1).getCol(1).getWidth()).should_be(40);
-        value_of(ctrl.getRow(1).getCol(2).getWidth()).should_be(40);
-        value_of(ctrl.getRow(2).getCol(0).getWidth()).should_be(80);
-        value_of(ctrl.getRow(2).getCol(2).getWidth()).should_be(40);
-        value_of(ctrl.getRow(3).getCol(0).getWidth()).should_be(80);
-        value_of(ctrl.getRow(3).getCol(1).getWidth()).should_be(40);
-        value_of(ctrl.getRow(3).getCol(2).getWidth()).should_be(40);
+        control.removeColumn(1);
+        value_of(control.getRow(0).getCell(0).getWidth()).should_be(80);
+        value_of(control.getRow(0).getCell(1).getWidth()).should_be(80);
+        value_of(control.getRow(1).getCell(0).getWidth()).should_be(80);
+        value_of(control.getRow(1).getCell(1).getWidth()).should_be(40);
+        value_of(control.getRow(1).getCell(2).getWidth()).should_be(40);
+        value_of(control.getRow(2).getCell(0).getWidth()).should_be(80);
+        value_of(control.getRow(2).getCell(2).getWidth()).should_be(40);
+        value_of(control.getRow(3).getCell(0).getWidth()).should_be(80);
+        value_of(control.getRow(3).getCell(1).getWidth()).should_be(40);
+        value_of(control.getRow(3).getCell(2).getWidth()).should_be(40);
 
-        ctrl.setParent();
-        ecui.dispose(ctrl);
+        control.setParent();
+        ecui.dispose(control);
     },
 
     '增加/删除行，普通操作(addRow/removeRow)': function () {
@@ -247,30 +245,30 @@ describe('表格功能测试', {
         el.innerHTML = '<table cellspacing="0" cellpadding="0"><tr><td style="width:80px"></td>'
             + '<td style="width:40px"></td><td style="width:40px"></td><td style="width:40px"></td></tr>'
             + '<tr><td></td><td></td><td></td><td></td></tr></table>';
-        var ctrl = ecui.create('Table', {element: el, parent: document.body, crossCell: true});
+        var control = ecui.create('Table', {main: el, parent: document.body, crossCell: true});
 
-        ctrl.addRow(['1', '2', '3', '4'], 1);
-        value_of(ctrl.getCell(1, 0).getBase().innerHTML).should_be('1');
-        value_of(ctrl.getCell(1, 1).getBase().innerHTML).should_be('2');
-        value_of(ctrl.getCell(1, 2).getBase().innerHTML).should_be('3');
-        value_of(ctrl.getCell(1, 3).getBase().innerHTML).should_be('4');
-        value_of(ctrl.getRow(0).getCol(0).getWidth()).should_be(80);
-        value_of(ctrl.getRow(0).getCol(1).getWidth()).should_be(40);
-        value_of(ctrl.getRow(0).getCol(2).getWidth()).should_be(40);
-        value_of(ctrl.getRow(0).getCol(3).getWidth()).should_be(40);
-        value_of(ctrl.getRow(1).getCol(0).getWidth()).should_be(80);
-        value_of(ctrl.getRow(1).getCol(1).getWidth()).should_be(40);
-        value_of(ctrl.getRow(1).getCol(2).getWidth()).should_be(40);
-        value_of(ctrl.getRow(1).getCol(3).getWidth()).should_be(40);
+        control.addRow(['1', '2', '3', '4'], 1);
+        value_of(control.getCell(1, 0).getMain().innerHTML).should_be('1');
+        value_of(control.getCell(1, 1).getMain().innerHTML).should_be('2');
+        value_of(control.getCell(1, 2).getMain().innerHTML).should_be('3');
+        value_of(control.getCell(1, 3).getMain().innerHTML).should_be('4');
+        value_of(control.getRow(0).getCell(0).getWidth()).should_be(80);
+        value_of(control.getRow(0).getCell(1).getWidth()).should_be(40);
+        value_of(control.getRow(0).getCell(2).getWidth()).should_be(40);
+        value_of(control.getRow(0).getCell(3).getWidth()).should_be(40);
+        value_of(control.getRow(1).getCell(0).getWidth()).should_be(80);
+        value_of(control.getRow(1).getCell(1).getWidth()).should_be(40);
+        value_of(control.getRow(1).getCell(2).getWidth()).should_be(40);
+        value_of(control.getRow(1).getCell(3).getWidth()).should_be(40);
 
-        ctrl.removeRow(0);
-        value_of(ctrl.getCell(0, 0).getBase().innerHTML).should_be('1');
-        value_of(ctrl.getCell(0, 1).getBase().innerHTML).should_be('2');
-        value_of(ctrl.getCell(0, 2).getBase().innerHTML).should_be('3');
-        value_of(ctrl.getCell(0, 3).getBase().innerHTML).should_be('4');
+        control.removeRow(0);
+        value_of(control.getCell(0, 0).getMain().innerHTML).should_be('1');
+        value_of(control.getCell(0, 1).getMain().innerHTML).should_be('2');
+        value_of(control.getCell(0, 2).getMain().innerHTML).should_be('3');
+        value_of(control.getCell(0, 3).getMain().innerHTML).should_be('4');
 
-        ctrl.setParent();
-        ecui.dispose(ctrl);
+        control.setParent();
+        ecui.dispose(control);
     },
 
     '增加行，跨行跨列增加(addRow)': function () {
@@ -279,24 +277,24 @@ describe('表格功能测试', {
         el.innerHTML = '<table cellspacing="0" cellpadding="0"><tr><td style="width:80px"></td>'
             + '<td style="width:40px"></td><td style="width:40px"></td><td style="width:40px"></td></tr>'
             + '<tr><td></td><td></td><td></td><td></td></tr></table>';
-        var ctrl = ecui.create('Table', {element: el, parent: document.body, crossCell: true});
+        var control = ecui.create('Table', {main: el, parent: document.body, crossCell: true});
 
-        ctrl.addRow(['1', '2', false, '4'], 1);
-        value_of(ctrl.getRow(1).getCol(0).getWidth()).should_be(80);
-        value_of(ctrl.getRow(1).getCol(1).getWidth()).should_be(40);
-        value_of(ctrl.getRow(1).getCol(2)).should_be(null);
-        value_of(ctrl.getRow(1).getCol(3).getWidth()).should_be(40);
-        value_of(ctrl.getRow(0).getCol(2).getBase().getAttribute('rowSpan')).should_be('2');
+        control.addRow(['1', '2', false, '4'], 1);
+        value_of(control.getRow(1).getCell(0).getWidth()).should_be(80);
+        value_of(control.getRow(1).getCell(1).getWidth()).should_be(40);
+        value_of(control.getRow(1).getCell(2)).should_be(null);
+        value_of(control.getRow(1).getCell(3).getWidth()).should_be(40);
+        value_of(control.getRow(0).getCell(2).getMain().getAttribute('rowSpan')).should_be('2');
 
-        ctrl.addRow(['1', '2', null, '4'], 2);
-        value_of(ctrl.getRow(2).getCol(0).getWidth()).should_be(80);
-        value_of(ctrl.getRow(2).getCol(1).getWidth()).should_be(80);
-        value_of(ctrl.getRow(2).getCol(2)).should_be(null);
-        value_of(ctrl.getRow(2).getCol(3).getWidth()).should_be(40);
-        value_of(ctrl.getRow(2).getCol(1).getBase().getAttribute('colSpan')).should_be('2');
+        control.addRow(['1', '2', null, '4'], 2);
+        value_of(control.getRow(2).getCell(0).getWidth()).should_be(80);
+        value_of(control.getRow(2).getCell(1).getWidth()).should_be(80);
+        value_of(control.getRow(2).getCell(2)).should_be(null);
+        value_of(control.getRow(2).getCell(3).getWidth()).should_be(40);
+        value_of(control.getRow(2).getCell(1).getMain().getAttribute('colSpan')).should_be('2');
 
-        ctrl.setParent();
-        ecui.dispose(ctrl);
+        control.setParent();
+        ecui.dispose(control);
     },
 
     '增加/删除行，在跨行的两行之间(addRow/removeRow)': function () {
@@ -306,95 +304,105 @@ describe('表格功能测试', {
             + '<td style="width:40px"></td><td style="width:40px"></td><td style="width:40px"></td></tr>'
             + '<tr><td></td><td></td><td rowspan="2"></td><td></td></tr>'
             + '<tr><td></td><td></td><td></td></tr></table>';
-        var ctrl = ecui.create('Table', {element: el, parent: document.body, crossCell: true});
+        var control = ecui.create('Table', {main: el, parent: document.body, crossCell: true});
 
-        ctrl.addRow(['1', '2', '3', '4'], 1);
-        value_of(ctrl.getRow(1).getCol(0).getWidth()).should_be(80);
-        value_of(ctrl.getRow(1).getCol(1).getWidth()).should_be(40);
-        value_of(ctrl.getRow(1).getCol(2)).should_be(null);
-        value_of(ctrl.getRow(1).getCol(3).getWidth()).should_be(40);
-        value_of(ctrl.getRow(0).getCol(2).getBase().getAttribute('rowSpan')).should_be('3');
+        control.addRow(['1', '2', '3', '4'], 1);
+        value_of(control.getRow(1).getCell(0).getWidth()).should_be(80);
+        value_of(control.getRow(1).getCell(1).getWidth()).should_be(40);
+        value_of(control.getRow(1).getCell(2)).should_be(null);
+        value_of(control.getRow(1).getCell(3).getWidth()).should_be(40);
+        value_of(control.getRow(0).getCell(2).getMain().getAttribute('rowSpan')).should_be('3');
 
-        ctrl.removeRow(1);
-        value_of(ctrl.getRow(0).getCol(2).getBase().getAttribute('rowSpan')).should_be('2');
+        control.removeRow(1);
+        value_of(control.getRow(0).getCell(2).getMain().getAttribute('rowSpan')).should_be('2');
 
-        ctrl.addRow(['1', '2', '3', '4'], 1);
-        ctrl.removeRow(0);
-        value_of(ctrl.getRow(0).getCol(2).getBase().getAttribute('rowSpan')).should_be('2');
+        control.addRow(['1', '2', '3', '4'], 1);
+        control.removeRow(0);
+        value_of(control.getRow(0).getCell(2).getMain().getAttribute('rowSpan')).should_be('2');
 
-        ctrl.setParent();
-        ecui.dispose(ctrl);
-    }/*,
+        control.setParent();
+        ecui.dispose(control);
+    },
 
     '行/单元格事件': function () {
         var el = document.createElement('div');
         el.style.cssText = 'width:200px;height:300px';
-        el.innerHTML = '<table cellspacing="0" cellpadding="0"><tr><td style="width:80px"></td>'
-            + '<td style="width:40px"></td><td style="width:40px"></td><td style="width:40px"></td></tr>'
-            + '<tr><td></td><td></td><td></td><td></td></tr></table>';
-        var ctrl = ecui.create('Table', {element: el, parent: document.body, crossCell: true}),
-            el = ctrl.getCell(0, 0).getBase(),
+        el.innerHTML = '<table cellspacing="0" cellpadding="0"><tr><td style="width:80px">&nbsp;</td>'
+            + '<td style="width:40px">&nbsp;</td><td style="width:40px">&nbsp;</td><td style="width:40px">&nbsp;</td></tr>'
+            + '<tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr></table>';
+        var control = ecui.create('Table', {main: el, parent: document.body, crossCell: true}),
+            el = control.getCell(0, 0).getMain(),
             result = [];
 
-        ctrl.onrowdown = function () {
+        control.onrowdown = function () {
             result.push('rowdown');
         };
 
-        ctrl.onrowover = function () {
+        control.onrowover = function () {
             result.push('rowover');
         };
 
-        ctrl.onrowmove = function () {
+        control.onrowmove = function () {
             result.push('rowmove');
         };
 
-        ctrl.onrowout = function () {
+        control.onrowout = function () {
             result.push('rowout');
         };
 
-        ctrl.onrowup = function () {
+        control.onrowup = function () {
             result.push('rowup');
         };
 
-        ctrl.onrowclick = function () {
+        control.onrowclick = function () {
             result.push('rowclick');
         };
 
-        ctrl.oncelldown = function () {
+        control.onrowdblclick = function () {
+            result.push('rowdblclick');
+        };
+
+        control.oncelldown = function () {
             result.push('celldown');
         };
 
-        ctrl.oncellover = function () {
+        control.oncellover = function () {
             result.push('cellover');
         };
 
-        ctrl.oncellmove = function () {
+        control.oncellmove = function () {
             result.push('cellmove');
         };
 
-        ctrl.oncellout = function () {
+        control.oncellout = function () {
             result.push('cellout');
         };
 
-        ctrl.oncellup = function () {
+        control.oncellup = function () {
             result.push('cellup');
         };
 
-        ctrl.oncellclick = function () {
+        control.oncellclick = function () {
             result.push('cellclick');
+        };
+
+        control.oncelldblclick = function () {
+            result.push('celldblclick');
         };
 
         uiut.MockEvents.mouseover(el);
         uiut.MockEvents.mousedown(el);
         uiut.MockEvents.mousemove(el);
         uiut.MockEvents.mouseup(el);
+        uiut.MockEvents.mousedown(el);
+        uiut.MockEvents.mouseup(el);
         uiut.MockEvents.mouseout(el);
         uiut.MockEvents.mouseover(document.body);
         value_of(result).should_be(
-            ['cellover', 'rowover', 'celldown', 'rowdown', 'cellmove', 'rowmove', 'cellup', 'rowup', 'cellclick', 'cellout', 'rowout']
+            ['cellover', 'rowover', 'celldown', 'rowdown', 'cellmove', 'rowmove', 'cellup', 'rowup', 'cellclick', 'rowclick', 'celldown', 'rowdown', 'cellup', 'rowup', 'cellclick', 'rowclick', 'celldblclick', 'rowdblclick', 'cellout', 'rowout']
         );
 
-        ctrl.setParent();
-        ecui.dispose(ctrl);
-    }*/
+        control.setParent();
+        ecui.dispose(control);
+    }
 })

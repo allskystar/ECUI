@@ -151,7 +151,7 @@
 
         eventNames = [
             'mousedown', 'mouseover', 'mousemove', 'mouseout', 'mouseup',
-            'click', 'focus', 'blur', 'activate', 'deactivate',
+            'click', 'dblclick', 'focus', 'blur', 'activate', 'deactivate',
             'keydown', 'keypress', 'keyup', 'mousewheel'
         ];
 //{else}//
@@ -199,6 +199,8 @@
             mouseX,                   // 当前鼠标光标的X轴坐标
             mouseY,                   // 当前鼠标光标的Y轴坐标
             keyCode = 0,              // 当前键盘按下的键值，解决keypress与keyup中得不到特殊按键的keyCode的问题
+            lastClickTime,            // 上一次产生点击事件的时间
+            lastClickControl,         // 上一次产生点击事件的控件
 
             status,                   // 框架当前状态
             allControls = [],         // 全部生成的控件，供释放控件占用的内存使用
@@ -266,16 +268,18 @@
 
                 // 鼠标移入的处理，需要计算是不是位于当前移入的控件之外，如果是需要触发移出事件
                 mouseover: function (event) {
-                    event = wrapEvent(event);
+                    if (currEnv.type != 'drag' && currEnv.type != 'zoom') {
+                        event = wrapEvent(event);
 
-                    //__transform__control_o
-                    var control = event.getControl(),
-                        parent = getCommonParent(control, hoveredControl);
+                        //__transform__control_o
+                        var control = event.getControl(),
+                            parent = getCommonParent(control, hoveredControl);
 
-                    bubble(hoveredControl, 'mouseout', event, parent);
-                    bubble(control, 'mouseover', event, parent);
+                        bubble(hoveredControl, 'mouseout', event, parent);
+                        bubble(control, 'mouseover', event, parent);
 
-                    hoveredControl = control;
+                        hoveredControl = control;
+                    }
                 },
 
                 mousemove: function (event) {
@@ -291,14 +295,25 @@
                     event = wrapEvent(event);
 
                     //__transform__control_o
-                    var control = event.getControl();
+                    var control = event.getControl(),
+                        commonParent;
 
                     bubble(control, 'mouseup', event);
 
                     if (activedControl) {
+                        commonParent = getCommonParent(control, activedControl);
                         // 点击事件在同时响应鼠标按下与弹起周期的控件上触发
                         // 模拟点击事件是为了解决控件的 Element 进行了 remove/append 操作后 click 事件不触发的问题
-                        bubble(getCommonParent(control, activedControl), 'click', event);
+                        if (lastClickTime > new DATE().getTime() - 200 && lastClickControl == control) {
+                            bubble(commonParent, 'click', event);
+                            bubble(commonParent, 'dblclick', event);
+                            lastClickTime = lastClickControl = null;
+                        }
+                        else {
+                            bubble(commonParent, 'click', event);
+                            lastClickTime = new DATE().getTime();
+                            lastClickControl = control;
+                        }
                         bubble(activedControl, 'deactivate', event);
                         activedControl = null;
                     }
@@ -337,6 +352,7 @@
                     activedControl = currEnv.actived;
                     restore();
 
+                    currEnv.mouseover(event);
                     currEnv.mouseup(event);
                 }
             },
@@ -351,6 +367,8 @@
                     var target = currEnv.target,
                         env = currEnv,
                         control = event.getControl();
+
+                    lastClickTime = lastClickControl = null;
 
                     if (!isScrollClick(event)) {
                         if (control && !control.isFocusable()) {
@@ -420,6 +438,7 @@
                     restore();
 
                     repaint();
+                    currEnv.mouseover(event);
                     currEnv.mouseup(event);
                 }
             },
@@ -1065,7 +1084,6 @@
                     options.main = el;
                     // 以下使用 el 替代 control
                     if (o = options.type) {
-                        delete options.type;
                         list.push(
                             el = $create(
                                 ui[toCamelCase(o.charAt(0).toUpperCase() + o.slice(1))],
@@ -1073,16 +1091,12 @@
                             )
                         );
                     }
-                    for (o in plugins) {
-                        if (options[o]) {
-                            plugins[o](el, options[o]);
+                    else {
+                        for (o in plugins) {
+                            if (options[o]) {
+                                plugins[o](el, options[o]);
+                            }
                         }
-//{if 0}//
-                        if (el instanceof ui.Control && el['$init' + o]) {
-                            el['$init' + o](options);
-                        }
-//{else}//                        el instanceof UI_CONTROL && el['$init' + o] && el['$init' + o](options);
-//{/if}//
                     }
                 }
             }
@@ -1378,6 +1392,8 @@
             currEnv.dblclick = function (event) {
                 currEnv.mousedown(event);
                 currEnv.mouseup(event);
+                currEnv.mousedown(event);
+                currEnv.mouseup(event);
             };
 
             // IE下取消对文字的选择不能仅通过 mousedown 事件进行
@@ -1492,8 +1508,8 @@
             event = event || new UI_EVENT(type);
             event.cancelBubble = false;
             for (; start != end; start = start.getParent()) {
-                triggerEvent(start, type, event);
                 event.returnValue = undefined;
+                triggerEvent(start, type, event);
                 if (event.cancelBubble) {
                     return;
                 }
@@ -1622,13 +1638,26 @@
                     WINDOW[options.id] = control;
                 }
             }
+
+            for (var o in plugins) {
+                if (options[o]) {
+                    plugins[o](control, options[o]);
+                }
+                if (o = control['$init' + o.charAt(0).toUpperCase() + toCamelCase(o.slice(1))]) {
+                    o.call(control, options);
+                }
+            }
         }
 
         /**
          * 窗体滚动时的事件处理。
          * @private
          */
-        function onscroll() {
+        function onscroll(event) {
+            event = wrapEvent(event);
+            for (var i = 0, o; o = independentControls[i++]; ) {
+                triggerEvent(o, 'pagescroll', event);
+            }
             mask(true);
         }
 

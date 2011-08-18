@@ -130,8 +130,8 @@ test('$connect', {
 test('create', {
     '不设置参数': function () {
         var control = ecui.create(ecui.ui.Control);
-        value_of(control.getTypes()).should_be(['ui-control']);
-        value_of(control.getPrimary()).should_be('ui-control');
+        value_of(control.getTypes()).should_be([]);
+        value_of(control.getPrimary()).should_be('');
         ecui.dispose(control);
     },
 
@@ -156,7 +156,7 @@ test('create', {
         el = el.firstChild;
 
         var control = ecui.create(ecui.ui.Control, {main: el});
-        value_of(control.getTypes()).should_be(['ui-control']);
+        value_of(control.getTypes()).should_be([]);
         value_of(control.getPrimary()).should_be('first');
         value_of(control.getParent()).should_be(ecui.get('child'));
         ecui.dispose(control);
@@ -173,7 +173,7 @@ test('create', {
         };
 
         var control = ecui.create(ecui.ui.Control, {main: el});
-        value_of(control.getTypes()).should_be(['ui-control']);
+        value_of(control.getTypes()).should_be([]);
         value_of(control.getPrimary()).should_be('first');
         value_of(control.getParent()).should_be(ecui.get('child'));
         value_of(result).should_be(['create']);
@@ -372,7 +372,7 @@ test('init', {
         value_of(child.getParent()).should_be(parent);
         value_of(ecui.query().length - 2).should_be(length);
         value_of(parent.getPrimary()).should_be('parent');
-        value_of(parent.getTypes()).should_be(['ui-control']);
+        value_of(parent.getTypes()).should_be([]);
     }
 });
 

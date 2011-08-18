@@ -59,7 +59,7 @@ _cJoint      - 行(锁定行)对应的锁定行(行)控件
 
         eventNames = [
             'mousedown', 'mouseover', 'mousemove', 'mouseout', 'mouseup',
-            'click', 'focus', 'blur', 'activate', 'deactivate',
+            'click', 'dblclick', 'focus', 'blur', 'activate', 'deactivate',
             'keydown', 'keypress', 'keyup', 'mousewheel'
         ];
 
@@ -418,7 +418,7 @@ _cJoint      - 行(锁定行)对应的锁定行(行)控件
             };
         }
 
-        for (var i = 0; i < 10; ) {
+        for (var i = 0; i < 11; ) {
             build('$' + eventNames[i++]);
         }
     })();

@@ -1051,8 +1051,7 @@
 
         {
             "name": "$resize",
-            "desc": "控件大小变化事件的默认处理。",
-            "event": 1
+            "desc": "控件大小变化事件的默认处理。"
         },
 
         {
@@ -1370,7 +1369,7 @@
         {
             "name": "render",
             "desc": "控件完全刷新。",
-            "remark": "对于存在数据源的控件，render 方法根据数据源重新填充控件内容，重新计算控件的大小进行完全的重绘，render 方法不会触发 {'onresize'|event:'control'} 事件。"
+            "remark": "对于存在数据源的控件，render 方法根据数据源重新填充控件内容，重新计算控件的大小进行完全的重绘。"
         },
 
         {
@@ -1382,7 +1381,7 @@
         {
             "name": "resize",
             "desc": "控件重置大小并刷新。",
-            "remark": "resize 方法重新计算并设置控件的大小，resize 方法触发 {'onresize'|event:'control'} 事件，如果事件返回值不为 false，则调用 {'\\$resize'|method:'control'} 方法按默认的方式重绘控件。因为浏览器可视化区域发生变化时，可能需要改变控件大小，框架会自动调用控件的 resize 方法。"
+            "remark": "resize 方法重新计算并设置控件的大小，浏览器可视化区域发生变化时，可能需要改变控件大小，框架会自动调用控件的 resize 方法。"
         },
 
         {
@@ -2075,11 +2074,6 @@
 
     "tree-view": [
         {
-            "name": "$cache",
-            "desc": "无效，树视图控件禁止设置大小。"
-        },
-
-        {
             "name": "$click",
             "remark": "控件点击时改变子树视图控件的显示/隐藏状态。"
         },
@@ -2090,18 +2084,8 @@
         },
 
         {
-            "name": "$resize",
-            "desc": "无效，树视图控件禁止设置大小。"
-        },
-
-        {
             "name": "$setParent",
             "remark": "树视图控件改变位置时，需要将自己的子树区域显示在主元素之后。"
-        },
-
-        {
-            "name": "$setSize",
-            "desc": "无效，树视图控件禁止设置大小。"
         },
 
         {
@@ -2216,6 +2200,139 @@
             "params": [
                 {"name": "year", "type": "number", "desc": "年份(19xx-20xx)，如果省略使用浏览器的当前年份"},
                 {"name": "month", "type": "number", "desc": "月份(1-12)，如果省略使用浏览器的当前月份"}
+            ]
+        }
+    ],
+
+    "table": [
+        {
+            "name": "$getElement",
+            "desc": "获取单元格主元素。",
+            "params": [
+                {"name": "rowIndex", "type": "number", "desc": "单元格的行数，从0开始"},
+                {"name": "colIndex", "type": "number", "desc": "单元格的列数，从0开始"}
+            ],
+            "return": {"type": "HTMLElement", "desc": "单元格主元素对象"},
+            "remark": "$getElement 方法在合法的行列序号内一定会返回一个 Element 对象，如果当前单元格被合并，将返回合并后的 Element 对象。"
+        },
+
+        {
+            "name": "$getElements",
+            "owner": "ecui.ui.Table.Row",
+            "desc": "获取一行内所有单元格的主元素。",
+            "return": {"type": "Array", "desc": "主元素数组"},
+            "remark": "$getElement 方法返回的主元素数组可能包含 false/null 值，分别表示当前单元格被向上或者向左合并。"
+        },
+
+        {
+            "name": "$setStyles",
+            "owner": "ecui.ui.Table.Column",
+            "desc": "设置整列的样式。",
+            "params": [
+                {"name": "name", "type": "string", "desc": "样式的名称"},
+                {"name": "value", "type": "string", "desc": "样式的值"},
+                {"name": "widthRevise", "type": "string", "desc": "改变样式后表格宽度的变化，如果省略表示没有变化"}
+            ],
+            "remark": "$setStyles 方法批量设置一列所有单元格的样式。"
+        },
+
+        {
+            "name": "addCol",
+            "desc": "新增一列。",
+            "params": [
+                {"name": "options", "type": "列的初始化选项"},
+                {"name": "index", "type": "number", "desc": "被添加的列的位置序号，如果不合法将添加在末尾"}
+            ],
+            "return": {"type": "ecui.ui.Table.Column", "desc": "列控件"},
+            "remark": [
+                "options 对象支持的属性如下：",
+                "<table class=\"clsSTD\"><tr><td>width</td><td>number，列的宽度</td></tr><tr><td>primary</td><td>string，列的基本样式</td></tr><tr><td>title</td><td>string，列的标题</td></tr></table>"
+            ]
+        },
+
+        {
+            "name": "addRow",
+            "desc": "新增一行。",
+            "params": [
+                {"name": "data", "type": "Array", "desc": "数据源(一维数组)"},
+                {"name": "index", "type": "number", "desc": "被添加的行的位置序号，如果不合法将添加在最后"}
+            ],
+            "return": {"type": "ecui.ui.Table.Row", "desc": "行控件"}
+        },
+
+        {
+            "name": "getCell",
+            "desc": "获取单元格控件。",
+            "syntax": "<i>ecui.ui.Table.Cell</i> = <i>ecui.ui.Table.</i><b>getCell(</b><i>rowIndex</i>, <i>colIndex</i><b>)</b></pre><pre class=\"clsSyntax\"><i>ecui.ui.Table.Cell</i> = <i>ecui.ui.Table.Row.</i><b>getCell(</b><i>colIndex</i><b>)</b></pre><pre class=\"clsSyntax\"><i>ecui.ui.Table.Cell</i> = <i>ecui.ui.Table.Column.</i><b>getCell(</b><i>rowIndex</i><b>)</b>",
+            "params": [
+                {"name": "rowIndex", "type": "number", "desc": "行序号，从0开始"},
+                {"name": "colIndex", "type": "number", "desc": "列序号，从0开始"}
+            ],
+            "return": {"type": "ecui.ui.Table.Cell", "desc": "单元格控件"}
+        },
+
+        {
+            "name": "getCells",
+            "syntax": "<i>Array</i> = <i>ecui.ui.Table.Row.</i><b>getCells()</b></pre><pre class=\"clsSyntax\"><i>Array</i> = <i>ecui.ui.Table.Column.</i><b>getCells()</b>",
+            "desc": "获取全部单元格控件。",
+            "return": {"type": "Array", "desc": "单元格控件数组"}
+        },
+
+        {
+            "name": "getColumn",
+            "desc": "获取列控件。",
+            "params": [
+                {"name": "index", "type": "number", "desc": "列序号，从0开始"}
+            ],
+            "return": {"type": "ecui.ui.Table.Column", "desc": "列控件"}
+        },
+
+        {
+            "name": "getColumnCount",
+            "desc": "获取列控件的数量。",
+            "return": {"type": "number", "desc": "列控件数量"}
+        },
+
+        {
+            "name": "getColumns",
+            "desc": "获取全部的列控件。",
+            "return": {"type": "Array", "desc": "列控件数组"}
+        },
+
+        {
+            "name": "getRow",
+            "desc": "获取行控件。",
+            "params": [
+                {"name": "index", "type": "number", "desc": "行序号，从0开始"}
+            ],
+            "return": {"type": "ecui.ui.Table.Row", "desc": "行控件"}
+        },
+
+        {
+            "name": "getRowCount",
+            "desc": "获取行控件的数量。",
+            "return": {"type": "number", "desc": "行控件数量"}
+        },
+
+        {
+            "name": "getRows",
+            "desc": "获取全部的行控件。",
+            "return": {"type": "Array", "desc": "行控件列表"}
+        },
+
+        {
+            "name": "removeColumn",
+            "desc": "移除一列并释放占用的空间。",
+            "params": [
+                {"name": "index", "type": "number", "desc": "列序号，从0开始计数"}
+            ]
+        },
+
+        {
+            "name": "removeRow",
+            "desc": "移除一行并释放占用的空间。",
+            "params": [
+                {"name": "index", "type": "number", "desc": "行序号，从0开始计数"}
             ]
         }
     ],
@@ -2366,214 +2483,6 @@
             "params": [
                 {"name": "status", "type": "boolean", "desc": "是否选中当前树视图控件复选框"}
             ]
-        }
-    ],
-
-    "table": [
-        {
-            "name": "$getCell",
-            "owner": "ecui.ui.Table",
-            "desc": "获取单元格元素。",
-            "params": [
-                {"name": "rowIndex", "type": "number", "desc": "单元格的行数，从0开始"},
-                {"name": "colIndex", "type": "number", "desc": "单元格的列数，从0开始"}
-            ],
-            "return": {"type": "HTMLElement", "desc": "单元格 Element 对象"},
-            "remark": "$getCell 方法在合法的行列序号内一定会返回一个 Element 对象，如果当前单元格被合并，将返回合并后的 Element 对象。"
-        },
-
-        {
-            "name": "$getCols",
-            "owner": "ecui.ui.Table.Row",
-            "desc": "获取一行中单元格的 Element 对象数组。",
-            "return": {"type": "Array", "desc": "单元格的 Element 对象数组"}
-        },
-
-/*        {
-            "name": "$initRow",
-            "desc": "初始化一行的数据。",
-            "params": [
-                {"name": "row", "type": "HTMLElement", "desc": "一行的DIV对象"},
-                {"name": "index", "type": "number", "desc": "行的序列号"}
-            ],
-            "return": {"type": "ecui.ui.Table.Row", "desc": "行控件"}
-        },
-*/
-        {
-            "name": "$setStyles",
-            "owner": "ecui.ui.Table.Col",
-            "desc": "设置整列的样式。",
-            "params": [
-                {"name": "name", "type": "string", "desc": "样式的名称"},
-                {"name": "value", "type": "string", "desc": "样式的值"},
-                {"name": "widthRevise", "type": "string", "desc": "改变样式后表格宽度的变化，如果省略表示没有变化"}
-            ],
-            "remark": "$setStyles 方法批量设置一列所有单元格的样式，但不包括表头的单元格。"
-        },
-
-        {
-            "name": "addCol",
-            "desc": "新增一列。",
-            "params": [
-                {"name": "options", "type": "列的初始化选项"},
-                {"name": "index", "type": "number", "desc": "被添加的列的位置序号，如果不合法将添加在末尾"}
-            ],
-            "return": {"type": "ecui.ui.Table.Col", "desc": "列控件"},
-            "remark": [
-                "options 对象支持的属性如下：",
-                "<table class=\"clsSTD\"><tr><td>width</td><td>number，列的宽度</td></tr><tr><td>primary</td><td>string，列的基本样式</td></tr><tr><td>title</td><td>string，列的标题</td></tr></table>"
-            ]
-        },
-
-        {
-            "name": "addRow",
-            "desc": "表格新增一行。",
-            "params": [
-                {"name": "data", "type": "Array", "desc": "数据源(一维数组)"},
-                {"name": "index", "type": "number", "desc": "被添加的行的位置序号，如果不合法将添加在最后"}
-            ]
-        },
-/*
-        {
-            "name": "addRows",
-            "desc": "表格新增多行。",
-            "params": [
-                {"name": "data", "type": "Array", "desc": "数据源(二维数组)"},
-                {"name": "index", "type": "number", "desc": "被添加的行的位置序号，如果不合法将添加在最后"}
-            ]
-        },
-
-        {
-            "name": "cancel",
-            "desc": "结束编辑状态，编辑的内容恢复编辑前的值。",
-            "remark": "当表格在编辑状态时，调用 cancel 方法会恢复编辑前的内容，如果需要保存编辑的内容，请使用 {'save'|method:'table'} 方法，如果表格没有处于编辑状态中，调用 cancel 方法没有任何作用。"
-        },
-
-        {
-            "name": "edit",
-            "owner": "ecui.ui.Table.Row",
-            "desc": "编辑当前行的内容。",
-            "remark": "edit 方法使表格进入编辑状态，需要使用 {'save'|method:'table'} 或者 {'cancel'|method:'table'} 方法来结束编辑状态。"
-        },
-*/
-        {
-            "name": "getCell",
-            "desc": "获取单元格控件。",
-            "params": [
-                {"name": "rowIndex", "type": "number", "desc": "单元格的行数，从0开始"},
-                {"name": "colIndex", "type": "number", "desc": "单元格的列数，从0开始"}
-            ],
-            "return": {"type": "ecui.ui.Control", "desc": "单元格控件"}
-        },
-
-        {
-            "name": "getCol",
-            "desc": "获取列控件/一行中的单元格控件。",
-            "syntax": "<i>ecui.ui.Table.Col</i> = <i>ecui.ui.Table.</i><b>getCol(</b><i>index</i><b>)</b></pre><pre class=\"clsSyntax\"><i>ecui.ui.Control</i> = <i>ecui.ui.Table.Row.</i><b>getCol(</b><i>index</i><b>)</b>",
-            "params": [
-                {"name": "index", "type": "number", "desc": "列数，从0开始"}
-            ],
-            "return": {"type": "ecui.ui.Table.Col", "desc": "列控件/单元格控件"},
-            "remark": "列控件只是通常的称呼，实际上就是普通的基础控件，提供了一些针对整列进行操作的方法，包括 {'hide'|method:'table'}、{'setSize'|method:'table'}(仅能设置宽度) 与 {'show'|method:'table'} 方法等。"
-        },
-
-        {
-            "name": "getColCount",
-            "desc": "获取列控件的数量。",
-            "return": {"type": "number", "desc": "列控件数量"}
-        },
-
-        {
-            "name": "getCols",
-            "desc": "获取全部的列控件/一行中的全部单元格控件。",
-            "syntax": "<i>Array</i> = <i>ecui.ui.Table.</i><b>getCols()</b></pre><pre class=\"clsSyntax\"><i>Array</i> = <i>ecui.ui.Table.Row.</i><b>getCols()</b>",
-            "return": {"type": "Array", "desc": "列控件数组/单元格控件数组"}
-        },
-
-        {
-            "name": "getRow",
-            "desc": "获取行控件。",
-            "params": [
-                {"name": "index", "type": "number", "desc": "行数，从0开始"}
-            ],
-            "return": {"type": "ecui.ui.Table.Row", "desc": "行控件"}
-        },
-
-        {
-            "name": "getColCount",
-            "desc": "获取行控件的数量。",
-            "return": {"type": "number", "desc": "行控件数量"}
-        },
-
-        {
-            "name": "getRows",
-            "desc": "获取表格中所有的行控件。",
-            "return": {"type": "Array", "desc": "行控件列表"}
-        },
-
-        {
-            "name": "hide",
-            "desc": "隐藏控件/隐藏一列。",
-            "syntax": "<i>boolean</i> = <i>ecui.ui.Table.</i><b>hide()</b></pre><pre class=\"clsSyntax\"><i>boolean</i> = <i>ecui.ui.Table.Col.</i><b>hide()</b>"
-        },
-
-        {
-            "name": "removeCol",
-            "desc": "表格移除一列。",
-            "params": [
-                {"name": "index", "type": "number", "desc": "列的序号，从0开始计数"}
-            ]
-        },
-
-        {
-            "name": "removeRow",
-            "desc": "移除一行并释放占用的空间。",
-            "params": [
-                {"name": "index", "type": "number", "desc": "行的序号，从0开始计数"}
-            ]
-        },
-/*
-        {
-            "name": "removeRows",
-            "desc": "表格移除所有的行。"
-        },
-
-        {
-            "name": "save",
-            "desc": "结束编辑状态，保存编辑的内容回写至表格控件中。",
-            "remark": "当表格在编辑状态时，调用 save 方法会保存编辑的内容，如果需要恢复编辑前的内容，请使用 {'cancel'|method:'table'} 方法，如果表格没有处于编辑状态中，调用 save 方法没有任何作用。"
-        },
-
-        {
-            "name": "setEditor",
-            "owner": "ecui.ui.Table.Col",
-            "desc": "设置指定列的编辑控件。",
-            "params": [
-                {"name": "editor", "type": "ecui.ui.Input", "desc": "编辑控件"}
-            ],
-            "remark": "需要编辑的列必须使用 setEditor 方法设置相应的编辑控件，在表格进入编辑状态时，编辑控件会出现在对应的单元格中。"
-        },
-
-        {
-            "name": "setEllipsis",
-            "owner": "ecui.ui.Table.Col",
-            "desc": "设置指定列是否为省略状态。",
-            "params": [
-                {"name": "status", "type": "boolean", "desc": "是否为省略状态"}
-            ],
-            "remark": "如果设置成省略状态，即当前列内容实际宽度超过列宽时，部分内容显示为省略号。"
-        },
-*/
-        {
-            "name": "setSize",
-            "desc": "设置控件的大小/设置整列的宽度。",
-            "syntax": "<i>boolean</i> = <i>ecui.ui.Table.</i><b>setSize(</b><i>width, height</i><b>)</b></pre><pre class=\"clsSyntax\"><i>boolean</i> = <i>ecui.ui.Table.Col.</i><b>setSize(</b><i>width</i><b>)</b>"
-        },
-
-        {
-            "name": "show",
-            "desc": "显示控件/显示一列。",
-            "syntax": "<i>boolean</i> = <i>ecui.ui.Table.</i><b>show()</b></pre><pre class=\"clsSyntax\"><i>boolean</i> = <i>ecui.ui.Table.Col.</i><b>show()</b>"
         }
     ],
 

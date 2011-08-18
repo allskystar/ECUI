@@ -69,7 +69,7 @@ _eInput  - INPUT对象
     var UI_INPUT_CONTROL = ui.InputControl =
         inheritsControl(
             UI_CONTROL,
-            'ui-input',
+            null,
             null,
             function (el, options) {
                 var input = el;

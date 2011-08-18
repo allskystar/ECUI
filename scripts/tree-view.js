@@ -100,6 +100,9 @@ _aChildren     - 子控件集合
                 else {
                     UI_TREE_VIEW_FLUSH(this);
                 }
+            },
+            function (el, options) {
+                options.resizable = false;
             }
         ),
         UI_TREE_VIEW_CLASS = UI_TREE_VIEW.prototype;
@@ -161,12 +164,6 @@ _aChildren     - 子控件集合
         }
         return false;
     }
-
-    /**
-     * 无效，树视图控件禁止设置大小。
-     * @override
-     */
-    UI_TREE_VIEW_CLASS.$cache = UI_TREE_VIEW_CLASS.$resize = UI_TREE_VIEW_CLASS.$setSize = blank;
 
     /**
      * 控件点击时改变子树视图控件的显示/隐藏状态。

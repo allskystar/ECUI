@@ -24,7 +24,7 @@ describe('控件初始化', {
         value_of(control.getWidth()).should_be(20);
         value_of(control.getHeight()).should_be(20);
         value_of(control.getInput().offsetWidth).should_be(0);
-        value_of(control.getTypes()).should_be(['ui-checkbox', 'ui-input', 'ui-control']);
+        value_of(control.getTypes()).should_be(['ui-checkbox']);
 
         this.wait(ready, 10);
         function ready() {
@@ -45,7 +45,7 @@ describe('控件初始化', {
         value_of(control.getWidth()).should_be(20);
         value_of(control.getHeight()).should_be(20);
         value_of(control.getInput().offsetWidth).should_be(0);
-        value_of(control.getTypes()).should_be(['ui-checkbox', 'ui-input', 'ui-control']);
+        value_of(control.getTypes()).should_be(['ui-checkbox']);
 
         this.wait(ready, 10);
         function ready() {
@@ -68,7 +68,7 @@ describe('控件初始化', {
         value_of(control.getWidth()).should_be(20);
         value_of(control.getHeight()).should_be(20);
         value_of(control.getInput().offsetWidth).should_be(0);
-        value_of(control.getTypes()).should_be(['ui-checkbox', 'ui-input', 'ui-control']);
+        value_of(control.getTypes()).should_be(['ui-checkbox']);
 
         this.wait(ready, 10);
         function ready() {
