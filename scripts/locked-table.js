@@ -61,7 +61,7 @@ _cJoint      - 行(锁定行)对应的锁定行(行)控件
             'mousedown', 'mouseover', 'mousemove', 'mouseout', 'mouseup',
             'click', 'dblclick', 'focus', 'blur', 'activate', 'deactivate',
             'keydown', 'keypress', 'keyup', 'mousewheel'
-        ];
+        ],
 
         UI_CONTROL = ui.Control,
         UI_CONTROL_CLASS = UI_CONTROL.prototype,

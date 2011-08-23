@@ -43,7 +43,6 @@ _aChildren     - 子控件集合
         getStyle = dom.getStyle,
         insertAfter = dom.insertAfter,
         trim = string.trim,
-        blank = util.blank,
         extend = util.extend,
         toNumber = util.toNumber,
 
@@ -160,9 +159,7 @@ _aChildren     - 子控件集合
         if (control._eChildren && control._bCollapsed != status) {
             control._eChildren.style.display = (control._bCollapsed = status) ? 'none' : '';
             UI_TREE_VIEW_FLUSH(control);
-            return true;
         }
-        return false;
     }
 
     /**
@@ -174,7 +171,9 @@ _aChildren     - 子控件集合
             UI_CONTROL_CLASS.$click.call(this, event);
 
             if (getMouseX(this) <= toNumber(getStyle(this.getBody(), 'paddingLeft'))) {
-                this[this.isCollapsed() ? 'expand' : 'collapse']();
+                // 以下使用 event 代替 name
+                this[event = this.isCollapsed() ? 'expand' : 'collapse']();
+                triggerEvent(this, event);
             }
             else {
                 this.getRoot().setSelected(this);
@@ -290,9 +289,7 @@ _aChildren     - 子控件集合
      * @public
      */
     UI_TREE_VIEW_CLASS.collapse = function () {
-        if (UI_TREE_VIEW_SET_FOLD(this, true)) {
-            triggerEvent(this, 'collapse');
-        }
+        UI_TREE_VIEW_SET_FOLD(this, true);
     };
 
     /**
@@ -300,9 +297,7 @@ _aChildren     - 子控件集合
      * @public
      */
     UI_TREE_VIEW_CLASS.expand = function () {
-        if (UI_TREE_VIEW_SET_FOLD(this, false)) {
-            triggerEvent(this, 'expand');
-        }
+        UI_TREE_VIEW_SET_FOLD(this, false);
     };
 
     /**

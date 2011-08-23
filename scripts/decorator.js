@@ -3,8 +3,8 @@ Decorator - 装饰器插件基类，使用inline-block附着在控件外围，�
             用通过访问Decorator的属性来得到，属性名为控件对象
 
 属性
-_sClass  - 装饰器样式
-_eBase  - 装饰器基本Element
+_sPrimary  - 装饰器样式
+_eMain   - 装饰器主元素
 _oInner  - 内层装饰器或者控件对象
 */
 //{if 0}//
@@ -33,7 +33,6 @@ _oInner  - 内层装饰器或者控件对象
         removeClass = dom.removeClass,
         removeDom = dom.remove,
         toCamelCase = string.toCamelCase,
-        copy = util.copy,
         inherits = util.inherits,
 
         $bind = core.$bind,
@@ -49,17 +48,16 @@ _oInner  - 内层装饰器或者控件对象
      * @public
      *
      * @param {ecui.ui.Control|ecui.ext.Decorator} control 需要装饰的控件
-     * @param {string} baseClass 装饰器的基本样式
+     * @param {string} primary 装饰器的基本样式
      * @param {Array} list 需要生成的区块样式名称集合
      */
-    var EXT_DECORATOR =
-        ext.Decorator = function (control, baseClass, list) {
+    var EXT_DECORATOR = ext.Decorator = function (control, primary, list) {
             //__transform__id_i
             var id = control.getUID(),
                 o = (this._oInner = EXT_DECORATOR[id] || control).getOuter();
 
-            insertBefore(this._eBase = createDom(this._sClass = baseClass), o).appendChild(o);
-            $bind(this._eBase, control);
+            insertBefore(this._eMain = createDom(this._sPrimary = primary), o).appendChild(o);
+            $bind(this._eMain, control);
             control.clearCache();
 
             EXT_DECORATOR[id] = this;
@@ -76,11 +74,11 @@ _oInner  - 内层装饰器或者控件对象
             if (list) {
                 for (id = 0; o = list[id]; ) {
                     list[id++] =
-                        '<div class="' + baseClass + '-' + o +
+                        '<div class="' + primary + '-' + o +
                             '" style="position:absolute;top:0px;left:0px"></div>';
                 }
 
-                insertHTML(this._eBase, 'BEFOREEND', list.join(''));
+                insertHTML(this._eMain, 'BEFOREEND', list.join(''));
             }
         },
         EXT_DECORATOR_CLASS = EXT_DECORATOR.prototype,
@@ -89,7 +87,7 @@ _oInner  - 内层装饰器或者控件对象
         EXT_DECORATOR_OLD_METHODS = {};
 //{else}//
     /**
-     * 清除所有的装饰器效果，同时清除所有的代理函数
+     * 清除所有的装饰器效果，同时清除所有的代理函数。
      * @public
      *
      * @param {ecui.ui.Control} control ECUI 控件
@@ -110,8 +108,8 @@ _oInner  - 内层装饰器或者控件对象
 
         o = EXT_DECORATOR[id];
 
-        insertBefore(control.getOuter(), o._eBase);
-        removeDom(o._eBase);
+        insertBefore(control.getOuter(), o._eMain);
+        removeDom(o._eMain);
         for (; o != control; o = o._oInner) {
             o.$dispose();
         }
@@ -120,16 +118,15 @@ _oInner  - 内层装饰器或者控件对象
     };
 
     /**
-     * 计算控件的缓存。
-     * 控件缓存部分核心属性的值，提高控件属性的访问速度，在子控件或者应用程序开发过程中，如果需要避开控件提供的方法(setSize、alterClass 等)直接操作 Element 对象，操作完成后必须调用 clearCache 方法清除控件的属性缓存，否则将引发错误。
+     * 缓存装饰器的属性。
      * @protected
      *
-     * @param {CssStyle} style 基本 Element 对象的 Css 样式对象
-     * @param {boolean} cacheSize 是否需要缓存控件大小，如果控件是另一个控件的部件时，不缓存大小能加快渲染速度，默认缓存
+     * @param {CssStyle} style 主元素的 Css 样式对象
+     * @param {boolean} cacheSize 是否需要缓存控件的大小，如果控件是另一个控件的部件时，不缓存大小能加快渲染速度，默认缓存
      */
     EXT_DECORATOR_CLASS.$cache = function (style, cacheSize) {
         this._oInner.$cache(style, cacheSize, true);
-        UI_CONTROL_CLASS.$cache.call(this, getStyle(this._eBase), false);
+        UI_CONTROL_CLASS.$cache.call(this, getStyle(this._eMain), false);
         this._oInner.$cache$position = 'relative';
         this.$cache$position = style.position == 'absolute' ? 'absolute' : 'relative';
         this.$cache$layout =
@@ -142,26 +139,16 @@ _oInner  - 内层装饰器或者控件对象
      * @protected
      */
     EXT_DECORATOR_CLASS.$dispose = function () {
-        this._eBase = null;
+        this._eMain = null;
     };
 
     /**
-     * 控件渲染完成后初始化的默认处理。
-     * @protected
-     */
-    EXT_DECORATOR_CLASS.$init = function () {
-        this._eBase.style.cssText = 'position:' + this.$cache$position + this.$cache$layout;
-        this._oInner.getOuter(true).style.cssText += ';position:relative;top:auto;left:auto;display:block';
-        this._oInner.$init(true);
-    };
-
-    /**
-     * 控件大小发生变化的默认处理。
+     * 装饰器大小变化事件的默认处理。
      * @protected
      */
     EXT_DECORATOR_CLASS.$resize = function () {
         //__gzip_original__style
-        var style = this._eBase.style;
+        var style = this._eMain.style;
 
         style.width = '';
         if (!ieVersion) {
@@ -171,16 +158,16 @@ _oInner  - 内层装饰器或者控件对象
     };
 
     /**
-     * 设置装饰器区域的大小
+     * 设置装饰器的大小。
      * @protected
      *
-     * @param {number} width 装饰器区域的宽度
-     * @param {number} height 装饰器区域的高度
+     * @param {number} width 宽度，如果不需要设置则将参数设置为等价于逻辑非的值
+     * @param {number} height 高度，如果不需要设置则省略此参数
      */
     EXT_DECORATOR_CLASS.$setSize = function (width, height) {
         //__gzip_original__style
         //__gzip_original__inner
-        var style = this._eBase.style,
+        var style = this._eMain.style,
             inner = this._oInner,
             invalidWidth = UI_CONTROL_CLASS.$getBasicWidth.call(this),
             invalidHeight = UI_CONTROL_CLASS.$getBasicHeight.call(this),
@@ -193,79 +180,96 @@ _oInner  - 内层装饰器或者控件对象
     };
 
     /**
-     * 为装饰器增加/删除一个扩展样式。
-     * @protected
+     * 为装饰器添加/移除一个扩展样式。
+     * @public
      *
-     * @param {string} className 扩展样式的尾缀
-     * @param {boolean} isRemoved 为 true 时删除样式，否则新增样式
+     * @param {string} className 扩展样式名，以+号开头表示添加扩展样式，以-号开头表示移除扩展样式
      */
-    EXT_DECORATOR_CLASS.alterClass = function (className, remove) {
-        (remove ? removeClass : addClass)(this._eBase, this._sClass + '-' + className);
-        this._oInner.alterClass(className, remove, true);
+    EXT_DECORATOR_CLASS.alterClass = function (className) {
+        var flag = className.charAt(0) == '+';
+
+        this._oInner.alterClass(className, true);
+
+        if (flag) {
+            className = '-' + className.slice(1);
+        }
+
+        (flag ? addClass : removeClass)(this._eMain, this._sPrimary + className);
     };
 
     /**
-     * 获取装饰器的基本样式名称
+     * 获取装饰器的当前样式。
      * @public
      *
-     * @return {string} 装饰器的基本样式名称
+     * @return {string} 控件的当前样式
      */
     EXT_DECORATOR_CLASS.getClass = function () {
-        return this._sClass;
+        return this._sPrimary;
     };
 
     /**
-     * 获取装饰器区域的高度
+     * 获取装饰器区域的高度。
      * @public
      *
-     * @return {number} 装饰器区域的高度
+     * @return {number} 装饰器的高度
      */
     EXT_DECORATOR_CLASS.getHeight = function () {
         return this._oInner.getHeight(true) + UI_CONTROL_CLASS.$getBasicHeight.call(this);
     };
 
     /**
-     * 获取装饰器内外区域的高度差
+     * 获取装饰器的最小高度。
      * @public
      *
-     * @return {number} 装饰器内外区域的高度差
+     * @return {number} 装饰器的最小高度
      */
     EXT_DECORATOR_CLASS.getMinimumHeight = function () {
         return this._oInner.getMinimumHeight(true) + UI_CONTROL_CLASS.$getBasicHeight.call(this);
     };
 
     /**
-     * 获取装饰器内外区域的宽度差
+     * 获取装饰器的最小宽度。
      * @public
      *
-     * @return {number} 装饰器内外区域的宽度差
+     * @return {number} 装饰器的最小宽度
      */
     EXT_DECORATOR_CLASS.getMinimumWidth = function () {
         return this._oInner.getMinimumWidth(true) + UI_CONTROL_CLASS.$getBasicWidth.call(this);
     };
 
     /**
-     * 获取装饰器的外框Element
+     * 获取装饰器的外层元素。
      * @public
      *
-     * @return {Element} 外框Element
+     * @return {HTMLElement} Element 对象
      */
     EXT_DECORATOR_CLASS.getOuter = function () {
-        return this._eBase;
+        return this._eMain;
     };
 
     /**
-     * 获取装饰器区域的宽度
+     * 获取装饰器区域的宽度。
      * @public
      *
-     * @return {number} 装饰器区域的宽度
+     * @return {number} 装饰器的宽度
      */
     EXT_DECORATOR_CLASS.getWidth = function () {
         return this._oInner.getWidth(true) + UI_CONTROL_CLASS.$getBasicWidth.call(this);
     };
 
     /**
-     * 释放对象时需要先释放装饰器
+     * 装饰器初始化。
+     * @public
+     */
+    EXT_DECORATOR_CLASS.init = function () {
+        this._eMain.style.cssText = 'position:' + this.$cache$position + this.$cache$layout;
+        this._oInner.getOuter(true).style.cssText += ';position:relative;top:auto;left:auto;display:block';
+        this._oInner.init(true);
+    };
+
+    /**
+     * 销毁控件的默认处理。
+     * 控件销毁时需要先销毁装饰器。
      * @protected
      */
     EXT_DECORATOR_PROXY.$dispose = function () {
@@ -287,10 +291,10 @@ _oInner  - 内层装饰器或者控件对象
         // 这里批量生成函数代理
         for (
             var i = 0, names = [
-                ['$cache', 2], ['$init', 0], ['$resize', 0], ['$setSize', 2],
-                ['alterClass', 2], ['getOuter', 0],
+                ['$cache', 2], ['$resize', 0], ['$setSize', 2],
+                ['alterClass', 1], ['getOuter', 0],
                 ['getMinimumWidth', 0], ['getMinimumHeight', 0],
-                ['getWidth', 0], ['getHeight', 0]
+                ['getWidth', 0], ['getHeight', 0], ['init', 0]
             ];
             i < 10;
         ) {
@@ -322,11 +326,10 @@ LRDecorator - 左右扩展装饰器，将区域分为"左-控件-右"三部分�
      * @public
      *
      * @param {Control} control 需要装饰的控件
-     * @param {string} baseClass 装饰器的基本样式
+     * @param {string} primary 装饰器的基本样式
      */
-    var EXT_LR_DECORATOR =
-        ext.LRDecorator = function (control, baseClass) {
-            EXT_DECORATOR.call(this, control, baseClass, ['left', 'right']);
+    var EXT_LR_DECORATOR = ext.LRDecorator = function (control, primary) {
+            EXT_DECORATOR.call(this, control, primary, ['left', 'right']);
         };
 //{else}//
     /**
@@ -339,7 +342,7 @@ LRDecorator - 左右扩展装饰器，将区域分为"左-控件-右"三部分�
     inherits(EXT_LR_DECORATOR, EXT_DECORATOR).$setSize = function (width, height) {
         EXT_DECORATOR_CLASS.$setSize.call(this, width, height);
 
-        var o = this._eBase.lastChild,
+        var o = this._eMain.lastChild,
             text = ';top:' + this.$cache$paddingTop + 'px;height:' + this._oInner.getHeight(true) + 'px;width:';
 
         o.style.cssText +=
@@ -357,11 +360,10 @@ TBDecorator - 上下扩展装饰器，将区域分为"上-控件-下"三部分�
          * @public
          *
          * @param {Control} control 需要装饰的控件
-         * @param {string} baseClass 装饰器的基本样式
+         * @param {string} primary 装饰器的基本样式
          */
-    var EXT_TB_DECORATOR =
-        ext.TBDecorator = function (control, baseClass) {
-            EXT_DECORATOR.call(this, control, baseClass, ['top', 'bottom']);
+    var EXT_TB_DECORATOR = ext.TBDecorator = function (control, primary) {
+            EXT_DECORATOR.call(this, control, primary, ['top', 'bottom']);
         };
 //{else}//
     /**
@@ -374,7 +376,7 @@ TBDecorator - 上下扩展装饰器，将区域分为"上-控件-下"三部分�
     inherits(EXT_TB_DECORATOR, EXT_DECORATOR).$setSize = function (width, height) {
         EXT_DECORATOR_CLASS.$setSize.call(this, width, height);
 
-        var o = this._eBase.lastChild,
+        var o = this._eMain.lastChild,
             text = ';left:' + this.$cache$paddingLeft + 'px;width:' + this._oInner.getWidth(true) + 'px;height:';
 
         o.style.cssText +=
@@ -392,14 +394,13 @@ MagicDecorator - 九宫格扩展装饰器，将区域分为"左上-上-右上-�
      * @public
      *
      * @param {Control} control 需要装饰的控件
-     * @param {string} baseClass 装饰器的基本样式
+     * @param {string} primary 装饰器的基本样式
      */
-    var EXT_MAGIC_DECORATOR =
-        ext.MagicDecorator = function (control, baseClass) {
+    var EXT_MAGIC_DECORATOR = ext.MagicDecorator = function (control, primary) {
             EXT_DECORATOR.call(
                 this,
                 control,
-                baseClass,
+                primary,
                 ['widget0', 'widget1', 'widget2', 'widget3', 'widget5', 'widget6', 'widget7', 'widget8']
             );
         };
@@ -414,7 +415,7 @@ MagicDecorator - 九宫格扩展装饰器，将区域分为"左上-上-右上-�
     inherits(EXT_MAGIC_DECORATOR, EXT_DECORATOR).$setSize = function (width, height) {
         EXT_DECORATOR_CLASS.$setSize.call(this, width, height);
 
-        var o = this._eBase.lastChild,
+        var o = this._eMain.lastChild,
             i = 9,
             paddingTop = this.$cache$paddingTop,
             paddingLeft = this.$cache$paddingLeft,

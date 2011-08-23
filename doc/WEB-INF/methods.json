@@ -768,7 +768,7 @@
             "params": [
                 {"name": "control", "type": "ecui.ui.Control", "desc": "控件对象"},
                 {"name": "name", "type": "string", "desc": "事件名"},
-                {"name": "event", "type": "ecui.ui.Event", "desc": "事件对象"},
+                {"name": "event", "type": "ecui.ui.Event", "desc": "事件对象，可以为 false 表示直接阻止默认事件处理"},
                 {"name": "args", "type": "Array", "desc": "事件的其它参数"}
             ],
             "remark": "triggerEvent 会根据事件返回值或 event 的新状态决定是否触发默认事件处理。"
@@ -1046,7 +1046,8 @@
             "desc": "控件移除子控件事件的默认处理。",
             "params": [
                 {"name": "child", "type": "ecui.ui.Control", "desc": "子控件"}
-            ]
+            ],
+            "return": {"type": "boolean", "desc": "如果不允许移除子控件，返回 false"}
         },
 
         {
@@ -1352,6 +1353,12 @@
             "name": "isHovered",
             "desc": "判断控件是否处于悬停状态。",
             "return": {"type": "boolean", "desc": "控件是否处于悬停状态"}
+        },
+
+        {
+            "name": "isResizable",
+            "desc": "判断控件是否允许改变大小。",
+            "return": {"type": "boolean", "desc": "控件是否允许改变大小"}
         },
 
         {

@@ -5,7 +5,6 @@ MessageBox - 消息框功能。
 (function () {
 
     var core = ecui,
-        array = core.array,
         dom = core.dom,
 
         WINDOW = window,

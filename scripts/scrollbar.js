@@ -38,7 +38,6 @@ _oRange         - 滑动按钮的合法滑动区间
         getMouseX = core.getMouseX,
         getMouseY = core.getMouseY,
         inheritsControl = core.inherits,
-        triggerEvent = core.triggerEvent,
 
         UI_CONTROL = ui.Control,
         UI_CONTROL_CLASS = UI_CONTROL.prototype,
@@ -150,10 +149,19 @@ _oRange         - 滑动按钮的合法滑动区间
      * @param {ecui.ui.Scrollbar} scrollbar 滚动条控件
      */
     function UI_SCROLLBAR_CHANGE(scrollbar) {
-        // 这里使用 scrollbar 代表滚动条控件的父控件
-        scrollbar = scrollbar.getParent();
-        if (scrollbar) {
-            triggerEvent(scrollbar, 'scroll');
+        var parent = scrollbar.getParent(),
+            uid;
+
+        if (parent) {
+            parent.$scroll();
+            if (!UI_SCROLLBAR[uid = parent.getUID()]) {
+                // 根据浏览器的行为，无论改变滚动条的值多少次，在一个脚本运行周期只会触发一次onscroll事件
+                timer(function () {
+                    delete UI_SCROLLBAR[uid];
+                    triggerEvent(parent, 'scroll', false);
+                });
+                UI_SCROLLBAR[uid] = true;
+            }
         }
     }
 

@@ -48,6 +48,7 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
         ui = core.ui,
         util = core.util,
 
+        undefined,
         DOCUMENT = document,
         MATH = Math,
         REGEXP = RegExp,
@@ -63,22 +64,24 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
         first = dom.first,
         getParent = dom.getParent,
         insertBefore = dom.insertBefore,
-        last = dom.last,
         next = dom.next,
         removeDom = dom.remove,
         trim = string.trim,
+        extend = util.extend,
         findConstructor = util.findConstructor,
-        inherits = util.inherits,
         toNumber = util.toNumber,
 
         $fastCreate = core.$fastCreate,
         disposeControl = core.dispose,
+        getParameters = core.getParameters,
+        inheritsControl = core.inherits,
+        triggerEvent = core.triggerEvent,
 
         eventNames = [
             'mousedown', 'mouseover', 'mousemove', 'mouseout', 'mouseup',
             'click', 'dblclick', 'focus', 'blur', 'activate', 'deactivate',
             'keydown', 'keypress', 'keyup', 'mousewheel'
-        ];
+        ],
 
         UI_CONTROL = ui.Control,
         UI_CONTROL_CLASS = UI_CONTROL.prototype,
@@ -252,7 +255,7 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
             // 为了防止写入getControl属性而导致的reflow如此处理
             var control;
             return function () {
-                return control = control || UI_TABLE_CREATE_CELL(this);
+                return (control = control || UI_TABLE_CREATE_CELL(this));
             };
         } : function () {
             return UI_TABLE_INIT_CELL;
@@ -739,12 +742,12 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
         var i = 0,
             headRowCount = this._aHeadRows.length,
             rows = this._aRows = this._aHeadRows.concat(this._aRows),
-            type = this.getType(),
             primary = options.primary || '',
             hcellClass = findConstructor(this, 'Column'),
             el = createDom(primary + hcellClass.TYPES, '', 'td'),
             col = $fastCreate(hcellClass, el, this),
-            row;
+            row,
+            o;
 
         el.innerHTML = options.title || '';
 
@@ -1015,7 +1018,6 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
             row = this._aRows[index],
             rowNext = this._aRows[index + 1],
             body = row.getBody(),
-            j,
             o;
 
         if (row) {

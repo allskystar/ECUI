@@ -247,9 +247,7 @@ _oFormat    - 允许提交的格式正则表达式
         }
 
         if (!result) {
-            if (this.onerror) {
-                this.onerror(err);
-            }
+            triggerEvent(this, 'error', null, [err]);
         }
         return result;
     };

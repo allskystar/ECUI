@@ -14,7 +14,7 @@ _bUserSelect             - 控件是否允许选中内容
 _bFocusable              - 控件是否允许获取焦点
 _bDisabled               - 控件的状态，为true时控件不处理任何事件
 _bCached                 - 控件是否已经读入缓存
-_bInit                   - 控件是否已经完成初始化
+_bCreated                - 控件是否已经完全生成
 _sUID                    - 控件的内部ID
 _sPrimary                - 控件定义时的基本样式
 _sClass                  - 控件的当前样式
@@ -78,6 +78,7 @@ $cache$position          - 控件布局方式缓存
         inheritsControl = core.inherits,
         isFixedSize = core.isFixedSize,
         loseFocus = core.loseFocus,
+        setFocused = core.setFocused,
         triggerEvent = core.triggerEvent,
 
         eventNames = [
@@ -140,15 +141,14 @@ $cache$position          - 控件布局方式缓存
     function UI_CONTROL_ALTER_PARENT(control, parent, parentElement) {
         var oldParent = control._cParent,
             el = control.getOuter(),
-            flag = control._bInit && control.isShow();
+            flag = control._bCreated && control.isShow();
 
         // 触发原来父控件的移除子控件事件
         if (parent != oldParent) {
             if (oldParent) {
-                if (oldParent.onremove) {
-                    oldParent.onremove(control);
+                if (!triggerEvent(oldParent, 'remove', null, [control])) {
+                    return;
                 }
-                oldParent.$remove(control);
             }
             if (parent) {
                 if (!triggerEvent(parent, 'append', null, [control])) {
@@ -168,8 +168,8 @@ $cache$position          - 控件布局方式缓存
             control.$setParent(parent);
         }
 
-        if (flag != (control._bInit && control.isShow())) {
-            triggerEvent(control, flag ? 'hide' : 'show');
+        if (flag != (control._bCreated && control.isShow())) {
+            triggerEvent(control, flag ? 'hide' : 'show', false);
         }
     }
 
@@ -239,7 +239,7 @@ $cache$position          - 控件布局方式缓存
      * @param {ecui.ui.Event} event 事件对象
      */
     UI_CONTROL_CLASS.$deactivate = function () {
-        this.alterClass('-active', true);
+        this.alterClass('-active');
     };
 
     /**
@@ -249,9 +249,7 @@ $cache$position          - 控件布局方式缓存
      */
     UI_CONTROL_CLASS.$dispose = function () {
         try {
-            if (this.ondispose) {
-                this.ondispose();
-            }
+            triggerEvent(this, 'dispose', false);
         }
         catch (e) {
         }
@@ -315,10 +313,27 @@ $cache$position          - 控件布局方式缓存
      */
     UI_CONTROL_CLASS.$hide = function () {
         if (this._sDisplay === undefined) {
-            var style = this.getOuter().style;
+            if (this._bCreated) {
+                for (
+                    var i = 0,
+                        me = this,
+                        list = query({
+                            custom: function (control) {
+                                return me != control && me.contain(control) && control.isShow();
+                            }
+                        }),
+                        o;
+                    o = list[i++];
+                ) {
+                    triggerEvent(o, 'hide', false);
+                }
+            }
+
+            o = this.getOuter().style;
+
             // 保存控件原来的 display 值，在显示时恢复
-            this._sDisplay = style.display;
-            style.display = 'none';
+            this._sDisplay = o.display;
+            o.display = 'none';
             // 控件隐藏时需要清除状态
             $clearState(this);
         }
@@ -343,7 +358,7 @@ $cache$position          - 控件布局方式缓存
      * @param {ecui.ui.Event} event 事件对象
      */
     UI_CONTROL_CLASS.$mouseout = function () {
-        this.alterClass('-hover', true);
+        this.alterClass('-hover');
     };
 
     /**
@@ -435,6 +450,22 @@ $cache$position          - 控件布局方式缓存
     UI_CONTROL_CLASS.$show = function () {
         this.getOuter().style.display = this._sDisplay || '';
         this._sDisplay = undefined;
+
+        if (this._bCreated) {
+            for (
+                var i = 0,
+                    me = this,
+                    list = query({
+                        custom: function (control) {
+                            return me != control && me.contain(control) && control.isShow();
+                        }
+                    }),
+                    o;
+                o = list[i++];
+            ) {
+                triggerEvent(o, 'show', false);
+            }
+        }
     };
 
     /**
@@ -560,7 +591,7 @@ $cache$position          - 控件布局方式缓存
      */
     UI_CONTROL_CLASS.enable = function () {
         if (this._bDisabled) {
-            this.alterClass('-disabled', true);
+            this.alterClass('-disabled');
             this._bDisabled = false;
             return true;
         }
@@ -666,10 +697,10 @@ $cache$position          - 控件布局方式缓存
     };
 
     /**
-     * 获取控件的完全无效宽度，即控件外部区域与控件内部区域宽度的差值。
+     * 获取控件的最小宽度。
      * @public
      *
-     * @return {number} 控件的无效宽度
+     * @return {number} 控件的最小宽度
      */
     UI_CONTROL_CLASS.getMinimumWidth = function () {
         return this.$getBasicWidth();
@@ -796,7 +827,7 @@ $cache$position          - 控件布局方式缓存
      * @public
      */
     UI_CONTROL_CLASS.init = function () {
-        if (!this._bInit) {
+        if (!this._bCreated) {
             if (this._bDisabled) {
                 this.alterClass('+disabled');
             }
@@ -821,7 +852,7 @@ $cache$position          - 控件布局方式缓存
                 }
                 UI_CONTROL_READY_LIST.push(this);
             }
-            this._bInit = true;
+            this._bCreated = true;
         }
     };
 
@@ -889,6 +920,16 @@ $cache$position          - 控件布局方式缓存
     };
 
     /**
+     * 判断控件是否允许改变大小。
+     * @public
+     *
+     * @return {boolean} 控件是否允许改变大小
+     */
+    UI_CONTROL_CLASS.isResizable = function () {
+        return this._bResizable;
+    };
+
+    /**
      * 判断是否处于显示状态。
      * @public
      *
@@ -933,9 +974,6 @@ $cache$position          - 控件布局方式缓存
      */
     UI_CONTROL_CLASS.resize = function () {
         if (this._bResizable) {
-            if (this.onresize) {
-                this.onresize();
-            }
             this.$resize();
         }
     };

@@ -91,6 +91,14 @@ Item/Items - 定义选项操作相关的基本操作。
     };
 
     /**
+     * @override
+     */
+    UI_ITEMS.$dispose = function () {
+        delete UI_ITEMS[this.getUID()];
+        callSuper(this, '$dispose');
+    };
+
+    /**
      * 初始化选项组对应的内部元素对象。
      * 选项组假设选项的主元素在内部元素中，因此实现了 Items 接口的类在初始化时需要调用 $initItems 方法自动生成选项控件，$initItems 方法内部保证一个控件对象只允许被调用一次，多次的调用无效。
      * @protected
@@ -175,14 +183,6 @@ Item/Items - 定义选项操作相关的基本操作。
      */
     UI_ITEMS.append = function (item, options) {
         this.add(item, undefined, options);
-    };
-
-    /**
-     * @override
-     */
-    UI_ITEMS.dispose = function () {
-        delete UI_ITEMS[this.getUID()];
-        callSuper(this, 'dispose');
     };
 
     /**

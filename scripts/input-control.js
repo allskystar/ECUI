@@ -44,8 +44,6 @@ _eInput  - INPUT对象
         $bind = core.$bind,
         findControl = core.findControl,
         inheritsControl = core.inherits,
-        loseFocus = core.loseFocus,
-        setFocused = core.setFocused,
         triggerEvent = core.triggerEvent,
         wrapEvent = core.wrapEvent,
 

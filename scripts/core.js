@@ -10,6 +10,7 @@
         undefined,
         WINDOW = window,
         DOCUMENT = document,
+        DATE = Date,
         MATH = Math,
         REGEXP = RegExp,
         ABS = MATH.abs,
@@ -199,8 +200,7 @@
             mouseX,                   // 当前鼠标光标的X轴坐标
             mouseY,                   // 当前鼠标光标的Y轴坐标
             keyCode = 0,              // 当前键盘按下的键值，解决keypress与keyup中得不到特殊按键的keyCode的问题
-            lastClickTime,            // 上一次产生点击事件的时间
-            lastClickControl,         // 上一次产生点击事件的控件
+            lastClick,                // 上一次产生点击事件的信息
 
             status,                   // 框架当前状态
             allControls = [],         // 全部生成的控件，供释放控件占用的内存使用
@@ -219,9 +219,11 @@
                 // 鼠标左键按下需要改变框架中拥有焦点的控件
                 mousedown: function (event) {
                     if (activedControl) {
-                        // 如果按下鼠标左键后，使用ALT+TAB使浏览器失去焦点然后松开鼠标左键，需要恢复激活控件状态
+                        // 如果按下鼠标左键后，使用ALT+TAB使浏览器失去焦点然后松开鼠标左键，
+                        // 需要恢复激活控件状态，第一次点击失效
                         bubble(activedControl, 'deactivate');
                         activedControl = null;
+                        return;
                     }
 
                     event = wrapEvent(event);
@@ -230,6 +232,10 @@
                     var control = event.getControl(),
                         flag = isScrollClick(event),
                         target = control;
+
+                    if (!(lastClick && isDblClick())) {
+                        lastClick = {time: new DATE().getTime()};
+                    }
 
                     if (control) {
                         if (flag && ieVersion < 8) {
@@ -263,6 +269,8 @@
                         }
                         // 点击到了空白区域，取消控件的焦点
                         setFocused();
+                        // 正常情况下 activedControl 是 null，如果是down按下但未点击到控件，此值为undefined
+                        activedControl = undefined;
                     }
                 },
 
@@ -298,24 +306,30 @@
                     var control = event.getControl(),
                         commonParent;
 
-                    bubble(control, 'mouseup', event);
+                    if (activedControl !== null) {
+                        // 如果为 null 表示之前没有触发 mousedown 事件就触发了 mouseup，
+                        // 这种情况出现在鼠标在浏览器外按下了 down 然后回浏览器区域 up，
+                        // 或者是 ie 系列浏览器在触发 dblclick 之前会触发一次单独的 mouseup，
+                        // dblclick 在 ie 下的事件触发顺序是 mousedown/mouseup/click/mouseup/dblclick
+                        bubble(control, 'mouseup', event);
 
-                    if (activedControl) {
-                        commonParent = getCommonParent(control, activedControl);
-                        // 点击事件在同时响应鼠标按下与弹起周期的控件上触发
-                        // 模拟点击事件是为了解决控件的 Element 进行了 remove/append 操作后 click 事件不触发的问题
-                        if (lastClickTime > new DATE().getTime() - 200 && lastClickControl == control) {
+                        if (activedControl) {
+                            commonParent = getCommonParent(control, activedControl);
                             bubble(commonParent, 'click', event);
-                            bubble(commonParent, 'dblclick', event);
-                            lastClickTime = lastClickControl = null;
+                            // 点击事件在同时响应鼠标按下与弹起周期的控件上触发(如果之间未产生鼠标移动事件)
+                            // 模拟点击事件是为了解决控件的 Element 进行了 remove/append 操作后 click 事件不触发的问题
+                            if (lastClick) {
+                                if (isDblClick() && lastClick.target == control) {
+                                    bubble(commonParent, 'dblclick', event);
+                                    lastClick = null;
+                                }
+                                else {
+                                    lastClick.target = control;
+                                }
+                            }
+                            bubble(activedControl, 'deactivate', event);
+                            activedControl = null;
                         }
-                        else {
-                            bubble(commonParent, 'click', event);
-                            lastClickTime = new DATE().getTime();
-                            lastClickControl = control;
-                        }
-                        bubble(activedControl, 'deactivate', event);
-                        activedControl = null;
                     }
                 }
             },
@@ -368,7 +382,7 @@
                         env = currEnv,
                         control = event.getControl();
 
-                    lastClickTime = lastClickControl = null;
+                    lastClick = null;
 
                     if (!isScrollClick(event)) {
                         if (control && !control.isFocusable()) {
@@ -477,7 +491,7 @@
                     // 按广度优先查找所有正在显示的控件，保证子控件一定在父控件之后
                     for (o = null; o !== undefined; o = list[i++]) {
                         for (var j = 0, controls = query({parent: o}); o = controls[j++]; ) {
-                            if (o.isShow()) {
+                            if (o.isShow() && o.isResizable()) {
                                 list.push(o);
                             }
                         }
@@ -486,7 +500,7 @@
                     for (i = 0; o = list[i++]; ) {
                         // 避免在resize中调用repaint从而引起反复的reflow
                         o.repaint = blank;
-                        o.resize();
+                        triggerEvent(o, 'resize');
                         delete o.repaint;
 
                         if (ieVersion < 8) {
@@ -526,6 +540,66 @@
                     mask(true);
                 }
                 status = NORMAL;
+            },
+
+            /**
+             * 初始化指定的 Element 对象对应的 DOM 节点树。
+             * init 方法将初始化指定的 Element 对象及它的子节点，如果这些节点拥有初始化属性(参见 getAttributeName 方法)，将按照规则为它们绑定 ECUI 控件，每一个节点只会被绑定一次，重复的绑定无效。页面加载完成时，将会自动针对 document.body 执行这个方法，相当于自动执行以下的语句：ecui.init(document.body)
+             * @public
+             *
+             * @param {Element} el Element 对象
+             */
+            init = core.init = function (el) {
+                if (!initEnvironment() && el) {
+                    var i = 0,
+                        list = [],
+                        options = el.all || el.getElementsByTagName('*'),
+                        elements = [el],
+                        o;
+
+                    if (!initRecursion++) {
+                        // 第一层 init 循环的时候需要关闭resize事件监听，防止反复的重入
+                        detachEvent(WINDOW, 'resize', repaint);
+                    }
+
+                    for (; o = options[i++]; ) {
+                        elements[i] = o;
+                    }
+
+                    for (i = 0; el = elements[i]; i++) {
+                        if (getParent(el)) {
+                            options = getParameters(el);
+                            options.main = el;
+                            // 以下使用 el 替代 control
+                            if (o = options.type) {
+                                list.push(
+                                    el = $create(
+                                        ui[toCamelCase(o.charAt(0).toUpperCase() + o.slice(1))],
+                                        options
+                                    )
+                                );
+                            }
+                            else {
+                                for (o in plugins) {
+                                    if (options[o]) {
+                                        plugins[o](el, options[o]);
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    for (i = 0; o = list[i++]; ) {
+                        o.cache();
+                    }
+                    for (i = 0; o = list[i++]; ) {
+                        o.init();
+                    }
+
+                    if (!(--initRecursion)) {
+                        attachEvent(WINDOW, 'resize', repaint);
+                    }
+                }
             };
 
         /**
@@ -875,44 +949,7 @@
          * @return {ecui.ui.Control} 指定名称的 ECUI 控件对象，如果不存在返回 null
          */
         core.get = function (id) {
-            if (!namedControls) {
-                status = LOADING;
-
-                // 设置全局事件处理
-                for (o in currEnv) {
-                    attachEvent(DOCUMENT, o, currEnv[o]);
-                }
-
-                namedControls = {};
-
-                // 检测Element宽度与高度的计算方式
-                //__gzip_original__body
-                var body = DOCUMENT.body,
-                    o = getParameters(body, 'data-ecui');
-
-                ecuiName = o.name || ecuiName;
-                isGlobalId = o.globalId;
-
-                insertHTML(
-                    body,
-                    'BEFOREEND',
-                    '<div style="position:absolute;overflow:scroll;top:-90px;left:-90px;width:80px;height:80px;' +
-                        'border:1px solid"><div style="position:absolute;top:0px;height:90px"></div></div>'
-                );
-                o = body.lastChild;
-                flgFixedSize = o.offsetWidth > 80;
-                flgFixedOffset = o.lastChild.offsetTop;
-                scrollNarrow = o.offsetWidth - o.clientWidth - 2;
-                removeDom(o);
-
-                attachEvent(WINDOW, 'resize', repaint);
-                attachEvent(WINDOW, 'unload', onunload);
-                attachEvent(WINDOW, 'scroll', onscroll);
-
-                core.init(body);
-
-                status = NORMAL;
-            }
+            initEnvironment();
             return namedControls[id] || null;
         };
 
@@ -1056,64 +1093,6 @@
         };
 
         /**
-         * 初始化指定的 Element 对象对应的 DOM 节点树。
-         * init 方法将初始化指定的 Element 对象及它的子节点，如果这些节点拥有初始化属性(参见 getAttributeName 方法)，将按照规则为它们绑定 ECUI 控件，每一个节点只会被绑定一次，重复的绑定无效。页面加载完成时，将会自动针对 document.body 执行这个方法，相当于自动执行以下的语句：ecui.init(document.body)
-         * @public
-         *
-         * @param {Element} el Element 对象
-         */
-        core.init = function (el) {
-            var i = 0,
-                list = [],
-                options = el.all || el.getElementsByTagName('*'),
-                elements = [el],
-                o;
-
-            if (!initRecursion++) {
-                // 第一层 init 循环的时候需要关闭resize事件监听，防止反复的重入
-                detachEvent(WINDOW, 'resize', repaint);
-            }
-
-            for (; o = options[i++]; ) {
-                elements[i] = o;
-            }
-
-            for (i = 0; el = elements[i]; i++) {
-                if (getParent(el)) {
-                    options = getParameters(el);
-                    options.main = el;
-                    // 以下使用 el 替代 control
-                    if (o = options.type) {
-                        list.push(
-                            el = $create(
-                                ui[toCamelCase(o.charAt(0).toUpperCase() + o.slice(1))],
-                                options
-                            )
-                        );
-                    }
-                    else {
-                        for (o in plugins) {
-                            if (options[o]) {
-                                plugins[o](el, options[o]);
-                            }
-                        }
-                    }
-                }
-            }
-
-            for (i = 0; o = list[i++]; ) {
-                o.cache();
-            }
-            for (i = 0; o = list[i++]; ) {
-                o.init();
-            }
-
-            if (!(--initRecursion)) {
-                attachEvent(WINDOW, 'resize', repaint);
-            }
-        };
-
-        /**
          * 设置框架拦截之后的一次点击，并将点击事件发送给指定的 ECUI 控件。
          * intercept 方法将下一次的鼠标点击事件转给指定控件的 $intercept 方法处理，相当于拦截了一次框架的鼠标事件点击操作，框架其它的状态不会自动改变，例如拥有焦点的控件不会改变。如果 $intercept 方法不阻止冒泡，将自动调用 restore 方法。
          * @public
@@ -1218,7 +1197,8 @@
                 o = independentControls[i++];
             ) {
                 if ((!condition.type || (o instanceof condition.type)) &&
-                        (parent === undefined || (o.getParent() == parent)) && (!custom || custom(o))) {
+                        (parent === undefined || (o.getParent() === parent)) &&
+                        (!custom || custom(o))) {
                     result.push(o);
                 }
             }
@@ -1268,7 +1248,7 @@
          *
          * @param {ecui.ui.Control} control 控件对象
          * @param {string} name 事件名
-         * @param {ecui.ui.Event} event 事件对象
+         * @param {ecui.ui.Event} event 事件对象，可以为 false 表示直接阻止默认事件处理
          * @param {Array} args 事件的其它参数
          * @return {boolean} 是否阻止默认事件处理
          */
@@ -1280,11 +1260,11 @@
                 args = [event];
             }
             else {
-                event = {preventDefault: UI_EVENT_CLASS.preventDefault};
+                event = {returnValue: event, preventDefault: UI_EVENT_CLASS.preventDefault};
             }
 
-            if ((control['on' + name] &&
-                        (control['on' + name].apply(control, args) === false || event.returnValue === false)) ||
+            if ((control['on' + name] && control['on' + name].apply(control, args) === false) ||
+                    event.returnValue === false ||
                     (control['$' + name] && control['$' + name].apply(control, args) === false)) {
                 event.preventDefault();
             }
@@ -1323,6 +1303,9 @@
                 event.which = event.keyCode;
             }
 
+            if (event.type == 'mousemove') {
+                lastClick = null;
+            }
             mouseX = event.pageX;
             mouseY = event.pageY;
 
@@ -1390,8 +1373,6 @@
         if (ieVersion) {
             // IE下双击事件不依次产生 mousedown 与 mouseup 事件，需要模拟
             currEnv.dblclick = function (event) {
-                currEnv.mousedown(event);
-                currEnv.mouseup(event);
                 currEnv.mousedown(event);
                 currEnv.mouseup(event);
             };
@@ -1594,6 +1575,65 @@
         }
 
         /**
+         * 初始化ECUI工作环境。
+         * @private
+         *
+         * @return {boolean} 是否执行了初始化操作
+         */
+        function initEnvironment() {
+            if (!namedControls) {
+                status = LOADING;
+
+                // 设置全局事件处理
+                for (o in currEnv) {
+                    attachEvent(DOCUMENT, o, currEnv[o]);
+                }
+
+                namedControls = {};
+
+                // 检测Element宽度与高度的计算方式
+                //__gzip_original__body
+                var body = DOCUMENT.body,
+                    o = getParameters(body, 'data-ecui');
+
+                ecuiName = o.name || ecuiName;
+                isGlobalId = o.globalId;
+
+                insertHTML(
+                    body,
+                    'BEFOREEND',
+                    '<div style="position:absolute;overflow:scroll;top:-90px;left:-90px;width:80px;height:80px;' +
+                        'border:1px solid"><div style="position:absolute;top:0px;height:90px"></div></div>'
+                );
+                o = body.lastChild;
+                flgFixedSize = o.offsetWidth > 80;
+                flgFixedOffset = o.lastChild.offsetTop;
+                scrollNarrow = o.offsetWidth - o.clientWidth - 2;
+                removeDom(o);
+
+                attachEvent(WINDOW, 'resize', repaint);
+                attachEvent(WINDOW, 'unload', onunload);
+                attachEvent(WINDOW, 'scroll', onscroll);
+
+                init(body);
+                addClass(body, 'ecui-loaded');
+
+                status = NORMAL;
+                return true;
+            }
+        }
+
+        /**
+         * 判断是否为允许的双击时间间隔。
+         * @private
+         *
+         * @return {boolean} 是否为允许的双击时间间隔
+         */
+        function isDblClick() {
+            return lastClick.time > new DATE().getTime() - 200;
+        }
+
+        /**
          * 判断点击是否发生在滚动条区域。
          * @private
          *
@@ -1725,7 +1765,7 @@
             }
         }
 
-        ready(core.get);
+        ready(init);
     })();
 //{/if}//
 //{if 0}//

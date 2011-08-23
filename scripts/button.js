@@ -66,7 +66,7 @@ Button - 定义按钮的基本操作。
     UI_BUTTON_CLASS.$mouseout = function (event) {
         UI_CONTROL_CLASS.$mouseout.call(this, event);
         if (this.isActived()) {
-            this.alterClass('-active', true);
+            this.alterClass('-active');
         }
     };
 

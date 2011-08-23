@@ -352,10 +352,13 @@ test('$click/$dblclick/onclick/ondblclick', {
 
         uiut.MockEvents.mousedown(el);
         uiut.MockEvents.mouseup(el);
+        uiut.MockEvents.mouseup(el);
+        uiut.MockEvents.mousedown(el);
+        uiut.MockEvents.mouseup(el);
         uiut.MockEvents.mousedown(el);
         uiut.MockEvents.mouseup(el);
 
-        value_of(result).should_be(['click', 'dblclick']);
+        value_of(result).should_be(['click', 'click', 'dblclick', 'click']);
     }
 });
 
@@ -537,7 +540,11 @@ test('$hide/$show/hide/isShow/show 测试', {
             result = [];
 
         common.onshow = function () {
-            result.push('show');
+            result.push('common-show');
+        };
+
+        ecui.get('child').onshow = function () {
+            result.push('child-show');
         };
 
         common.hide();
@@ -546,7 +553,7 @@ test('$hide/$show/hide/isShow/show 测试', {
         common.show();
         value_of(common.isShow()).should_be_true();
 
-        value_of(result).should_be(['show']);
+        value_of(result).should_be(['common-show', 'child-show']);
     },
 
     '已经隐藏的不再隐藏': function () {
@@ -555,7 +562,11 @@ test('$hide/$show/hide/isShow/show 测试', {
             result = [];
 
         common.onhide = function () {
-            result.push('hide');
+            result.push('common-hide');
+        };
+
+        ecui.get('child').onhide = function () {
+            result.push('child-hide');
         };
 
         value_of(common.isShow()).should_be_true();
@@ -563,7 +574,7 @@ test('$hide/$show/hide/isShow/show 测试', {
         common.hide();
         value_of(common.isShow()).should_be_false();
 
-        value_of(result).should_be(['hide']);
+        value_of(result).should_be(['common-hide', 'child-hide']);
     },
 
     '显示时恢复原来的布局信息值': function () {
@@ -1341,7 +1352,7 @@ test('$remove/onremove', {
     }
 });
 
-test('$resize/resize', {
+test('$resize/onresize/resize', {
     '控件大小变化': function () {
         var common = ecui.get('common'),
             parent = ecui.get('parent');
@@ -1411,22 +1422,24 @@ test('$setParent/appendTo/getParent/setParent', {
     },
 
     '父对象可以阻止添加不可以阻止移除': function () {
-        var parent = ecui.get('parent'),
+        var common = ecui.get('common'),
+            parent = ecui.get('parent'),
             child = ecui.get('child');
 
-        parent.onappend = function () {
+        common.onappend = function () {
             return false;
         };
 
-        parent.onremove = function () {
+        common.onremove = function () {
             return false;
         };
 
-        child.setParent(parent);
-        value_of(child.getParent()).should_be(parent);
-        child.setParent();
-        child.setParent(parent);
+        child.setParent(common);
         value_of(child.getParent()).should_be(null);
+        parent.setParent(common);
+        value_of(parent.getParent()).should_be(common);
+        parent.setParent();
+        value_of(parent.getParent()).should_be(common);
     },
 
     '直接设置逻辑父对象': function () {

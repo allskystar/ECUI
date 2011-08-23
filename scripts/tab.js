@@ -45,7 +45,6 @@ _eContent        - 内容 DOM 元素
         moveElements = dom.moveElements,
         removeDom = dom.remove,
         first = dom.first,
-        insertBefore = dom.insertBefore,
         setStyle = dom.setStyle,
         extend = util.extend,
         inherits = util.inherits,
@@ -437,11 +436,11 @@ _eContent        - 内容 DOM 元素
             }
 
             if (this._cSelected) {
-                this._cSelected.alterClass('selected', true);
+                this._cSelected.alterClass('-selected');
             }
 
             if (item) {
-                item.alterClass('selected');
+                item.alterClass('+selected');
                 o = this._aPosition[indexOf(list, item)] - (prev.isShow() ? 0 : prev.getWidth());
                 if (left < o) {
                     style.left = o + 'px';

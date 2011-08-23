@@ -29,7 +29,6 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
         getParent = dom.getParent,
         removeClass = dom.removeClass,
         setText = dom.setText,
-        blank = util.blank,
         findConstructor = util.findConstructor,
 
         $fastCreate = core.$fastCreate,
