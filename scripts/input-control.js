@@ -42,7 +42,6 @@ _eInput  - INPUT对象
         timer = util.timer,
 
         $bind = core.$bind,
-        findControl = core.findControl,
         inheritsControl = core.inherits,
         triggerEvent = core.triggerEvent,
         wrapEvent = core.wrapEvent,
@@ -170,16 +169,11 @@ _eInput  - INPUT对象
         //__gzip_original__type
         var type = event.type;
 
-        event = findControl(wrapEvent(event).target);
+        event = wrapEvent(event).target.getControl();
 
         // 设置默认失去焦点事件，阻止在blur/focus事件中再次回调
         event['$' + type] = UI_CONTROL_CLASS['$' + type];
         event[type]();
-
-        // 如果控件处于失效状态，不允许获得焦点
-        if (event.isDisabled()) {
-            event._eInput.blur();
-        }
 
         delete event['$' + type];
     };
@@ -204,13 +198,13 @@ _eInput  - INPUT对象
     if (ieVersion) {
         UI_INPUT_CONTROL_INPUT.propertychange = function (event) {
             if (event.propertyName == 'value') {
-                triggerEvent(findControl(wrapEvent(event).target), 'change');
+                triggerEvent(wrapEvent(event).target.getControl(), 'change');
             }
         };
     }
     else {
         UI_INPUT_CONTROL_INPUT.input = function (event) {
-            triggerEvent(findControl(this), 'change');
+            triggerEvent(this.getControl(), 'change');
         };
     }
 

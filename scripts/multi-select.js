@@ -36,7 +36,6 @@ _eInput - 多选项的INPUT对象
         extend = util.extend,
         inherits = util.inherits,
 
-        findControl = core.findControl,
         getKey = core.getKey,
         mask = core.mask,
 
@@ -186,8 +185,10 @@ _eInput - 多选项的INPUT对象
      * @param {Event} event 事件对象
      */
     UI_MULTI_SELECT_CLASS.$intercept = function (event) {
-        if (findControl(event.target) instanceof UI_MULTI_SELECT_ITEM) {
-            return false;
+        for (var control = event.getControl(); control; control = control.getParent()) {
+            if (control instanceof UI_MULTI_SELECT_ITEM) {
+                return false;
+            }
         }
         this.$getSection('Options').hide();
         mask();

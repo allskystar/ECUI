@@ -55,7 +55,6 @@ _cPopup      - 是否包含下级弹出菜单
         toNumber = util.toNumber,
 
         $fastCreate = core.$fastCreate,
-        findControl = core.findControl,
         intercept = core.intercept,
         restore = core.restore,
 
@@ -389,9 +388,12 @@ _cPopup      - 是否包含下级弹出菜单
      * @param {Event} event 事件对象
      */
     UI_POPUP_CLASS.$intercept = function (event) {
-        if (!(findControl(event.target) instanceof UI_POPUP_ITEM)) {
-            UI_POPUP_CHAIN_FIRST.hide();
+        for (var control = event.getControl(); control; control = control.getParent()) {
+            if (control instanceof UI_MULTI_SELECT_ITEM) {
+                return false;
+            }
         }
+        UI_POPUP_CHAIN_FIRST.hide();
         return false;
     };
 

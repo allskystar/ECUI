@@ -3,6 +3,7 @@
     var core = ecui,
         array = core.array,
         dom = core.dom,
+        ext = core.ext,
         string = core.string,
         util = core.util,
         ui = core.ui,
@@ -213,8 +214,22 @@
             hoveredControl,           // 当前环境下鼠标悬停的控件
             focusedControl,           // 当前环境下拥有焦点的控件
 
+            eventListeners = {},      // 控件事件监听描述对象
+
             envStack = [],            // 高优先级事件调用时，保存上一个事件环境的栈
             currEnv = {               // 当前操作的环境
+
+                // 鼠标点击时控件如果被屏弊需要取消点击事件的默认处理，此时链接将不能提交
+                click: function (event) {
+                    event =wrapEvent(event);
+
+                    //__transform__control_o
+                    var control = findControl(event.target);
+
+                    if (control && control.isDisabled()) {
+                        event.preventDefault();
+                    }
+                },
 
                 // 鼠标左键按下需要改变框架中拥有焦点的控件
                 mousedown: function (event) {
@@ -263,9 +278,16 @@
                         }
                     }
                     else {
-                        if (control = findControl(event.target)) {
+                        if (control = findControl(target = event.target)) {
                             // 如果点击的是失效状态的控件，检查是否需要取消文本选择
                             onselectstart(control, event);
+                            // 检查是否INPUT/SELECT/TEXTAREA/BUTTON标签，需要失去焦点
+                            if (target.tagName == 'INPUT' || target.tagName == 'SELECT' ||
+                                    target.tagName == 'TEXTAREA' || target.tagName == 'BUTTON') {
+                                timer(function () {
+                                    target.blur();
+                                });
+                            }
                         }
                         // 点击到了空白区域，取消控件的焦点
                         setFocused();
@@ -328,8 +350,10 @@
                                 }
                             }
                             bubble(activedControl, 'deactivate', event);
-                            activedControl = null;
                         }
+
+                        // 将 activeControl 的设置复位，此时表示没有鼠标左键点击
+                        activedControl = null;
                     }
                 }
             },
@@ -644,7 +668,7 @@
          * 使用页面静态初始化或页面动态初始化(参见 ECUI 使用方式)方式，控件创建时，需要的关联控件也许还未创建。$connect 方法提供将指定的函数滞后到对应的控件创建后才调用的模式。如果 targetId 对应的控件还未创建，则调用会被搁置，直到需要的控件创建成功后，再自动执行(参见 create 方法)。
          * @protected
          *
-         * @param {ecui.ui.Control} caller 发起建立连接请求的 ECUI 控件
+         * @param {Object} caller 发起建立连接请求的对象
          * @param {Function} func 用于建立连接的方法，即通过调用 func.call(caller, ecui.get(targetId)) 建立连接
          * @param {string} targetId 被连接的 ECUI 控件 标识符，即在标签的 ecui 属性中定义的 id 值
          */
@@ -760,17 +784,6 @@
             oncreate(type, options);
 
             return type;
-        };
-
-        /**
-         * 注册一个插件。
-         * @protected
-         *
-         * @param {string} name 插件的初始化选项名
-         * @param {Function} func 插件的初始化函数
-         */
-        $register = core.$register = function (name, func) {
-            plugins[name] = func;
         };
 
         /**
@@ -1241,6 +1254,11 @@
             bubble(focusedControl = control, 'focus', null, parent);
         };
 
+        core.addEventListener = function (control, name, caller) {
+            name = control.getUID() + name;
+            (eventListeners[name] = eventListeners[name] || []).push(caller);
+        };
+
         /**
          * 触发事件。
          * triggerEvent 会根据事件返回值或 event 的新状态决定是否触发默认事件处理。
@@ -1261,6 +1279,12 @@
             }
             else {
                 event = {returnValue: event, preventDefault: UI_EVENT_CLASS.preventDefault};
+            }
+
+            if (listeners = eventListeners[control.getUID() + name]) {
+                for (var i = 0, listeners, o; o = listeners[i++]; ) {
+                    o.apply(control, args);
+                }
             }
 
             if ((control['on' + name] && control['on' + name].apply(control, args) === false) ||
@@ -1583,6 +1607,11 @@
         function initEnvironment() {
             if (!namedControls) {
                 status = LOADING;
+
+                // 自动加载插件
+                for (o in ext) {
+                    plugins[o] = ext[o];
+                }
 
                 // 设置全局事件处理
                 for (o in currEnv) {

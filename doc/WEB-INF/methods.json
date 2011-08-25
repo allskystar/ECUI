@@ -431,7 +431,7 @@
             "name": "$connect",
             "desc": "为两个 {'controls'|menu} 建立连接。",
             "params": [
-                {"name": "caller", "type": "ecui.ui.Control", "desc": "发起建立连接请求的 {'controls'|menu}"},
+                {"name": "caller", "type": "Object", "desc": "发起建立连接请求的对象"},
                 {"name": "func", "type": "Function", "desc": "用于建立连接的方法，即通过调用 func.call(caller, ecui.get(targetId)) 建立连接"},
                 {"name": "targetId", "type": "string", "desc": "被连接的 {'controls'|menu} 标识符，即在标签的 ecui 属性中定义的 id 值"}
             ],
@@ -463,15 +463,6 @@
             ],
             "return": {"type": "ecui.ui.Control", "desc": "{'controls'|menu}"},
             "remark": "$fastCreate 方法仅供控件生成自己的部件使用，生成的控件不在控件列表中注册，不自动刷新也不能通过 {'query'|method:'core'} 方法查询(参见 {'\\$create'|method:'core'} 方法)。$fastCreate 方法通过分解 Element 对象的 className 属性得到样式信息，其中第一个样式为类型样式，第二个样式为基本样式。"
-        },
-
-        {
-            "name": "$register",
-            "desc": "注册一个插件。",
-            "params": [
-                {"name": "name", "type": "string", "desc": "插件的初始化选项名"},
-                {"name": "func", "type": "Function", "desc": "插件的初始化函数"}
-            ]
         },
 
         {
@@ -1159,7 +1150,6 @@
         {
             "name": "disable",
             "desc": "控件获得失效状态。",
-            "return": {"type": "boolean", "desc": "控件失效状态是否变化"},
             "remark": "控件获得失效状态时，添加状态样式 -disabled(参见 alterClass 方法)。disable 方法导致控件失去激活、悬停、焦点状态，所有子控件的 {'isDisabled'|method:'control'} 方法返回 true，但不会设置子控件的失效状态样式。"
         },
 
@@ -1172,7 +1162,6 @@
         {
             "name": "enable",
             "desc": "控件解除失效状态。",
-            "return": {"type": "boolean", "desc": "控件失效状态是否变化"},
             "remark": "控件解除失效状态时，移除状态样式 -disabled(参见 alterClass 方法)。enable 方法仅解除控件自身的失效状态，如果其父控件失效，{'isDisabled'|method:'control'} 方法返回 true。"
         },
 

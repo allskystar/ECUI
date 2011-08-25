@@ -51,7 +51,6 @@ _uOptions     - 下拉选择框
         getView = util.getView,
 
         $fastCreate = core.$fastCreate,
-        findControl = core.findControl,
         getAttributeName = core.getAttributeName,
         getFocused = core.getFocused,
         inheritsControl = core.inherits,
@@ -347,15 +346,17 @@ _uOptions     - 下拉选择框
      */
     UI_SELECT_CLASS.$intercept = function (event) {
         //__transform__control_o
-        var control = findControl(event.target);
-        this._uOptions.hide();
-
-        // 检查点击是否在当前下拉框的选项上
-        if (control instanceof UI_SELECT.Item && control != this._cSelected) {
-            UI_SELECT_CHANGE_SELECTED(this, control);
-            triggerEvent(this, 'change');
+        for (var control = event.getControl(); control; control = control.getParent()) {
+            if (control instanceof UI_MULTI_SELECT_ITEM) {
+                if (control != this._cSelected) {
+                    // 检查点击是否在当前下拉框的选项上
+                    UI_SELECT_CHANGE_SELECTED(this, control);
+                    triggerEvent(this, 'change');
+                }
+                break;
+            }
         }
-
+        this._uOptions.hide();
         event.exit();
     };
 

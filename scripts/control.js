@@ -560,17 +560,13 @@ $cache$position          - 控件布局方式缓存
      * 控件获得失效状态。
      * 控件获得失效状态时，添加状态样式 -disabled(参见 alterClass 方法)。disable 方法导致控件失去激活、悬停、焦点状态，所有子控件的 isDisabled 方法返回 true，但不会设置子控件的失效状态样式。
      * @public
-     *
-     * @return {boolean} 控件失效状态是否变化
      */
     UI_CONTROL_CLASS.disable = function () {
         if (!this._bDisabled) {
             this.alterClass('+disabled');
             this._bDisabled = true;
             $clearState(this);
-            return true;
         }
-        return false;
     };
 
     /**
@@ -586,16 +582,12 @@ $cache$position          - 控件布局方式缓存
      * 控件解除失效状态。
      * 控件解除失效状态时，移除状态样式 -disabled(参见 alterClass 方法)。enable 方法仅解除控件自身的失效状态，如果其父控件失效，isDisabled 方法返回 true。
      * @public
-     *
-     * @return {boolean} 控件失效状态是否变化
      */
     UI_CONTROL_CLASS.enable = function () {
         if (this._bDisabled) {
             this.alterClass('-disabled');
             this._bDisabled = false;
-            return true;
         }
-        return false;
     };
 
     /**

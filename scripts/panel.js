@@ -47,7 +47,6 @@ $cache$mainHeight         - layout区域的实际高度
         $fastCreate = core.$fastCreate,
         calcHeightRevise = core.calcHeightRevise,
         calcWidthRevise = core.calcWidthRevise,
-        findControl = core.findControl,
         getKey = core.getKey,
         getScrollNarrow = core.getScrollNarrow,
         inheritsControl = core.inherits,
@@ -95,7 +94,7 @@ $cache$mainHeight         - layout区域的实际高度
      * @param {ecui.ui.Event} event 事件对象
      */
     function UI_BROWSER_SCROLLBAR_SCROLL(event) {
-        triggerEvent(findControl(wrapEvent(event).target).getParent(), 'scroll');
+        triggerEvent(wrapEvent(event).target.getControl().getParent(), 'scroll');
     }
 
     /**
