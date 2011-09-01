@@ -13,7 +13,6 @@ Tween - 点击及按压动画插件
         MIN = MATH.min,
         POW = MATH.pow,
 
-        copy = util.copy,
         timer = util.timer;
 //{/if}//
 //{if $phase == "define"}//
@@ -230,9 +229,7 @@ Tween - 点击及按压动画插件
                  * @param {Event} event 事件对象
                  */
                 object.$click = function (event) {
-                    var options = EXT_TWEEN[this.getUID()],
-                        flag = false,
-                        name;
+                    var options = EXT_TWEEN[this.getUID()];
 
                     if (options) {
                         // 如果之前有未完成的动画，立即结束，以当前的位置作为新的开始点

@@ -391,15 +391,15 @@ describe('表格功能测试', {
         };
 
         uiut.MockEvents.mouseover(el);
-        uiut.MockEvents.mousedown(el);
         uiut.MockEvents.mousemove(el);
+        uiut.MockEvents.mousedown(el);
         uiut.MockEvents.mouseup(el);
         uiut.MockEvents.mousedown(el);
         uiut.MockEvents.mouseup(el);
         uiut.MockEvents.mouseout(el);
         uiut.MockEvents.mouseover(document.body);
         value_of(result).should_be(
-            ['cellover', 'rowover', 'celldown', 'rowdown', 'cellmove', 'rowmove', 'cellup', 'rowup', 'cellclick', 'rowclick', 'celldown', 'rowdown', 'cellup', 'rowup', 'cellclick', 'rowclick', 'celldblclick', 'rowdblclick', 'cellout', 'rowout']
+            ['cellover', 'rowover', 'cellmove', 'rowmove', 'celldown', 'rowdown', 'cellup', 'rowup', 'cellclick', 'rowclick', 'celldown', 'rowdown', 'cellup', 'rowup', 'cellclick', 'rowclick', 'celldblclick', 'rowdblclick', 'cellout', 'rowout']
         );
 
         control.setParent();

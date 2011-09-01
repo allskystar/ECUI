@@ -21,7 +21,7 @@ describe('控件初始化', {
         var control = ecui.create('TreeView', {main: el, parent: document.body});
 
         value_of(control.getFirst().getClass()).should_be('custom');
-        value_of(control.getLast().getClass()).should_be('custom-expand');
+        value_of(control.getLast().getClass()).should_be('custom-expanded');
         value_of(control.getFirst().getMain().offsetWidth > 0).should_be_true();
         value_of(control.getLast().getMain().offsetWidth > 0).should_be_true();
 
@@ -37,7 +37,7 @@ describe('控件初始化', {
         var control = ecui.create('TreeView', {main: el, parent: document.body, collapsed: true});
 
         value_of(control.getFirst().getClass()).should_be('custom');
-        value_of(control.getLast().getClass()).should_be('custom-collapse');
+        value_of(control.getLast().getClass()).should_be('custom-collapsed');
         value_of(control.getFirst().getMain().offsetWidth == 0).should_be_true();
         value_of(control.getLast().getMain().offsetWidth == 0).should_be_true();
 
@@ -53,7 +53,7 @@ describe('控件初始化', {
         var control = ecui.create('TreeView', {main: el, parent: document.body});
 
         value_of(control.getFirst().getClass()).should_be('custom');
-        value_of(control.getLast().getClass()).should_be('custom-collapse');
+        value_of(control.getLast().getClass()).should_be('custom-collapsed');
         value_of(control.getFirst().getMain().offsetWidth > 0).should_be_true();
         value_of(control.getLast().getFirst().getMain().offsetWidth == 0).should_be_true();
 
@@ -92,28 +92,28 @@ test('add', {
         value_of(control.getLast()).should_be(node3);
         value_of(node3.getClass()).should_be('custom');
         node3.add(node2);
-        value_of(node3.getClass()).should_be('custom-expand');
+        value_of(node3.getClass()).should_be('custom-expanded');
         control.add(node2, 1);
         value_of(control.getLast()).should_be(node3);
         value_of(node3.getClass()).should_be('custom');
     }
 });
 
-test('collapse/expand', {
+test('collapse/expanded', {
     '子树收缩/展开': function () {
         var control = ecui.get('tree'),
             children = control.getChildren(),
             child = children[1];
-        value_of(child.getClass()).should_be('custom-expand');
+        value_of(child.getClass()).should_be('custom-expanded');
         control.collapse();
-        value_of(control.getClass()).should_be('custom-collapse');
-        value_of(child.getClass()).should_be('custom-expand');
+        value_of(control.getClass()).should_be('custom-collapsed');
+        value_of(child.getClass()).should_be('custom-expanded');
         value_of(child.getMain().offsetWidth).should_be(0);
         child.collapse();
-        value_of(children[1].getClass()).should_be('custom-collapse');
+        value_of(children[1].getClass()).should_be('custom-collapsed');
         control.expand();
-        value_of(control.getClass()).should_be('custom-expand');
-        value_of(child.getClass()).should_be('custom-collapse');
+        value_of(control.getClass()).should_be('custom-expanded');
+        value_of(child.getClass()).should_be('custom-collapsed');
         value_of(child.getMain().offsetWidth > 0).should_be_true();
         value_of(child.getFirst().getMain().offsetWidth).should_be(0);
     }
@@ -123,13 +123,13 @@ test('交互行为模拟', {
     '鼠标操作': function () {
         var control = ecui.get('tree');
 
-        value_of(control.getClass()).should_be('custom-expand');
+        value_of(control.getClass()).should_be('custom-expanded');
         uiut.MockEvents.mousedown(control.getMain());
         uiut.MockEvents.mouseup(control.getMain());
-        value_of(control.getClass()).should_be('custom-collapse');
+        value_of(control.getClass()).should_be('custom-collapsed');
         uiut.MockEvents.mousedown(control.getMain());
         uiut.MockEvents.mouseup(control.getMain());
-        value_of(control.getClass()).should_be('custom-expand');
+        value_of(control.getClass()).should_be('custom-expanded');
         uiut.MockEvents.mousedown(document.body);
         uiut.MockEvents.mouseup(document.body);
     }

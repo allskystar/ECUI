@@ -13,7 +13,7 @@ href = href + '/' + href;
 document.write('<link rel="stylesheet" type="text/css" media="screen" href="specs.css" />');
 document.write('<link rel="stylesheet" type="text/css" media="screen" href="' + href + '.css" />');
 document.write('<script type="text/javascript" src="tangram.js"></script>');
-document.write('<script type="text/javascript" src="../release/ecui-1.2.0-all.js"></script>');
+document.write('<script type="text/javascript" src="../release/ecui-2.0.0-all.js"></script>');
 document.write('<script type="text/javascript" src="test.js"></script>');
 document.write('<script type="text/javascript" src="MockEvent.js"></script>');
 document.write('<script type="text/javascript" src="USTORE.js"></script>');

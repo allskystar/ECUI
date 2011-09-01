@@ -63,6 +63,7 @@ _uOptions     - 下拉选择框
         UI_INPUT_CONTROL = ui.InputControl,
         UI_INPUT_CONTROL_CLASS = UI_INPUT_CONTROL.prototype,
         UI_BUTTON = ui.Button,
+        UI_SCROLLBAR = ui.Scrollbar,
         UI_PANEL = ui.Panel,
         UI_PANEL_CLASS = UI_PANEL.prototype,
         UI_ITEM = ui.Item,
@@ -192,6 +193,7 @@ _uOptions     - 下拉选择框
         if (!getParent(el)) {
             // 第一次显示时需要进行下拉选项部分的初始化，将其挂载到 DOM 树中
             DOCUMENT.body.appendChild(el);
+            control.cache(false, true);
             control.$alterItems();
         }
 
@@ -292,13 +294,15 @@ _uOptions     - 下拉选择框
      * @override
      */
     UI_SELECT_CLASS.$activate = function (event) {
-        UI_INPUT_CONTROL_CLASS.$activate.call(this, event);
-        this._uOptions.show();
-        // 拦截之后的点击，同时屏蔽所有的控件点击事件
-        intercept(this);
-        mask(0, 65534);
-        UI_SELECT_FLUSH(this);
-        event.stopPropagation();
+        if (!(event.getControl() instanceof UI_SCROLLBAR)) {
+            UI_INPUT_CONTROL_CLASS.$activate.call(this, event);
+            this._uOptions.show();
+            // 拦截之后的点击，同时屏蔽所有的控件点击事件
+            intercept(this);
+            mask(0, 65534);
+            UI_SELECT_FLUSH(this);
+            event.stopPropagation();
+        }
     };
 
     /**
@@ -325,7 +329,7 @@ _uOptions     - 下拉选择框
             );
 
             // 设置options框的大小，如果没有元素，至少有一个单位的高度
-            options.cache(false);
+            options.$cache$mainHeight = itemLength * step + options.$cache$bodyHeightRevise;
             options.$setSize(width, (MIN(itemLength, optionSize) || 1) * step + options.getMinimumHeight());
         }
     };
@@ -338,6 +342,7 @@ _uOptions     - 下拉选择框
             .$cache.call(this, style, cacheSize);
         this._uText.cache(false, true);
         this._uButton.cache(false, true);
+        this._uOptions.cache(false, true);
     };
 
     /**
@@ -347,7 +352,7 @@ _uOptions     - 下拉选择框
     UI_SELECT_CLASS.$intercept = function (event) {
         //__transform__control_o
         for (var control = event.getControl(); control; control = control.getParent()) {
-            if (control instanceof UI_MULTI_SELECT_ITEM) {
+            if (control instanceof findConstructor(this, 'Item')) {
                 if (control != this._cSelected) {
                     // 检查点击是否在当前下拉框的选项上
                     UI_SELECT_CHANGE_SELECTED(this, control);

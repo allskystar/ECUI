@@ -57,7 +57,7 @@ MessageBox - 消息框功能。
             body.style.overflow = 'hidden';
             body.innerHTML =
                 '<div class="ec-messagebox-text" style="position:absolute;white-space:nowrap"></div>' +
-                '<div class="ec-messagebox-bottom" style="position:absolute;white-space:nowrap"></div>'
+                '<div class="ec-messagebox-bottom" style="position:absolute;white-space:nowrap"></div>';
             ECUI_MESSAGEBOX_BOTTOM = createControl('Control', {element: body.lastChild});
         }
 

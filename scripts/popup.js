@@ -1,37 +1,34 @@
 /*
 Popup - 定义弹出菜单项的基本操作。
-弹出菜单控件，继承自基础控件，实现了选项组接口。弹出式菜单操作时不会改变当前已经激活的对象，任何点击都将导致弹出菜单消
-失，弹出菜单默认向右展开子菜单，如果右部已经到达浏览器最边缘，将改为向左显示。
+弹出菜单控件，继承自基础控件，实现了选项组接口。弹出式菜单操作时不会改变当前已经激活的对象，任何点击都将导致弹出菜单消失，弹出菜单默认向右展开子菜单，如果右部已经到达浏览器最边缘，将改为向左显示。
 
 弹出菜单控件直接HTML初始化的例子:
-<div ecui="type:popup;name:test">
-    <!-- 这里放选项内容 -->
-    <li>菜单项</li>
+<div ecui="type:popup">
+  <!-- 这里放选项内容 -->
+  ...
+  <div>菜单项</div>
+  <!-- 包含子菜单项的菜单项 -->
+  <div>
+    <label>菜单项</label>
+    <!-- 这里放子菜单项 -->
     ...
-    <!-- 包含子菜单项的菜单项 -->
-    <li>
-        <label>菜单项</label>
-        <!-- 这里放子菜单项 -->
-        <li>子菜单项</li>
-        ...
-    </li>
-    ...
+    <div>子菜单项</div>
+  </div>
 </div>
 
 属性
 _nOptionSize - 弹出菜单选项的显示数量，不设置将全部显示
-_cSuperior   - 上一级被激活的弹出菜单控件
-_cInferior   - 下一级被激活的弹出菜单控件
 _uPrev       - 向上滚动按钮
 _uNext       - 向下滚动按钮
 
 子菜单项属性
-_cPopup      - 是否包含下级弹出菜单
+_cSubPopup   - 下级弹出菜单的引用
 */
 //{if 0}//
 (function () {
 
     var core = ecui,
+        array = core.array,
         dom = core.dom,
         ui = core.ui,
         util = core.util,
@@ -41,25 +38,28 @@ _cPopup      - 是否包含下级弹出菜单
         MAX = MATH.max,
         MIN = MATH.min,
 
+        indexOf = array.indexOf,
         createDom = dom.create,
         first = dom.first,
         getParent = dom.getParent,
         getPosition = dom.getPosition,
-        getStyle = dom.getStyle,
         moveElements = dom.moveElements,
         removeDom = dom.remove,
         blank = util.blank,
         extend = util.extend,
+        findConstructor = util.findConstructor,
         getView = util.getView,
-        inherits = util.inherits,
         toNumber = util.toNumber,
 
         $fastCreate = core.$fastCreate,
+        inheritsControl = core.inherits,
         intercept = core.intercept,
         restore = core.restore,
 
         UI_CONTROL = ui.Control,
         UI_CONTROL_CLASS = UI_CONTROL.prototype,
+        UI_BUTTON = ui.Button,
+        UI_BUTTON_CLASS = UI_BUTTON.prototype,
         UI_ITEM = ui.Item,
         UI_ITEM_CLASS = UI_ITEM.prototype,
         UI_ITEMS = ui.Items;
@@ -73,40 +73,41 @@ _cPopup      - 是否包含下级弹出菜单
      *
      * @param {Object} options 初始化选项
      */
-    //__gzip_original__UI_POPUP
-    //__gzip_original__UI_POPUP_BUTTON
-    //__gzip_original__UI_POPUP_ITEM
-    var UI_POPUP =
-        ui.Popup = function (el, options) {
-            UI_CONTROL.call(this, el, options);
+    ///__gzip_original__UI_POPUP
+    ///__gzip_original__UI_POPUP_BUTTON
+    ///__gzip_original__UI_POPUP_ITEM
+    var UI_POPUP = ui.Popup =
+        inheritsControl(
+            UI_CONTROL,
+            'ui-popup',
+            function (el, options) {
+                //__gzip_original__buttonParams
+                var type = this.getType(),
+                    buttonClass = findConstructor(this, 'Button');
 
-            //__gzip_original__baseClass
-            //__gzip_original__buttonParams
-            var baseClass = options.base,
-                buttonParams = {select: false, focus: false};
+                removeDom(el);
+                el.style.cssText += ';position:absolute;overflow:hidden';
+                if (this._nOptionSize = options.optionSize) {
+                    var o = createDom(type + '-body', 'position:absolute;top:0px;left:0px');
 
-            removeDom(el);
-            el.style.cssText += ';position:absolute;overflow:hidden';
-            if (this._nOptionSize = options.optionSize) {
-                var o = createDom(baseClass + '-main', 'position:absolute;top:0px;left:0px');
+                    moveElements(el, o);
 
-                moveElements(el, o);
+                    el.innerHTML =
+                        '<div class="' + type + '-prev' + buttonClass.TYPES +
+                            '" style="position:absolute;top:0px;left:0px"></div><div class="' +
+                            type + '-next' + buttonClass.TYPES + '" style="position:absolute"></div>';
 
-                el.innerHTML =
-                    '<div class="ec-control ' + baseClass +
-                        '-prev" style="position:absolute;top:0px;left:0px"></div><div class="ec-control ' +
-                        baseClass + '-next" style="position:absolute"></div>';
+                    this.$setBody(el.insertBefore(o, el = el.firstChild));
 
-                this.$setBody(el.insertBefore(o, el = el.firstChild));
+                    this._uPrev = $fastCreate(buttonClass, el, this);
+                    this._uNext = $fastCreate(buttonClass, el.nextSibling, this);
+                }
 
-                this._uPrev = $fastCreate(UI_POPUP_BUTTON, el, this, buttonParams);
-                this._uNext = $fastCreate(UI_POPUP_BUTTON, el.nextSibling, this, buttonParams);
+                // 初始化菜单项
+                this.$initItems();
             }
-
-            // 初始化菜单项
-            this.$initItems();
-        },
-        UI_POPUP_CLASS = inherits(UI_POPUP, UI_CONTROL),
+        ),
+        UI_POPUP_CLASS = UI_POPUP.prototype,
 
         /**
          * 初始化弹出菜单控件的按钮部件。
@@ -114,10 +115,14 @@ _cPopup      - 是否包含下级弹出菜单
          *
          * @param {Object} options 初始化选项
          */
-        UI_POPUP_BUTTON = UI_POPUP.Button = function (el, options) {
-            UI_CONTROL.call(this, el, options);
-        },
-        UI_POPUP_BUTTON_CLASS = inherits(UI_POPUP_BUTTON, UI_CONTROL),
+        UI_POPUP_BUTTON_CLASS = (UI_POPUP.Button = inheritsControl(
+            UI_BUTTON,
+            null,
+            null,
+            function (el, options) {
+                options.userSelect = options.focusable = false;
+            }
+        )).prototype,
 
         /**
          * 初始化弹出菜单控件的选项部件。
@@ -125,24 +130,24 @@ _cPopup      - 是否包含下级弹出菜单
          *
          * @param {Object} options 初始化选项
          */
-        UI_POPUP_ITEM = UI_POPUP.Item = function (el, options) {
-            UI_ITEM.call(this, el, options);
+        UI_POPUP_ITEM_CLASS = (UI_POPUP.Item = inheritsControl(
+            UI_ITEM,
+            null,
+            function (el, options) {
+                var o = first(el),
+                    tmpEl;
 
-            var o = first(el),
-                tmpEl;
+                if (o && o.tagName == 'LABEL') {
+                    moveElements(el, tmpEl = createDom(options.parent.getPrimary() + UI_POPUP.TYPES));
+                    el.appendChild(o);
+                    this._cSubPopup = $fastCreate(UI_POPUP, tmpEl, this, extend({}, options));
+                }
 
-            if (o && o.tagName == 'LABEL') {
-                moveElements(el, tmpEl = createDom('ec-popup ' + options.parent.getBaseClass()));
-                el.appendChild(o);
-                this._cPopup = $fastCreate(UI_POPUP, tmpEl, this, extend({}, options));
+                UI_POPUP_ITEM_FLUSH(this);
             }
+        )).prototype,
 
-            UI_POPUP_ITEM_FLUSH(this);
-        },
-        UI_POPUP_ITEM_CLASS = inherits(UI_POPUP_ITEM, UI_ITEM),
-
-        UI_POPUP_CHAIN_FIRST,
-        UI_POPUP_CHAIN_LAST;
+        UI_POPUP_CHAIN = [];
 //{else}//
     /**
      * 弹出菜单选项样式刷新。
@@ -152,98 +157,90 @@ _cPopup      - 是否包含下级弹出菜单
      */
     function UI_POPUP_ITEM_FLUSH(item) {
         if (item) {
-            item.setClass(item.getBaseClass() + (item.getItems().length ? '-complex' : ''));
+            item.setClass(item.getPrimary() + (item.getItems().length ? '-branch' : ''));
         }
     }
 
     extend(UI_POPUP_CLASS, UI_ITEMS);
 
     /**
-     * 鼠标单击控件事件的默认处理。
-     * @protected
-     *
-     * @param {Event} event 事件对象
+     * @override
      */
     UI_POPUP_BUTTON_CLASS.$click = function (event) {
-        UI_CONTROL_CLASS.$click.call(this, event);
+        UI_BUTTON_CLASS.$click.call(this, event);
 
-        //__gzip_original__prev
         var parent = this.getParent(),
             style = parent.getBody().style,
             list = parent.getItems(),
             height = list[0].getHeight(),
-            prev = parent._uPrev,
-            prevHeight = prev.getHeight(),
+            prevHeight = parent._uPrev.getHeight(),
             top = (toNumber(style.top) - prevHeight) / height;
 
-        parent.$setActived();
         style.top =
-            MIN(MAX(prev == this ? ++top : --top, parent._nOptionSize - list.length), 0) * height + prevHeight + 'px';
+            MIN(MAX(parent._uPrev == this ? ++top : --top, parent._nOptionSize - list.length), 0) * height +
+                prevHeight + 'px';
     };
 
     /**
-     * 菜单项点击的默认处理
-     * @protected
-     *
-     * @params {Event} event 事件对象
+     * @override
      */
     UI_POPUP_ITEM_CLASS.$click = function (event) {
         UI_ITEM_CLASS.$click.call(this, event);
         if (!this.getItems().length) {
-            UI_POPUP_CHAIN_FIRST.hide();
+            // 点击最终项将关闭打开的全部弹出菜单
+            UI_POPUP_CHAIN[0].hide();
         }
     };
 
     /**
-     * 菜单项移出的默认处理
-     * @protected
-     *
-     * @params {Event} event 事件对象
+     * @override
      */
-    UI_POPUP_ITEM_CLASS.$mouseout = function (event) {
-        UI_ITEM_CLASS.$mouseout.call(this, event);
-        if (!this.getItems().length) {
-            this.getParent().$setActived();
+    UI_POPUP_ITEM_CLASS.$deactivate = function (event) {
+        UI_ITEM_CLASS.$deactivate.call(this, event);
+        if (!this.contain(event.getControl())) {
+            // 如果没有在菜单项上形成完整的点击，同样关闭弹出菜单，不触发click事件
+            UI_POPUP_CHAIN[0].hide();
         }
     };
 
     /**
-     * 菜单项移入的默认处理
-     * @protected
-     *
-     * @params {Event} event 事件对象
+     * @override
      */
     UI_POPUP_ITEM_CLASS.$mouseover = function (event) {
         // 改变菜单项控件的显示状态
         UI_ITEM_CLASS.$mouseover.call(this, event);
 
         var o = getView(),
-            childPopup = this._cPopup,
+            subPopup = this._cSubPopup,
             popup = this.getParent(),
-            superior = popup._cSuperior,
-            inferior = popup._cInferior,
+            index = indexOf(UI_POPUP_CHAIN, popup),
+            supPopup = UI_POPUP_CHAIN[index - 1],
+            oldSubPopup = UI_POPUP_CHAIN[index + 1],
             pos = getPosition(this.getOuter()),
             x = pos.left,
             width;
 
-        if (inferior != childPopup) {
+        if (oldSubPopup != subPopup) {
             // 隐藏之前显示的下级弹出菜单控件
-            if (inferior) {
-                inferior.hide();
+            if (oldSubPopup) {
+                oldSubPopup.hide();
             }
 
             if (this.getItems().length) {
-                childPopup.show();
+                popup._cExpanded = this;
+                this.alterClass('+expanded');
 
-                // 计算子菜单应该显示的位置，以下使用o表示left
-                width = childPopup.getWidth();
-                inferior = x + this.getWidth() - 4;
+                subPopup.show();
+
+                // 计算子菜单应该显示的位置，以下使用oldSubPopup表示left
+                width = subPopup.getWidth();
+                oldSubPopup = x + this.getWidth() - 4;
                 x -= width - 4;
 
                 // 优先计算延用之前的弹出顺序的应该的位置，显示新的子弹出菜单
-                childPopup.setPosition(
-                    inferior + width > o.right || superior && superior.getX() > popup.getX() && x > o.left ?
-                        x : inferior,
+                subPopup.setPosition(
+                    oldSubPopup + width > o.right || supPopup && supPopup.getX() > popup.getX() && x > o.left ?
+                        x : oldSubPopup,
                     pos.top - 4
                 );
             }
@@ -251,41 +248,30 @@ _cPopup      - 是否包含下级弹出菜单
     };
 
     /**
-     * 菜单项激活结束的默认处理
-     * @protected
-     *
-     * @params {Event} event 事件对象
-     */
-    UI_POPUP_ITEM_CLASS.$deactivate = function (event) {
-        UI_ITEM_CLASS.$deactivate.call(this, event);
-        if (!this.contain(event.getTarget())) {
-            UI_POPUP_CHAIN_FIRST.hide();
-        }
-    };
-
-    /**
      * 添加子选项控件。
-     * 弹出菜单控件与弹出菜单子选项控件都包含 add 方法，用于添加子选项控件。如果位置序号不合法，子选项控件将添加在末尾的位置。
      * @public
      *
      * @param {string|Element|ecui.ui.Item} item 选项控件的 html 内容/控件对应的 Element 对象/选项控件
      * @param {number} index 子选项控件需要添加的位置序号
+     * @param {Object} options 子控件初始化选项
      * @return {ecui.ui.Item} 子选项控件
      */
-    UI_POPUP_ITEM_CLASS.add = function (item, index) {
-        return (this._cPopup =
-            this._cPopup || $fastCreate(UI_POPUP, createDom('ec-popup ' + this.getParent().getBaseClass()), this))
-                .add(item, index);
+    UI_POPUP_ITEM_CLASS.add = function (item, index, options) {
+        var parent = this.getParent();
+
+        return (this._cSubPopup = this._cSubPopup ||
+                    $fastCreate(UI_POPUP, createDom(parent.getPrimary() + parent.constructor.agent.TYPES), this)
+        ).add(item, index, options);
     };
 
     /**
-     * 获取当前菜单选项控件的所有子选项控件。
+     * 获取全部的子选项控件。
      * @public
      *
-     * @return {Array} 子选项控件列表，如果不存在返回空列表
+     * @return {Array} 子选项控件数组
      */
     UI_POPUP_ITEM_CLASS.getItems = function () {
-        return this._cPopup && this._cPopup.getItems() || [];
+        return this._cSubPopup && this._cSubPopup.getItems() || [];
     };
 
     /**
@@ -296,13 +282,11 @@ _cPopup      - 是否包含下级弹出菜单
      * @return {ecui.ui.Item} 被移除的子选项控件
      */
     UI_POPUP_ITEM_CLASS.remove = function (item) {
-        return this._cPopup && this._cPopup.remove(item);
+        return this._cSubPopup && this._cSubPopup.remove(item);
     };
 
     /**
-     * 选项控件发生变化的处理。
-     * 在 选项组接口 中，选项控件发生增加/减少操作时调用此方法。
-     * @protected
+     * @override
      */
     UI_POPUP_CLASS.$alterItems = function () {
         UI_POPUP_ITEM_FLUSH(this.getParent());
@@ -345,12 +329,7 @@ _cPopup      - 是否包含下级弹出菜单
     };
 
     /**
-     * 计算控件的缓存。
-     * 控件缓存部分核心属性的值，提高控件属性的访问速度，在子控件或者应用程序开发过程中，如果需要避开控件提供的方法(setSize、alterClass 等)直接操作 Element 对象，操作完成后必须调用 clearCache 方法清除控件的属性缓存，否则将引发错误。
-     * @protected
-     *
-     * @param {CssStyle} style 基本 Element 对象的 Css 样式对象
-     * @param {boolean} cacheSize 是否需要缓存控件大小，如果控件是另一个控件的部件时，不缓存大小能加快渲染速度，默认缓存
+     * @override
      */
     UI_POPUP_CLASS.$cache = function (style, cacheSize) {
         UI_ITEMS.$cache.call(this, style, cacheSize);
@@ -364,68 +343,72 @@ _cPopup      - 是否包含下级弹出菜单
     };
 
     /**
-     * 隐藏控件。
-     * 隐藏弹出菜单，同时隐藏所有的子弹出菜单。
-     * @protected
+     * @override
+     */
+    UI_POPUP_CLASS.$dispose = function () {
+        // 这里取消展开项的引用，是为了防止全页面 unload 时，展开项在弹出菜单之前被释放了，从而调用 alterClass 恢复状态出错。
+        this._cExpanded = null;
+        this.hide();
+        UI_ITEMS.$dispose.call(this);
+    };
+
+    /**
+     * @override
      */
     UI_POPUP_CLASS.$hide = function () {
-        UI_CONTROL_CLASS.$hide.call(this);
+        for (var i = indexOf(UI_POPUP_CHAIN, this), index = i, o; o = UI_POPUP_CHAIN[i++]; ) {
+            // 关闭弹出菜单需要同步关闭所有后续的弹出菜单
+            if (o._cExpanded) {
+                o._cExpanded.alterClass('-expanded');
+            }
 
-        if (UI_POPUP_CHAIN_LAST = this._cSuperior) {
-            this._cSuperior = null;
-            UI_POPUP_CHAIN_LAST._cInferior = null;
+            UI_CONTROL_CLASS.$hide.call(o);
+        }
+
+        if (index) {
+            UI_POPUP_CHAIN = UI_POPUP_CHAIN.slice(0, index);
+            UI_POPUP_CHAIN[index - 1]._cExpanded.alterClass('-expanded');
         }
         else {
+            UI_POPUP_CHAIN = [];
             restore();
         }
     };
 
     /**
-     * 界面点击强制拦截事件的默认处理。
-     * 弹出菜单需要强制拦截浏览器的点击事件，关闭弹出菜单。
-     * @protected
-     *
-     * @param {Event} event 事件对象
+     * @override
      */
     UI_POPUP_CLASS.$intercept = function (event) {
         for (var control = event.getControl(); control; control = control.getParent()) {
-            if (control instanceof UI_MULTI_SELECT_ITEM) {
+            if (control instanceof findConstructor(this, 'Item')) {
+                // 点击发生在按钮上可能触发点击事件，不默认调用 restore 恢复状态
                 return false;
             }
         }
-        UI_POPUP_CHAIN_FIRST.hide();
+        // 点击发生在其它区域需要关闭弹出菜单，restore 在 $hide 中触发
+        UI_POPUP_CHAIN[0].hide();
         return false;
     };
 
     /**
-     * 设置激活的选项。
-     * $setActived 方法改变选项组控件中当前选中项的效果，不会触发相应的移入移出事件。
-     * @protected
-     *
-     * @param {ecui.ui.Item} item 选项控件
+     * @override
      */
-    UI_POPUP_CLASS.$setActived = function (item) {
-        UI_ITEMS.$setActived.call(this, item);
-        if (!item) {
-            if (this._cInferior) {
-                this._cInferior.hide();
-            }
+    UI_POPUP_CLASS.$remove = function (item) {
+        if (this._cExpanded == item) {
+            UI_POPUP_CHAIN[indexOf(UI_POPUP_CHAIN, this) + 1].hide();
         }
+        UI_ITEMS.$remove.call(this, item);
     };
 
     /**
-     * 显示控件。
-     * 显示弹出菜单时，必须保证弹出菜单显示在屏幕内，并且子弹出菜单展开的方向尽可能一致。
-     * @protected
+     * @override
      */
     UI_POPUP_CLASS.$show = function () {
         UI_CONTROL_CLASS.$show.call(this);
 
-        // 已经移入的菜单选项需要移出
-        this.$setActived();
-
         var o = getView(),
             el = this.getOuter(),
+            length = UI_POPUP_CHAIN.length,
             pos;
         
         if (!getParent(el)) {
@@ -441,28 +424,23 @@ _cPopup      - 是否包含下级弹出菜单
             MIN(MAX(pos.top, o.top), o.bottom - this.getHeight())
         );
 
-        if (UI_POPUP_CHAIN_LAST) {
-            // 如果之前存在已弹出的菜单
-            el.style.zIndex = toNumber(getStyle(UI_POPUP_CHAIN_LAST.getOuter(), 'zIndex')) + 1;
-            this._cSuperior = UI_POPUP_CHAIN_LAST;
-            UI_POPUP_CHAIN_LAST._cInferior = this;
-        }
-        else {
+        if (!length) {
             // 第一个弹出菜单，需要屏蔽鼠标点击
-            el.style.zIndex = 32768;
-            intercept(UI_POPUP_CHAIN_FIRST = this);
+            intercept(this);
         }
 
-        UI_POPUP_CHAIN_LAST = this;
+        el.style.zIndex = 32768 + length;
+        UI_POPUP_CHAIN.push(this);
     };
 
     /**
-     * 计算控件的缓存。
-     * 控件缓存部分核心属性的值，提高控件属性的访问速度，在子控件或者应用程序开发过程中，如果需要避开控件提供的方法(setSize、alterClass 等)直接操作 Element 对象，操作完成后必须调用 clearCache 方法清除控件的属性缓存，否则将引发错误。
-     * @public
-     *
-     * @param {boolean} cacheSize 是否需要缓存控件大小，如果控件是另一个控件的部件时，不缓存大小能加快渲染速度，默认缓存
-     * @param {boolean} force 是否需要强制刷新缓存，相当于执行了 clearCache 方法，默认不强制刷新
+     * 弹出菜单无法指定挂载位置。
+     * @override
+     */
+    UI_POPUP_CLASS.appendTo = UI_POPUP_CLASS.setParent = blank;
+
+    /**
+     * @override
      */
     UI_POPUP_CLASS.cache = function (cacheSize, force) {
         if (getParent(this.getOuter())) {
@@ -471,56 +449,13 @@ _cPopup      - 是否包含下级弹出菜单
     };
 
     /**
-     * 销毁控件。
-     * dispose 方法触发 ondispose 事件，然后调用 $dispose 方法，dispose 方法在页面卸载时会被自动调用，通常不需要直接调用。
-     * @public
-     */
-    UI_POPUP_CLASS.dispose = function () {
-        this.hide();
-        UI_ITEMS.dispose.call(this);
-    };
-
-    /**
-     * 获取当前激活的下级弹出菜单。
-     * getInferior 方法返回弹出菜单处于显示状态时，通过它打开的子弹出菜单。
-     * @public
-     *
-     * @return {ecui.ui.Popup} 弹出菜单控件
-     */
-    UI_POPUP_CLASS.getInferior = function () {
-        return this._cInferior;
-    };
-
-    /**
-     * 获取当前激活的上级弹出菜单。
-     * getSuperior 方法返回弹出菜单处于显示状态时，打开它的父弹出菜单。
-     * @public
-     *
-     * @return {ecui.ui.Popup} 弹出菜单控件
-     */
-    UI_POPUP_CLASS.getSuperior = function () {
-        return this._cSuperior;
-    };
-
-    /**
-     * 控件刷新。
-     * repaint 方法将导致控件整体重绘，在通常情况下，建议控件改变的状态进行重绘，而不是调用 repaint 方法。
-     * @public
+     * @override
      */
     UI_POPUP_CLASS.repaint = function () {
         if (getParent(this.getOuter())) {
             UI_CONTROL_CLASS.repaint.call(this);
         }
     };
-
-    /**
-     * 设置当前控件的父控件。
-     * 弹出菜单控件只能挂在 document.body 上，因此 setParent 方法无效。
-     * @public
-     *
-     * @param {boolean} parent 设置/取消父控件对象，默认值为 false
-     */
-    UI_POPUP_CLASS.setParent = blank;
 //{/if}//
 //{if 0}//
 })();

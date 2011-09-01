@@ -79,7 +79,7 @@
             "定义按钮的基本操作。",
             "按钮控件，屏蔽了激活状态的向上冒泡，并且在激活(active)状态下鼠标移出控件区域会失去激活样式，移入控件区域再次获得激活样式，按钮控件中的文字不可以被选中。"
         ],
-        "html": "<div ecui=\"type:button;id:demo\"><!-- 这里放按钮的文字 -->...</div>"
+        "html": "<div ecui=\"type:button\"><!-- 这里放按钮的文字 -->...</div><button ecui=\"type:button\"><!-- 这里放按钮的文字 -->...</button><input ecui=\"type:button\" type=\"button\" value=\"按钮文字\">"
     },
 
     {
@@ -160,7 +160,7 @@
         "html": "<input ecui=\"type:checkbox;subject:china\" type=\"checkbox\" name=\"city\" value=\"beijing\" checked><div ecui=\"type:checkbox;name:city;value:beijing;checked:true;subject:china\"></div><div ecui=\"type:checkbox;subject:china\"><input type=\"checkbox\" name=\"city\" value=\"beijing\" checked></div>",
         "remark": [
             "定义单个设置项选择状态的基本操作。",
-            "复选框控件，实现了对原生 InputElement 复选框的功能扩展，支持复选框之间的主从关系定义。当一个复选框的“从复选框”选中一部分时，“主复选框”将处于半选状态，这种状态逻辑意义上等同于未选择状态，但显示效果不同，复选框的主从关系可以有多级。"
+            "复选框控件，实现了对原生 InputElement 复选框的功能扩展，支持复选框之间的主从关系定义。当一个复选框的“从复选框”选中一部分时，“主复选框”将处于半选状态，这种状态逻辑意义上等同于未选择状态，但显示效果不同，复选框的主从关系可以有多级。复选框控件适用所有在一组中允许选择多个目标的交互，并不局限于此分组的表现形式(文本、图片等)。"
         ]
     },
 
@@ -178,7 +178,7 @@
         "html": "<input ecui=\"type:radio\" type=\"radio\" name=\"city\" value=\"beijing\" checked><div ecui=\"type:radio;name:city;value:beijing;checked:true\"></div><div ecui=\"type:radio\"><input type=\"radio\" name=\"city\" value=\"beijing\" checked></div>",
         "remark": [
             "定义一组选项中选择唯一选项的基本操作。",
-            "单选框控件，实现了对原生 InputElement 单选框的功能扩展，支持对选中的图案的选择。单选框控件需要分组后使用，一组内只有一个单选框能被选中。"
+            "单选框控件，实现了对原生 InputElement 单选框的功能扩展，支持对选中的图案的选择。单选框控件适用所有在一组中只允许选择一个目标的交互，并不局限于此分组的表现形式(文本、图片等)。"
         ]
     },
 
@@ -276,6 +276,23 @@
             "定义由行列构成的表格的基本操作。",
             "表格控件，对基本的 TableElement 功能进行了扩展，表头固定，不会随表格的垂直滚动条滚动而滚动，在行列滚动时，支持整行整列移动，允许直接对表格的数据进行增加/删除/修改操作。"
         ]
+    },
+
+    {
+        "name": "popup",
+        "type": "ui",
+        "position": "ecui.ui.Popup",
+        "super": "control",
+        "interface": ["items"],
+        "desc": "弹出菜单控件",
+        "params": [
+            {"name": "optionSize", "desc": "number，弹出菜单选项的显示数量，不设置将全部显示"}
+        ],
+        "html": "<div ecui=\"type:popup\"><!-- 这里放选项内容 -->...<div>菜单项</div><!-- 包含子菜单项的菜单项 --><div><label>菜单项</label><!-- 这里放子菜单项 -->...<div>子菜单项</div></div></div>",
+        "remark": [
+            "定义弹出菜单项的基本操作。",
+            "弹出菜单控件，弹出式菜单操作时不会改变当前已经激活的对象，任何点击都将导致弹出菜单消失，弹出菜单默认向右展开子菜单，如果右部已经到达浏览器最边缘，将改为向左显示。"
+        ]
     }
 
 
@@ -370,23 +387,6 @@
         "remark": [
             "定义允许左右锁定若干列显示的高级表格的基本操作。",
             "允许锁定左右两列的高级表格控件，继承自表格控件，内部包含两个部件——锁定的表头区(基础控件)与锁定的行内容区(基础控件)。"
-        ]
-    },
-
-    {
-        "name": "popup",
-        "type": "ui",
-        "position": "ecui.ui.Popup",
-        "super": "control",
-        "interface": ["items"],
-        "desc": "弹出菜单控件",
-        "params": [
-            {"name": "optionSize", "desc": "number，弹出菜单选项的显示数量，不设置将全部显示"}
-        ],
-        "html": "<div ecui=\"type:popup;id:ctrl1\"><div>选项一</div><div><label>菜单项二(子菜单)</label><div>子菜单选项1</div><div>子菜单选项2/div></div></div>",
-        "remark": [
-            "定义弹出菜单项的基本操作。",
-            "弹出菜单控件，弹出式菜单操作时不会改变当前已经激活的对象，任何点击都将导致弹出菜单消失，弹出菜单默认向右展开子菜单，如果右部已经到达浏览器最边缘，将改为向左显示。"
         ]
     },
 

@@ -1,6 +1,6 @@
 /*
 Radio - 定义一组选项中选择唯一选项的基本操作。
-单选框控件，继承自输入框控件，实现了对原生 InputElement 单选框的功能扩展，支持对选中的图案的选择。单选框控件需要分组后使用，在表单项提交中，一组单选框控件中的第一个单选框保存提交用的表单内容。
+单选框控件，继承自输入框控件，实现了对原生 InputElement 单选框的功能扩展，支持对选中的图案的选择。单选框控件适用所有在一组中只允许选择一个目标的交互，并不局限于此分组的表现形式(文本、图片等)。
 
 单选框控件直接HTML初始化的例子:
 <input ecui="type:radio" name="city" value="beijing" checked="checked" type="radio">
@@ -19,6 +19,8 @@ _bDefault  - 默认的选中状态
 
     var core = ecui,
         ui = core.ui,
+
+        undefined,
 
         getKey = core.getKey,
         inheritsControl = core.inherits,

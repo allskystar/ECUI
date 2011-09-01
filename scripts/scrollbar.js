@@ -38,6 +38,7 @@ _oRange         - 滑动按钮的合法滑动区间
         getMouseX = core.getMouseX,
         getMouseY = core.getMouseY,
         inheritsControl = core.inherits,
+        triggerEvent = core.triggerEvent,
 
         UI_CONTROL = ui.Control,
         UI_CONTROL_CLASS = UI_CONTROL.prototype,
@@ -427,6 +428,7 @@ _oRange         - 滑动按钮的合法滑动区间
         if (this._nValue != value) {
             // 值发生改变时触发相应的事件
             this._nValue = value;
+            console.log(this.getValue());
             UI_SCROLLBAR_CHANGE(this);
             this.$flushThumb();
         }

@@ -26,16 +26,6 @@ Shield - 分组屏蔽功能插件，通过修改setEnabled方法实现同组的�
         ];
 //{/if}//
 //{if $phase == "define"}//
-    var EXT_COMBINE = ext.combine = function (control, value) {
-        if (/(^[^(]+)(\(([^)]+)\))?$/.test(value)) {
-            value = REGEXP.$3;
-            new COMBINE(
-                [control].concat(REGEXP.$1.split(/\s+/)),
-                value.split(/\s+/)
-            );
-        }
-    };
-
     /**
      * 控件组合。
      * 控件组合后形成一个共同体虚拟控件，虚拟控件体内所有控件的基本事件与操作将同时进行，一个控件只能被组合到一个共同体虚拟控件中。
@@ -121,6 +111,16 @@ Shield - 分组屏蔽功能插件，通过修改setEnabled方法实现同组的�
         remove(combine._aControls, this);
         for (; o = combine._aNames[i++]; ) {
             delete COMBINE[uid + o];
+        }
+    };
+
+    ext.combine = function (control, value) {
+        if (/(^[^(]+)(\(([^)]+)\))?$/.test(value)) {
+            value = REGEXP.$3;
+            new COMBINE(
+                [control].concat(REGEXP.$1.split(/\s+/)),
+                value.split(/\s+/)
+            );
         }
     };
 //{/if}//

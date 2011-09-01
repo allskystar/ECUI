@@ -16,6 +16,7 @@ _oInner  - 内层装饰器或者控件对象
         ui = core.ui,
         util = core.util,
 
+        undefined,
         DOCUMENT = document,
         MATH = Math,
         REGEXP = RegExp,
@@ -35,7 +36,6 @@ _oInner  - 内层装饰器或者控件对象
         inherits = util.inherits,
 
         $bind = core.$bind,
-        $register = core.$register,
         isFixedSize = core.isFixedSize,
 
         UI_CONTROL = ui.Control,

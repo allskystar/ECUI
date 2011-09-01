@@ -57,7 +57,6 @@
         $clearState,
         $create,
         $fastCreate,
-        $register,
         calcHeightRevise,
         calcLeftRevise,
         calcTopRevise,
@@ -83,13 +82,14 @@
 
             return null;
         },
+        getActived,
         getAttributeName,
         getFocused,
+        getHovered,
         getKey,
         getMouseX,
         getMouseY,
         getParameters,
-        getActived,
         getScrollNarrow,
         getStatus,
 
@@ -581,7 +581,7 @@
                         elements = [el],
                         o;
 
-                    if (!initRecursion++) {
+                    if (!(initRecursion++)) {
                         // 第一层 init 循环的时候需要关闭resize事件监听，防止反复的重入
                         detachEvent(WINDOW, 'resize', repaint);
                     }
@@ -784,6 +784,19 @@
             oncreate(type, options);
 
             return type;
+        };
+
+        /**
+         * 添加控件的事件监听函数。
+         * @public
+         *
+         * @param {ecui.ui.Control} control ECUI 控件
+         * @param {string} name 事件名称
+         * @param {Function} caller 监听函数
+         */
+        core.addEventListener = function (control, name, caller) {
+            name = control.getUID() + name;
+            (eventListeners[name] = eventListeners[name] || []).push(caller);
         };
 
         /**
@@ -1070,7 +1083,7 @@
             if (text) {
                 for (
                     el.removeAttribute(attributeName);
-                    /\s*([\w-]+)\s*(:\s*|:\s*([^;\s]+(\s+[^;\s]+)*)\s*)?($|;)/.test(text);
+                    /\s*([\w\-]+)\s*(:\s*|:\s*([^;\s]+(\s+[^;\s]+)*)\s*)?($|;)/.test(text);
                 ) {
                     text = REGEXP["$'"];
 
@@ -1191,7 +1204,7 @@
          * query 方法允许按多种条件组合查询满足需要的控件，如果省略条件表示不进行限制。condition参数对象支持的属性如下：
          * type   {Function} 控件的类型构造函数
          * parent {ecui.ui.Control} 控件的父控件对象
-         * custom {Function} 自定义查询函数，传入的参数是控件对象
+         * custom {Function} 自定义查询函数，传入的参数是控件对象，query 方法会将自己的 this 指针传入查询函数中
          * @public
          *
          * @param {Object} condition 查询条件，如果省略将返回全部的控件
@@ -1211,12 +1224,26 @@
             ) {
                 if ((!condition.type || (o instanceof condition.type)) &&
                         (parent === undefined || (o.getParent() === parent)) &&
-                        (!custom || custom(o))) {
+                        (!custom || custom.call(this, o))) {
                     result.push(o);
                 }
             }
 
             return result;
+        };
+
+        /**
+         * 移除控件的事件监听函数。
+         * @public
+         *
+         * @param {ecui.ui.Control} control ECUI 控件
+         * @param {string} name 事件名称
+         * @param {Function} caller 监听函数
+         */
+        core.removeEventListener = function (control, name, caller) {
+            if (name = eventListeners[control.getUID() + name]) {
+                remove(name, caller);
+            }
         };
 
         /**
@@ -1252,11 +1279,6 @@
 
             bubble(focusedControl, 'blur', null, parent);
             bubble(focusedControl = control, 'focus', null, parent);
-        };
-
-        core.addEventListener = function (control, name, caller) {
-            name = control.getUID() + name;
-            (eventListeners[name] = eventListeners[name] || []).push(caller);
         };
 
         /**
@@ -1620,32 +1642,37 @@
 
                 namedControls = {};
 
-                // 检测Element宽度与高度的计算方式
-                //__gzip_original__body
-                var body = DOCUMENT.body,
-                    o = getParameters(body, 'data-ecui');
+                var o = getParameters(DOCUMENT.body, 'data-ecui');
 
                 ecuiName = o.name || ecuiName;
                 isGlobalId = o.globalId;
 
                 insertHTML(
-                    body,
+                    DOCUMENT.body,
                     'BEFOREEND',
                     '<div style="position:absolute;overflow:scroll;top:-90px;left:-90px;width:80px;height:80px;' +
                         'border:1px solid"><div style="position:absolute;top:0px;height:90px"></div></div>'
                 );
-                o = body.lastChild;
+                // 检测Element宽度与高度的计算方式
+                o = DOCUMENT.body.lastChild;
                 flgFixedSize = o.offsetWidth > 80;
                 flgFixedOffset = o.lastChild.offsetTop;
                 scrollNarrow = o.offsetWidth - o.clientWidth - 2;
                 removeDom(o);
 
                 attachEvent(WINDOW, 'resize', repaint);
-                attachEvent(WINDOW, 'unload', onunload);
+                attachEvent(WINDOW, 'unload', function () {
+                    for (var i = 0; o = allControls[i++]; ) {
+                        o.$dispose();
+                    }
+
+                    // 清除闭包中引用的 Element 对象
+                    DOCUMENT = maskElements = null;
+                });
                 attachEvent(WINDOW, 'scroll', onscroll);
 
-                init(body);
-                addClass(body, 'ecui-loaded');
+                init(DOCUMENT.body);
+                addClass(DOCUMENT.body, 'ecui-loaded');
 
                 status = NORMAL;
                 return true;
@@ -1744,19 +1771,6 @@
                     return;
                 }
             }
-        }
-
-        /**
-         * 页面关闭时释放占用的空间，防止内存泄漏。
-         * @private
-         */
-        function onunload() {
-            for (var i = 0, o; o = allControls[i++]; ) {
-                o.$dispose();
-            }
-
-            // 清除闭包中引用的 Element 对象
-            DOCUMENT = maskElements = null;
         }
 
         /**

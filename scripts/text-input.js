@@ -40,6 +40,8 @@ _oFormat    - 允许提交的格式正则表达式
         trim = string.trim,
         inherits = util.inherits,
 
+        triggerEvent = core.triggerEvent,
+
         UI_EDIT = ui.Edit,
         UI_EDIT_CLASS = UI_EDIT.prototype;
 //{/if}//

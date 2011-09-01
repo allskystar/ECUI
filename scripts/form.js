@@ -163,8 +163,8 @@ _uClose     - 关闭按钮
         UI_CONTROL_CLASS.$cache.call(this, style, cacheSize);
 
         style = getStyle(this.getMain().lastChild);
-        this.$cache$mainWidthRevise = calcWidthRevise(style);
-        this.$cache$mainHeightRevise = calcHeightRevise(style);
+        this.$cache$bodyWidthRevise = calcWidthRevise(style);
+        this.$cache$bodyHeightRevise = calcHeightRevise(style);
         this._uTitle.cache(true, true);
         this._uClose.cache(true, true);
     };
@@ -174,7 +174,10 @@ _uClose     - 关闭按钮
      * @override
      */
     UI_FORM_CLASS.$dispose = function () {
-        UI_CONTROL_CLASS.hide.call(this);
+        if (indexOf(UI_FORM_ALL, this) >= 0) {
+            // 窗口处于显示状态，需要强制关闭
+            this.$hide();
+        }
         UI_CONTROL_CLASS.$dispose.call(this);
     };
 
@@ -223,8 +226,8 @@ _uClose     - 关闭按钮
 
         var style = this.getMain().lastChild.style;
 
-        style.width = this.getBodyWidth() - this.$cache$mainWidthRevise + 'px';
-        style.height = this.getBodyHeight() - this.$cache$mainHeightRevise + 'px';
+        style.width = this.getBodyWidth() + 'px';
+        style.height = this.getBodyHeight() + 'px';
         if (this._bAuto) {
             this._uTitle.$setSize(this.getBodyWidth());
         }

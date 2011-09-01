@@ -537,7 +537,7 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
                 o.style[name] = value;
             }
             if (widthRevise && o !== false) {
-                for (j = index; !(o = body[j]); j--) {};
+                for (j = index; !(o = body[j]); j--) {}
 
                 var width = -cols[j].getMinimumWidth(),
                     colspan = 0;
@@ -671,8 +671,8 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
             col = null;
         }
         else if (!col) {
-            for (; col === false; col = (cols = rows[--rowIndex]._aElements)[colIndex]) {};
-            for (; !col; col = cols[--colIndex]) {};
+            for (; col === false; col = (cols = rows[--rowIndex]._aElements)[colIndex]) {}
+            for (; !col; col = cols[--colIndex]) {}
         }
         return col;
     };

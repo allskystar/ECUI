@@ -16,6 +16,7 @@ _eMask - 完成的进度比例内容区域
         ui = core.ui,
         util = core.util,
 
+        undefined,
         MATH = Math,
         FLOOR = MATH.floor,
         MAX = MATH.max,

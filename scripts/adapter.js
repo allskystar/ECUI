@@ -286,7 +286,7 @@
                 top = html.scrollTop + body.scrollTop;
                 left = html.scrollLeft + body.scrollLeft;
             }
-            else {
+            else if (el != html) {
                 for (o = el; o; o = o.offsetParent) {
                     top += o.offsetTop;
                     left += o.offsetLeft;

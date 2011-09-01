@@ -15,8 +15,6 @@ _eBrowser                 - 用于浏览器原生的滚动条实现的Element
 _uVScrollbar              - 垂直滚动条控件
 _uHScrollbar              - 水平滚动条控件
 _uCorner                  - 夹角控件
-$cache$layoutWidthRevise  - layout区域的宽度修正值
-$cache$layoutHeightRevise - layout区域的高度修正值
 $cache$mainWidth          - layout区域的实际宽度
 $cache$mainHeight         - layout区域的实际高度
 */
@@ -55,8 +53,8 @@ $cache$mainHeight         - layout区域的实际高度
 
         UI_CONTROL = ui.Control,
         UI_CONTROL_CLASS = UI_CONTROL.prototype,
-        UI_VSCROLLBAR = ui.VScroll,
-        UI_HSCROLLBAR = ui.HScroll;
+        UI_VSCROLLBAR = ui.VScrollbar,
+        UI_HSCROLLBAR = ui.HScrollbar;
 //{/if}//
 //{if $phase == "define"}//
     /**
@@ -329,8 +327,8 @@ $cache$mainHeight         - layout区域的实际高度
             mainHeight = body.offsetHeight;
 
         style = getStyle(getParent(body));
-        this.$cache$layoutWidthRevise = calcWidthRevise(style);
-        this.$cache$layoutHeightRevise = calcHeightRevise(style);
+        this.$cache$bodyWidthRevise = calcWidthRevise(style);
+        this.$cache$bodyHeightRevise = calcHeightRevise(style);
 
         // 考虑到内部Element绝对定位的问题，中心区域的宽度与高度修正
         if (this._bAbsolute) {
@@ -377,11 +375,11 @@ $cache$mainHeight         - layout区域的实际高度
      */
     UI_PANEL_CLASS.$keydown = UI_PANEL_CLASS.$keypress = function (event) {
         var which = getKey(),
-            scroll = which % 2 ? this._uHScrollbar : this._uVScrollbar;
+            o = which % 2 ? this._uHScrollbar : this._uVScrollbar;
 
         if (which >= 37 && which <= 40 && !event.target.value) {
-            if (scroll) {
-                scroll.skip(which + which % 2 - 39);
+            if (o) {
+                o.skip(which + which % 2 - 39);
             }
             return false;
         }
@@ -393,18 +391,18 @@ $cache$mainHeight         - layout区域的实际高度
      */
     UI_PANEL_CLASS.$mousewheel = function (event) {
         if (this.isHovered()) {
-            scroll = this._uVScrollbar;
+            o = this._uVScrollbar;
 
-            if (scroll && scroll.isShow()) {
+            if (o && o.isShow()) {
                 // 计算滚动的次数，至少要滚动一次
-                var value = scroll.getValue(),
-                    delta = this._nWheelDelta || FLOOR(20 / scroll.getStep()) || 1,
-                    scroll;
+                var value = o.getValue(),
+                    delta = this._nWheelDelta || FLOOR(20 / o.getStep()) || 1,
+                    o;
 
-                scroll.skip(event.detail > 0 ? delta : -delta);
+                o.skip(event.detail > 0 ? delta : -delta);
                 event.stopPropagation();
                 // 如果截面已经移动到最后，不屏弊缺省事件
-                return value == scroll.getValue();
+                return value == o.getValue();
             }
         }
     };
@@ -429,8 +427,8 @@ $cache$mainHeight         - layout区域的实际高度
 
         var paddingWidth = this.$cache$paddingLeft + this.$cache$paddingRight,
             paddingHeight = this.$cache$paddingTop + this.$cache$paddingBottom,
-            bodyWidth = this.getBodyWidth(),
-            bodyHeight = this.getBodyHeight(),
+            bodyWidth = this.getWidth() - this.$getBasicWidth(),
+            bodyHeight = this.getHeight() - this.$getBasicHeight(),
             mainWidth = this.$cache$mainWidth,
             mainHeight = this.$cache$mainHeight,
             browser = this._eBrowser,
@@ -520,8 +518,8 @@ $cache$mainHeight         - layout区域的实际高度
             }
         }
 
-        innerWidth -= this.$cache$layoutWidthRevise;
-        innerHeight -= this.$cache$layoutHeightRevise;
+        innerWidth -= this.$cache$bodyWidthRevise;
+        innerHeight -= this.$cache$bodyHeightRevise;
 
         if (vscroll) {
             vscroll.$setPageStep(innerHeight);
@@ -550,8 +548,8 @@ $cache$mainHeight         - layout区域的实际高度
      * @return {number} 水平滚动条的当前值，如果没有水平滚动条返回 -1
      */
     UI_PANEL_CLASS.getScrollLeft = function () {
-        var scroll = this._uHScrollbar;
-        return scroll ? scroll.getValue() : -1;
+        var o = this._uHScrollbar;
+        return o ? o.getValue() : -1;
     };
 
     /**
@@ -562,8 +560,8 @@ $cache$mainHeight         - layout区域的实际高度
      * @return {number} 垂直滚动条的当前值，如果没有垂直滚动条返回 -1
      */
     UI_PANEL_CLASS.getScrollTop = function () {
-        var scroll = this._uVScrollbar;
-        return scroll ? scroll.getValue() : -1;
+        var o = this._uVScrollbar;
+        return o ? o.getValue() : -1;
     };
 
     /**

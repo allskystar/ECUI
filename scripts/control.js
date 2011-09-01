@@ -27,6 +27,8 @@ _cParent                 - 父控件对象
 _aStatus                 - 控件当前的状态集合
 $cache$width             - 控件的宽度缓存
 $cache$height            - 控件的高度缓存
+$cache$bodyWidthRevise   - 内容区域的宽度修正缓存
+$cache$bodyHeightRevise  - 内容区域的高度修正缓存
 $cache$borderTopWidth    - 上部边框线宽度缓存
 $cache$borderLeftWidth   - 左部边框线宽度缓存
 $cache$borderRightWidth  - 右部边框线宽度缓存
@@ -78,6 +80,7 @@ $cache$position          - 控件布局方式缓存
         inheritsControl = core.inherits,
         isFixedSize = core.isFixedSize,
         loseFocus = core.loseFocus,
+        query = core.query,
         setFocused = core.setFocused,
         triggerEvent = core.triggerEvent,
 
@@ -128,7 +131,10 @@ $cache$position          - 控件布局方式缓存
             }
         ),
         UI_CONTROL_CLASS = UI_CONTROL.prototype,
-        UI_CONTROL_READY_LIST;
+        UI_CONTROL_READY_LIST,
+        UI_CONTROL_QUERY_SHOW = {custom: function (control) {
+            return this != control && this.contain(control) && control.isShow();
+        }};
 //{else}//
     /**
      * 设置控件的父对象。
@@ -314,17 +320,7 @@ $cache$position          - 控件布局方式缓存
     UI_CONTROL_CLASS.$hide = function () {
         if (this._sDisplay === undefined) {
             if (this._bCreated) {
-                for (
-                    var i = 0,
-                        me = this,
-                        list = query({
-                            custom: function (control) {
-                                return me != control && me.contain(control) && control.isShow();
-                            }
-                        }),
-                        o;
-                    o = list[i++];
-                ) {
+                for (var i = 0, list = query.call(this, UI_CONTROL_QUERY_SHOW), o; o = list[i++]; ) {
                     triggerEvent(o, 'hide', false);
                 }
             }
@@ -427,7 +423,8 @@ $cache$position          - 控件布局方式缓存
     UI_CONTROL_CLASS.$setSize = function (width, height) {
         //__gzip_original__style
         var style = this._eMain.style,
-            flgFixedSize = isFixedSize();
+            tagName = this._eMain.tagName,
+            flgFixedSize = isFixedSize() && tagName != 'BUTTON' && tagName != 'INPUT';
 
         // 负宽度IE下将出错
         if (width) {
@@ -452,17 +449,7 @@ $cache$position          - 控件布局方式缓存
         this._sDisplay = undefined;
 
         if (this._bCreated) {
-            for (
-                var i = 0,
-                    me = this,
-                    list = query({
-                        custom: function (control) {
-                            return me != control && me.contain(control) && control.isShow();
-                        }
-                    }),
-                    o;
-                o = list[i++];
-            ) {
+            for (var i = 0, list = query.call(this, UI_CONTROL_QUERY_SHOW), o; o = list[i++]; ) {
                 triggerEvent(o, 'show', false);
             }
         }
@@ -560,13 +547,17 @@ $cache$position          - 控件布局方式缓存
      * 控件获得失效状态。
      * 控件获得失效状态时，添加状态样式 -disabled(参见 alterClass 方法)。disable 方法导致控件失去激活、悬停、焦点状态，所有子控件的 isDisabled 方法返回 true，但不会设置子控件的失效状态样式。
      * @public
+     *
+     * @return {boolean} 控件失效状态是否改变
      */
     UI_CONTROL_CLASS.disable = function () {
         if (!this._bDisabled) {
             this.alterClass('+disabled');
             this._bDisabled = true;
             $clearState(this);
+            return true;
         }
+        return false;
     };
 
     /**
@@ -582,12 +573,16 @@ $cache$position          - 控件布局方式缓存
      * 控件解除失效状态。
      * 控件解除失效状态时，移除状态样式 -disabled(参见 alterClass 方法)。enable 方法仅解除控件自身的失效状态，如果其父控件失效，isDisabled 方法返回 true。
      * @public
+     *
+     * @return {boolean} 控件失效状态是否改变
      */
     UI_CONTROL_CLASS.enable = function () {
         if (this._bDisabled) {
             this.alterClass('-disabled');
             this._bDisabled = false;
+            return true;
         }
+        return false;
     };
 
     /**
@@ -685,7 +680,7 @@ $cache$position          - 控件布局方式缓存
      * @return {number} 控件的最小高度
      */
     UI_CONTROL_CLASS.getMinimumHeight = function () {
-        return this.$getBasicHeight();
+        return this.$getBasicHeight() + (this.$cache$bodyHeightRevise || 0);
     };
 
     /**
@@ -695,7 +690,7 @@ $cache$position          - 控件布局方式缓存
      * @return {number} 控件的最小宽度
      */
     UI_CONTROL_CLASS.getMinimumWidth = function () {
-        return this.$getBasicWidth();
+        return this.$getBasicWidth() + (this.$cache$bodyWidthRevise || 0);
     };
 
     /**

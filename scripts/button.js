@@ -2,11 +2,18 @@
 Button - 定义按钮的基本操作。
 按钮控件，继承自基础控件，屏蔽了激活状态的向上冒泡，并且在激活(active)状态下鼠标移出控件区域会失去激活样式，移入控件区域再次获得激活样式，按钮控件中的文字不可以被选中。
 
-按钮控件直接HTML初始化的例子，id指定名称，可以通过ecui.get(id)的方式访问控件:
-<div ecui="type:button;id:demo">
+按钮控件直接HTML初始化的例子:
+<div ecui="type:button">
   <!-- 这里放按钮的文字 -->
   ...
 </div>
+或
+<button ecui="type:button">
+  <!-- 这里放按钮的文字 -->
+  ...
+</button>
+或
+<input ecui="type:button" value="按钮文字" type="button">
 
 属性
 */

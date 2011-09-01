@@ -129,7 +129,7 @@ _aChildren     - 子控件集合
      */
     function UI_TREE_VIEW_FLUSH(control) {
         control.setClass(
-            control.getPrimary() + (control._aChildren.length ? control._bCollapsed ? '-collapse' : '-expand' : '')
+            control.getPrimary() + (control._aChildren.length ? control._bCollapsed ? '-collapsed' : '-expanded' : '')
         );
     }
 
@@ -403,7 +403,7 @@ _aChildren     - 子控件集合
      * setSelected 方法只有根节点才能执行，其它节点执行无效。
      * @public
      *
-     * @params {ecui.ui.TreeView} node 选中的节点
+     * @param {ecui.ui.TreeView} node 选中的节点
      */
     UI_TREE_VIEW_CLASS.setSelected = function (node) {
         if (this == this.getRoot()) {

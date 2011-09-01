@@ -466,6 +466,16 @@
         },
 
         {
+            "name": "addEventListener",
+            "desc": "添加控件的事件监听函数。",
+            "params": [
+                {"name": "control", "type": "ecui.ui.Control", "desc": "ECUI 控件"},
+                {"name": "name", "type": "string", "desc": "事件名称"},
+                {"name": "caller", "type": "Function", "desc": "监听函数"}
+            ]
+        },
+
+        {
             "name": "calcHeightRevise",
             "desc": "获取高度修正值(即计算 padding, border 样式对 height 样式的影响)。",
             "params": [
@@ -727,7 +737,17 @@
             "return": {"type": "Array", "desc": "控件列表"},
             "remark": [
                 "query 方法允许按多种条件组合查询满足需要的控件，如果省略条件表示不进行限制。condition 参数对象支持的属性如下：", 
-                "<table class=\"clsSTD\"><tr><td>type</td><td>Function，控件的类型构造函数</td></tr><tr><td>parent</td><td>ecui.ui.Control，控件的父控件对象</td></tr><tr><td>custom</td><td>Function，自定义查询函数，传入的参数是控件对象</td></tr></table>"
+                "<table class=\"clsSTD\"><tr><td>type</td><td>Function，控件的类型构造函数</td></tr><tr><td>parent</td><td>ecui.ui.Control，控件的父控件对象</td></tr><tr><td>custom</td><td>Function，自定义查询函数，传入的参数是控件对象，query 方法会将自己的 this 指针传入查询函数中</td></tr></table>"
+            ]
+        },
+
+        {
+            "name": "removeEventListener",
+            "desc": "移除控件的事件监听函数。",
+            "params": [
+                {"name": "control", "type": "ecui.ui.Control", "desc": "ECUI 控件"},
+                {"name": "name", "type": "string", "desc": "事件名称"},
+                {"name": "caller", "type": "Function", "desc": "监听函数"}
             ]
         },
 
@@ -1150,6 +1170,7 @@
         {
             "name": "disable",
             "desc": "控件获得失效状态。",
+            "return": {"type": "boolean", "desc": "控件失效状态是否改变"},
             "remark": "控件获得失效状态时，添加状态样式 -disabled(参见 alterClass 方法)。disable 方法导致控件失去激活、悬停、焦点状态，所有子控件的 {'isDisabled'|method:'control'} 方法返回 true，但不会设置子控件的失效状态样式。"
         },
 
@@ -1162,6 +1183,7 @@
         {
             "name": "enable",
             "desc": "控件解除失效状态。",
+            "return": {"type": "boolean", "desc": "控件失效状态是否改变"},
             "remark": "控件解除失效状态时，移除状态样式 -disabled(参见 alterClass 方法)。enable 方法仅解除控件自身的失效状态，如果其父控件失效，{'isDisabled'|method:'control'} 方法返回 true。"
         },
 
@@ -2333,6 +2355,33 @@
         }
     ],
 
+    "popup": [
+        {
+            "name": "add",
+            "syntax": "<i>ecui.ui.Items.</i><b>add(</b><i>item, index</i><b>)</b></pre><pre class=\"clsSyntax\"><i>ecui.ui.Popup.Item.</i><b>add(</b><i>item, index</i><b>)</b>"
+        },
+
+        {
+            "name": "appendTo",
+            "desc": "弹出菜单无法指定挂载位置。"
+        },
+
+        {
+            "name": "getItems",
+            "syntax": "<i>Array</i> = <i>ecui.ui.Popup.</i><b>getItems()</b></pre><pre class=\"clsSyntax\"><i>Array</i> = <i>ecui.ui.Popup.Item.</i><b>getItems()</b>"
+        },
+
+        {
+            "name": "remove",
+            "syntax": "<i>ecui.ui.Items.</i><b>remove(</b><i>item</i><b>)</b></pre><pre class=\"clsSyntax\"><i>ecui.ui.Popup.Item.</i><b>remove(</b><i>item</i><b>)</b>"
+        },
+
+        {
+            "name": "setParent",
+            "desc": "弹出菜单无法指定挂载位置。"
+        }
+    ],
+
 
     
     
@@ -2483,59 +2532,6 @@
     ],
 
     "locked-table": [
-    ],
-
-    "popup": [
-        {
-            "name": "$blur",
-            "remark": "弹出菜单控件失去焦点时需要隐藏自己，参见 {'hide'|method:'popup'} 方法。"
-        },
-
-        {
-            "name": "$intercept",
-            "remark": "弹出菜单需要强制拦截浏览器的点击事件，关闭弹出菜单。"
-        },
-
-        {
-            "name": "add",
-            "syntax": "<i>ecui.ui.Items.</i><b>add(</b><i>item, index</i><b>)</b></pre><pre class=\"clsSyntax\"><i>ecui.ui.Popup.Item.</i><b>add(</b><i>item, index</i><b>)</b>"
-        },
-
-        {
-            "name": "getInferior",
-            "desc": "获取当前激活的下级弹出菜单。",
-            "return": {"type": "ecui.ui.Popup", "desc": "弹出菜单控件"},
-            "remark": "getInferior 方法返回弹出菜单处于显示状态时，通过它打开的子弹出菜单。"
-        },
-
-        {
-            "name": "getItems",
-            "syntax": "<i>Array</i> = <i>ecui.ui.Popup.</i><b>getItems()</b></pre><pre class=\"clsSyntax\"><i>Array</i> = <i>ecui.ui.Popup.Item.</i><b>getItems()</b>",
-            "desc": "获取全部的子选项控件/获取当前菜单选项控件的所有子选项控件。",
-            "return": {"type": "Array", "desc": "子选项控件列表，如果不存在返回空列表"}
-        },
-
-        {
-            "name": "getSuperior",
-            "desc": "获取当前激活的上级弹出菜单。",
-            "return": {"type": "ecui.ui.Popup", "desc": "弹出菜单控件"},
-            "remark": "getSuperior 方法返回弹出菜单处于显示状态时，打开它的父弹出菜单。"
-        },
-
-        {
-            "name": "hide",
-            "remark": "隐藏弹出菜单，同时隐藏所有的子弹出菜单。"
-        },
-
-        {
-            "name": "remove",
-            "syntax": "<i>ecui.ui.Items.</i><b>remove(</b><i>item</i><b>)</b></pre><pre class=\"clsSyntax\"><i>ecui.ui.Popup.Item.</i><b>remove(</b><i>item</i><b>)</b>"
-        },
-
-        {
-            "name": "show",
-            "remark": "显示弹出菜单时，必须保证弹出菜单显示在屏幕内，并且子弹出菜单展开的方向尽可能一致。"
-        }
     ],
 
     "listbox": [
