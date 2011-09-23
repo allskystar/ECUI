@@ -423,18 +423,18 @@ $cache$position          - 控件布局方式缓存
     UI_CONTROL_CLASS.$setSize = function (width, height) {
         //__gzip_original__style
         var style = this._eMain.style,
-            tagName = this._eMain.tagName,
-            flgFixedSize = isFixedSize() && tagName != 'BUTTON' && tagName != 'INPUT';
+            o = this._eMain.tagName,
+            flgFixedSize = isFixedSize() && o != 'BUTTON' && o != 'INPUT';
 
-        // 负宽度IE下将出错
-        if (width) {
-            style.width = width - (flgFixedSize ? this.$getBasicWidth() : 0) + 'px';
+        // 防止负宽度IE下出错
+        if (width && (o = width - (flgFixedSize ? this.$getBasicWidth() : 0)) > 0) {
+            style.width = o + 'px';
             this.$cache$width = width;
         }
 
-        // 负高度IE下将出错
-        if (height) {
-            style.height = height - (flgFixedSize ? this.$getBasicHeight() : 0) + 'px';
+        // 防止负高度IE下出错
+        if (height && (o = height - (flgFixedSize ? this.$getBasicHeight() : 0)) > 0) {
+            style.height = o + 'px';
             this.$cache$height = height;
         }
     };
@@ -680,6 +680,7 @@ $cache$position          - 控件布局方式缓存
      * @return {number} 控件的最小高度
      */
     UI_CONTROL_CLASS.getMinimumHeight = function () {
+        this.cache();
         return this.$getBasicHeight() + (this.$cache$bodyHeightRevise || 0);
     };
 
@@ -690,6 +691,7 @@ $cache$position          - 控件布局方式缓存
      * @return {number} 控件的最小宽度
      */
     UI_CONTROL_CLASS.getMinimumWidth = function () {
+        this.cache();
         return this.$getBasicWidth() + (this.$cache$bodyWidthRevise || 0);
     };
 

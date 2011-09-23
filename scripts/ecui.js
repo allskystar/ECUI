@@ -1,3 +1,4 @@
+var ecui;
 (function () {
 
 //{assign var="phases" value="define,body" delimiter=","}//
@@ -20,22 +21,23 @@
 //{include file="month-view.js"}//
 //{include file="table.js"}//
 //{include file="popup.js"}//
+//{include file="listbox.js"}//
+//{include file="tab.js"}//
+//{include file="decorate.js"}//
+//{include file="combine.js"}//
 
 //*{include file="label.js"}//
 //*{include file="progress.js"}//
 //*{include file="collection.js"}//
 //*{include file="calendar.js"}//
-//*{include file="tab.js"}//
 //*{include file="format-edit.js"}//
 //*{include file="radio-tree.js"}//
 //*{include file="check-tree.js"}//
 //*{include file="color.js"}//
 //*{include file="palette.js"}//
-//*{include file="listbox.js"}//
 //*{include file="multi-select.js"}//
 //*{include file="locked-table.js"}//
 //*{include file="messagebox.js"}//
-//*{include file="decorator.js"}//
 //*{include file="shield.js"}//
 //*{include file="tween.js"}//
 //{/foreach}//

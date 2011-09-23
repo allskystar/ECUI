@@ -1,10 +1,5 @@
 /*
-Decorator - 装饰器插件基类，使用inline-block附着在控件外围，在控件改变状态时，装饰器同步改变状态。控件最外层装饰器的引用通过访问Decorator的属性来得到，属性名为控件对象
-
-属性
-_sPrimary  - 装饰器样式
-_eMain   - 装饰器主元素
-_oInner  - 内层装饰器或者控件对象
+Decorate - 装饰器插件。
 */
 //{if 0}//
 (function () {
@@ -42,6 +37,13 @@ _oInner  - 内层装饰器或者控件对象
         UI_CONTROL_CLASS = UI_CONTROL.prototype;
 //{/if}//
 //{if $phase == "define"}//
+    /**
+     * 装饰器插件加载。
+     * @public
+     *
+     * @param {ecui.ui.Control} control 需要应用插件的控件
+     * @param {string} value 插件的参数
+     */
     var EXT_DECORATE = ext.decorate = function (control, value) {
         value.replace(/([A-Za-z0-9\-]+)\s*\(\s*([^)]+)\)/g, function ($0, $1, $2) {
             // 获取装饰器函数

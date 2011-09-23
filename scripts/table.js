@@ -62,6 +62,7 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
         children = dom.children,
         createDom = dom.create,
         first = dom.first,
+        getAttribute = dom.getAttribute,
         getParent = dom.getParent,
         insertBefore = dom.insertBefore,
         next = dom.next,
@@ -164,8 +165,8 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
                                 // 当前元素处理完成，将list[i]指向下一个列元素
                                 list[i] = next(el);
 
-                                var rowspan = toNumber(el.getAttribute('rowSpan')) || 1,
-                                    colspan = colspans[i] = toNumber(el.getAttribute('colSpan')) || 1;
+                                var rowspan = +getAttribute(el, 'rowSpan') || 1,
+                                    colspan = colspans[i] = +getAttribute(el, 'colSpan') || 1;
 
                                 while (rowspan--) {
                                     if (!rowspan) {
@@ -178,6 +179,7 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
                             }
                         }
                         else {
+                            // 当前行处理完毕，list[i]不再保存行内需要处理的下一个元素
                             for (j = 0; ; j++) {
                                 // 以下使用 type 临时表示列的初始化参数
                                 type = {};
@@ -208,6 +210,18 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
             },
             function (el, options) {
                 options.wheelDelta = 1;
+                if (el.tagName == 'TABLE') {
+                    var table = el;
+                    insertBefore(el = createDom(table.className), table).appendChild(table);
+                    if (options.width) {
+                        el.style.width = options.width;
+                    }
+                    if (options.height) {
+                        el.style.height = options.height;
+                    }
+                    table.className = '';
+                    return el;
+                }
             }
         ),
         UI_TABLE_CLASS = UI_TABLE.prototype,
@@ -397,11 +411,11 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
                 o = table.$getElement(index - 1, i);
                 // 如果单元格向左被合并，cell == o
                 if (cell != o) {
-                    o.setAttribute('rowSpan', toNumber(o.getAttribute('rowSpan')) - 1);
+                    o.setAttribute('rowSpan', +getAttribute(o, 'rowSpan') - 1);
                     cell = o;
                 }
             }
-            else if (o && (j = toNumber(o.getAttribute('rowSpan'))) > 1) {
+            else if (o && (j = +getAttribute(o, 'rowSpan')) > 1) {
                 // 如果单元格包含rowSpan属性，需要将属性添加到其它行去
                 o.setAttribute('rowSpan', j - 1);
                 for (j = i + 1; ; ) {
@@ -438,13 +452,13 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
                 o = table.$getElement(index - 1, i);
                 // 如果单元格向左被合并，cell == o
                 if (cell != o) {
-                    o.setAttribute('rowSpan', toNumber(o.getAttribute('rowSpan')) + 1);
+                    o.setAttribute('rowSpan', +getAttribute(o, 'rowSpan') + 1);
                     cell = o;
                 }
             }
             else if (o && nextRow && nextRow._aElements[i] === false) {
                 // 如果单元格包含rowSpan属性，需要从其它行恢复
-                o.setAttribute('rowSpan', toNumber(o.getAttribute('rowSpan')) + 1);
+                o.setAttribute('rowSpan', +getAttribute(o, 'rowSpan') + 1);
                 for (j = i + 1; ; ) {
                     cell = this._aElements[j++];
                     if (cell || cell === undefined) {
@@ -776,9 +790,9 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
             else {
                 // 出现跨列的插入列操作，需要修正colspan的属性值
                 var cell = this.$getElement(i, index),
-                    j = toNumber(cell.getAttribute('rowspan')) || 1;
+                    j = +getAttribute(cell, 'rowspan') || 1;
 
-                cell.setAttribute('colSpan', toNumber(cell.getAttribute('colSpan')) + 1);
+                cell.setAttribute('colSpan', +getAttribute(cell, 'colSpan') + 1);
                 row._aElements.splice(index, 0, o);
                 for (; --j; ) {
                     rows[++i]._aElements.splice(index, 0, false);
@@ -864,7 +878,7 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
             else if (o === false) {
                 o = this.$getElement(index, i);
                 if (o != col) {
-                    o.setAttribute('rowSpan', (toNumber(o.getAttribute('rowSpan')) || 1) + 1);
+                    o.setAttribute('rowSpan', (+getAttribute(o, 'rowSpan') || 1) + 1);
                     col = o;
                 }
             }

@@ -75,10 +75,11 @@ _eInput  - INPUT对象
                     // 根据表单项初始化
                     input = el;
 
-                    el = createDom(input.className, input.style.cssText + ';overflow:hidden');
-
+                    insertBefore(
+                        el = createDom(input.className, input.style.cssText + ';overflow:hidden'),
+                        input
+                    ).appendChild(input);
                     input.className = '';
-                    insertBefore(el, input).appendChild(input);
                 }
                 else {
                     // 根据普通元素初始化

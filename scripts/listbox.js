@@ -1,7 +1,6 @@
 ﻿/*
 Listbox - 定义了多项选择的基本操作。
-多选框控件，继承自截面控件，实现了选项组接口，扩展了多选的 SelectElement 的功能，允许使用鼠标拖拽进行多项选择，多个交
-换框，可以将选中的选项在互相之间移动。多选框控件也可以单独的使用，选中的选项在表单提交时将被提交。
+多选框控件，继承自截面控件，实现了选项组接口，多个交换框，可以将选中的选项在互相之间移动。多选框控件也可以单独的使用，选中的选项在表单提交时将被提交。
 
 多选框控件直接HTML初始化的例子:
 <div ecui="type:listbox;name:test">
@@ -25,18 +24,12 @@ _eInput - 选项对应的input，form提交时使用
         util = core.util,
 
         undefined,
-        MATH = Math,
-        MAX = MATH.max,
-        MIN = MATH.min,
-        CEIL = MATH.ceil,
-        FLOOR = MATH.floor,
 
         getText = dom.getText,
         setInput = dom.setInput,
         extend = util.extend,
-        inherits = util.inherits,
 
-        getMouseY = core.getMouseY,
+        inheritsControl = core.inherits,
 
         UI_PANEL = ui.Panel,
         UI_ITEM = ui.Item,
@@ -50,17 +43,21 @@ _eInput - 选项对应的input，form提交时使用
      *
      * @param {Object} options 初始化选项
      */
-    //__gzip_original__UI_LISTBOX
-    //__gzip_original__UI_LISTBOX_ITEM
-    var UI_LISTBOX =
-        ui.Listbox = function (el, options) {
-            options.hScroll = false;
-            UI_PANEL.call(this, el, options);
-            this._sName = options.name || '';
-
-            this.$initItems();
-        },
-        UI_LISTBOX_CLASS = inherits(UI_LISTBOX, UI_PANEL),
+    ///__gzip_original__UI_LISTBOX
+    ///__gzip_original__UI_LISTBOX_ITEM
+    var UI_LISTBOX = ui.Listbox =
+        inheritsControl(
+            UI_PANEL,
+            'ui-listbox',
+            function (el, options) {
+                this._sName = options.name || '';
+                this.$initItems();
+            },
+            function (el, options) {
+                options.hScroll = false;
+            }
+        ),
+        UI_LISTBOX_CLASS = UI_LISTBOX.prototype,
 
         /**
          * 初始化多选框控件的选项部件。
@@ -68,76 +65,28 @@ _eInput - 选项对应的input，form提交时使用
          *
          * @param {Object} options 初始化选项
          */
-        UI_LISTBOX_ITEM = UI_LISTBOX.Item = function (el, options) {
-            UI_ITEM.call(this, el, options);
-            el.appendChild(this._eInput = setInput(null, options.parent._sName, 'hidden')).value =
-                options.value === undefined ? getText(el) : options.value;
-            this.setSelected(!!options.selected);
-        },
-        UI_LISTBOX_ITEM_CLASS = inherits(UI_LISTBOX_ITEM, UI_ITEM);
+        UI_LISTBOX_ITEM_CLASS = (UI_LISTBOX.Item = inheritsControl(
+            UI_ITEM,
+            null,
+            function (el, options) {
+                el.appendChild(this._eInput = setInput(null, options.parent._sName, 'hidden')).value =
+                    options.value === undefined ? getText(el) : options.value;
+                this.setSelected(!!options.selected);
+            }
+        )).prototype;
 //{else}//
-    /**
-     * 计算当前鼠标移入的选项编号。
-     * @private
-     *
-     * @param {ecui.ui.Item} control 选项控件
-     */
-    function UI_LISTBOX_OVERED(control) {
-        var parent = control.getParent(),
-            vscroll = parent.$getSection('VScroll'),
-            step = vscroll.getStep(),
-            o = getMouseY(parent),
-            oldTop = control._nTop;
-
-        control._nTop = o;
-
-        if (o > parent.getHeight()) {
-            if (o < oldTop) {
-                // 鼠标回退不需要滚动
-                o = 0;
-            }
-            else {
-                // 超出控件范围，3像素点对应一个选项
-                // 如果不滚动，需要恢复原始的移动距离
-                if (o = FLOOR((o - MAX(0, oldTop)) / 3)) {
-                    vscroll.skip(o);
-                }
-                else {
-                    control._nTop = oldTop;
-                }
-            }
-            o += control._nLast;
-        }
-        else if (o < 0) {
-            if (o > oldTop) {
-                // 鼠标回退不需要滚动
-                o = 0;
-            }
-            else {
-                // 超出控件范围，3像素点对应一个选项
-                // 如果不滚动，需要恢复原始的移动距离
-                if (o = CEIL((o - MIN(0, oldTop)) / 3)) {
-                    vscroll.skip(o);
-                }
-                else {
-                    control._nTop = oldTop;
-                }
-            }
-            o += control._nLast;
-        }
-        else {
-            o = FLOOR((parent.getScrollTop() + o) / step);
-        }
-
-        return MIN(MAX(0, o), parent.getItems().length - 1);
-    }
-
     extend(UI_LISTBOX_CLASS, UI_ITEMS);
 
     /**
-     * 销毁控件的默认处理。
-     * 页面卸载时将销毁所有的控件，释放循环引用，防止在 IE 下发生内存泄漏，$dispose 方法的调用不会受到 ondispose 事件返回值的影响。
-     * @protected
+     * @override
+     */
+    UI_LISTBOX_ITEM_CLASS.$click = function (event) {
+        UI_ITEM_CLASS.$click.call(this, event);
+        this.setSelected(!this.isSelected());
+    };
+
+    /**
+     * @override
      */
     UI_LISTBOX_ITEM_CLASS.$dispose = function () {
         this._eInput = null;
@@ -145,125 +94,7 @@ _eInput - 选项对应的input，form提交时使用
     };
 
     /**
-     * 鼠标在滑动块激活开始事件的默认处理。
-     * @protected
-     *
-     * @param {Event} event 事件对象
-     */
-    UI_LISTBOX_ITEM_CLASS.$activate = function (event) {
-        UI_ITEM_CLASS.$activate.call(this, event);
-        core.select(this, event, 'listbox');
-    };
-
-    /**
-     * 选择框选中处理事件的默认处理。
-     * @protected
-     */
-    UI_LISTBOX_ITEM_CLASS.$select = function () {
-        //__transform__index_o
-        //__transform__items_list
-        //__gzip_original__startIndex
-        var index = UI_LISTBOX_OVERED(this),
-            items = this.getParent().getItems(),
-            startIndex = this._nStart,
-            lastIndex = this._nLast,
-            fromCancel = 0,
-            toCancel = -1,
-            fromSelect = 0,
-            toSelect = -1;
-
-        if (index > lastIndex) {
-            if (index < startIndex) {
-                // index与lastIndex都在负方向
-                fromCancel = lastIndex;
-                toCancel = index - 1;
-            }
-            else if (lastIndex < startIndex) {
-                // index与lastIndex位于起始选项两边
-                fromCancel = lastIndex;
-                toCancel = startIndex - 1;
-                fromSelect = startIndex + 1;
-                toSelect = index;
-            }
-            else {
-                // index与lastIndex都在正方向
-                fromSelect = lastIndex + 1;
-                toSelect = index;
-            }
-        }
-        else if (index < lastIndex) {
-            if (index > startIndex) {
-                // index与lastIndex都在正方向
-                fromCancel = index + 1;
-                toCancel = lastIndex;
-            }
-            else if (lastIndex > startIndex) {
-                // index与lastIndex位于起始选项两边
-                fromCancel = startIndex + 1;
-                toCancel = lastIndex;
-                fromSelect = index;
-                toSelect = startIndex - 1;
-            }
-            else {
-                // index与lastIndex都在负方向
-                fromSelect = index;
-                toSelect = lastIndex - 1;
-            }
-        }
-
-        this._nLast = index;
-
-        // 恢复之前的选择状态
-        for (; fromCancel <= toCancel; ) {
-            index = items[fromCancel++];
-            index.alterClass('selected', !index.isSelected());
-        }
-
-        // 选择框内的全部假选中
-        for (; fromSelect <= toSelect; ) {
-            items[fromSelect++].alterClass('selected');
-        }
-    };
-
-    /**
-     * 选择框选中结束事件的默认处理。
-     * @protected
-     */
-    UI_LISTBOX_ITEM_CLASS.$selectend = function () {
-        //__transform__index_o
-        //__transform__items_list
-        var index = UI_LISTBOX_OVERED(this),
-            items = this.getParent().getItems(),
-            startIndex = this._nStart,
-            fromIndex = MIN(startIndex, index),
-            toIndex = MAX(startIndex, index);
-
-        if (startIndex == index) {
-            // 点击的当前条目，进行反选
-            this.setSelected(!this.isSelected());
-        }
-        else {
-            // 否则选择框内的全部选中
-            for (; fromIndex <= toIndex; ) {
-                items[fromIndex++].setSelected();
-            }
-        }
-    };
-
-    /**
-     * 选择框选中开始事件的默认处理。
-     * @protected
-     */
-    UI_LISTBOX_ITEM_CLASS.$selectstart = function () {
-        this._nStart = this._nLast = UI_LISTBOX_OVERED(this);
-        this.alterClass('selected');
-    };
-
-    /**
-     * 直接设置父控件。
-     * @protected
-     *
-     * @param {ecui.ui.Control} parent ECUI 控件对象
+     * @override
      */
     UI_LISTBOX_ITEM_CLASS.$setParent = function (parent) {
         UI_ITEM_CLASS.$setParent.call(this, parent);
@@ -294,14 +125,12 @@ _eInput - 选项对应的input，form提交时使用
     };
 
     /**
-     * 选项控件发生变化的处理。
-     * 在 ecui.ui.Items 接口中，选项控件发生增加/减少操作时调用此方法。
-     * @protected
+     * @override
      */
     UI_LISTBOX_CLASS.$alterItems = function () {
         //__transform__items_list
         var items = this.getItems(),
-            vscroll = this.$getSection('VScroll'),
+            vscroll = this.$getSection('VScrollbar'),
             step = items.length && items[0].getHeight();
 
         if (step) {

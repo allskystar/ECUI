@@ -28,6 +28,7 @@
         addClass = dom.addClass,
         contain = dom.contain,
         createDom = dom.create,
+        getAttribute = dom.getAttribute,
         getParent = dom.getParent,
         getPosition = dom.getPosition,
         getStyle = dom.getStyle,
@@ -587,21 +588,18 @@
                     }
 
                     for (; o = options[i++]; ) {
-                        elements[i] = o;
+                        if (getAttribute(o, ecuiName)) {
+                            elements.push(o);
+                        }
                     }
 
                     for (i = 0; el = elements[i]; i++) {
                         if (getParent(el)) {
                             options = getParameters(el);
-                            options.main = el;
                             // 以下使用 el 替代 control
                             if (o = options.type) {
-                                list.push(
-                                    el = $create(
-                                        ui[toCamelCase(o.charAt(0).toUpperCase() + o.slice(1))],
-                                        options
-                                    )
-                                );
+                                options.main = el;
+                                list.push($create(ui[toCamelCase(o.charAt(0).toUpperCase() + o.slice(1))], options));
                             }
                             else {
                                 for (o in plugins) {
@@ -1077,7 +1075,7 @@
         getParameters = core.getParameters = function (el, attributeName) {
             attributeName = attributeName || ecuiName;
 
-            var text = el.getAttribute(attributeName),
+            var text = getAttribute(el, attributeName),
                 options = {};
 
             if (text) {
@@ -1301,6 +1299,7 @@
             }
             else {
                 event = {returnValue: event, preventDefault: UI_EVENT_CLASS.preventDefault};
+                args = args || [];
             }
 
             if (listeners = eventListeners[control.getUID() + name]) {

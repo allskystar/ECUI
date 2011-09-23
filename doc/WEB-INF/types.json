@@ -293,8 +293,38 @@
             "定义弹出菜单项的基本操作。",
             "弹出菜单控件，弹出式菜单操作时不会改变当前已经激活的对象，任何点击都将导致弹出菜单消失，弹出菜单默认向右展开子菜单，如果右部已经到达浏览器最边缘，将改为向左显示。"
         ]
-    }
+    },
 
+    {
+        "name": "listbox",
+        "type": "ui",
+        "position": "ecui.ui.Listbox",
+        "super": "panel",
+        "interface": ["items"],
+        "desc": "多选框控件",
+        "html": "<div ecui=\"type:listbox;id:ctrl1\"><div>选项一</div><div>选项二</div><div>选项三</div></div>",
+        "remark": [
+            "定义了多项选择的基本操作。",
+            "多选框控件，扩展了多选的 SelectElement 的功能，允许使用鼠标拖拽进行多项选择，多个多选框，可以将选中的选项在互相之间移动。多选框控件也可以单独的使用，选中的选项在表单提交时将被提交。"
+        ]
+    },
+
+    {
+        "name": "tab",
+        "type": "ui",
+        "position": "ecui.ui.Tab",
+        "super": "control",
+        "interface": ["items"],
+        "desc": "选项卡控件",
+        "params": [
+            {"name": "selected", "desc": "number，选中的选项序号，默认为0"}
+        ],
+        "html": "<div ecui=\"type:tab;selected:1\"><!-- 包含内容的选项卡 --><div><label>标题1</label><!-- 这里是内容 -->...</div><!-- 仅有标题的选项卡，以下selected定义与控件定义是一致的，可以忽略其中之一 --><label ecui=\"selected:true\">标题2</label></div>",
+        "remark": [
+            "定义分页选项卡的操作。",
+            "选项卡控件，继承自基础控件，实现了选项组接口。每一个选项卡都包含一个头部区域与内容区域，选项卡控件存在互斥性，只有唯一的一个选项卡能被选中并显示容器区域。"
+        ]
+    }
 
 
 
@@ -391,20 +421,6 @@
     },
 
     {
-        "name": "listbox",
-        "type": "ui",
-        "position": "ecui.ui.Listbox",
-        "super": "panel",
-        "interface": ["items"],
-        "desc": "多选框控件",
-        "html": "<div ecui=\"type:listbox;id:ctrl1\"><div>选项一</div><div>选项二</div><div>选项三</div></div>",
-        "remark": [
-            "定义了多项选择的基本操作。",
-            "多选框控件，扩展了多选的 SelectElement 的功能，允许使用鼠标拖拽进行多项选择，多个多选框，可以将选中的选项在互相之间移动。多选框控件也可以单独的使用，选中的选项在表单提交时将被提交。"
-        ]
-    },
-
-    {
         "name": "progress",
         "type": "ui",
         "position": "ecui.ui.Progress",
@@ -431,22 +447,5 @@
             "定义拾色器的基本操作。",
             "拾色器控件，内部包含了多个部件，分别是色彩选择区(基础控件)、色彩选择区箭头(基础控件)、亮度条选择区(基础控件)、亮度条选择区箭头(基础控件)、基本色彩选择区(基础控件组)、色彩显示区(基础控件)、输入区域(输入框控件组)与确认按钮(基础控件)。"
         ]
-    },
-
-    {
-        "name": "tab",
-        "type": "ui",
-        "position": "ecui.ui.Tab",
-        "super": "control",
-        "interface": ["items"],
-        "desc": "选项卡控件",
-        "params": [
-            {"name": "selected", "desc": "number，选中的选项序号，默认为0"}
-        ],
-        "html": "<div ecui=\"type:tab;selected:1\"><!-- 包含内容的选项卡 --><div><label>标题1</label><!-- 这里是内容 -->...</div><!-- 仅有标题的选项卡，以下selected定义与控件定义是一致的，可以忽略其中之一 --><label ecui=\"selected:true\">标题2</label></div>",
-        "remark": [
-            "定义分页选项卡的操作。",
-            "选项卡控件，继承自基础控件，实现了选项组接口。每一个选项卡都包含一个头部区域与内容区域，选项卡控件存在互斥性，只有唯一的一个选项卡能被选中显卡内容区域。"
-        ]
-    }*/
+    },*/
 ]

@@ -12,6 +12,7 @@
         array = core.array = {},
         dom = core.dom = {},
         ext = core.ext = {},
+        json = core.json = {},
         string = core.string = {},
         ui = core.ui = {},
         util = core.util = {};
@@ -234,6 +235,21 @@
          */
         first = dom.first = function (el) {
             return matchNode(el.firstChild, 'nextSibling');
+        },
+
+        /**
+         * 获取 Element 对象的属性值。
+         * 在 IE 下，Element 对象的属性可以通过名称直接访问，效率是 getAttribute 方式的两倍。
+         * @public
+         *
+         * @param {HTMLElement} el Element 对象
+         * @param {string} name 属性名称
+         * @return {string} 属性值
+         */
+        getAttribute = dom.getAttribute = ieVersion < 8 ? function (el, name) {
+            return el[name];
+        } : function (el, name) {
+            return el.getAttribute(name);
         },
 
         /**
@@ -562,6 +578,143 @@
         } : function (el, text) {
             el.innerText = text;
         },
+
+        /**
+         * JSON字串解析，将JSON字符串解析为JSON对象。
+         * @public
+         *
+         * @param {string} text json字符串
+         * @return {Object} json字符串描述的对象
+         */
+        parse = json.parse = function (text) {
+            return new Function('return (' + text + ')')();
+        },
+
+        /**
+         * JSON对象序列化。
+         * @public
+         *
+         * @param {Object} source 需要序列化的对象
+         * @return {string} json字符串
+         */
+        stringify = json.stringify = (function () {
+//__gzip_unitize__result
+//__gzip_unitize__source
+            var escapeMap = {
+                    '\b': '\\b',
+                    '\t': '\\t',
+                    '\n': '\\n',
+                    '\f': '\\f',
+                    '\r': '\\r',
+                    '"' : '\\"',
+                    '\\': '\\\\'
+                };
+
+            /**
+             * 字符串序列化。
+             * @private
+             *
+             * @param {string} source 需要序列化的字符串
+             */
+            function encodeString(source) {
+                if (/["\\\x00-\x1f]/.test(source)) {
+                    source = source.replace(
+                        /["\\\x00-\x1f]/g,
+                        function (match) {
+                            var o = escapeMap[match];
+                            if (o) {
+                                return o;
+                            }
+                            o = match.charCodeAt();
+                            return '\\u00' + FLOOR(o / 16) + (o % 16).toString(16);
+                        }
+                    );
+                }
+                return '"' + source + '"';
+            }
+
+            /**
+             * 数组序列化。
+             * @private
+             *
+             * @param {Array} source 需要序列化的数组
+             */
+            function encodeArray(source) {
+                var i = 0,
+                    result = [],
+                    o,
+                    l = source.length;
+
+                for (var i = 0, result = [], o, l = source.length; i < l; i++) {
+                    if ((o = stringify(source[i])) !== undefined) {
+                        result.push(o);
+                    }
+                }
+                return '[' + result.join(',') + ']';
+            }
+
+            /**
+             * 处理日期序列化时的补零。
+             * @private
+             *
+             * @param {number} source 数值，小于10需要补零
+             */
+            function pad(source) {
+                return source < 10 ? '0' + source : source;
+            }
+
+            /**
+             * 日期序列化。
+             * @private
+             *
+             * @param {Date} source 需要序列化的日期
+             */
+            function encodeDate(source) {
+                return '"' + source.getFullYear() + '-' + pad(source.getMonth() + 1) + '-' +
+                        pad(source.getDate()) + 'T' + pad(source.getHours()) + ':' +
+                        pad(source.getMinutes()) + ':' + pad(source.getSeconds()) + '"';
+            }
+
+            return function (source) {
+                switch (typeof source) {
+                case 'undefined':
+                case 'function':
+                case 'unknown':
+                    return undefined;
+                case 'number':
+                    if (!isFinite(source)) {
+                        return 'null';
+                    }
+                    // 对于有意义的数值与布尔类型直接输出
+                case 'boolean':
+                    return source.toString();
+                case 'string':
+                    return encodeString(source);
+                default:
+                    if (source === null) {
+                        return 'null';
+                    }
+                    else if (source instanceof Array) {
+                        return encodeArray(source);
+                    }
+                    else if (source instanceof Date) {
+                        return encodeDate(source);
+                    }
+                    else {
+                        var result = [],
+                            o;
+
+                        for (var i in source) {
+                            if ((o = stringify(source[i])) !== undefined) {
+                                result.push(encodeString(i) + ':' + o);
+                            }
+                        }
+
+                        return '{' + result.join(',') + '}';
+                    }
+                }
+            };
+        })(),
 
         /**
          * 对目标字符串进行 html 编码。
@@ -947,7 +1100,7 @@
                             }
                             if (list = DOCUMENT.getElementsByTagName('link')) {
                                 for (; o = list[i++]; ) {
-                                    if (o.getAttribute('rel') == 'stylesheet') {
+                                    if (getAttribute(o, 'rel') == 'stylesheet') {
                                         numStyles++;
                                     }
                                 }

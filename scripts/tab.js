@@ -1,14 +1,13 @@
 /*
 Tab - 定义分页选项卡的操作。
-选项卡控件，继承自基础控件，实现了选项组接口。每一个选项卡都包含一个头部区域与内容区域，选项卡控件存在互斥性，只有唯一
-的一个选项卡能被选中显卡内容区域。
+选项卡控件，继承自基础控件，实现了选项组接口。每一个选项卡都包含一个头部区域与容器区域，选项卡控件存在互斥性，只有唯一的一个选项卡能被选中并显示容器区域。
 
 直接初始化选项卡控件的例子
 <div ecui="type:tab;selected:1">
-    <!-- 包含内容的选项卡 -->
+    <!-- 包含容器的选项卡 -->
     <div>
         <label>标题1</label>
-        <!-- 这里是内容 -->
+        <!-- 这里是容器 -->
         ...
     </div>
     <!-- 仅有标题的选项卡，以下selected定义与控件定义是一致的，可以忽略其中之一 -->
@@ -24,8 +23,8 @@ _uPrev           - 向前滚动按钮
 _uNext           - 向后滚动按钮
 
 Item属性
-_sContentDisplay - 内容 DOM 元素的布局属性
-_eContent        - 内容 DOM 元素
+_sContainer - 容器 DOM 元素的布局属性
+_eContainer        - 容器 DOM 元素
 */
 //{if 0}//
 (function () {
@@ -47,13 +46,16 @@ _eContent        - 内容 DOM 元素
         first = dom.first,
         setStyle = dom.setStyle,
         extend = util.extend,
-        inherits = util.inherits,
+        findConstructor = util.findConstructor,
         toNumber = util.toNumber,
 
         $fastCreate = core.$fastCreate,
+        inheritsControl = core.inherits,
+        triggerEvent = core.triggerEvent,
 
         UI_CONTROL = ui.Control,
         UI_CONTROL_CLASS = UI_CONTROL.prototype,
+        UI_BUTTON = ui.Button,
         UI_ITEM = ui.Item,
         UI_ITEM_CLASS = UI_ITEM.prototype,
         UI_ITEMS = ui.Items;
@@ -67,41 +69,40 @@ _eContent        - 内容 DOM 元素
      *
      * @param {Object} options 初始化选项
      */
-    //__gzip_original__UI_TAB
-    //__gzip_original__UI_TAB_BUTTON
-    //__gzip_original__UI_TAB_ITEM
-    var UI_TAB =
-        ui.Tab = function (el, options) {
-            UI_CONTROL.call(this, el, options);
+    ///__gzip_original__UI_TAB
+    ///__gzip_original__UI_TAB_BUTTON
+    ///__gzip_original__UI_TAB_ITEM
+    var UI_TAB = ui.Tab =
+        inheritsControl(
+            UI_CONTROL,
+            'ui-tab',
+            function (el, options) {
+                //__gzip_original__buttonParams
+                var type = this.getType(),
+                    buttonClass = findConstructor(this, 'Button'),
+                    o = createDom(type + '-title', 'position:relative;overflow:hidden');
 
-            //__gzip_original__baseClass
-            //__gzip_original__typeClass
-            //__gzip_original__buttonParams
-            var typeClass = options.type,
-                baseClass = options.base,
-                buttonParams = {select: false},
-                o = createDom(typeClass + '-title ' + baseClass + '-title', 'position:relative;overflow:hidden');
+                this._oSelected = options.selected || 0;
 
-            this._oSelected = options.selected || 0;
+                // 生成选项卡头的的DOM结构
+                o.innerHTML = '<div class="' + type + '-prev' + buttonClass.TYPES +
+                    '" style="position:absolute;display:none;left:0px"></div><div class="' +
+                    type + '-next' + buttonClass.TYPES +
+                    '" style="position:absolute;display:none"></div><div class="' +
+                    type + '-items" style="position:absolute;white-space:nowrap"></div>';
 
-            // 生成选项卡头的的DOM结构
-            o.innerHTML = '<div class="' + typeClass + '-title-prev ' + baseClass +
-                '-title-prev" style="position:absolute;left:0px;display:none"></div><div class="' +
-                typeClass + '-title-next ' + baseClass +
-                '-title-next" style="position:absolute;display:none"></div><div class="' +
-                baseClass + '-title-main" style="position:absolute;white-space:nowrap"></div>';
+                moveElements(el, options = o.lastChild);
+                el.appendChild(o);
+                this.$setBody(options);
 
-            moveElements(el, options = o.lastChild);
-            el.appendChild(o);
-            this.$setBody(options);
+                this.$initItems();
 
-            this.$initItems();
-
-            // 滚动按钮
-            this._uNext = $fastCreate(UI_TAB_BUTTON, options = options.previousSibling, this, buttonParams);
-            this._uPrev = $fastCreate(UI_TAB_BUTTON, options.previousSibling, this, buttonParams);
-        },
-        UI_TAB_CLASS = inherits(UI_TAB, UI_CONTROL),
+                // 滚动按钮
+                this._uNext = $fastCreate(buttonClass, options = options.previousSibling, this);
+                this._uPrev = $fastCreate(buttonClass, options.previousSibling, this);
+            }
+        ),
+        UI_TAB_CLASS = UI_TAB.prototype,
 
         /**
          * 初始化选项卡控件的按钮部件。
@@ -109,10 +110,7 @@ _eContent        - 内容 DOM 元素
          *
          * @param {Object} options 初始化选项
          */
-        UI_TAB_BUTTON = UI_TAB.Button = function (el, options) {
-            UI_CONTROL.call(this, el, options);
-        },
-        UI_TAB_BUTTON_CLASS = inherits(UI_TAB_BUTTON, UI_CONTROL),
+        UI_TAB_BUTTON_CLASS = (UI_TAB.Button = inheritsControl(UI_BUTTON, 'ui-tab-button')).prototype,
 
         /**
          * 初始化选项卡控件的选项部件。
@@ -122,28 +120,30 @@ _eContent        - 内容 DOM 元素
          *
          * @param {Object} options 初始化选项
          */
-        UI_TAB_ITEM = UI_TAB.Item = function (el, options) {
-            UI_ITEM.call(this, el, options);
+        UI_TAB_ITEM_CLASS =
+            (UI_TAB.Item = inheritsControl(
+                UI_ITEM,
+                null,
+                function (el, options) {
+                    //__gzip_original__parent
+                    var parent = options.parent;
 
-            //__gzip_original__parent
-            var parent = options.parent;
+                    if (el.tagName != 'LABEL') {
+                        var o = first(el),
+                            tmpEl;
 
-            if (el.tagName != 'LABEL') {
-                var o = first(el),
-                    tmpEl;
+                        moveElements(el, tmpEl = createDom(options.primary + '-container'), true);
+                        el.appendChild(o);
+                        this.setContainer(tmpEl);
+                    }
 
-                moveElements(el, tmpEl = createDom(options.base + '-content'), true);
-                el.appendChild(o);
-                this.setContent(tmpEl);
-            }
+                    setStyle(el, 'display', 'inline-block');
 
-            setStyle(el, 'display', 'inline-block');
-
-            if (parent && options.selected) {
-                parent._oSelected = this;
-            }
-        },
-        UI_TAB_ITEM_CLASS = inherits(UI_TAB_ITEM, UI_ITEM);
+                    if (parent && options.selected) {
+                        parent._oSelected = this;
+                    }
+                }
+            )).prototype;
 //{else}//
     /**
      * 刷新向前向右滚动按钮的可操作状态。
@@ -154,19 +154,17 @@ _eContent        - 内容 DOM 元素
     function UI_TAB_FLUSH_BUTTON(control) {
         var left = toNumber(control.getBody().style.left);
 
-        control._uPrev.setEnabled(left < control._uPrev.getWidth());
-        control._uNext.setEnabled(
-            left > control.getBodyWidth() - control.$cache$bodyWidth - control._uNext.getWidth()
-        );
+        control._uPrev[left < control._uPrev.getWidth() ? 'enable' : 'disable']();
+        control._uNext[
+            left > control.getBodyWidth() - control.$cache$bodyWidth - control._uNext.getWidth() ?
+                'enable' : 'disable'
+        ]();
     }
 
     extend(UI_TAB_CLASS, UI_ITEMS);
 
     /**
-     * 鼠标单击控件事件的默认处理。
-     * @protected
-     *
-     * @param {Event} event 事件对象
+     * @override
      */
     UI_TAB_BUTTON_CLASS.$click = function (event) {
         UI_CONTROL_CLASS.$click.call(this, event);
@@ -181,18 +179,14 @@ _eContent        - 内容 DOM 元素
             MAX(0, index + (parent._uPrev == this ? toNumber(style.left) != pos[index] ? 0 : -1 : 1)),
             pos.length - 1
         );
+
         style.left =
             MAX(pos[index], parent.getBodyWidth() - parent.$cache$bodyWidth - parent._uNext.getWidth()) + 'px';
         UI_TAB_FLUSH_BUTTON(parent);
     };
 
     /**
-     * 计算控件的缓存。
-     * 控件缓存部分核心属性的值，提高控件属性的访问速度，在子控件或者应用程序开发过程中，如果需要避开控件提供的方法(setSize、alterClass 等)直接操作 Element 对象，操作完成后必须调用 clearCache 方法清除控件的属性缓存，否则将引发错误。
-     * @protected
-     *
-     * @param {CssStyle} style 基本 Element 对象的 Css 样式对象
-     * @param {boolean} cacheSize 是否需要缓存控件大小，如果控件是另一个控件的部件时，不缓存大小能加快渲染速度，默认缓存
+     * @override
      */
     UI_TAB_ITEM_CLASS.$cache = function (style, cacheSize) {
         UI_ITEM_CLASS.$cache.call(this, style, cacheSize);
@@ -202,11 +196,7 @@ _eContent        - 内容 DOM 元素
     };
 
     /**
-     * 鼠标单击控件事件的默认处理。
-     * 选项卡控件点击时将当前选项卡设置成为选中状态，同时取消同一个选项卡控件组的其它控件的选中状态。如果控件处于可操作状态(参见 isEnabled)，click 方法触发 onclick 事件，如果事件返回值不为 false，则调用 $click 方法。
-     * @protected
-     *
-     * @param {Event} event 事件对象
+     * @override
      */
     UI_TAB_ITEM_CLASS.$click = function (event) {
         UI_ITEM_CLASS.$click.call(this, event);
@@ -214,29 +204,24 @@ _eContent        - 内容 DOM 元素
     };
 
     /**
-     * 销毁控件的默认处理。
-     * 页面卸载时将销毁所有的控件，释放循环引用，防止在 IE 下发生内存泄漏，$dispose 方法的调用不会受到 ondispose 事件返回值的影响。
-     * @protected
+     * @override
      */
     UI_TAB_ITEM_CLASS.$dispose = function () {
-        this._eContent = null;
+        this._eContainer = null;
         UI_ITEM_CLASS.$dispose.call(this);
     };
 
     /**
-     * 直接设置父控件。
-     * @protected
-     *
-     * @param {ecui.ui.Control} parent ECUI 控件对象
+     * @override
      */
     UI_TAB_ITEM_CLASS.$setParent = function (parent) {
         //__gzip_original__el
-        var el = this._eContent;
+        var el = this._eContainer;
 
         UI_ITEM_CLASS.$setParent.call(this, parent);
         if (el) {
             if (parent) {
-                parent.getBase().appendChild(el);
+                parent.getMain().appendChild(el);
             }
             else {
                 removeDom(el);
@@ -245,32 +230,43 @@ _eContent        - 内容 DOM 元素
     };
 
     /**
-     * 获取选项卡对应的内容元素。
+     * 获取选项卡对应的容器元素。
      * @public
      *
-     * @return {HTMLElement} 选项卡对应的内容 DOM 元素。
+     * @return {HTMLElement} 选项卡对应的容器元素
      */
-    UI_TAB_ITEM_CLASS.getContent = function () {
-        return this._eContent;
+    UI_TAB_ITEM_CLASS.getContainer = function () {
+        return this._eContainer;
     };
 
     /**
-     * 设置选项卡对应的内容元素。
+     * 设置选项卡对应的容器元素。
      * @public
      *
-     * @param {HTMLElement} el 选项卡对应的内容 DOM 元素。
+     * @param {HTMLElement} el 选项卡对应的容器元素
      */
-    UI_TAB_ITEM_CLASS.setContent = function (el) {
-        this._eContent = el;
-        if (el) {
-            this._sContentDisplay = el.style.display;
+    UI_TAB_ITEM_CLASS.setContainer = function (el) {
+        var parent = this.getParent();
+
+        if (this._eContainer) {
+            removeDom(this._eContainer);
+        }
+        if (this._eContainer = el) {
+            if ((this._sContainer = el.style.display) == 'none') {
+                this._sContainer = '';
+            }
+
+            if (parent) {
+                parent.getMain().appendChild(el);
+
+                // 如果当前节点被选中需要显示容器元素，否则隐藏
+                el.style.display = parent._cSelected == this ? this._sContainer : 'none';
+            }
         }
     };
 
     /**
-     * 选项控件发生变化的处理。
-     * 在 选项组接口 中，选项控件发生增加/减少操作时调用此方法。
-     * @protected
+     * @override
      */
     UI_TAB_CLASS.$alterItems = function () {
         // 第一次进入时不需要调用$setSize函数，否则将初始化两次
@@ -292,12 +288,7 @@ _eContent        - 内容 DOM 元素
     };
 
     /**
-     * 计算控件的缓存。
-     * 控件缓存部分核心属性的值，提高控件属性的访问速度，在子控件或者应用程序开发过程中，如果需要避开控件提供的方法(setSize、alterClass 等)直接操作 Element 对象，操作完成后必须调用 clearCache 方法清除控件的属性缓存，否则将引发错误。
-     * @protected
-     *
-     * @param {CssStyle} style 基本 Element 对象的 Css 样式对象
-     * @param {boolean} cacheSize 是否需要缓存控件大小，如果控件是另一个控件的部件时，不缓存大小能加快渲染速度，默认缓存
+     * @override
      */
     UI_TAB_CLASS.$cache = function (style, cacheSize) {
         UI_ITEMS.$cache.call(this, style, cacheSize);
@@ -323,26 +314,7 @@ _eContent        - 内容 DOM 元素
     };
 
     /**
-     * 控件渲染完成后初始化的默认处理。
-     * $init 方法在控件渲染完成后调用，参见 create 与 init 方法。
-     * @protected
-     */
-    UI_TAB_CLASS.$init = function () {
-        this._uPrev.$init();
-        this._uNext.$init();
-        UI_ITEMS.$init.call(this);
-        for (var i = 0, list = this.getItems(), o; o = list[i++];) {
-            o.$setSize(o.getWidth(), o.getHeight());
-        }
-        this.setSelected(this._oSelected);
-    };
-
-     /**
-     * 控件移除子控件事件的默认处理。
-     * 选项组移除子选项时需要额外移除引用。
-     * @protected
-     *
-     * @param {ecui.ui.Tab.Item} child 选项控件
+     * @override
      */
     UI_TAB_CLASS.$remove = function (child) {
         if (this._cSelected == child) {
@@ -357,17 +329,13 @@ _eContent        - 内容 DOM 元素
     };
 
     /**
-     * 设置控件的大小。
-     * @protected
-     *
-     * @param {number} width 宽度，如果不需要设置则将参数设置为等价于逻辑非的值
-     * @param {number} height 高度，如果不需要设置则省略此参数
+     * @override
      */
     UI_TAB_CLASS.$setSize = function (width, height) {
         UI_CONTROL_CLASS.$setSize.call(this, width, height);
 
         //__gzip_original__prev
-        ///__gzip_original__next
+        //__gzip_original__next
         var prev = this._uPrev,
             next = this._uNext,
             style = this.getBody().style;
@@ -411,6 +379,19 @@ _eContent        - 内容 DOM 元素
     };
 
     /**
+     * @override
+     */
+    UI_TAB_CLASS.init = function () {
+        this._uPrev.init();
+        this._uNext.init();
+        UI_ITEMS.init.call(this);
+        for (var i = 0, list = this.getItems(), o; o = list[i++];) {
+            o.$setSize(o.getWidth(), o.getHeight());
+        }
+        this.setSelected(this._oSelected);
+    };
+
+    /**
      * 设置被选中的选项卡。
      * @public
      *
@@ -430,8 +411,8 @@ _eContent        - 内容 DOM 元素
         }
         if (this._cSelected != item) {
             for (; o = list[i++]; ) {
-                if (o._eContent) {
-                    o._eContent.style.display = o == item ? o._sContentDisplay : 'none';
+                if (o._eContainer) {
+                    o._eContainer.style.display = o == item ? o._sContainer : 'none';
                 }
             }
 
@@ -442,6 +423,8 @@ _eContent        - 内容 DOM 元素
             if (item) {
                 item.alterClass('+selected');
                 o = this._aPosition[indexOf(list, item)] - (prev.isShow() ? 0 : prev.getWidth());
+
+                // 如果当前选中的项没有被完全显示(例如处于最左或最右时)，设置成完全显示
                 if (left < o) {
                     style.left = o + 'px';
                 }
@@ -455,7 +438,7 @@ _eContent        - 内容 DOM 元素
             }
 
             this._cSelected = item;
-            this.change();
+            triggerEvent(this, 'change');
         }
     };
 //{/if}//

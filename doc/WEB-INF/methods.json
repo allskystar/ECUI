@@ -71,6 +71,17 @@
         },
 
         {
+            "name": "getAttribute",
+            "desc": "获取 Element 对象的属性值。",
+            "params": [
+                {"name": "el", "type": "HTMLElement", "desc": "Element 对象"},
+                {"name": "name", "type": "string", "desc": "属性名称"}
+            ],
+            "return": {"type": "string", "desc": "属性值"},
+            "remark": "在 IE 下，Element 对象的属性可以通过名称直接访问，效率是 getAttribute 方式的两倍。"
+        },
+
+        {
             "name": "getParent",
             "desc": "获取 Element 对象的父 Element 对象。",
             "params": [
@@ -228,6 +239,26 @@
                 {"name": "el", "type": "HTMLElement", "desc": "Element 对象"},
                 {"name": "text", "type": "string", "desc": "Element 对象的文本"}
             ]
+        }
+    ],
+
+    "json": [
+        {
+            "name": "parse",
+            "desc": "JSON字串解析，将JSON字符串解析为JSON对象。",
+            "params": [
+                {"name": "text", "type": "string", "desc": "json字符串"}
+            ],
+            "return": {"type": "Object", "desc": "json字符串描述的对象"}
+        },
+
+        {
+            "name": "stringify",
+            "desc": "JSON对象序列化。",
+            "params": [
+                {"name": "source", "type": "Object", "desc": "需要序列化的对象"}
+            ],
+            "return": {"type": "string", "desc": "json字符串"}
         }
     ],
 
@@ -2382,6 +2413,89 @@
         }
     ],
 
+    "listbox": [
+        {
+            "name": "getName",
+            "desc": "获取控件的表单项名称。",
+            "return": {"type": "string", "desc": "单选框名称"},
+            "remark": "多选框控件可以在表单中被提交，getName 方法返回提交时用的表单项名称，表单项名称可以使用 {'setName'|method:'listbox'} 方法改变。"
+        },
+
+        {
+            "name": "getSelected",
+            "desc": "获取所有选中的选项。",
+            "return": {"type": "Array", "desc": "选项数组"}
+        },
+
+        {
+            "name": "isSelected",
+            "owner": "ecui.ui.Listbox.Item",
+            "desc": "判断多选框的选项控件是否被选中。",
+            "return": {"type": "boolean", "desc": "选项是否被选中"}
+        },
+
+        {
+            "name": "selectAll",
+            "desc": "选中所有的选项。",
+            "remark": "某些场景下，需要多选框控件的内容都可以被提交，可以在表单的 onsubmit 事件中调用 selectAll 方法全部选择。"
+        },
+
+        {
+            "name": "setName",
+            "desc": "设置控件的表单项名称。",
+            "params": [
+                {"name": "name", "type": "string", "desc": "表单项名称"}
+            ],
+            "remark": "多选框控件可以在表单中被提交，setName 方法设置提交时用的表单项名称，表单项名称可以使用 {'getName'|method:'listbox'} 方法获取。"
+        },
+
+        {
+            "name": "setSelected",
+            "owner": "ecui.ui.Listbox.Item",
+            "desc": "设置选中状态。",
+            "params": [
+                {"name": "status", "type": "boolean", "desc": "是否选中，默认为选中"}
+            ]
+        }
+    ],
+
+    "tab": [
+        {
+            "name": "$getLeftMostIndex",
+            "desc": "获得当前显示的选项卡中左边元素的索引，只在能左右滚动时有效。",
+            "return": {"type": "number", "desc": "最左边元素的索引"}
+        },
+
+        {
+            "name": "getContainer",
+            "syntax": "<i>HTMLElement</i> = <i>ecui.ui.Tab.Item.</i><b>getContainer(</b><i></i><b>)</b>",
+            "desc": "获取选项卡对应的容器元素。",
+            "return": {"type": "HTMLElement", "desc": "选项卡对应的容器元素"}
+        },
+
+        {
+            "name": "getSelected",
+            "desc": "获得当前选中的选项卡控件。",
+            "return": {"type": "ecui.ui.Tab.Item", "desc": "选中的选项卡控件"}
+        },
+
+        {
+            "name": "setContainer",
+            "syntax": "<i>ecui.ui.Tab.Item.</i><b>setContainer(</b><i>el</i><b>)</b>",
+            "desc": "设置选项卡对应的容器元素。",
+            "params": [
+                {"name": "el", "type": "HTMLElement", "desc": "选项卡对应的容器元素"}
+            ]
+        },
+
+        {
+            "name": "setSelected",
+            "desc": "设置被选中的选项卡。",
+            "params": [
+                {"name": "item", "type": "number|ecui.ui.Tab.Item", "desc": "选项卡子选项的索引/选项卡子选项控件"}
+            ]
+        }
+    ],
 
     
     
@@ -2534,69 +2648,6 @@
     "locked-table": [
     ],
 
-    "listbox": [
-        {
-            "name": "add",
-            "params": [
-                {"name": "item", "type": "string|HTMLElement|ecui.ui.Item", "desc": "选项控件的 html 内容/控件对应的 Element 对象/选项控件"},
-                {"name": "index", "type": "number", "desc": "选项控件需要添加的位置序号"},
-                {"name": "value", "type": "string", "desc": "选项对应的表单项提交值，如果忽略将使用控件的文本内容作为提交值"}
-            ]
-        },
-
-        {
-            "name": "append",
-            "params": [
-                {"name": "item", "type": "string|HTMLElement|ecui.ui.Item", "desc": "选项控件的 html 内容/控件对应的 Element 对象/选项控件"},
-                {"name": "value", "type": "string", "desc": "选项对应的表单项提交值，如果忽略将使用控件的文本内容作为提交值"}
-            ]
-        },
-
-        {
-            "name": "getName",
-            "desc": "获取控件的表单项名称。",
-            "return": {"type": "string", "desc": "单选框名称"},
-            "remark": "多选框控件可以在表单中被提交，getName 方法返回提交时用的表单项名称，表单项名称可以使用 {'setName'|method:'listbox'} 方法改变。"
-        },
-
-        {
-            "name": "getSelected",
-            "desc": "获取所有选中的选项。",
-            "return": {"type": "Array", "desc": "选项数组"}
-        },
-
-        {
-            "name": "isSelected",
-            "owner": "ecui.ui.Listbox.Item",
-            "desc": "判断多选框的选项控件是否被选中。",
-            "return": {"type": "boolean", "desc": "选项是否被选中"}
-        },
-
-        {
-            "name": "selectAll",
-            "desc": "选中所有的选项。",
-            "remark": "某些场景下，需要多选框控件的内容都可以被提交，可以在表单的 onsubmit 事件中调用 selectAll 方法全部选择。"
-        },
-
-        {
-            "name": "setName",
-            "desc": "设置控件的表单项名称。",
-            "params": [
-                {"name": "name", "type": "string", "desc": "表单项名称"}
-            ],
-            "remark": "多选框控件可以在表单中被提交，setName 方法设置提交时用的表单项名称，表单项名称可以使用 {'getName'|method:'listbox'} 方法获取。"
-        },
-
-        {
-            "name": "setSelected",
-            "owner": "ecui.ui.Listbox.Item",
-            "desc": "设置选中状态。",
-            "params": [
-                {"name": "status", "type": "boolean", "desc": "是否选中，默认为选中"}
-            ]
-        }
-    ],
-
     "progress": [
         {
             "name": "setText",
@@ -2620,36 +2671,6 @@
             "desc": "设置拾色器当前选中的颜色对象。",
             "params": [
                 {"name": "color", "type": "ecui.Color", "desc": "颜色对象"}
-            ]
-        }
-    ],
-
-    "tab": [
-        {
-            "name": "$getLeftMostIndex",
-            "desc": "获得当前显示的选项卡中左边元素的索引，只在能左右滚动时有效。",
-            "return": {"type": "number", "desc": "最左边元素的索引"}
-        },
-
-        {
-            "name": "getSelected",
-            "desc": "获得当前选中的选项卡控件。",
-            "return": {"type": "ecui.ui.Tab.Item", "desc": "选中的选项卡控件"}
-        },
-
-        {
-            "name": "move",
-            "desc": "移动分页选项头部。",
-            "params": [
-                {"name": "skip", "type": "number", "desc": "移动头部指定个数的选项卡数量，正数向后，负数向前"}
-            ]
-        },
-
-        {
-            "name": "setSelected",
-            "desc": "设置被选中的选项卡。",
-            "params": [
-                {"name": "item", "type": "number|ecui.ui.Tab.Item", "desc": "选项卡子选项的索引/选项卡子选项控件"}
             ]
         }
     ]

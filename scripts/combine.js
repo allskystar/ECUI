@@ -1,5 +1,5 @@
 /*
-Shield - 分组屏蔽功能插件，通过修改setEnabled方法实现同组的控件同时屏蔽或取消屏蔽，通过增加遮罩层实现完全的disabled效果。
+Combine - 联合器插件。
 */
 //{if 0}//
 (function () {
@@ -16,7 +16,6 @@ Shield - 分组屏蔽功能插件，通过修改setEnabled方法实现同组的�
         blank = util.blank,
 
         $connect = core.$connect,
-        addEventListener = core.addEventListener,
         triggerEvent = core.triggerEvent,
 
         eventNames = [
@@ -57,6 +56,14 @@ Shield - 分组屏蔽功能插件，通过修改setEnabled方法实现同组的�
         EXT_COMBINE_CLASS = COMBINE.prototype,
         EXT_COMBINE_PROXY = {};
 //{else}//
+    /**
+     * 联合器调用方法创建。
+     * 联合器的方法都创建在代理对象中，用于分组进行调用。
+     * @public
+     *
+     * @param {string} name 需要创建的方法名
+     * @return {Function} 进行分组联合调用的函数
+     */
     function EXT_COMBINE_BUILD(name) {
         if (!EXT_COMBINE_PROXY[name]) {
             EXT_COMBINE_CLASS[name] = function () {
@@ -85,6 +92,12 @@ Shield - 分组屏蔽功能插件，通过修改setEnabled方法实现同组的�
         return EXT_COMBINE_PROXY[name];
     }
 
+    /**
+     * 为控件绑定需要联合调用的方法。
+     * @public
+     *
+     * @param {ecui.ui.Control} control 控件对象
+     */
     function EXT_COMBINE_BIND(control) {
         for (var i = 0, uid = control.getUID(), o; o = this._aNames[i++]; ) {
             if (indexOf(eventNames, o) < 0) {
@@ -92,13 +105,17 @@ Shield - 分组屏蔽功能插件，通过修改setEnabled方法实现同组的�
                 control[o] = EXT_COMBINE_BUILD(o);
             }
             else {
-                addEventListener(control, o, EXT_COMBINE_BUILD(o));
+                core.addEventListener(control, o, EXT_COMBINE_BUILD(o));
             }
         }
         this._aControls.push(control);
         COMBINE[uid] = this;
     }
 
+    /**
+     * 联合器释放。
+     * @protected
+     */
     EXT_COMBINE_PROXY.$dispose = function () {
         var i = 0,
             uid = this.getUID(),
@@ -114,6 +131,13 @@ Shield - 分组屏蔽功能插件，通过修改setEnabled方法实现同组的�
         }
     };
 
+    /**
+     * 联合器插件加载。
+     * @public
+     *
+     * @param {ecui.ui.Control} control 需要应用插件的控件
+     * @param {string} value 插件的参数
+     */
     ext.combine = function (control, value) {
         if (/(^[^(]+)(\(([^)]+)\))?$/.test(value)) {
             value = REGEXP.$3;
