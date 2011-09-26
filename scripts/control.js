@@ -9,35 +9,35 @@ Control - ECUI 的核心组成部分，定义所有控件的基本操作。
 </div>
 
 属性
-_bCapturable             - 控件是否响应浏览器事件状态
-_bUserSelect             - 控件是否允许选中内容
-_bFocusable              - 控件是否允许获取焦点
-_bDisabled               - 控件的状态，为true时控件不处理任何事件
-_bCached                 - 控件是否已经读入缓存
-_bCreated                - 控件是否已经完全生成
-_sUID                    - 控件的内部ID
-_sPrimary                - 控件定义时的基本样式
-_sClass                  - 控件的当前样式
-_sWidth                  - 控件的基本宽度值，可能是百分比或者空字符串
-_sHeight                 - 控件的基本高度值，可能是百分比或者空字符串
-_sDisplay                - 控件的布局方式，在hide时保存，在show时恢复
-_eMain                   - 控件的基本标签对象
-_eBody                   - 控件用于承载子控件的载体标签，通过$setBody函数设置这个值，绑定当前控件
-_cParent                 - 父控件对象
-_aStatus                 - 控件当前的状态集合
-$cache$width             - 控件的宽度缓存
-$cache$height            - 控件的高度缓存
-$cache$bodyWidthRevise   - 内容区域的宽度修正缓存
-$cache$bodyHeightRevise  - 内容区域的高度修正缓存
-$cache$borderTopWidth    - 上部边框线宽度缓存
-$cache$borderLeftWidth   - 左部边框线宽度缓存
-$cache$borderRightWidth  - 右部边框线宽度缓存
-$cache$borderBottomWidth - 下部边框线宽度缓存
-$cache$paddingTop        - 上部内填充宽度缓存
-$cache$paddingLeft       - 左部内填充宽度缓存
-$cache$paddingRight      - 右部内填充宽度缓存
-$cache$paddingBottom     - 下部内填充宽度缓存
-$cache$position          - 控件布局方式缓存
+_bCapturable        - 控件是否响应浏览器事件状态
+_bUserSelect        - 控件是否允许选中内容
+_bFocusable         - 控件是否允许获取焦点
+_bDisabled          - 控件的状态，为true时控件不处理任何事件
+_bCached            - 控件是否已经读入缓存
+_bCreated           - 控件是否已经完全生成
+_sUID               - 控件的内部ID
+_sPrimary           - 控件定义时的基本样式
+_sClass             - 控件的当前样式
+_sWidth             - 控件的基本宽度值，可能是百分比或者空字符串
+_sHeight            - 控件的基本高度值，可能是百分比或者空字符串
+_sDisplay           - 控件的布局方式，在hide时保存，在show时恢复
+_eMain              - 控件的基本标签对象
+_eBody              - 控件用于承载子控件的载体标签，通过$setBody函数设置这个值，绑定当前控件
+_cParent            - 父控件对象
+_aStatus            - 控件当前的状态集合
+$$width             - 控件的宽度缓存
+$$height            - 控件的高度缓存
+$$bodyWidthRevise   - 内容区域的宽度修正缓存
+$$bodyHeightRevise  - 内容区域的高度修正缓存
+$$borderTopWidth    - 上部边框线宽度缓存
+$$borderLeftWidth   - 左部边框线宽度缓存
+$$borderRightWidth  - 右部边框线宽度缓存
+$$borderBottomWidth - 下部边框线宽度缓存
+$$paddingTop        - 上部内填充宽度缓存
+$$paddingLeft       - 左部内填充宽度缓存
+$$paddingRight      - 右部内填充宽度缓存
+$$paddingBottom     - 下部内填充宽度缓存
+$$position          - 控件布局方式缓存
 */
 //{if 0}//
 (function () {
@@ -78,7 +78,7 @@ $cache$position          - 控件布局方式缓存
         getHovered = core.getHovered,
         getStatus = core.getStatus,
         inheritsControl = core.inherits,
-        isFixedSize = core.isFixedSize,
+        isContentBox = core.isContentBox,
         loseFocus = core.loseFocus,
         query = core.query,
         setFocused = core.setFocused,
@@ -109,25 +109,32 @@ $cache$position          - 控件布局方式缓存
      */
     var UI_CONTROL = ui.Control =
         inheritsControl(
-            Object,
             null,
+            null,
+            blank,
             function (el, options) {
-                this._bCapturable = options.capturable !== false;
-                this._bUserSelect = options.userSelect !== false;
-                this._bFocusable = options.focusable !== false;
-                this._bResizable = options.resizable !== false;
+                $bind(el, this);
+
                 this._bDisabled = !!options.disabled;
                 this._sUID = options.uid;
                 this._sPrimary = this._sClass = options.primary;
                 this._eMain = this._eBody = el;
                 this._cParent = null;
 
-                this._sWidth = el.style.width;
-                this._sHeight = el.style.height;
+                this._bCapturable = options.capturable !== false;
+                this._bUserSelect = options.userSelect !== false;
+                this._bFocusable = options.focusable !== false;
+                if (options.resizable !== false) {
+                    this._bResizable = true;
+                    el = el.style;
+                    this._sWidth = el.width;
+                    this._sHeight = el.height;
+                }
+                else {
+                    this._bResizable = false;
+                }
 
                 this._aStatus = ['', ' '];
-
-                $bind(el, this);
             }
         ),
         UI_CONTROL_CLASS = UI_CONTROL.prototype,
@@ -210,30 +217,51 @@ $cache$position          - 控件布局方式缓存
      * @param {boolean} cacheSize 是否需要缓存控件的大小，如果控件是另一个控件的部件时，不缓存大小能加快渲染速度，默认缓存
      */
     UI_CONTROL_CLASS.$cache = function (style, cacheSize) {
-        //__gzip_original__el
-        for (
-            var i = 0,
-                list = [
-                    'borderTopWidth', 'borderLeftWidth', 'borderRightWidth', 'borderBottomWidth',
-                    'paddingTop', 'paddingLeft', 'paddingRight', 'paddingBottom'
-                ],
-                el = this._eMain,
-                fixedSize = isFixedSize(),
-                o;
-            o = list[i++];
-        ) {
-            this['$cache$' + o] = toNumber(style[o]);
+        if (ieVersion < 8) {
+            o = style.borderWidth;
+            if (o.indexOf(' ') > 0) {
+                o = o.split(' ');
+                this.$$borderTopWidth = toNumber(o[0]);
+                this.$$borderRightWidth = toNumber(o[1]);
+                this.$$borderBottomWidth = o[2] ? toNumber(o[2]) : this.$$borderTopWidth;
+                this.$$borderLeftWidth = o[3] ? toNumber(o[3]) : this.$$borderRightWidth = toNumber(o[1]);
+            }
+            else {
+                this.$$borderTopWidth = this.$$borderLeftWidth = this.$$borderRightWidth = this.$$borderBottomWidth =
+                    toNumber(o);
+            }
+            o = style.padding;
+            if (o.indexOf(' ') > 0) {
+                o = o.split(' ');
+                this.$$paddingTop = toNumber(o[0]);
+                this.$$paddingRight = toNumber(o[1]);
+                this.$$paddingBottom = o[2] ? toNumber(o[2]) : this.$$paddingTop;
+                this.$$paddingLeft = o[3] ? toNumber(o[3]) : this.$$paddingRight;
+            }
+            else {
+                this.$$paddingTop = this.$$paddingLeft = this.$$paddingRight = this.$$paddingBottom = toNumber(o);
+            }
+        }
+        else {
+            for (
+                var i = 0,
+                    list = [
+                        'borderTopWidth', 'borderLeftWidth', 'borderRightWidth', 'borderBottomWidth',
+                        'paddingTop', 'paddingLeft', 'paddingRight', 'paddingBottom'
+                    ],
+                    o;
+                o = list[i++];
+            ) {
+                this['$$' + o] = toNumber(style[o]);
+            }
         }
 
-        this.$cache$position = style.position;
+        this.$$position = style.position;
 
         if (cacheSize !== false) {
-            this.$cache$width =
-                el.offsetWidth ||
-                    toNumber(style.width || el.style.width) + (fixedSize ? this.$getBasicWidth() : 0);
-            this.$cache$height =
-                el.offsetHeight ||
-                    toNumber(style.height || el.style.height) + (fixedSize ? this.$getBasicHeight() : 0);
+            o = isContentBox();
+            this.$$width = this._eMain.offsetWidth || toNumber(style.width) + (o ? this.$getBasicWidth() : 0);
+            this.$$height = this._eMain.offsetHeight || toNumber(style.height) + (o ? this.$getBasicHeight() : 0);
         }
     };
 
@@ -284,8 +312,7 @@ $cache$position          - 控件布局方式缓存
      * @return {number} 控件的基本高度
      */
     UI_CONTROL_CLASS.$getBasicHeight = function () {
-        return this.$cache$borderTopWidth + this.$cache$borderBottomWidth +
-            this.$cache$paddingTop + this.$cache$paddingBottom;
+        return this.$$borderTopWidth + this.$$borderBottomWidth + this.$$paddingTop + this.$$paddingBottom;
     };
 
     /**
@@ -296,8 +323,7 @@ $cache$position          - 控件布局方式缓存
      * @return {number} 控件的基本宽度
      */
     UI_CONTROL_CLASS.$getBasicWidth = function () {
-        return this.$cache$borderLeftWidth + this.$cache$borderRightWidth +
-            this.$cache$paddingLeft + this.$cache$paddingRight;
+        return this.$$borderLeftWidth + this.$$borderRightWidth + this.$$paddingLeft + this.$$paddingRight;
     };
 
     /**
@@ -341,8 +367,8 @@ $cache$position          - 控件布局方式缓存
      * @protected
      */
     UI_CONTROL_CLASS.$locate = function () {
-        if (this.$cache$position == 'static') {
-            this._eMain.style.position = this.$cache$position = 'relative';
+        if (this.$$position == 'static') {
+            this._eMain.style.position = this.$$position = 'relative';
         }
     };
 
@@ -384,7 +410,7 @@ $cache$position          - 控件布局方式缓存
             var style = getStyle(el);
             if (style.width == 'auto' && style.display == 'block') {
                 currStyle.width = '100%';
-                currStyle.width = el.offsetWidth - (isFixedSize() ? this.$getBasicWidth() * 2 : 0) + 'px';
+                currStyle.width = el.offsetWidth - (isContentBox() ? this.$getBasicWidth() * 2 : 0) + 'px';
             }
         }
         currStyle.height = this._sHeight;
@@ -424,18 +450,18 @@ $cache$position          - 控件布局方式缓存
         //__gzip_original__style
         var style = this._eMain.style,
             o = this._eMain.tagName,
-            flgFixedSize = isFixedSize() && o != 'BUTTON' && o != 'INPUT';
+            fixedSize = isContentBox() && o != 'BUTTON' && o != 'INPUT';
 
         // 防止负宽度IE下出错
-        if (width && (o = width - (flgFixedSize ? this.$getBasicWidth() : 0)) > 0) {
+        if (width && (o = width - (fixedSize ? this.$getBasicWidth() : 0)) > 0) {
             style.width = o + 'px';
-            this.$cache$width = width;
+            this.$$width = width;
         }
 
         // 防止负高度IE下出错
-        if (height && (o = height - (flgFixedSize ? this.$getBasicHeight() : 0)) > 0) {
+        if (height && (o = height - (fixedSize ? this.$getBasicHeight() : 0)) > 0) {
             style.height = o + 'px';
-            this.$cache$height = height;
+            this.$$height = height;
         }
     };
 
@@ -658,7 +684,7 @@ $cache$position          - 控件布局方式缓存
      */
     UI_CONTROL_CLASS.getHeight = function () {
         this.cache();
-        return this.$cache$height;
+        return this.$$height;
     };
 
     /**
@@ -681,7 +707,7 @@ $cache$position          - 控件布局方式缓存
      */
     UI_CONTROL_CLASS.getMinimumHeight = function () {
         this.cache();
-        return this.$getBasicHeight() + (this.$cache$bodyHeightRevise || 0);
+        return this.$getBasicHeight() + (this.$$bodyHeightRevise || 0);
     };
 
     /**
@@ -692,7 +718,7 @@ $cache$position          - 控件布局方式缓存
      */
     UI_CONTROL_CLASS.getMinimumWidth = function () {
         this.cache();
-        return this.$getBasicWidth() + (this.$cache$bodyWidthRevise || 0);
+        return this.$getBasicWidth() + (this.$$bodyWidthRevise || 0);
     };
 
     /**
@@ -768,7 +794,7 @@ $cache$position          - 控件布局方式缓存
      */
     UI_CONTROL_CLASS.getWidth = function () {
         this.cache();
-        return this.$cache$width;
+        return this.$$width;
     };
 
     /**
@@ -839,7 +865,9 @@ $cache$position          - 控件布局方式缓存
                         UI_CONTROL_READY_LIST = null;
                     });
                 }
-                UI_CONTROL_READY_LIST.push(this);
+                if (this.$ready != blank) {
+                    UI_CONTROL_READY_LIST.push(this);
+                }
             }
             this._bCreated = true;
         }

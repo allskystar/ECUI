@@ -31,7 +31,7 @@ Decorate - 装饰器插件。
         inherits = util.inherits,
 
         $bind = core.$bind,
-        isFixedSize = core.isFixedSize,
+        isContentBox = core.isContentBox,
 
         UI_CONTROL = ui.Control,
         UI_CONTROL_CLASS = UI_CONTROL.prototype;
@@ -142,9 +142,9 @@ Decorate - 装饰器插件。
     DECORATOR_CLASS.$cache = function (style, cacheSize) {
         this._oInner.$cache(style, cacheSize, true);
         UI_CONTROL_CLASS.$cache.call(this, getStyle(this._eMain), false);
-        this._oInner.$cache$position = 'relative';
-        this.$cache$position = style.position == 'absolute' ? 'absolute' : 'relative';
-        this.$cache$layout =
+        this._oInner.$$position = 'relative';
+        this.$$position = style.position == 'absolute' ? 'absolute' : 'relative';
+        this.$$layout =
             ';top:' + style.top + ';left:' + style.left + ';display:' + style.display +
                 (ieVersion ? ';zoom:' + style.zoom : '');
     };
@@ -186,7 +186,7 @@ Decorate - 装饰器插件。
             inner = this._oInner,
             invalidWidth = UI_CONTROL_CLASS.$getBasicWidth.call(this),
             invalidHeight = UI_CONTROL_CLASS.$getBasicHeight.call(this),
-            fixedSize = isFixedSize();
+            fixedSize = isContentBox();
 
         inner.$setSize(width && width - invalidWidth, height && height - invalidHeight, true);
 
@@ -277,7 +277,7 @@ Decorate - 装饰器插件。
      * @public
      */
     DECORATOR_CLASS.init = function () {
-        this._eMain.style.cssText = 'position:' + this.$cache$position + this.$cache$layout;
+        this._eMain.style.cssText = 'position:' + this.$$position + this.$$layout;
         this._oInner.getOuter(true).style.cssText += ';position:relative;top:auto;left:auto;display:block';
         this._oInner.init(true);
     };
@@ -344,12 +344,11 @@ LRDecorator - 左右扩展装饰器，将区域分为"左-控件-右"三部分�
         DECORATOR_CLASS.$setSize.call(this, width, height);
 
         var o = this._eMain.lastChild,
-            text = ';top:' + this.$cache$paddingTop + 'px;height:' + this._oInner.getHeight(true) + 'px;width:';
+            text = ';top:' + this.$$paddingTop + 'px;height:' + this._oInner.getHeight(true) + 'px;width:';
 
         o.style.cssText +=
-            text + this.$cache$paddingRight + 'px;left:' +
-                (this.$cache$paddingLeft + this._oInner.getWidth(true)) + 'px';
-        o.previousSibling.style.cssText += text + this.$cache$paddingLeft + 'px';
+            text + this.$$paddingRight + 'px;left:' + (this.$$paddingLeft + this._oInner.getWidth(true)) + 'px';
+        o.previousSibling.style.cssText += text + this.$$paddingLeft + 'px';
     };
 //{/if}//
 /*
@@ -378,12 +377,11 @@ TBDecorator - 上下扩展装饰器，将区域分为"上-控件-下"三部分�
         DECORATOR_CLASS.$setSize.call(this, width, height);
 
         var o = this._eMain.lastChild,
-            text = ';left:' + this.$cache$paddingLeft + 'px;width:' + this._oInner.getWidth(true) + 'px;height:';
+            text = ';left:' + this.$$paddingLeft + 'px;width:' + this._oInner.getWidth(true) + 'px;height:';
 
         o.style.cssText +=
-            text + this.$cache$paddingBottom + 'px;top:' +
-                (this.$cache$paddingTop + this._oInner.getHeight(true)) + 'px';
-        o.previousSibling.style.cssText += text + this.$cache$paddingTop + 'px';
+            text + this.$$paddingBottom + 'px;top:' + (this.$$paddingTop + this._oInner.getHeight(true)) + 'px';
+        o.previousSibling.style.cssText += text + this.$$paddingTop + 'px';
     };
 //{/if}//
 /*
@@ -418,15 +416,15 @@ MagicDecorator - 九宫格扩展装饰器，将区域分为"左上-上-右上-�
 
         var o = this._eMain.lastChild,
             i = 9,
-            paddingTop = this.$cache$paddingTop,
-            paddingLeft = this.$cache$paddingLeft,
+            paddingTop = this.$$paddingTop,
+            paddingLeft = this.$$paddingLeft,
             widthList = this._oInner.getWidth(true),
             heightList = this._oInner.getHeight(true),
             topList = [0, paddingTop, paddingTop + heightList],
             leftList = [0, paddingLeft, paddingLeft + widthList];
 
-        widthList = [paddingLeft, widthList, this.$cache$paddingRight];
-        heightList = [paddingTop, heightList, this.$cache$paddingBottom];
+        widthList = [paddingLeft, widthList, this.$$paddingRight];
+        heightList = [paddingTop, heightList, this.$$paddingBottom];
 
         for (; i--; ) {
             if (i != 4) {

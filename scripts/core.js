@@ -100,50 +100,63 @@
          *
          * @param {Function} superClass 父控件类
          * @param {string} type 子控件的类型样式
-         * @param {Function} constructor 子控件的标准构造函数，如果忽略将直接调用父控件类的构造函数
-         * @param {Function} before 子控件构造函数调用之前的设置函数，用于设置缺省的 options 值或根据条件转换主元素，before 的返回值是新的控件主元素，如果没有返回值，控件主元素不改变
+         * @param {Function} preprocess 控件正式生成前对参数及主元素结构信息调整的预处理函数
+         * @param {Function} subClass 子控件的标准构造函数，如果忽略将直接调用父控件类的构造函数
          * @return {Function} 新控件的构造函数
          */
-        inheritsControl = core.inherits = function (superClass, type, constructor, before) {
+        inheritsControl = core.inherits = function (superClass, type, preprocess, subClass) {
             var agent = function (options) {
-                    return createControl(agent.client, options);
+                    return createControl(client, options);
+                },
+                client = agent.client = superClass ? function (el, options, flag) {
+                    if (!flag) {
+                        el = this._preprocess(el, options);
+                    }
+                    superClass.client.call(this, el, options, true);
+                    if (subClass) {
+                        subClass.call(this, el, options);
+                    }
+                } : function (el, options) {
+                    // ecui.ui.Control的特殊初始化设置
+                    el = this._preprocess(el, options);
+                    if (subClass) {
+                        subClass.call(this, el, options);
+                    }
                 };
 
-            inherits(agent, superClass);
+            if (superClass) {
+                inherits(agent, superClass);
 
-            if (type && type.charAt(0) == '*') {
-                (agent.types = superClass.types.slice())[0] = type.slice(1);
+                if (type && type.charAt(0) == '*') {
+                    (agent.types = superClass.types.slice())[0] = type.slice(1);
+                }
+                else {
+                    agent.types = (type ? [type] : []).concat(superClass.types);
+                }
             }
             else {
-                type = type ? [type] : [];
-                agent.types = type.concat(superClass.types || []);
+                // ecui.ui.Control的特殊初始化设置
+                agent.types = [];
             }
             agent.TYPES = ' ' + agent.types.join(' ');
 
-            superClass = superClass.client;
-            inherits(
-                agent.client =
-                    constructor || before ? function (el, options) {
-                        if (before) {
-                            el = before.call(this, el, options) || el;
-                        }
-                        if (superClass) {
-                            superClass.call(this, el, options);
-                        }
-                        if (constructor) {
-                            constructor.call(this, el, options);
-                        }
-                    } : function (el, options) {
-                        superClass.call(this, el, options);
-                    },
-                agent
-            );
-            agent.client.agent = agent;
+            inherits(client, agent);
+            client.agent = agent;
+
+            if (preprocess) {
+                agent.prototype._preprocess = superClass ? function (el, options) {
+                    el = superClass.prototype._preprocess.call(this, el, options) || el;
+                    return preprocess.call(this, el, options) || el;
+                } : function (el, options) {
+                    // ecui.ui.Control的特殊初始化设置
+                    return preprocess.call(this, el, options) || el;
+                };
+            }
 
             return agent;
         },
         intercept,
-        isFixedSize,
+        isContentBox,
         loseFocus,
         mask,
         query,
@@ -189,7 +202,7 @@
             ecuiName = 'ecui',        // Element 中用于自动渲染的 ecui 属性名称
             isGlobalId,               // 是否自动将 ecui 的标识符全局化
 
-            flgFixedSize,             // 在计算宽度与高度时，是否需要修正内填充与边框样式的影响
+            flgContentBox,            // 在计算宽度与高度时，是否需要修正内填充与边框样式的影响
             flgFixedOffset,           // 在计算相对位置时，是否需要修正边框样式的影响
             scrollNarrow,             // 浏览器滚动条相对窄的一边的长度
 
@@ -545,7 +558,7 @@
                         }
                         for (; o = list[i--]; ) {
                             o.getMain().style.width =
-                                widthList[i] - (flgFixedSize ? o.$getBasicWidth() * 2 : 0) + 'px';
+                                widthList[i] - (flgContentBox ? o.$getBasicWidth() * 2 : 0) + 'px';
                         }
                     }
 
@@ -592,28 +605,22 @@
                             elements.push(o);
                         }
                     }
-
+window.timer && window.timer.record('控件创建');
                     for (i = 0; el = elements[i]; i++) {
-                        if (getParent(el)) {
-                            options = getParameters(el);
-                            // 以下使用 el 替代 control
-                            if (o = options.type) {
-                                options.main = el;
-                                list.push($create(ui[toCamelCase(o.charAt(0).toUpperCase() + o.slice(1))], options));
-                            }
-                            else {
-                                for (o in plugins) {
-                                    if (options[o]) {
-                                        plugins[o](el, options[o]);
-                                    }
-                                }
-                            }
+                        options = getParameters(el);
+                        // 以下使用 el 替代 control
+                        if (o = options.type) {
+                            options.main = el;
+                            list.push($create(ui[toCamelCase(o.charAt(0).toUpperCase() + o.slice(1))], options));
                         }
                     }
-
+window.timer && window.timer.record('控件重绘');
+document.body.offsetWidth;
+window.timer && window.timer.record('控件缓存');
                     for (i = 0; o = list[i++]; ) {
                         o.cache();
                     }
+window.timer && window.timer.record('控件生成');
                     for (i = 0; o = list[i++]; ) {
                         o.init();
                     }
@@ -626,20 +633,15 @@
 
         /**
          * 使一个 Element 对象与一个 ECUI 控件 在逻辑上绑定。
-         * 一个 Element 对象只能绑定一个 ECUI 控件，多次绑定仅第一次有效，绑定后的 Element 对象可以通过 getControl 方法得到绑定的 ECUI 控件。使用页面静态初始化(参见 ECUI 使用方式)控件后，如果需要修改 Element 对象绑定的 ECUI 控件，通过改变 Element 对象的 ecui 属性值，并调用核心提供的 init 方法初始化，是无效的。请调用 dispose 方法释放控件后，重新初始化，控件的 $dispose 方法或 ondispose 事件中需要释放与其相关联的所有非 JSObject 的绑定。
+         * 一个 Element 对象只能绑定一个 ECUI 控件，重复绑定会自动取消之前的绑定。
          * @protected
          *
          * @param {HTMLElement} el Element 对象
          * @param {ecui.ui.Control} control ECUI 控件
-         * @return {boolean} 绑定操作是否成功
          */
         $bind = core.$bind = function (el, control) {
-            if (!el.getControl) {
-                el._cControl = control;
-                el.getControl = getControlByElement;
-                return true;
-            }
-            return false;
+            el._cControl = control;
+            el.getControl = getControlByElement;
         };
 
         /**
@@ -734,13 +736,8 @@
                     type.appendTo(parent);
                 }
             }
-            else if (o = findControl(getParent(type.getOuter()))) {
-                if (triggerEvent(o, 'append', null, [type])) {
-                    type.$setParent(o);
-                }
-            }
             else {
-                type.$setParent();
+                type.$setParent(findControl(getParent(type.getOuter())));
             }
 
             oncreate(type, options);
@@ -806,7 +803,7 @@
          * @return {number} 高度修正值
          */
         calcHeightRevise = core.calcHeightRevise = function (style) {
-            return flgFixedSize ? toNumber(style.borderTopWidth) + toNumber(style.borderBottomWidth) +
+            return flgContentBox ? toNumber(style.borderTopWidth) + toNumber(style.borderBottomWidth) +
                     toNumber(style.paddingTop) + toNumber(style.paddingBottom)
                 : 0;
         };
@@ -850,7 +847,7 @@
          * @return {number} 宽度修正值
          */
         calcWidthRevise = core.calcWidthRevise = function (style) {
-            return flgFixedSize ? toNumber(style.borderLeftWidth) + toNumber(style.borderRightWidth) +
+            return flgContentBox ? toNumber(style.borderLeftWidth) + toNumber(style.borderRightWidth) +
                     toNumber(style.paddingLeft) + toNumber(style.paddingRight)
                 : 0;
         };
@@ -1081,13 +1078,14 @@
             if (text) {
                 for (
                     el.removeAttribute(attributeName);
-                    /\s*([\w\-]+)\s*(:\s*|:\s*([^;\s]+(\s+[^;\s]+)*)\s*)?($|;)/.test(text);
+                    /^(\s*;)?\s*(ext\-)?([\w\-]+)\s*(:\s*([^;\s]+(\s+[^;\s]+)*)\s*)?($|;)/.test(text);
                 ) {
                     text = REGEXP["$'"];
 
-                    el = REGEXP.$3;
-                    options[toCamelCase(REGEXP.$1)] =
-                        !el || el == 'true' ? true : el == 'false' ? false : ISNAN(el - 0) ? el : el - 0;
+                    el = REGEXP.$5;
+                    attributeName = REGEXP.$2 ? (options.ext = options.ext || {}) : options;
+                    attributeName[toCamelCase(REGEXP.$3)] =
+                        !el || el == 'true' ? true : el == 'false' ? false : ISNAN(+el) ? el : +el;
                 }
             }
 
@@ -1129,13 +1127,14 @@
         };
 
         /**
-         * 判断容器大小是否需要修正(即计算 padding, border 样式对 width, height 样式的影响)。
+         * 判断容器默认是否基于 content-box 属性进行布局。
+         * isContentBox 返回的是容器默认的布局方式，针对具体的元素，需要访问 box-sizing 样式来确认它的布局方式。
          * @public
          *
-         * @return {boolean} 容器大小是否需要修正
+         * @return {boolean} 容器是否使用 content-box 属性布局
          */
-        isFixedSize = core.isFixedSize = function () {
-            return flgFixedSize;
+        isContentBox = core.isContentBox = function () {
+            return flgContentBox;
         };
 
         /**
@@ -1654,7 +1653,7 @@
                 );
                 // 检测Element宽度与高度的计算方式
                 o = DOCUMENT.body.lastChild;
-                flgFixedSize = o.offsetWidth > 80;
+                flgContentBox = o.offsetWidth > 80;
                 flgFixedOffset = o.lastChild.offsetTop;
                 scrollNarrow = o.offsetWidth - o.clientWidth - 2;
                 removeDom(o);
@@ -1717,14 +1716,16 @@
         }
 
         /**
-         * 设置document节点上的鼠标事件。
+         * 控件对象创建后的处理。
          * @private
          *
          * @param {ecui.ui.Control} control 
          * @param {Object} options 控件初始化选项
          */
         function oncreate(control, options) {
-            triggerEvent(control, 'create', null, [options]);
+            if (control.oncreate) {
+                control.oncreate(options);
+            }
             allControls.push(control);
 
             if (options.id) {
@@ -1734,12 +1735,14 @@
                 }
             }
 
-            for (var o in plugins) {
-                if (options[o]) {
-                    plugins[o](control, options[o]);
-                }
-                if (o = control['$init' + o.charAt(0).toUpperCase() + toCamelCase(o.slice(1))]) {
-                    o.call(control, options);
+            if (options.ext) {
+                for (var o in options.ext) {
+                    if (plugins[o]) {
+                        plugins[o](control, options.ext[o], options);
+                        if (o = control['$init' + o.charAt(0).toUpperCase() + toCamelCase(o.slice(1))]) {
+                            o.call(control, options);
+                        }
+                    }
                 }
             }
         }

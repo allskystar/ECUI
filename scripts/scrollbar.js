@@ -510,12 +510,12 @@ _oRange         - 滑动按钮的合法滑动区间
 
         //__gzip_original__next
         var bodyWidth = this.getBodyWidth(),
-            prevHeight = this.$cache$paddingTop,
+            prevHeight = this.$$paddingTop,
             next = this._uNext;
 
         // 设置滚动按钮与滑动按钮的信息
         this._uPrev.$setSize(bodyWidth, prevHeight);
-        next.$setSize(bodyWidth, this.$cache$paddingBottom);
+        next.$setSize(bodyWidth, this.$$paddingBottom);
         this._uThumb.$setSize(bodyWidth);
         next.setPosition(0, this.getBodyHeight() + prevHeight);
 
@@ -600,12 +600,12 @@ _oRange         - 滑动按钮的合法滑动区间
 
         //__gzip_original__next
         var bodyHeight = this.getBodyHeight(),
-            prevWidth = this.$cache$paddingLeft,
+            prevWidth = this.$$paddingLeft,
             next = this._uNext;
 
         // 设置滚动按钮与滑动按钮的信息
         this._uPrev.$setSize(prevWidth, bodyHeight);
-        next.$setSize(this.$cache$paddingRight, bodyHeight);
+        next.$setSize(this.$$paddingRight, bodyHeight);
         this._uThumb.$setSize(0, bodyHeight);
         next.setPosition(this.getBodyWidth() + prevWidth, 0);
 

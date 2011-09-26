@@ -163,8 +163,8 @@ _uClose     - 关闭按钮
         UI_CONTROL_CLASS.$cache.call(this, style, cacheSize);
 
         style = getStyle(this.getMain().lastChild);
-        this.$cache$bodyWidthRevise = calcWidthRevise(style);
-        this.$cache$bodyHeightRevise = calcHeightRevise(style);
+        this.$$bodyWidthRevise = calcWidthRevise(style);
+        this.$$bodyHeightRevise = calcHeightRevise(style);
         this._uTitle.cache(true, true);
         this._uClose.cache(true, true);
     };
@@ -249,7 +249,7 @@ _uClose     - 关闭按钮
      */
     UI_FORM_CLASS.center = function () {
         o = this.getOuter();
-        o.style.position = this.$cache$position = 'absolute';
+        o.style.position = this.$$position = 'absolute';
         o = o.offsetParent;
 
         if (!o || o.tagName == 'BODY' || o.tagName == 'HTML') {

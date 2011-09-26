@@ -32,6 +32,7 @@ _eInput  - INPUT对象
         ieVersion = /msie (\d+\.\d)/i.test(USER_AGENT) ? DOCUMENT.documentMode || (REGEXP.$1 - 0) : undefined,
 
         createDom = dom.create,
+        first = dom.first,
         insertBefore = dom.insertBefore,
         setInput = dom.setInput,
         setStyle = dom.setStyle,
@@ -67,40 +68,39 @@ _eInput  - INPUT对象
         inheritsControl(
             UI_CONTROL,
             null,
-            null,
             function (el, options) {
-                var input = el;
-
                 if (el.type) {
                     // 根据表单项初始化
-                    input = el;
+                    var input = el;
 
-                    insertBefore(
-                        el = createDom(input.className, input.style.cssText + ';overflow:hidden'),
-                        input
-                    ).appendChild(input);
+                    insertBefore(el = createDom(input.className, input.style.cssText + ';overflow:hidden'), input)
+                        .appendChild(input);
                     input.className = '';
                 }
                 else {
                     // 根据普通元素初始化
                     el.style.overflow = 'hidden';
-                    if (!(input = el.getElementsByTagName('input')[0] || el.getElementsByTagName('textarea')[0])) {
+                    input = first(el);
+
+                    if (!input || (input.tagName != 'INPUT' && input.tagName != 'TEXTAREA')) {
                         input = setInput(null, options.name, options.inputType);
                         input.defaultValue = input.value = options.value === undefined ? '' : options.value.toString();
-                        el.appendChild(input);
+                        el.insertBefore(input, el.firstChild);
                     }
                 }
 
                 input.style.border = '0px';
-                if (this._bHidden = options.hidden) {
+                if (options.hidden) {
                     input.style.display = 'none';
                 }
                 setStyle(el, 'display', 'inline-block');
 
-                this._eInput = input;
-                UI_INPUT_CONTROL_BIND_EVENT(this);
-
                 return el;
+            },
+            function (el, options) {
+                this._bHidden = options.hidden;
+                this._eInput = el.firstChild;
+                UI_INPUT_CONTROL_BIND_EVENT(this);
             }
         ),
         UI_INPUT_CONTROL_CLASS = UI_INPUT_CONTROL.prototype,
@@ -152,7 +152,8 @@ _eInput  - INPUT对象
      * @param {ecui.ui.Edit} control 输入控件对象
      */
     function UI_INPUT_CONTROL_BIND_EVENT(control) {
-        if ($bind(control._eInput, control) && !control._bHidden) {
+        $bind(control._eInput, control);
+        if (!control._bHidden) {
             // 对于IE或者textarea的变化，需要重新绑定相关的控件事件
             for (var name in UI_INPUT_CONTROL_INPUT) {
                 attachEvent(control._eInput, name, UI_INPUT_CONTROL_INPUT[name]);
@@ -393,8 +394,11 @@ _eInput  - INPUT对象
      * @param {string} name 表单项名称
      */
     UI_INPUT_CONTROL_CLASS.setName = function (name) {
-        this._eInput = setInput(this._eInput, name || '');
-        UI_INPUT_CONTROL_BIND_EVENT(this);
+        var el = setInput(this._eInput, name || '');
+        if (this._eInput != el) {
+            UI_INPUT_CONTROL_BIND_EVENT(this);
+            this._eInput = el;
+        }
     };
 
     /**

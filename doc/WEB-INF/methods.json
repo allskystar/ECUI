@@ -445,8 +445,7 @@
                 {"name": "el", "type": "HTMLElement", "desc": "Element 对象"},
                 {"name": "control", "type": "ecui.ui.Control", "desc": "{'controls'|menu}"}
             ],
-            "return": {"type": "boolean", "desc": "绑定操作是否成功"},
-            "remark": "一个 Element 对象只能绑定一个 {'controls'|menu}，多次绑定仅第一次有效，绑定后的 Element 对象可以通过 {'getControl'|method:'core'} 方法得到绑定的 {'controls'|menu}。使用页面静态初始化(参见 {'ecui'|menu})控件后，如果需要修改 Element 对象绑定的 {'controls'|menu}，<font color=\"red\">通过改变 Element 对象的 ecui 属性值，并调用核心提供的 {'init'|method:'core'} 方法初始化，是无效的</font>。请调用 {'dispose'|method:'core'} 方法释放控件后，重新初始化，<font color=\"red\">控件的 {'\\$dispose'|method:'control'} 方法或 {'ondispose'|event:'control'} 事件中需要释放与其相关联的所有非 JSObject 的绑定</font>。"
+            "remark": "一个 Element 对象只能绑定一个 {'controls'|menu}，重复绑定会自动取消之前的绑定。"
         },
 
         {
@@ -717,8 +716,8 @@
             "params": [
                 {"name": "superClass", "type": "Function", "desc": "父控件类"},
                 {"name": "type", "type": "string", "desc": "子控件的类型样式"},
-                {"name": "constructor", "type": "Function", "desc": "子控件的标准构造函数，如果忽略将直接调用父控件类的构造函数"},
-                {"name": "before", "type": "Function", "desc": "子控件构造函数调用之前的设置函数，用于设置缺省的 options 值或根据条件转换主元素，before 的返回值是新的控件主元素，如果没有返回值，控件主元素不改变"}
+                {"name": "preprocess", "type": "Function", "desc": "控件正式生成前对参数及主元素结构信息调整的预处理函数"},
+                {"name": "subClass", "type": "Function", "desc": "子控件的标准构造函数，如果忽略将直接调用父控件类的构造函数"}
             ],
             "return": {"type": "Function", "desc": "新控件的构造函数"}
         },
@@ -733,9 +732,10 @@
         },
 
         {
-            "name": "isFixedSize",
-            "desc": "判断容器大小是否需要修正(即计算 padding, border 样式对 width, height 样式的影响)。",
-            "return": {"type": "boolean", "desc": "容器大小是否需要修正"}
+            "name": "isContentBox",
+            "desc": "判断容器默认是否基于 content-box 属性进行布局。",
+            "return": {"type": "boolean", "desc": "容器是否使用 content-box 属性布局"},
+            "remark": "isContentBox 返回的是容器默认的布局方式，针对具体的元素，需要访问 box-sizing 样式来确认它的布局方式。"
         },
 
         {
@@ -2286,13 +2286,13 @@
         },
 
         {
-            "name": "addCol",
+            "name": "addColumn",
             "desc": "新增一列。",
             "params": [
                 {"name": "options", "type": "列的初始化选项"},
                 {"name": "index", "type": "number", "desc": "被添加的列的位置序号，如果不合法将添加在末尾"}
             ],
-            "return": {"type": "ecui.ui.Table.Column", "desc": "列控件"},
+            "return": {"type": "ecui.ui.Table.HCell", "desc": "表头单元格控件"},
             "remark": [
                 "options 对象支持的属性如下：",
                 "<table class=\"clsSTD\"><tr><td>width</td><td>number，列的宽度</td></tr><tr><td>primary</td><td>string，列的基本样式</td></tr><tr><td>title</td><td>string，列的标题</td></tr></table>"
@@ -2328,24 +2328,25 @@
         },
 
         {
-            "name": "getColumn",
-            "desc": "获取列控件。",
+            "name": "getColumnCount",
+            "desc": "获取表格列的数量。",
+            "return": {"type": "number", "desc": "表格列的数量"}
+        },
+
+        {
+            "name": "getHCell",
+            "desc": "获取表头单元格控件。",
             "params": [
                 {"name": "index", "type": "number", "desc": "列序号，从0开始"}
             ],
-            "return": {"type": "ecui.ui.Table.Column", "desc": "列控件"}
+            "return": {"type": "ecui.ui.Table.Column", "desc": "表头单元格控件"},
+            "remark": "表头单元格控件提供了一些针对整列进行操作的方法，包括 hide、setSize(仅能设置宽度) 与 show 方法等。"
         },
 
         {
-            "name": "getColumnCount",
-            "desc": "获取列控件的数量。",
-            "return": {"type": "number", "desc": "列控件数量"}
-        },
-
-        {
-            "name": "getColumns",
-            "desc": "获取全部的列控件。",
-            "return": {"type": "Array", "desc": "列控件数组"}
+            "name": "getHCells",
+            "desc": "获取全部的表头单元格控件。",
+            "return": {"type": "Array", "desc": "表头单元格控件数组"}
         },
 
         {
@@ -2359,8 +2360,8 @@
 
         {
             "name": "getRowCount",
-            "desc": "获取行控件的数量。",
-            "return": {"type": "number", "desc": "行控件数量"}
+            "desc": "获取表格行的数量。",
+            "return": {"type": "number", "desc": "表格行的数量"}
         },
 
         {

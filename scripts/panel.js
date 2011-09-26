@@ -9,14 +9,14 @@ Panel - 定义在一个小区域内截取显示大区域内容的基本操作。
 </div>
 
 属性
-_bAbsolute                - 是否包含绝对定位的Element
-_nWheelDelta              - 鼠标滚轮滚动一次的差值
-_eBrowser                 - 用于浏览器原生的滚动条实现的Element
-_uVScrollbar              - 垂直滚动条控件
-_uHScrollbar              - 水平滚动条控件
-_uCorner                  - 夹角控件
-$cache$mainWidth          - layout区域的实际宽度
-$cache$mainHeight         - layout区域的实际高度
+_bAbsolute           - 是否包含绝对定位的Element
+_nWheelDelta         - 鼠标滚轮滚动一次的差值
+_eBrowser            - 用于浏览器原生的滚动条实现的Element
+_uVScrollbar         - 垂直滚动条控件
+_uHScrollbar         - 水平滚动条控件
+_uCorner             - 夹角控件
+$$mainWidth          - layout区域的实际宽度
+$$mainHeight         - layout区域的实际高度
 */
 //{if 0}//
 (function () {
@@ -327,8 +327,8 @@ $cache$mainHeight         - layout区域的实际高度
             mainHeight = body.offsetHeight;
 
         style = getStyle(getParent(body));
-        this.$cache$bodyWidthRevise = calcWidthRevise(style);
-        this.$cache$bodyHeightRevise = calcHeightRevise(style);
+        this.$$bodyWidthRevise = calcWidthRevise(style);
+        this.$$bodyHeightRevise = calcHeightRevise(style);
 
         // 考虑到内部Element绝对定位的问题，中心区域的宽度与高度修正
         if (this._bAbsolute) {
@@ -347,8 +347,8 @@ $cache$mainHeight         - layout区域的实际高度
             }
         }
 
-        this.$cache$mainWidth = mainWidth;
-        this.$cache$mainHeight = mainHeight;
+        this.$$mainWidth = mainWidth;
+        this.$$mainHeight = mainHeight;
 
         if (this._uVScrollbar) {
              this._uVScrollbar.cache(true, true);
@@ -425,12 +425,12 @@ $cache$mainHeight         - layout区域的实际高度
         UI_CONTROL_CLASS.$setSize.call(this, width, height);
         this.$locate();
 
-        var paddingWidth = this.$cache$paddingLeft + this.$cache$paddingRight,
-            paddingHeight = this.$cache$paddingTop + this.$cache$paddingBottom,
+        var paddingWidth = this.$$paddingLeft + this.$$paddingRight,
+            paddingHeight = this.$$paddingTop + this.$$paddingBottom,
             bodyWidth = this.getWidth() - this.$getBasicWidth(),
             bodyHeight = this.getHeight() - this.$getBasicHeight(),
-            mainWidth = this.$cache$mainWidth,
-            mainHeight = this.$cache$mainHeight,
+            mainWidth = this.$$mainWidth,
+            mainHeight = this.$$mainHeight,
             browser = this._eBrowser,
             vscroll = this._uVScrollbar,
             hscroll = this._uHScrollbar,
@@ -518,8 +518,8 @@ $cache$mainHeight         - layout区域的实际高度
             }
         }
 
-        innerWidth -= this.$cache$bodyWidthRevise;
-        innerHeight -= this.$cache$bodyHeightRevise;
+        innerWidth -= this.$$bodyWidthRevise;
+        innerHeight -= this.$$bodyHeightRevise;
 
         if (vscroll) {
             vscroll.$setPageStep(innerHeight);

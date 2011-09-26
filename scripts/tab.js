@@ -21,10 +21,11 @@ _aPosition       - 选项卡位置缓存
 _cSelected       - 当前选中的选项卡
 _uPrev           - 向前滚动按钮
 _uNext           - 向后滚动按钮
+$$titleWidth     - 标签区域的宽度
 
 Item属性
-_sContainer - 容器 DOM 元素的布局属性
-_eContainer        - 容器 DOM 元素
+_sContainer      - 容器 DOM 元素的布局属性
+_eContainer      - 容器 DOM 元素
 */
 //{if 0}//
 (function () {
@@ -156,8 +157,7 @@ _eContainer        - 容器 DOM 元素
 
         control._uPrev[left < control._uPrev.getWidth() ? 'enable' : 'disable']();
         control._uNext[
-            left > control.getBodyWidth() - control.$cache$bodyWidth - control._uNext.getWidth() ?
-                'enable' : 'disable'
+            left > control.getBodyWidth() - control.$$titleWidth - control._uNext.getWidth() ? 'enable' : 'disable'
         ]();
     }
 
@@ -180,8 +180,7 @@ _eContainer        - 容器 DOM 元素
             pos.length - 1
         );
 
-        style.left =
-            MAX(pos[index], parent.getBodyWidth() - parent.$cache$bodyWidth - parent._uNext.getWidth()) + 'px';
+        style.left = MAX(pos[index], parent.getBodyWidth() - parent.$$titleWidth - parent._uNext.getWidth()) + 'px';
         UI_TAB_FLUSH_BUTTON(parent);
     };
 
@@ -191,8 +190,8 @@ _eContainer        - 容器 DOM 元素
     UI_TAB_ITEM_CLASS.$cache = function (style, cacheSize) {
         UI_ITEM_CLASS.$cache.call(this, style, cacheSize);
 
-        this.$cache$marginLeft = toNumber(style.marginLeft);
-        this.$cache$marginRight = toNumber(style.marginRight);
+        this.$$marginLeft = toNumber(style.marginLeft);
+        this.$$marginRight = toNumber(style.marginRight);
     };
 
     /**
@@ -278,12 +277,12 @@ _eContainer        - 容器 DOM 元素
             var i = 0,
                 list = this.getItems(),
                 pos = this._aPosition = [this._uPrev.getWidth()],
-                lastItem = {$cache$marginRight: 0},
+                lastItem = {$$marginRight: 0},
                 o;
             o = list[i++];
             lastItem = o
         ) {
-            pos[i] = pos[i - 1] - MAX(lastItem.$cache$marginRight, o.$cache$marginLeft) - o.getWidth();
+            pos[i] = pos[i - 1] - MAX(lastItem.$$marginRight, o.$$marginLeft) - o.getWidth();
         }
     };
 
@@ -296,7 +295,7 @@ _eContainer        - 容器 DOM 元素
         this._uPrev.cache(true, true);
         this._uNext.cache(true, true);
 
-        this.$cache$bodyWidth = this.getBody().offsetWidth;
+        this.$$titleWidth = this.getBody().offsetWidth;
     };
 
     /**
@@ -341,13 +340,13 @@ _eContainer        - 容器 DOM 元素
             style = this.getBody().style;
 
         width = this.getBodyWidth();
-        if (this.$cache$bodyWidth > width) {
+        if (this.$$titleWidth > width) {
             width -= next.getWidth();
             next.getOuter().style.left = width + 'px';
 
             if (this._bButton) {
                 // 缩小后变大，右边的空白自动填补
-                width -= this.$cache$bodyWidth;
+                width -= this.$$titleWidth;
                 if (toNumber(style.left) < width) {
                     style.left = width + 'px';
                 }

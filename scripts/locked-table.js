@@ -227,27 +227,27 @@ _cJoint      - 行(锁定行)对应的锁定行(行)控件
         var i = 0,
             rows = this.getRows(),
             cols = this.getCols(),
-            pos = cols[this._nLeft].$cache$pos;
+            pos = cols[this._nLeft].$$pos;
 
-        this.$cache$paddingTop = MAX(this.$cache$paddingTop, this._uLockedHead.getBody().offsetHeight);
-        this.$cache$mainWidth -=
-            (this.$cache$paddingLeft = pos) +
-                (this.$cache$paddingRight =
-                    this._nRight < cols.length ? this.$cache$mainWidth - cols[this._nRight].$cache$pos : 0);
+        this.$$paddingTop = MAX(this.$$paddingTop, this._uLockedHead.getBody().offsetHeight);
+        this.$$mainWidth -=
+            (this.$$paddingLeft = pos) +
+                (this.$$paddingRight =
+                    this._nRight < cols.length ? this.$$mainWidth - cols[this._nRight].$$pos : 0);
 
         // 以下使用 style 代替临时变量 o
         for (; style = cols[i++]; ) {
-            style.$cache$pos -= pos;
+            style.$$pos -= pos;
         }
 
         for (i = 0, pos = 0; style = rows[i++]; ) {
             style.getCol(this._nLeft).cache(false, true);
-            style.$cache$pos = pos;
+            style.$$pos = pos;
             style._cJoint.cache(true, true);
             pos += MAX(style.getHeight(), style._cJoint.getHeight());
         }
 
-        this.$cache$mainHeight = pos;
+        this.$$mainHeight = pos;
     };
 
     /**
@@ -277,7 +277,7 @@ _cJoint      - 行(锁定行)对应的锁定行(行)控件
     UI_LOCKED_TABLE_CLASS.$resize = function () {
         var o = this.getBase().style;
         o.paddingLeft = o.paddingRight = '';
-        this.$cache$paddingLeft = this.$cache$paddingRight = 0;
+        this.$$paddingLeft = this.$$paddingRight = 0;
         UI_TABLE_CLASS.$resize.call(this);
     };
 
@@ -304,14 +304,14 @@ _cJoint      - 行(锁定行)对应的锁定行(行)控件
             lockedHead = this._uLockedHead,
             style = getParent(getParent(lockedHead.getBody())).style;
 
-        o.paddingLeft = this.$cache$paddingLeft + 'px';
-        o.paddingRight = this.$cache$paddingRight + 'px';
+        o.paddingLeft = this.$$paddingLeft + 'px';
+        o.paddingRight = this.$$paddingRight + 'px';
 
         UI_TABLE_CLASS.$setSize.call(this, width, height);
 
-        o = lockedHead._cJoint.getWidth() + this.$cache$paddingLeft + this.$cache$paddingRight;
-        lockedHead.$setSize(0, this.$cache$paddingTop);
-        style.height = this.$cache$paddingTop + 'px';
+        o = lockedHead._cJoint.getWidth() + this.$$paddingLeft + this.$$paddingRight;
+        lockedHead.$setSize(0, this.$$paddingTop);
+        style.height = this.$$paddingTop + 'px';
         this._uLockedMain.$setSize(o, this.getBodyHeight());
         style.width = this._uLockedMain.getBody().lastChild.style.width = o + 'px';
 
@@ -319,8 +319,8 @@ _cJoint      - 行(锁定行)对应的锁定行(行)控件
         lockedHead._eFill.style.width = width;
 
         style = layout.previousSibling.style;
-        style.width = toNumber(width) + this.$cache$paddingLeft + this.$cache$paddingRight + 'px';
-        style.height = toNumber(layout.style.height) + this.$cache$paddingTop + 'px';
+        style.width = toNumber(width) + this.$$paddingLeft + this.$$paddingRight + 'px';
+        style.height = toNumber(layout.style.height) + this.$$paddingTop + 'px';
 
         for (; o = this._aLockedRow[i++]; ) {
             o._eFill.style.width = width;

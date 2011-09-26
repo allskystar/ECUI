@@ -329,7 +329,7 @@ _uOptions     - 下拉选择框
             );
 
             // 设置options框的大小，如果没有元素，至少有一个单位的高度
-            options.$cache$mainHeight = itemLength * step + options.$cache$bodyHeightRevise;
+            options.$$mainHeight = itemLength * step + options.$$bodyHeightRevise;
             options.$setSize(width, (MIN(itemLength, optionSize) || 1) * step + options.getMinimumHeight());
         }
     };

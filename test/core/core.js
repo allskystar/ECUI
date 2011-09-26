@@ -32,7 +32,7 @@ test('$bind', {
         ecui.$bind(el, common);
         value_of(el.getControl()).should_be(common);
         ecui.$bind(el, control);
-        value_of(el.getControl()).should_be(common);
+        value_of(el.getControl()).should_be(control);
         ecui.dispose(control);
     }
 });
@@ -363,7 +363,7 @@ test('init', {
         
         el.innerHTML =
             '<div id="newParent" class="parent" ecui="type:control;id:newParent">'
-            + '<div id="newChild" ecui="type:control;id:newChild"></div></div>';
+            + '<div id="newChild" ecui=";type:control;id:newChild"></div></div>';
         ecui.init(el);
 
         var parent = ecui.get('newParent'),

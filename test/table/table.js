@@ -6,8 +6,8 @@ describe('表格控件初始化测试', {
             + '<td style="width:120px"></td></tr></table>';
 
         var control = ecui.create('Table', {main: el, parent: document.body});
-        value_of(control.getColumn(0).getWidth()).should_be(80);
-        value_of(control.getColumn(1).getWidth()).should_be(120);
+        value_of(control.getHCell(0).getWidth()).should_be(80);
+        value_of(control.getHCell(1).getWidth()).should_be(120);
         control.setParent();
         ecui.dispose(control);
     },
@@ -20,9 +20,9 @@ describe('表格控件初始化测试', {
             + '<td style="width:80px"></td><td style="width:40px"></td></tr></thead><tbody></tbody></table>';
 
         var control = ecui.create('Table', {main: el, parent: document.body});
-        value_of(control.getColumn(0).getWidth()).should_be(80);
-        value_of(control.getColumn(1).getWidth()).should_be(80);
-        value_of(control.getColumn(2).getWidth()).should_be(40);
+        value_of(control.getHCell(0).getWidth()).should_be(80);
+        value_of(control.getHCell(1).getWidth()).should_be(80);
+        value_of(control.getHCell(2).getWidth()).should_be(40);
         control.setParent();
         ecui.dispose(control);
     },
@@ -61,7 +61,7 @@ describe('表格控件初始化测试', {
 });
 
 describe('表格功能测试', {
-    '访问行/列/单元格(getCell/getColumn/getColumns/getRow/getRows)': function () {
+    '访问行/列/单元格(getCell/getHCell/getHCells/getRow/getRows)': function () {
         var el = document.createElement('div');
         el.style.cssText = 'height:300px';
         el.innerHTML = '<table cellspacing="0" cellpadding="0"><tr><td style="width:80px"></td>'
@@ -74,7 +74,7 @@ describe('表格功能测试', {
             row = control.getRow(3);
 
         value_of(control.getRows() !== control.getRows()).should_be_true();
-        value_of(control.getColumns() !== control.getColumns()).should_be_true();
+        value_of(control.getHCells() !== control.getHCells()).should_be_true();
         value_of(row.getCells() !== row.getCells()).should_be_true();
         value_of(control.getCell(3, 0)).should_be(row.getCell(0));
 
@@ -93,7 +93,7 @@ describe('表格功能测试', {
             + '<tr><td></td><td></td><td></td><td></td></tr></table>';
         var control = ecui.create('Table', {main: el, parent: document.body, crossCell: true});
 
-        control.getColumn(1).hide();
+        control.getHCell(1).hide();
         value_of(control.getRow(0).getCell(0).getWidth()).should_be(80);
         value_of(control.getRow(0).getCell(2).getWidth()).should_be(80);
         value_of(control.getRow(1).getCell(0).getWidth()).should_be(80);
@@ -107,7 +107,7 @@ describe('表格功能测试', {
         value_of(control.getRow(3).getCell(3).getWidth()).should_be(40);
         value_of(control.getWidth()).should_be(160);
 
-        control.getColumn(2).hide();
+        control.getHCell(2).hide();
         value_of(control.getRow(0).getCell(0).getWidth()).should_be(80);
         value_of(control.getRow(0).getCell(2).getWidth()).should_be(40);
         value_of(control.getRow(1).getCell(0).getWidth()).should_be(80);
@@ -121,7 +121,7 @@ describe('表格功能测试', {
         value_of(control.getRow(3).getCell(3).getWidth()).should_be(40);
         value_of(control.getWidth()).should_be(120);
 
-        control.getColumn(1).show();
+        control.getHCell(1).show();
         value_of(control.getRow(0).getCell(0).getWidth()).should_be(120);
         value_of(control.getRow(0).getCell(2).getWidth()).should_be(40);
         value_of(control.getRow(1).getCell(0).getWidth()).should_be(80);
@@ -135,7 +135,7 @@ describe('表格功能测试', {
         value_of(control.getRow(3).getCell(3).getWidth()).should_be(40);
         value_of(control.getWidth()).should_be(160);
 
-        control.getColumn(1).setSize(80);
+        control.getHCell(1).setSize(80);
         value_of(control.getRow(0).getCell(0).getWidth()).should_be(160);
         value_of(control.getRow(0).getCell(2).getWidth()).should_be(40);
         value_of(control.getRow(1).getCell(0).getWidth()).should_be(80);

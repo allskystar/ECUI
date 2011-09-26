@@ -1656,9 +1656,9 @@ test('getBodyWidth/getBodyHeight/getWidth/getHeight', {
         var el = document.createElement('div');
         el.style.cssText = 'border:1px solid;padding:2px;height:100px;display:block';
         var control = ecui.create(ecui.ui.Control, {parent: baidu.dom.g('inner'), main: el});
-        value_of(control.getBodyHeight()).should_be(ecui.isFixedSize() ? 100 : 94);
+        value_of(control.getBodyHeight()).should_be(ecui.isContentBox() ? 100 : 94);
         value_of(control.getBodyWidth()).should_be(394);
-        value_of(control.getHeight()).should_be(ecui.isFixedSize() ? 106 : 100);
+        value_of(control.getHeight()).should_be(ecui.isContentBox() ? 106 : 100);
         value_of(control.getWidth()).should_be(400);
     }
 });

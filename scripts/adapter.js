@@ -1148,6 +1148,12 @@
         }
         return el;
     }
+
+    try {
+	    DOCUMENT.execCommand("BackgroundImageCache", false, true);
+    }
+    catch (e) {
+    }
 //{/if}//
 //{if 0}//
 })();
