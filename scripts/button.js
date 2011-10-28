@@ -47,10 +47,12 @@ Button - 定义按钮的基本操作。
             UI_CONTROL,
             'ui-button',
             function (el, options) {
-                options.userSelect = false;
                 if (options.text) {
                     setText(el, options.text);
                 }
+            },
+            function (el, options) {
+                options.userSelect = false;
             }
         ),
         UI_BUTTON_CLASS = UI_BUTTON.prototype;

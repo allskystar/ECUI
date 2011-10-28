@@ -47,7 +47,6 @@ _uOptions     - 下拉选择框
         removeDom = dom.remove,
         encodeHTML = string.encodeHTML,
         extend = util.extend,
-        findConstructor = util.findConstructor,
         getView = util.getView,
 
         $fastCreate = core.$fastCreate,
@@ -106,9 +105,8 @@ _uOptions     - 下拉选择框
                     name = el.name || options.name || '',
                     elements = el.options,
                     type = this.getType(),
-                    optionsClass = findConstructor(this, 'Options'),
                     optionsEl = createDom(
-                        type + '-options' + optionsClass.TYPES,
+                        type + '-options' + this.Options.TYPES,
                         'position:absolute;z-index:65535;display:none'
                     ),
                     o = el;
@@ -138,7 +136,7 @@ _uOptions     - 下拉选择框
                 }
 
                 this._uOptions = $fastCreate(
-                    optionsClass,
+                    this.Options,
                     optionsEl,
                     this,
                     {hScroll: false, browser: options.browser}
@@ -159,7 +157,7 @@ _uOptions     - 下拉选择框
          *
          * @param {Object} options 初始化选项
          */
-        UI_SELECT_OPTIONS_CLASS = (UI_SELECT.Options = inheritsControl(UI_PANEL)).prototype,
+        UI_SELECT_OPTIONS_CLASS = (UI_SELECT_CLASS.Options = inheritsControl(UI_PANEL)).prototype,
 
         /**
          * 初始化下拉框控件的选项部件。
@@ -168,7 +166,7 @@ _uOptions     - 下拉选择框
          * @param {Object} options 初始化选项
          */
         UI_SELECT_ITEM_CLASS =
-            (UI_SELECT.Item = inheritsControl(
+            (UI_SELECT_CLASS.Item = inheritsControl(
                 UI_ITEM,
                 null,
                 function (el, options) {
@@ -352,7 +350,7 @@ _uOptions     - 下拉选择框
     UI_SELECT_CLASS.$intercept = function (event) {
         //__transform__control_o
         for (var control = event.getControl(); control; control = control.getParent()) {
-            if (control instanceof findConstructor(this, 'Item')) {
+            if (control instanceof this.Item) {
                 if (control != this._cSelected) {
                     // 检查点击是否在当前下拉框的选项上
                     UI_SELECT_CHANGE_SELECTED(this, control);

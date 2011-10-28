@@ -225,27 +225,27 @@ _oFormat    - 允许提交的格式正则表达式
             format = this._oFormat,
             value = this.getValue(),
             length = getByteLength(value, this._sCharset),
-			result = true;
+            result = true;
 
         if (minLength > length) {
             err.minLength = minLength;
-			result = false;
+            result = false;
         }
         if (maxLength < length) {
             err.maxLength = maxLength;
-			result = false;
+            result = false;
         }
         if (minValue > value - 0) {
             err.minValue = minValue;
-			result = false;
+            result = false;
         }
         if (maxValue < value - 0) {
             err.maxValue = maxValue;
-			result = false;
+            result = false;
         }
         if (format && !format.test(value)) {
             err.format = true;
-			result = false;
+            result = false;
         }
 
         if (!result) {

@@ -48,7 +48,7 @@ _aChildren     - 子控件集合
 
         $fastCreate = core.$fastCreate,
         getMouseX = core.getMouseX,
-        getParameters = core.getParameters,
+        getOptions = core.getOptions,
         inheritsControl = core.inherits,
         triggerEvent = core.triggerEvent,
 
@@ -144,7 +144,7 @@ _aChildren     - 子控件集合
      */
     function UI_TREE_VIEW_CREATE_CHILD(el, parent, options) {
         el.className = (trim(el.className) || parent.getPrimary()) + parent.constructor.agent.TYPES;
-        return $fastCreate(parent.constructor, el, null, extend(extend({}, options), getParameters(el)));
+        return $fastCreate(parent.constructor, el, null, extend(extend({}, options), getOptions(el)));
     }
 
     /**

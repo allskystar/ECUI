@@ -65,7 +65,7 @@ _eInput - 选项对应的input，form提交时使用
          *
          * @param {Object} options 初始化选项
          */
-        UI_LISTBOX_ITEM_CLASS = (UI_LISTBOX.Item = inheritsControl(
+        UI_LISTBOX_ITEM_CLASS = (UI_LISTBOX_CLASS.Item = inheritsControl(
             UI_ITEM,
             null,
             function (el, options) {

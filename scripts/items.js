@@ -23,10 +23,9 @@ Item/Items - 定义选项操作相关的基本操作。
         trim = string.trim,
         blank = util.blank,
         callSuper = util.callSuper,
-        findConstructor = util.findConstructor,
 
         $fastCreate = core.$fastCreate,
-        getParameters = core.getParameters,
+        getOptions = core.getOptions,
         inheritsControl = core.inherits,
         triggerEvent = core.triggerEvent,
 
@@ -72,7 +71,7 @@ Item/Items - 定义选项操作相关的基本操作。
      */
     UI_ITEMS.$append = function (child) {
         // 检查待新增的控件是否为选项控件
-        if (!(child instanceof (findConstructor(this, 'Item') || UI_ITEM)) || callSuper(this, '$append') === false) {
+        if (!(child instanceof (this.Item || UI_ITEM)) || callSuper(this, '$append') === false) {
             return false;
         }
         UI_ITEMS[this.getUID()].push(child);
@@ -153,10 +152,10 @@ Item/Items - 定义选项操作相关的基本操作。
                 item = o;
             }
 
-            o = findConstructor(this, 'Item') || UI_ITEM;
+            o = this.Item || UI_ITEM;
             item.className = trim(item.className) + ' ' + this.getType() + '-item' + o.TYPES;
 
-            options = options || getParameters(item);
+            options = options || getOptions(item);
             options.parent = this;
             options.select = false;
             list.push(item = $fastCreate(o, item, this, options));

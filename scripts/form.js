@@ -31,7 +31,6 @@ _uClose     - 关闭按钮
         first = dom.first,
         getStyle = dom.getStyle,
         moveElements = dom.moveElements,
-        findConstructor = util.findConstructor,
         getView = util.getView,
 
         $fastCreate = core.$fastCreate,
@@ -66,8 +65,6 @@ _uClose     - 关闭按钮
             function (el, options) {
                 // 生成标题控件与内容区域控件对应的Element对象
                 var type = this.getType(),
-                    titleClass = findConstructor(this, 'Title'),
-                    closeClass = findConstructor(this, 'Close'),
                     o = createDom(type + '-body', 'position:relative;overflow:auto'),
                     titleEl = first(el);
 
@@ -75,15 +72,15 @@ _uClose     - 关闭按钮
 
                 if (titleEl && titleEl.tagName == 'LABEL') {
                     el.innerHTML =
-                        '<div class="' + type + '-close' + closeClass.TYPES + '" style="position:absolute"></div>';
+                        '<div class="' + type + '-close' + this.Close.TYPES + '" style="position:absolute"></div>';
                     el.insertBefore(titleEl, el.firstChild);
-                    titleEl.className = type + '-title' + titleClass.TYPES;
+                    titleEl.className = type + '-title' + this.Title.TYPES;
                     titleEl.style.position = 'absolute';
                 }
                 else {
                     el.innerHTML =
-                        '<div class="' + type + '-title' + titleClass.TYPES +
-                            '" style="position:absolute"></div><div class="' + type + '-close' + closeClass.TYPES +
+                        '<div class="' + type + '-title' + this.Title.TYPES +
+                            '" style="position:absolute"></div><div class="' + type + '-close' + this.Close.TYPES +
                             '" style="position:absolute"></div>';
                     titleEl = el.firstChild;
                 }
@@ -96,10 +93,10 @@ _uClose     - 关闭按钮
                 this._bAuto = options.titleAuto !== false;
 
                 // 初始化标题区域
-                this._uTitle = $fastCreate(titleClass, titleEl, this, {userSelect: false});
+                this._uTitle = $fastCreate(this.Title, titleEl, this, {userSelect: false});
 
                 // 初始化关闭按钮
-                this._uClose = $fastCreate(closeClass, titleEl.nextSibling, this);
+                this._uClose = $fastCreate(this.Close, titleEl.nextSibling, this);
             }
         ),
         UI_FORM_CLASS = UI_FORM.prototype,
@@ -110,7 +107,7 @@ _uClose     - 关闭按钮
          *
          * @param {Object} options 初始化选项
          */
-        UI_FORM_TITLE_CLASS = (UI_FORM.Title = inheritsControl(UI_CONTROL)).prototype,
+        UI_FORM_TITLE_CLASS = (UI_FORM_CLASS.Title = inheritsControl(UI_CONTROL)).prototype,
 
         /**
          * 初始化窗体控件的关闭按钮部件。
@@ -118,7 +115,7 @@ _uClose     - 关闭按钮
          *
          * @param {Object} options 初始化选项
          */
-        UI_FORM_CLOSE_CLASS = (UI_FORM.Close = inheritsControl(UI_BUTTON)).prototype,
+        UI_FORM_CLOSE_CLASS = (UI_FORM_CLASS.Close = inheritsControl(UI_BUTTON)).prototype,
 
         UI_FORM_ALL = [],   // 当前显示的全部窗体
         UI_FORM_MODAL = 0;  // 当前showModal的窗体数

@@ -29,7 +29,6 @@ _oRange         - 滑动按钮的合法滑动区间
 
         children = dom.children,
         blank = util.blank,
-        findConstructor = util.findConstructor,
         timer = util.timer,
 
         $fastCreate = core.$fastCreate,
@@ -63,18 +62,15 @@ _oRange         - 滑动按钮的合法滑动区间
             UI_CONTROL,
             'ui-scrollbar',
             function (el, options) {
-                var type = this.getType(),
-                    buttonClass = findConstructor(this, 'Button'),
-                    thumbClass = findConstructor(this, 'Thumb');
+                var type = this.getType();
 
                 el.innerHTML =
                     '<div class="' +
-                        type + '-prev' + buttonClass.TYPES +
+                        type + '-prev' + this.Button.TYPES +
                         '" style="position:absolute;top:0px;left:0px"></div><div class="' +
-                        type + '-next' + buttonClass.TYPES +
+                        type + '-next' + this.Button.TYPES +
                         '" style="position:absolute;top:0px;left:0px"></div><div class="' +
-                        thumbClass.TYPES +
-                        '" style="position:absolute"></div>';
+                        this.Thumb.TYPES + '" style="position:absolute"></div>';
 
                 // 使用 el 代替 children
                 el = children(el);
@@ -84,9 +80,9 @@ _oRange         - 滑动按钮的合法滑动区间
                 this._nStep = 1;
 
                 // 创建向前/向后滚动按钮与滑动按钮
-                this._uPrev = $fastCreate(buttonClass, el[0], this, {focusable: false});
-                this._uNext = $fastCreate(buttonClass, el[1], this, {focusable: false});
-                this._uThumb = $fastCreate(thumbClass, el[2], this, {focusable: false});
+                this._uPrev = $fastCreate(this.Button, el[0], this, {focusable: false});
+                this._uNext = $fastCreate(this.Button, el[1], this, {focusable: false});
+                this._uThumb = $fastCreate(this.Thumb, el[2], this, {focusable: false});
 
                 this._oStop = blank;
             },
@@ -103,7 +99,7 @@ _oRange         - 滑动按钮的合法滑动区间
          * @param {Object} options 初始化选项
          */
         UI_SCROLLBAR_THUMB_CLASS =
-            (UI_SCROLLBAR.Thumb = inheritsControl(UI_BUTTON, 'ui-scrollbar-thumb')).prototype,
+            (UI_SCROLLBAR_CLASS.Thumb = inheritsControl(UI_BUTTON, 'ui-scrollbar-thumb')).prototype,
 
         /**
          * 初始化滚动条控件的按钮部件。
@@ -112,7 +108,7 @@ _oRange         - 滑动按钮的合法滑动区间
          * @param {Object} options 初始化选项
          */
         UI_SCROLLBAR_BUTTON_CLASS =
-            (UI_SCROLLBAR.Button = inheritsControl(UI_BUTTON, 'ui-scrollbar-button')).prototype;
+            (UI_SCROLLBAR_CLASS.Button = inheritsControl(UI_BUTTON, 'ui-scrollbar-button')).prototype;
 //{else}//
     /**
      * 控扭控件自动滚动。

@@ -803,6 +803,49 @@
         },
 
         /**
+         * 日期格式化。
+         * @public
+         *
+         * @param {Date} source 日期对象
+         * @param {string} pattern 日期格式描述字符串
+         * @return {string} 结果字符串
+         */
+        formatDate = string.formatDate = function (source, pattern) {
+            var year = source.getFullYear(),
+                month = source.getMonth() + 1,
+                date = source.getDate(),
+                hours = source.getHours(),
+                minutes = source.getMinutes(),
+                seconds = source.getSeconds();
+
+            return pattern.replace(/(y+|M+|d+|H+|h+|m+|s+)/g, function (match) {
+                var length = match.length;
+                switch (match.charAt()) {
+                case 'y':
+                    return length > 2 ? year : year.toString().slice(2);
+                case 'M':
+                    match = month;
+                    break;
+                case 'd':
+                    match = date;
+                    break;
+                case 'H':
+                    match = hours;
+                    break;
+                case 'h':
+                    match = hours % 12;
+                    break;
+                case 'm':
+                    match = minutes;
+                    break;
+                case 's':
+                    match = seconds;
+                }
+                return length > 1 && match < 10 ? '0' + match : match;
+            });
+        },
+
+        /**
          * 挂载事件。
          * @public
          *
@@ -914,23 +957,6 @@
                 target[key] = source[key];
             }
             return target;
-        },
-
-        /**
-         * 在 prototype 链的 constructor 上查找指定的属性。
-         * @public
-         *
-         * @param {Object} object 需要查找属性的对象
-         * @param {string} name 属性名称
-         * @param {Object} 属性值
-         */
-        findConstructor = util.findConstructor = function (object, name) {
-            for (; object; object = object.superClass) {
-                object = object.constructor;
-                if (object[name]) {
-                    return object[name];
-                }
-            }
         },
 
         /**
@@ -1150,7 +1176,7 @@
     }
 
     try {
-	    DOCUMENT.execCommand("BackgroundImageCache", false, true);
+        DOCUMENT.execCommand("BackgroundImageCache", false, true);
     }
     catch (e) {
     }

@@ -382,16 +382,6 @@
         },
 
         {
-            "name": "findConstructor",
-            "desc": "在 prototype 链的 constructor 上查找指定的属性。",
-            "params": [
-                {"name": "object", "type": "Object", "desc": "需要查找属性的对象"},
-                {"name": "name", "type": "string", "desc": "属性名称"}
-            ],
-            "return": {"type": "Object", "desc": "属性值"}
-        },
-
-        {
             "name": "getView",
             "desc": "获取浏览器可视区域的相关信息。",
             "return": {"type": "Object", "desc": "浏览器可视区域信息"},
@@ -675,7 +665,13 @@
         },
 
         {
-            "name": "getParameters",
+            "name": "getNamedControls",
+            "desc": "获取所有被命名的控件。",
+            "return": {"type": "number", "desc": "所有被命名的控件集合"}
+        },
+
+        {
+            "name": "getOptions",
             "desc": "从 Element 对象中获取初始化选项对象。",
             "params": [
                 {"name": "el", "type": "HTMLElement", "desc": "Element 对象"},
@@ -716,8 +712,8 @@
             "params": [
                 {"name": "superClass", "type": "Function", "desc": "父控件类"},
                 {"name": "type", "type": "string", "desc": "子控件的类型样式"},
-                {"name": "preprocess", "type": "Function", "desc": "控件正式生成前对参数及主元素结构信息调整的预处理函数"},
-                {"name": "subClass", "type": "Function", "desc": "子控件的标准构造函数，如果忽略将直接调用父控件类的构造函数"}
+                {"name": "subClass", "type": "Function", "desc": "子控件的标准构造函数，如果忽略将直接调用父控件类的构造函数"},
+                {"name": "preprocess", "type": "Function", "desc": "控件正式生成前对选项信息与主元素结构信息调整的预处理函数"}
             ],
             "return": {"type": "Function", "desc": "新控件的构造函数"}
         },

@@ -47,7 +47,6 @@ _eContainer      - 容器 DOM 元素
         first = dom.first,
         setStyle = dom.setStyle,
         extend = util.extend,
-        findConstructor = util.findConstructor,
         toNumber = util.toNumber,
 
         $fastCreate = core.$fastCreate,
@@ -80,15 +79,14 @@ _eContainer      - 容器 DOM 元素
             function (el, options) {
                 //__gzip_original__buttonParams
                 var type = this.getType(),
-                    buttonClass = findConstructor(this, 'Button'),
                     o = createDom(type + '-title', 'position:relative;overflow:hidden');
 
                 this._oSelected = options.selected || 0;
 
                 // 生成选项卡头的的DOM结构
-                o.innerHTML = '<div class="' + type + '-prev' + buttonClass.TYPES +
+                o.innerHTML = '<div class="' + type + '-prev' + this.Button.TYPES +
                     '" style="position:absolute;display:none;left:0px"></div><div class="' +
-                    type + '-next' + buttonClass.TYPES +
+                    type + '-next' + this.Button.TYPES +
                     '" style="position:absolute;display:none"></div><div class="' +
                     type + '-items" style="position:absolute;white-space:nowrap"></div>';
 
@@ -99,8 +97,8 @@ _eContainer      - 容器 DOM 元素
                 this.$initItems();
 
                 // 滚动按钮
-                this._uNext = $fastCreate(buttonClass, options = options.previousSibling, this);
-                this._uPrev = $fastCreate(buttonClass, options.previousSibling, this);
+                this._uNext = $fastCreate(this.Button, options = options.previousSibling, this);
+                this._uPrev = $fastCreate(this.Button, options.previousSibling, this);
             }
         ),
         UI_TAB_CLASS = UI_TAB.prototype,
@@ -111,7 +109,7 @@ _eContainer      - 容器 DOM 元素
          *
          * @param {Object} options 初始化选项
          */
-        UI_TAB_BUTTON_CLASS = (UI_TAB.Button = inheritsControl(UI_BUTTON, 'ui-tab-button')).prototype,
+        UI_TAB_BUTTON_CLASS = (UI_TAB_CLASS.Button = inheritsControl(UI_BUTTON, 'ui-tab-button')).prototype,
 
         /**
          * 初始化选项卡控件的选项部件。
@@ -122,7 +120,7 @@ _eContainer      - 容器 DOM 元素
          * @param {Object} options 初始化选项
          */
         UI_TAB_ITEM_CLASS =
-            (UI_TAB.Item = inheritsControl(
+            (UI_TAB_CLASS.Item = inheritsControl(
                 UI_ITEM,
                 null,
                 function (el, options) {

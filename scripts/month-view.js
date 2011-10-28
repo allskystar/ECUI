@@ -29,7 +29,6 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
         getParent = dom.getParent,
         removeClass = dom.removeClass,
         setText = dom.setText,
-        findConstructor = util.findConstructor,
 
         $fastCreate = core.$fastCreate,
         inheritsControl = core.inherits,
@@ -56,7 +55,6 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
             function (el, options) {
                 var i = 0,
                     type = this.getType(),
-                    cellClass = findConstructor(this, 'Cell'),
                     list = [],
                     o;
 
@@ -64,13 +62,13 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
 
                 for (; i < 7; ) {
                     list[i] =
-                        '<td class="' + type + '-title' + cellClass.TYPES + '">' +
+                        '<td class="' + type + '-title' + this.Cell.TYPES + '">' +
                             UI_MONTH_VIEW.WEEKNAMES[i++] + '</td>';
                 }
                 list[i] = '</tr></thead><tbody><tr>';
                 for (; ++i < 50; ) {
                     list[i] =
-                        '<td class="' + type + '-item' + cellClass.TYPES + '"></td>' +
+                        '<td class="' + type + '-item' + this.Cell.TYPES + '"></td>' +
                             (i % 7 ? '' : '</tr><tr>');
                 }
 
@@ -81,7 +79,7 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
                 list = el.getElementsByTagName('td');
                 for (i = 0; o = list[i]; ) {
                     // 日历视图单元格禁止改变大小
-                    this._aCells[i++] = $fastCreate(cellClass, o, this, {resizable: false});
+                    this._aCells[i++] = $fastCreate(this.Cell, o, this, {resizable: false});
                 }
 
                 this.setDate(options.year, options.month);
@@ -95,7 +93,7 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
          *
          * @param {Object} options 初始化选项
          */
-        UI_MONTH_VIEW_CELL_CLASS = (UI_MONTH_VIEW.Cell = inheritsControl(UI_CONTROL)).prototype;
+        UI_MONTH_VIEW_CELL_CLASS = (UI_MONTH_VIEW_CLASS.Cell = inheritsControl(UI_CONTROL)).prototype;
 //{else}//
     UI_MONTH_VIEW.WEEKNAMES = ['一', '二', '三', '四', '五', '六', '日'];
 

@@ -69,12 +69,11 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
         removeDom = dom.remove,
         trim = string.trim,
         extend = util.extend,
-        findConstructor = util.findConstructor,
         toNumber = util.toNumber,
 
         $fastCreate = core.$fastCreate,
         disposeControl = core.dispose,
-        getParameters = core.getParameters,
+        getOptions = core.getOptions,
         inheritsControl = core.inherits,
         triggerEvent = core.triggerEvent,
 
@@ -107,9 +106,6 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
             function (el, options) {
                 var i = 0,
                     type = this.getType(),
-                    rowClass = findConstructor(this, 'Row'),
-                    hcellClass = findConstructor(this, 'HCell'),
-                    cellClass = findConstructor(this, 'Cell'),
                     rows = this._aRows = [],
                     cols = this._aHCells = [],
                     colspans = [],
@@ -147,11 +143,11 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
 
                 // 以下初始化所有的行控件
                 for (; o = list[i]; i++) {
-                    o.className = trim(o.className) + rowClass.TYPES;
+                    o.className = trim(o.className) + this.Row.TYPES;
                     // list[i] 保存每一行的当前需要处理的列元素
                     list[i] = first(o);
                     colspans[i] = 1;
-                    (rows[i] = $fastCreate(rowClass, o, this))._aElements = [];
+                    (rows[i] = $fastCreate(this.Row, o, this))._aElements = [];
                 }
 
                 for (j = 0; ; j++) {
@@ -191,13 +187,13 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
                                     }
                                     else if (el) {
                                         if (i < headRowCount) {
-                                            extend(type, getParameters(el));
-                                            el.className = trim(el.className) + hcellClass.TYPES;
-                                            cols[j] = $fastCreate(hcellClass, el, this);
+                                            extend(type, getOptions(el));
+                                            el.className = trim(el.className) + this.HCell.TYPES;
+                                            cols[j] = $fastCreate(this.HCell, el, this);
                                         }
                                         else {
                                             el.className =
-                                                (trim(el.className) || type.primary || '') + cellClass.TYPES;
+                                                (trim(el.className) || type.primary || '') + this.Cell.TYPES;
                                             el.getControl = UI_TABLE_GETCONTROL();
                                         }
                                     }
@@ -232,7 +228,7 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
          *
          * @param {Object} options 初始化选项
          */
-        UI_TABLE_ROW_CLASS = (UI_TABLE.Row = inheritsControl(UI_CONTROL, 'ui-table-row')).prototype,
+        UI_TABLE_ROW_CLASS = (UI_TABLE_CLASS.Row = inheritsControl(UI_CONTROL, 'ui-table-row')).prototype,
 
         /**
          * 初始化表格控件的列部件。
@@ -240,7 +236,7 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
          *
          * @param {Object} options 初始化选项
          */
-        UI_TABLE_HCELL_CLASS = (UI_TABLE.HCell = inheritsControl(UI_CONTROL, 'ui-table-hcell')).prototype,
+        UI_TABLE_HCELL_CLASS = (UI_TABLE_CLASS.HCell = inheritsControl(UI_CONTROL, 'ui-table-hcell')).prototype,
 
         /**
          * 初始化表格控件的单元格部件。
@@ -248,7 +244,7 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
          *
          * @param {Object} options 初始化选项
          */
-        UI_TABLE_CELL_CLASS = (UI_TABLE.Cell = inheritsControl(
+        UI_TABLE_CELL_CLASS = (UI_TABLE_CLASS.Cell = inheritsControl(
             UI_CONTROL,
             'ui-table-cell',
             null,
@@ -299,7 +295,7 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
             table = row.getParent();
 
         return $fastCreate(
-            findConstructor(table, 'Cell'),
+            table.Cell,
             main,
             row,
             extend({}, table._aHCells[indexOf(row._aElements, main)]._oOptions)
@@ -757,15 +753,14 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
             headRowCount = this._aHeadRows.length,
             rows = this._aRows = this._aHeadRows.concat(this._aRows),
             primary = options.primary || '',
-            hcellClass = findConstructor(this, 'HCell'),
-            el = createDom(primary + hcellClass.TYPES, '', 'td'),
-            col = $fastCreate(hcellClass, el, this),
+            el = createDom(primary + this.HCell.TYPES, '', 'td'),
+            col = $fastCreate(this.HCell, el, this),
             row,
             o;
 
         el.innerHTML = options.title || '';
 
-        primary += findConstructor(this, 'Cell').TYPES;
+        primary += this.Cell.TYPES;
         for (; row = rows[i]; i++) {
             o = row._aElements[index];
             if (o !== null) {
@@ -821,11 +816,9 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
     UI_TABLE_CLASS.addRow = function (data, index) {
         var i = 0,
             j = 1,
-            rowClass = findConstructor(this, 'Row'),
-            cellClass = findConstructor(this, 'Cell'),
             body = this.getBody().lastChild.lastChild,
             el = createDom(),
-            html = ['<table><tbody><tr class="' + rowClass.TYPES + '">'],
+            html = ['<table><tbody><tr class="' + this.Row.TYPES + '">'],
             rowCols = [],
             row = this._aRows[index],
             col;
@@ -841,7 +834,7 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
             else {
                 // 如果部分列被隐藏，colspan/width 需要动态计算
                 rowCols[i] = true;
-                html[j++] = '<td class="' + cellClass.TYPES + '" style="';
+                html[j++] = '<td class="' + this.Cell.TYPES + '" style="';
                 for (
                     var o = i,
                         colspan = col.isShow() ? 1 : 0,
@@ -865,7 +858,7 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
         el = el.lastChild.lastChild.lastChild;
 
         body.insertBefore(el, row ? row.getOuter() : null);
-        row = $fastCreate(rowClass, el, this);
+        row = $fastCreate(this.Row, el, this);
         this._aRows.splice(index--, 0, row);
 
         // 以下使用 col 表示上一次执行了rowspan++操作的单元格，同一个单元格只需要增加一次

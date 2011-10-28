@@ -47,7 +47,6 @@ _cSubPopup   - 下级弹出菜单的引用
         removeDom = dom.remove,
         blank = util.blank,
         extend = util.extend,
-        findConstructor = util.findConstructor,
         getView = util.getView,
         toNumber = util.toNumber,
 
@@ -82,8 +81,7 @@ _cSubPopup   - 下级弹出菜单的引用
             'ui-popup',
             function (el, options) {
                 //__gzip_original__buttonParams
-                var type = this.getType(),
-                    buttonClass = findConstructor(this, 'Button');
+                var type = this.getType();
 
                 removeDom(el);
                 el.style.cssText += ';position:absolute;overflow:hidden';
@@ -93,14 +91,14 @@ _cSubPopup   - 下级弹出菜单的引用
                     moveElements(el, o);
 
                     el.innerHTML =
-                        '<div class="' + type + '-prev' + buttonClass.TYPES +
+                        '<div class="' + type + '-prev' + this.Button.TYPES +
                             '" style="position:absolute;top:0px;left:0px"></div><div class="' +
-                            type + '-next' + buttonClass.TYPES + '" style="position:absolute"></div>';
+                            type + '-next' + this.Button.TYPES + '" style="position:absolute"></div>';
 
                     this.$setBody(el.insertBefore(o, el = el.firstChild));
 
-                    this._uPrev = $fastCreate(buttonClass, el, this);
-                    this._uNext = $fastCreate(buttonClass, el.nextSibling, this);
+                    this._uPrev = $fastCreate(this.Button, el, this);
+                    this._uNext = $fastCreate(this.Button, el.nextSibling, this);
                 }
 
                 // 初始化菜单项
@@ -115,7 +113,7 @@ _cSubPopup   - 下级弹出菜单的引用
          *
          * @param {Object} options 初始化选项
          */
-        UI_POPUP_BUTTON_CLASS = (UI_POPUP.Button = inheritsControl(
+        UI_POPUP_BUTTON_CLASS = (UI_POPUP_CLASS.Button = inheritsControl(
             UI_BUTTON,
             null,
             null,
@@ -130,7 +128,7 @@ _cSubPopup   - 下级弹出菜单的引用
          *
          * @param {Object} options 初始化选项
          */
-        UI_POPUP_ITEM_CLASS = (UI_POPUP.Item = inheritsControl(
+        UI_POPUP_ITEM_CLASS = (UI_POPUP_CLASS.Item = inheritsControl(
             UI_ITEM,
             null,
             function (el, options) {
@@ -380,7 +378,7 @@ _cSubPopup   - 下级弹出菜单的引用
      */
     UI_POPUP_CLASS.$intercept = function (event) {
         for (var control = event.getControl(); control; control = control.getParent()) {
-            if (control instanceof findConstructor(this, 'Item')) {
+            if (control instanceof this.Item) {
                 // 点击发生在按钮上可能触发点击事件，不默认调用 restore 恢复状态
                 return false;
             }

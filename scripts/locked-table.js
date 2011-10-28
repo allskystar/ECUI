@@ -51,7 +51,6 @@ _cJoint      - 行(锁定行)对应的锁定行(行)控件
         getParent = dom.getParent,
         insertBefore = dom.insertBefore,
         blank = util.blank,
-        findConstructor = util.findConstructor,
         inherits = util.inherits,
         toNumber = util.toNumber,
 
@@ -130,7 +129,7 @@ _cJoint      - 行(锁定行)对应的锁定行(行)控件
          *
          * @param {Object} options 初始化选项
          */
-        UI_LOCKED_TABLE_ROW = UI_LOCKED_TABLE.Row = function (el, options) {
+        UI_LOCKED_TABLE_ROW = UI_LOCKED_TABLE_CLASS.Row = function (el, options) {
             UI_TABLE_ROW.call(this, el, options);
         },
         UI_LOCKED_TABLE_ROW_CLASS = inherits(UI_LOCKED_TABLE_ROW, UI_TABLE_ROW);
@@ -144,7 +143,7 @@ _cJoint      - 行(锁定行)对应的锁定行(行)控件
      * @param {ecui.ui.Table.Row} row 表格基本行控件
      */
     function UI_LOCKED_TABLE_CREATE_LOCKEDROW(table, el, row) {
-        el = $fastCreate(findConstructor(table, 'Row'), el, table);
+        el = $fastCreate(table.Row, el, table);
         el._eFill = el.getBase().lastChild;
         el._cJoint = row;
         row._cJoint = el;

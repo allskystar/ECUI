@@ -90,71 +90,10 @@
         getKey,
         getMouseX,
         getMouseY,
-        getParameters,
+        getOptions,
         getScrollNarrow,
         getStatus,
-
-        /**
-         * 控件继承。
-         * @public
-         *
-         * @param {Function} superClass 父控件类
-         * @param {string} type 子控件的类型样式
-         * @param {Function} preprocess 控件正式生成前对参数及主元素结构信息调整的预处理函数
-         * @param {Function} subClass 子控件的标准构造函数，如果忽略将直接调用父控件类的构造函数
-         * @return {Function} 新控件的构造函数
-         */
-        inheritsControl = core.inherits = function (superClass, type, preprocess, subClass) {
-            var agent = function (options) {
-                    return createControl(client, options);
-                },
-                client = agent.client = superClass ? function (el, options, flag) {
-                    if (!flag) {
-                        el = this._preprocess(el, options);
-                    }
-                    superClass.client.call(this, el, options, true);
-                    if (subClass) {
-                        subClass.call(this, el, options);
-                    }
-                } : function (el, options) {
-                    // ecui.ui.Control的特殊初始化设置
-                    el = this._preprocess(el, options);
-                    if (subClass) {
-                        subClass.call(this, el, options);
-                    }
-                };
-
-            if (superClass) {
-                inherits(agent, superClass);
-
-                if (type && type.charAt(0) == '*') {
-                    (agent.types = superClass.types.slice())[0] = type.slice(1);
-                }
-                else {
-                    agent.types = (type ? [type] : []).concat(superClass.types);
-                }
-            }
-            else {
-                // ecui.ui.Control的特殊初始化设置
-                agent.types = [];
-            }
-            agent.TYPES = ' ' + agent.types.join(' ');
-
-            inherits(client, agent);
-            client.agent = agent;
-
-            if (preprocess) {
-                agent.prototype._preprocess = superClass ? function (el, options) {
-                    el = superClass.prototype._preprocess.call(this, el, options) || el;
-                    return preprocess.call(this, el, options) || el;
-                } : function (el, options) {
-                    // ecui.ui.Control的特殊初始化设置
-                    return preprocess.call(this, el, options) || el;
-                };
-            }
-
-            return agent;
-        },
+        inheritsControl,
         intercept,
         isContentBox,
         loseFocus,
@@ -170,7 +109,7 @@
             'click', 'dblclick', 'focus', 'blur', 'activate', 'deactivate',
             'keydown', 'keypress', 'keyup', 'mousewheel'
         ];
-//{else}//
+
     (function () {
         /**
          * 创建 ECUI 事件对象。
@@ -201,6 +140,7 @@
 
             ecuiName = 'ecui',        // Element 中用于自动渲染的 ecui 属性名称
             isGlobalId,               // 是否自动将 ecui 的标识符全局化
+            structural,               // DOM结构生成的方式，0表示填充所有内容，1表示不填充控件的class，2表示完全不填充
 
             flgContentBox,            // 在计算宽度与高度时，是否需要修正内填充与边框样式的影响
             flgFixedOffset,           // 在计算相对位置时，是否需要修正边框样式的影响
@@ -496,6 +436,57 @@
             },
 
             /**
+             * 初始化指定的 Element 对象对应的 DOM 节点树。
+             * init 方法将初始化指定的 Element 对象及它的子节点，如果这些节点拥有初始化属性(参见 getAttributeName 方法)，将按照规则为它们绑定 ECUI 控件，每一个节点只会被绑定一次，重复的绑定无效。页面加载完成时，将会自动针对 document.body 执行这个方法，相当于自动执行以下的语句：ecui.init(document.body)
+             * @public
+             *
+             * @param {Element} el Element 对象
+             */
+            init = core.init = function (el) {
+                if (!initEnvironment() && el) {
+                    var i = 0,
+                        list = [],
+                        options = el.all || el.getElementsByTagName('*'),
+                        elements = [el],
+                        o;
+
+                    if (!(initRecursion++)) {
+                        // 第一层 init 循环的时候需要关闭resize事件监听，防止反复的重入
+                        detachEvent(WINDOW, 'resize', repaint);
+                    }
+
+                    for (; o = options[i++]; ) {
+                        if (getAttribute(o, ecuiName)) {
+                            elements.push(o);
+                        }
+                    }
+window.timer && window.timer.record('控件创建');
+                    for (i = 0; el = elements[i]; i++) {
+                        options = getOptions(el);
+                        // 以下使用 el 替代 control
+                        if (o = options.type) {
+                            options.main = el;
+                            list.push($create(ui[toCamelCase(o.charAt(0).toUpperCase() + o.slice(1))], options));
+                        }
+                    }
+window.timer && window.timer.record('控件重绘');
+document.body.offsetWidth;
+window.timer && window.timer.record('控件缓存');
+                    for (i = 0; o = list[i++]; ) {
+                        o.cache();
+                    }
+window.timer && window.timer.record('控件生成');
+                    for (i = 0; o = list[i++]; ) {
+                        o.init();
+                    }
+
+                    if (!(--initRecursion)) {
+                        attachEvent(WINDOW, 'resize', repaint);
+                    }
+                }
+            },
+
+            /**
              * 重绘浏览器区域的控件。
              * repaint 方法在页面改变大小时自动触发，一些特殊情况下，例如包含框架的页面，页面变化时不会触发 onresize 事件，需要手工调用 repaint 函数重绘所有的控件。
              * @public
@@ -578,57 +569,6 @@
                     mask(true);
                 }
                 status = NORMAL;
-            },
-
-            /**
-             * 初始化指定的 Element 对象对应的 DOM 节点树。
-             * init 方法将初始化指定的 Element 对象及它的子节点，如果这些节点拥有初始化属性(参见 getAttributeName 方法)，将按照规则为它们绑定 ECUI 控件，每一个节点只会被绑定一次，重复的绑定无效。页面加载完成时，将会自动针对 document.body 执行这个方法，相当于自动执行以下的语句：ecui.init(document.body)
-             * @public
-             *
-             * @param {Element} el Element 对象
-             */
-            init = core.init = function (el) {
-                if (!initEnvironment() && el) {
-                    var i = 0,
-                        list = [],
-                        options = el.all || el.getElementsByTagName('*'),
-                        elements = [el],
-                        o;
-
-                    if (!(initRecursion++)) {
-                        // 第一层 init 循环的时候需要关闭resize事件监听，防止反复的重入
-                        detachEvent(WINDOW, 'resize', repaint);
-                    }
-
-                    for (; o = options[i++]; ) {
-                        if (getAttribute(o, ecuiName)) {
-                            elements.push(o);
-                        }
-                    }
-window.timer && window.timer.record('控件创建');
-                    for (i = 0; el = elements[i]; i++) {
-                        options = getParameters(el);
-                        // 以下使用 el 替代 control
-                        if (o = options.type) {
-                            options.main = el;
-                            list.push($create(ui[toCamelCase(o.charAt(0).toUpperCase() + o.slice(1))], options));
-                        }
-                    }
-window.timer && window.timer.record('控件重绘');
-document.body.offsetWidth;
-window.timer && window.timer.record('控件缓存');
-                    for (i = 0; o = list[i++]; ) {
-                        o.cache();
-                    }
-window.timer && window.timer.record('控件生成');
-                    for (i = 0; o = list[i++]; ) {
-                        o.init();
-                    }
-
-                    if (!(--initRecursion)) {
-                        attachEvent(WINDOW, 'resize', repaint);
-                    }
-                }
             };
 
         /**
@@ -688,10 +628,10 @@ window.timer && window.timer.record('控件生成');
         /**
          * 创建 ECUI 控件。
          * $create 方法创建控件时不会自动渲染控件。在大批量创建控件时，为了加快渲染速度，应该首先使用 $create 方法创建所有控件完成后，再批量分别调用控件的 cache、init 与 repaint 方法渲染控件。options 对象支持的属性如下：
-         * id        {string} 当前控件的 id，提供给 $connect 与 get 方法使用
-         * main      {HTMLElement} 与控件绑捆的 Element 对象(参见 getMain 方法)，如果忽略此参数将创建 Element 对象与控件绑捆
-         * parent    {ecui.ui.Control} 父控件对象或者父 Element 对象
-         * primary   {string} 控件的基本样式(参见 getMainClass 方法)，如果忽略此参数将使用主元素的 className 属性
+         * id         {string} 当前控件的 id，提供给 $connect 与 get 方法使用
+         * main       {HTMLElement} 与控件绑捆的 Element 对象(参见 getMain 方法)，如果忽略此参数将创建 Element 对象与控件绑捆
+         * parent     {ecui.ui.Control} 父控件对象或者父 Element 对象
+         * primary    {string} 控件的基本样式(参见 getMainClass 方法)，如果忽略此参数将使用主元素的 className 属性
          * @protected
          *
          * @param {Function} type 控件的构造函数
@@ -705,21 +645,37 @@ window.timer && window.timer.record('控件生成');
             //__gzip_original__parent
             var i = 0,
                 parent = options.parent,
-                el = options.main || createDom(),
-                o = options.primary || '';
-
-            // 如果指定的元素已经初始化，直接返回
-            if (el.getControl) {
-                return el.getControl();
-            }
+                el = options.main,
+                o = options.primary || '',
+                className;
 
             options.uid = 'ecui-' + (++uniqueIndex);
-            el.className += type.agent.TYPES + ' ' + o;
 
-            // 如果没有指定基本样式，使用控件的样式作为基本样式
-            if (!o) {
-                o = el.className.split(/\s+/);
-                options.primary = o[0] || o[1];
+            if (el) {
+                if (structural) {
+                    className = el.className;
+                }
+                else {
+                    el.className = className = el.className + ' ' + o + type.agent.TYPES;
+                }
+
+                // 如果没有指定基本样式，使用控件的样式作为基本样式
+                if (!o) {
+                    /\s*([^\s]+)/.test(className);
+                    options.primary = REGEXP.$1;
+                }
+
+                // 如果指定的元素已经初始化，直接返回
+                if (el.getControl) {
+                    return el.getControl();
+                }
+            }
+            else {
+                // 没有传入主元素，需要自动生成，此种情况比较少见
+                el = createDom(o + type.agent.TYPES);
+                if (!o) {
+                    options.primary = type.agent.types[0];
+                }
             }
 
             // 生成控件
@@ -765,13 +721,14 @@ window.timer && window.timer.record('控件生成');
          * @return {ecui.ui.Control} ECUI 控件
          */
         $fastCreate = core.$fastCreate = function (type, el, parent, options) {
-            var o = el.className.split(' ');
-
             type = type.client || type;
             options = options || {};
 
             options.uid = 'ecui-' + (++uniqueIndex);
-            options.primary = o[0] || o[1];
+            if (!options.primary) {
+                /\s*([^\s]+)/.test(el.className);
+                options.primary = REGEXP.$1;
+            }
 
             type = new type(el, options);
             type.$setParent(parent);
@@ -1062,6 +1019,16 @@ window.timer && window.timer.record('控件生成');
         };
 
         /**
+         * 获取所有被命名的控件。
+         * @public
+         *
+         * @return {Object} 所有被命名的控件集合
+         */
+        core.getNamedControls = function () {
+            return extend({}, namedControls);
+        };
+
+        /**
          * 从 Element 对象中获取初始化选项对象。
          * @public
          *
@@ -1069,15 +1036,22 @@ window.timer && window.timer.record('控件生成');
          * @param {string} attributeName 当前的初始化属性名(参见 getAttributeName 方法)
          * @return {Object} 初始化选项对象
          */
-        getParameters = core.getParameters = function (el, attributeName) {
+        getOptions = core.getOptions = function (el, attributeName) {
             attributeName = attributeName || ecuiName;
 
             var text = getAttribute(el, attributeName),
-                options = {};
+                options;
 
             if (text) {
+                el.removeAttribute(attributeName);
+                if (core.onparseoptions) {
+                    if (options = core.onparseoptions(text)) {
+                        return options;
+                    }
+                }
+
                 for (
-                    el.removeAttribute(attributeName);
+                    options = {};
                     /^(\s*;)?\s*(ext\-)?([\w\-]+)\s*(:\s*([^;\s]+(\s+[^;\s]+)*)\s*)?($|;)/.test(text);
                 ) {
                     text = REGEXP["$'"];
@@ -1087,9 +1061,12 @@ window.timer && window.timer.record('控件生成');
                     attributeName[toCamelCase(REGEXP.$3)] =
                         !el || el == 'true' ? true : el == 'false' ? false : ISNAN(+el) ? el : +el;
                 }
-            }
 
-            return options;
+                return options;
+            }
+            else {
+                return {};
+            }
         };
 
         /**
@@ -1112,6 +1089,54 @@ window.timer && window.timer.record('控件生成');
          */
         getStatus = core.getStatus = function () {
             return status;
+        };
+
+        /**
+         * 控件继承。
+         * @public
+         *
+         * @param {Function} superClass 父控件类
+         * @param {string} type 子控件的类型样式
+         * @param {Function} subClass 子控件的标准构造函数，如果忽略将直接调用父控件类的构造函数
+         * @param {Function} preprocess 控件正式生成前对选项信息与主元素结构信息调整的预处理函数
+         * @return {Function} 新控件的构造函数
+         */
+        inheritsControl = core.inherits = function (superClass, type, subClass, preprocess) {
+            var agent = function (options) {
+                    return createControl(client, options);
+                },
+                client = agent.client = function (el, options) {
+                    if (preprocess) {
+                        el = preprocess.call(this, el, options) || el;
+                    }
+                    if (superClass) {
+                        superClass.client.call(this, el, options);
+                    }
+                    if (subClass) {
+                        subClass.call(this, el, options);
+                    }
+                };
+
+            if (superClass) {
+                inherits(agent, superClass);
+
+                if (type && type.charAt(0) == '*') {
+                    (agent.types = superClass.types.slice())[0] = type.slice(1);
+                }
+                else {
+                    agent.types = (type ? [type] : []).concat(superClass.types);
+                }
+            }
+            else {
+                // ecui.ui.Control的特殊初始化设置
+                agent.types = [];
+            }
+            agent.TYPES = ' ' + agent.types.join(' ');
+
+            inherits(client, agent);
+            client.agent = agent;
+
+            return agent;
         };
 
         /**
@@ -1640,10 +1665,11 @@ window.timer && window.timer.record('控件生成');
 
                 namedControls = {};
 
-                var o = getParameters(DOCUMENT.body, 'data-ecui');
+                var o = getOptions(DOCUMENT.body, 'data-ecui');
 
                 ecuiName = o.name || ecuiName;
                 isGlobalId = o.globalId;
+                structural = indexOf(['class', 'all'], o.structural) + 1;
 
                 insertHTML(
                     DOCUMENT.body,

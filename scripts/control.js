@@ -111,13 +111,12 @@ $$position          - 控件布局方式缓存
         inheritsControl(
             null,
             null,
-            blank,
             function (el, options) {
                 $bind(el, this);
 
                 this._bDisabled = !!options.disabled;
                 this._sUID = options.uid;
-                this._sPrimary = this._sClass = options.primary;
+                this._sPrimary = this._sClass = options.primary || '';
                 this._eMain = this._eBody = el;
                 this._cParent = null;
 

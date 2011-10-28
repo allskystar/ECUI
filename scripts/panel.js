@@ -39,7 +39,6 @@ $$mainHeight         - layout区域的实际高度
         attachEvent = util.attachEvent,
         blank = util.blank,
         detachEvent = util.detachEvent,
-        findConstructor = util.findConstructor,
         toNumber = util.toNumber,
 
         $fastCreate = core.$fastCreate,
@@ -253,16 +252,8 @@ $$mainHeight         - layout区域的实际高度
                     hscroll = options.hScroll !== false,
                     type = this.getType(),
                     list = [
-                        [
-                            vscroll,
-                            '_uVScrollbar',
-                            browser ? UI_BROWSER_VSCROLLBAR : findConstructor(this, 'VScrollbar')
-                        ],
-                        [
-                            hscroll,
-                            '_uHScrollbar',
-                            browser ? UI_BROWSER_HSCROLLBAR : findConstructor(this, 'HScrollbar')
-                        ],
+                        [vscroll, '_uVScrollbar', browser ? UI_BROWSER_VSCROLLBAR : this.VScrollbar],
+                        [hscroll, '_uHScrollbar', browser ? UI_BROWSER_HSCROLLBAR : this.HScrollbar],
                         [vscroll && hscroll, '_uCorner', browser ? UI_BROWSER_CORNER : UI_CONTROL]
                     ],
                     o = createDom(
@@ -313,8 +304,8 @@ $$mainHeight         - layout区域的实际高度
         UI_PANEL_CLASS = UI_PANEL.prototype;
 //{else}//
 
-    UI_PANEL.VScrollbar = UI_VSCROLLBAR;
-    UI_PANEL.HScrollbar = UI_HSCROLLBAR;
+    UI_PANEL_CLASS.VScrollbar = UI_VSCROLLBAR;
+    UI_PANEL_CLASS.HScrollbar = UI_HSCROLLBAR;
 
     /**
      * @override

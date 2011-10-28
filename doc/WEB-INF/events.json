@@ -1,5 +1,13 @@
 {
     "core": [
+        {
+            "name": "onparseoptions",
+            "desc": "ECUI 元素属性选项解析事件。",
+            "type": "core",
+            "params": [{"name": "text", "type": "string", "desc": "ECUI 元素属性"}],
+            "remark": "ECUI 元素属性选项解析在基于元素初始化 ECUI 控件时触发，函数返回触析的选项对象，如果事件不返回，将使用默认规则解析选项。"
+        }
+
     ],
 
     "array": [

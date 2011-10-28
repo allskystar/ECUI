@@ -68,39 +68,40 @@ _eInput  - INPUT对象
         inheritsControl(
             UI_CONTROL,
             null,
+            null,
             function (el, options) {
-                if (el.type) {
+                if (el.tagName == 'INPUT' || el.tagName == 'TEXTAREA') {
                     // 根据表单项初始化
                     var input = el;
 
-                    insertBefore(el = createDom(input.className, input.style.cssText + ';overflow:hidden'), input)
+                    insertBefore(el = createDom(input.className, input.style.cssText), input)
                         .appendChild(input);
                     input.className = '';
                 }
                 else {
                     // 根据普通元素初始化
-                    el.style.overflow = 'hidden';
                     input = first(el);
 
                     if (!input || (input.tagName != 'INPUT' && input.tagName != 'TEXTAREA')) {
                         input = setInput(null, options.name, options.inputType);
-                        input.defaultValue = input.value = options.value === undefined ? '' : options.value.toString();
-                        el.insertBefore(input, el.firstChild);
+                        input.defaultValue = input.value =
+                            options.value === undefined ? '' : options.value.toString();
+                        el.appendChild(input);
                     }
                 }
 
-                input.style.border = '0px';
-                if (options.hidden) {
-                    input.style.display = 'none';
-                }
+                el.style.overflow = 'hidden';
                 setStyle(el, 'display', 'inline-block');
 
-                return el;
-            },
-            function (el, options) {
-                this._bHidden = options.hidden;
-                this._eInput = el.firstChild;
+                input.style.border = '0px';
+                if (this._bHidden = options.hidden) {
+                    input.style.display = 'none';
+                }
+
+                this._eInput = input;
                 UI_INPUT_CONTROL_BIND_EVENT(this);
+
+                return el;
             }
         ),
         UI_INPUT_CONTROL_CLASS = UI_INPUT_CONTROL.prototype,
