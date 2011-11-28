@@ -44,6 +44,7 @@ $$mainHeight         - layout区域的实际高度
         $fastCreate = core.$fastCreate,
         calcHeightRevise = core.calcHeightRevise,
         calcWidthRevise = core.calcWidthRevise,
+        findControl = core.findControl,
         getKey = core.getKey,
         getScrollNarrow = core.getScrollNarrow,
         inheritsControl = core.inherits,
@@ -76,6 +77,7 @@ $$mainHeight         - layout区域的实际高度
         inheritsControl(
             UI_CONTROL,
             null,
+            null,
             function (el, options) {
                 detachEvent(el, 'scroll', UI_BROWSER_SCROLLBAR_SCROLL);
                 attachEvent(el, 'scroll', UI_BROWSER_SCROLLBAR_SCROLL);
@@ -91,7 +93,7 @@ $$mainHeight         - layout区域的实际高度
      * @param {ecui.ui.Event} event 事件对象
      */
     function UI_BROWSER_SCROLLBAR_SCROLL(event) {
-        triggerEvent(wrapEvent(event).target.getControl().getParent(), 'scroll');
+        triggerEvent(findControl(getParent(wrapEvent(event).target)), 'scroll');
     }
 
     /**
@@ -191,6 +193,7 @@ $$mainHeight         - layout区域的实际高度
         inheritsControl(
             UI_BROWSER_SCROLLBAR,
             null,
+            null,
             function (el, options) {
                 this._aProperty = ['overflowY', 'scrollTop', 'height', null, 'offsetHeight'];
             }
@@ -206,6 +209,7 @@ $$mainHeight         - layout区域的实际高度
     var UI_BROWSER_HSCROLLBAR =
         inheritsControl(
             UI_BROWSER_SCROLLBAR,
+            null,
             null,
             function (el, options) {
                 this._aProperty = ['overflowX', 'scrollLeft', 'width', 'offsetWidth', null];
@@ -246,16 +250,9 @@ $$mainHeight         - layout区域的实际高度
             UI_CONTROL,
             'ui-panel',
             function (el, options) {
-                var i = 0,
-                    browser = options.browser,
-                    vscroll = options.vScroll !== false,
+                var vscroll = options.vScroll !== false,
                     hscroll = options.hScroll !== false,
                     type = this.getType(),
-                    list = [
-                        [vscroll, '_uVScrollbar', browser ? UI_BROWSER_VSCROLLBAR : this.VScrollbar],
-                        [hscroll, '_uHScrollbar', browser ? UI_BROWSER_HSCROLLBAR : this.HScrollbar],
-                        [vscroll && hscroll, '_uCorner', browser ? UI_BROWSER_CORNER : UI_CONTROL]
-                    ],
                     o = createDom(
                         type + '-body',
                         'position:absolute;top:0px;left:0px' + (hscroll ? ';white-space:nowrap' : '')
@@ -265,14 +262,14 @@ $$mainHeight         - layout区域的实际高度
                 moveElements(el, o, true);
 
                 el.innerHTML =
-                    (browser ?
+                    (options.browser ?
                         '<div style="position:absolute;top:0px;left:0px;overflow:auto;padding:0px;border:0px">' +
                             '<div style="width:1px;height:1px;padding:0px;border:0px"></div></div>'
                         : (vscroll ?
-                            '<div class="' + type + '-vscrollbar' + list[0][2].TYPES +
+                            '<div class="' + type + '-vscrollbar' + this.VScrollbar.TYPES +
                                 '" style="position:absolute"></div>' : '') +
                                 (hscroll ?
-                                    '<div class="' + type + '-hscrollbar' + list[1][2].TYPES +
+                                    '<div class="' + type + '-hscrollbar' + this.HScrollbar.TYPES +
                                         '" style="position:absolute"></div>' : '') +
                                 (vscroll && hscroll ?
                                     '<div class="' + type + '-corner' + UI_CONTROL.TYPES +
@@ -280,7 +277,21 @@ $$mainHeight         - layout区域的实际高度
                     ) + '<div class="' + type +
                             '-layout" style="position:relative;overflow:hidden;padding:0px"></div>';
 
-                this.$setBody(el.lastChild.appendChild(o));
+                el.lastChild.appendChild(o);
+            },
+            function (el, options) {
+                var i = 0,
+                    browser = options.browser,
+                    vscroll = options.vScroll !== false,
+                    hscroll = options.hScroll !== false,
+                    list = [
+                        [vscroll, '_uVScrollbar', browser ? UI_BROWSER_VSCROLLBAR : this.VScrollbar],
+                        [hscroll, '_uHScrollbar', browser ? UI_BROWSER_HSCROLLBAR : this.HScrollbar],
+                        [vscroll && hscroll, '_uCorner', browser ? UI_BROWSER_CORNER : UI_CONTROL]
+                    ],
+                    o;
+
+                this.$setBody(el.lastChild.lastChild);
 
                 this._bAbsolute = options.absolute;
                 this._nWheelDelta = options.wheelDelta;

@@ -27,6 +27,7 @@ _uClose     - 关闭按钮
         undefined,
 
         indexOf = array.indexOf,
+        children = dom.children,
         createDom = dom.create,
         first = dom.first,
         getStyle = dom.getStyle,
@@ -52,8 +53,8 @@ _uClose     - 关闭按钮
     /**
      * 初始化窗体控件。
      * options 对象支持的属性如下：
-     * hide 初始是否自动隐藏
-     * titleAuto title 是否自适应宽度，默认自适应宽度
+     * hide         初始是否自动隐藏
+     * titleAuto    title 是否自适应宽度，默认自适应宽度
      * @public
      *
      * @param {Object} options 初始化选项
@@ -79,24 +80,28 @@ _uClose     - 关闭按钮
                 }
                 else {
                     el.innerHTML =
-                        '<div class="' + type + '-title' + this.Title.TYPES +
-                            '" style="position:absolute"></div><div class="' + type + '-close' + this.Close.TYPES +
+                        '<label class="' + type + '-title' + this.Title.TYPES +
+                            '" style="position:absolute"></label><div class="' + type + '-close' + this.Close.TYPES +
                             '" style="position:absolute"></div>';
                     titleEl = el.firstChild;
                 }
 
                 el.style.overflow = 'hidden';
                 el.appendChild(o);
-                this.$setBody(o);
+            },
+            function (el, options) {
+                var elements = children(el);
 
                 this._bFlag = options.hide;
                 this._bAuto = options.titleAuto !== false;
 
                 // 初始化标题区域
-                this._uTitle = $fastCreate(this.Title, titleEl, this, {userSelect: false});
+                this._uTitle = $fastCreate(this.Title, elements[0], this, {userSelect: false});
 
                 // 初始化关闭按钮
-                this._uClose = $fastCreate(this.Close, titleEl.nextSibling, this);
+                this._uClose = $fastCreate(this.Close, elements[1], this);
+
+                this.$setBody(elements[2]);
             }
         ),
         UI_FORM_CLASS = UI_FORM.prototype,

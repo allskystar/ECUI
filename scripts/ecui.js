@@ -15,12 +15,14 @@ var ecui;
 //{include file="checkbox.js"}//
 //{include file="radio.js"}//
 //{include file="select.js"}//
+
 //{include file="combox.js"}//
 //{include file="form.js"}//
 //{include file="tree-view.js"}//
 //{include file="month-view.js"}//
 //{include file="table.js"}//
-//{include file="popup.js"}//
+//{include file="locked-table.js"}//
+//{include file="popup-menu.js"}//
 //{include file="listbox.js"}//
 //{include file="tab.js"}//
 //{include file="decorate.js"}//

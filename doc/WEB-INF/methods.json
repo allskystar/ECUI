@@ -609,7 +609,7 @@
         },
 
         {
-            "name": "getControl(Element)",
+            "name": "getControl",
             "desc": "获取当前 Element 对象绑定的 {'controls'|menu}。",
             "syntax": "<i>ecui.ui.Control</i> = <i>HTMLElement.</i><b>getControl(</b><i></i><b>)</b>",
             "return": {"type": "ecui.ui.Control", "desc": "与 Element 对象绑定的 {'controls'|menu}"},
@@ -712,8 +712,8 @@
             "params": [
                 {"name": "superClass", "type": "Function", "desc": "父控件类"},
                 {"name": "type", "type": "string", "desc": "子控件的类型样式"},
-                {"name": "subClass", "type": "Function", "desc": "子控件的标准构造函数，如果忽略将直接调用父控件类的构造函数"},
-                {"name": "preprocess", "type": "Function", "desc": "控件正式生成前对选项信息与主元素结构信息调整的预处理函数"}
+                {"name": "preprocess", "type": "Function", "desc": "控件正式生成前对选项信息与主元素结构信息调整的预处理函数"},
+                {"name": "subClass", "type": "Function", "desc": "子控件的标准构造函数，如果忽略将直接调用父控件类的构造函数"}
             ],
             "return": {"type": "Function", "desc": "新控件的构造函数"}
         },
@@ -1071,6 +1071,11 @@
                 {"name": "event", "type": "ecui.ui.Event", "desc": "事件对象"}
             ],
             "event": 10
+        },
+
+        {
+            "name": "$pagescroll",
+            "desc": "页面滚动事件的默认处理。"
         },
 
         {
@@ -2208,12 +2213,8 @@
         },
 
         {
-            "name": "setSelected",
-            "desc": "设置当前树视图控件选中的节点。",
-            "params": [
-                {"type": "ecui.ui.TreeView", "desc": "选中的节点"}
-            ],
-            "remark": "setSelected 方法只有根节点才能执行，其它节点执行无效。"
+            "name": "select",
+            "desc": "将当前节点设置为选中。"
         }
     ],
 

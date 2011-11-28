@@ -35,9 +35,6 @@ _bDefault  - 默认的选中状态
     /**
      * 初始化单选框控件。
      * options 对象支持的属性如下：
-     * checked 控件是否默认选中
-     * name    控件所属组的名称
-     * value   控件的值
      * @public
      *
      * @param {Object} options 初始化选项
@@ -47,18 +44,12 @@ _bDefault  - 默认的选中状态
             UI_INPUT_CONTROL,
             'ui-radio',
             function (el, options) {
-                el = this.getInput();
-
-                if (options.checked) {
-                    el.defaultChecked = el.checked = true;
-                }
-
-                // 保存节点选中状态，用于修复IE6/7下移动DOM节点时选中状态发生改变的问题
-                this._bDefault = el.defaultChecked;
-            },
-            function (el, options) {
                 options.hidden = true;
                 options.inputType = 'radio';
+            },
+            function (el, options) {
+                // 保存节点选中状态，用于修复IE6/7下移动DOM节点时选中状态发生改变的问题
+                this._bDefault = this.getInput().defaultChecked;
             }
         ),
         UI_RADIO_CLASS = UI_RADIO.prototype;

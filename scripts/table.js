@@ -65,6 +65,7 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
         getAttribute = dom.getAttribute,
         getParent = dom.getParent,
         insertBefore = dom.insertBefore,
+        insertHTML = dom.insertHTML,
         next = dom.next,
         removeDom = dom.remove,
         trim = string.trim,
@@ -104,15 +105,32 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
             UI_PANEL,
             'ui-table',
             function (el, options) {
+                options.wheelDelta = 1;
+                if (el.tagName == 'TABLE') {
+                    var table = el;
+                    insertBefore(el = createDom(table.className), table).appendChild(table);
+                    if (options.width) {
+                        el.style.width = options.width;
+                    }
+                    if (options.height) {
+                        el.style.height = options.height;
+                    }
+                    table.className = '';
+                    return el;
+                }
+            },
+            function (el, options) {
                 var i = 0,
                     type = this.getType(),
                     rows = this._aRows = [],
                     cols = this._aHCells = [],
                     colspans = [],
-                    o = el.getElementsByTagName('table')[0],
+                    o = el.getElementsByTagName('TABLE')[0],
                     list = children(o),
                     j = list[0],
                     headRowCount = 1;
+
+                this._sPaddingTop = el.style.paddingTop;
 
                 o.setAttribute('cellSpacing', '0');
 
@@ -134,7 +152,7 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
                     o.setValue = UI_TABLE_SCROLL_SETVALUE;
                 }
 
-                // 初始化表头区域
+                // 初始化表格区域
                 o = createDom(type + '-head' + UI_CONTROL.TYPES, 'position:absolute;top:0px;overflow:hidden');
                 o.innerHTML =
                     '<div style="white-space:nowrap;position:absolute"><table cellspacing="0"><tbody>' +
@@ -203,21 +221,6 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
                         }
                     }
                 }
-            },
-            function (el, options) {
-                options.wheelDelta = 1;
-                if (el.tagName == 'TABLE') {
-                    var table = el;
-                    insertBefore(el = createDom(table.className), table).appendChild(table);
-                    if (options.width) {
-                        el.style.width = options.width;
-                    }
-                    if (options.height) {
-                        el.style.height = options.height;
-                    }
-                    table.className = '';
-                    return el;
-                }
             }
         ),
         UI_TABLE_CLASS = UI_TABLE.prototype,
@@ -247,7 +250,6 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
         UI_TABLE_CELL_CLASS = (UI_TABLE_CLASS.Cell = inheritsControl(
             UI_CONTROL,
             'ui-table-cell',
-            null,
             function (el, options) {
                 // 单元格控件不能改变大小
                 options.resizable = false;
@@ -642,8 +644,7 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
         this._uHead.cache(false, true);
 
         // 以下使用 style 表示临时对象 o
-        this.$$mainHeight += this.$$paddingTop;
-        this.$$mainHeight -= this.$$paddingTop = this._uHead.getBody().offsetHeight;
+        this.$$paddingTop = this._uHead.getBody().offsetHeight;
 
         for (var i = 0, pos = 0; style = this._aRows[i++]; ) {
             style.$$pos = pos;
@@ -652,6 +653,7 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
                 pos += style.getHeight();
             }
         }
+        this.$$mainHeight = pos;
         for (i = 0, pos = 0; style = this._aHCells[i++]; ) {
             style.$$pos = pos;
             style.cache(true, true);
@@ -685,6 +687,26 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
             for (; !col; col = cols[--colIndex]) {}
         }
         return col;
+    };
+
+    /**
+     * 页面滚动事件的默认处理。
+     * @protected
+     */
+    UI_TABLE_CLASS.$pagescroll = function () {
+        UI_PANEL_CLASS.$pagescroll.call(this);
+        if (!this._uVScrollbar) {
+            this._uHead.getOuter().style.top =
+                MAX(ecui.util.getView().top - getPosition(this.getOuter()).top, 0) + 'px';
+        }
+    };
+
+    /**
+     * @override
+     */
+    UI_TABLE_CLASS.$resize = function () {
+        this.getMain().style.paddingTop = this._sPaddingTop;
+        UI_PANEL_CLASS.$resize.call(this);
     };
 
     /**
@@ -751,7 +773,7 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
     UI_TABLE_CLASS.addColumn = function (options, index) {
         var i = 0,
             headRowCount = this._aHeadRows.length,
-            rows = this._aRows = this._aHeadRows.concat(this._aRows),
+            rows = this._aHeadRows.concat(this._aRows),
             primary = options.primary || '',
             el = createDom(primary + this.HCell.TYPES, '', 'td'),
             col = $fastCreate(this.HCell, el, this),
@@ -784,7 +806,7 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
             }
             else {
                 // 出现跨列的插入列操作，需要修正colspan的属性值
-                var cell = this.$getElement(i, index),
+                var cell = this.$getElement(i - headRowCount, index),
                     j = +getAttribute(cell, 'rowspan') || 1;
 
                 cell.setAttribute('colSpan', +getAttribute(cell, 'colSpan') + 1);
@@ -799,8 +821,6 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
         col.$setSize(options.width);
         col.$setStyles('width', el.style.width, options.width);
         col._oOptions = extend({}, options);
-
-        this._aRows.splice(0, headRowCount);
 
         return col;
     };
@@ -963,7 +983,6 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
      */
     UI_TABLE_CLASS.init = function () {
         insertBefore(this._uHead.getBody(), this._uHead.getMain().lastChild.lastChild.firstChild);
-        this.$$mainHeight -= this.$$paddingTop;
 
         UI_PANEL_CLASS.init.call(this);
 

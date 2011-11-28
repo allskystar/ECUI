@@ -50,11 +50,11 @@ _eInput - 选项对应的input，form提交时使用
             UI_PANEL,
             'ui-listbox',
             function (el, options) {
-                this._sName = options.name || '';
-                this.$initItems();
+                options.hScroll = false;
             },
             function (el, options) {
-                options.hScroll = false;
+                this._sName = options.name || '';
+                this.$initItems();
             }
         ),
         UI_LISTBOX_CLASS = UI_LISTBOX.prototype,
@@ -67,6 +67,7 @@ _eInput - 选项对应的input，form提交时使用
          */
         UI_LISTBOX_ITEM_CLASS = (UI_LISTBOX_CLASS.Item = inheritsControl(
             UI_ITEM,
+            null,
             null,
             function (el, options) {
                 el.appendChild(this._eInput = setInput(null, options.parent._sName, 'hidden')).value =

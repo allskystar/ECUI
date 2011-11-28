@@ -41,7 +41,6 @@ _aDependents     - 所有的从属复选框
     /**
      * 初始化复选框控件。
      * options 对象支持的属性如下：
-     * checked 控件是否默认选中
      * subject 主复选框 ID，会自动与主复选框建立关联后，作为主复选框的从属复选框之一
      * @public
      *
@@ -52,21 +51,15 @@ _aDependents     - 所有的从属复选框
             UI_INPUT_CONTROL,
             'ui-checkbox',
             function (el, options) {
-                el = this.getInput();
-
-                if (options.checked) {
-                    el.defaultChecked = el.checked = true;
-                }
-
+                options.hidden = true;
+                options.inputType = 'checkbox';
+            },
+            function (el, options) {
                 // 保存节点选中状态，用于修复IE6/7下移动DOM节点时选中状态发生改变的问题
-                this._bDefault = el.defaultChecked;
+                this._bDefault = this.getInput().defaultChecked;
                 this._aDependents = [];
 
                 $connect(this, this.setSubject, options.subject);
-            },
-            function (el, options) {
-                options.hidden = true;
-                options.inputType = 'checkbox';
             }
         ),
         UI_CHECKBOX_CLASS = UI_CHECKBOX.prototype;

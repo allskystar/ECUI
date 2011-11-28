@@ -42,6 +42,7 @@ _uOptions     - 下拉选择框
         getParent = dom.getParent,
         getPosition = dom.getPosition,
         getText = dom.getText,
+        insertAfter = dom.insertAfter,
         insertBefore = dom.insertBefore,
         moveElements = dom.moveElements,
         removeDom = dom.remove,
@@ -75,8 +76,9 @@ _uOptions     - 下拉选择框
     /**
      * 初始化下拉框控件。
      * options 对象支持的属性如下：
-     * browser    是否使用浏览器原生的滚动条，默认使用模拟的滚动条
-     * optionSize 下拉框最大允许显示的选项数量，默认为5
+     * browser        是否使用浏览器原生的滚动条，默认使用模拟的滚动条
+     * optionSize     下拉框最大允许显示的选项数量，默认为5
+     * optionsElement 下拉选项主元素
      * @public
      *
      * @param {Object} options 初始化选项
@@ -86,36 +88,23 @@ _uOptions     - 下拉选择框
             UI_INPUT_CONTROL,
             'ui-select',
             function (el, options) {
-                this.$setBody(this._uOptions.getBody());
-
-                el = children(el);
-
-                this._uText = $fastCreate(UI_ITEM, el[0], this, {capturable: false});
-                this._uButton = $fastCreate(UI_BUTTON, el[1], this, {capturable: false});
-                el[2].defaultValue = el[2].value = options.value || '';
-
-                // 初始化下拉区域最多显示的选项数量
-                this._nOptionSize = options.optionSize || 5;
-
-                this.$initItems();
-            },
-            function (el, options) {
-                var i = 0,
-                    list = [],
-                    name = el.name || options.name || '',
-                    elements = el.options,
+                var name = el.name || options.name || '',
                     type = this.getType(),
                     optionsEl = createDom(
                         type + '-options' + this.Options.TYPES,
                         'position:absolute;z-index:65535;display:none'
-                    ),
-                    o = el;
+                    );
 
                 if (options.hidden === undefined) {
                     options.hidden = true;
                 }
 
-                if (elements) {
+                if (el.tagName == 'SELECT') {
+                    var i = 0,
+                        list = [],
+                        elements = el.options,
+                        o = el;
+
                     options.value = el.value;
 
                     // 移除select标签
@@ -135,18 +124,33 @@ _uOptions     - 下拉选择框
                     moveElements(el, optionsEl);
                 }
 
+                el.innerHTML =
+                    '<div class="' + type + '-text' + UI_ITEM.TYPES + '"></div><div class="' + type + '-button' +
+                        UI_BUTTON.TYPES + '" style="position:absolute"></div><input name="' + name + '" value="' +
+                        encodeHTML(options.value || '') + '">';
+
+                el.appendChild(optionsEl);
+
+                return el;
+            },
+            function (el, options) {
+                el = children(el);
+
+                this._uText = $fastCreate(UI_ITEM, el[0], this, {capturable: false});
+                this._uButton = $fastCreate(UI_BUTTON, el[1], this, {capturable: false});
+
                 this._uOptions = $fastCreate(
                     this.Options,
-                    optionsEl,
+                    removeDom(el[3]),
                     this,
                     {hScroll: false, browser: options.browser}
                 );
-    
-                el.innerHTML =
-                    '<div class="' + type + '-text' + UI_ITEM.TYPES + '"></div><div class="' + type + '-button' +
-                        UI_BUTTON.TYPES + '" style="position:absolute"></div><input name="' + name + '">';
 
-                return el;
+                this.$setBody(this._uOptions.getBody());
+                // 初始化下拉区域最多显示的选项数量
+                this._nOptionSize = options.optionSize || 5;
+
+                this.$initItems();
             }
         ),
         UI_SELECT_CLASS = UI_SELECT.prototype,
@@ -168,6 +172,7 @@ _uOptions     - 下拉选择框
         UI_SELECT_ITEM_CLASS =
             (UI_SELECT_CLASS.Item = inheritsControl(
                 UI_ITEM,
+                null,
                 null,
                 function (el, options) {
                     this._sValue = options.value === undefined ? getText(el) : '' + options.value;

@@ -62,6 +62,8 @@ _oRange         - 滑动按钮的合法滑动区间
             UI_CONTROL,
             'ui-scrollbar',
             function (el, options) {
+                options.userSelect = options.focusable = false;
+
                 var type = this.getType();
 
                 el.innerHTML =
@@ -71,7 +73,8 @@ _oRange         - 滑动按钮的合法滑动区间
                         type + '-next' + this.Button.TYPES +
                         '" style="position:absolute;top:0px;left:0px"></div><div class="' +
                         this.Thumb.TYPES + '" style="position:absolute"></div>';
-
+            },
+            function (el, options) {
                 // 使用 el 代替 children
                 el = children(el);
 
@@ -85,9 +88,6 @@ _oRange         - 滑动按钮的合法滑动区间
                 this._uThumb = $fastCreate(this.Thumb, el[2], this, {focusable: false});
 
                 this._oStop = blank;
-            },
-            function (el, options) {
-                options.userSelect = options.focusable = false;
             }
         ),
         UI_SCROLLBAR_CLASS = UI_SCROLLBAR.prototype,

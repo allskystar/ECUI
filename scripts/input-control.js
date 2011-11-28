@@ -32,7 +32,6 @@ _eInput  - INPUT对象
         ieVersion = /msie (\d+\.\d)/i.test(USER_AGENT) ? DOCUMENT.documentMode || (REGEXP.$1 - 0) : undefined,
 
         createDom = dom.create,
-        first = dom.first,
         insertBefore = dom.insertBefore,
         setInput = dom.setInput,
         setStyle = dom.setStyle,
@@ -56,10 +55,11 @@ _eInput  - INPUT对象
     /**
      * 初始化输入控件。
      * options 对象支持的属性如下：
-     * name       输入框的名称
-     * value      输入框的默认值
-     * inputType  输入框的类型，默认为 text
-     * hidden     输入框是否隐藏，隐藏状态下将不会绑定键盘事件
+     * name         输入框的名称
+     * value        输入框的默认值
+     * checked      输入框是否默认选中(radio/checkbox有效)
+     * inputType    输入框的类型，默认为 text
+     * hidden       输入框是否隐藏，隐藏状态下将不会绑定键盘事件
      * @public
      *
      * @param {Object} options 初始化选项
@@ -68,21 +68,18 @@ _eInput  - INPUT对象
         inheritsControl(
             UI_CONTROL,
             null,
-            null,
             function (el, options) {
                 if (el.tagName == 'INPUT' || el.tagName == 'TEXTAREA') {
                     // 根据表单项初始化
                     var input = el;
 
-                    insertBefore(el = createDom(input.className, input.style.cssText), input)
-                        .appendChild(input);
+                    insertBefore(el = createDom(input.className, input.style.cssText), input).appendChild(input);
                     input.className = '';
                 }
                 else {
-                    // 根据普通元素初始化
-                    input = first(el);
+                    input = el.getElementsByTagName('INPUT')[0] || el.getElementsByTagName('TEXTAREA')[0];
 
-                    if (!input || (input.tagName != 'INPUT' && input.tagName != 'TEXTAREA')) {
+                    if (!input) {
                         input = setInput(null, options.name, options.inputType);
                         input.defaultValue = input.value =
                             options.value === undefined ? '' : options.value.toString();
@@ -94,14 +91,19 @@ _eInput  - INPUT对象
                 setStyle(el, 'display', 'inline-block');
 
                 input.style.border = '0px';
-                if (this._bHidden = options.hidden) {
+                if (options.hidden) {
                     input.style.display = 'none';
                 }
-
-                this._eInput = input;
-                UI_INPUT_CONTROL_BIND_EVENT(this);
+                if (options.checked) {
+                    input.defaultChecked = input.checked = true;
+                }
 
                 return el;
+            },
+            function (el, options) {
+                this._bHidden = options.hidden;
+                this._eInput = el.getElementsByTagName('INPUT')[0] || el.getElementsByTagName('TEXTAREA')[0];
+                UI_INPUT_CONTROL_BIND_EVENT(this);
             }
         ),
         UI_INPUT_CONTROL_CLASS = UI_INPUT_CONTROL.prototype,

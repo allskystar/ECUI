@@ -76,6 +76,7 @@ _eContainer      - 容器 DOM 元素
         inheritsControl(
             UI_CONTROL,
             'ui-tab',
+            null,
             function (el, options) {
                 //__gzip_original__buttonParams
                 var type = this.getType(),
@@ -122,6 +123,7 @@ _eContainer      - 容器 DOM 元素
         UI_TAB_ITEM_CLASS =
             (UI_TAB_CLASS.Item = inheritsControl(
                 UI_ITEM,
+                null,
                 null,
                 function (el, options) {
                     //__gzip_original__parent

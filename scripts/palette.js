@@ -131,7 +131,7 @@ _aButton          - 按钮数组
             this._uBasic = $fastCreate(UI_PALETTE_COLLECTION, list[1], this);
 
             // 初始化颜色输入框区域
-            el = list[2].getElementsByTagName('td');
+            el = list[2].getElementsByTagName('TD');
             this._uColor = $fastCreate(UI_CONTROL, el[0].firstChild, this);
 
             this._aValue = [];

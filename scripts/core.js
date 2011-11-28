@@ -24,6 +24,7 @@
         ieVersion = /msie (\d+\.\d)/i.test(USER_AGENT) ? DOCUMENT.documentMode || (REGEXP.$1 - 0) : undefined,
         firefoxVersion = /firefox\/(\d+\.\d)/i.test(USER_AGENT) ? REGEXP.$1 - 0 : undefined,
 
+        indexOf = array.indexOf,
         remove = array.remove,
         addClass = dom.addClass,
         contain = dom.contain,
@@ -460,7 +461,7 @@
                             elements.push(o);
                         }
                     }
-window.timer && window.timer.record('控件创建');
+
                     for (i = 0; el = elements[i]; i++) {
                         options = getOptions(el);
                         // 以下使用 el 替代 control
@@ -469,13 +470,11 @@ window.timer && window.timer.record('控件创建');
                             list.push($create(ui[toCamelCase(o.charAt(0).toUpperCase() + o.slice(1))], options));
                         }
                     }
-window.timer && window.timer.record('控件重绘');
-document.body.offsetWidth;
-window.timer && window.timer.record('控件缓存');
+
                     for (i = 0; o = list[i++]; ) {
                         o.cache();
                     }
-window.timer && window.timer.record('控件生成');
+
                     for (i = 0; o = list[i++]; ) {
                         o.init();
                     }
@@ -672,7 +671,7 @@ window.timer && window.timer.record('控件生成');
             }
             else {
                 // 没有传入主元素，需要自动生成，此种情况比较少见
-                el = createDom(o + type.agent.TYPES);
+                el = options.main = createDom(o + type.agent.TYPES);
                 if (!o) {
                     options.primary = type.agent.types[0];
                 }
@@ -1097,13 +1096,13 @@ window.timer && window.timer.record('控件生成');
          *
          * @param {Function} superClass 父控件类
          * @param {string} type 子控件的类型样式
-         * @param {Function} subClass 子控件的标准构造函数，如果忽略将直接调用父控件类的构造函数
          * @param {Function} preprocess 控件正式生成前对选项信息与主元素结构信息调整的预处理函数
+         * @param {Function} subClass 子控件的标准构造函数，如果忽略将直接调用父控件类的构造函数
          * @return {Function} 新控件的构造函数
          */
-        inheritsControl = core.inherits = function (superClass, type, subClass, preprocess) {
+        inheritsControl = core.inherits = function (superClass, type, preprocess, subClass) {
             var agent = function (options) {
-                    return createControl(client, options);
+                    return createControl(agent.client, options);
                 },
                 client = agent.client = function (el, options) {
                     if (preprocess) {

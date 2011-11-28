@@ -50,9 +50,6 @@ Combox - 定义可输入下拉框行为的基本操作。
             UI_SELECT,
             '*ui-combox',
             function (el, options) {
-                this.$getSection('Text').getOuter().style.display = 'none';
-            },
-            function (el, options) {
                 options.hidden = false;
             }
         ),

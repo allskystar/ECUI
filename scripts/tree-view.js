@@ -37,11 +37,13 @@ _aChildren     - 子控件集合
 
         indexOf = array.indexOf,
         remove = array.remove,
+        addClass = dom.addClass,
         children = dom.children,
         createDom = dom.create,
         first = dom.first,
         getStyle = dom.getStyle,
         insertAfter = dom.insertAfter,
+        removeClass = dom.removeClass,
         trim = string.trim,
         extend = util.extend,
         toNumber = util.toNumber,
@@ -72,11 +74,9 @@ _aChildren     - 子控件集合
             UI_CONTROL,
             'ui-treeview',
             function (el, options) {
-                var o = first(el),
-                    childTrees = this._aChildren = [];
+                options.resizable = false;
 
-                this._bCollapsed = false;
-                this._bExpandSelected = options.expandSelected !== false;
+                var o = first(el);
 
                 // 检查是否存在label标签，如果是需要自动初始化树的子结点
                 if (o && o.tagName == 'LABEL') {
@@ -84,24 +84,39 @@ _aChildren     - 子控件集合
                     for (
                         var i = 0,
                             list = children(el).slice(1),
-                            el = UI_TREE_VIEW_SETITEMS(this, createDom());
-                        o = list[i];
+                            childItems = UI_TREE_VIEW_SETITEMS(this, el.appendChild(createDom()));
+                        o = list[i++];
                     ) {
-                        el.appendChild(o);
-                        (childTrees[i++] = UI_TREE_VIEW_CREATE_CHILD(o, this, options)).$setParent(this);
+                        childItems.appendChild(o);
                     }
-                }
 
-                // 改变默认的展开状态
-                if (options.collapsed) {
-                    this.collapse();
-                }
-                else {
-                    UI_TREE_VIEW_FLUSH(this);
+                    removeClass(el, options.primary);
+                    addClass(
+                        el,
+                        options.current = options.primary + (options.collapsed ? '-collapsed' : '-expanded')
+                    );
+
+                    if (options.collapsed) {
+                        childItems.style.display = 'none';
+                    }
                 }
             },
             function (el, options) {
-                options.resizable = false;
+                var childTrees = this._aChildren = [];
+
+                this._bCollapsed = false;
+                this._bExpandSelected = options.expandSelected !== false;
+
+                // 初始化子控件
+                for (
+                    var i = 0,
+                        list = children(el.lastChild),
+                        o;
+                    o = list[i];
+                ) {
+                    delete options.current;
+                    (childTrees[i++] = UI_TREE_VIEW_CREATE_CHILD(o, this, options)).$setParent(this);
+                }
             }
         ),
         UI_TREE_VIEW_CLASS = UI_TREE_VIEW.prototype;
@@ -155,7 +170,7 @@ _aChildren     - 子控件集合
      * @param {boolean} status 是否隐藏子树区域
      * @return {boolean} 状态是否改变
      */
-    function UI_TREE_VIEW_SET_FOLD(control, status) {
+    function UI_TREE_VIEW_SET_COLLAPSE(control, status) {
         if (control._eChildren && control._bCollapsed != status) {
             control._eChildren.style.display = (control._bCollapsed = status) ? 'none' : '';
             UI_TREE_VIEW_FLUSH(control);
@@ -176,7 +191,7 @@ _aChildren     - 子控件集合
                 triggerEvent(this, event);
             }
             else {
-                this.getRoot().setSelected(this);
+                this.select();
             }
         }
     };
@@ -209,14 +224,13 @@ _aChildren     - 子控件集合
         var root = this.getRoot(),
             o = this.getParent();
 
-        // 如果当前节点被选中，需要先释放选中
-        if (this == root._cSelected) {
-            root.setSelected();
-        }
-
-        if (this == root) {
+        if (this == root._cSelected || this == root) {
+            // 如果当前节点被选中，需要先释放选中
             // 如果当前节点是根节点，需要释放选中
-            this.setSelected();
+            if (root._cSelected) {
+                root._cSelected.alterClass('-selected');
+            }
+            root._cSelected = null;
         }
         else {
             remove(o._aChildren, this);
@@ -289,7 +303,7 @@ _aChildren     - 子控件集合
      * @public
      */
     UI_TREE_VIEW_CLASS.collapse = function () {
-        UI_TREE_VIEW_SET_FOLD(this, true);
+        UI_TREE_VIEW_SET_COLLAPSE(this, true);
     };
 
     /**
@@ -297,7 +311,7 @@ _aChildren     - 子控件集合
      * @public
      */
     UI_TREE_VIEW_CLASS.expand = function () {
-        UI_TREE_VIEW_SET_FOLD(this, false);
+        UI_TREE_VIEW_SET_COLLAPSE(this, false);
     };
 
     /**
@@ -399,25 +413,22 @@ _aChildren     - 子控件集合
     };
 
     /**
-     * 设置当前树视图控件选中的节点。
-     * setSelected 方法只有根节点才能执行，其它节点执行无效。
+     * 将当前节点设置为选中。
      * @public
-     *
-     * @param {ecui.ui.TreeView} node 选中的节点
      */
-    UI_TREE_VIEW_CLASS.setSelected = function (node) {
-        if (this == this.getRoot()) {
-            if (this._cSelected != node) {
-                if (this._cSelected) {
-                    this._cSelected.alterClass('-selected');
-                }
-                node.alterClass('+selected');
-                this._cSelected = node;
-            }
+    UI_TREE_VIEW_CLASS.select = function () {
+        var root = this.getRoot();
 
-            if (node && this._bExpandSelected) {
-                node.expand();
+        if (root._cSelected != this) {
+            if (root._cSelected) {
+                root._cSelected.alterClass('-selected');
             }
+            this.alterClass('+selected');
+            root._cSelected = this;
+        }
+
+        if (this._bExpandSelected) {
+            this.expand();
         }
     };
 //{/if}//

@@ -98,6 +98,7 @@ $$position          - 控件布局方式缓存
      * options 对象支持的属性如下：
      * type       控件的类型样式
      * primary    控件的基本样式
+     * current    控件的当前样式
      * capturable 是否需要捕获鼠标事件，默认捕获
      * userSelect 是否允许选中内容，默认允许
      * focusable  是否允许获取焦点，默认允许
@@ -111,12 +112,14 @@ $$position          - 控件布局方式缓存
         inheritsControl(
             null,
             null,
+            null,
             function (el, options) {
                 $bind(el, this);
 
                 this._bDisabled = !!options.disabled;
                 this._sUID = options.uid;
-                this._sPrimary = this._sClass = options.primary || '';
+                this._sPrimary = options.primary || '';
+                this._sClass = options.current || this._sPrimary;
                 this._eMain = this._eBody = el;
                 this._cParent = null;
 
@@ -1029,8 +1032,8 @@ $$position          - 控件布局方式缓存
             classes[0] = oldClass;
             this._eMain.className =
                 currClass +
-                    this._eMain.className.replace(
-                        new REGEXP('^\\s+|(' + classes.join('|') + ')(-[^\\s]+)?(\\s+|$)|\\s+$', 'g'),
+                    this._eMain.className.split(/\s+/).join('  ').replace(
+                        new REGEXP('(^| )(' + classes.join('|') + ')(-[^ ]+)?( |$)', 'g'),
                         ''
                     );
         }
@@ -1081,6 +1084,8 @@ $$position          - 控件布局方式缓存
      */
     UI_CONTROL_CLASS.setSize = function (width, height) {
         if (this._bResizable) {
+            this.cache();
+
             //__gzip_original__style
             var style = this._eMain.style;
 

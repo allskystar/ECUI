@@ -20,7 +20,6 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
         array = core.array,
         dom = core.dom,
         ui = core.ui,
-        util = core.util,
 
         DATE = Date,
 
@@ -55,8 +54,7 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
             function (el, options) {
                 var i = 0,
                     type = this.getType(),
-                    list = [],
-                    o;
+                    list = [];
 
                 el.style.overflow = 'auto';
 
@@ -74,10 +72,10 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
 
                 el.innerHTML =
                     '<table cellspacing="0"><thead><tr>' + list.join('') + '</tr></tbody></table>';
-
+            },
+            function (el, options) {
                 this._aCells = [];
-                list = el.getElementsByTagName('td');
-                for (i = 0; o = list[i]; ) {
+                for (var i = 0, list = el.getElementsByTagName('TD'), o; o = list[i]; ) {
                     // 日历视图单元格禁止改变大小
                     this._aCells[i++] = $fastCreate(this.Cell, o, this, {resizable: false});
                 }

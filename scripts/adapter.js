@@ -60,7 +60,7 @@
     // 字符集基本操作定义
     var charset = {
             utf8: {
-                getLength: function (source) {
+                byteLength: function (source) {
                     return source.replace(/[\x80-\u07ff]/g, '  ').replace(/[\u0800-\uffff]/g, '   ').length;
                 },
 
@@ -70,7 +70,7 @@
             },
 
             gbk: {
-                getLength: function (source) {
+                byteLength: function (source) {
                     return source.replace(/[\x80-\uffff]/g, '  ').length;
                 },
 
@@ -80,7 +80,7 @@
             },
 
             '': {
-                getLength: function (source) {
+                byteLength: function (source) {
                     return source.length;
                 },
 
@@ -201,9 +201,10 @@
          * @param {HTMLElement} contained 被包含的 Element 对象
          * @return {boolean} contained 对象是否被包含于 container 对象的 DOM 节点上
          */
-        contain = dom.contain = function (container, contained) {
-            return container.contains ? container.contains(contained)
-                : container == contained || !!(container.compareDocumentPosition(contained) & 16);
+        contain = dom.contain = firefoxVersion ? function (container, contained) {
+            return container == contained || !!(container.compareDocumentPosition(contained) & 16);
+        } : function (container, contained) {
+            return container.contains(contained);
         },
 
         /**
@@ -395,23 +396,20 @@
          * @param {string} position 插入 html 的位置信息，取值为 beforeBegin,afterBegin,beforeEnd,afterEnd
          * @param {string} html 要插入的 html 代码
          */
-        insertHTML = dom.insertHTML = function (el, position, html) {
-            if (el.insertAdjacentHTML) {
-                el.insertAdjacentHTML(position, html);
-            }
-            else {
-                var name = {
-                        AFTERBEGIN: 'selectNodeContents',
-                        BEFOREEND: 'selectNodeContents',
-                        BEFOREBEGIN: 'setStartBefore',
-                        AFTEREND: 'setEndAfter'
-                    }[position.toUpperCase()],
-                    range = DOCUMENT.createRange();
+        insertHTML = dom.insertHTML = firefoxVersion ? function (el, position, html) {
+            var name = {
+                    AFTERBEGIN: 'selectNodeContents',
+                    BEFOREEND: 'selectNodeContents',
+                    BEFOREBEGIN: 'setStartBefore',
+                    AFTEREND: 'setEndAfter'
+                }[position.toUpperCase()],
+                range = DOCUMENT.createRange();
 
-                range[name](el);
-                range.collapse(position.length > 9);
-                range.insertNode(range.createContextualFragment(html));
-            }
+            range[name](el);
+            range.collapse(position.length > 9);
+            range.insertNode(range.createContextualFragment(html));
+        } : function (el, position, html) {
+            el.insertAdjacentHTML(position, html);
         },
 
         /**
@@ -739,7 +737,7 @@
          * @return {number} 字节长度
          */
         getByteLength = string.getByteLength = function (source, charsetName) {
-            return charset[charsetName || ''].getLength(source);
+            return charset[charsetName || ''].byteLength(source);
         },
 
         /**
@@ -853,13 +851,10 @@
          * @param {string} type 事件类型
          * @param {Function} func 事件处理函数
          */
-        attachEvent = util.attachEvent = function (obj, type, func) {
-            if (obj.attachEvent) {
-                obj.attachEvent('on' + type, func);
-            }
-            else {
-                obj.addEventListener(type, func, false);
-            }
+        attachEvent = util.attachEvent = ieVersion ? function (obj, type, func) {
+            obj.attachEvent('on' + type, func);
+        } : function (obj, type, func) {
+            obj.addEventListener(type, func, false);
         },
 
         /*
@@ -935,13 +930,10 @@
          * @param {string} type 事件类型
          * @param {Function} func 事件处理函数
          */
-        detachEvent = util.detachEvent = function (obj, type, func) {
-            if (obj.detachEvent) {
-                obj.detachEvent('on' + type, func);
-            }
-            else {
-                obj.removeEventListener(type, func, false);
-            }
+        detachEvent = util.detachEvent = ieVersion ? function (obj, type, func) {
+            obj.detachEvent('on' + type, func);
+        } : function (obj, type, func) {
+            obj.removeEventListener(type, func, false);
         },
 
         /**
