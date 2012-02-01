@@ -99,6 +99,7 @@
         isContentBox,
         loseFocus,
         mask,
+        needInitClass,
         query,
         restore,
         setFocused,
@@ -1221,6 +1222,16 @@
         };
 
         /**
+         * 判断是否需要初始化 class 属性。
+         * @public
+         *
+         * @return {boolean} 是否需要初始化 class 属性
+         */
+        needInitClass = core.needInitClass = function () {
+            return !structural;
+        };
+
+        /**
          * 查询满足条件的控件列表。
          * query 方法允许按多种条件组合查询满足需要的控件，如果省略条件表示不进行限制。condition参数对象支持的属性如下：
          * type   {Function} 控件的类型构造函数
@@ -1229,7 +1240,7 @@
          * @public
          *
          * @param {Object} condition 查询条件，如果省略将返回全部的控件
-         * @param {Array} 控件列表
+         * @return {Array} 控件列表
          */
         query = core.query = function (condition) {
             condition = condition || {};
