@@ -734,8 +734,8 @@
                 return source.replace(/&(quot|lt|gt|amp|#([\d]+));/g, function(match, $1, $2) {
                     return codeTable[$1] || String.fromCharCode(+$2);
                 });
-            })();
-        },
+            };
+        })(),
 
         /**
          * 对目标字符串进行 html 编码。
