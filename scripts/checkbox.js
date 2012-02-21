@@ -23,10 +23,12 @@ _aDependents     - 所有的从属复选框
     var core = ecui,
         array = core.array,
         ui = core.ui,
+        util = core.util,
 
         undefined,
 
         remove = array.remove,
+        setDefault = util.setDefault,
 
         $connect = core.$connect,
         getKey = core.getKey,
@@ -51,8 +53,8 @@ _aDependents     - 所有的从属复选框
             UI_INPUT_CONTROL,
             'ui-checkbox',
             function (el, options) {
-                options.hidden = true;
-                options.inputType = 'checkbox';
+                setDefault(options, 'hidden', true);
+                setDefault(options, 'inputType', 'checkbox');
             },
             function (el, options) {
                 // 保存节点选中状态，用于修复IE6/7下移动DOM节点时选中状态发生改变的问题
@@ -115,6 +117,17 @@ _aDependents     - 所有的从属复选框
     UI_CHECKBOX_CLASS.$click = function (event) {
         UI_INPUT_CONTROL_CLASS.$click.call(this, event);
         this.setChecked(!!this._nStatus);
+    };
+
+    /**
+     * @override
+     */
+    UI_CHECKBOX_CLASS.$dispose = function () {
+        this.setSubject();
+        for (var i = 0, o; o = this._aDependents[i++]; ) {
+            o.setSubject();
+        }
+        UI_INPUT_CONTROL_CLASS.$dispose.call(this);
     };
 
     /**

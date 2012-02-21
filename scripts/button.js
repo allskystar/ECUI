@@ -23,8 +23,10 @@ Button - 定义按钮的基本操作。
     var core = ecui,
         dom = core.dom,
         ui = core.ui,
+        util = core.util,
 
         setText = dom.setText,
+        setDefault = util.setDefault,
 
         inheritsControl = core.inherits,
 
@@ -47,7 +49,7 @@ Button - 定义按钮的基本操作。
             UI_CONTROL,
             'ui-button',
             function (el, options) {
-                options.userSelect = false;
+                setDefault(options, 'userSelect', false);
                 if (options.text) {
                     setText(el, options.text);
                 }

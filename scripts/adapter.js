@@ -715,6 +715,29 @@
         })(),
 
         /**
+         * 对目标字符串进行 html 解码。
+         * @public
+         *
+         * @param {string} source 目标字符串
+         * @return {string} 结果字符串
+         */
+        decodeHTML = string.decodeHTML = (function () {
+            var codeTable = {
+                quot: '"',
+                lt: '<',
+                gt: '>',
+                amp: '&'
+            };
+
+            return function (source) {
+                //处理转义的中文和实体字符
+                return source.replace(/&(quot|lt|gt|amp|#([\d]+));/g, function(match, $1, $2) {
+                    return codeTable[$1] || String.fromCharCode(+$2);
+                });
+            })();
+        },
+
+        /**
          * 对目标字符串进行 html 编码。
          * encodeHTML 方法对四个字符进行编码，分别是 &<>"
          * @public
@@ -1007,6 +1030,21 @@
             subClass.superClass = superClass.prototype;
 
             return subClass.prototype;
+        },
+
+        /**
+         * 设置缺省的属性值。
+         * 如果对象的属性已经被设置，setDefault 方法不进行任何处理，否则将默认值设置到指定的属性上。
+         * @public
+         *
+         * @param {Object} obj 被设置的对象
+         * @param {string} key 属性名
+         * @param {Object} value 属性的默认值
+         */
+        setDefault = util.setDefault = function (obj, key, value) {
+            if (!obj.hasOwnProperty(key)) {
+                obj[key] = value;
+            }
         },
 
         /**

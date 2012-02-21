@@ -19,8 +19,11 @@ _bDefault  - 默认的选中状态
 
     var core = ecui,
         ui = core.ui,
+        util = core.util,
 
         undefined,
+
+        setDefault = util.setDefault,
 
         getKey = core.getKey,
         inheritsControl = core.inherits,
@@ -44,8 +47,8 @@ _bDefault  - 默认的选中状态
             UI_INPUT_CONTROL,
             'ui-radio',
             function (el, options) {
-                options.hidden = true;
-                options.inputType = 'radio';
+                setDefault(options, 'hidden', true);
+                setDefault(options, 'inputType', 'radio');
             },
             function (el, options) {
                 // 保存节点选中状态，用于修复IE6/7下移动DOM节点时选中状态发生改变的问题

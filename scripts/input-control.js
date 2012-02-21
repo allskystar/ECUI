@@ -1,6 +1,7 @@
 /*
 InputControl - 定义输入数据的基本操作。
 输入控件，继承自基础控件，实现了对原生 InputElement 的功能扩展，包括光标的控制、输入事件的实时响应(每次改变均触发事件)，以及 IE 下不能动态改变输入框的表单项名称的模拟处理。
+** 在IE6下原生Input会有上下3px的间距，只能通过设置父元素的overflow:hidden解决，本控件未对这种情况进行特殊设置，请注意 **
 
 输入控件直接HTML初始化的例子:
 <input ecui="type:input-control" type="password" name="passwd" value="1111">
@@ -87,7 +88,6 @@ _eInput  - INPUT对象
                     }
                 }
 
-                el.style.overflow = 'hidden';
                 setStyle(el, 'display', 'inline-block');
 
                 input.style.border = '0px';

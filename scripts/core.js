@@ -201,7 +201,8 @@
 
                     //__transform__control_o
                     var control = event.getControl(),
-                        flag = isScrollClick(event),
+                        // 修复ie下跨iframe导致的事件类型错误的问题
+                        flag = ieVersion < 8 && isScrollClick(event),
                         target = control;
 
                     if (!(lastClick && isDblClick())) {
@@ -209,7 +210,7 @@
                     }
 
                     if (control) {
-                        if (flag && ieVersion < 8) {
+                        if (flag) {
                             // IE8以下的版本，如果为控件添加激活样式，原生滚动条的操作会失效
                             // 常见的表现是需要点击两次才能进行滚动操作，而且中途不能离开控件区域
                             // 以免触发悬停状态的样式改变。
@@ -504,6 +505,8 @@
                         lastClientWidth = o;
                     }
                     else {
+                        // 如果高度发生变化，相当于滚动条的信息发生变化，因此需要产生scroll事件进行刷新
+                        onscroll(new UI_EVENT('scroll'));
                         return;
                     }
                 }
@@ -1371,6 +1374,11 @@
          * @return {ecui.ui.Event} 标准化后的事件对象
          */
         wrapEvent = core.wrapEvent = function (event) {
+            if (event instanceof UI_EVENT) {
+                // 防止事件对象被多次包装
+                return event;
+            }
+
             var body = DOCUMENT.body,
                 html = getParent(body);
 

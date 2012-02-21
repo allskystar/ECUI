@@ -264,6 +264,15 @@
 
     "string": [
         {
+            "name": "decodeHTML",
+            "desc": "对目标字符串进行 html 解码。",
+            "params": [
+                {"name": "source", "type": "string", "desc": "目标字符串"}
+            ],
+            "return": {"type": "string", "desc": "结果字符串"}
+        },
+
+        {
             "name": "encodeHTML",
             "desc": "对目标字符串进行 html 编码。",
             "params": [
@@ -399,6 +408,17 @@
                 {"name": "superClass", "type": "Function", "desc": "父类"}
             ],
             "return": {"type": "Object", "desc": "subClass 的 prototype 属性"}
+        },
+
+        {
+            "name": "setDefault",
+            "desc": "设置缺省的属性值。",
+            "params": [
+                {"name": "obj", "type": "Object", "desc": "被设置的对象"},
+                {"name": "key", "type": "string", "desc": "属性名"},
+                {"name": "value", "type": "Object", "desc": "属性的默认值"}
+            ],
+            "remark": "如果对象的属性已经被设置，setDefault 方法不进行任何处理，否则将默认值设置到指定的属性上。"
         },
 
         {
@@ -753,6 +773,12 @@
                 {"name": "status", "type": "boolean", "desc": "false 表示隐藏整个遮罩层，true 表示显示整个遮罩层"}
             ],
             "remark": "遮罩层的 z-index 样式默认取值为 32767，<font color=\"red\">请不要将 Element 对象的 z-index 样式设置大于 32767</font>。当框架中至少一个遮罩层工作时，body 标签将增加一个样式 ecui-mask，IE6/7 的原生 select 标签可以使用此样式进行隐藏，解决强制置顶的问题。"
+        },
+
+        {
+            "name": "needInitClass",
+            "desc": "判断是否需要初始化 class 属性。",
+            "return": {"type": "boolean", "desc": "是否需要初始化 class 属性"}
         },
 
         {
@@ -1782,6 +1808,12 @@
             "desc": "获取垂直滚动条的当前值。",
             "return": {"type": "number", "desc": "垂直滚动条的当前值，如果没有垂直滚动条返回 -1"},
             "remark": "getScrollTop 方法提供了对水平滚动条当前值的快捷访问方式，参见 {'getValue'|method:'scrollbar'} 方法。"
+        },
+
+        {
+            "name": "reset",
+            "desc": "控件显示区域复位。",
+            "remark": "reset 方法设置水平滚动条或者垂直滚动条的当前值为 0。"
         }
     ],
 

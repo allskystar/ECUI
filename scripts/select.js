@@ -49,6 +49,7 @@ _uOptions     - 下拉选择框
         encodeHTML = string.encodeHTML,
         extend = util.extend,
         getView = util.getView,
+        setDefault = util.setDefault,
 
         $fastCreate = core.$fastCreate,
         getAttributeName = core.getAttributeName,
@@ -95,9 +96,7 @@ _uOptions     - 下拉选择框
                         'position:absolute;z-index:65535;display:none'
                     );
 
-                if (options.hidden === undefined) {
-                    options.hidden = true;
-                }
+                setDefault(options, 'hidden', true);
 
                 if (el.tagName == 'SELECT') {
                     var i = 0,
