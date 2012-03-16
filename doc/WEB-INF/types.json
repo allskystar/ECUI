@@ -17,6 +17,12 @@
         "position": "ecui.dom"
     },
 
+	{
+        "name": "json",
+        "type": "core",
+        "position": "ecui.json"
+    },
+
     {
         "name": "string",
         "type": "core",

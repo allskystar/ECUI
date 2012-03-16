@@ -26,6 +26,20 @@ describe('表格控件初始化测试', {
         control.setParent();
         ecui.dispose(control);
     },
+     
+    '表头多行2': function () {
+        var el = document.createElement('div');
+        el.style.cssText = 'width:400px;height:300px';
+        el.innerHTML = '<table cellspacing="0" cellpadding="0" border="0"><thead><tr><th colspan="2" style="width:200px">xxxx</th><th rowspan="2" style="width:100px">xxxx</th><th rowspan="2" style="width:100px">xxxx</th></tr><tr><th style="width:100px">xxx</th><th style="width:100px">xxx</th></tr></thead><tbody></tbody></table>';
+
+        var control = ecui.create('Table', {main: el, parent: document.body});
+        value_of(control.getHCell(0).getWidth()).should_be(100);
+        value_of(control.getHCell(1).getWidth()).should_be(100);
+        value_of(control.getHCell(2).getWidth()).should_be(100);
+        value_of(control.getHCell(3).getWidth()).should_be(100);
+        control.setParent();
+        ecui.dispose(control);
+    },
 
     '内容跨行列': function () {
         var el = document.createElement('div');

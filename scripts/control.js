@@ -416,7 +416,6 @@ $$position          - 控件布局方式缓存
             }
         }
         currStyle.height = this._sHeight;
-        this.repaint();
     };
 
     /**
@@ -994,6 +993,7 @@ $$position          - 控件布局方式缓存
     UI_CONTROL_CLASS.resize = function () {
         if (this._bResizable) {
             this.$resize();
+            this.repaint();
         }
     };
 
@@ -1018,7 +1018,8 @@ $$position          - 控件布局方式缓存
     UI_CONTROL_CLASS.setClass = function (currClass) {
         var i = 0,
             oldClass = this._sClass,
-            classes = this.getTypes();
+            classes = this.getTypes(),
+            list = [];
 
         currClass = currClass || this._sPrimary;
 
@@ -1026,12 +1027,11 @@ $$position          - 控件布局方式缓存
         if (currClass != oldClass) {
             classes.splice(0, 0, this._sClass = currClass);
             for (; classes[i]; ) {
-                classes[i] = this._aStatus.join(classes[i++]);
+                list[i] = this._aStatus.join(classes[i++]);
             }
-            currClass = classes.join('');
             classes[0] = oldClass;
             this._eMain.className =
-                currClass +
+                list.join('') +
                     this._eMain.className.split(/\s+/).join('  ').replace(
                         new REGEXP('(^| )(' + classes.join('|') + ')(-[^ ]+)?( |$)', 'g'),
                         ''

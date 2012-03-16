@@ -164,13 +164,14 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
                     o.className = trim(o.className) + this.Row.TYPES;
                     // list[i] 保存每一行的当前需要处理的列元素
                     list[i] = first(o);
-                    colspans[i] = 1;
+                    colspans[i] = 0;
                     (rows[i] = $fastCreate(this.Row, o, this))._aElements = [];
                 }
 
                 for (j = 0; ; j++) {
                     for (i = 0; o = rows[i]; i++) {
-                        if (colspans[i]-- > 1) {
+                        if (colspans[i] > 0) {
+                            colspans[i]--;
                             continue;
                         }
                         if (el = list[i]) {
@@ -180,10 +181,15 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
                                 list[i] = next(el);
 
                                 var rowspan = +getAttribute(el, 'rowSpan') || 1,
-                                    colspan = colspans[i] = +getAttribute(el, 'colSpan') || 1;
+                                    colspan = +getAttribute(el, 'colSpan') || 1;
+
+                                colspans[i] = colspan - 1;
 
                                 while (rowspan--) {
-                                    if (!rowspan) {
+                                    if (rowspan) {
+                                        colspans[i + rowspan] += colspan;
+                                    }
+                                    else {
                                         colspan--;
                                     }
                                     for (o = colspan; o--; ) {

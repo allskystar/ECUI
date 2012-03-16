@@ -1,4 +1,4 @@
-var ecui;
+var ecui = {};
 (function () {
 
 //{assign var="phases" value="define,body" delimiter=","}//

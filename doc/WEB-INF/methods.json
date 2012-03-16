@@ -283,6 +283,16 @@
         },
 
         {
+            "name": "formatDate",
+            "desc": "日期格式化。",
+            "params": [
+                {"name": "source", "type": "Date", "desc": "日期对象"},
+                {"name": "pattern", "type": "string", "desc": "日期格式描述字符串"}
+            ],
+            "return": {"type": "string", "desc": "结果字符串"}
+        },
+
+        {
             "name": "getByteLength",
             "desc": "计算字符串的字节长度。",
             "params": [

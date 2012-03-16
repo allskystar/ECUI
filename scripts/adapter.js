@@ -1,4 +1,5 @@
 //{if 0}//
+var ecui = {};
 (function () {
 //{/if}//
 //{if $phase == "define"}//
@@ -8,7 +9,7 @@
 //__gzip_unitize__o
 //__gzip_unitize__el
 //__gzip_unitize__params
-    var core = ecui = {},
+    var core = ecui,
         array = core.array = {},
         dom = core.dom = {},
         ext = core.ext = {},
@@ -17,21 +18,6 @@
         ui = core.ui = {},
         util = core.util = {};
 
-    //__gzip_original__WINDOW
-    ///__gzip_original__DOCUMENT
-    //__gzip_original__DATE
-    //__gzip_original__FUNCTION
-    //__gzip_original__MATH
-    //__gzip_original__REGEXP
-    //__gzip_original__ABS
-    //__gzip_original__CEIL
-    ///__gzip_original__FLOOR
-    ///__gzip_original__MAX
-    ///__gzip_original__MIN
-    //__gzip_original__POW
-    ///__gzip_original__ROUND
-    ///__gzip_original__PARSEINT
-    //__gzip_original__ISNAN
     var undefined,
         WINDOW = window,
         DOCUMENT = document,
@@ -51,11 +37,11 @@
 
     var USER_AGENT = navigator.userAgent,
         isStrict = DOCUMENT.compatMode == 'CSS1Compat',
-        ieVersion = /msie (\d+\.\d)/i.test(USER_AGENT) ? DOCUMENT.documentMode || (REGEXP.$1 - 0) : undefined,
-        firefoxVersion = /firefox\/(\d+\.\d)/i.test(USER_AGENT) ? REGEXP.$1 - 0 : undefined,
-        operaVersion = /opera\/(\d+\.\d)/i.test(USER_AGENT) ? REGEXP.$1 - 0 : undefined,
+        ieVersion = /msie (\d+\.\d)/i.test(USER_AGENT) ? DOCUMENT.documentMode || +REGEXP.$1 : undefined,
+        firefoxVersion = /firefox\/(\d+\.\d)/i.test(USER_AGENT) ? +REGEXP.$1 : undefined,
+        operaVersion = /opera\/(\d+\.\d)/i.test(USER_AGENT) ? +REGEXP.$1 : undefined,
         safariVersion =
-            /(\d+\.\d)(\.\d)?\s+safari/i.test(USER_AGENT) && !/chrome/i.test(USER_AGENT) ? REGEXP.$1 - 0 : undefined;
+            /(\d+\.\d)(\.\d)?\s+safari/i.test(USER_AGENT) && !/chrome/i.test(USER_AGENT) ? +REGEXP.$1 : undefined;
 
     // 字符集基本操作定义
     var charset = {
@@ -118,7 +104,7 @@
             opacity:
                 ieVersion ? {
                     get: function (el, style) {
-                        return /alpha\(opacity=(\d+)/.test(style.filter) ? ((REGEXP.$1 - 0) / 100) + '' : '1';
+                        return /alpha\(opacity=(\d+)/.test(style.filter) ? (+REGEXP.$1 / 100) + '' : '1';
                     },
 
                     set: function (el, value) {
@@ -184,12 +170,13 @@
          * @return {Array} Element 对象数组
          */
         children = dom.children = function (el) {
+//__transform__result_list
             for (var result = [], o = el.firstChild; o; o = o.nextSibling) {
                 if (o.nodeType == 1) {
                     result.push(o);
                 }
             }
-            return result;    
+            return result;
         },
 
         /**
@@ -585,7 +572,7 @@
          * @return {Object} json字符串描述的对象
          */
         parse = json.parse = function (text) {
-            return new Function('return (' + text + ')')();
+            return new FUNCTION('return (' + text + ')')();
         },
 
         /**
@@ -752,6 +739,49 @@
         },
 
         /**
+         * 日期格式化。
+         * @public
+         *
+         * @param {Date} source 日期对象
+         * @param {string} pattern 日期格式描述字符串
+         * @return {string} 结果字符串
+         */
+        formatDate = string.formatDate = function (source, pattern) {
+            var year = source.getFullYear(),
+                month = source.getMonth() + 1,
+                date = source.getDate(),
+                hours = source.getHours(),
+                minutes = source.getMinutes(),
+                seconds = source.getSeconds();
+
+            return pattern.replace(/(y+|M+|d+|H+|h+|m+|s+)/g, function (match) {
+                var length = match.length;
+                switch (match.charAt()) {
+                case 'y':
+                    return length > 2 ? year : year.toString().slice(2);
+                case 'M':
+                    match = month;
+                    break;
+                case 'd':
+                    match = date;
+                    break;
+                case 'H':
+                    match = hours;
+                    break;
+                case 'h':
+                    match = hours % 12;
+                    break;
+                case 'm':
+                    match = minutes;
+                    break;
+                case 's':
+                    match = seconds;
+                }
+                return length > 1 && match < 10 ? '0' + match : match;
+            });
+        },
+
+        /**
          * 计算字符串的字节长度。
          * 如果没有指定编码集，相当于获取字符串属性 length 的值。
          * 
@@ -824,49 +854,6 @@
         },
 
         /**
-         * 日期格式化。
-         * @public
-         *
-         * @param {Date} source 日期对象
-         * @param {string} pattern 日期格式描述字符串
-         * @return {string} 结果字符串
-         */
-        formatDate = string.formatDate = function (source, pattern) {
-            var year = source.getFullYear(),
-                month = source.getMonth() + 1,
-                date = source.getDate(),
-                hours = source.getHours(),
-                minutes = source.getMinutes(),
-                seconds = source.getSeconds();
-
-            return pattern.replace(/(y+|M+|d+|H+|h+|m+|s+)/g, function (match) {
-                var length = match.length;
-                switch (match.charAt()) {
-                case 'y':
-                    return length > 2 ? year : year.toString().slice(2);
-                case 'M':
-                    match = month;
-                    break;
-                case 'd':
-                    match = date;
-                    break;
-                case 'H':
-                    match = hours;
-                    break;
-                case 'h':
-                    match = hours % 12;
-                    break;
-                case 'm':
-                    match = minutes;
-                    break;
-                case 's':
-                    match = seconds;
-                }
-                return length > 1 && match < 10 ? '0' + match : match;
-            });
-        },
-
-        /**
          * 挂载事件。
          * @public
          *
@@ -885,8 +872,7 @@
          * blank 方法不应该被执行，也不进行任何处理，它用于提供给不需要执行操作的事件方法进行赋值，与 blank 类似的用于给事件方法进行赋值，而不直接被执行的方法还有 cancel。
          * @public
          */
-        blank = util.blank = function () {
-        },
+        blank = util.blank = new FUNCTION(),
 
         /**
          * 调用指定对象超类的指定方法。
@@ -906,15 +892,10 @@
              * @param {Function} caller 基准方法，即查找 caller 对应的超类方法
              * @return {Function} 基准方法对应的超类方法，没有找到基准方法返回 undefined，基准方法没有超类方法返回 null
              */
-            function findPrototype(clazz, caller) {
+            function find(clazz, caller) {
                 for (; clazz; clazz = clazz.constructor.superClass) {
-                    if (clazz[name] == caller) {
-                        for (; clazz = clazz.constructor.superClass; ) {
-                            if (clazz[name] != caller) {
-                                return clazz[name];
-                            }
-                        }
-                        return null;
+                    if (clazz.hasOwnProperty(name) && clazz[name] == caller) {
+                        return clazz.constructor.superClass[name] || null;
                     }
                 }
             }
@@ -922,11 +903,11 @@
             //__gzip_original__clazz
             var clazz = object.constructor.prototype,
                 caller = callSuper.caller,
-                func = findPrototype(clazz, caller);
+                func = find(clazz, caller);
 
             if (func === undefined) {
-                // 如果Items的方法直接位于prototype链上，是caller，如果是间接被别的方法调用Items.xxx.call，是caller.caller
-                func = findPrototype(clazz, caller.caller);
+                // 如果接口的方法直接位于prototype链上，宿主是caller，如果是间接被别的方法调用Interface.xxx.call，宿主是caller.caller
+                func = find(clazz, caller.caller);
             }
 
             if (func) {

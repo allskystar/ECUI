@@ -530,10 +530,7 @@
                     }
 
                     for (i = 0; o = list[i++]; ) {
-                        // 避免在resize中调用repaint从而引起反复的reflow
-                        o.repaint = blank;
                         triggerEvent(o, 'resize');
-                        delete o.repaint;
 
                         if (ieVersion < 8) {
                             // 修复ie6/7下宽度自适应错误的问题
