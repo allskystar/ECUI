@@ -1,0 +1,22 @@
+.ui-input{
+    border:1px solid #bbb;
+    height:22px;
+    width:300px;
+    color:#333;
+    background:#fff;
+    background-image:-webkit-gradient(linear, 0 0, 0 2, from(#ececec), to(#fff));
+    background-image:-moz-linear-gradient(top, #ececec, #fff 2px, #fff);
+}
+.ui-input-hover{
+    border-color:#888;
+}
+.ui-input-focus{
+    border-color:#666;
+}
+.ui-input input:focus{
+    outline:0;
+}
+
+.ui-input-virtual input{
+    color:#ccc;
+}

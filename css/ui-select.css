@@ -1,0 +1,36 @@
+.ui-select{
+    height:20px;
+    display:inline-block;
+    border:1px solid #bbb;
+    background:#FFF;
+    width:100px;
+    *display:inline;
+    *zoom:1;
+}
+.ui-select-hover{
+    border-color:#888;
+}
+.ui-select-text{
+    padding-left:4px;
+    line-height:20px;
+}
+.ui-select-button{
+    border:none;
+    border-radius:0;
+    border-left:1px solid #bbb;
+}
+.ui-select-options{
+    border:1px solid #888;
+    background:#fff;
+}
+.ui-select-item{
+    padding-left:4px;
+    cursor:default;
+    -moz-user-select:none;
+    -webkit-user-select:none;
+    line-height:20px;
+}
+.ui-select-item-hover,
+.ui-select-item-focus{
+    background:#ddd;
+}

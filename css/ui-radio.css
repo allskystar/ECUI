@@ -1,0 +1,6 @@
+.ui-radio {width:12px;height:12px;overflow:hidden;display:inline-block;margin:0px 0px;background:url(img/ecui.png) 0px -18px no-repeat;vertical-align:middle;*display:inline;zoom:1;}
+.ui-radio-hover {background-position:-17px -18px}
+.ui-radio-disabled {background-position:-68px -18px}
+.ui-radio-checked {background-position:-34px -18px}
+.ui-radio-checked-hover {background-position:-51px -18px}
+.ui-radio-checked-disabled {background-position:-85px -18px}

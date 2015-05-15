@@ -1,0 +1,78 @@
+.ui-table{
+    border:0;
+    background:#fff;
+}
+.ui-table-head,.ui-table-locked-head{
+    background:#fff;
+}
+.ui-table-hcell{
+    font-weight:normal;
+    text-align:center;
+    line-height:28px;
+    padding:0 3px;
+    background-color:#bbb;
+    cursor:default;
+    border-right:1px solid #bbb;
+    border-bottom:1px solid #bbb;
+    vertical-align:middle;
+}
+.ui-table-hcell-last{
+    border-right:0
+}
+.ui-table-cell{
+    border-bottom:1px solid #bbb;
+    border-right:1px solid #bbb;
+    line-height:28px;
+    padding:0 3px;
+}
+.ui-table-cell .ui-checkbox{
+    *margin-top:4px;
+}
+.ui-table-expend-cell .ui-checkbox{
+    *margin-top:9px;
+}
+.ui-table-cell-last{
+    border-right:0;
+}
+.ui-table-cell-align-right{
+    text-align:right;
+}
+.ui-table-cell-align-center{
+    text-align:center;
+}
+.ui-table-row-focus{
+    background:#666;
+    color:#fff;
+}
+.ui-table-row-hover{
+    background:#999;
+}
+.ui-table-row-highlight{
+    background:#999;
+}
+.ui-table-head-shadow{
+    height:5px;
+    overflow:hidden;
+    background:#CCC;
+    filter:alpha(opacity=50);
+    opacity:.5;
+}
+.ui-table-hcell-sort{
+    background:#fc0;
+}
+.ui-table-hcell-sort-asc{
+    background:#fc0;
+}
+.ui-table-hcell-sort-desc{
+    background:#fc0;
+}
+.ui-table-panel-empty{
+    height:40px;
+    line-height:40px;
+}
+.ui-table-empty{
+    height:40px;
+    line-height:40px;
+    text-align:center;
+    font-weight:bold;
+}

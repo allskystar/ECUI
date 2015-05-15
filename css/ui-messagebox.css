@@ -1,0 +1,19 @@
+.ui-messagebox-text{
+	padding:10px;
+}
+.ui-messagebox-bottom{
+	border-top:1px solid #ddd;
+	padding:5px;
+	text-align: right;
+}
+
+/* ui-messagebox-info */
+.ui-messagebox-info{
+	background:lightyellow;
+}
+.ui-messagebox-info .ui-form-title{
+	display:none;
+}
+.ui-messagebox-info .ui-messagebox-bottom{
+	display:none;
+}

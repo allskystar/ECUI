@@ -1,0 +1,17 @@
+.ui-checkbox {
+	width:12px;
+	height:12px;
+	overflow:hidden;
+	display:inline-block;
+	margin:0px 3px;
+	background:url(./images/adbox-sprite.png) 0px 0px no-repeat;
+	vertical-align:middle;
+	*display:inline;zoom:1;
+}
+.ui-checkbox-hover {background-position:-17px 0px}
+.ui-checkbox-checked {background-position:-34px -0px}
+.ui-checkbox-checked-hover {background-position:-51px -0px}
+.ui-checkbox-checked-disabled {background-position:-85px -0px}
+.ui-checkbox-disabled {background-position:-68px -0px}
+.ui-checkbox-part {background-position:-102px -0px}
+.ui-checkbox-part-hover {background-position:-51px -0px}

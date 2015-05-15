@@ -1,0 +1,159 @@
+.ui-calendar{
+    position:relative;
+    width:160px;
+    height:20px;
+    border:1px solid #bbb;
+    background-color:#FFF;
+    display:inline-block;
+    vertical-align:middle;
+    *display:inline;
+    *zoom:1;
+}
+.ui-calendar input{
+    display:none;
+}
+.ui-calendar-text{
+    height:19px;
+    line-height:19px;
+    font-size:12px;
+    padding-left:5px;
+    margin-right:40px;
+}
+.ui-calendar-button{
+    width:40px;
+    height:20px;
+    position:absolute;
+    right:0;
+    top:0;
+}
+.ui-calendar-cancel{
+    position:absolute;
+    top:1px;
+    right:45px;
+    height:19px;
+    width:8px;
+}
+.ui-calendar-default{
+    color:#ccc;
+}
+.ui-calendar-layer{
+    border:1px solid #bbb;
+    background:#FFF;
+    width:225px;
+    z-index:32800;
+}
+.ui-calendar-layer .ui-button{
+    padding:0;
+    margin:0;
+    border-radius:2;
+}
+.ui-calendar-layer-buttons{
+    height:25px;
+    padding:3px 10px 0;
+}
+.ui-calendar-layer .ui-calendar-layer-btn-prv,
+.ui-calendar-layer .ui-calendar-layer-btn-nxt{
+    width:18px;
+    height:18px;
+    vertical-align:middle;
+}
+.ui-calendar-layer-slt-year{
+    width:65px;
+    margin-right:10px;
+    margin-left:15px;
+    vertical-align:middle;
+}
+.ui-calendar-layer-slt-month{
+    width:45px;
+    margin-right:20px;
+    vertical-align:middle;
+}
+.ui-calendar-layer-month-view{
+    padding:0 2px 2px;
+    cursor:default;
+}
+.ui-calendar-layer-month-view table{
+    margin:0 auto;
+}
+.ui-calendar-layer-month-view table td{
+    width:26px;
+    height:26px;
+    text-align:center;
+    line-height:20px;
+    cursor:default;
+    border:none;
+    margin:5px;
+}
+.ui-calendar-layer-month-view .ui-monthview-title{
+    font-weight:bold;
+}
+.ui-calendar-layer-month-view .ui-monthview-item-hover{
+    background-color:#888;
+    border-color:#888;
+}
+.ui-calendar-layer-month-view .ui-monthview-item-selected{
+    border-color:#666;
+    background-color:#666;
+    color:#fff;
+    font-weight:bold;
+}
+.ui-calendar-layer-month-view .ui-monthview-item-disabled{
+    color:#ccc;
+}
+.ui-multi-calendar{
+    position:relative;
+    width:212px;
+    height:20px;
+    border:1px solid #bbb;
+    background-color:#FFF;
+    display:inline-block;
+    vertical-align:middle;
+    *display:inline;
+    *zoom:1;
+}
+.ui-multi-calendar ul{
+    list-style:none;
+}
+.ui-multi-calendar-text{
+    height:19px;
+    line-height:19px;
+    font-size:12px;
+    padding-left:5px;
+    margin-right:40px;
+}
+.ui-multi-calendar-button{
+    width:40px;height:20px;
+    position:absolute;
+    right:0;
+    top:0;
+}
+.ui-multi-calendar-cancel{
+    position:absolute;
+    top:1px;
+    right:45px;
+    height:19px;
+    width:8px;
+}
+.ui-multi-calendar-default{
+    color:#ccc;
+}
+.ui-multi-calendar-layer{
+    width:475px;
+    border:1px solid #bbb;
+    padding:15px 0 0 10px;
+    background-color:#FFF;
+    z-index:32801;
+}
+.ui-multi-calendar-layer-text strong{
+    color:#888;
+}
+.ui-multi-calendar-layer-cal-area{
+    display:inline-block;
+    margin-right:10px;
+    *display:inline;
+    *zoom:1;
+}
+.ui-multi-calendar-layer-buttons{
+    margin-top:10px;
+    padding-bottom:5px;
+}
