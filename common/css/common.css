@@ -1,0 +1,235 @@
+/*<script>window.onload=function(){var url=location.href,hash=document.getElementsByTagName('TEXTAREA')[0].value;url=decodeURIComponent(url.slice(url.indexOf('=')+1));parent.location.href=url+'#'+encodeURIComponent(hash.slice(hash.indexOf('\n')+1).replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&')||' ');}</script><textarea>*/
+* {
+    margin: 0;
+    padding: 0;
+}
+
+html * {
+    outline: 0;
+    -webkit-text-size-adjust: none;
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+    -webkit-font-smoothing: antialiased;
+}
+
+html,
+body {
+    color: #495362;
+    background: #FFF;
+    font-size: 14px;
+    font-family: "'Helvetica Neue', 'Microsoft Yahei','PingFang SC'";
+    height: 100%;
+}
+
+input,
+button,
+select,
+textarea {
+    outline: none
+}
+
+table {
+    border-spacing: 0
+}
+
+fieldset,
+img {
+    border: 0
+}
+
+address,
+caption,
+cite,
+code,
+dfn,
+em,
+strong,
+th,
+var {
+    font-style: normal;
+    font-weight: normal
+}
+
+ol,
+ul,
+li {
+    list-style: none
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-size: 100%;
+    font-weight: normal
+}
+
+a {
+    color: #8492A6;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.box {
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    -o-box-sizing: border-box;
+    -ms-box-sizing: border-box;
+    box-sizing: border-box;
+}
+
+.ui-dialog h6,
+.ui-tab h6,
+.ui-checktree h6 {
+    font-weight: normal;
+    margin: 0;
+}
+
+
+/*元素存在但显示为不可见*/
+
+.ui-visible-hidden {
+    visibility: hidden;
+}
+
+.clearfix {
+    *zoom: 1;
+}
+
+.clearfix:before,
+.clearfix:after {
+    display: table;
+    content: "";
+    line-height: 0;
+}
+
+.clearfix:after {
+    clear: both;
+}
+
+.ui-hide {
+    display: none !important;
+}
+
+#ECUI_LOCATOR {
+    position: absolute;
+    visibility: hidden;
+}
+
+.ui-valid {
+    position: absolute !important;
+    overflow: scroll !important;
+    visibility: hidden !important;
+    top: -90px !important;
+    left: -90px !important;
+    width: 80px !important;
+    height: 80px !important;
+    border: 1px solid !important;
+}
+
+.ui-valid div {
+    position: absolute !important;
+    top: 0 !important;
+    height: 90px !important;
+}
+
+.ui-item {
+    overflow: hidden !important;
+}
+
+/*蓝色按钮*/
+.blue-btn-hover {
+    background-color: #429aeb;
+    border: 1px solid #429aeb;
+    color: #fff;
+    border-radius: 25px;
+    height:30px;
+    line-height: 30px;
+    width: 80px;
+    text-align: center;
+    cursor: pointer;
+    font-size: 14px;
+}
+.blue-btn-active {
+    background-color: #2e7bc2;
+    border: 1px solid #2e7bc2;
+    color: #fff;
+    border-radius: 25px;
+    height:30px;
+    line-height: 30px;
+    width: 80px;
+    text-align: center;
+    cursor: pointer;
+    font-size: 14px;
+
+
+}
+.ui-disabled .blue-btn,
+.blue-btn-disabled {
+    background-color: #EFF2F7;
+    border:1px solid #eff2f7;
+    color: #E0E6ED;
+    border-radius: 25px;
+    height:30px;
+    line-height: 30px;
+    width: 80px;
+    text-align: center;
+    cursor: pointer;
+    font-size: 14px;
+}
+/*白色按钮*/
+.white-btn {
+    background-color: #fff;
+    border: 1px solid #acbaca;
+    color: #4293dd;
+    border-radius: 25px;
+    height:30px;
+    line-height: 30px;
+    width: 80px;
+    text-align: center;
+    cursor: pointer;
+    font-size: 14px;
+}
+.white-btn-hover {
+    background-color: #fff;
+    border: 1px solid #368cda;
+    color: #368CDA;
+    border-radius: 25px;
+    height:30px;
+    line-height: 30px;
+    width: 80px;
+    text-align: center;
+    cursor: pointer;
+    font-size: 14px;
+
+}
+.white-btn-active {
+    background-color: #2E7BC2;
+    border: 1px solid #2e7bc2;
+    color: #fff;
+    border-radius: 25px;
+    height:30px;
+    line-height: 30px;
+    width: 80px;
+    text-align: center;
+    cursor: pointer;
+    font-size: 14px;
+
+}
+.ui-disabled .white-btn,
+.white-btn-disabled {
+    background-color: #fff;
+    border:1px solid #EFF2F7;
+    color: #e0e6ed;
+    border-radius: 25px;
+    height:30px;
+    line-height: 30px;
+    width: 80px;
+    text-align: center;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+
+

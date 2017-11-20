@@ -1,0 +1,30 @@
+/*<script>window.onload=function(){var url=location.href,hash=document.getElementsByTagName('TEXTAREA')[0].value;url=decodeURIComponent(url.slice(url.lastIndexOf('=')+1));parent.location.href=url+'#'+encodeURIComponent(hash.slice(hash.indexOf('\n')+1).replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&')||' ');}</script><textarea>*/
+.ui-checkbox {
+    width: 17px;
+    height: 17px;
+    background-image: url('images/ecui/icons.png');
+    background-position:0 -84px;
+    background-repeat: no-repeat;
+    input {
+    	position: relative !important;
+    	width: 10px !important;
+    	left: -12px !important;
+        outline: none;
+        border-radius: 0;
+        display: none;
+    }
+}
+.ui-checkbox-checked {
+    background-image: url('images/ecui/icons.png');
+    background-position:0 0;
+}
+.ui-checkbox-disabled,
+.ui-disabled .ui-checkbox{
+    background-image: url('images/ecui/icons.png');
+    background-position:0 -29px;
+}
+.ui-checkbox-checked-disabled,
+.ui-disabled .ui-checkbox-checked{
+    background-image: url('images/ecui/icons.png');
+    background-position:0 -57px;
+}

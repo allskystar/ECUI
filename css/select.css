@@ -1,0 +1,65 @@
+/*<script>window.onload=function(){var url=location.href,hash=document.getElementsByTagName('TEXTAREA')[0].value;url=decodeURIComponent(url.slice(url.lastIndexOf('=')+1));parent.location.href=url+'#'+encodeURIComponent(hash.slice(hash.indexOf('\n')+1).replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&')||' ');}</script><textarea>*/
+.ui-select {
+    width: 110px;
+    height: 30px;
+    line-height: 30px;
+    padding-right: 30px;
+    background: url(images/ecui/arrow.png) no-repeat 120px center;
+    border: 1px solid #acbaca;
+    border-radius: 2px;
+    color: #495362;
+    .ui-select-text {
+        position: absolute !important;
+        overflow: hidden !important;
+        padding-left:5px;
+        display: block;
+        border: none;
+        background-color: #fff;
+        color: #495362;
+        cursor: pointer;
+    }
+    input {
+        z-index: -1;
+        position: absolute !important;
+        opacity: 0;
+    }
+}
+.ui-select-hover {
+    border:1px solid #8492a6;
+}
+.ui-select-active {
+    border:1px solid #368cda;
+}
+.ui-select-focus {
+    border:1px solid #368cda;
+}
+.ui-select-disabled,
+.ui-disabled .ui-select
+{
+    background:#eff2f7 url(images/ecui/arrow.png) no-repeat 120px center;
+    border:1px solid #e0e6ed;
+    .ui-select-text {
+        background-color: #eff2f7;
+        color: #e0e6ed
+    }
+}
+.ui-select-options {
+    position: absolute !important;
+    overflow: auto !important;
+    border: 1px solid #d7d8d9;
+    background: #fff;
+    overflow-x: hidden;
+    .ui-select-item {
+        display: block !important;
+        text-indent: 5px;
+        line-height: 28px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .ui-select-item-hover,
+    .ui-select-item-focus {
+        background-color: #368cda;
+        color: #fff;
+        cursor: pointer;
+    }
+}

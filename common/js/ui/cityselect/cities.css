@@ -1,0 +1,24 @@
+/*<script>window.onload=function(){var url=location.href,hash=document.getElementsByTagName('TEXTAREA')[0].value;url=decodeURIComponent(url.slice(url.indexOf('=')+1));parent.location.href=url+'#'+encodeURIComponent(hash.slice(hash.indexOf('\n')+1).replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&')||' ');}</script><textarea>*/
+.ui-cities {
+	position: relative;
+	font-size: 0px;
+	.ui-select {
+		background:url('images/ecui/arrow.png') no-repeat;
+		background-position: 100px center !important;
+		background-color: #FFF; 
+		position: relative;
+		width: 120px !important;
+		height: 30px !important;
+		line-height: 30px !important;
+		padding-right: 0px;
+		margin: 0px 5px;
+		vertical-align: middle;
+		font-size: 14px;
+		display: inline-block !important;
+		border: 1px solid #acbaca !important;
+		color: #8492a6;
+	}
+	.ui-select-focus {
+	    border: 1px solid #368cda !important;
+	}
+}

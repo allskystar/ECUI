@@ -1,0 +1,33 @@
+/*<script>window.onload=function(){var url=location.href,hash=document.getElementsByTagName('TEXTAREA')[0].value;url=decodeURIComponent(url.slice(url.indexOf('=')+1));parent.location.href=url+'#'+encodeURIComponent(hash.slice(hash.indexOf('\n')+1).replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&')||' ');}</script><textarea>*/
+.pagination{
+	-moz-user-select: none; /*火狐-禁止文本选中*/
+	-webkit-user-select: none; /*webkit浏览器*/
+	-ms-user-select: none; /*IE10*/
+	-khtml-user-select: none; /*早期浏览器*/
+	user-select: none;
+	height:24px;
+	font-size:14px;
+	span,font,strong{
+		display:inline-block;
+		margin-right:6px;
+		padding:0 4px;
+		min-width:16px;
+		height:24px;
+		text-align:center;
+		line-height:24px;
+		color:#495362;
+		border-radius:3px;
+		cursor:pointer
+	}
+	font{
+		color:#ccc;
+		cursor:default;
+	}
+	span:hover{
+		color:#38abff;
+	}
+	strong{
+		background:#368cda;
+		color:#fff !important;
+	}
+}

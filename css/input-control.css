@@ -1,0 +1,17 @@
+/*<script>window.onload=function(){var url=location.href,hash=document.getElementsByTagName('TEXTAREA')[0].value;url=decodeURIComponent(url.slice(url.lastIndexOf('=')+1));parent.location.href=url+'#'+encodeURIComponent(hash.slice(hash.indexOf('\n')+1).replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&')||' ');}</script><textarea>*/
+.ui-input {
+    .inline-block();
+    overflow: hidden !important;
+	input,
+	textarea {
+	    border: 0 !important;
+    	padding: 0 !important;
+    	margin: 0 !important;
+	    font-family: "'Helvetica Neue', 'Microsoft Yahei','PingFang SC'";
+	    color: #495362;
+	}
+	textarea {
+	    resize: none;
+	    word-wrap: break-word;
+	}
+}

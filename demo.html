@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>样式规范</title>
+    <link rel="stylesheet/less" type="text/css" href="ecui.css" />
+    <link rel="stylesheet/less" type="text/css" href="common.css">
+    <script type="text/javascript" src="ecui.js"></script>
+</head>
+<body>
+    <!--table-->
+    <div ui="type:table;id:test;left-lock:1;head-float:true;right-lock:1">
+      <table style="width:600px">
+        <!-- 表头区域 -->
+        <thead>
+          <tr>
+            <th style="width:25%;">公司名</th>
+            <th style="width:25%;">url</th>
+            <th style="width:25%;">地址</th>
+            <th style="width:25%;">创办时间</th>
+          </tr>
+        </thead>
+        <!-- 内容行区域 -->
+        <tbody>
+          <tr>
+            <td>百度</td>
+            <td>www.baidu.com</td>
+            <td>中国北京中关村</td>
+            <td>1999</td>
+          </tr>
+          <tr>
+            <td>百度</td>
+            <td>www.baidu.com</td>
+            <td>中国北京中关村</td>
+            <td>1999</td>
+          </tr>
+          <tr>
+            <td>百度</td>
+            <td>www.baidu.com</td>
+            <td>中国北京中关村</td>
+            <td>1999</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    
+    <br>
+    <br>
+   <!--蓝色按钮-->
+   <div ui="type:button;" class="blue-btn">normal</div>
+   <div ui="type:button;capturable:false" class="blue-btn-hover">hover</div>
+   <div ui="type:button;capturable:false" class="blue-btn-active">pressed</div>
+   <div ui="type:button;capturable:false;disabled" class="blue-btn">disabled</div>
+   <br>
+   <br>
+   <!--白色按钮-->
+   <div ui="type:button;" class="white-btn">normal</div>
+   <div ui="type:button;capturable:false" class="white-btn-hover">hover</div>
+   <div ui="type:button;capturable:false" class="white-btn-active">pressed</div>
+   <div ui="type:button;capturable:false;disabled" class="white-btn">disabled</div>
+   <br>
+   <br>
+   <!--checkbox-->
+    <input ui="type:checkbox;" class="ui-checkbox">
+    <input ui="type:checkbox;capturable:false" class="ui-checkbox-checked">
+    <input ui="type:checkbox;capturable:false;disabled">
+    <input ui="type:checkbox;capturable:false;disabled" class="ui-checkbox-checked">
+    <br>
+    <br>
+    <!--select-->
+    <select ui="type:select;" class="ui-select">
+        <option>管理员</option>
+        <option>管理员</option>
+    </select> 
+    <select ui="type:select;capturable:false" class="ui-select-hover">
+        <option>管理员</option>
+    </select>
+    <select ui="type:select;capturable:false" class="ui-select-active">
+        <option>管理员</option>
+    </select>
+    <select ui="type:select;capturable:false;disabled" class="">
+        <option>管理员</option>
+    </select>
+    <br>
+    <br>  
+    <!--text-->  
+    <input ui="type:text;" class="" placeholder="输入框">  
+    <input ui="type:text;capturable:false" class="ui-text-hover">   
+    <input ui="type:text;capturable:false" class="ui-text-active"> 
+    <input ui="type:text;capturable:false;disabled">
+    <!-- <div ui="disabled:true">  
+        <input ui="type:text;capturable:false">
+    </div>
+    <div>  
+        <input ui="type:text;valid:blur;len:2" value = "11" placeholder="请输入2char">
+    </div> -->
+    <br>
+    <br> 
+    <!--radio-->
+    <input ui="type:radio;" class="ui-radio">
+    <input ui="type:radio;capturable:false" class="ui-radio-checked">
+    <input ui="type:radio;capturable:false;disabled">
+    <input ui="type:radio;capturable:false;disabled" class="ui-radio-checked">
+    <br>
+    <br>
+    <!--dialog-->
+    <div ui="type:dialog;">
+        <strong>
+          样式规范
+        </strong>
+    </div>
+    <br>
+    <br>
+    <!--calender-->
+    <div ui="type:month-view;"></div>
+    <br>
+    <br> 
+    <div ui="type:calendar-input;"></div>
+    <br>
+    <br> 
+    <div ui="type:calendar;"></div>
+    <br>
+    <br>
+    <!--combox-->
+    <div ui="type:combox"></div>
+    <br>
+    <br>
+    <!--tab-->
+    <div ui="type:tab;selected:1">
+        <!-- 包含容器的选项卡 -->
+        <div>
+            <strong>标题1</strong>
+            <!-- 这里是容器 -->
+            content1
+        </div>
+        <div>
+            <strong>标题2</strong>
+            <!-- 这里是容器 -->
+            content2
+        </div>
+        <!-- 仅有标题的选项卡，以下selected定义与控件定义是一致的，可以忽略其中之一 -->
+        <!-- <strong ui="selected:true">标题2</strong> -->
+    </div>
+    <br>
+    <br>
+
+</body>
+</html>
+

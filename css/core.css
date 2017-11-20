@@ -1,0 +1,20 @@
+/*<script>window.onload=function(){var url=location.href,hash=document.getElementsByTagName('TEXTAREA')[0].value;url=decodeURIComponent(url.slice(url.lastIndexOf('=')+1));parent.location.href=url+'#'+encodeURIComponent(hash.slice(hash.indexOf('\n')+1).replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&')||' ');}</script><textarea>*/
+.ui-valid {
+    position: absolute !important;
+    overflow: scroll !important;
+    visibility: hidden !important;
+    top: -90px !important;
+    left: -90px !important;
+    width: 80px !important;
+    height: 80px !important;
+    border: 1px solid !important;
+	div {
+    	position: absolute !important;
+    	top: 0 !important;
+    	height: 90px !important;
+    }
+}
+.ui-mask {
+    position: absolute !important;
+    background-color: #000 !important;
+}

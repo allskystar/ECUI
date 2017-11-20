@@ -1,103 +1,108 @@
 /*
-Progress - 定义进度显示的基本操作。
-进度条控件，继承自基础控件，面向用户显示一个任务执行的程度。
+Progress - 定义进度显示的基本操作，不建议直接初始化。
+进度控件，继承自基础控件，面向用户显示一个任务执行的程度。
 
-进度条控件直接HTML初始化的例子:
-<div ecui="type:progress;rate:0.5"></div>
+进度控件直接HTML初始化的例子:
+<div ui="type:progress;max:100;value:0"></div>
 
 属性
-_eText - 内容区域
-_eMask - 完成的进度比例内容区域
+_nValue  - 进度值
+_nMax    - 进度最大值
 */
 //{if 0}//
 (function () {
-
     var core = ecui,
         ui = core.ui,
-        util = core.util,
-
-        undefined,
-        MATH = Math,
-        FLOOR = MATH.floor,
-        MAX = MATH.max,
-        MIN = MATH.min,
-        ROUND = MATH.round,
-
-        inherits = util.inherits,
-
-        UI_CONTROL = ui.Control,
-        UI_CONTROL_CLASS = UI_CONTROL.prototype;
+        util = core.util;
 //{/if}//
-//{if $phase == "define"}//
     /**
-     * 初始化进度条控件。
+     * 初始化进度控件。
      * options 对象支持的属性如下：
-     * rate 初始的百分比
+     * max 最大值
+     * value 当前值
      * @public
      *
      * @param {Object} options 初始化选项
      */
-    //__gzip_original__UI_PROGRESS
-    var UI_PROGRESS =
-        ui.Progress = function (el, options) {
-            UI_CONTROL.call(this, el, options);
+    ui.Progress = core.inherits(
+        ui.Control,
+        'ui-progress',
+        function (el, options) {
+            ui.Control.call(this, el, options);
 
-            var text = el.innerHTML;
-
-            el.innerHTML = '<div class="' + options.base +
-                '-text" style="position:absolute;top:0px;left:0px"></div><div class="' + options.base +
-                '-mask" style="position:absolute;top:0px;left:0px"></div>';
+            el.innerHTML = '<div class="' + options.classes.join('-text ') + '"></div><div class="' + options.classes.join('-mask ') + '"></div>';
             this._eText = el.firstChild;
             this._eMask = el.lastChild;
 
-            this.setText(options.rate || 0, text);
+            this._sFormat = options.format;
+            this._nMax = options.max || 100;
+            this._nValue = options.value || 0;
         },
-        UI_PROGRESS_CLASS = inherits(UI_PROGRESS, UI_CONTROL);
-//{else}//
-    /**
-     * 销毁控件的默认处理。
-     * @protected
-     */
-    UI_PROGRESS_CLASS.$dispose = function () {
-        this._eText = this._eMask = null;
-        UI_CONTROL_CLASS.$dispose.call(this);
-    };
+        {
+            /**
+             * 进度变化的默认处理。
+             * @protected
+             */
+            $progress: util.blank,
 
-    /**
-     * 设置控件的大小。
-     * @protected
-     *
-     * @param {number} width 宽度，如果不需要设置则将参数设置为等价于逻辑非的值
-     * @param {number} height 高度，如果不需要设置则省略此参数
-     */
-    UI_PROGRESS_CLASS.$setSize = function (width, height) {
-        UI_CONTROL_CLASS.$setSize.call(this, width, height);
-        this.$locate();
+            /**
+             * 获取进度的最大值。
+             * @public
+             *
+             * @return {number} 进度的最大值
+             */
+            getMax: function () {
+                return this._nMax;
+            },
 
-        //__gzip_original__style1
-        //__gzip_original__style2
-        var style1 = this._eText.style,
-            style2 = this._eMask.style;
-        style1.width = style2.width = this.getBodyWidth() + 'px';
-        style1.height = style2.height = this.getBodyHeight() + 'px';
-    };
+            /**
+             * 获取进度的当前值。
+             * @public
+             *
+             * @return {number} 进度的当前值
+             */
+            getValue: function () {
+                return this._nValue;
+            },
 
-    /**
-     * 设置进度的比例以及需要显示的文本。
-     * @protected
-     *
-     * @param {number} rate 进度比例，在0-1之间
-     * @param {number} text 显示的文本，如果省略将显示成 xx%
-     */
-    UI_PROGRESS_CLASS.setText = function (rate, text) {
-        rate = MIN(MAX(0, rate), 1);
-        if (text !== undefined) {
-            this._eText.innerHTML = this._eMask.innerHTML = text || ROUND(rate * 100) + '%';
+            /**
+             * @override
+             */
+            init: function (options) {
+                ui.Control.prototype.init.call(this, options);
+                core.triggerEvent(this, 'progress');
+            },
+
+            /**
+             * 设置进度的最大值。
+             * @public
+             *
+             * @param {number} max 进度的最大值
+             */
+            setMax: function (max) {
+                max = Math.max(1, max);
+                if (this._nMax !== max) {
+                    this._nMax = max;
+                    this._nValue = Math.min(this._nValue, this._nMax);
+                    core.triggerEvent(this, 'progress');
+                }
+            },
+
+            /**
+             * 设置进度的当前值。
+             * @public
+             *
+             * @param {number} value 进度的当前值
+             */
+            setValue: function (value) {
+                value = Math.max(Math.min(this._nMax, value), 0);
+                if (this._nValue !== value) {
+                    this._nValue = value;
+                    core.triggerEvent(this, 'progress');
+                }
+            }
         }
-        this._eMask.style.clip =
-            'rect(0px,' + FLOOR(rate * this.getBodyWidth()) + 'px,' + this.getBodyHeight() + 'px,0px)';
-    };
-//{/if}//
+    );
 //{if 0}//
-})();
+}());
 //{/if}//

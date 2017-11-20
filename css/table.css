@@ -1,0 +1,40 @@
+/*<script>window.onload=function(){var url=location.href,hash=document.getElementsByTagName('TEXTAREA')[0].value;url=decodeURIComponent(url.slice(url.lastIndexOf('=')+1));parent.location.href=url+'#'+encodeURIComponent(hash.slice(hash.indexOf('\n')+1).replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&')||' ');}</script><textarea>*/
+.ui-table {
+    overflow: hidden !important;
+    .ui-table-layout {
+	    position: relative !important;
+	    overflow: auto !important;
+	}
+    table {
+    	width: 100%;
+    	th {
+    		height: 50px;
+		    line-height: 50px;
+		    background: #EDF8FF;
+		    border-top: 2px solid #a9d3fa;
+		    border-bottom: 1px solid #a9d3fa;
+		    font-size: 16px;
+		    padding: 0 0 0 10px;
+		    text-align: left;
+    	}
+    	td {
+	    	height: 50px;
+	    	padding: 0 0 0 10px;
+		    text-align: left;
+		    text-overflow: ellipsis;
+		    overflow: hidden;
+		    white-space: nowrap;
+    	}
+	    .ui-table-row:nth-child(2n) > td {
+    		background: #f7fcff;
+		}
+    }
+	.ui-table-head {
+	    position: absolute;
+	    overflow: hidden !important;
+	    top: 0px;
+	}
+	.ui-table-body {
+	    overflow: auto !important;
+	}
+}

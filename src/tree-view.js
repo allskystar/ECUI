@@ -3,149 +3,47 @@ TreeView - 定义树形视图的基本操作。
 树视图控件，继承自基础控件，不可以被改变大小，可以包含普通子控件或者子树视图控件，普通子控件显示在它的文本区域，如果是子树视图控件，将在专门的子树视图控件区域显示。子树视图控件区域可以被收缩隐藏或是展开显示，默认情况下点击树视图控件就改变子树视图控件区域的状态。
 
 树视图控件直接HTML初始化的例子:
-<div ecui="type:tree-view;">
+<ul ui="type:tree-view;">
   <!-- 显示的文本，如果没有label整个内容就是节点的文本 -->
-  <label>公司</label>
+  <div>公司</div>
   <!-- 子控件 -->
-  <div>董事会</div>
-  <div>监事会</div>
-  <div>
-    <label>总经理</label>
-    <div>行政部</div>
-    <div>人事部</div>
-    <div>财务部</div>
-    <div>市场部</div>
-    <div>销售部</div>
-    <div>技术部</div>
-  </div>
-</div>
+  <li>董事会</li>
+  <li>监事会</li>
+  <ul>
+    <div>总经理</div>
+    <li>行政部</li>
+    <li>人事部</li>
+    <li>财务部</li>
+    <li>市场部</li>
+    <li>销售部</li>
+    <li>技术部</li>
+  </ul>
+</ul>
 
 属性
 _bCollapsed    - 是否收缩子树
 _eChildren     - 子控件区域Element对象
 _aChildren     - 子控件集合
 */
-//{if 0}//
 (function () {
-
+//{if 0}//
     var core = ecui,
-        array = core.array,
         dom = core.dom,
-        string = core.string,
         ui = core.ui,
-        util = core.util,
-
-        indexOf = array.indexOf,
-        remove = array.remove,
-        addClass = dom.addClass,
-        children = dom.children,
-        createDom = dom.create,
-        first = dom.first,
-        getStyle = dom.getStyle,
-        insertAfter = dom.insertAfter,
-        removeClass = dom.removeClass,
-        trim = string.trim,
-        extend = util.extend,
-        toNumber = util.toNumber,
-
-        $fastCreate = core.$fastCreate,
-        getMouseX = core.getMouseX,
-        getOptions = core.getOptions,
-        inheritsControl = core.inherits,
-        triggerEvent = core.triggerEvent,
-
-        UI_CONTROL = ui.Control,
-        UI_CONTROL_CLASS = UI_CONTROL.prototype;
+        util = core.util;
 //{/if}//
-//{if $phase == "define"}//
-    ///__gzip_original__UI_TREE_VIEW
-    ///__gzip_original__UI_TREE_VIEW_CLASS
-    /**
-     * 初始化树视图控件。
-     * options 对象支持的属性如下：
-     * collapsed      子树区域是否收缩，默认为展开
-     * expandSelected 是否展开选中的节点，如果不自动展开，需要点击左部的小区域图标才有效，默认自动展开
-     * @public
-     *
-     * @param {Object} options 初始化选项
-     */
-    var UI_TREE_VIEW = ui.TreeView =
-        inheritsControl(
-            UI_CONTROL,
-            'ui-treeview',
-            function (el, options) {
-                options.resizable = false;
-
-                var o = first(el);
-
-                // 检查是否存在label标签，如果是需要自动初始化树的子结点
-                if (o && o.tagName == 'LABEL') {
-                    // 初始化子控件
-                    for (
-                        var i = 0,
-                            list = children(el).slice(1),
-                            childItems = UI_TREE_VIEW_SETITEMS(this, el.appendChild(createDom()));
-                        o = list[i++];
-                    ) {
-                        childItems.appendChild(o);
-                    }
-
-                    removeClass(el, options.primary);
-                    addClass(
-                        el,
-                        options.current = options.primary + (options.collapsed ? '-collapsed' : '-expanded')
-                    );
-
-                    if (options.collapsed) {
-                        childItems.style.display = 'none';
-                    }
-                }
-            },
-            function (el, options) {
-                var childTrees = this._aChildren = [];
-
-                this._bCollapsed = false;
-                this._bExpandSelected = options.expandSelected !== false;
-
-                // 初始化子控件
-                for (
-                    var i = 0,
-                        list = children(el.lastChild),
-                        o;
-                    o = list[i];
-                ) {
-                    delete options.current;
-                    (childTrees[i++] = UI_TREE_VIEW_CREATE_CHILD(o, this, options)).$setParent(this);
-                }
-            }
-        ),
-        UI_TREE_VIEW_CLASS = UI_TREE_VIEW.prototype;
-//{else}//
-    /**
-     * 设置树视图控件的选项组 Element 对象。
-     * @private
-     *
-     * @param {ecui.ui.TreeView} tree 树视图控件
-     * @param {HTMLElement} items 子树选项组的 Element 对象
-     * @return {HTMLElement} items 子树选项组的 Element 对象
-     */
-    function UI_TREE_VIEW_SETITEMS(tree, items) {
-        tree._eChildren = items;
-        items.className = tree.getType() + '-children';
-        items.style.cssText = '';
-        return items;
-    }
+    var hovered;
 
     /**
      * 树视图控件刷新，根据子树视图控件的数量及显示的状态设置样式。
      * @private
      *
-     * @param {ecui.ui.TreeView} control 树视图控件
+     * @param {ecui.ui.TreeView} tree 树控件
      */
-    function UI_TREE_VIEW_FLUSH(control) {
-        control.setClass(
-            control.getPrimary() + (control._aChildren.length ? control._bCollapsed ? '-collapsed' : '-expanded' : '')
-        );
+    function refresh(tree) {
+        if (tree._aChildren) {
+            tree.alterSubType(tree._aChildren.length ? (tree._bCollapsed ? 'collapsed' : 'expanded') : (!tree._eChildren || tree._bAutoType ? 'leaf' : 'empty'));
+        }
     }
 
     /**
@@ -157,281 +55,328 @@ _aChildren     - 子控件集合
      * @param {Object} options 初始化选项，参见 create 方法
      * @return {ecui.ui.TreeView} 子树视图控件
      */
-    function UI_TREE_VIEW_CREATE_CHILD(el, parent, options) {
-        el.className = (trim(el.className) || parent.getPrimary()) + parent.constructor.agent.TYPES;
-        return $fastCreate(parent.constructor, el, null, extend(extend({}, options), getOptions(el)));
+    function createChild(el, parent, options) {
+        el.className += parent.constructor.CLASS;
+        return core.$fastCreate(parent.constructor, el, null, util.extend(util.extend({}, options), core.getOptions(el) || {}));
     }
 
     /**
-     * 收缩/展开子树区域。
-     * @private
+     * 初始化树视图控件。
+     * options 对象支持的属性如下：
+     * collapsed      子树区域是否收缩，默认为展开
+     * autoType       是否自动根据子节点数量转换节点的状态(叶子节点/非叶子节点)
+     * expandSelected 是否展开选中的节点，如果不自动展开，需要点击左部的小区域图标才有效，默认自动展开
+     * @public
      *
-     * @param {ecui.ui.TreeView} control 树视图控件
-     * @param {boolean} status 是否隐藏子树区域
-     * @return {boolean} 状态是否改变
+     * @param {Object} options 初始化选项
      */
-    function UI_TREE_VIEW_SET_COLLAPSE(control, status) {
-        if (control._eChildren && control._bCollapsed != status) {
-            control._eChildren.style.display = (control._bCollapsed = status) ? 'none' : '';
-            UI_TREE_VIEW_FLUSH(control);
-        }
-    }
+    ui.TreeView = core.inherits(
+        ui.Control,
+        'ui-treeview',
+        function (el, options) {
+            if (el.tagName === 'UL') {
+                var childrenEl = this._eChildren = el;
+                el = dom.insertBefore(dom.first(el), el);
+                el.className = childrenEl.className;
+                childrenEl.className = options.classes.join('-children ');
 
-    /**
-     * 控件点击时改变子树视图控件的显示/隐藏状态。
-     * @override
-     */
-    UI_TREE_VIEW_CLASS.$click = function (event) {
-        if (event.getControl() == this) {
-            UI_CONTROL_CLASS.$click.call(this, event);
+                var list = dom.children(childrenEl);
 
-            if (getMouseX(this) <= toNumber(getStyle(this.getBody(), 'paddingLeft'))) {
-                // 以下使用 event 代替 name
-                this[event = this.isCollapsed() ? 'expand' : 'collapse']();
-                triggerEvent(this, event);
+                if (options.collapsed) {
+                    dom.addClass(childrenEl, 'ui-hide');
+                }
             }
-            else {
-                this.select();
+
+            ui.Control.call(this, el, options);
+
+            this._bCollapsed = !!options.collapsed;
+            this._bAutoType = options.autoType;
+
+            // 初始化子控件
+            this._aChildren = list ? list.map(function (item) {
+                item = createChild(item, this, options);
+                item.$setParent(this);
+                return item;
+            }, this) : [];
+
+            refresh(this);
+        },
+        {
+            /**
+             * @override
+             */
+            $cache: function (style, cacheSize) {
+                ui.Control.prototype.$cache.call(this, style, cacheSize);
+                this._aChildren.forEach(function (item) {
+                    item.cache(true, true);
+                });
+            },
+
+            /**
+             * 控件点击时改变子树视图控件的显示/隐藏状态。
+             * @override
+             */
+            $click: function (event) {
+                ui.Control.prototype.$click.call(this, event);
+
+                if (event.getControl() === this) {
+                    if (this._eChildren) {
+                        if (this.isCollapsed()) {
+                            this.expand();
+                            core.triggerEvent(this, 'expand');
+                        } else {
+                            this.collapse();
+                            core.triggerEvent(this, 'collapse');
+                        }
+                    }
+                    core.triggerEvent(this, 'nodeclick', event);
+                }
+            },
+
+            /**
+             * @override
+             */
+            $dispose: function () {
+                this._eChildren = null;
+                ui.Control.prototype.$dispose.call(this);
+            },
+
+            /**
+             * 隐藏树视图控件的同时需要将子树区域也隐藏。
+             * @override
+             */
+            $hide: function () {
+                ui.Control.prototype.$hide.call(this);
+
+                if (this._eChildren) {
+                    dom.addClass(this._eChildren, 'ui-hide');
+                }
+            },
+
+            /**
+             * @override
+             */
+            $mouseout: function (event) {
+                ui.Control.prototype.$mouseout.call(this, event);
+
+                if (hovered) {
+                    if (!this.contain(hovered)) {
+                        return;
+                    }
+                    for (var control = event.getControl(); control; control = control.getParent()) {
+                        if (control instanceof ui.TreeView) {
+                            core.triggerEvent(control, 'nodeover', event);
+                            break;
+                        }
+                    }
+                    core.triggerEvent(hovered, 'nodeout', event);
+                    hovered = control;
+                }
+            },
+
+            /**
+             * @override
+             */
+            $mouseover: function (event) {
+                ui.Control.prototype.$mouseover.call(this, event);
+
+                if (hovered) {
+                    if (this.contain(hovered)) {
+                        return;
+                    }
+                    core.triggerEvent(hovered, 'nodeout', event);
+                }
+                core.triggerEvent(this, 'nodeover', event);
+                hovered = this;
+            },
+
+            /**
+             * 节点点击事件的默认处理。
+             * @protected
+             *
+             * @param {ECUIEvent} event 事件对象
+             */
+            $nodeclick: function () {
+                var root = this.getRoot();
+                if (root._cSelected !== this) {
+                    if (root._cSelected) {
+                        root._cSelected.alterClass('-selected');
+                    }
+                    this.alterClass('+selected');
+                    root._cSelected = this;
+                }
+            },
+
+            /**
+             * 节点移出事件的默认处理。
+             * 鼠标移出节点区域时，控件解除悬停状态，移除状态样式 -nodehover。与 mouseout 不同的是， nodeout 没有与父结点关联。
+             * @protected
+             *
+             * @param {ECUIEvent} event 事件对象
+             */
+            $nodeout: function () {
+                this.alterClass('-nodehover');
+            },
+
+            /**
+             * 节点移入事件的默认处理。
+             * 鼠标移入节点区域时，控件获得悬停状态，添加状态样式 -nodehover。与 mouseover 不同的是， nodeover 没有与父结点关联。
+             * @protected
+             *
+             * @param {ECUIEvent} event 事件对象
+             */
+            $nodeover: function () {
+                this.alterClass('+nodehover');
+            },
+
+            /**
+             * 树视图控件改变位置时，需要将自己的子树区域显示在主元素之后。
+             * @override
+             */
+            $setParent: function (parent) {
+                var oldParent = this.getParent();
+
+                if (oldParent) {
+                    var root = this.getRoot();
+                    if (this.contain(root._cSelected)) {
+                        root._cSelected.alterClass('-selected');
+                        root._cSelected = null;
+                    }
+
+                    util.remove(oldParent._aChildren, this);
+                    refresh(oldParent);
+                }
+
+                ui.Control.prototype.$setParent.call(this, parent);
+
+                // 将子树区域显示在主元素之后
+                if (this._eChildren) {
+                    dom.insertAfter(this._eChildren, this.getOuter());
+                }
+            },
+
+            /**
+             * 显示树视图控件的同时需要将子树视图区域也显示。
+             * @override
+             */
+            $show: function () {
+                ui.Control.prototype.$show.call(this);
+
+                if (this._eChildren && !this._bCollapsed) {
+                    dom.removeClass(this._eChildren, 'ui-hide');
+                }
+            },
+
+            /**
+             * 添加子树视图控件。
+             * @public
+             *
+             * @param {string|ecui.ui.TreeView} item 子树视图控件的 html 内容/树视图控件
+             * @param {number} index 子树视图控件需要添加的位置序号，不指定将添加在最后
+             * @param {Object} options 子树视图控件初始化选项
+             * @return {ecui.ui.TreeView} 添加的树视图控件
+             */
+            add: function (item, index, options) {
+                var list = this._aChildren,
+                    el;
+
+                if ('string' === typeof item) {
+                    el = dom.create('LI', {innerHTML: item});
+                    item = createChild(el, this, options);
+                }
+
+                // 这里需要先 setParent，否则 getRoot 的值将不正确
+                if (!this._eChildren) {
+                    this._eChildren = dom.create('UL', {className: this.getPrimary() + '-children ' + this.getType() + '-children'});
+                    dom.insertAfter(this._eChildren, this.getOuter());
+                }
+                item.setParent(this);
+
+                if (item.getParent()) {
+                    el = item.getOuter();
+                    util.remove(list, item);
+                    if (list[index]) {
+                        dom.insertBefore(el, list[index].getOuter());
+                        list.splice(index, 0, item);
+                    } else {
+                        this._eChildren.appendChild(el);
+                        list.push(item);
+                    }
+                    if (item._eChildren) {
+                        dom.insertAfter(item._eChildren, el);
+                    }
+                }
+
+                refresh(this);
+
+                return item;
+            },
+
+            /**
+             * 收缩当前树视图控件的子树区域。
+             * @public
+             */
+            collapse: function () {
+                if (this._eChildren && !this._bCollapsed) {
+                    this._bCollapsed = true;
+                    dom.addClass(this._eChildren, 'ui-hide');
+                    refresh(this);
+                }
+            },
+
+            /**
+             * 展开当前树视图控件的子树区域。
+             * @public
+             */
+            expand: function () {
+                if (this._eChildren && this._bCollapsed) {
+                    this._bCollapsed = false;
+                    dom.removeClass(this._eChildren, 'ui-hide');
+                    refresh(this);
+                }
+            },
+
+            /**
+             * 获取当前树视图控件的所有子树视图控件。
+             * @public
+             *
+             * @return {Array} 树视图控件列表
+             */
+            getChildren: function () {
+                return this._aChildren.slice();
+            },
+
+            /**
+             * 获取当前树视图控件的根控件。
+             * @public
+             *
+             * @return {ecui.ui.TreeView} 树视图控件的根控件
+             */
+            getRoot: function () {
+                // 这里需要考虑Tree位于上一个Tree的节点内部
+                for (var control = this, parent; (parent = control.getParent()) instanceof ui.TreeView && parent._aChildren.indexOf(control) >= 0; control = parent) {}
+                return control;
+            },
+
+            /**
+             * @override
+             */
+            init: function (options) {
+                ui.Control.prototype.init.call(this, options);
+                this._aChildren.forEach(function (item) {
+                    item.init(options);
+                });
+            },
+
+            /**
+             * 当前子树区域是否收缩。
+             * @public
+             *
+             * @return {boolean} true 表示子树区域收缩，false 表示子树区域展开
+             */
+            isCollapsed: function () {
+                return !this._eChildren || this._bCollapsed;
             }
         }
-    };
-
-    /**
-     * @override
-     */
-    UI_TREE_VIEW_CLASS.$dispose = function () {
-        this._eChildren = null;
-        UI_CONTROL_CLASS.$dispose.call(this);
-    };
-
-    /**
-     * 隐藏树视图控件的同时需要将子树区域也隐藏。
-     * @override
-     */
-    UI_TREE_VIEW_CLASS.$hide = function () {
-        UI_CONTROL_CLASS.$hide.call(this);
-
-        if (this._eChildren) {
-            this._eChildren.style.display = 'none';
-        }
-    };
-
-    /**
-     * 树视图控件改变位置时，需要将自己的子树区域显示在主元素之后。
-     * @override
-     */
-    UI_TREE_VIEW_CLASS.$setParent = function (parent) {
-        var root = this.getRoot(),
-            o = this.getParent();
-
-        if (this == root._cSelected || this == root) {
-            // 如果当前节点被选中，需要先释放选中
-            // 如果当前节点是根节点，需要释放选中
-            if (root._cSelected) {
-                root._cSelected.alterClass('-selected');
-            }
-            root._cSelected = null;
-        }
-        else {
-            remove(o._aChildren, this);
-            UI_TREE_VIEW_FLUSH(o);
-        }
-
-        UI_CONTROL_CLASS.$setParent.call(this, parent);
-
-        // 将子树区域显示在主元素之后
-        if (this._eChildren) {
-            insertAfter(this._eChildren, this.getOuter());
-        }
-    };
-
-    /**
-     * 显示树视图控件的同时需要将子树视图区域也显示。
-     * @override
-     */
-    UI_TREE_VIEW_CLASS.$show = function () {
-        UI_CONTROL_CLASS.$show.call(this);
-
-        if (this._eChildren && !this._bCollapsed) {
-            this._eChildren.style.display = '';
-        }
-    };
-
-    /**
-     * 添加子树视图控件。
-     * @public
-     *
-     * @param {string|ecui.ui.TreeView} item 子树视图控件的 html 内容/树视图控件
-     * @param {number} index 子树视图控件需要添加的位置序号，不指定将添加在最后
-     * @param {Object} options 子树视图控件初始化选项
-     * @return {ecui.ui.TreeView} 添加的树视图控件
-     */
-    UI_TREE_VIEW_CLASS.add = function (item, index, options) {
-        var list = this._aChildren,
-            o;
-
-        if ('string' == typeof item) {
-            o = createDom();
-            o.innerHTML = item;
-            item = UI_TREE_VIEW_CREATE_CHILD(o, this, options);
-        }
-
-        if (o = list[index]) {
-            o = o.getOuter();
-        }
-        else {
-            index = list.length;
-            o = null;
-        }
-
-        // 这里需要先 setParent，否则 getRoot 的值将不正确
-        item.$setParent(this);
-        list.splice(index, 0, item);
-        if (!this._eChildren) {
-            UI_TREE_VIEW_SETITEMS(this, createDom());
-            insertAfter(this._eChildren, this.getOuter());
-        }
-        this._eChildren.insertBefore(item.getOuter(), o);
-
-        UI_TREE_VIEW_FLUSH(this);
-
-        return item;
-    };
-
-    /**
-     * 收缩当前树视图控件的子树区域。
-     * @public
-     */
-    UI_TREE_VIEW_CLASS.collapse = function () {
-        UI_TREE_VIEW_SET_COLLAPSE(this, true);
-    };
-
-    /**
-     * 展开当前树视图控件的子树区域。
-     * @public
-     */
-    UI_TREE_VIEW_CLASS.expand = function () {
-        UI_TREE_VIEW_SET_COLLAPSE(this, false);
-    };
-
-    /**
-     * 获取当前树视图控件的所有子树视图控件。
-     * @public
-     *
-     * @return {Array} 树视图控件列表
-     */
-    UI_TREE_VIEW_CLASS.getChildren = function () {
-        return this._aChildren.slice();
-    };
-
-    /**
-     * 获取当前树视图控件的第一个子树视图控件。
-     * @public
-     *
-     * @return {ecui.ui.TreeView} 树视图控件，如果没有，返回 null
-     */
-    UI_TREE_VIEW_CLASS.getFirst = function () {
-        return this._aChildren[0] || null;
-    };
-
-    /**
-     * 获取当前树视图控件的最后一个子树视图控件。
-     * @public
-     *
-     * @return {ecui.ui.TreeView} 树视图控件，如果没有，返回 null
-     */
-    UI_TREE_VIEW_CLASS.getLast = function () {
-        return this._aChildren[this._aChildren.length - 1] || null;
-    };
-
-    /**
-     * 获取当前树视图控件的后一个同级树视图控件。
-     * @public
-     *
-     * @return {ecui.ui.TreeView} 树视图控件，如果没有，返回 null
-     */
-    UI_TREE_VIEW_CLASS.getNext = function () {
-        var parent = this.getParent();
-        return parent instanceof UI_TREE_VIEW && parent._aChildren[indexOf(parent._aChildren, this) + 1] || null;
-    };
-
-    /**
-     * 获取当前树视图控件的前一个同级树视图控件。
-     * @public
-     *
-     * @return {ecui.ui.TreeView} 树视图控件，如果没有，返回 null
-     */
-    UI_TREE_VIEW_CLASS.getPrev = function () {
-        var parent = this.getParent();
-        return parent instanceof UI_TREE_VIEW && parent._aChildren[indexOf(parent._aChildren, this) - 1] || null;
-    };
-
-    /**
-     * 获取当前树视图控件的根控件。
-     * @public
-     *
-     * @return {ecui.ui.TreeView} 树视图控件的根控件
-     */
-    UI_TREE_VIEW_CLASS.getRoot = function () {
-        for (
-            var o = this, parent;
-            // 这里需要考虑Tree位于上一个Tree的节点内部
-            (parent = o.getParent()) instanceof UI_TREE_VIEW && indexOf(parent._aChildren, o) >= 0;
-            o = parent
-        ) {}
-        return o;
-    };
-
-    /**
-     * 获取当前树视图控件选中的节点。
-     * @public
-     *
-     * @return {ecui.ui.TreeView} 选中的节点
-     */
-    UI_TREE_VIEW_CLASS.getSelected = function () {
-        return this.getRoot()._cSelected || null;
-    };
-
-    /**
-     * @override
-     */
-    UI_TREE_VIEW_CLASS.init = function () {
-        UI_CONTROL_CLASS.init.call(this);
-        for (var i = 0, list = this._aChildren, o; o = list[i++]; ) {
-            o.init();
-        }
-    };
-
-    /**
-     * 当前子树区域是否收缩。
-     * @public
-     *
-     * @return {boolean} true 表示子树区域收缩，false 表示子树区域展开
-     */
-    UI_TREE_VIEW_CLASS.isCollapsed = function () {
-        return !this._eChildren || this._bCollapsed;
-    };
-
-    /**
-     * 将当前节点设置为选中。
-     * @public
-     */
-    UI_TREE_VIEW_CLASS.select = function () {
-        var root = this.getRoot();
-
-        if (root._cSelected != this) {
-            if (root._cSelected) {
-                root._cSelected.alterClass('-selected');
-            }
-            this.alterClass('+selected');
-            root._cSelected = this;
-        }
-
-        if (this._bExpandSelected) {
-            this.expand();
-        }
-    };
-//{/if}//
-//{if 0}//
-})();
-//{/if}//
+    );
+}());

@@ -1,0 +1,39 @@
+/*<script>window.onload=function(){var url=location.href,hash=document.getElementsByTagName('TEXTAREA')[0].value;url=decodeURIComponent(url.slice(url.lastIndexOf('=')+1));parent.location.href=url+'#'+encodeURIComponent(hash.slice(hash.indexOf('\n')+1).replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&')||' ');}</script><textarea>*/
+.ui-monthview {
+    .inline-block();
+    table {
+        border: 1px solid #ccc;
+        border-top: 0;
+        padding: 0 12px 7px 12px;
+        border-spacing: 8px;
+        thead td {
+            color: #8492A6;
+        }
+        td {
+            width: 24px;
+            height: 24px;
+            border: none;
+            line-height: 24px;
+            text-align: center;
+            vertical-align: middle;
+            font: 12px "Microsoft YaHei";
+            cursor: pointer;
+            border-radius: 2px;
+            padding: 0px;
+        }
+        td.ui-today {
+            color: #368CDA;
+        }
+        td:hover {
+            background: #368cda;
+        }
+        td.ui-calendar-date-selected {
+            background: #368cda;
+            color: #fff;
+        }
+        td.ui-calendar-date-disabled {
+            color: #dde3eb;
+            background: #fff;
+        }
+    }
+}

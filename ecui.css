@@ -1,0 +1,43 @@
+/*<script>window.onload=function(){var url=location.href,hash=document.getElementsByTagName('TEXTAREA')[0].value;url=decodeURIComponent(url.slice(url.indexOf('=')+1));parent.location.href=url+'#'+encodeURIComponent(hash.slice(hash.indexOf('\n')+1).replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&')||' ');}</script><textarea>*/
+.inline-block() {
+	display: inline-block;
+	*display: inline;
+	*zoom: 1;
+}
+@import (less) "css/core.css";
+@import (less) "css/control.css";
+@import (less) "css/input-control.css";
+
+@import (less) "css/items.css";
+@import (less) "css/popup.css";
+
+@import (less) "css/button.css";
+@import (less) "css/dialog.css";
+@import (less) "css/label.css";
+@import (less) "css/month-view.css";
+@import (less) "css/progress.css";
+@import (less) "css/progress-bar.css";
+@import (less) "css/progress-circle.css";
+@import (less) "css/retina.css";
+@import (less) "css/tab.css";
+@import (less) "css/table.css";
+@import (less) "css/tree-view.css";
+@import (less) "css/upload.css";
+
+@import (less) "css/text.css";
+@import (less) "css/checkbox.css";
+@import (less) "css/radio.css";
+@import (less) "css/select.css";
+@import (less) "css/combox.css";
+@import (less) "css/listbox.css";
+
+@import (less) "css/calendar.css";
+@import (less) "css/calendar-input.css";
+@import (less) "css/locked-table.css";
+@import (less) "css/check-tree.css";
+@import (less) "css/multilevel-select.css";
+@import (less) "css/upload.css";
+
+@import (less) "css/messagebox.css";
+
+@import (less) "css/esr.css";
