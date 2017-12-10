@@ -1,0 +1,24 @@
+/*<script>window.onload=function(){var url=location.href,hash=document.getElementsByTagName('TEXTAREA')[0].value;url=decodeURIComponent(url.slice(url.lastIndexOf('=')+1));parent.location.href=url+'#'+encodeURIComponent(hash.slice(hash.indexOf('\n')+1).replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&')||' ');}</script><textarea>*/
+.ui-mobile-scroll {
+    overflow: hidden;
+    position: relative !important;
+}
+.ui-mobile-scroll-mask {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(rgba(255,255,255,1),rgba(255,255,255,0),rgba(255,255,255,1));
+    z-index: 1;
+}
+.ui-mobile-scroll-options {
+    position: absolute;
+    width: 100%;
+}
+.ui-mobile-scroll-item {
+    font-size: 18px;
+    height: 25px;
+    text-align: center;
+}
+.ui-mobile-scroll-item-selected {
+    font-weight: bold;
+}
