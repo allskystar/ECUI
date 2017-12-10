@@ -1,8 +1,5 @@
 /*
-Tab - 定义分页选项卡的操作。
-选项卡控件，继承自基础控件，实现了选项组接口。每一个选项卡都包含一个头部区域与容器区域，选项卡控件存在互斥性，只有唯一的一个选项卡能被选中并显示容器区域。
-
-直接初始化选项卡控件的例子
+@example
 <div ui="type:tab;selected:1">
     <!-- 包含容器的选项卡 -->
     <div>
@@ -14,10 +11,8 @@ Tab - 定义分页选项卡的操作。
     <strong ui="selected:true">标题2</strong>
 </div>
 
-属性
+@fields
 _cSelected       - 当前选中的选项卡
-
-Item属性
 _eContainer      - 容器 DOM 元素
 */
 (function () {
@@ -47,12 +42,11 @@ _eContainer      - 容器 DOM 元素
     }
 
     /**
-     * 初始化选项卡控件。
-     * options 对象支持的特定属性如下：
-     * selected 选中的选项序号，默认为0
-     * @public
-     *
-     * @param {Object} options 初始化选项
+     * 选项卡控件。
+     * 每一个选项卡都包含一个头部区域与容器区域，选项卡控件存在互斥性，只有唯一的一个选项卡能被选中并显示容器区域。
+     * options 属性：
+     * selected    选中的选项序号，默认为0
+     * @control
      */
     ui.Tab = core.inherits(
         ui.Control,
@@ -81,13 +75,11 @@ _eContainer      - 容器 DOM 元素
         },
         {
             /**
-             * 初始化选项卡控件的选项部件。
-             * options 对象支持的特定属性如下：
-             * container 容器的id，如果通过这里设置，不允许改变关联容器
-             * selected 当前项是否被选中
-             * @protected
-             *
-             * @param {Object} options 初始化选项
+             * 选项部件。
+             * options 属性：
+             * container   容器的id，如果通过这里设置，不允许改变关联容器
+             * selected    当前项是否被选中
+             * @unit
              */
             Item: core.inherits(
                 ui.Item,
@@ -187,35 +179,35 @@ _eContainer      - 容器 DOM 元素
             /**
              * @override
              */
-            $itemclick: function (event, target) {
-                this.setSelected(target);
+            $itemclick: function (event) {
+                this.setSelected(event.item);
                 core.triggerEvent(this, 'change');
             },
 
             /**
              * @override
              */
-            $ready: function (options) {
-                ui.Control.prototype.$ready.call(this, options);
+            $ready: function (event) {
+                ui.Control.prototype.$ready.call(this, event.options);
 
                 if (!this._cSelected) {
-                    this.setSelected(+(options.selected || 0));
+                    this.setSelected(+(event.options.selected || 0));
                 }
             },
 
             /**
              * @override
              */
-            $remove: function (child) {
-                if (this._cSelected === child) {
+            $remove: function (event) {
+                if (this._cSelected === event.child) {
                     var list = this.getItems(),
-                        index = list.indexOf(child);
+                        index = list.indexOf(event.child);
 
                     // 跳到被删除项的后一项
                     this.setSelected(index === list.length - 1 ? index - 1 : index + 1);
                 }
 
-                ui.Control.prototype.$remove.call(this, child);
+                ui.Control.prototype.$remove.call(this, event);
             },
 
             /**
@@ -235,7 +227,7 @@ _eContainer      - 容器 DOM 元素
              */
             setSelected: function (item) {
                 if ('number' === typeof item) {
-                    item = this.getItems()[item];
+                    item = this.getItem(item);
                 }
 
                 if (this._cSelected !== item) {

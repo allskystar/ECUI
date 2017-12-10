@@ -1,17 +1,14 @@
 /*
-Radio - 定义一组选项中选择唯一选项的基本操作。
-单选框控件，继承自输入框控件，实现了对原生 InputElement 单选框的功能扩展，支持对选中的图案的选择。单选框控件适用所有在一组中只允许选择一个目标的交互，并不局限于此分组的表现形式(文本、图片等)。
-
-单选框控件直接HTML初始化的例子:
+@example
 <input ui="type:radio" name="city" value="beijing" checked="checked" type="radio">
 或
 <div ui="type:radio;name:city;value:beijing;checked:true"></div>
 或
 <div ui="type:radio">
-  <input name="city" value="beijing" checked="checked" type="radio">
+    <input name="city" value="beijing" checked="checked" type="radio">
 </div>
 
-属性
+@fields
 _bDefault  - 默认的选中状态
 */
 (function () {
@@ -62,11 +59,9 @@ _bDefault  - 默认的选中状态
     }
 
     /**
-     * 初始化单选框控件。
-     * options 对象支持的属性如下：
-     * @public
-     *
-     * @param {Object} options 初始化选项
+     * 单选框控件。
+     * 实现了对原生 InputElement 单选框的功能扩展，支持对选中的图案的选择。单选框控件适用所有在一组中只允许选择一个目标的交互，并不局限于此分组的表现形式(文本、图片等)。
+     * @control
      */
     ui.Radio = core.inherits(
         ui.InputControl,
@@ -91,10 +86,8 @@ _bDefault  - 默认的选中状态
             },
 
             /**
-             * 接管对空格键的处理。
-             * @protected
-             *
-             * @param {ECUIEvent} event 键盘事件
+             * 空格键按下时选中。
+             * @override
              */
             $keydown: function (event) {
                 ui.InputControl.prototype.$keydown.call(this, event);
@@ -104,10 +97,8 @@ _bDefault  - 默认的选中状态
             },
 
             /**
-             * 接管对空格键的处理。
-             * @protected
-             *
-             * @param {ECUIEvent} event 键盘事件
+             * 空格键按下时选中。
+             * @override
              */
             $keypress: function (event) {
                 ui.InputControl.prototype.$keypress.call(this, event);
@@ -117,10 +108,8 @@ _bDefault  - 默认的选中状态
             },
 
             /**
-             * 接管对空格键的处理。
-             * @protected
-             *
-             * @param {ECUIEvent} event 键盘事件
+             * 空格键按下时选中。
+             * @override
              */
             $keyup: function (event) {
                 ui.InputControl.prototype.$keyup.call(this, event);

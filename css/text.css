@@ -2,7 +2,7 @@
 .ui-text {
     width: 135px;
     height: 30px;
-    padding-left: 5px !important;  
+    padding-left: 5px !important;
     line-height: 30px;
     border: 1px solid #acbaca;
     border-radius: 2px;
@@ -47,7 +47,7 @@
         color: #8492A6;
         background-color: #EFF2F7;
     }
-    
+
 }
 .ui-text-error {
     border-color: #D0021B;

@@ -1,18 +1,13 @@
 /*
-Listbox - 定义了多项选择的基本操作。
-多选框控件，继承自截面控件，实现了选项组接口，多个交换框，可以将选中的选项在互相之间移动。多选框控件也可以单独的使用，选中的选项在表单提交时将被提交。
-
-多选框控件直接HTML初始化的例子:
+@example
 <div ui="type:listbox;name:test">
     <!-- 这里放选项内容 -->
     <div>选项</div>
     ...
 </div>
 
-属性
+@fields
 _sName  - 多选框内所有input的名称
-
-选项属性
 _eInput - 选项对应的input，form提交时使用
 */
 //{if 0}//
@@ -22,10 +17,9 @@ _eInput - 选项对应的input，form提交时使用
         ui = core.ui;
 //{/if}//
     /**
-     * 初始化多选框控件。
-     * @public
-     *
-     * @param {Object} options 初始化选项
+     * 多选框控件。
+     * 类似<select>的复选模式，可以选择多项数据。
+     * @control
      */
     ui.Listbox = core.inherits(
         ui.Control,
@@ -38,10 +32,8 @@ _eInput - 选项对应的input，form提交时使用
         },
         {
             /**
-             * 初始化多选框控件的选项部件。
-             * @public
-             *
-             * @param {Object} options 初始化选项
+             * 选项部件。
+             * @unit
              */
             Item: core.inherits(
                 ui.Item,

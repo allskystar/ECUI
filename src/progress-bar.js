@@ -1,11 +1,8 @@
 /*
-ProgressBar - 使用进度条定义进度。
-进度条控件，继承自进度控件，使用进度条显示一个任务执行的程度。
-
-进度条控件直接HTML初始化的例子:
+@example
 <div ui="type:progress-bar;max:100;value:0"></div>
 
-属性
+@fields
 _eMask   - 完成的进度比例内容区域
 */
 //{if 0}//
@@ -14,11 +11,9 @@ _eMask   - 完成的进度比例内容区域
         ui = core.ui;
 //{/if}//
     /**
-     * 初始化进度条控件。
-     * options 对象支持的属性如下：
-     * @public
-     *
-     * @param {Object} options 初始化选项
+     * 进度条控件。
+     * 使用进度条显示一个任务执行的程度。
+     * @control
      */
     ui.ProgressBar = core.inherits(
         ui.Progress,

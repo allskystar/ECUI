@@ -170,7 +170,7 @@
                         stop();
                         ecui.io.ajax(moduleName + '/route.' + filename + '.html', {
                             onsuccess: function (data) {
-                                etpl.compile(data);
+                                ecui.esr.getEngine(moduleName).compile(data);
                                 moduleRoute.splice(0, 1);
                                 if (moduleRoute.length) {
                                     load();

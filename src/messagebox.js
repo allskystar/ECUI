@@ -1,5 +1,5 @@
 /*
-MessageBox - 消息框功能。
+模拟系统消息框。
 */
 (function () {
 //{if 0}//
@@ -39,7 +39,7 @@ MessageBox - 消息框功能。
                     innerHTML: '<div class="ui-messagebox-text"></div><div class="ui-messagebox-buttons"></div>'
                 }
             );
-            instance = core.create(ui.Dialog, {main: el, parent: document.body, resizable: true});
+            instance = core.create(ui.Dialog, {main: el, parent: document.body});
         }
 
         var el = instance.getBody(),

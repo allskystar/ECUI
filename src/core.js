@@ -1,3 +1,6 @@
+/*
+ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交互处理的不同，保存控制的状态及进行事件的分发处理。ECUI核心的事件分发实现了浏览器原生的防止事件重入功能，因此请使用 triggerEvent 方法来请求事件。
+*/
 (function () {
 //{if 0}//
     var core = ecui,
@@ -6,14 +9,14 @@
         util = core.util,
         ui = core.ui,
 
+        isMobile = /(Android|iPhone|iPad|UCWEB|Fennec|Mobile)/i.test(navigator.userAgent),
         isStrict = document.compatMode === 'CSS1Compat',
         ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined,
         firefoxVersion = /firefox\/(\d+\.\d)/i.test(navigator.userAgent) ? +RegExp.$1 : undefined,
 
-        eventNames = ['mousedown', 'mouseover', 'mousemove', 'mouseout', 'mouseup', 'click', 'dblclick', 'focus', 'blur', 'activate', 'deactivate', 'keydown', 'keypress', 'keyup', 'mousewheel'];
+        eventNames = ['mousedown', 'mouseover', 'mousemove', 'mouseout', 'mouseup', 'click', 'dblclick', 'focus', 'blur', 'activate', 'deactivate'];
 //{/if}//
-    var isMobile = /(Android|iPhone|iPad|UCWEB|Fennec|Mobile)/i.test(navigator.userAgent),
-        scrollHandler,            // 处理IE的DOM滚动事件
+    var scrollHandler,            // DOM滚动事件
         isMobileScroll,
         ecuiName = 'ui',          // Element 中用于自动渲染的 ecui 属性名称
         isGlobalId,               // 是否自动将 ecui 的标识符全局化
@@ -155,7 +158,10 @@
                         onbeforescroll(event);
                         scrollHandler = util.timer(
                             function () {
+                                var handler = scrollHandler;
+                                scrollHandler = null;
                                 onscroll(event);
+                                scrollHandler = handler;
                                 onbeforescroll(event);
                             },
                             -50
@@ -372,21 +378,18 @@
                 var target = currEnv.target,
                     // 计算期待移到的位置
                     expectX = currEnv.targetX + mouseX - currEnv.x,
-                    expectY = currEnv.targetY + mouseY - currEnv.y,
-                    // 计算实际允许移到的位置
-                    x = Math.min(Math.max(expectX, currEnv.left), currEnv.right),
-                    y = Math.min(Math.max(expectY, currEnv.top), currEnv.bottom);
+                    expectY = currEnv.targetY + mouseY - currEnv.y;
 
-                if (core.triggerEvent(target, 'dragmove', event, x, y)) {
-                    target.setPosition(x, y);
+                // 计算实际允许移到的位置
+                event.x = Math.min(Math.max(expectX, currEnv.left), currEnv.right);
+                event.y = Math.min(Math.max(expectY, currEnv.top), currEnv.bottom);
+
+                if (core.triggerEvent(target, 'dragmove', event)) {
+                    target.setPosition(event.x, event.y);
                 }
 
                 currEnv.x = mouseX + currEnv.targetX - expectX;
                 currEnv.y = mouseY + currEnv.targetY - expectY;
-
-                // 增加对drag时控件mouseover行为的处理
-                x = event.pageX;
-                y = event.pageY;
 
                 event.exit();
             },
@@ -943,7 +946,13 @@
                 bubble(focusedControl, 'mousewheel', event);
             }
             onbeforescroll(event);
-            util.timer(onscroll, 50, this, event);
+            scrollHandler = util.timer(
+                function () {
+                    scrollHandler = null;
+                    onscroll(event);
+                },
+                50
+            );
         }
     }
 
@@ -954,6 +963,9 @@
      * @param {ECUIEvent} event 事件对象
      */
     function onscroll(event) {
+        if (scrollHandler) {
+            return;
+        }
         event = core.wrapEvent(event);
         independentControls.forEach(function (item) {
             core.triggerEvent(item, 'scroll', event);
@@ -1261,6 +1273,7 @@
          * 创建一个 ECUI 事件对象。
          * @public
          *
+         * @param {String} type 对象类型
          * @return {ECUIEvent} ECUI 事件对象
          */
         createEvent: function (type) {
@@ -1355,6 +1368,8 @@
         /**
          * 将指定的 ECUI 控件 设置为拖拽状态。
          * 只有在鼠标左键按下时，才允许调用 drag 方法设置待拖拽的 {'controls'|menu}，在拖拽操作过程中，将依次触发 ondragstart、ondragmove 与 ondragend 事件。range 参数支持的属性如下：
+         * x      {number} 初始的x坐标
+         * y      {number} 初始的y坐标
          * top    {number} 控件允许拖拽到的最小Y轴坐标
          * right  {number} 控件允许拖拽到的最大X轴坐标
          * bottom {number} 控件允许拖拽到的最大Y轴坐标
@@ -1370,9 +1385,7 @@
                 // 判断鼠标没有mouseup
                 var el = control.getOuter(),
                     parent = el.offsetParent,
-                    style = dom.getStyle(parent),
-                    x = control.getX(),
-                    y = control.getY();
+                    style = dom.getStyle(parent);
 
                 // 拖拽范围默认不超出上级元素区域
                 util.extend(
@@ -1385,14 +1398,13 @@
                     }
                 );
                 util.extend(dragEnv, options);
+
+                var x = dragEnv.x !== undefined ? dragEnv.x : control.getX(),
+                    y = dragEnv.y !== undefined ? dragEnv.y : control.getY();
                 dragEnv.right = Math.max(dragEnv.right - control.getWidth(), dragEnv.left);
                 dragEnv.bottom = Math.max(dragEnv.bottom - control.getHeight(), dragEnv.top);
                 dragEnv.targetX = x;
                 dragEnv.targetY = y;
-
-                el.style.left = x + 'px';
-                el.style.top = y + 'px';
-                el.style.position = 'absolute';
 
                 dragEnv.target = control;
                 dragEnv.actived = activedControl;
@@ -1401,7 +1413,11 @@
                 // 清除激活的控件，在drag中不需要针对激活控件移入移出的处理
                 activedControl = undefined;
 
-                core.triggerEvent(control, 'dragstart', event);
+                if (core.triggerEvent(control, 'dragstart', event)) {
+                    control.setPosition(x, y);
+                    el.style.position = 'absolute';
+                }
+
                 event.exit();
             }
         },
@@ -1578,11 +1594,11 @@
         },
 
         getXSpeed: function () {
-            return lastMoveTime + 1000 < Date.now() ? 0 : speedX;
+            return speedX;
         },
 
         getYSpeed: function () {
-            return lastMoveTime + 1000 < Date.now() ? 0 : speedY;
+            return speedY;
         },
 
         /**
@@ -1865,6 +1881,11 @@
          * @public
          */
         repaint: function () {
+            if (isMobile) {
+                // 移动端不需要处理浏览器resize的情况，因为此时一般是输入法触发的
+                return;
+            }
+
             function filter(item) {
                 return item.getParent() === resizeList && item.isShow();
             }
@@ -2059,7 +2080,9 @@
                 event.which = event.keyCode || (event.button | 1);
             }
 
-            if (event.type === 'mousemove') {
+            event = new ECUIEvent(event.type, event);
+
+            if (event.type === 'mousemove' || event.type === 'touchmove') {
                 lastClick = null;
                 if (currEnv.type === 'drag') {
                     lastMoveTime = 1000 / (Date.now() - lastMoveTime);
@@ -2067,9 +2090,11 @@
                     speedY = (event.pageY - mouseY) * lastMoveTime;
                     lastMoveTime = Date.now();
                 }
+            } else if (event.type !== 'mouseup' && event.type !== 'touchend') {
+                speedX = 0;
+                speedY = 0;
             }
 
-            event = new ECUIEvent(event.type, event);
             mouseX = event.pageX;
             mouseY = event.pageY;
 

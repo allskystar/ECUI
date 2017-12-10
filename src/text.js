@@ -1,8 +1,5 @@
 /*
-Text - 定义文本输入数据的基本操作。
-文本输入框控件，继承自输入框控件，允许对输入的数据内容格式进行限制。
-
-文本输入框控件直接HTML初始化的例子:
+@example
 <input ui="type:text" name="test" />
 或:
 <div ui="type:text;name:test;value:test">
@@ -10,7 +7,7 @@ Text - 定义文本输入数据的基本操作。
     <input name="test" value="test" />
 </div>
 
-属性
+@fields
 _bTrim        - 字符串是否需要过滤两端空白
 _nMinLength   - 允许提将近最小长度
 _nMaxLength   - 允许提交的最大长度
@@ -30,15 +27,14 @@ _ePlaceHolder - 为空时的提示信息标签
         ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined;
 //{/if}//
     /**
-     * 初始化格式化输入框控件。
-     * options 对象支持的属性如下：
-     * trim 是否进行前后空格过滤，默认为 true (注：粘贴内容也会进行前后空格过滤)
-     * len [aaa,bbb]表示数字允许的最小(aaa)/最大(bbb)长度
-     * num [aaa,bbb]表示数字允许的最小(aaa)/最大(bbb)值
-     * regexp 正则表达式，自动在两端添加^与$
-     * @public
-     *
-     * @param {Object} options 初始化选项
+     * 文本输入框控件。
+     * 扩展 InputELement 标签的功能，提供对低版本 IE 的 placeholder 的兼容。
+     * options 属性：
+     * trim    是否进行前后空格过滤，默认为 true (注：粘贴内容也会进行前后空格过滤)
+     * len     [aaa,bbb]表示数字允许的最小(aaa)/最大(bbb)长度
+     * num     [aaa,bbb]表示数字允许的最小(aaa)/最大(bbb)值
+     * regexp  正则表达式，自动在两端添加^与$
+     * @control
      */
     ui.Text = core.inherits(
         ui.InputControl,
@@ -107,7 +103,7 @@ _ePlaceHolder - 为空时的提示信息标签
                 var body = this.getBody(),
                     input = this.getInput();
 
-                body.removeChild(this._eInput);
+                body.removeChild(input);
                 if (input.type === 'password') {
                     // 如果输入框是密码框需要直接隐藏，不允许将密码显示在浏览器中
                     var value = '';
@@ -116,7 +112,7 @@ _ePlaceHolder - 为空时的提示信息标签
                     }
                     body.innerHTML = value;
                 } else {
-                    body.innerHTML = util.encodeHTML(this._eInput.value);
+                    body.innerHTML = util.encodeHTML(input.value);
                 }
             },
 
@@ -207,35 +203,29 @@ _ePlaceHolder - 为空时的提示信息标签
             $validate: function () {
                 ui.InputControl.prototype.$validate.call(this);
 
-                var err = {},
-                    value = this.getValue(),
+                var value = this.getValue(),
                     length = value.length,
                     result = true;
 
                 value = +value;
                 if (this._nMinLength > length) {
-                    err.minLength = this._nMinLength;
                     result = false;
                 }
                 if (this._nMaxLength < length) {
-                    err.maxLength = this._nMaxLength;
                     result = false;
                 }
                 if (this._nMinValue > value) {
-                    err.minValue = this._nMinValue;
                     result = false;
                 }
                 if (this._nMaxValue < value) {
-                    err.maxValue = this._nMaxValue;
                     result = false;
                 }
                 if ((this._oRegExp && !this._oRegExp.test(value)) || (isNaN(value) && (this._nMinValue !== undefined || this._nMaxValue !== undefined))) {
-                    err.format = true;
                     result = false;
                 }
 
                 if (!result) {
-                    core.triggerEvent(this, 'error', null, [err]);
+                    core.triggerEvent(this, 'error');
                 }
                 return result;
             },
@@ -249,10 +239,10 @@ _ePlaceHolder - 为空时的提示信息标签
             getSelectionEnd: ieVersion ? function () {
                 var range = document.selection.createRange().duplicate();
 
-                range.moveStart('character', -this._eInput.value.length);
+                range.moveStart('character', -this.getInput().value.length);
                 return range.text.length;
             } : function () {
-                return this._eInput.selectionEnd;
+                return this.getInput().selectionEnd;
             },
 
             /**
@@ -263,12 +253,12 @@ _ePlaceHolder - 为空时的提示信息标签
              */
             getSelectionStart: ieVersion ? function () {
                 var range = document.selection.createRange().duplicate(),
-                    length = this._eInput.value.length;
+                    length = this.getInput().value.length;
 
                 range.moveEnd('character', length);
                 return length - range.text.length;
             } : function () {
-                return this._eInput.selectionStart;
+                return this.getInput().selectionStart;
             },
 
             /**
@@ -278,14 +268,14 @@ _ePlaceHolder - 为空时的提示信息标签
              * @param {number} pos 位置索引
              */
             setCaret: ieVersion ? function (pos) {
-                var range = this._eInput.createTextRange();
+                var range = this.getInput().createTextRange();
                 range.collapse();
                 range.select();
                 range.moveStart('character', pos);
                 range.collapse();
                 range.select();
             } : function (pos) {
-                this._eInput.setSelectionRange(pos, pos);
+                this.getInput().setSelectionRange(pos, pos);
             }
         }
     );

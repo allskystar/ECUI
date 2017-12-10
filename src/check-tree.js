@@ -1,19 +1,25 @@
 /*
-CheckTree - 定义包含复选框的树形结构的基本操作。
-包含复选框的树控件，继承自树控件。每一个选项包含一个复选框进行选择，除非特别的指定，否则子节点的复选框与父节点的复选框
-自动联动。
-
-树控件直接HTML初始化的例子:
+@example
 <ul ui="type:check-tree;fold:true;id:parent;name:part">
-    <!-- 当前节点的文本，如果没有整个内容就是节点的文本 -->
-    <div>节点的文本</div>
-    <!-- 这里放子控件，如果需要fold某个子控件，将子控件的style="display:none"即可 -->
-    <li ui="subject:other">子控件文本</li>
-    <li ui="subject:true">直接关联父节点树的checkbox</li>
-    ...
+    <div>
+        <!-- 当前节点的文本 -->
+    </div>
+    <!-- 下面放子控件，如果需要 fold 某个子控件，设置子控件样式 style="display:none" 即可 -->
+    <li ui="subject:other">
+        <!-- 复选框与 id 为 other 的复选框联动 -->
+        <!-- 子控件文本 -->
+    </li>
+    <li ui="subject:true">
+        <!-- 复选框与父节点的复选框联动 -->
+        <!-- 子控件文本 -->
+    </li>
+    <ul>
+        <!-- 非叶子节点，格式与根节点相同 -->
+        ...
+    </ul>
 </ul>
 
-属性
+@fields
 _uCheckbox - 复选框控件
 */
 //{if 0}//
@@ -23,14 +29,13 @@ _uCheckbox - 复选框控件
         ui = core.ui;
 //{/if}//
     /**
-     * 初始化复选树控件。
-     * options 对象支持的属性如下：
-     * name 复选框的表单项的默认名称
-     * value 复选框的表单项的值
-     * subject 父复选框的标识，如果为true表示自动使用上级树节点作为父复选框，其它等价false的值表示不联动
-     * @public
-     *
-     * @param {Object} options 初始化选项
+     * 复选框树控件。
+     * 树的每一个节点都包含一个复选框标识选中状态，除非特别的使用 subject 参数指定，否则子节点与父节点的复选框缺省设置联动。
+     * options 属性：
+     * name    复选框对应表单项的名称
+     * value   复选框对应表单项的值
+     * subject 父复选框的标识符，如果为 true 表示使用上级树节点的复选框作为父复选框，其它等价 false 的值表示不联动
+     * @control
      */
     ui.CheckTree = core.inherits(
         ui.TreeView,
@@ -62,14 +67,6 @@ _uCheckbox - 复选框控件
         },
         {
             /**
-             * @override
-             */
-            $cache: function (style, cacheSize) {
-                ui.TreeView.prototype.$cache.call(this, style, cacheSize);
-                this._uCheckbox.cache(true, true);
-            },
-
-            /**
              * 获取包括当前树控件在内的全部选中的子树控件。
              * @public
              *
@@ -91,14 +88,6 @@ _uCheckbox - 复选框控件
              */
             getValue: function () {
                 return this._uCheckbox.getValue();
-            },
-
-            /**
-             * @override
-             */
-            init: function (options) {
-                ui.TreeView.prototype.init.call(this, options);
-                this._uCheckbox.init(options);
             },
 
             /**

@@ -18,10 +18,8 @@
     }
 
     /**
-     * 初始化单选框控件。
-     * @public
-     *
-     * @param {Object} options 初始化选项
+     * 高清屏控件。
+     * @control
      */
     ui.Retina = core.inherits(
         ui.Control,

@@ -1,8 +1,5 @@
 /*
-Upload - 文件上传控件。
-文件上传控件，继承自基础控件，内部必须包含<input type="file">的标签，可以包含或不包含进度控件，如果包含就会自动设置进度控件参数。
-
-标签控件直接HTML初始化的例子:
+@example
 <label ui="type:upload">
     <input type="file" name="file">
     <div ui="type:progress-bar"></div>
@@ -12,8 +9,6 @@ Upload - 文件上传控件。
     <input type="file" name="file">
     <div ui="type:progress-circle"></div>
 </label>
-
-属性
 */
 (function () {
 //{if 0}//
@@ -21,6 +16,10 @@ Upload - 文件上传控件。
         dom = core.dom,
         ui = core.ui;
 //{/if}//
+    /**
+     * 文件上传回调事件。
+     * @private
+     */
     function fileChangeHandler() {
         var reader = new FileReader(),
             file = this._eFile.files[0],
@@ -47,11 +46,9 @@ Upload - 文件上传控件。
     }
 
     /**
-     * 初始化标签控件。
-     * options 对象支持的属性如下：
-     * @public
-     *
-     * @param {Object} options 初始化选项
+     * 文件上传控件。
+     * 内部必须包含<input type="file">的标签，可以包含或不包含进度控件，如果包含就会自动设置进度控件参数。
+     * @control
      */
     ui.Upload = core.inherits(
         ui.Control,
@@ -62,13 +59,19 @@ Upload - 文件上传控件。
             this._eFile = el.getElementsByTagName('INPUT')[0];
         },
         {
+            /**
+             * @override
+             */
             $dispose: function () {
                 this._eFile = null;
                 ui.Control.prototype.$dispose.call(this);
             },
 
-            init: function (options) {
-                ui.Control.prototype.init.call(this, options);
+            /**
+             * @override
+             */
+            $ready: function (event) {
+                ui.Control.prototype.$ready.call(this, event);
                 dom.addEventListener(this._eFile, 'change', fileChangeHandler.bind(this));
             }
         }

@@ -1,8 +1,5 @@
 /*
-LockedTable - 定义允许左右锁定若干列显示的高级表格的基本操作。
-允许锁定左右两列的高级表格控件，继承自表格控件，内部包含两个部件——锁定的表头区(基础控件)与锁定的行内容区(基础控件)。
-
-锁定列高级表格控件直接HTML初始化的例子:
+@example
 <div ui="type:locked-table;left-lock:2;right-lock:1">
     <table>
         <!-- 当前节点的列定义，如果有特殊格式，需要使用width样式 -->
@@ -23,13 +20,11 @@ LockedTable - 定义允许左右锁定若干列显示的高级表格的基本操
     </table>
 </div>
 
-属性
+@fields
 _nLeft       - 最左部未锁定列的序号
 _nRight      - 最右部未锁定列的后续序号，即未锁定的列序号+1
 _uLockedHead - 锁定的表头区
 _uLockedMain - 锁定的行内容区
-
-表格行与锁定行属性
 _eLeft       - 左侧锁定行的Element元素
 _eRight      - 右侧乐定行的Element元素
 */
@@ -44,7 +39,7 @@ _eRight      - 右侧乐定行的Element元素
         ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined,
         safariVersion = /(\d+\.\d)(\.\d)?\s+safari/i.test(navigator.userAgent) && !/chrome/i.test(navigator.userAgent) ? +RegExp.$1 : undefined,
 
-        eventNames = ['mousedown', 'mouseover', 'mousemove', 'mouseout', 'mouseup', 'click', 'dblclick', 'focus', 'blur', 'activate', 'deactivate', 'keydown', 'keypress', 'keyup', 'mousewheel'];
+        eventNames = ['mousedown', 'mouseover', 'mousemove', 'mouseout', 'mouseup', 'click', 'dblclick', 'focus', 'blur', 'activate', 'deactivate'];
 //{/if}//
     /**
      * 建立锁定行控件。
@@ -65,9 +60,10 @@ _eRight      - 右侧乐定行的Element元素
      * 恢复行内的单元格到锁定列或基本列中。
      * @private
      *
+     * @param {ecui.ui.LockedTable} table 锁定表格控件
      * @param {ecui.ui.LockedTable.Row} row 锁定表头控件或者锁定行控件
      */
-    function restoreRow(row) {
+    function restoreRow(table, row) {
         var elements = row.$getElements(),
             first;
 
@@ -76,47 +72,47 @@ _eRight      - 右侧乐定行的Element元素
         row = row.getMain();
         first = row.firstChild;
 
-        this.getHCells().forEach(function (item, index) {
+        table.getHCells().forEach(function (item, index) {
             if (item = elements[index]) {
-                if (index < this._nLeft) {
+                if (index < table._nLeft) {
                     row.insertBefore(item, first);
-                } else if (index >= this._nRight) {
+                } else if (index >= table._nRight) {
                     row.appendChild(item);
                 }
             }
-        }, this);
+        });
     }
 
     /**
      * 拆分行内的单元格到锁定列或基本列中。
      * @private
      *
+     * @param {ecui.ui.LockedTable} table 锁定表格控件
      * @param {ecui.ui.LockedTable.Row} row 锁定表头控件或者锁定行控件
      */
-    function splitRow(row) {
+    function splitRow(table, row) {
         var elements = row.$getElements();
 
-        this.getHCells().forEach(function (item, index) {
+        table.getHCells().forEach(function (item, index) {
             if (item = elements[index]) {
-                if (index < this._nLeft) {
-                    row._eLeft.appendChild(item);
-                } else if (index >= this._nRight) {
+                if (index < table._nLeft) {
+                    row._eLeft.insertBefore(item, row._eLeft.lastChild);
+                } else if (index >= table._nRight) {
                     row._eRight.appendChild(item);
                 }
             }
-        }, this);
+        });
 
-        row._eLeft.firstChild.style.height = row._eRight.firstChild.style.height = row.getHeight() + 'px';
+        row._eLeft.lastChild.style.height = row._eRight.firstChild.style.height = row.getHeight() + 'px';
     }
 
     /**
-     * 初始化高级表格控件。
-     * options 对象支持的属性如下：
+     * 锁定式表格控件。
+     * 允许锁定左右两列的高级表格控件。
+     * options 属性：
      * left-lock  左边需要锁定的列数
      * right-lock 右边需要锁定的列数
-     * @public
-     *
-     * @param {Object} options 初始化选项
+     * @control
      */
     ui.LockedTable = core.inherits(
         ui.Table,
@@ -127,8 +123,9 @@ _eRight      - 右侧乐定行的Element元素
             this._sTableWidth = dom.getParent(this.getBody()).style.width;
 
             var i = 0,
-                headRows = this._aHeadRows,
-                rows = headRows.concat(this._aRows),
+                headRows = this.getHRows(),
+                rows = this.getRows(),
+                totalRows = headRows.concat(rows),
                 layout = this.getLayout(),
                 list = [],
                 o;
@@ -136,13 +133,17 @@ _eRight      - 右侧乐定行的Element元素
             this._nLeft = options.leftLock || 0;
             this._nRight = this.getColumnCount() - (options.rightLock || 0);
 
-            rows.forEach(function (item, index) {
+            totalRows.forEach(function (item, index) {
                 item = item.getMain();
                 list[index] = '<tr class="' + item.className + '" style="' + item.style.cssText + '"><td class="ui-locked-table-height"></td></tr>';
             });
 
-            o = '<table cellspacing="0" class="ui-locked-table-body ' + dom.getParent(this.getBody()).className + '"><tbody>' + list.splice(headRows.length, rows.length - headRows.length).join('') + '</tbody></table><table cellspacing="0" class="' + this._uHead.getMain().className + '"><thead>' + list.join('') + '</thead></table>';
-            dom.insertHTML(layout, 'beforeEnd', '<div class="ui-locked-table-fill"></div>' + o + o);
+            o = '<table cellspacing="0" class="ui-locked-table-{0} ui-locked-table-body ' + dom.getParent(this.getBody()).className + '"><tbody>' + list.splice(headRows.length, rows.length).join('') + '</tbody></table><table cellspacing="0" class="ui-locked-table-{0} ui-locked-table-head ' + this.$getSection('Head').getMain().className + '"><thead>' + list.join('') + '</thead></table>';
+            dom.insertHTML(
+                layout,
+                'beforeEnd',
+                '<div class="ui-locked-table-fill"></div>' + util.stringFormat(o, 'right') + util.stringFormat(o, 'left')
+            );
 
             el = layout.lastChild;
             for (i = 0; i < 4; i++) {
@@ -166,15 +167,13 @@ _eRight      - 右侧乐定行的Element元素
             right.$setBody(right = right.getMain().lastChild);
 
             for (i = 0, left = dom.children(left), right = dom.children(right); el = left[i]; ) {
-                initLockedRow(this._aRows[i], el, right[i++]);
+                initLockedRow(rows[i], el, right[i++]);
             }
         },
         {
             /**
-             * 初始化高级表格行控件。
-             * @public
-             *
-             * @param {Object} options 初始化选项
+             * 行部件。
+             * @unit
              */
             Row: core.inherits(
                 ui.Table.prototype.Row,
@@ -212,8 +211,8 @@ _eRight      - 右侧乐定行的Element元素
                 if (this.$getSection('Head').getMain().style.position === 'fixed' || fixed) {
                     leftHeadStyle.position = rightHeadStyle.position = 'fixed';
                     leftHeadStyle.top = rightHeadStyle.top = (Math.min(this.getBodyHeight() - this.$$paddingTop + top, Math.max(0, top))) + 'px';
-                    leftHeadStyle.left = (left - this.$$emptyTDWidth) + 'px';
-                    rightHeadStyle.left = (Math.min(this.getBodyWidth(), this.$$tableWidth) - this.$$paddingRight + left - this.$$emptyTDWidth - this.$$scrollFixed[0]) + 'px';
+                    leftHeadStyle.left = left + 'px';
+                    rightHeadStyle.left = (Math.min(this.getBodyWidth(), this.$$tableWidth) - this.$$paddingRight + left - this.$$rightTDWidth - this.$$scrollFixed[0]) + 'px';
                 }
 
                 if (fixed) {
@@ -234,7 +233,6 @@ _eRight      - 右侧乐定行的Element元素
                 ui.Table.prototype.$cache.call(this, style, cacheSize);
 
                 this.$$paddingLeft = 0;
-                this.$$emptyTDWidth = safariVersion ? 1 : 0;
 
                 for (var i = 0, list = this.getHCells(); i < this._nLeft; ) {
                     this.$$paddingLeft += list[i++].getWidth();
@@ -249,6 +247,9 @@ _eRight      - 右侧乐定行的Element元素
                 this._uRightHead.cache(false, true);
                 this._uLeftMain.cache(false, true);
                 this._uRightMain.cache(false, true);
+
+                this.$$leftTDWidth = (safariVersion ? 1 : 0) + this._uLeftHead.$$border[1] + this._uLeftHead.$$border[3];
+                this.$$rightTDWidth = (safariVersion ? 1 : 0) + this._uRightHead.$$border[1] + this._uRightHead.$$border[3];
             },
 
             /**
@@ -266,20 +267,21 @@ _eRight      - 右侧乐定行的Element元素
                 ui.Table.prototype.$initStructure.call(this, width, height);
 
                 this._aHeadRows.forEach(function (item) {
-                    splitRow.call(this, item);
+                    splitRow(this, item);
                 }, this);
                 this._aRows.forEach(function (item) {
-                    splitRow.call(this, item);
+                    splitRow(this, item);
                 }, this);
 
                 var table = dom.getParent(this.getBody()),
-                    head = this._uHead.getMain().lastChild;
+                    head = this.$getSection('Head').getMain().lastChild;
 
                 this._eFill.style.width = this.$$tableWidth + 'px';
-                this._uLeftHead.getMain().style.width = this._uLeftMain.getMain().style.width = (this.$$emptyTDWidth + this.$$paddingLeft) + 'px';
-                this._uRightHead.getMain().style.width = this._uRightMain.getMain().style.width = (this.$$emptyTDWidth + this.$$paddingRight) + 'px';
+                this._uLeftHead.getMain().style.width = this._uLeftMain.getMain().style.width = (this.$$leftTDWidth + this.$$paddingLeft) + 'px';
+                this._uRightHead.getMain().style.width = this._uRightMain.getMain().style.width = (this.$$rightTDWidth + this.$$paddingRight) + 'px';
                 table.style.marginLeft = head.style.marginLeft = this.$$paddingLeft + 'px';
                 table.style.width = head.style.width = (this.$$tableWidth - this.$$paddingLeft - this.$$paddingRight) + 'px';
+                dom.getParent(head).style.width = this.$$tableWidth + 'px';
             },
 
             /**
@@ -289,10 +291,10 @@ _eRight      - 右侧乐定行的Element元素
                 ui.Table.prototype.$resize.call(this);
 
                 this._aHeadRows.forEach(function (item) {
-                    restoreRow.call(this, item);
+                    restoreRow(this, item);
                 }, this);
                 this._aRows.forEach(function (item) {
-                    restoreRow.call(this, item);
+                    restoreRow(this, item);
                 }, this);
 
                 var leftHead = this._uLeftHead.getMain(),
@@ -300,7 +302,7 @@ _eRight      - 右侧乐定行的Element元素
                     leftMain = this._uLeftMain.getMain(),
                     rightMain = this._uRightMain.getMain(),
                     table = dom.getParent(this.getBody()),
-                    head = this._uHead.getMain();
+                    head = this.$getSection('Head').getMain();
 
                 this._eFill.style.width = '';
                 leftHead.style.width = leftMain.style.width = '';
@@ -327,9 +329,9 @@ _eRight      - 右侧乐定行的Element元素
 
                 leftHeadStyle.top = rightHeadStyle.top = this.$getSection('Head').getOuter().style.top;
 
-                leftHeadStyle.left = leftMainStyle.left = (this.getLayout().scrollLeft - this.$$emptyTDWidth) + 'px';
-                rightHeadStyle.left = rightMainStyle.left = (Math.min(this.getWidth(), this.$$tableWidth) - this.$$paddingRight + this.getLayout().scrollLeft - this.$$emptyTDWidth - this.$$scrollFixed[0]) + 'px';
-                leftMainStyle.top = rightMainStyle.top = (this.$$paddingTop + this.getLayout().scrollTop - dom.getParent(this._uHead.getOuter()).scrollTop) + 'px';
+                leftHeadStyle.left = leftMainStyle.left = this.getLayout().scrollLeft + 'px';
+                rightHeadStyle.left = rightMainStyle.left = (Math.min(this.getWidth(), this.$$tableWidth) - this.$$paddingRight + this.getLayout().scrollLeft - this.$$rightTDWidth - this.$$scrollFixed[0]) + 'px';
+                leftMainStyle.top = rightMainStyle.top = (this.$$paddingTop + this.getLayout().scrollTop - dom.getParent(this.$getSection('Head').getOuter()).scrollTop) + 'px';
                 leftMainStyle.clip = rightMainStyle.clip = 'auto';
             },
 
@@ -368,7 +370,7 @@ _eRight      - 右侧乐定行的Element元素
                 initLockedRow(row, o.firstChild, o.lastChild);
                 leftBody.insertBefore(o.firstChild, dom.children(leftBody)[index]);
                 rightBody.insertBefore(o.firstChild, dom.children(rightBody)[index]);
-                splitRow.call(this, row);
+                splitRow(this, row);
 
                 return row;
             },
@@ -394,7 +396,7 @@ _eRight      - 右侧乐定行的Element元素
             removeRow: function (index) {
                 var row = this.getRow(index);
                 if (row) {
-                    restoreRow.call(this, row);
+                    restoreRow(this, row);
 
                     var leftBody = this._uLeftMain.getBody(),
                         rightBody = this._uRightMain.getBody();
@@ -411,19 +413,11 @@ _eRight      - 右侧乐定行的Element元素
     /**
      * 初始化需要执行关联控制的行控件鼠标事件的默认处理。
      * 行控件鼠标事件发生时，需要通知关联的行控件也同步产生默认的处理。
-     * @protected
      */
-    (function () {
-        function build(name) {
-            ui.LockedTable.prototype.Row.prototype[name] = function (event) {
-                ui.Table.prototype.Row.prototype[name].call(this, event);
-                dom.getParent(this._eLeft).className = this.getMain().className;
-                dom.getParent(this._eRight).className = this.getMain().className;
-            };
-        }
-
-        for (var i = 0; i < 11; ) {
-            build('$' + eventNames[i++]);
-        }
-    }());
+    eventNames.forEach(function (item) {
+        ui.LockedTable.prototype.Row.prototype['$' + item] = function (event) {
+            ui.Table.prototype.Row.prototype['$' + item].call(this, event);
+            dom.getParent(this._eLeft).className = dom.getParent(this._eRight).className = this.getMain().className;
+        };
+    });
 }());

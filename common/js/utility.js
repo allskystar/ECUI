@@ -87,7 +87,7 @@
             if (code === 300000) {
                 throw data.msg;
             }
-            window.alert(data.msg);
+            daikuan.showHint('error', data.msg);
         }
         return code;
     };
@@ -155,7 +155,7 @@ daikuan.getCity = function(code, city_data) {
     (code.slice(2,4) != '00') && arr.push(city_data[city]);
     (code.slice(4,6) != '00') && arr.push(city_data[area]);
     return arr;
-}
+};
 
 Date.prototype.pattern = function(fmt) {
     var o = {
@@ -183,3 +183,17 @@ Date.prototype.pattern = function(fmt) {
     return fmt;
 };
 
+daikuan.showHint = function (type, msg) {
+    var className = {
+        success: 'successHint',
+        error: 'errorHint',
+        warn: 'warnHint'
+    }[type];
+    var hintContainer = ecui.$('hintContainer') || ecui.dom.create({id: 'hintContainer'});
+    ecui.dom.removeClass(hintContainer, 'ui-hide');
+    hintContainer.innerHTML = ecui.util.stringFormat('<div class="{0}">{1}</div>', className, msg);
+    ecui.dom.insertAfter(hintContainer, ecui.dom.last(document.body));
+    ecui.util.timer(function () {
+        ecui.dom.addClass(hintContainer, 'ui-hide');
+    }, 2000)
+};

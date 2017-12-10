@@ -231,5 +231,33 @@ a {
     font-size: 14px;
 }
 
-
+/*提示框样式*/
+#hintContainer {
+    position: fixed;
+    z-index: 65555;
+    top: 50%;
+    left: 50%;
+    -webkit-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
+}
+#hintContainer > div {
+    min-width: 270px;
+    max-width: 522px;
+    padding: 55px 35px;
+    background: rgba(43,43,59,0.95);
+    border-radius: 4px;
+    line-height: 30px;
+    color: #FFFFFF;
+    font-size: 18px;
+    text-align: center;
+}
+#hintContainer .successHint {
+    background: rgba(58,183,106,0.70);
+}
+#hintContainer .errorHint {
+    background: rgba(213,18,0,0.70);
+}
+#hintContainer .warnHint {
+    background: rgba(43,43,59,0.95);
+}
 

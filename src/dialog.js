@@ -1,7 +1,4 @@
 /*
-Dialog - 定义独立于文档布局的内容区域的基本操作。
-窗体控件，继承自基础控件，仿真浏览器的多窗体效果，如果在其中包含 iframe 标签，可以在当前页面打开一个新的页面，避免了使用 window.open 在不同浏览器下的兼容性问题。多个窗体控件同时工作时，当前激活的窗体在最上层。窗体控件的标题栏默认可以拖拽，窗体可以设置置顶方式显示，在置顶模式下，只有当前窗体可以响应操作。窗体控件的 z-index 从4096开始，页面开发请不要使用大于或等于4096的 z-index 值。
-
 窗体控件直接HTML初始化的例子:
 <div ui="type:dialog">
   <strong>窗体的标题</strong>
@@ -42,10 +39,9 @@ _uClose     - 关闭按钮
     }
 
     /**
-     * 初始化窗体控件。
-     * @public
-     *
-     * @param {Object} options 初始化选项
+     * 窗体控件。
+     * 定义独立于文档布局的内容区域，如果在其中包含 iframe 标签，在当前页面打开一个新的页面，可以仿真浏览器的多窗体效果，避免了使用 window.open 在不同浏览器下的兼容性问题。多个窗体控件同时工作时，当前激活的窗体在最上层。窗体控件的标题栏默认可以拖拽，窗体可以设置置顶方式显示，在置顶模式下，只有当前窗体可以响应操作。窗体控件的 z-index 从4096开始，页面开发请不要使用大于或等于4096的 z-index 值。
+     * @control
      */
     ui.Dialog = core.inherits(
         ui.Control,
@@ -91,10 +87,8 @@ _uClose     - 关闭按钮
         },
         {
             /**
-             * 初始化窗体控件的关闭按钮部件。
-             * @public
-             *
-             * @param {Object} options 初始化选项
+             * 关闭按钮部件。
+             * @unit
              */
             Close: core.inherits(
                 ui.Button,
@@ -111,14 +105,11 @@ _uClose     - 关闭按钮
             ),
 
             /**
-             * 初始化窗体控件的标题栏部件。
-             * @public
-             *
-             * @param {Object} options 初始化选项
+             * 标题栏部件。
+             * @unit
              */
             Title: core.inherits(
                 ui.Control,
-                'ui-dialog-title',
                 {
                     /**
                      * 标题栏激活时触发拖动，如果当前窗体未得到焦点则得到焦点。
@@ -130,15 +121,6 @@ _uClose     - 关闭按钮
                     }
                 }
             ),
-
-            /**
-             * @override
-             */
-            $cache: function (style, cacheSize) {
-                ui.Control.prototype.$cache.call(this, style, cacheSize);
-                this._uClose.cache(true, true);
-                this._uTitle.cache(true, true);
-            },
 
             /**
              * 销毁窗体时需要先关闭窗体，并不再保留窗体的索引。
@@ -213,16 +195,7 @@ _uClose     - 关闭按钮
             },
 
             /**
-             * @override
-             */
-            init: function (options) {
-                ui.Control.prototype.init.call(this, options);
-                this._uTitle.init(options);
-                this._uClose.init(options);
-            },
-
-            /**
-             * showModal时如果窗体不置顶都设置为不可用。
+             * showModal 时如果窗体不置顶都设置为不可用。
              * @override
              */
             isDisabled: function () {
@@ -278,13 +251,13 @@ _uClose     - 关闭按钮
                         modalCount++;
                     }
 
+                    this.center();
                     core.mask(opacity !== undefined ? opacity : 0.5, 32766 + modalCount * 2);
 
                     this._bModal = true;
                     if (!ui.Control.prototype.show.call(this)) {
                         refresh(this);
                     }
-                    this.center();
                 }
             }
         }

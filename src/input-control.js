@@ -1,17 +1,14 @@
 /*
-InputControl - 定义输入数据的基本操作，不建议直接控件化。
-输入控件，继承自基础控件，实现了对原生 InputElement 的功能扩展，包括光标的控制、输入事件的实时响应(每次改变均触发事件)，以及 IE 下不能动态改变输入框的表单项名称的模拟处理。
-
-输入控件直接HTML初始化的例子:
+@example
 <input ui="type:input-control" type="password" name="passwd" value="1111">
 或:
 <div ui="type:input-control;name:passwd;value:1111;inputType:password"></div>
 或:
 <div ui="type:input-control">
-  <input type="password" name="passwd" value="1111">
+    <input type="password" name="passwd" value="1111">
 </div>
 
-属性
+@fields
 _bBlur         - 失去焦点时是否需要校验
 _eInput        - INPUT对象
 */
@@ -25,9 +22,10 @@ _eInput        - INPUT对象
         ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined;
 //{/if}//
     var timer = util.blank,
+        // INPUT事件集合对象
         events = {
             /**
-             * 输入框失去焦点事件处理函数。
+             * 失去焦点事件处理。
              * @private
              */
             blur: function (event) {
@@ -39,7 +37,7 @@ _eInput        - INPUT对象
             },
 
             /**
-             * 输入法输入结束事件处理函数。
+             * 输入结束事件处理。
              * @private
              */
             compositionend: function (event) {
@@ -54,7 +52,7 @@ _eInput        - INPUT对象
             },
 
             /**
-             * 输入法输入开始事件处理函数。
+             * 输入开始事件处理。
              * @private
              */
             compositionstart: function (event) {
@@ -63,7 +61,7 @@ _eInput        - INPUT对象
             },
 
             /**
-             * 拖拽内容到输入框时处理函数。
+             * 拖拽内容到输入框的事件处理。
              * 为了增加可控性，阻止该行为。[todo] firefox下无法阻止，后续升级
              * @private
              *
@@ -74,7 +72,7 @@ _eInput        - INPUT对象
             },
 
             /**
-             * 拖拽内容到输入框时处理函数。
+             * 拖拽内容到输入框时的事件处理。
              * 为了增加可控性，阻止该行为。[todo] firefox下无法阻止，后续升级
              * @private
              *
@@ -85,7 +83,7 @@ _eInput        - INPUT对象
             },
 
             /**
-             * 输入框获得焦点事件处理函数。
+             * 获得焦点事件处理。
              * @private
              */
             focus: function (event) {
@@ -104,7 +102,7 @@ _eInput        - INPUT对象
             },
 
             /**
-             * 输入框输入内容事件处理函数。
+             * 输入内容事件处理。
              * @private
              */
             input: function (event) {
@@ -116,7 +114,7 @@ _eInput        - INPUT对象
             },
 
             /**
-             * 输入框输入内容事件处理函数，兼容IE6-8。
+             * 输入内容事件处理，兼容IE6-8。
              * @private
              *
              * @param {Event} event 事件对象
@@ -134,14 +132,16 @@ _eInput        - INPUT对象
     /**
      * 为控件的 INPUT 节点绑定事件。
      * @private
+     *
+     * @param {ecui.ui.InputControl} input 基础输入控件
      */
-    function bindEvent() {
-        core.$bind(this._eInput, this);
-        if (this._eInput.type !== 'hidden') {
+    function bindEvent(input) {
+        core.$bind(input._eInput, input);
+        if (input._eInput.type !== 'hidden') {
             // 对于IE或者textarea的变化，需要重新绑定相关的控件事件
             for (var name in events) {
                 if (events.hasOwnProperty(name)) {
-                    dom.addEventListener(this._eInput, name, events[name]);
+                    dom.addEventListener(input._eInput, name, events[name]);
                 }
             }
         }
@@ -176,17 +176,16 @@ _eInput        - INPUT对象
     }
 
     /**
-     * 初始化输入控件。
-     * options 对象支持的属性如下：
+     * 基础输入控件。
+     * 实现了对原生 InputElement 的功能扩展，包括输入事件的实时响应(每次改变均触发事件)，以及 IE 下不能动态改变输入框的表单项名称的模拟处理。
+     * options 属性：
      * name         输入框的名称
      * value        输入框的默认值
      * checked      输入框是否默认选中(radio/checkbox有效)
      * inputType    输入框的类型，默认为 text
      * readOnly     输入框是否只读
      * valid        在什么情况下校验，表单提交时一定会校验，blur表示需要在失去焦点时校验
-     * @public
-     *
-     * @param {Object} options 初始化选项
+     * @control
      */
     ui.InputControl = core.inherits(
         ui.Control,
@@ -228,7 +227,7 @@ _eInput        - INPUT对象
             ui.Control.call(this, el, options);
 
             this._eInput = inputEl;
-            bindEvent.call(this);
+            bindEvent(this);
 
             if (options.valid) {
                 options = options.valid.split(',');
@@ -257,7 +256,7 @@ _eInput        - INPUT对象
             },
 
             /**
-             * 控件失效，阻止输入框提交
+             * 控件失效，阻止输入框提交。
              * @override
              */
             $disable: function () {
@@ -275,7 +274,7 @@ _eInput        - INPUT对象
             },
 
             /**
-             * 控件解除失效，需要将输入框设置为可提交
+             * 控件解除失效，需要将输入框设置为可提交。
              * @override
              */
             $enable: function () {
@@ -304,17 +303,17 @@ _eInput        - INPUT对象
             },
 
             /**
-             * 输入框内容改变事件的默认处理。
-             * @protected
+             * 内容改变事件。
+             * @event
              */
             $input: util.blank,
 
             /**
-             * 输入重置事件的默认处理。
-             * @protected
+             * 重置事件。
+             * @event
              */
-            $reset: function () {
-                this.$ready();
+            $reset: function (event) {
+                this.$ready(event);
             },
 
             /**
@@ -352,10 +351,8 @@ _eInput        - INPUT对象
             },
 
             /**
-             * 输入提交事件的默认处理。
-             * @protected
-             *
-             * @param {Event} event 事件对象
+             * 输入提交事件。
+             * @event
              */
             $submit: function (event) {
                 ui.Control.prototype.$submit.call(this, event);
@@ -365,8 +362,8 @@ _eInput        - INPUT对象
             },
 
             /**
-             * 输入格式校验事件的默认处理。
-             * @protected
+             * 输入格式校验事件。
+             * @event
              */
             $validate: util.blank,
 
@@ -413,7 +410,7 @@ _eInput        - INPUT对象
                 var el = dom.setInput(this._eInput, name || '');
                 if (this._eInput !== el) {
                     this._eInput = el;
-                    bindEvent.call(this);
+                    bindEvent(this);
                 }
             },
 

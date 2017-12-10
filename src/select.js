@@ -1,19 +1,16 @@
 /*
-Select - 定义模拟下拉框行为的基本操作。
-下拉框控件，继承自输入控件，实现了选项组接口，扩展了原生 SelectElement 的功能，允许指定下拉选项框的最大选项数量，在屏幕显示不下的时候，会自动显示在下拉框的上方。在没有选项时，下拉选项框有一个选项的高度。下拉框控件允许使用键盘与滚轮操作，在下拉选项框打开时，可以通过回车键或鼠标点击选择，上下键选择选项的当前条目，在关闭下拉选项框后，只要拥有焦点，就可以通过滚轮上下选择选项。
-
-下拉框控件直接HTML初始化的例子:
+@example
 <select ui="type:select" name="sex">
-  <option value="male" selected="selected">男</option>
-  <option value="female">女</option>
+    <option value="male" selected="selected">男</option>
+    <option value="female">女</option>
 </select>
 或
 <div ui="type:select;name:sex;value:male">
-  <div ui="value:male">男</div>
-  <div ui="value:female">女</div>
+    <div ui="value:male">男</div>
+    <div ui="value:female">女</div>
 </div>
 
-属性
+@fields
 _nOptionSize  - 下接选择框可以用于选择的条目数量
 _cSelected    - 当前选中的选项
 _uText        - 下拉框的文本框
@@ -51,13 +48,16 @@ _uOptions     - 下拉选择框
     function setSelected(select, item) {
         item = item || null;
         if (item !== select._cSelected) {
-            select._uText.setContent(item ? item.getBody().innerHTML : '');
-            ui.InputControl.prototype.setValue.call(select, item ? item._sValue : '');
             if (item) {
+                select._uText.setContent(item.getBody().innerHTML);
+                ui.InputControl.prototype.setValue.call(select, item._sValue);
                 if (select._uOptions.isShow()) {
                     core.setFocused(item);
                 }
+                select.alterClass(item._sValue === '' ? '+placeholder' : '-placeholder');
             } else {
+                select._uText.setContent('');
+                ui.InputControl.prototype.setValue.call(select, '');
                 core.loseFocus(select._cSelected);
             }
             select._cSelected = item;
@@ -65,12 +65,11 @@ _uOptions     - 下拉选择框
     }
 
     /**
-     * 初始化下拉框控件。
-     * options 对象支持的属性如下：
+     * 下拉框控件。
+     * 扩展了原生 SelectElement 的功能，允许指定下拉选项框的最大选项数量，在屏幕显示不下的时候，会自动显示在下拉框的上方。在没有选项时，下拉选项框有一个选项的高度。下拉框控件允许使用键盘与滚轮操作，在下拉选项框打开时，可以通过回车键或鼠标点击选择，上下键选择选项的当前条目，在关闭下拉选项框后，只要拥有焦点，就可以通过滚轮上下选择选项。
+     * options 属性：
      * optionSize     下拉框最大允许显示的选项数量，默认为5
-     * @public
-     *
-     * @param {Object} options 初始化选项
+     * @control
      */
     ui.Select = core.inherits(
         ui.InputControl,
@@ -135,10 +134,8 @@ _uOptions     - 下拉选择框
         },
         {
             /**
-             * 初始化下拉框控件的选项部件。
-             * @public
-             *
-             * @param {Object} options 初始化选项
+             * 选项部件。
+             * @unit
              */
             Item: core.inherits(
                 ui.Item,
@@ -156,7 +153,7 @@ _uOptions     - 下拉选择框
                         var parent = this.getParent();
                         parent._uOptions.hide();
                         setSelected(parent, this);
-                        core.triggerEvent(parent, 'change');
+                        core.triggerEvent(parent, 'change', event);
                     },
 
                     /**
@@ -189,10 +186,8 @@ _uOptions     - 下拉选择框
             ),
 
             /**
-             * 初始化下拉框控件的下拉选项框部件。
-             * @public
-             *
-             * @param {Object} options 初始化选项
+             * 选项框部件。
+             * @unit
              */
             Options: core.inherits(
                 ui.Control,
@@ -237,8 +232,8 @@ _uOptions     - 下拉选择框
             },
 
             /**
-             * 选项改变事件默认处理。
-             * @protected
+             * 选项改变事件。
+             * @event
              */
             $change: util.blank,
 
@@ -260,10 +255,8 @@ _uOptions     - 下拉选择框
             },
 
             /**
-             * 接管对上下键与回车/ESC键的处理。
-             * @protected
-             *
-             * @param {ECUIEvent} event 键盘事件
+             * 通过上下键与回车键操作下拉框。
+             * @override
              */
             $keydown: function (event) {
                 ui.InputControl.prototype.$keydown.call(this, event);
@@ -274,10 +267,8 @@ _uOptions     - 下拉选择框
             },
 
             /**
-             * 接管对上下键与回车/ESC键的处理。
-             * @protected
-             *
-             * @param {ECUIEvent} event 键盘事件
+             * 通过上下键与回车键操作下拉框。
+             * @override
              */
             $keypress: function (event) {
                 ui.InputControl.prototype.$keypress.call(this, event);
@@ -288,10 +279,8 @@ _uOptions     - 下拉选择框
             },
 
             /**
-             * 接管对上下键与回车/ESC键的处理。
-             * @protected
-             *
-             * @param {ECUIEvent} event 键盘事件
+             * 通过上下键与回车键操作下拉框。
+             * @override
              */
             $keyup: function (event) {
                 ui.InputControl.prototype.$keyup.call(this, event);
@@ -315,7 +304,7 @@ _uOptions     - 下拉选择框
                                         index = Math.min(Math.max(0, oldIndex + which - 39), list.length - 1);
                                     if (oldIndex !== index) {
                                         this.setSelectedIndex(index);
-                                        core.triggerEvent(this, 'change');
+                                        core.triggerEvent(this, 'change', event);
                                     }
                                 }
                             }
@@ -325,7 +314,7 @@ _uOptions     - 下拉选择框
                             if (which === 13) {
                                 if (focus.getParent() === this && this._cSelected !== focus) {
                                     setSelected(this, focus);
-                                    core.triggerEvent(this, 'change');
+                                    core.triggerEvent(this, 'change', event);
                                 }
                             }
                             this._uOptions.hide();
@@ -369,11 +358,11 @@ _uOptions     - 下拉选择框
              * 下拉框移除子选项时，如果选项被选中，需要先取消选中。
              * @override
              */
-            $remove: function (item) {
-                if (item === this._cSelected) {
+            $remove: function (event) {
+                if (event.child === this._cSelected) {
                     setSelected(this);
                 }
-                ui.InputControl.prototype.$remove.call(this, item);
+                ui.InputControl.prototype.$remove.call(this, event);
             },
 
             /**

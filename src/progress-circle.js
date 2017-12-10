@@ -1,11 +1,6 @@
 /*
-ProgressCircle - 使用进度圆定义进度。
-进度圆控件，继承自进度控件，使用进度圆显示一个任务执行的程度。
-
-进度圆控件直接HTML初始化的例子:
+@example
 <div ui="type:progress-circle;max:100;value:0"></div>
-
-属性
 */
 //{if 0}//
 (function () {
@@ -14,11 +9,9 @@ ProgressCircle - 使用进度圆定义进度。
         ui = core.ui;
 //{/if}//
     /**
-     * 初始化进度条控件。
-     * options 对象支持的属性如下：
-     * @public
-     *
-     * @param {Object} options 初始化选项
+     * 进度圆控件。
+     * 使用进度圆显示一个任务执行的程度。
+     * @control
      */
     ui.ProgressCircle = core.inherits(
         ui.Progress,

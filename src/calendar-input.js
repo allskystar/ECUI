@@ -1,15 +1,6 @@
 /*
-calendar - 日历输入框控件。
-日历输入框控件，继承自文本输入框控件，提供日期的选择输入功能。
-
-日历视图控件直接HTML初始化的例子:
+@example
 <div ui="type:calendar-input"></div>
-
-属性
-_eTitle        - 日历头部信息提示区
-
-子控件属性
-_uCalendar     - 日历控件
 */
 (function () {
 //{if 0}//
@@ -23,9 +14,11 @@ _uCalendar     - 日历控件
                 /**
                  * @override
                  */
-                $dateclick: function (event, date) {
-                    ui.Calendar.prototype.$dateclick.call(this, event, date);
-                    this.getParent().setValue(date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate());
+                $dateclick: function (event) {
+                    ui.Calendar.prototype.$dateclick.call(this, event);
+                    var parent = this.getParent();
+                    parent.setValue(event.date.getFullYear() + '-' + (event.date.getMonth() + 1) + '-' + event.date.getDate());
+                    core.triggerEvent(parent, 'input', event);
                     this.hide();
                 },
 
@@ -51,10 +44,9 @@ _uCalendar     - 日历控件
         singleton = core.$fastCreate(Calendar, dom.create({className: Calendar.CLASS + 'ui-popup ui-hide'}));
 
     /**
-     * 初始化日历输入框控件。
-     * @public
-     *
-     * @param {Object} options 初始化选项
+     * 日历输入框控件。
+     * 提供日期的选择输入功能，所有的日历输入框控件共享一个日历选择弹层。
+     * @control
      */
     ui.CalendarInput = core.inherits(
         ui.Text,

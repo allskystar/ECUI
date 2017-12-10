@@ -1,11 +1,8 @@
 /*
-Progress - 定义进度显示的基本操作，不建议直接初始化。
-进度控件，继承自基础控件，面向用户显示一个任务执行的程度。
-
-进度控件直接HTML初始化的例子:
+@example
 <div ui="type:progress;max:100;value:0"></div>
 
-属性
+@fields
 _nValue  - 进度值
 _nMax    - 进度最大值
 */
@@ -16,13 +13,11 @@ _nMax    - 进度最大值
         util = core.util;
 //{/if}//
     /**
-     * 初始化进度控件。
-     * options 对象支持的属性如下：
-     * max 最大值
+     * 进度控件。
+     * options 属性：
+     * max   最大值
      * value 当前值
-     * @public
-     *
-     * @param {Object} options 初始化选项
+     * @control
      */
     ui.Progress = core.inherits(
         ui.Control,
@@ -30,20 +25,24 @@ _nMax    - 进度最大值
         function (el, options) {
             ui.Control.call(this, el, options);
 
-            el.innerHTML = '<div class="' + options.classes.join('-text ') + '"></div><div class="' + options.classes.join('-mask ') + '"></div>';
-            this._eText = el.firstChild;
-            this._eMask = el.lastChild;
-
             this._sFormat = options.format;
             this._nMax = options.max || 100;
             this._nValue = options.value || 0;
         },
         {
             /**
-             * 进度变化的默认处理。
-             * @protected
+             * 进度变化事件。
+             * @event
              */
             $progress: util.blank,
+
+            /**
+             * @override
+             */
+            $ready: function (event) {
+                ui.Control.prototype.$ready.call(this, event);
+                core.triggerEvent(this, 'progress');
+            },
 
             /**
              * 获取进度的最大值。
@@ -63,14 +62,6 @@ _nMax    - 进度最大值
              */
             getValue: function () {
                 return this._nValue;
-            },
-
-            /**
-             * @override
-             */
-            init: function (options) {
-                ui.Control.prototype.init.call(this, options);
-                core.triggerEvent(this, 'progress');
             },
 
             /**

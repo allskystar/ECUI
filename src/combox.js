@@ -1,31 +1,17 @@
 /*
-Combox - 定义可输入下拉框行为的基本操作。
-可输入下拉框控件，继承自下拉框控件，在下拉框控件的基础上允许选项框可输入内容。
-
-可输入下拉框控件直接HTML初始化的例子:
+@example
 <select ui="type:combox" name="age">
-  <option value="20">20</option>
-  <option value="21" selected="selected">21</option>
-  <option value="22">22</option>
+    <option value="20">20</option>
+    <option value="21" selected="selected">21</option>
+    <option value="22">22</option>
 </select>
 或
 <div ui="type:combox;name:age;value:21">
-  <div ui="value:20">20</div>
-  <div ui="value:21">21</div>
-  <div ui="value:22">22</div>
+    <!-- 这里可以放input元素，如果没有自动生成 -->
+    <div ui="value:20">20</div>
+    <div ui="value:21">21</div>
+    <div ui="value:22">22</div>
 </div>
-
-如果需要自定义特殊的选项效果，请按下列方法初始化:
-<div ui="type:combox">
-    <!-- 如果ec中不指定name，也可以在input中指定 -->
-    <input name="test" />
-    <!-- 这里放选项内容 -->
-    <div value="值">文本</div>
-    ...
-</div>
-
-属性
-_sInputWidth   - INPUT对象初始宽度
 */
 //{if 0}//
 (function () {
@@ -34,11 +20,9 @@ _sInputWidth   - INPUT对象初始宽度
         util = core.util;
 //{/if}//
     /**
-     * 初始化可输入下拉框控件。
-     * options 对象支持的属性如下：
-     * @public
-     *
-     * @param {Object} options 初始化选项
+     * 组合框控件。
+     * 组合框可以在下拉选项中选择，也可以输入内容。
+     * @control
      */
     ui.Combox = core.inherits(
         ui.Select,
@@ -49,10 +33,8 @@ _sInputWidth   - INPUT对象初始宽度
         },
         {
             /**
-             * 初始化可输入下拉框控件的选项部件。
-             * @public
-             *
-             * @param {Object} options 初始化选项
+             * 选项部件。
+             * @unit
              */
             Item: core.inherits(
                 ui.Select.prototype.Item,
@@ -60,7 +42,6 @@ _sInputWidth   - INPUT对象初始宽度
             ),
 
             /**
-             * 控件失效，阻止输入框提交
              * @override
              */
             $disable: function () {
@@ -69,7 +50,6 @@ _sInputWidth   - INPUT对象初始宽度
             },
 
             /**
-             * 控件解除失效，需要将输入框设置为可提交
              * @override
              */
             $enable: function () {
@@ -83,9 +63,9 @@ _sInputWidth   - INPUT对象初始宽度
             $initStructure: function (width, height) {
                 ui.Select.prototype.$initStructure.call(this, width, height);
 
-                var el = this.getInput();
-                el.style.width = width + 'px';
-                el.style.height = height + 'px';
+                var style = this.getInput().style;
+                style.width = width + 'px';
+                style.height = height + 'px';
             },
 
             /**

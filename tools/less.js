@@ -1068,10 +1068,16 @@ abstractFileManager.prototype.extractUrlParts = function extractUrlParts(url, ba
 
         for(i = 0; i < directories.length; i++) {
             if (directories[i] === ".." && i > 0) {
-                directories.splice(i - 1, 2);
-                i -= 2;
+                if (i === 1) {
+                    directories.splice(i, 1);
+                    i--;
+                } else {
+                    directories.splice(i - 1, 2);
+                    i -= 2;
+                }
             }
         }
+        // console.log(directories);
     }
 
     returner.hostPart = urlParts[1];

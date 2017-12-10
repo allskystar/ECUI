@@ -1,7 +1,5 @@
 /*
-Item/Items - 定义选项操作相关的基本操作。
-选项控件，继承自基础控件，用于弹出菜单、下拉框、交换框等控件的单个选项，通常不直接初始化。选项控件必须用在使用选项组接口(Items)的控件中。
-选项组不是控件，是一组对选项进行操作的方法的集合，提供了基本的增/删操作，通过将 ecui.ui.Items 对象下的方法复制到类的 prototype 属性下继承接口，最终对象要正常使用还需要在类构造器中调用 $initItems 方法。
+选项组接口，是对选项进行操作的方法的集合，提供了基本的增/删操作，通过将 ecui.ui.Items 对象下的方法复制到类的 prototype 属性下继承接口，最终对象要正常使用还需要在类构造器中调用 $initItems 方法。
 */
 (function () {
 //{if 0}//
@@ -10,15 +8,14 @@ Item/Items - 定义选项操作相关的基本操作。
         ui = core.ui,
         util = core.util,
 
-        eventNames = ['mousedown', 'mouseover', 'mousemove', 'mouseout', 'mouseup', 'click', 'dblclick', 'focus', 'blur', 'activate', 'deactivate', 'keydown', 'keypress', 'keyup', 'mousewheel'];
+        eventNames = ['mousedown', 'mouseover', 'mousemove', 'mouseout', 'mouseup', 'click', 'dblclick', 'focus', 'blur', 'activate', 'deactivate'];
 //{/if}//
     var namedMap = {};
 
     /**
-     * 初始化选项控件。
-     * @public
-     *
-     * @param {string|Object} options 对象
+     * 选项控件。
+     * 用于弹出菜单、下拉框、交换框等控件的单个选项，通常不直接初始化。选项控件必须用在使用选项组接口(Items)的控件中。
+     * @control
      */
     ui.Item = core.inherits(
         ui.Control,
@@ -36,12 +33,12 @@ Item/Items - 定义选项操作相关的基本操作。
              * 选项组只允许添加选项控件，添加成功后会自动调用 alterItems 方法。
              * @override
              */
-            $append: function (child) {
+            $append: function (event) {
                 // 检查待新增的控件是否为选项控件
-                if (!(child instanceof (this.Item || ui.Item)) || this.$Items.$append.call(this, child) === false) {
+                if (!(event.child instanceof (this.Item || ui.Item)) || this.$Items.$append.call(this, event) === false) {
                     return false;
                 }
-                namedMap[this.getUID()].push(child);
+                namedMap[this.getUID()].push(event.child);
                 this.alterItems();
             },
 
@@ -86,10 +83,10 @@ Item/Items - 定义选项操作相关的基本操作。
              * 选项组移除子选项后会自动调用 alterItems 方法。
              * @override
              */
-            $remove: function (child) {
-                core.$clearState(child);
-                this.$Items.$remove.call(this, child);
-                util.remove(namedMap[this.getUID()], child);
+            $remove: function (event) {
+                core.$clearState(event.child);
+                this.$Items.$remove.call(this, event);
+                util.remove(namedMap[this.getUID()], event.child);
                 this.alterItems();
             },
 
@@ -170,6 +167,17 @@ Item/Items - 定义选项操作相关的基本操作。
             },
 
             /**
+             * 获取指定的子选项控件。
+             * @public
+             *
+             * @param {Number} index 子选项控件编号
+             * @return {ecui.ui.Item} 子选项控件
+             */
+            getItem: function (index) {
+                return namedMap[this.getUID()][index] || null;
+            },
+
+            /**
              * 获取全部的子选项控件。
              * @public
              *
@@ -177,6 +185,16 @@ Item/Items - 定义选项操作相关的基本操作。
              */
             getItems: function () {
                 return namedMap[this.getUID()].slice();
+            },
+
+            /**
+             * 获取子选项的数量。
+             * @public
+             *
+             * @return {Number} 子选项数量
+             */
+            getLength: function () {
+                return namedMap[this.getUID()].length;
             },
 
             /**
@@ -257,21 +275,16 @@ Item/Items - 定义选项操作相关的基本操作。
     };
 
     // 初始化事件转发信息
-    (function () {
-        function build(name) {
-            ui.Item.prototype['$' + name] = function (event) {
-                ui.Control.prototype['$' + name].call(this, event);
+    eventNames.slice(0, 7).forEach(function (item) {
+        ui.Item.prototype['$' + item] = function (event) {
+            ui.Control.prototype['$' + item].call(this, event);
 
-                var parent = this.getParent();
+            var parent = this.getParent();
 
-                if (parent) {
-                    core.triggerEvent(parent, 'item' + name.replace('mouse', ''), event, this);
-                }
-            };
-        }
-
-        for (var i = 0; i < 7; ) {
-            build(eventNames[i++]);
-        }
-    }());
+            if (parent) {
+                event.item = this;
+                core.triggerEvent(parent, 'item' + item.replace('mouse', ''), event);
+            }
+        };
+    });
 }());

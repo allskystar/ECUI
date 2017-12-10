@@ -319,13 +319,13 @@ LRDecorator - 左右扩展装饰器，将区域分为"左-控件-右"三部分�
 /*
 TBDecorator - 上下扩展装饰器，将区域分为"上-控件-下"三部分，使用paddingTop与paddingBottom作为上下区域的高度
 */
-        /**
-         * 初始化上下扩展装饰器，将其附着在控件外围。
-         * @public
-         *
-         * @param {Control} control 需要装饰的控件
-         * @param {string} primary 装饰器的基本样式
-         */
+    /**
+     * 初始化上下扩展装饰器，将其附着在控件外围。
+     * @public
+     *
+     * @param {Control} control 需要装饰的控件
+     * @param {string} primary 装饰器的基本样式
+     */
     decorates.TBDecorator = function (control, primary) {
         decorates.Decorator.call(this, control, primary, ['top', 'bottom']);
     };

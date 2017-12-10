@@ -4,7 +4,7 @@
     height: 30px;
     line-height: 30px;
     padding-right: 30px;
-    background: url(images/ecui/arrow.png) no-repeat 120px center;
+    background:#fff url(images/ecui/arrow.png) no-repeat 120px center;
     border: 1px solid #acbaca;
     border-radius: 2px;
     color: #495362;
@@ -22,6 +22,11 @@
         z-index: -1;
         position: absolute !important;
         opacity: 0;
+    }
+}
+.ui-select-placeholder {
+    .ui-select-text{
+        color:#C0CCDA;
     }
 }
 .ui-select-hover {
@@ -56,10 +61,15 @@
         overflow: hidden;
         text-overflow: ellipsis;
     }
-    .ui-select-item-hover,
-    .ui-select-item-focus {
+    .ui-select-item-hover
+    {
         background-color: #368cda;
         color: #fff;
+        cursor: pointer;
+    }
+    .ui-select-item-focus {
+        background-color: #fff;
+        color: #368cda;
         cursor: pointer;
     }
 }

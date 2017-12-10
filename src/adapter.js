@@ -1,3 +1,6 @@
+/*
+ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECUI自己实现了适配器中对应的接口，可以将适配器切换至其它第三方库。
+*/
 //{if 0}//
 var ecui;
 (function () {
@@ -5,8 +8,10 @@ var ecui;
     var //{if 1}//undefined,//{/if}//
         //{if 1}//JAVASCRIPT = 'javascript',//{/if}//
 
+        isMobile = /(Android|iPhone|iPad|UCWEB|Fennec|Mobile)/i.test(navigator.userAgent),
         isStrict = document.compatMode === 'CSS1Compat',
         isWebkit = /webkit/i.test(navigator.userAgent),
+        chromeVersion = /Chrome\/(\d+\.\d)/i.test(navigator.userAgent) ? +RegExp.$1 : undefined,
         ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined,
         firefoxVersion = /firefox\/(\d+\.\d)/i.test(navigator.userAgent) ? +RegExp.$1 : undefined,
         operaVersion = /opera\/(\d+\.\d)/i.test(navigator.userAgent) ? +RegExp.$1 : undefined,
@@ -24,8 +29,10 @@ var ecui;
             return document.getElementById(id);
         },
 
+        mobile: isMobile,
         strict: isStrict,
         webkit: isWebkit,
+        chrome: chromeVersion,
         ie: ieVersion,
         firefox: firefoxVersion,
         opera: operaVersion,
@@ -1112,7 +1119,7 @@ var ecui;
         //{if 1}//ui = core.ui,//{/if}//
         util = core.util;
 
-    //{if 1}//var eventNames = ['mousedown', 'mouseover', 'mousemove', 'mouseout', 'mouseup', 'click', 'dblclick', 'focus', 'blur', 'activate', 'deactivate', 'keydown', 'keypress', 'keyup', 'mousewheel'];//{/if}//
+    //{if 1}//var eventNames = ['mousedown', 'mouseover', 'mousemove', 'mouseout', 'mouseup', 'click', 'dblclick', 'focus', 'blur', 'activate', 'deactivate'];//{/if}//
 
     // 读写特殊的 css 属性操作
     var __ECUI__StyleFixer = {

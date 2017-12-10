@@ -1219,7 +1219,7 @@
      * @return {function(Object):string} renderer函数
      */
     Engine.prototype.getRenderer = function (name) {
-        var target = this.targets[name];
+        var target = this.targets[name] || etpl.targets[name];
         if (target) {
             return target.getRenderer();
         }
@@ -1250,7 +1250,9 @@
      * @param {Function} filter 过滤函数
      */
     Engine.prototype.addFilter = function (name, filter) {
-        if ('function' === typeof filter) {
+        if (etpl === this) {
+            DEFAULT_FILTERS[name] = filter;
+        } else {
             this.filters[name] = filter;
         }
     };

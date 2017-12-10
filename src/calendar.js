@@ -1,11 +1,8 @@
 /*
-calendar - 日历控件。
-日历控件，继承自日历视图控件，包含头部展示操作区域、日历展示区域。头部展示操作区域中的四个按钮包含年/月的切换功能，他们继承自button控件。
-
-日历控件直接HTML初始化的例子:
+@example
 <div ui="type:calendar;year:2009;month:11"></div>
 
-属性
+@fields
 _eTitle        - 日历头部信息提示区
 */
 //{if 0}//
@@ -16,10 +13,12 @@ _eTitle        - 日历头部信息提示区
         util = core.util;
 //{/if}//
     /**
-     * 初始化日历控件。
-     * @public
-     *
-     * @param {Object} options 初始化选项
+     * 日历控件。
+     * 提供日期的选择功能，通过改变年月改变月视图选择指定的日期。
+     * options 属性：
+     * year    初始的年份
+     * month   初始的月份
+     * @control
      */
     ui.Calendar = core.inherits(
         ui.MonthView,
@@ -56,8 +55,10 @@ _eTitle        - 日历头部信息提示区
             TITLEFORMAT: '{0}年{1}月',
 
             /**
-             * 控件的前进后退控制部件。
-             * @public
+             * 日历前进后退部件。
+             * options 属性：
+             * move    前进后退月份的偏移值，需要改变一年设置为12
+             * @unit
              */
             Button: core.inherits(
                 ui.Button,
@@ -66,6 +67,9 @@ _eTitle        - 日历头部信息提示区
                     this._nMove = options.move;
                 },
                 {
+                    /**
+                     * @override
+                     */
                     $click: function (event) {
                         ui.Button.prototype.$click.call(this, event);
                         this.getParent().move(this._nMove);

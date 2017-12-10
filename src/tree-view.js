@@ -1,8 +1,5 @@
 /*
-TreeView - 定义树形视图的基本操作。
-树视图控件，继承自基础控件，不可以被改变大小，可以包含普通子控件或者子树视图控件，普通子控件显示在它的文本区域，如果是子树视图控件，将在专门的子树视图控件区域显示。子树视图控件区域可以被收缩隐藏或是展开显示，默认情况下点击树视图控件就改变子树视图控件区域的状态。
-
-树视图控件直接HTML初始化的例子:
+@example
 <ul ui="type:tree-view;">
   <!-- 显示的文本，如果没有label整个内容就是节点的文本 -->
   <div>公司</div>
@@ -20,7 +17,7 @@ TreeView - 定义树形视图的基本操作。
   </ul>
 </ul>
 
-属性
+@fields
 _bCollapsed    - 是否收缩子树
 _eChildren     - 子控件区域Element对象
 _aChildren     - 子控件集合
@@ -61,14 +58,13 @@ _aChildren     - 子控件集合
     }
 
     /**
-     * 初始化树视图控件。
-     * options 对象支持的属性如下：
+     * 树控件。
+     * 包含普通子控件或者子树视图控件，普通子控件显示在它的文本区域，如果是子树视图控件，将在专门的子树视图控件区域显示。子树视图控件区域可以被收缩隐藏或是展开显示，默认情况下点击树视图控件就改变子树视图控件区域的状态。
+     * options 属性：
      * collapsed      子树区域是否收缩，默认为展开
      * autoType       是否自动根据子节点数量转换节点的状态(叶子节点/非叶子节点)
      * expandSelected 是否展开选中的节点，如果不自动展开，需要点击左部的小区域图标才有效，默认自动展开
-     * @public
-     *
-     * @param {Object} options 初始化选项
+     * @control
      */
     ui.TreeView = core.inherits(
         ui.Control,
@@ -191,10 +187,8 @@ _aChildren     - 子控件集合
             },
 
             /**
-             * 节点点击事件的默认处理。
-             * @protected
-             *
-             * @param {ECUIEvent} event 事件对象
+             * 节点点击事件。
+             * @event
              */
             $nodeclick: function () {
                 var root = this.getRoot();
@@ -208,22 +202,18 @@ _aChildren     - 子控件集合
             },
 
             /**
-             * 节点移出事件的默认处理。
+             * 节点移出事件。
              * 鼠标移出节点区域时，控件解除悬停状态，移除状态样式 -nodehover。与 mouseout 不同的是， nodeout 没有与父结点关联。
-             * @protected
-             *
-             * @param {ECUIEvent} event 事件对象
+             * @event
              */
             $nodeout: function () {
                 this.alterClass('-nodehover');
             },
 
             /**
-             * 节点移入事件的默认处理。
+             * 节点移入事件。
              * 鼠标移入节点区域时，控件获得悬停状态，添加状态样式 -nodehover。与 mouseover 不同的是， nodeover 没有与父结点关联。
-             * @protected
-             *
-             * @param {ECUIEvent} event 事件对象
+             * @event
              */
             $nodeover: function () {
                 this.alterClass('+nodehover');
