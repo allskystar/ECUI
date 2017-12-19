@@ -15,7 +15,8 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
         ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined,
         firefoxVersion = /firefox\/(\d+\.\d)/i.test(navigator.userAgent) ? +RegExp.$1 : undefined;
 //{/if}//
-    var routes = {},
+    var options,
+        routes = {},
         autoRender = {},
         context = {},
         currLocation = '',
@@ -610,7 +611,7 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
                 }
 
                 var method = varUrl.split(' '),
-                    headers = {'x-enum-version': metaVersion};
+                    headers = options.meta ? {'x-enum-version': metaVersion} : {};
 
                 if (method[0] === 'JSON' || method[0] === 'FORM') {
                     var url = method[1].split('?'),
@@ -676,8 +677,10 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
                                 key;
 
                             // 枚举常量管理
-                            if (data.meta) {
-                                metaUpdate = true;
+                            if (options.meta) {
+                                if (data.meta) {
+                                    metaUpdate = true;
+                                }
                             }
 
                             if (esr.onparsedata) {
@@ -733,10 +736,10 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
                 handle = onsuccess || util.blank;
 
             onsuccess = function () {
-                if (metaUpdate && esr.META_URL) {
+                if (metaUpdate) {
                     // 枚举常量管理
                     io.ajax(
-                        esr.META_URL,
+                        options.meta,
                         {
                             headers: {'x-enum-version': metaVersion},
                             onsuccess: function (text) {
@@ -825,25 +828,29 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
          * 加载ESR框架。
          * @public
          */
-        load: function () {
-            if (window.localStorage) {
-                localStorage = window.localStorage;
-            } else {
-                localStorage = dom.setInput(null, null, 'hidden');
-                localStorage.addBehavior('#default#userData');
-                document.body.appendChild(localStorage);
-                localStorage.getItem = function (key) {
-                    localStorage.load('ecui');
-                    return localStorage.getAttribute(key);
-                };
-                localStorage.setItem = function (key, value) {
-                    localStorage.setAttribute(key, value);
-                    localStorage.save('ecui');
-                };
-            }
+        load: function (value) {
+            options = JSON.parse('{' + decodeURIComponent(value.replace(/(\w+)\s*=\s*([^\s]+)\s*($|,)/g, '"$1":"$2"')) + '}');
 
-            metaVersion = localStorage.getItem('esr_meta_version') || '0';
-            meta = JSON.parse(localStorage.getItem('esr_meta')) || {};
+            if (options.meta) {
+                if (window.localStorage) {
+                    localStorage = window.localStorage;
+                } else {
+                    localStorage = dom.setInput(null, null, 'hidden');
+                    localStorage.addBehavior('#default#userData');
+                    document.body.appendChild(localStorage);
+                    localStorage.getItem = function (key) {
+                        localStorage.load('ecui');
+                        return localStorage.getAttribute(key);
+                    };
+                    localStorage.setItem = function (key, value) {
+                        localStorage.setAttribute(key, value);
+                        localStorage.save('ecui');
+                    };
+                }
+
+                metaVersion = localStorage.getItem('esr_meta_version') || '0';
+                meta = JSON.parse(localStorage.getItem('esr_meta')) || {};
+            }
 
             for (var i = 0, links = document.getElementsByTagName('A'), el; el = links[i++]; i++) {
                 if (el.href.slice(-1) === '#') {
