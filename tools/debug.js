@@ -143,9 +143,10 @@
 
     function load() {
         var filename = moduleRoute[0];
-        oldLoadScriptFn(moduleName + '/route.' + filename + '.js');
+        oldLoadScriptFn(moduleName + '/route.' + filename + '.js', null, {cache: true});
 
         ecui.io.ajax(moduleName + '/route.' + filename + '.css', {
+            cache: true,
             onsuccess: function (cssText) {
                 var el = document.createElement('STYLE');
                 el.setAttribute('type', 'text/less');
@@ -169,6 +170,7 @@
                     if (document.head.lastChild.getAttribute('type') !== 'text/less') {
                         stop();
                         ecui.io.ajax(moduleName + '/route.' + filename + '.html', {
+                            cache: true,
                             onsuccess: function (data) {
                                 ecui.esr.getEngine(moduleName).compile(data);
                                 moduleRoute.splice(0, 1);
@@ -186,7 +188,7 @@
     }
 
     ecui.esr.loadClass = function (filename) {
-        oldLoadScriptFn(moduleName + '/class.' + filename + '.js');
+        oldLoadScriptFn(moduleName + '/class.' + filename + '.js', null, {cache: true});
     };
     ecui.esr.loadRoute = function (filename) {
         moduleRoute.push(filename);

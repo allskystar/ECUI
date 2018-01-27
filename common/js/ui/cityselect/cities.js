@@ -48,7 +48,7 @@ cities - 地区联动下拉框控件。
                     value: '000000',
                     children: [{
                         code: '全部区',
-                        value: '000000',
+                        value: '000000'
                     }]
                 }]
             }];
@@ -61,8 +61,8 @@ cities - 地区联动下拉框控件。
                     code: '全部市',
                     children: [{
                         code: '全部区',
-                        value: '000000',
-                    }],
+                        value: '000000'
+                    }]
                 }]
             };
             item = CITY[code];
@@ -73,7 +73,7 @@ cities - 地区联动下拉框控件。
                         code: item[key],
                         children: [{
                             value: '000000',
-                            code: '全部区',
+                            code: '全部区'
                         }]
                     };
                     item2 = AREA[key];

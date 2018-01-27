@@ -170,6 +170,9 @@ _ePlaceHolder - 为空时的提示信息标签
                 var input = this.getInput();
                 input.style.width = width + 'px';
                 input.style.height = height + 'px';
+                if (ieVersion < 9 && input.tagName === 'INPUT') {
+                    input.style.lineHeight = height + 'px';
+                }
                 if (this._ePlaceHolder) {
                     this._ePlaceHolder.style.width = width - this.$$placeholder[1] - this.$$placeholder[3] + 'px';
                     this._ePlaceHolder.style.height = height - this.$$placeholder[0] - this.$$placeholder[2] + 'px';

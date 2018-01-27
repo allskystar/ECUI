@@ -481,6 +481,7 @@ ecui.pause();
 
                     FileManager.prototype.doXHR = function doXHR(url, type, callback, errback) {
                         ecui.io.ajax(url, {
+                            cache: true,
                             onsuccess: function (text, xhr) {
                                 callback(text, xhr.getResponseHeader('Last-Modified'));
                             },

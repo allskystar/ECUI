@@ -10,6 +10,7 @@
     font-size: 14px;
     .ui-placeholder {
         position: absolute;
+        display: none;
     }
     input,
     textarea {
@@ -26,6 +27,7 @@
 .ui-text-error {
     .ui-placeholder {
         z-index: 1;
+        display: block;
     }
 }
 .ui-text-hover {

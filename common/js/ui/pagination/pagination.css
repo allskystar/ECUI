@@ -1,5 +1,5 @@
 /*<script>window.onload=function(){var url=location.href,hash=document.getElementsByTagName('TEXTAREA')[0].value;url=decodeURIComponent(url.slice(url.indexOf('=')+1));parent.location.href=url+'#'+encodeURIComponent(hash.slice(hash.indexOf('\n')+1).replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&')||' ');}</script><textarea>*/
-.pagination{
+.ui-pagination{
 	-moz-user-select: none; /*火狐-禁止文本选中*/
 	-webkit-user-select: none; /*webkit浏览器*/
 	-ms-user-select: none; /*IE10*/
@@ -7,6 +7,7 @@
 	user-select: none;
 	height:24px;
 	font-size:14px;
+	text-align: center;
 	span,font,strong{
 		display:inline-block;
 		margin-right:6px;
@@ -29,5 +30,13 @@
 	strong{
 		background:#368cda;
 		color:#fff !important;
+	}
+	.pagination,
+	.pagination-msgBox {
+		display: inline-block;
+	}
+	.pagination-msg {
+		display: inline-block;
+		margin-left: 15px;
 	}
 }

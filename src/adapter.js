@@ -1123,6 +1123,12 @@ var ecui;
 
     // 读写特殊的 css 属性操作
     var __ECUI__StyleFixer = {
+            clip: ieVersion < 8 ? {
+                set: function (el, value) {
+                    el.style.clip = value === 'auto' ? 'rect(0,100%,100%,0)' : value;
+                }
+            } : undefined,
+
             display: ieVersion < 8 ? {
                 get: function (el, style) {
                     return style.display === 'inline' && style.zoom === '1' ? 'inline-block' : style.display;

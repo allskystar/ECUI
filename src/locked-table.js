@@ -332,7 +332,7 @@ _eRight      - 右侧乐定行的Element元素
                 leftHeadStyle.left = leftMainStyle.left = this.getLayout().scrollLeft + 'px';
                 rightHeadStyle.left = rightMainStyle.left = (Math.min(this.getWidth(), this.$$tableWidth) - this.$$paddingRight + this.getLayout().scrollLeft - this.$$rightTDWidth - this.$$scrollFixed[0]) + 'px';
                 leftMainStyle.top = rightMainStyle.top = (this.$$paddingTop + this.getLayout().scrollTop - dom.getParent(this.$getSection('Head').getOuter()).scrollTop) + 'px';
-                leftMainStyle.clip = rightMainStyle.clip = 'auto';
+                leftMainStyle.clip = rightMainStyle.clip = ieVersion < 8 ? 'rect(0,100%,100%,0)' : 'auto';
             },
 
             /**

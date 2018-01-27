@@ -395,6 +395,6 @@ ECUI动画效果库，支持对CSS3动画效果的模拟并扩展了相应的功
                 }
                 fn = options = transition = null;
             };
-        },
+        }
     };
 }());

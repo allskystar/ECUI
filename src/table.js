@@ -669,7 +669,7 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
                     style.position = '';
                     style.top = (Math.min(this.getBodyHeight() - this.$$paddingTop, Math.max(0, util.getView().top - dom.getPosition(this.getOuter()).top)) + this._eLayout.scrollTop) + 'px';
                     style.left = '0px';
-                    style.clip = 'auto';
+                    style.clip = ieVersion < 8 ? 'rect(0,100%,100%,0)' : 'auto';
                 }
             },
 

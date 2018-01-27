@@ -30,7 +30,6 @@
             left += el.offsetLeft;
             el = el.offsetParent;
         }
-        console.log(left, top);
 
         var popupTop = top + owner.getHeight(),
             height = this.getHeight();

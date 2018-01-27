@@ -183,6 +183,7 @@ Date.prototype.pattern = function(fmt) {
     return fmt;
 };
 
+// 弹出提示框
 daikuan.showHint = function (type, msg) {
     var className = {
         success: 'successHint',
@@ -197,3 +198,49 @@ daikuan.showHint = function (type, msg) {
         ecui.dom.addClass(hintContainer, 'ui-hide');
     }, 2000)
 };
+
+// 搜索数据回填表单数据
+daikuan.setFormValue = function (context, form, searchParm) {
+    var elements = form.elements;
+    for (var i = 0, item; item = elements[i++]; ) {
+        var name = item.name;
+        if (name) {
+            if (context[name]) {
+                searchParm[name] = context[name];
+            }
+            var _control = item.getControl && item.getControl();
+            if (_control) {
+                _control.setValue(searchParm[name] || '');
+            } else {
+                form.elements[name].value = searchParm[name] || '';
+            }
+        }
+    }
+};
+
+// 初始化dialog控件
+daikuan.initDialog = function (container, targetName, options) {
+    ecui.dispose(container);
+    container.innerHTML = ecui.esr.getEngine().render(targetName, options);
+    ecui.init(container);
+    return container.children[0].getControl();
+}
+
+// 复制text到剪切板中
+daikuan.copy = function (text) {
+    var textarea = document.createElement("textarea");
+    textarea.style.position = 'fixed';
+    textarea.style.top = -100;
+    textarea.style.left = 0;
+    textarea.style.border = 'none';
+    textarea.style.outline = 'none';
+    textarea.style.resize = 'none';
+    textarea.style.background = 'transparent';
+    textarea.style.color = 'transparent';
+
+    textarea.value = text;
+    document.body.appendChild(textarea);
+    textarea.select();
+    var flag = document.execCommand('copy');
+    document.body.removeChild(textarea);
+}

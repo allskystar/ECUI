@@ -3,7 +3,7 @@ pagination - 分页控件。
 定制分页控件，继承自基础控件
 
 分页视图控件直接HTML初始化的例子:
-<div ui="type:pagination;page:1-20;total:304";id:test></div>
+<div ui="type:pagination;page:1-20;total:304";id:test;page:0,674,20,34;route:customerListTable;skipInput:true;></div>
 
 外部调用获取当前点击页数的方法（通过在外部定义go方法，进行业务代码实现）:
 ecui.get('test').go = function(pageNo){
@@ -21,17 +21,48 @@ _nTotalPage       - 总页数
         ui = core.ui,
         util = core.util;
 
+    // 回车跳转到指定页
+    var skipTo = function (event) {
+        if (event.which === 13) {
+            this.getParent().go(this.getValue());
+        }
+    };
     ui.Pagination = core.inherits(
         ui.Control,
         'ui-pagination',
         function (el, options) {
             ui.Control.call(this, el, options);
-            var offset = options.page.split('-');
-            var pageSize = +offset[1] - offset[0] + 1;
-            // 定义当前页数
-            this._nCurrentPage = Math.ceil(+offset[1] / pageSize);
-            // 定义总页数
-            this._nTotalPage = Math.ceil(options.total / pageSize);
+            if (FeatureFlags.PAGEON_1) {
+                // page值的形式: offset,total,pageSize,totalPage
+                var page = options.page.split(',');
+                // 定义当前页数
+                this._nCurrentPage = Math.ceil((+page[0] + 1) / +page[2]);
+                // 定义总页数
+                this._nTotalPage = +page[3];
+
+                if (options.route) {
+                    this._sRoute = options.route;
+                    el.innerHTML = '<div class="pagination"></div>'
+                                    + '<div class="pagination-msgBox clearfix">'
+                                    + (options.skipInput ? '<div class="pagination-msg">第<input class="ui-text ui-input" />页</div>' : '')
+                                    + '<div class="pagination-msg">共' + this._nTotalPage + '页</div>'
+                                    + '<div class="pagination-msg">共' + (+page[1]) + '条</div>'
+                                    + '</div>';
+                    this.$setBody(el.firstChild);
+                    if (options.skipInput) {
+                        this._uSkipInput = core.$fastCreate(ui.Text, el.children[1].firstChild.children[0], this);
+                        this._uSkipInput.setValue(this._nCurrentPage);
+                        this._uSkipInput.onkeydown = skipTo;
+                    }
+                }
+            } else {
+                var offset = options.page.split('-');
+                var pageSize = +offset[1] - offset[0] + 1;
+                // 定义当前页数
+                this._nCurrentPage = Math.ceil(+offset[1] / pageSize);
+                // 定义总页数
+                this._nTotalPage = Math.ceil(options.total / pageSize);
+            }
         },
         {
             /**
@@ -103,8 +134,16 @@ _nTotalPage       - 总页数
                     html.push(start === currentPage ? '<strong>' + start + '</strong>' : '<span>' + start + '</span>');
                 }
 
-                // 填充数字按钮区
-                this.getMain().innerHTML = util.stringFormat('<{0}>&lt;&lt;</{0}><{0}>&lt;</{0}>', currentPage === 1 ? 'font' : 'span') + html.join('') + util.stringFormat('<{0}>&gt;</{0}><{0}>&gt;&gt;</{0}>', currentPage === totalPage ? 'font' : 'span');
+                if (FeatureFlags.PAGEON_1) {
+                    // 填充数字按钮区
+                    this.getBody().innerHTML = util.stringFormat('<{0}>&lt;&lt;</{0}><{0}>&lt;</{0}>', currentPage === 1 ? 'font' : 'span') + html.join('') + util.stringFormat('<{0}>&gt;</{0}><{0}>&gt;&gt;</{0}>', currentPage === totalPage ? 'font' : 'span');
+                } else {
+                    this.getMain().innerHTML = util.stringFormat('<{0}>&lt;&lt;</{0}><{0}>&lt;</{0}>', currentPage === 1 ? 'font' : 'span') + html.join('') + util.stringFormat('<{0}>&gt;</{0}><{0}>&gt;&gt;</{0}>', currentPage === totalPage ? 'font' : 'span');
+                }
+            },
+            go: function (pageNo) {
+                ecui.esr.callRoute(this._sRoute + '~pageNo=' + pageNo, true);
+                this._nCurrentPage = pageNo;
             }
         }
     );

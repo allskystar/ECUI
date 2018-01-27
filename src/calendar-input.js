@@ -41,7 +41,7 @@
                 }
             }
         ),
-        singleton = core.$fastCreate(Calendar, dom.create({className: Calendar.CLASS + 'ui-popup ui-hide'}));
+        singleton = core.createSingleton(Calendar, dom.create({className: Calendar.CLASS + 'ui-popup ui-hide'}));
 
     /**
      * 日历输入框控件。

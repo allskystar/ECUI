@@ -7,7 +7,6 @@
     if (ieVersion < 9) {
         document.write('<script src="ie-es5.js"></script>');
     }
-
     document.write('<script type="text/javascript" src="src/core.js"></script>');
     document.write('<script type="text/javascript" src="src/control.js"></script>');
     document.write('<script type="text/javascript" src="src/input-control.js"></script>');
@@ -16,6 +15,8 @@
     document.write('<script type="text/javascript" src="src/popup.js"></script>');
 
     document.write('<script type="text/javascript" src="src/button.js"></script>');
+    document.write('<script type="text/javascript" src="src/submit.js"></script>');
+    document.write('<script type="text/javascript" src="src/cancel.js"></script>');
     document.write('<script type="text/javascript" src="src/dialog.js"></script>');
     document.write('<script type="text/javascript" src="src/label.js"></script>');
     document.write('<script type="text/javascript" src="src/month-view.js"></script>');
