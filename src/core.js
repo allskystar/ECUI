@@ -40,6 +40,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
         speedY,                   // 当前鼠标Y轴速度参数
         keyCode = 0,              // 当前键盘按下的键值，解决keypress与keyup中得不到特殊按键的keyCode的问题
         lastClick,                // 上一次产生点击事件的信息
+        inertiaHandles = {},      // 惯性处理句柄
 
         allControls = [],         // 全部生成的控件，供释放控件占用的内存使用
         independentControls = [], // 独立的控件，即使用create($create)方法创建的控件
@@ -180,7 +181,10 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                                         // 允许获得焦点的控件必须是当前激活的控件，或者它没有焦点的时候才允许获得
                                         // 典型的用例是滚动条，滚动条不需要获得焦点，如果滚动条的父控件没有焦点
                                         // 父控件获得焦点，否则焦点不发生变化
-                                        core.setFocused(target);
+                                        if (!isMobile) {
+                                            // 移动端是在mouseup时获得焦点
+                                            core.setFocused(target);
+                                        }
                                     }
                                     break;
                                 }
@@ -195,17 +199,23 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                             onselectstart(control, event);
                             // 检查是否INPUT/SELECT/TEXTAREA/BUTTON标签，需要失去焦点，
                             // 因为ecui不能阻止mousedown focus输入框
-                            if (target.tagName === 'INPUT' || target.tagName === 'SELECT' || target.tagName === 'TEXTAREA' || target.tagName === 'BUTTON') {
-                                util.timer(
-                                    function () {
-                                        target.blur();
-                                    }
-                                );
-                                event.preventDefault();
+                            if (!isMobile) {
+                                // 移动端输入框是在mouseup时失去焦点
+                                if (target.tagName === 'INPUT' || target.tagName === 'SELECT' || target.tagName === 'TEXTAREA' || target.tagName === 'BUTTON') {
+                                    util.timer(
+                                        function () {
+                                            target.blur();
+                                        }
+                                    );
+                                    event.preventDefault();
+                                }
                             }
                         }
-                        // 点击到了空白区域，取消控件的焦点
-                        core.setFocused();
+                        if (!isMobile) {
+                            // 移动端输入框是在mouseup时失去焦点
+                            // 点击到了空白区域，取消控件的焦点
+                            core.setFocused();
+                        }
                         // 正常情况下 activedControl 是 undefined，如果是down按下但未点击到控件，此值为null
                         activedControl = null;
                     }
@@ -376,21 +386,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             mousemove: function (event) {
                 event = core.wrapEvent(event);
 
-                var target = currEnv.target,
-                    // 计算期待移到的位置
-                    expectX = currEnv.targetX + mouseX - currEnv.x,
-                    expectY = currEnv.targetY + mouseY - currEnv.y;
-
-                // 计算实际允许移到的位置
-                event.x = Math.min(Math.max(expectX, currEnv.left), currEnv.right);
-                event.y = Math.min(Math.max(expectY, currEnv.top), currEnv.bottom);
-
-                if (core.triggerEvent(target, 'dragmove', event)) {
-                    target.setPosition(event.x, event.y);
-                }
-
-                currEnv.x = mouseX + currEnv.targetX - expectX;
-                currEnv.y = mouseY + currEnv.targetY - expectY;
+                dragmove(event, currEnv, mouseX, mouseY);
 
                 event.exit();
             },
@@ -398,9 +394,37 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             mouseover: util.blank,
 
             mouseup: function (event) {
-                event = core.wrapEvent(event);
+                var target = currEnv.target,
+                    inertia = 'function' === typeof currEnv.inertia ? currEnv.inertia.call(target) : currEnv.inertia;
 
-                core.triggerEvent(currEnv.target, 'dragend', event);
+                if (FeatureFlags.INERTIA_1 && inertia) {
+                    var uid = target.getUID(),
+                        env = currEnv,
+                        mx = mouseX,
+                        my = mouseY,
+                        start = Date.now(),
+                        vx = core.getXSpeed(),
+                        vy = core.getYSpeed(),
+                        ax = vx / inertia,
+                        ay = vy / inertia;
+
+                    event = core.wrapEvent(event);
+
+                    inertiaHandles[uid] = util.timer(function () {
+                        var event = new ECUIEvent(),
+                            time = (Date.now() - start) / 1000,
+                            t = Math.min(time, inertia);
+
+                        dragmove(event, env, Math.round(mx + vx * t - ax * t * t / 2), Math.round(my + vy * t - ay * t * t / 2));
+                        if (t >= inertia) {
+                            inertiaHandles[uid]();
+                            dragend(event, env, target);
+                        }
+                    }, -20);
+                } else {
+                    event = core.wrapEvent(event);
+                    dragend(event, currEnv, target);
+                }
                 activedControl = currEnv.actived;
                 core.restore();
 
@@ -722,6 +746,91 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
         } catch (ignore) {
         }
         core.triggerEvent(control, 'dispose');
+    }
+
+    /**
+     * 拖拽结束事件处理。
+     * @private
+     *
+     * @param {ECUIEvent} ECUI 事件对象
+     * @param {Object} ECUI 框架运行环境
+     * @param {ecui.ui.Control} target 被拖拽的 ECUI 控件
+     */
+    function dragend(event, env, target) {
+        var uid = target.getUID();
+
+        if (env.limit) {
+            var range = 'function' === typeof env.limit ? env.limit.call(target) : env.limit,
+                codes = [],
+                el = env.el || target.getOuter(),
+                x = util.toNumber(el.style.left),
+                y = util.toNumber(el.style.top),
+                expectX = Math.min(range[1], Math.max(range[3], x)),
+                expectY = Math.min(range[2], Math.max(range[0], y));
+            if (range[5]) {
+                expectX = Math.round(expectX / range[5]) * range[5];
+            }
+            if (range[4]) {
+                expectY = Math.round(expectY / range[4]) * range[4];
+            }
+            if (x !== expectX) {
+                codes.push('this.style.left->' + expectX);
+            }
+            if (y !== expectY) {
+                codes.push('this.style.top->' + expectY);
+            }
+
+            if (codes.length) {
+                inertiaHandles[uid] = core.effect.grade(
+                    codes.join(';'),
+                    500,
+                    {
+                        $: el,
+                        onstep: function (percent) {
+                            event.x = util.toNumber(this.style.left);
+                            event.y = util.toNumber(this.style.top);
+                            core.triggerEvent(target, 'dragmove', event);
+                            if (percent === 1) {
+                                core.triggerEvent(target, 'change', event);
+                                inertiaHandles[uid]();
+                                core.triggerEvent(target, 'dragend', event);
+                                delete inertiaHandles[uid];
+                            }
+                        }
+                    }
+                );
+                return;
+            }
+        }
+        core.triggerEvent(target, 'dragend', event);
+        delete inertiaHandles[uid];
+    }
+
+    /**
+     * 拖拽移动事件处理。
+     * @private
+     *
+     * @param {ECUIEvent} ECUI 事件对象
+     * @param {Object} ECUI 框架运行环境
+     * @param {number} x 需要移动到的 X 坐标
+     * @param {number} y 需要移动到的 Y 坐标
+     */
+    function dragmove(event, env, x, y) {
+        var target = env.target,
+            // 计算期待移到的位置
+            expectX = env.targetX + x - env.x,
+            expectY = env.targetY + y - env.y;
+
+        // 计算实际允许移到的位置
+        event.x = Math.min(Math.max(expectX, env.left), env.right);
+        event.y = Math.min(Math.max(expectY, env.top), env.bottom);
+
+        if (core.triggerEvent(target, 'dragmove', event)) {
+            target.setPosition(event.x, event.y);
+        }
+
+        env.x = x + env.targetX - expectX;
+        env.y = y + env.targetY - expectY;
     }
 
     /**
@@ -1272,17 +1381,6 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
         },
 
         /**
-         * 创建一个 ECUI 事件对象。
-         * @public
-         *
-         * @param {String} type 对象类型
-         * @return {ECUIEvent} ECUI 事件对象
-         */
-        createEvent: function (type) {
-            return new ECUIEvent(type);
-        },
-
-        /**
          * 创建一个 ECUI 单例控件，ECUI 并未实现真正意义上的单例，这里只是用于标记该控件不会被 dispose 方法释放。
          * @public
          *
@@ -1413,6 +1511,15 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
          */
         drag: function (control, event, options) {
             if (activedControl !== undefined) {
+                if (FeatureFlags.INERTIA_1) {
+                    // 控件之前处于惯性状态必须停止
+                    var uid = control.getUID();
+                    if (inertiaHandles[uid]) {
+                        inertiaHandles[uid]();
+                        delete inertiaHandles[uid];
+                    }
+                }
+
                 // 判断鼠标没有mouseup
                 var el = control.getOuter(),
                     parent = el.offsetParent,
@@ -1625,11 +1732,11 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
         },
 
         getXSpeed: function () {
-            return speedX;
+            return Date.now() - lastMoveTime > 500 ? 0 : speedX;
         },
 
         getYSpeed: function () {
-            return speedY;
+            return Date.now() - lastMoveTime > 500 ? 0 : speedY;
         },
 
         /**
@@ -1639,56 +1746,68 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
          *
          * @param {Function} superClass 父控件类
          * @param {string} type 子控件的类型样式
-         * @param {Function} subClass 子控件的标准构造函数，如果忽略将直接调用父控件类的构造函数
+         * @param {Function} constructor 子控件的标准构造函数，如果忽略将直接调用父控件类的构造函数
          * @param {Object} ... 控件扩展的方法
          * @return {Function} 新控件的构造函数
          */
-        inherits: function (superClass, type, subClass) {
+        inherits: function (superClass, type, constructor) {
             var index = 3,
-                argType = type,
-                argSubClass = subClass;
-
-            if ('string' !== typeof argType) {
-                argSubClass = argType;
-                index--;
-                argType = '';
-            }
-
-            if ('function' !== typeof argSubClass) {
-                argSubClass = function (el, options) {
-                    superClass.call(this, el, options);
+                realType = type,
+                realConstructor = constructor,
+                subClass = function (el, options) {
+                    subClass.constructor.call(this, el, options);
+                    subClass.interfaces.forEach(function (constructor) {
+                        constructor.call(this, el, options);
+                    }, this);
                 };
+
+            if ('string' !== typeof realType) {
                 index--;
+                realType = '';
+                realConstructor = type;
             }
+
+            if ('function' !== typeof realConstructor) {
+                subClass.constructor = superClass.constructor;
+                index--;
+            } else {
+                subClass.constructor = realConstructor;
+            }
+            subClass.interfaces = [];
 
             if (superClass) {
-                util.inherits(argSubClass, superClass);
+                util.inherits(subClass, superClass);
 
-                if (argType && argType.charAt(0) === '*') {
-                    (argSubClass.TYPES = superClass.TYPES.slice())[0] = argType.slice(1);
+                if (realType && realType.charAt(0) === '*') {
+                    (subClass.TYPES = superClass.TYPES.slice())[0] = realType.slice(1);
                 } else {
-                    argSubClass.TYPES = (argType ? [argType] : []).concat(superClass.TYPES);
+                    subClass.TYPES = (realType ? [realType] : []).concat(superClass.TYPES);
                 }
             } else {
                 // ecui.ui.Control的特殊初始化设置
-                argSubClass.TYPES = [];
+                subClass.TYPES = [];
             }
-            argSubClass.CLASS = argSubClass.TYPES.length ? ' ' + argSubClass.TYPES.join(' ') + ' ' : ' ';
+            subClass.CLASS = subClass.TYPES.length ? ' ' + subClass.TYPES.join(' ') + ' ' : ' ';
 
             Array.prototype.slice.call(arguments, index).forEach(function (item) {
                 if (item.NAME) {
+                    if (item.constructor) {
+                        subClass.interfaces.push(item.constructor);
+                    }
                     // 对接口的处理
                     var Clazz = new Function();
                     Clazz.prototype = superClass.prototype;
                     var prototype = new Clazz();
-                    util.extend(prototype, argSubClass.prototype);
-                    argSubClass.prototype[item.NAME] = prototype;
+                    util.extend(prototype, subClass.prototype);
+                    subClass.prototype[item.NAME] = prototype;
                     item = item.Methods;
                 }
-                util.extend(argSubClass.prototype, item);
+                util.extend(subClass.prototype, item);
             });
 
-            return argSubClass;
+            // 释放闭包占用的资源
+            superClass = type = constructor = realConstructor = null;
+            return subClass;
         },
 
         /**
@@ -2036,7 +2155,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
          *
          * @param {ecui.ui.Control} control 控件对象
          * @param {string} name 事件名
-         * @param {ECUIEvent} event 事件对象，可以为 false 表示直接阻止默认事件处理
+         * @param {ECUIEvent|Object} event 事件对象或事件对象参数
          * @param {Object} ... 事件的其它参数
          * @return {boolean} 是否阻止默认事件处理
          */
@@ -2053,11 +2172,12 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             eventStack[uid][name] = true;
 
             if (!(event instanceof ECUIEvent)) {
-                event = new ECUIEvent(name);
+                event = util.extend(new ECUIEvent(name), event);
             } else {
                 event.type = name;
             }
 
+            delete event.returnValue;
             if ((control['on' + name] && control['on' + name].apply(control, args) === false) || event.returnValue === false || (control['$' + name] && control['$' + name].apply(control, args) === false)) {
                 event.preventDefault();
             }

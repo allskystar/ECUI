@@ -1,4 +1,4 @@
-/*<script>window.onload=function(){var url=location.href,hash=document.getElementsByTagName('TEXTAREA')[0].value;url=decodeURIComponent(url.slice(url.indexOf('=')+1));parent.location.href=url+'#'+encodeURIComponent(hash.slice(hash.indexOf('\n')+1).replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&')||' ');}</script><textarea>*/
+/*<script>window.onload=function(){value=document.getElementsByTagName('TEXTAREA')[0].value;parent.postMessage({url:location.href.slice(7),text:value.slice(value.indexOf('\n')+1).replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&')},'*');}</script><textarea>*/
 .inline-block() {
 	display: inline-block;
 	*display: inline;
@@ -22,7 +22,6 @@
 @import (less) "css/tab.css";
 @import (less) "css/table.css";
 @import (less) "css/tree-view.css";
-@import (less) "css/upload.css";
 
 @import (less) "css/text.css";
 @import (less) "css/checkbox.css";
@@ -42,4 +41,4 @@
 
 @import (less) "css/esr.css";
 
-@import (less) "css/m-scroll.css";
+@import (less) "css/m-select.css";

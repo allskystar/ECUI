@@ -28,7 +28,7 @@
         'ui-button',
         function (el, options) {
             util.setDefault(options, 'userSelect', false);
-            ui.Control.call(this, el, options);
+            ui.Control.constructor.call(this, el, options);
         }
     );
 //{if 0}//

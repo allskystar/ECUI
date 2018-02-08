@@ -25,7 +25,7 @@ _eInput - 选项对应的input，form提交时使用
         ui.Control,
         'ui-listbox',
         function (el, options) {
-            ui.Control.call(this, el, options);
+            ui.Control.constructor.call(this, el, options);
 
             this._sName = options.name || '';
             this.$initItems();
@@ -39,7 +39,7 @@ _eInput - 选项对应的input，form提交时使用
                 ui.Item,
                 'ui-listbox-item',
                 function (el, options) {
-                    ui.Item.call(this, el, options);
+                    ui.Item.constructor.call(this, el, options);
                     el.appendChild(this._eInput = dom.setInput(null, options.parent._sName, 'hidden')).value = options.value === undefined ? dom.getText(el) : options.value;
                     this.setSelected(!!options.selected);
                 },

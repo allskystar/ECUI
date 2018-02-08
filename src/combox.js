@@ -29,7 +29,7 @@
         '*ui-combox',
         function (el, options) {
             util.setDefault(options, 'readOnly', false);
-            ui.Select.call(this, el, options);
+            ui.Select.constructor.call(this, el, options);
         },
         {
             /**

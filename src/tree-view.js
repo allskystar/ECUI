@@ -83,7 +83,7 @@ _aChildren     - 子控件集合
                 }
             }
 
-            ui.Control.call(this, el, options);
+            ui.Control.constructor.call(this, el, options);
 
             this._bCollapsed = !!options.collapsed;
             this._bAutoType = options.autoType;

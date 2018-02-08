@@ -23,7 +23,7 @@ _nMax    - 进度最大值
         ui.Control,
         'ui-progress',
         function (el, options) {
-            ui.Control.call(this, el, options);
+            ui.Control.constructor.call(this, el, options);
 
             this._sFormat = options.format;
             this._nMax = options.max || 100;

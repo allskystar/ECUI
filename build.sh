@@ -4,11 +4,23 @@ then
     exit -1
 fi
 
+css_proc='lessc - --plugin=less-plugin-clean-css | python ${path}less-funcs.py "$2"'
+tpl_proc='java -jar ${path}smarty4j.jar --left //{ --right }// --charset utf-8'
+compress_proc='java -jar ${path}webpacker.jar --mode 1 --charset utf-8'
+reg_load="-e \"s/ecui.esr.loadRoute('/\/\/{include file='route./g\""
+reg_script="-e \"s/ *document.write('<script type=\\\"text\/javascript\\\" src=\([^>]*\)><\/script>');/\/\/{include file=\1}\/\//g\""
+reg_comment="-e \"s/[[:space:]]/ /g\" -e \"s/^ *//g\" -e \"s/ *$//g\" -e \"/^ *$/d\" -e \"/<\!-- *$/{N;s/\\n//;}\" -e \"s/<\!-- *-->//g\" -e \"/^ *$/d\" -e \"/<script>window.onload=/d\""
+
 if [ $1 = 'ecui' ]
 then
+    if [ ! -d release ]
+    then
+        mkdir release
+    fi
     echo "build ecui-2.0.0"
-    lessc --plugin=less-plugin-clean-css ecui.css > ecui-2.0.0.css
-    sed -e "s/ *document.write('<script type=\"text\/javascript\" src=\([^>]*\)><\/script>');/\/\/{include file=\1}\/\//g" ecui.js | java -jar smarty4j.jar --left //{ --right }// --charset utf-8 | java -jar webpacker.jar --mode 1 --charset utf-8 -o "ecui-2.0.0.js"
+    path=""
+    more ecui.css | eval $css_proc > release/ecui-2.0.0.css
+    eval "sed $reg_script ecui.js" | eval $tpl_proc | eval $compress_proc > release/ecui-2.0.0.js
     exit 0
 fi
 
@@ -17,9 +29,12 @@ then
     flag=1
     cd ..
 fi
-ln -s ../lib-fe/common $1"/common"
+if [ ! -d "$1/common" ]
+then
+    ln -s ../lib-fe/common "$1/common"
+fi
 
-output="output-"$1
+output="output-$1"
 if [ ! -d $output ]
 then
     mkdir $output
@@ -27,53 +42,57 @@ fi
 
 if [ ! -d $1 ]
 then
-    echo $1" doesn't exist"
+    echo "$1 doesn't exist"
     exit -2
 fi
 
 for file in `ls $1`
 do
-    if [ -d $1"/"$file ]
+    if [ -d "$1/$file" ]
     then
-    	if [ -f $1"/"$file"/"$file".js" ]
+    	if [ -f "$1/$file/$file.js" ]
     	then
-            echo "process module-"$file
-	        if [ ! -d $output"/"$file ]
+            echo "process module-$file"
+	        if [ ! -d "$output/$file" ]
 	        then
-	            mkdir $output"/"$file
+	            mkdir "$output/$file"
 	        fi
-	        cd $1"/"$file
-	        sed -e "s/ecui.esr.loadRoute('/\/\/{include file='route./g" -e "s/ecui.esr.loadClass('/\/\/{include file='class./g" -e "s/');/.js'}\/\//g" $file".js" | java -jar ../../lib-fe/smarty4j.jar --left //{ --right }// --charset utf-8 | java -jar ../../lib-fe/webpacker.jar --mode 1 --charset utf-8 -o "../../"$output"/"$file"/"$file".js"
-	        sed -e "s/ecui.esr.loadRoute('/\/\/{include file='route./g" -e "s/ecui.esr.loadClass(*//g" -e "s/');/.css'}\/\//g" $file".js" | java -jar ../../lib-fe/smarty4j.jar --left //{ --right }// --charset utf-8 | lessc - --plugin=less-plugin-clean-css > "../../"$output"/"$file"/"$file".css"
-	        sed -e "s/ecui.esr.loadRoute('/\/\/{include file='route./g" -e "s/ecui.esr.loadClass(*//g" -e "s/');/.html'}\/\//g" $file".js" | java -jar ../../lib-fe/smarty4j.jar --left //{ --right }// --charset utf-8 | sed -e "/<\!--$/{N;s/\n/ /;}" -e "s/  / /g" -e "s/<\!-- *\!-->//g" -e "s/^[ ]*//g" -e "s/[ ]*$//g" -e "/^$/d" -e "/<script>window.onload=/d" > "../../"$output"/"$file"/"$file".html"
+	        cd "$1/$file"
+            path="../../lib-fe/"
+	        eval "sed $reg_load -e \"s/ecui.esr.loadClass('/\/\/{include file='class./g\" -e \"s/');/.js'}\/\//g\" \"$file.js\"" | eval $tpl_proc | eval $compress_proc > "../../$output/$file/$file.js"
+            eval "sed $reg_load -e \"s/ecui.esr.loadClass(*//g\" -e \"s/');/.css'}\/\//g\" \"$file.js\"" | eval $tpl_proc | eval $css_proc > "../../$output/$file/$file.css"
+	        eval "sed $reg_load -e \"s/ecui.esr.loadClass(*//g\" -e \"s/');/.html'}\/\//g\" \"$file.js\"" | eval $tpl_proc | eval "sed $reg_comment" > "../../$output/$file/$file.html"
 	        cd ../..
 	    else
-	    	if [ ! -f $1"/"$file"/.buildignore" ]
+	    	if [ ! -f "$1/$file/.buildignore" ]
             then
-                if [ ! -d $output"/"$file"/" ]
+                if [ ! -d "$output/$file/" ]
                 then
-                    mkdir $output"/"$file"/"
+                    mkdir "$output/$file/"
                 fi
-	    		cp -R $1"/"$file"/"* $output"/"$file"/"
+	    		cp -R "$1/$file/"* "$output/$file/"
 	    	fi
 	    fi
     else
-        echo "process file-"$file
+        echo "process file-$file"
+        path="../lib-fe/"
         if [ "${file##*.}" = "js" ]
         then
             cd $1
-            sed -e "/ecui.esr.loadModule/d" -e "s/ *document.write('<script type=\"text\/javascript\" src=\([^>]*\)><\/script>');/\/\/{include file=\1}\/\//g" $file | java -jar ../lib-fe/smarty4j.jar --left //{ --right }// --charset utf-8 | java -jar ../lib-fe/webpacker.jar --mode 1 --charset utf-8 -o "../"$output"/"$file
+            eval "sed -e \"/ecui.esr.loadModule/d\" $reg_script $file" | eval $tpl_proc | eval $compress_proc > "../$output/$file"
             cd ..
         else
             if [ "${file##*.}" = "css" ]
             then
-                lessc --plugin=less-plugin-clean-css $1"/"$file > $output"/"$file
+                cd $1
+                more "$file" | eval $css_proc > "../$output/$file"
+                cd ..
             else
                 if [ "${file##*.}" = "html" ]
                 then
-                    sed -e "s/stylesheet\/less/stylesheet/g" -e "/<\!--$/{N;s/\n/ /;}" -e "s/  / /g" -e "s/<\!-- *\!-->//g" -e "s/^[ ]*//g" -e "s/[ ]*$//g" -e "/^$/d" -e "/<script>window.onload=/d" $1"/"$file > $output"/"$file
+                    eval "sed -e \"s/stylesheet\/less[^\\\"]*/stylesheet/g\" $reg_comment \"$1/$file\"" > "$output/$file"
                 else
-                    cp $1"/"$file $output"/"
+                    cp "$1/$file $output/"
                 fi
             fi
         fi
@@ -81,25 +100,39 @@ do
 done
 
 cd lib-fe
-lessc --plugin=less-plugin-clean-css common.css > "../"$output"/common.css"
-lessc --plugin=less-plugin-clean-css ecui.css > "../"$output"/ecui.css"
-sed -e "s/ *document.write('<script type=\"text\/javascript\" src=\([^>]*\)><\/script>');/\/\/{include file=\1}\/\//g" common.js | java -jar smarty4j.jar --left //{ --right }// --charset utf-8 | java -jar webpacker.jar --mode 1 --charset utf-8 -o "../"$output"/common.js"
-sed -e "s/ *document.write('<script type=\"text\/javascript\" src=\([^>]*\)><\/script>');/\/\/{include file=\1}\/\//g" ecui.js | java -jar smarty4j.jar --left //{ --right }// --charset utf-8 | java -jar webpacker.jar --mode 1 --charset utf-8 -o "../"$output"/ecui.js"
-java -jar webpacker.jar ie-es5.js --mode 1 --charset utf-8 -o "../"$output"/ie-es5.js"
-if [ ! -d "../"$output"/images/" ]
+for file in `ls`
+do
+    if [ -f $file ]
+    then
+        path=""
+        if [ "${file##*.}" = "js" ]
+        then
+            echo "process file-$file"
+            more $file | eval "sed $reg_script" | eval $tpl_proc | eval $compress_proc > "../$output/$file"
+        else
+            if [ "${file##*.}" = "css" ]
+            then
+                echo "process file-$file"
+                more $file | eval $css_proc > "../$output/$file"
+            fi
+        fi
+    fi
+done
+if [ ! -d "../$output/images/" ]
 then
-    mkdir "../"$output"/images/"
+    mkdir "../$output/images/"
 fi
-cp -R images/* "../"$output"/images/"
+cp -R images/* "../$output/images/"
 cd ..
+
+rm "$1/common"
 
 cd $output
-tar -zcvf "../"$1".tar.gz" *
+tar -zcvf "../$1.tar.gz" *
 cd ..
 
-rm -rf $output
+# rm -rf $output
 
-rm $1"/common"
 if [ $flag ]
 then
     cd lib-fe

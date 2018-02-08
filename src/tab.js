@@ -68,7 +68,7 @@ _eContainer      - 容器 DOM 元素
             titleEl.style.cssText = '';
             el.appendChild(titleEl);
 
-            ui.Control.call(this, el, options);
+            ui.Control.constructor.call(this, el, options);
 
             this.$setBody(titleEl);
             this.$initItems();
@@ -92,7 +92,7 @@ _eContainer      - 容器 DOM 元素
                         containerEl.className = '';
                     }
 
-                    ui.Item.call(this, el, options);
+                    ui.Item.constructor.call(this, el, options);
 
                     if (containerEl) {
                         if (options.parent) {

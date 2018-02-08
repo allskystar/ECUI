@@ -40,7 +40,7 @@ _ePlaceHolder - 为空时的提示信息标签
         ui.InputControl,
         'ui-text',
         function (el, options) {
-            ui.InputControl.call(this, el, options);
+            ui.InputControl.constructor.call(this, el, options);
 
             this._bTrim = options.trim !== false;
             if (options.len) {

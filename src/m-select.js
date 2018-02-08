@@ -18,9 +18,9 @@
         }
     }
 
-    ui.MScroll = core.inherits(
+    ui.MSelect = core.inherits(
         ui.Control,
-        'ui-mobile-scroll',
+        'ui-mobile-select',
         function (el, options) {
             var values = options.values,
                 optionsEl = el;
@@ -42,14 +42,14 @@
                         break;
                     }
                 }
-                el.innerHTML = '<div class="ui-mobile-scroll-mask"></div><div class="ui-mobile-scroll-options">' + ret.join('') + '</div>';
+                el.innerHTML = '<div class="ui-mobile-select-mask"></div><div class="ui-mobile-select-options">' + ret.join('') + '</div>';
                 optionsEl = el.lastChild;
             } else {
                 el = dom.insertBefore(
                     dom.create(
                         {
                             className: el.className,
-                            innerHTML: '<div class="ui-mobile-scroll-mask"></div>',
+                            innerHTML: '<div class="ui-mobile-select-mask"></div>',
                             style: {
                                 cssText: el.style.cssText
                             }
@@ -57,12 +57,12 @@
                     ),
                     el
                 );
-                optionsEl.className = 'ui-mobile-scroll-options';
+                optionsEl.className = 'ui-mobile-select-options';
                 optionsEl.style.cssText = '';
                 el.appendChild(optionsEl);
             }
 
-            ui.Control.call(this, el, options);
+            ui.Control.constructor.call(this, el, options);
 
             this._nRadius = Math.floor(options.optionSize / 2);
             this.$setBody(optionsEl);
@@ -71,14 +71,50 @@
         {
             Item: core.inherits(
                 ui.Item,
-                'ui-mobile-scroll-item'
+                'ui-mobile-select-item'
             ),
             $activate: function (event) {
                 ui.Control.prototype.$activate.call(this, event);
+
+                var body = this.getBody();
+
                 if (this._oHandler) {
                     this._oHandler();
                 }
-                core.drag(this, event, {x: 0, y: this.getBody().offsetTop, left: 0, right: 0, top: this._nMinTop, bottom: this._nMaxBottom});
+                core.drag(
+                    this,
+                    event,
+                    {
+                        el: body,
+                        x: 0,
+                        y: body.offsetTop,
+                        left: 0,
+                        right: 0,
+                        top: this._nMinTop,
+                        bottom: this._nMaxBottom,
+                        inertia: function () {
+                            var speed = core.getYSpeed();
+                            if (!speed) {
+                                return 0;
+                            }
+
+                            var y = util.toNumber(body.style.top),
+                                sy = speed * 0.5 / 2,  // 计划0.5秒动画结束
+                                expectY = Math.round(y + sy);
+
+                            if (expectY < this._nTop) {
+                                expectY = Math.max(this._nMinTop, expectY);
+                            } else if (expectY > this._nBottom) {
+                                expectY = Math.min(this._nMaxBottom, expectY);
+                            } else {
+                                expectY = Math.round(expectY / this._nItemHeight) * this._nItemHeight;
+                            }
+                            //计算实际结束时间
+                            return (expectY - y) * 2 / speed;
+                        },
+                        limit: [this._nTop, 0, this._nBottom, 0, this._nItemHeight]
+                    }
+                );
             },
             $alterItems: function () {
                 this._nTop = -this._nItemHeight * (this.getLength() - this._nRadius - 1);
@@ -95,63 +131,6 @@
                 this._nItemHeight = this.getItem(0).getMain().offsetHeight;
             },
             $change: util.blank,
-            $deactivate: function (event) {
-                ui.Control.prototype.$deactivate.call(this, event);
-
-                var speed = core.getYSpeed() / 10,
-                    control = this,
-                    body = this.getBody(),
-                    expectY = Math.round(util.toNumber(body.style.top) + speed),
-                    y;
-
-                if (expectY < this._nTop) {
-                    y = Math.max(this._nMinTop, expectY);
-                    expectY = this._nTop;
-                } else if (expectY > this._nBottom) {
-                    y = Math.min(this._nMaxBottom, expectY);
-                    expectY = this._nBottom;
-                } else {
-                    y = Math.round(expectY / this._nItemHeight) * this._nItemHeight;
-                    expectY = undefined;
-                }
-
-                this._oHandler = util.timer(function () {
-                    control._oHandler = core.effect.grade(
-                        'this.style.top->' + y,
-                        1000,
-                        {
-                            $: body,
-                            onstep: function (percent) {
-                                var top = util.toNumber(body.style.top);
-                                setSelected(control, control.getItem(Math.round(-top / control._nItemHeight) + control._nRadius));
-                                if (percent === 1 || (expectY !== undefined && Math.abs(top - y) < control._nItemHeight / 2)) {
-                                    control._oHandler();
-                                    if (expectY !== undefined) {
-                                        control._oHandler = core.effect.grade(
-                                            'this.style.top->' + expectY,
-                                            500,
-                                            {
-                                                $: body,
-                                                onstep: function (percent) {
-                                                    setSelected(control, control.getItem(Math.round(-util.toNumber(body.style.top) / control._nItemHeight) + control._nRadius));
-                                                    if (percent === 1) {
-                                                        core.triggerEvent(control, 'change', event);
-                                                    }
-                                                }
-                                            }
-                                        );
-                                    } else {
-                                        core.triggerEvent(control, 'change', event);
-                                    }
-                                }
-                            }
-                        },
-                        function (percent) {
-                            return 1 - Math.pow(1 - percent, 4);
-                        }
-                    );
-                }, 0);
-            },
             $dispose: function () {
                 this._oHandler = null;
                 ui.Control.prototype.$dispose.call(this);

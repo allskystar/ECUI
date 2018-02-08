@@ -758,7 +758,7 @@ less.registerStylesheets = function () {
     less.sheets = [];
 
     for (var i = 0; i < links.length; i++) {
-        if (links[i].rel === 'stylesheet/less' || (links[i].rel.match(/stylesheet/) &&
+        if (/^stylesheet\/less(\{[^}]+\})?$/.test(links[i].rel) || (links[i].rel.match(/stylesheet/) &&
             (links[i].type.match(typePattern)))) {
             less.sheets.push(links[i]);
         }
@@ -790,6 +790,18 @@ less.refresh = function (reload, modifyVars, clearFileCache) {
             less.logger.info("loading " + sheet.href + " from cache.");
         } else {
             less.logger.info("rendered " + sheet.href + " successfully.");
+        }
+        if (/^stylesheet\/less(\{[^}]+\})?$/.test(sheet.rel)) {
+            var options = JSON.parse(+RegExp.$1);
+            css = css.replace(
+                /(\w+)\(([^)]+)\)/g,
+                function (match, name, value) {
+                    if (less.funcs && less.funcs[name]) {
+                        return less.funcs[name](value, options);
+                    }
+                    return match;
+                }
+            );
         }
         ecui.dom.createStyleSheet(css);
         less.logger.info("css for " + sheet.href + " generated in " + (new Date() - endTime) + 'ms');

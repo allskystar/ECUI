@@ -2,12 +2,11 @@
 ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECUI自己实现了适配器中对应的接口，可以将适配器切换至其它第三方库。
 */
 //{if 0}//
-var ecui;
 (function () {
 //{/if}//
     var //{if 1}//undefined,//{/if}//
         //{if 1}//JAVASCRIPT = 'javascript',//{/if}//
-
+        patch = ecui,
         isMobile = /(Android|iPhone|iPad|UCWEB|Fennec|Mobile)/i.test(navigator.userAgent),
         isStrict = document.compatMode === 'CSS1Compat',
         isWebkit = /webkit/i.test(navigator.userAgent),
@@ -1231,6 +1230,24 @@ var ecui;
     try {
         document.execCommand('BackgroundImageCache', false, true);
     } catch (ignore) {
+    }
+
+    if (FeatureFlags.SYSTEM_PATCH_1) {
+        (function () {
+            function extend(des, src) {
+                if (src) {
+                    util.extend(des, src);
+                }
+            }
+
+            if (patch) {
+                extend(core.dom, patch.dom);
+                extend(core.ext, patch.ext);
+                extend(core.io, patch.io);
+                extend(core.util, patch.util);
+                patch = null;
+            }
+        }());
     }
 //{if 0}//
 }());

@@ -69,7 +69,7 @@ _bDefault  - 默认的选中状态
         function (el, options) {
             util.setDefault(options, 'inputType', 'radio');
 
-            ui.InputControl.call(this, el, options);
+            ui.InputControl.constructor.call(this, el, options);
 
             // 保存节点选中状态，用于修复IE6/7下移动DOM节点时选中状态发生改变的问题
             this._bDefault = this.getInput().defaultChecked;

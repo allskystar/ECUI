@@ -48,22 +48,17 @@ _aStatus            - 控件当前的状态集合
      */
     function alterParent(control, parent, parentElement) {
         var oldParent = control._cParent,
-            el = control.getOuter(),
-            event;
+            el = control.getOuter();
 
         // 触发原来父控件的移除子控件事件
         if (parent !== oldParent) {
             if (oldParent) {
-                event = core.createEvent('remove');
-                event.child = control;
-                if (!core.triggerEvent(oldParent, 'remove', event)) {
+                if (!core.triggerEvent(oldParent, 'remove', {child: control})) {
                     return;
                 }
             }
             if (parent) {
-                event = core.createEvent('append');
-                event.child = control;
-                if (!core.triggerEvent(parent, 'append', event)) {
+                if (!core.triggerEvent(parent, 'append', {child: control})) {
                     parent = parentElement = null;
                 }
             }
@@ -954,8 +949,7 @@ _aStatus            - 控件当前的状态集合
                         dom.addClass(this.getMain(), 'ui-disabled');
                     }
 
-                    var el = this.getOuter(),
-                        event = core.createEvent('ready');
+                    var el = this.getOuter();
 
                     if (el.style.display === 'none') {
                         this.$hide();
@@ -966,8 +960,7 @@ _aStatus            - 控件当前的状态集合
 
                     if (waitReadyList === null) {
                         // 页面已经加载完毕，直接运行 $ready 方法
-                        event.options = options;
-                        core.triggerEvent(this, 'ready', event);
+                        core.triggerEvent(this, 'ready', {options: options});
                     } else {
                         if (!waitReadyList) {
                             // 页面未加载完成，首先将 $ready 方法的调用存放在调用序列中
@@ -977,8 +970,7 @@ _aStatus            - 控件当前的状态集合
                             util.timer(
                                 function () {
                                     waitReadyList.forEach(function (item) {
-                                        event.options = item.options;
-                                        core.triggerEvent(item.control, 'ready', event);
+                                        core.triggerEvent(item.control, 'ready', {options: item.options});
                                     });
                                     waitReadyList = null;
                                 }

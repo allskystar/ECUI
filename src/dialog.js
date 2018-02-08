@@ -79,7 +79,7 @@ _uClose     - 关闭按钮
             bodyEl.style.cssText = '';
             el.appendChild(bodyEl);
 
-            ui.Control.call(this, el, options);
+            ui.Control.constructor.call(this, el, options);
 
             this._uClose = core.$fastCreate(this.Close, el.firstChild, this);
             this._uTitle = core.$fastCreate(this.Title, titleEl, this, {userSelect: false});

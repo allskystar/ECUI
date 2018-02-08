@@ -48,7 +48,7 @@
                 el.appendChild(img);
             }
 
-            ui.Control.call(this, el, options);
+            ui.Control.constructor.call(this, el, options);
         }
     );
 }());

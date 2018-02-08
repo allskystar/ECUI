@@ -46,54 +46,6 @@
 }());*/
 
 (function () {
-    function doLoad() {
-        var el = ecui.$('LESS-FILE-PROTOCOL');
-        if (!el) {
-            el = document.createElement('IFRAME');
-            el.id = 'LESS-FILE-PROTOCOL';
-            el.style.cssText = 'position:absolute;width:1px;height:1px;left:-10px;top:-10px';
-            document.body.appendChild(el);
-        }
-
-        var path = waits[0][0],
-            callback = waits[0][1];
-
-        location.hash = '';
-        path = path.split('?');
-        if (path[0].slice(-5) !== '.html') {
-            path[0] += '.html';
-        }
-        if (path[1]) {
-            path.push('url=' + encodeURIComponent(loc));
-        } else {
-            path[1] = 'url=' + encodeURIComponent(loc);
-        }
-        el.src = path[0] + '?' + path.slice(1).join('&');
-        var stop = ecui.util.timer(function () {
-            if (location.hash && location.hash !== '#') {
-                stop();
-                callback(
-                    decodeURIComponent(location.hash.slice(1)),
-                    {
-                        getResponseHeader: function (name) {
-                            return {
-                                'Last-Modified': new Date(1970, 0, 1).toString()
-                            }[name];
-                        }
-                    }
-                );
-                waits.splice(0, 1);
-                if (waits.length) {
-                    doLoad();
-                } else {
-                    location.hash = oldLocation;
-                    ecui.esr.redirect = oldRedirectFn;
-                    ecui.resume();
-                }
-            }
-        }, -100);
-    }
-
     /**
      * 动态加载模块，用于测试。
      * @public
@@ -104,30 +56,56 @@
         moduleCallback,
         moduleRoute,
         loc = location.href + '#',
-        waits = [],
-        oldRedirectFn = ecui.esr.redirect,
-        oldLoadScriptFn = ecui.io.loadScript,
-        oldLocation;
+        waits = {},
+        oldLoadScriptFn = ecui.io.loadScript;
 
     loc = loc.slice(0, loc.indexOf('#'));
 
     if (loc.slice(0, 5) === 'file:') {
         ecui.io.ajax = function (url, options) {
             ecui.dom.ready(function () {
-                if (url.slice(0, 5) === 'file:') {
-                    url = url.slice(loc.lastIndexOf('/') + 1);
-                } else if (url.charAt(0) === '/') {
-                    url = url.slice(1);
+                if (url.slice(0, 5) !== 'file:') {
+                    url = loc.slice(0, loc.lastIndexOf('/') + (url.charAt(0) === '/' ? 0 : 1)) + url;
                 }
-                waits.push([url, options.onsuccess]);
-                if (waits.length === 1) {
-                    ecui.pause();
-                    oldLocation = location.hash;
-                    ecui.esr.redirect = ecui.util.blank;
-                    doLoad();
+
+                url = url.slice(7).split('?')[0];
+                if (url.slice(-5) !== '.html') {
+                    url += '.html';
                 }
+
+                if (waits[url]) {
+                    waits[url].push(options.onsuccess);
+                } else {
+                    waits[url] = [options.onsuccess];
+                }
+
+                var el = document.createElement('IFRAME');
+                el.id = url;
+                el.src = url;
+                el.style.cssText = 'position:absolute;width:1px;height:1px;left:-10px;top:-10px';
+                document.body.appendChild(el);
             });
         };
+
+        ecui.dom.addEventListener(window, 'message', function (event) {
+            var url = event.data.url;
+            if (waits[url]) {
+                waits[url].forEach(function (item) {
+                    item(
+                        event.data.text,
+                        {
+                            getResponseHeader: function (name) {
+                                return {
+                                    'Last-Modified': new Date(1970, 0, 1).toString()
+                                }[name];
+                            }
+                        }
+                    );
+                });
+                delete waits[url];
+                ecui.dom.remove(ecui.$(url));
+            }
+        });
     }
 
     ecui.io.loadScript = function (url, callback, options) {
@@ -182,7 +160,7 @@
                             }
                         });
                     }
-                }, -50);
+                }, -1);
             }
         });
     }
@@ -196,4 +174,19 @@
             load();
         }
     };
+
+    var lastUpdate;
+    ecui.util.timer(function () {
+        ecui.io.ajax('update.html', {
+            onsuccess: function (data) {
+                if (lastUpdate) {
+                    if (lastUpdate !== data) {
+                        location.reload();
+                    }
+                } else {
+                    lastUpdate = data;
+                }
+            }
+        });
+    }, -3000);
 }());

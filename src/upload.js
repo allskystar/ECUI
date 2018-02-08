@@ -54,7 +54,7 @@
         ui.Control,
         'ui-upload',
         function (el, options) {
-            ui.Control.call(this, el, options);
+            ui.Control.constructor.call(this, el, options);
             this._sUrl = options.url;
             this._eFile = el.getElementsByTagName('INPUT')[0];
         },

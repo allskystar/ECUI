@@ -1,25 +1,37 @@
 #! /bin/bash
 function scandir() {
-    for file in `ls $1`
+    for file in `ls`
     do
-        if [ ! $1 = "." ]
-        then
-            file=$1"/"$file
-        fi
         if [ -d $file ]
         then
             cd $file
-            scandir .
+            scandir $1
             cd ..
         else
             if [ "${file##*.}" = "css" ]
             then
-                echo $file"->"$file".html"
-                rm $file".html"
-                ln $file $file".html"
+                if [ $1 = 'clean' ]
+                then
+                    if [ -f $file".html" ]
+                    then
+                        echo "remove "$file".html"
+                        rm $file".html"
+                    fi
+                else
+                    if [ ! -f $file".html" ]
+                    then
+                        echo $file"->"$file".html"
+                        ln $file $file".html"
+                    fi
+                fi
             fi
         fi
     done
 }
 
-scandir .
+if [ $1 ]
+then
+    scandir $1
+else
+    scandir build
+fi
