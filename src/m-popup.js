@@ -1,5 +1,5 @@
 /*
-弹出操作集合，提供了基本的点击显示/关闭操作，通过将 ecui.ui.Popup 对象下的方法复制到类的 prototype 属性下继承接口，最终对象要正常使用需要通过 setPopup 方法设置自己关联的弹出层。
+移动端弹出操作集合，提供了从4个不同的方向飞入界面指定位置的操作，弹出层控件支持 enter 与 scale 初始化选项。
 */
 (function () {
 //{if 0}//
@@ -8,91 +8,74 @@
         ui = core.ui,
         util = core.util;
 //{/if}//
-    function setPopup(control) {
-        var view = util.getView(),
-            data = namedMap[control.getUID()],
-            style = control.constructor.POPUP.getOuter().style,
-            width = view.width * data[1],
-            height = view.height * data[0];
-
-        control.constructor.POPUP.setSize(view.width, view.height);
-
-        style.backgroundColor = 'white';
-        style.position = 'fixed';
-        style.overflow = 'auto';
-        style.top = height + 'px';
-        style.left = width + 'px';
-        style.display = '';
-        ecui.effect.grade('this.style.left->' + (width * data[2]) + ';this.style.top->' + (height * data[2]), 1000, {$: control.constructor.POPUP.getOuter()});
-    }
-
     var namedMap = {},
         position = {
             top: [-1, 0],
             bottom: [1, 0],
             left: [0, -1],
             right: [0, 1]
-        };
+        },
+        locked;
 
     ui.MPopup = {
         NAME: '$MPopup',
 
         constructor: function (el, options) {
-            var data = namedMap[this.getUID()] = position[options.enter || 'right'] || position.right,
-                scale = options.scale;
-            data[2] = scale ? Math.max(0, 1 - (scale.indexOf('%') > 0 ? +scale.slice(0, -1) / 100 : +scale)) : 0;
-
-            if (!this.constructor.POPUP) {
-                this.constructor.POPUP = core.$fastCreate(
-                    ui.Control,
-                    document.body.appendChild(
-                        dom.create(
-                            'DIV',
-                            {
-                                style: {
-                                    display: 'none'
-                                }
-                            }
-                        )
-                    ),
-                    ''
-                );
-            }
+            namedMap[this.getUID()] = namedMap[this.getUID()] || {};
+            namedMap[this.getUID()].enter = (position[options.enter || 'right'] || position.right).concat([options.scale ? Math.max(0, 1 - (options.scale.indexOf('%') > 0 ? +options.scale.slice(0, -1) / 100 : +options.scale)) : 0]);
         },
 
         Methods: {
             /**
              * @override
              */
-            $cache: function (style, cacheSize) {
-                this.$MPopup.$cache.call(this, style, cacheSize);
-                if (this.constructor.POPUP) {
-                    this.constructor.POPUP.cache(true, true);
-                }
-            },
-
-            /**
-             * @override
-             */
             $click: function (event) {
-                this.$MPopup.$click.call(this, event);
+                if (!locked) {
+                    var view = util.getView(),
+                        data = namedMap[this.getUID()],
+                        popup = this.getPopup(),
+                        el = popup.getOuter(),
+                        style = el.style,
+                        width = view.width * data.enter[1],
+                        height = view.height * data.enter[0];
 
-                var el = this.constructor.POPUP.getOuter();
-                setPopup(this);
+                    if (!dom.getParent(el)) {
+                        // 第一次显示时需要进行下拉选项部分的初始化，将其挂载到 DOM 树中
+                        document.body.appendChild(el);
+                        popup.cache(true, true);
+                    }
 
-                if (!dom.getParent(el)) {
-                    // 第一次显示时需要进行下拉选项部分的初始化，将其挂载到 DOM 树中
-                    document.body.appendChild(el);
-                    this.constructor.POPUP.cache(true, true);
+                    this.$MPopup.$click.call(this, event);
+
+                    if (dom.contain(this.getOuter(), event.target)) {
+                        style.top = (document.body.scrollTop + height) + 'px';
+                        style.left = (document.body.scrollLeft + width) + 'px';
+                        popup.setSize(view.width, view.height);
+
+                        locked = true;
+                        ecui.effect.grade(
+                            'round:this.style.left->' + (document.body.scrollLeft + width * data.enter[2]) + ';round:this.style.top->' + (document.body.scrollTop + height * data.enter[2]),
+                            1000,
+                            {
+                                $: el,
+                                onstep: function (percent) {
+                                    if (percent >= 1) {
+                                        locked = false;
+                                    }
+                                }
+                            }
+                        );
+
+                        popup.show();
+                    }
                 }
-
-                this.constructor.POPUP.show();
             },
 
             /**
              * @override
              */
             $dispose: function () {
+                this.setPopup();
                 delete namedMap[this.getUID()];
                 this.$MPopup.$dispose.call(this);
             },
@@ -102,7 +85,37 @@
              */
             $repaint: function (event) {
                 this.$MPopup.$repaint.call(this, event);
-                setPopup(this);
+
+                var popup = this.getPopup();
+                if (popup.isShow()) {
+                    var view = util.getView();
+                    popup.setSize(view.width, view.height);
+                }
+            },
+
+            /**
+             * 获取控件的弹出层。
+             * @public
+             *
+             * @return {ecui.ui.Control} 弹出层控件
+             */
+            getPopup: function () {
+                return namedMap[this.getUID()].popup;
+            },
+
+            /**
+             * 设置控件的弹出层。
+             * @public
+             *
+             * @param {ecui.ui.Control} control 弹出层控件
+             */
+            setPopup: function (control) {
+                namedMap[this.getUID()] = namedMap[this.getUID()] || {};
+                if (control) {
+                    namedMap[this.getUID()].popup = control;
+                } else {
+                    delete namedMap[this.getUID()].popup;
+                }
             }
         }
     };

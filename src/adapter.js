@@ -7,6 +7,8 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
     var //{if 1}//undefined,//{/if}//
         //{if 1}//JAVASCRIPT = 'javascript',//{/if}//
         patch = ecui,
+        fontSizeCache = [],
+        loadScriptCount = 0,
         isMobile = /(Android|iPhone|iPad|UCWEB|Fennec|Mobile)/i.test(navigator.userAgent),
         isStrict = document.compatMode === 'CSS1Compat',
         isWebkit = /webkit/i.test(navigator.userAgent),
@@ -14,9 +16,12 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
         ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined,
         firefoxVersion = /firefox\/(\d+\.\d)/i.test(navigator.userAgent) ? +RegExp.$1 : undefined,
         operaVersion = /opera\/(\d+\.\d)/i.test(navigator.userAgent) ? +RegExp.$1 : undefined,
-        safariVersion = /(\d+\.\d)(\.\d)?\s+safari/i.test(navigator.userAgent) && !/chrome/i.test(navigator.userAgent) ? +RegExp.$1 : undefined;
+        safariVersion = /(\d+\.\d)(\.\d)?\s+.*safari/i.test(navigator.userAgent) && !/chrome/i.test(navigator.userAgent) ? +RegExp.$1 : undefined;
 
     ecui = {
+//{if 0}//
+        fontSizeCache: fontSizeCache,
+//{/if}//
         /**
          * 返回指定id的 DOM 对象。
          * @public
@@ -58,11 +63,12 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              * @param {Object} obj 响应事件的对象
              * @param {string} type 事件类型
              * @param {Function} func 事件处理函数
+             * @param {Object|boolean} options 对支持 addEventListener 的浏览器有效，IE9以下无效
              */
             addEventListener: ieVersion < 9 ? function (obj, type, func) {
                 obj.attachEvent('on' + type, func);
-            } : function (obj, type, func) {
-                obj.addEventListener(type, func, true);
+            } : function (obj, type, func, options) {
+                obj.addEventListener(type, func, options !== undefined ? options : true);
             },
 
             /**
@@ -154,6 +160,8 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                 }
 
                 document.head.appendChild(el);
+
+                util.adjustFontSize([document.styleSheets[document.styleSheets.length - 1]]);
             },
 
             /**
@@ -475,11 +483,12 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              * @param {Object} obj 响应事件的对象
              * @param {string} type 事件类型
              * @param {Function} func 事件处理函数
+             * @param {Object|boolean} options 对支持 addEventListener 的浏览器有效，IE9以下无效
              */
             removeEventListener: ieVersion < 9 ? function (obj, type, func) {
                 obj.detachEvent('on' + type, func);
-            } : function (obj, type, func) {
-                obj.removeEventListener(type, func, true);
+            } : function (obj, type, func, options) {
+                obj.removeEventListener(type, func, options !== undefined ? options : true);
             },
 
             /**
@@ -697,6 +706,10 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              */
             loadScript: function (url, callback, options) {
                 function removeScriptTag() {
+                    loadScriptCount--;
+                    if (stop) {
+                        stop();
+                    }
                     scr.onload = scr.onreadystatechange = scr.onerror = null;
                     if (scr && scr.parentNode) {
                         scr.parentNode.removeChild(scr);
@@ -704,6 +717,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                     scr = null;
                 }
 
+                loadScriptCount++;
                 options = options || {};
 
                 if (!options.cache) {
@@ -725,11 +739,8 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                     if (scr.readyState === undefined || scr.readyState === 'loaded' || scr.readyState === 'complete') {
                         scriptLoaded = 1;
                         try {
-                            if (callback) {
+                            if (callback && loadScriptCount === 1) {
                                 callback();
-                            }
-                            if (stop) {
-                                stop();
                             }
                         } finally {
                             removeScriptTag();
@@ -838,13 +849,42 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                     },
 
                     send: function (data) {
-                        socket.send(data);
+                        if (socket.readyState !== 1) {
+                            util.timer(this.send, 100, this, data);
+                        } else {
+                            socket.send(data);
+                        }
                     }
                 };
             }
         },
         ui: {},
         util: {
+            /*
+             * 自适应调整字体大小。
+             * @public
+             *
+             * @param {Array} sheets 样式对象列表
+             */
+            adjustFontSize: function (sheets) {
+                var fontSize = util.toNumber(dom.getStyle(dom.getParent(document.body), 'font-size'));
+                sheets.forEach(function (item) {
+                    item = Array.prototype.slice.call(item.rules || item.cssRules);
+                    for (var i = 0, rule; rule = item[i++]; ) {
+                        if (rule.cssRules && rule.cssRules.length) {
+                            item = item.concat(Array.prototype.slice.call(rule.cssRules));
+                        } else {
+                            var value = rule.style['font-size'];
+                            if (value && value.slice(-3) === 'rem') {
+                                value = +value.slice(0, -3);
+                                fontSizeCache.push([rule.style, value]);
+                                rule.style['font-size'] = (Math.round(fontSize * value / 2) * 2) + 'px';
+                            }
+                        }
+                    }
+                });
+            },
+
             /*
              * 空函数。
              * blank 方法不应该被执行，也不进行任何处理，它用于提供给不需要执行操作的事件方法进行赋值，与 blank 类似的用于给事件方法进行赋值，而不直接被执行的方法还有 cancel。
@@ -903,6 +943,21 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                     }
                 }
                 return target;
+            },
+
+            /**
+             * 格式化日期对象。
+             * @public
+             *
+             * @param {Date} date 日期对象
+             * @param {string} format 日期格式
+             * @return {string} 格式化日期字符串
+             */
+            formatDate: function (date, format) {
+                if (date) {
+                    return date.getTime();
+                }
+                return '';
             },
 
             /**
@@ -1206,7 +1261,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
             list = [];
 
         if (document.addEventListener && !operaVersion) {
-            document.addEventListener('DOMContentLoaded', loadedHandler, false);
+            dom.addEventListener(document, 'DOMContentLoaded', loadedHandler);
         } else if (ieVersion && window === top) {
             checkLoaded();
         }
@@ -1232,23 +1287,21 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
     } catch (ignore) {
     }
 
-    if (FeatureFlags.SYSTEM_PATCH_1) {
-        (function () {
-            function extend(des, src) {
-                if (src) {
-                    util.extend(des, src);
-                }
+    (function () {
+        function extend(des, src) {
+            if (src) {
+                util.extend(des, src);
             }
+        }
 
-            if (patch) {
-                extend(core.dom, patch.dom);
-                extend(core.ext, patch.ext);
-                extend(core.io, patch.io);
-                extend(core.util, patch.util);
-                patch = null;
-            }
-        }());
-    }
+        if (patch) {
+            extend(core.dom, patch.dom);
+            extend(core.ext, patch.ext);
+            extend(core.io, patch.io);
+            extend(core.util, patch.util);
+            patch = null;
+        }
+    }());
 //{if 0}//
 }());
 //{/if}//

@@ -2,16 +2,3 @@
 .ui-button {
     .inline-block();
 }
-
-.blue-btn {
-    background-color: #368cda;
-    border: 1px solid #368cda;
-    color: #fff;
-    border-radius: 25px;
-    height:30px;
-    line-height: 30px;
-    width: 80px;
-    text-align: center;
-    cursor: pointer;
-    font-size: 14px;
-}

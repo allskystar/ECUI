@@ -1,0 +1,33 @@
+@charset "utf-8";
+
+.inline-block() {
+	display: inline-block;
+	*display: inline;
+	*zoom: 1;
+}
+@treeNode: #2b2b3b;/* 树底色 */
+@treeNodeHover: #242432;/* 树节点选中底色 */
+@disablBackground: #eff2f7;/* 禁用底色 */
+@logo: #368cda;/* logo底色 */
+@listBorder: #a9d3fa;/* 列表边框色 */
+@listBackground: #f7fcff; /* 列表底色 */
+
+/* fontsize */
+@fontFamily:"'Helvetica Neue', 'Microsoft Yahei','PingFang SC'";
+
+
+/* color */
+@text: #495362;/* 正文 */
+@contTitle:#8492a6;/* 类型头 */
+@treeUnFocus: #8492a6;/* 树未选中文字 */
+@placeholder: #c0ccda;/* 输入框提示文字 */
+@link: #368cda;/* 链接文字 */
+@warning: #d0021b;/* 警示、出错文字 */
+
+
+/* border-color */
+@border-color-primary: #acbaca;
+@border-color-active: #368cda;
+@border-color-focus: #368cda;
+@border-color-hover: #8492a6;
+@border-color-disabled: #e0e6ed;

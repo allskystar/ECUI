@@ -139,6 +139,18 @@ daikuan.util = {
             }
         }
         return newobj;
+    },
+    unique: function(array) {
+        var ret = [];
+        if (!(array instanceof Array)) {
+            return array;
+        }
+        for (var i = 0; i < array.length; i++) {
+            if (ret.indexOf(array[i]) < 0) {
+                ret.push(array[i]);
+            }
+        }
+        return ret;
     }
 };
 
@@ -152,8 +164,8 @@ daikuan.getCity = function(code, city_data) {
         area = code.slice(0, 6),
         arr = [];
     arr.push(city_data[pro]);
-    (code.slice(2,4) != '00') && arr.push(city_data[city]);
-    (code.slice(4,6) != '00') && arr.push(city_data[area]);
+    (code.slice(2,4) != '00') && arr.push(city_data[city] || '');
+    (code.slice(4,6) != '00') && arr.push(city_data[area] || '');
     return arr;
 };
 
@@ -199,6 +211,60 @@ daikuan.showHint = function (type, msg) {
     }, 2000)
 };
 
+// 录入表单反显数据
+daikuan.setEditFormValue = function (data, form) {
+    var elements = form.elements;
+    var ignore = [], arr_obj_ignore = [];
+    for (var i = 0, item; item = elements[i++]; ) {
+        var name = item.name;
+        // 使用ecui.util.parseValue解析数据，处理ecui.esr.CreateObject创建的对象数据的参数回填
+        var value = ecui.util.parseValue(name, data) + '';
+        if (name && value !== undefined) {
+            if (ignore.indexOf(name.split('.')[0]) === -1) {
+                var _control = item.getControl && item.getControl();
+                if (_control) {
+                    if (_control instanceof ecui.ui.Radio) {
+                        _control.setChecked(value === _control.getValue());
+                    } else if (_control instanceof ecui.ui.Checkbox) {
+                        _control.setChecked(value.indexOf(_control.getValue()) !== -1);
+                    } else if (_control instanceof ecui.esr.CreateArray) {
+                        if (elements[name][1]) {
+                            // 获取与ecui.esr.CreateArray控件的name相同第一个input元素
+                            var control = elements[name][1] && elements[name][1].getControl && elements[name][1].getControl();
+                            // 忽略Array复杂数据结构处理
+                            if (!(control instanceof ecui.ui.Checkbox)) {
+                                ignore.push(name);
+                            }
+                        }
+                    } else if (_control instanceof ecui.esr.CreateObject) {
+                        ignore.indexOf(name) !== -1 && arr_obj_ignore.push(name);
+                    } else {
+                        _control.setValue(value);
+                    }
+
+                } else {
+                    item.value = value;
+                }
+            // 对象数组 数据 不做任何处理 ecui.esr.CreateArray 和 ecui.esr.CreateObject 同时使用
+            } else if (arr_obj_ignore.indexOf(name.split('.')[0]) === -1) {
+                // return;
+            } else {
+                // ecui.esr.CreateArray数组回填时index减去ecui.esr.CreateArray本身input表单元素
+                value = ecui.util.parseValue(name, data);
+                value = value && value.length ? value[Array.prototype.slice.call(elements[name]).indexOf(item) - 1] : '';
+                if (item.getControl) {
+                    var control = item.getControl();
+                    if (!(control instanceof ecui.esr.CreateObject)) {
+                        item.getControl().setValue(value);
+                    }
+                } else {
+                    item.value = value;
+                }
+            }
+        }
+    }
+};
+
 // 搜索数据回填表单数据
 daikuan.setFormValue = function (context, form, searchParm) {
     var elements = form.elements;
@@ -210,12 +276,75 @@ daikuan.setFormValue = function (context, form, searchParm) {
             }
             var _control = item.getControl && item.getControl();
             if (_control) {
-                _control.setValue(searchParm[name] || '');
+                if (_control instanceof ecui.ui.Radio) {
+                    _control.setChecked(searchParm[name] === _control.getValue());
+                } else if (_control instanceof ecui.ui.Checkbox) {
+                    _control.setChecked(searchParm[name].indexOf(_control.getValue()) !== -1);
+                } else {
+                    _control.setValue(searchParm[name] || '');
+                }
+
             } else {
-                form.elements[name].value = searchParm[name] || '';
+                item.value = searchParm[name] || '';
             }
         }
     }
+};
+
+// 清空表单数据
+daikuan.resetFormValue = function (form) {
+    var elements = form.elements;
+    for (var i = 0, item; item = elements[i++]; ) {
+        var name = item.name;
+        if (name) {
+            var _control = item.getControl && item.getControl();
+            if (_control) {
+                if (_control instanceof ecui.ui.Radio) {
+                    _control.setChecked(false);
+                } else if (_control instanceof ecui.ui.Checkbox) {
+                    _control.setChecked(false);
+                } else if (_control instanceof ecui.esr.CreateArray || _control instanceof ecui.esr.CreateObject) {
+                    // 如果是ecui.esr.CreateArray 和 ecui.esr.CreateObject元素，不做任何处理
+                } else {
+                    _control.setValue('');
+                }
+            } else {
+                if (!ecui.dom.hasClass(item, 'ui-hide')) {
+                    item.value = '';
+                }
+            }
+        }
+    }
+};
+
+// 获取表单数据设置searchParam数据
+daikuan.setSearchParam = function(searchParm, form) {
+    Array.prototype.slice.call(form.elements).forEach(function(item) {
+        if (item.name) {
+            var _control = ecui.findControl(item);
+            if (_control) {
+                if (_control instanceof ecui.ui.Radio) {
+                    if (Array.prototype.indexOf.call(form.elements[item.name], _control.getInput()) === 0) {
+                        searchParm[item.name] = '';
+                    }
+                    if (_control.isChecked()) {
+                        searchParm[item.name] = _control.getValue();
+                    }
+                } else if (_control instanceof ecui.ui.Checkbox) {
+                    if (Array.prototype.indexOf.call(form.elements[item.name], _control.getInput()) === 0) {
+                        searchParm[item.name] = [];
+                    }
+                    if (_control.isChecked()) {
+                        searchParm[item.name].push(_control.getValue());
+                    }
+                }  else {
+                    searchParm[item.name] = _control.getValue();
+                }
+            } else {
+                searchParm[item.name] = item.value;
+            }
+        }
+    });
 };
 
 // 初始化dialog控件
@@ -224,9 +353,10 @@ daikuan.initDialog = function (container, targetName, options) {
     container.innerHTML = ecui.esr.getEngine().render(targetName, options);
     ecui.init(container);
     return container.children[0].getControl();
-}
+};
 
 // 复制text到剪切板中
+// 在异步ajax请求中使用document.execCommand('copy')无效，同步的ajax请求中正常使用
 daikuan.copy = function (text) {
     var textarea = document.createElement("textarea");
     textarea.style.position = 'fixed';
@@ -243,4 +373,37 @@ daikuan.copy = function (text) {
     textarea.select();
     var flag = document.execCommand('copy');
     document.body.removeChild(textarea);
+    return flag;
+};
+
+// 设置分页数据
+daikuan.setPageData = function (context, listNmae) {
+    var data = ecui.util.parseValue(listNmae, context);
+
+    context.offset = data.offset;
+    context.total = data.total;
+    context.totalPage = data.totalPage;
 }
+
+/**
+ * 列表路由对象。
+ * @public
+ *
+ * @param {Object} route 路由对象
+ */
+daikuan.TableListRoute = function (route) {
+    this.model = [route.NAME.slice(0, -5) + '@FORM ' + route.url];
+    this.main = route.NAME.slice(0, -9) + '_table';
+    ecui.util.extend(this, route);
+}
+daikuan.TableListRoute.prototype.onbeforerequest = function (context) {
+    context.pageNo = context.pageNo || +this.searchParm.pageNo;
+    context.pageSize = +this.searchParm.pageSize;
+    daikuan.setFormValue(context, document.forms[this.model[0].split('?')[1]], this.searchParm);
+};
+daikuan.TableListRoute.prototype.onbeforerender = function (context) {
+    var data = ecui.util.parseValue(this.model[0].split('@')[0], context);
+    context.offset = data.offset;
+    context.total = data.total;
+    context.totalPage = data.totalPage;
+};

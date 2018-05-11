@@ -1,33 +1,8 @@
 /*<script>window.onload=function(){value=document.getElementsByTagName('TEXTAREA')[0].value;parent.postMessage({url:location.href.slice(7),text:value.slice(value.indexOf('\n')+1).replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&')},'*');}</script><textarea>*/
 .ui-dialog {
-    background: #fff;
-    border: none;
     position: absolute;
-    min-width: 120px;
-    .ui-dialog-close {
-        position: absolute !important;
-        width: 15px;
-        height: 15px;
-        background: url(images/ecui/icons.png) no-repeat;
-        background-position:-1px -145px ;
-        top: 15px;
-        right: 15px;
-        cursor: pointer;
-    }
-    .ui-dialog-close-hover {
-        background: url(images/ecui/icons.png) no-repeat;
-        background-position:0 -114px ;
-    }
     strong.ui-dialog-title {
-        display: block;
-        padding-left: 15px;
-        height: 45px;
-        line-height: 45px;
-        background-color: #368CDA;
-        border: none;
-        font-weight: normal;
-        color: #fff;
-        font-size: 16px;
+        display: block;    
     }
     .ui-dialog-body {
         position: relative !important;

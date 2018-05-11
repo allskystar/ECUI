@@ -1,5 +1,5 @@
 /*
-选项组接口，是对选项进行操作的方法的集合，提供了基本的增/删操作，通过将 ecui.ui.Items 对象下的方法复制到类的 prototype 属性下继承接口，最终对象要正常使用还需要在类构造器中调用 $initItems 方法。
+选项组接口，是对选项进行操作的方法的集合，提供了基本的增/删操作，通过将 ecui.ui.Items 对象下的方法复制到类的 prototype 属性下继承接口。
 */
 (function () {
 //{if 0}//
@@ -19,11 +19,38 @@
      */
     ui.Item = core.inherits(
         ui.Control,
-        'ui-item'
+        'ui-item',
+        {
+            /**
+             * 选项控件的父控件必须实现 Items 接口，同时选项控件有父控件时不能设置别的父控件。
+             * @override
+             */
+            setParent: function (parent) {
+                var oldParent = this.getParent();
+                if (parent) {
+                    if (parent.$Items && !oldParent) {
+                        parent.add(this);
+                    }
+                } else if (oldParent) {
+                    oldParent.remove(this);
+                }
+            }
+        }
     );
 
     ui.Items = {
         NAME: '$Items',
+
+        constructor: function () {
+            (namedMap[this.getUID()] = []).preventCount = 0;
+
+            this.preventAlterItems();
+
+            // 初始化选项控件
+            this.add(dom.children(this.getBody()));
+
+            this.premitAlterItems();
+        },
 
         Methods: {
             // 选项控件的文本在 options 中的名称
@@ -35,11 +62,13 @@
              */
             $append: function (event) {
                 // 检查待新增的控件是否为选项控件
-                if (!(event.child instanceof (this.Item || ui.Item)) || this.$Items.$append.call(this, event) === false) {
-                    return false;
+                if (event.child instanceof (this.Item || ui.Item)) {
+                    this.$Items.$append.call(this, event);
+                    if (event.returnValue !== false) {
+                        namedMap[this.getUID()].push(event.child);
+                        this.alterItems();
+                    }
                 }
-                namedMap[this.getUID()].push(event.child);
-                this.alterItems();
             },
 
             /**
@@ -62,21 +91,14 @@
             },
 
             /**
-             * 初始化选项组对应的内部元素对象。
-             * 选项组假设选项的主元素在内部元素中，因此实现了 Items 接口的类在初始化时需要调用 $initItems 方法自动生成选项控件，$initItems 方法内部保证一个控件对象只允许被调用一次，多次的调用无效。
-             * @protected
+             * @override
              */
-            $initItems: function () {
-                (namedMap[this.getUID()] = []).preventCount = 0;
-
-                // 防止因为选项变化引起重复刷新，以及防止控件进行多次初始化操作
-                this.$initItems = util.blank;
-                this.preventAlterItems();
-
-                // 初始化选项控件
-                this.add(dom.children(this.getBody()));
-
-                this.premitAlterItems();
+            $ready: function (event) {
+                this.$Items.$ready.call(this, event);
+                this.alterItems();
+                this.getItems().forEach(function (item) {
+                    core.triggerEvent(item, 'ready');
+                });
             },
 
             /**
@@ -86,8 +108,10 @@
             $remove: function (event) {
                 core.$clearState(event.child);
                 this.$Items.$remove.call(this, event);
-                util.remove(namedMap[this.getUID()], event.child);
-                this.alterItems();
+                if (event.returnValue !== false) {
+                    util.remove(namedMap[this.getUID()], event.child);
+                    this.alterItems();
+                }
             },
 
             /**
@@ -103,7 +127,8 @@
                 var list = namedMap[this.getUID()],
                     items = [],
                     UIClass = this.Item || ui.Item,
-                    el = list[index] ? list[index].getOuter() : null;
+                    el = list[index] ? list[index].getOuter() : null,
+                    body = this.getBody();
 
                 this.preventAlterItems();
 
@@ -114,17 +139,16 @@
                             var options = core.getOptions(item) || {};
                         } else {
                             if ('string' === typeof item) {
-                                item = {};
-                                item[this.TEXTNAME] = item;
+                                options = {};
+                                options[this.TEXTNAME] = item;
+                            } else {
+                                options = item;
                             }
-                            options = item;
-                            this.getBody().appendChild(
-                                item = dom.create(
-                                    {
-                                        className: options.primary,
-                                        innerHTML: options[this.TEXTNAME]
-                                    }
-                                )
+                            item = dom.create(
+                                {
+                                    className: options.primary,
+                                    innerHTML: options[this.TEXTNAME]
+                                }
                             );
                         }
 
@@ -135,8 +159,9 @@
                     }
 
                     // 选项控件，直接添加
-                    item.setParent(this);
-                    if (item.getParent()) {
+                    if (core.triggerEvent(this, 'append', {child: item})) {
+                        body.appendChild(item.getOuter());
+                        item.$setParent(this);
                         items.push(item);
                     }
                 }, this);
@@ -198,14 +223,6 @@
             },
 
             /**
-             * @override
-             */
-            init: function (options) {
-                this.$Items.init.call(this, options);
-                this.alterItems();
-            },
-
-            /**
              * 允许执行 alterItems 方法，针对多次阻止，需要全部 premitAlterItems 后才执行 alterItems 方法。
              * @public
              */
@@ -233,7 +250,12 @@
                     item = namedMap[this.getUID()][item];
                 }
                 if (item) {
-                    item.setParent();
+                    if (core.triggerEvent(this, 'remove', {child: item})) {
+                        dom.remove(item.getOuter());
+                        item.$setParent();
+                    } else {
+                        item = null;
+                    }
                 }
                 return item || null;
             },
@@ -283,6 +305,7 @@
 
             if (parent) {
                 event.item = this;
+                event.index = namedMap[parent.getUID()].indexOf(this);
                 core.triggerEvent(parent, 'item' + item.replace('mouse', ''), event);
             }
         };

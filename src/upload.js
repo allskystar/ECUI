@@ -39,8 +39,8 @@
                     progress.setMax(event.total);
                     progress.setValue(event.loaded);
                 } : undefined,
-                onsuccess: this.onupload,
-                onerror: this.onerror
+                onsuccess: this.onupload.bind(this),
+                onerror: this.onerror.bind(this)
             });
         }.bind(this);
     }
@@ -54,7 +54,7 @@
         ui.Control,
         'ui-upload',
         function (el, options) {
-            ui.Control.constructor.call(this, el, options);
+            ui.Control.call(this, el, options);
             this._sUrl = options.url;
             this._eFile = el.getElementsByTagName('INPUT')[0];
         },
@@ -69,10 +69,28 @@
 
             /**
              * @override
+             *
+             */
+            $click: function (event) {
+                this._eFile.click();
+            },
+
+            /**
+             * @override
              */
             $ready: function (event) {
                 ui.Control.prototype.$ready.call(this, event);
                 dom.addEventListener(this._eFile, 'change', fileChangeHandler.bind(this));
+            },
+
+            /**
+             * 设置控件上传文件路径。
+             * @public
+             *
+             * @param {string} url 文件上传路径
+             */
+            setUrl: function (url) {
+                this._sUrl = url;
             }
         }
     );

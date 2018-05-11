@@ -27,7 +27,7 @@ _cFor - 被转发的控件对象
         ui.Control,
         'ui-label',
         function (el, options) {
-            ui.Control.constructor.call(this, el, options);
+            ui.Control.call(this, el, options);
             core.delegate(options['for'], this, this.setFor);
         },
         {

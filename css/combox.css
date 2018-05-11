@@ -1,60 +1,15 @@
 /*<script>window.onload=function(){value=document.getElementsByTagName('TEXTAREA')[0].value;parent.postMessage({url:location.href.slice(7),text:value.slice(value.indexOf('\n')+1).replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&')},'*');}</script><textarea>*/
 .ui-combox {
-    width: 110px;
-    height: 28px;
-    padding-right: 30px;
-    background: url(images/ecui/arrow.png) no-repeat 120px center;
-    font-size: 14px;
-    font-family: "宋体";
-    border: 1px solid #acbaca;
-    color: #8492a6;
+    position: relative;
     .ui-combox-text {
-        position: absolute;
+        position: absolute !important;
         overflow: hidden !important;
     }
     input {
-        position: absolute;
-    	outline: none;
-    }
-}
-.ui-combox-hover {
-    border-color: #8492a6;
-}
-.ui-combox-active {
-    border-color: #368cda;
-}
-.ui-combox-focus {
-    border-color: #368cda;
-}
-.ui-combox-disabled {
-    border-color: #e0e6ed;
-}
-.ui-combox-disabled {
-    .ui-combox-text {
-        background-color: #eff2f7;
-        color: #e0e6ed
+        position: absolute !important;
+        outline: none;
     }
 }
 .ui-combox-options {
-    position: absolute !important;
     overflow: auto !important;
-    border: 1px solid #d7d8d9;
-    font-size: 12px;
-    font-family: "宋体";
-    background: #fff;
-    overflow-x: hidden;
-    .ui-combox-item {
-        display: block !important;
-        text-indent: 10px;
-        line-height: 28px;
-        overflow: hidden;
-        font-family: "'Helvetica Neue', 'Microsoft Yahei','PingFang SC'";
-        text-overflow: ellipsis;
-    }
-    .ui-combox-item-hover,
-    .ui-combox-item-focus {
-        background-color: #368cda;
-        color: #fff;
-        cursor: pointer;
-    }
 }

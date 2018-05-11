@@ -24,7 +24,7 @@ _eTitle        - 日历头部信息提示区
         ui.MonthView,
         'ui-calendar',
         function (el, options) {
-            ui.MonthView.constructor.call(this, el, options);
+            ui.MonthView.call(this, el, options);
             el = this.getMain();
 
             // 生成日历控件结构
@@ -33,10 +33,10 @@ _eTitle        - 日历头部信息提示区
                 'AFTERBEGIN',
                 '<div class="' + options.classes.join('-header ') + '"><div class="' +
                     options.classes.join('-title ') + '"></div><div class="' +
-                    options.classes.join('-prev-year ') + '">&lt;&lt;</div><div class="' +
-                    options.classes.join('-prev-month ') + '">&lt;</div><div class="' +
-                    options.classes.join('-next-month ') + '">&gt;</div><div class="' +
-                    options.classes.join('-next-year ') + '">&gt;&gt;</div></div>'
+                    options.classes.join('-prev-year ') + 'ui-button">&lt;&lt;</div><div class="' +
+                    options.classes.join('-prev-month ') + 'ui-button">&lt;</div><div class="' +
+                    options.classes.join('-next-month ') + 'ui-button">&gt;</div><div class="' +
+                    options.classes.join('-next-year ') + 'ui-button">&gt;&gt;</div></div>'
             );
 
             // 获取el所有直属节点
@@ -63,7 +63,7 @@ _eTitle        - 日历头部信息提示区
             Button: core.inherits(
                 ui.Button,
                 function (el, options) {
-                    ui.Button.constructor.call(this, el, options);
+                    ui.Button.call(this, el, options);
                     this._nMove = options.move;
                 },
                 {

@@ -19,7 +19,7 @@ _eMask   - 完成的进度比例内容区域
         ui.Progress,
         'ui-progress-bar',
         function (el, options) {
-            ui.Progress.constructor.call(this, el, options);
+            ui.Progress.call(this, el, options);
 
             el.innerHTML = '<div class="' + options.classes.join('-mask ') + '"></div>';
             this._eMask = el.lastChild;

@@ -1,11 +1,11 @@
 /*
-示例
+@example
 <div ui="type:control">
     <!-- 这里放控件包含的内容 -->
     ...
 </div>
 
-属性
+@fields
 _bCapturable        - 控件是否响应浏览器事件状态
 _bUserSelect        - 控件是否允许选中内容
 _bFocusable         - 控件是否允许获取焦点
@@ -961,6 +961,7 @@ _aStatus            - 控件当前的状态集合
                     if (waitReadyList === null) {
                         // 页面已经加载完毕，直接运行 $ready 方法
                         core.triggerEvent(this, 'ready', {options: options});
+                        this._bReady = true;
                     } else {
                         if (!waitReadyList) {
                             // 页面未加载完成，首先将 $ready 方法的调用存放在调用序列中
@@ -971,6 +972,7 @@ _aStatus            - 控件当前的状态集合
                                 function () {
                                     waitReadyList.forEach(function (item) {
                                         core.triggerEvent(item.control, 'ready', {options: item.options});
+                                        item.control._bReady = true;
                                     });
                                     waitReadyList = null;
                                 }
@@ -980,7 +982,6 @@ _aStatus            - 控件当前的状态集合
                             waitReadyList.push({control: this, options: options});
                         }
                     }
-                    this._bReady = true;
                 }
             },
 

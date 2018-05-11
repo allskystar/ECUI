@@ -9,19 +9,19 @@
         'ui-mobile-calendar',
         function (el, options) {
             el.innerHTML = '<div class="' + ui.MSelect.CLASS + 'ui-mobile-calender-year"></div><div class="' + ui.MSelect.CLASS + 'ui-mobile-calender-month"></div><div class="' + ui.MSelect.CLASS + 'ui-mobile-calender-date"></div>';
-            ui.Control.constructor.call(this, el, options);
+            ui.Control.call(this, el, options);
             var list = dom.children(el);
-            this._uYear = core.$fastCreate(this.Scroll, list[0], this, {values: [2000, 2040], optionSize: 7});
-            this._uMonth = core.$fastCreate(this.Scroll, list[1], this, {values: [1, 12], optionSize: 7});
-            this._uDate = core.$fastCreate(this.Scroll, list[2], this, {values: [1, 31], optionSize: 7});
+            this._uYear = core.$fastCreate(this.Select, list[0], this, {values: [2000, 2040], optionSize: 7});
+            this._uMonth = core.$fastCreate(this.Select, list[1], this, {values: [1, 12], optionSize: 7});
+            this._uDate = core.$fastCreate(this.Select, list[2], this, {values: [1, 31], optionSize: 7});
             this._aItems = this._uDate.getItems();
         },
         {
-            Scroll: core.inherits(
+            Select: core.inherits(
                 ui.MSelect,
                 {
-                    $change: function (event) {
-                        ui.MSelect.prototype.$change.call(this, event);
+                    $dragend: function (event) {
+                        ui.MSelect.prototype.$dragend.call(this, event);
                         var parent = this.getParent();
                         if (this === parent._uYear || this === parent._uMonth) {
                             var year = parent._uYear.getValue(),
@@ -30,7 +30,11 @@
                                 parent._uDate.preventAlterItems();
                                 var days = new Date(year, month, 0).getDate(),
                                     oldDays = parent._uDate.getLength();
+
                                 if (days < oldDays) {
+                                    if (parent._uDate.getValue() > days) {
+                                        parent._uDate.setValue(days);
+                                    }
                                     for (; days < oldDays; days++) {
                                         parent._uDate.remove(parent._aItems[days]);
                                     }

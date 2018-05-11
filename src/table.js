@@ -1,8 +1,5 @@
 /*
-Table - 定义由行列构成的表格的基本操作。
-表格控件，继承自截面控件，
-
-表格控件直接HTML初始化的例子:
+@example
 <!-- 如果需要滚动条，请设置div的width样式到合适的值，并且在div外部再包一个div显示滚动条 -->
 <div ui="type:table">
   <table>
@@ -27,14 +24,12 @@ Table - 定义由行列构成的表格的基本操作。
   </table>
 </div>
 
-属性
+@fields
 _bHeadFloat  - 表头飘浮
 _aHCells     - 表格头单元格控件对象
 _aRows       - 表格数据行对象
 _uHead       - 表头区域
-
-行属性
-_aElements   - 行的列Element对象，如果当前列需要向左合并为null，需要向上合并为false
+_aElements   - 行控件属性，行的列Element对象，如果当前列需要向左合并为null，需要向上合并为false
 */
 (function () {
 //{if 0}//
@@ -197,7 +192,7 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
                 }
             }
 
-            ui.Control.prototype.constructor.call(this, el, options);
+            ui.Control.call(this, el, options);
 
             // 初始化表格区域
             this.$setBody(body);

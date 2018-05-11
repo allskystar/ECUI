@@ -1,44 +1,4 @@
 /*<script>window.onload=function(){value=document.getElementsByTagName('TEXTAREA')[0].value;parent.postMessage({url:location.href.slice(7),text:value.slice(value.indexOf('\n')+1).replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&')},'*');}</script><textarea>*/
 .ui-calendar {
-    background-color: #FFF;
     z-index: 1;
-    .ui-calendar-header {
-        width: 256px;
-        height: 45px;
-        background: #fff;
-        border: 1px solid #ccc;
-        position: relative;
-        text-align: center;
-        .ui-calendar-title {
-            display: block;
-            width: 130px;
-            height: 100%;
-            margin: 0 auto;
-            line-height: 45px;
-            font-size: 14px;
-        }
-        .ui-calendar-next-month,
-        .ui-calendar-next-year,
-        .ui-calendar-prev-month,
-        .ui-calendar-prev-year {
-            width: 24px;
-            height: 24px;
-            font-size: 14px;
-            position: absolute;
-            top: 12px;
-            cursor: pointer;
-        }
-        .ui-calendar-prev-year {
-            left: 22px;
-        }
-        .ui-calendar-prev-month {
-            left: 48px;
-        }
-        .ui-calendar-next-month {
-            right: 48px;
-        }
-        .ui-calendar-next-year {
-            right: 22px;
-        }
-    }
 }

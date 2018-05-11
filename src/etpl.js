@@ -741,7 +741,7 @@
             }
         }
 
-        var master = this.engine.targets[masterName];
+        var master = this.engine.targets[masterName] || etpl.targets[masterName];
         if (master && master.applyMaster(master.master)) {
             this.children = master.clone().children;
             replaceBlock(this);
@@ -773,8 +773,8 @@
         function checkReadyState(node) {
             node.children.forEach(function (child) {
                 if (child instanceof ImportCommand) {
-                    var target = engine.targets[child.name];
-                    readyState = readyState && target && target.isReady(engine);
+                    var target = engine.targets[child.name] || etpl.targets[child.name];
+                    readyState = readyState && target && target.isReady();
                 } else if (child instanceof Command) {
                     checkReadyState(child);
                 }
@@ -837,7 +837,6 @@
      */
     function addTargetToContext(target, context) {
         context.target = target;
-
         if (context.engine.targets[target.name]) {
             switch (context.engine.options.namingConflict) {
             case 'override':
@@ -1252,9 +1251,8 @@
     Engine.prototype.addFilter = function (name, filter) {
         if (etpl === this) {
             DEFAULT_FILTERS[name] = filter;
-        } else {
-            this.filters[name] = filter;
         }
+        this.filters[name] = filter;
     };
 
     /**

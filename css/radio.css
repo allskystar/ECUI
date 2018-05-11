@@ -1,28 +1,11 @@
 /*<script>window.onload=function(){value=document.getElementsByTagName('TEXTAREA')[0].value;parent.postMessage({url:location.href.slice(7),text:value.slice(value.indexOf('\n')+1).replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&')},'*');}</script><textarea>*/
 .ui-radio {
-    width: 17px;
-    height: 17px;
-    background: url('images/ecui/icons.png');
-    background-position: 0 -252px;
     input {
         position: relative !important;
         width: 10px !important;
         left: -12px !important;
-        outline: none;
         border-radius: 0;
+        opacity: 0;
     }
 }
-.ui-radio-checked {
-    background-image: url('images/ecui/icons.png');
-    background-position: 0 -286px;
-}
-.ui-disabled .ui-radio,
-.ui-radio-disabled {
-    background-image: url('images/ecui/icons.png');
-    background-position: 0 -185px;
-}
-.ui-disabled .ui-radio-checked,
-.ui-radio-checked-disabled {
-    background-image: url('images/ecui/icons.png');
-    background-position: 0 -218px;
-}
+

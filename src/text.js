@@ -14,11 +14,12 @@ _nMaxLength   - 允许提交的最大长度
 _nMinValue    - 允许提交的最小值
 _nMaxValue    - 允许提交的最大值
 _sErrValue    - 检验错误的文本值
+_sPlaceHolder - 为空时的提示信息内容
 _oRegExp      - 允许提交的格式正则表达式
 _ePlaceHolder - 为空时的提示信息标签
 */
-//{if 0}//
 (function () {
+//{if 0}//
     var core = ecui,
         dom = core.dom,
         ui = core.ui,
@@ -27,20 +28,35 @@ _ePlaceHolder - 为空时的提示信息标签
         ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined;
 //{/if}//
     /**
+     * 设置控件提示信息。
+     * @private
+     *
+     * @param {ecui.ui.Control} text 文本控件对象
+     * @param {string} prompt 提示信息的内容
+     */
+    function setPlaceHolder(text, prompt) {
+        if (text._ePlaceHolder) {
+            text._ePlaceHolder.innerHTML = prompt;
+        } else {
+            text.getInput().setAttribute('placeholder', prompt);
+        }
+    }
+
+    /**
      * 文本输入框控件。
      * 扩展 InputELement 标签的功能，提供对低版本 IE 的 placeholder 的兼容。
      * options 属性：
-     * trim    是否进行前后空格过滤，默认为 true (注：粘贴内容也会进行前后空格过滤)
-     * len     [aaa,bbb]表示数字允许的最小(aaa)/最大(bbb)长度
-     * num     [aaa,bbb]表示数字允许的最小(aaa)/最大(bbb)值
-     * regexp  正则表达式，自动在两端添加^与$
+     * trim     是否进行前后空格过滤，默认为 true (注：粘贴内容也会进行前后空格过滤)
+     * len      aaa-bbb表示数字允许的最小(aaa)/最大(bbb)长度
+     * num      aaa-bbb表示数字允许的最小(aaa)/最大(bbb)值
+     * regexp   正则表达式，自动在两端添加^与$
      * @control
      */
     ui.Text = core.inherits(
         ui.InputControl,
         'ui-text',
         function (el, options) {
-            ui.InputControl.constructor.call(this, el, options);
+            ui.InputControl.call(this, el, options);
 
             this._bTrim = options.trim !== false;
             if (options.len) {
@@ -65,20 +81,18 @@ _ePlaceHolder - 为空时的提示信息标签
                 this._oRegExp = new RegExp('^' + options.regexp + '$');
             }
 
+            el = this.getInput();
+            this._sPlaceHolder = dom.getAttribute(el, 'placeholder') || '';
             if (ieVersion < 10) {
-                el = this.getInput();
-                options = dom.getAttribute(el, 'placeholder');
-                if (options) {
-                    this._ePlaceHolder = dom.insertBefore(
-                        dom.create(
-                            {
-                                className: 'ui-placeholder',
-                                innerHTML: options
-                            }
-                        ),
-                        el
-                    );
-                }
+                this._ePlaceHolder = dom.insertBefore(
+                    dom.create(
+                        {
+                            className: 'ui-placeholder',
+                            innerHTML: this._sPlaceHolder
+                        }
+                    ),
+                    el
+                );
             }
         },
         {
@@ -89,7 +103,15 @@ _ePlaceHolder - 为空时的提示信息标签
                 ui.InputControl.prototype.$cache.call(this, style, cacheSize);
                 if (this._ePlaceHolder) {
                     style = dom.getStyle(this._ePlaceHolder);
-                    this.$$placeholder = [util.toNumber(style.paddingTop), util.toNumber(style.paddingRight), util.toNumber(style.paddingBottom), util.toNumber(style.paddingLeft)];
+                    if (ieVersion < 8) {
+                        var list = style.padding.split(' ');
+                        this.$$placeholder = [util.toNumber(list[0])];
+                        this.$$placeholder[1] = list[1] ? util.toNumber(list[1]) : this.$$placeholder[0];
+                        this.$$placeholder[2] = list[2] ? util.toNumber(list[2]) : this.$$placeholder[0];
+                        this.$$placeholder[3] = list[3] ? util.toNumber(list[3]) : this.$$placeholder[1];
+                    } else {
+                        this.$$placeholder = [util.toNumber(style.paddingTop), util.toNumber(style.paddingRight), util.toNumber(style.paddingBottom), util.toNumber(style.paddingLeft)];
+                    }
                 }
             },
 
@@ -137,15 +159,20 @@ _ePlaceHolder - 为空时的提示信息标签
             },
 
             /**
-             * 控件格式校验错误的默认处理。
-             * @protected
+             * @override
              */
-            $error: function () {
-                this.alterSubType('error');
+            $error: function (event) {
+                if (this._sErrValue === undefined) {
+                    if (ui.InputControl.prototype.$error.call(this, event) !== false) {
+                        if (event.text) {
+                            setPlaceHolder(this, event.text);
+                        }
 
-                var el = this.getInput();
-                this._sErrValue = el.value;
-                el.value = '';
+                        var el = this.getInput();
+                        this._sErrValue = el.value;
+                        el.value = '';
+                    }
+                }
             },
 
             /**
@@ -153,9 +180,10 @@ _ePlaceHolder - 为空时的提示信息标签
              */
             $focus: function () {
                 ui.InputControl.prototype.$focus.call(this);
-                this.alterSubType('');
 
                 if (this._sErrValue !== undefined) {
+                    setPlaceHolder(this, this._sPlaceHolder);
+
                     var el = this.getInput();
                     el.value = this._sErrValue;
                     delete this._sErrValue;
@@ -210,20 +238,23 @@ _ePlaceHolder - 为空时的提示信息标签
                     length = value.length,
                     result = true;
 
-                value = +value;
+                if (this._bTrim) {
+                    value = value.trim();
+                }
+
                 if (this._nMinLength > length) {
                     result = false;
                 }
                 if (this._nMaxLength < length) {
                     result = false;
                 }
-                if (this._nMinValue > value) {
+                if (this._nMinValue > +value) {
                     result = false;
                 }
-                if (this._nMaxValue < value) {
+                if (this._nMaxValue < +value) {
                     result = false;
                 }
-                if ((this._oRegExp && !this._oRegExp.test(value)) || (isNaN(value) && (this._nMinValue !== undefined || this._nMaxValue !== undefined))) {
+                if ((this._oRegExp && !this._oRegExp.test(value)) || (isNaN(+value) && (this._nMinValue !== undefined || this._nMaxValue !== undefined))) {
                     result = false;
                 }
 
@@ -265,6 +296,17 @@ _ePlaceHolder - 为空时的提示信息标签
             },
 
             /**
+             * @override
+             */
+            getValue: function () {
+                var value = this._sErrValue !== undefined ? this._sErrValue : ui.InputControl.prototype.getValue.call(this);
+                if (this._bTrim) {
+                    value = value.trim();
+                }
+                return value;
+            },
+
+            /**
              * 设置输入框光标的位置。
              * @public
              *
@@ -282,6 +324,4 @@ _ePlaceHolder - 为空时的提示信息标签
             }
         }
     );
-//{if 0}//
 }());
-//{/if}//

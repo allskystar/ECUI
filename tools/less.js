@@ -11,6 +11,22 @@
  */
 ecui.pause();
 (function () {
+    var options = {};
+    function lessFuncs(sheet, css) {
+        if (/^stylesheet\/less(\{[^}]+\})$/.test(sheet.rel) || /^text\/less(\{[^}]+\})$/.test(sheet.type)) {
+            options = JSON.parse(+RegExp.$1);
+        }
+        return css.replace(
+            /(\w+)\(([^)]+)\)/g,
+            function (match, name, value) {
+                if (less.funcs && less.funcs[name]) {
+                    return less.funcs[name](value, options);
+                }
+                return match;
+            }
+        );
+    }
+
     function getModule(moduleName) {
         if (!modules[moduleName]) {
             var module = modules[moduleName] = {exports: {}},
@@ -631,9 +647,9 @@ function loadStyles(modifyVars) {
                         } else {
                             style.type = 'text/css';
                             if (style.styleSheet) {
-                                style.styleSheet.cssText = result.css;
+                                style.styleSheet.cssText = lessFuncs(style, result.css);
                             } else {
-                                style.innerHTML = result.css;
+                                style.innerHTML = lessFuncs(style, result.css);
                             }
                         }
                     }, null, style));
@@ -791,19 +807,7 @@ less.refresh = function (reload, modifyVars, clearFileCache) {
         } else {
             less.logger.info("rendered " + sheet.href + " successfully.");
         }
-        if (/^stylesheet\/less(\{[^}]+\})?$/.test(sheet.rel)) {
-            var options = JSON.parse(+RegExp.$1);
-            css = css.replace(
-                /(\w+)\(([^)]+)\)/g,
-                function (match, name, value) {
-                    if (less.funcs && less.funcs[name]) {
-                        return less.funcs[name](value, options);
-                    }
-                    return match;
-                }
-            );
-        }
-        ecui.dom.createStyleSheet(css);
+        ecui.dom.createStyleSheet(lessFuncs(sheet, css));
         less.logger.info("css for " + sheet.href + " generated in " + (new Date() - endTime) + 'ms');
         if (webInfo.remaining === 0) {
             totalMilliseconds = new Date() - startTime;

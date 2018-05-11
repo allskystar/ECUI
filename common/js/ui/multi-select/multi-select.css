@@ -1,0 +1,16 @@
+.ui-multi-select {
+	cursor: pointer;
+}
+.ui-multi-select-options {
+	border: 1px solid #D6DBE6;
+	min-width: 200px;
+	.ui-select-item {
+		display: inline-block;
+	}
+	.ui-multi-select-options-operate  {
+		display: block;
+		.ui-button {
+			display: inline-block;
+		}
+	}
+}

@@ -20,6 +20,9 @@
         ui.Button,
         'ui-submit',
         {
+            /**
+             * @override
+             */
             $click: function (event) {
                 ui.Button.prototype.$click.call(this, event);
                 for (var parent = this.getParent(); parent; parent = parent.getParent()) {

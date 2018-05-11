@@ -10,6 +10,7 @@
 
 @fields
 _bBlur         - 失去焦点时是否需要校验
+_bError        - 是否出错
 _eInput        - INPUT对象
 */
 (function () {
@@ -224,7 +225,7 @@ _eInput        - INPUT对象
                 inputEl.defaultChecked = inputEl.checked = true;
             }
 
-            ui.Control.constructor.call(this, el, options);
+            ui.Control.call(this, el, options);
 
             this._eInput = inputEl;
             bindEvent(this);
@@ -283,11 +284,39 @@ _eInput        - INPUT对象
             },
 
             /**
+             * 控件格式校验错误的默认处理。
+             * @protected
+             *
+             * @param {ECUIEvent} event 事件对象
+             * @return {boolean} 是否由控件自身处理错误
+             */
+            $error: function () {
+                for (var control = this; control = control.getParent(); ) {
+                    if (control instanceof ui.InputGroup) {
+                        core.triggerEvent(control, 'error');
+                        return false;
+                    }
+                }
+                this._bError = true;
+                this.alterSubType('error');
+            },
+
+            /**
              * @override
              */
             $focus: function (event) {
                 ui.Control.prototype.$focus.call(this, event);
 
+                for (var control = this; control = control.getParent(); ) {
+                    if (control instanceof ui.InputGroup) {
+                        control.alterSubType('');
+                        break;
+                    }
+                }
+                if (this._bError) {
+                    this.alterSubType('');
+                    this._bError = false;
+                }
                 util.timer(
                     function () {
                         dom.removeEventListener(this._eInput, 'focus', events.focus);
@@ -355,7 +384,6 @@ _eInput        - INPUT对象
              * @event
              */
             $submit: function (event) {
-                ui.Control.prototype.$submit.call(this, event);
                 if (!core.triggerEvent(this, 'validate')) {
                     event.preventDefault();
                 }
