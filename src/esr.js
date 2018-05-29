@@ -19,17 +19,18 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
     var historyCache,
         historyIndex = 0,
         historyData = [],
-        routeRequestCount = 0,
+        delegateRoutes = {},    // 路由赋值的委托，如果路由不存在，会保存在此处
+        routeRequestCount = 0,  // 记录路由正在加载的数量，用于解决第一次加载时要全部加载完毕才允许init操作
         cacheList = [],
         options,
         routes = {},
-        autoRender = {},
+        autoRender = {},        // 模拟MVVM双向绑定
         context = {},
         currLocation = '',
         pauseStatus,
         loadStatus = {},
         engine = etpl,
-        requestVersion = 0,
+        requestVersion = 0,     // 请求的版本号，主路由切换时会更新，在多次提交时保证只有最后一次提交会触发渲染
         localStorage,
         metaVersion,
         meta,
@@ -136,23 +137,26 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
         if (route) {
             if (route.cache !== undefined) {
                 if (route.cache) {
-                    var el = core.$(route.main);
-                    // TODO，如果没有，是否需要自动生成一个层?
-                    if (el) {
-                        el = core.findControl(el);
-                        var layers = ui.Layer.allShown(),
-                            index = layers.indexOf(el);
-                        if (index < 0) {
-                            if (el instanceof ui.Layer) {
-                                el.show();
+                    // 添加oncached事件，在路由已经cache的时候依旧执行
+                    if (!route.oncached || route.oncached() !== false) {
+                        var el = core.$(route.main);
+                        // TODO，如果没有，是否需要自动生成一个层?
+                        if (el) {
+                            el = core.findControl(el);
+                            var layers = ui.Layer.allShown(),
+                                index = layers.indexOf(el);
+                            if (index < 0) {
+                                if (el instanceof ui.Layer) {
+                                    el.show();
+                                }
+                            } else {
+                                for (; ++index < layers.length; ) {
+                                    layers[index].hide();
+                                }
                             }
-                        } else {
-                            for (; ++index < layers.length; ) {
-                                layers[index].hide();
-                            }
-                            return;
                         }
                     }
+                    return;
                 }
             }
             if (!route.onrender || route.onrender() !== false) {
@@ -213,7 +217,7 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
      * @private
      */
     function listener() {
-        esr.redirect(esr.getLocation());
+        redirect(esr.getLocation());
     }
 
     /**
@@ -230,8 +234,8 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
 
                 document.body.appendChild(iframe);
                 setInterval(listener, 100);
-            } else if (window.onhashchange === null) {
-                window.onhashchange = listener;
+            } else if (window.onhashchange !== undefined) {
+                ecui.dom.addEventListener(window, 'hashchange', listener);
                 listener();
             } else {
                 setInterval(listener, 100);
@@ -262,6 +266,83 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
         });
 
         return options;
+    }
+
+    /**
+     * 控制定位器转向。
+     * @private
+     *
+     * @param {string} loc location位置
+     */
+    function redirect(loc) {
+        if (pauseStatus) {
+            if (window.onhashchange) {
+                setTimeout(listener, 100);
+            }
+        } else {
+            // 增加location带起始#号的容错性
+            // 可能有人直接读取location.hash，经过string处理后直接传入
+            if (loc) {
+                loc = loc.replace(/^#/, '');
+            }
+
+            if (!loc) {
+                loc = esr.DEFAULT_PAGE;
+                if (historyCache) {
+                    loc += '~ECUI_CACHE=' + historyIndex;
+                    if (!(ieVersion < 9)) {
+                        history.replaceState('', '', '#' + loc);
+                        return;
+                    }
+                }
+            }
+
+            // 与当前location相同时不进行route
+            if (currLocation !== loc) {
+                requestVersion++;
+
+                if (historyCache) {
+                    cacheList = cacheList.filter(function (item) {
+                        return item.target.getMain();
+                    });
+                    historyData[historyIndex] = historyData[historyIndex] || {};
+                    cacheList.forEach(function (item) {
+                        var data = {};
+                        item.values.forEach(function (value) {
+                            data[value] = item.target['get' + value]();
+                        });
+                        historyData[historyIndex][item.name] = data;
+                    });
+                    historyIndex++;
+
+                    if (/~ECUI_CACHE=(\d+)/.test(loc)) {
+                        historyIndex = +RegExp.$1;
+                    } else {
+                        historyData.splice(historyIndex, historyData.length - historyIndex);
+                        loc += '~ECUI_CACHE=' + historyIndex;
+                        if (ieVersion < 9) {
+                            pauseStatus = true;
+                            history.back();
+                            var handle = util.timer(function () {
+                                if (/~ECUI_CACHE=(\d+)/.test(location.href)) {
+                                    esr.setLocation(loc);
+                                    pauseStatus = false;
+                                    handle();
+                                }
+                            }, -10);
+                            return;
+                        }
+                        history.replaceState('', '', '#' + loc);
+                        currLocation = loc;
+                    }
+                }
+                // ie下使用中间iframe作为中转控制
+                // 其他浏览器直接调用控制器方法
+                if (!addIEHistory(loc)) {
+                    esr.callRoute(loc);
+                }
+            }
+        }
     }
 
     /**
@@ -422,6 +503,13 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
             route.main = route.main || esr.DEFAULT_MAIN;
             route.view = route.view || name;
             routes[name] = route;
+
+            if (delegateRoutes[name]) {
+                delegateRoutes[name].forEach(function (item) {
+                    route[item.name] = item.value;
+                });
+                delete delegateRoutes[name];
+            }
         },
 
         /**
@@ -480,6 +568,23 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
                 if (!addIEHistory(currLocation)) {
                     callRoute(name, oldOptions);
                 }
+            }
+        },
+
+        /**
+         * 委托框架在指定的路由生成时赋值。
+         * 使用框架式结构时，路由被操作，相关路由也许还未创建。delegate 方法提供将指定的赋值滞后到对应的路由创建后才调用的模式。
+         * @public
+         *
+         * @param {string} routeName 被委托的路由名称
+         * @param {string} name 委托的属性名称
+         * @param {Object} value 委托的属性值
+         */
+        delegate: function (routeName, name, value) {
+            if (routes[routeName]) {
+                routes[routeName][name] = value;
+            } else {
+                (delegateRoutes[routeName] = delegateRoutes[routeName] || []).push({name: name, value: value});
             }
         },
 
@@ -598,80 +703,12 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
 
         /**
          * 控制定位器转向。
-         * @public
+         * @private
          *
          * @param {string} loc location位置
          */
         redirect: function (loc) {
-            if (pauseStatus) {
-                if (window.onhashchange) {
-                    setTimeout(listener, 100);
-                }
-            } else {
-                // 增加location带起始#号的容错性
-                // 可能有人直接读取location.hash，经过string处理后直接传入
-                if (loc) {
-                    loc = loc.replace(/^#/, '');
-                }
-
-                if (!loc) {
-                    loc = esr.DEFAULT_PAGE;
-                    if (historyCache) {
-                        loc += '~ECUI_CACHE=' + historyIndex;
-                        if (!(ieVersion < 9)) {
-                            history.replaceState('', '', '#' + loc);
-                            return;
-                        }
-                    }
-                }
-
-                // 与当前location相同时不进行route
-                if (currLocation !== loc) {
-                    requestVersion++;
-
-                    esr.setLocation(loc);
-                    if (historyCache) {
-                        cacheList = cacheList.filter(function (item) {
-                            return item.target.getMain();
-                        });
-                        historyData[historyIndex] = historyData[historyIndex] || {};
-                        cacheList.forEach(function (item) {
-                            var data = {};
-                            item.values.forEach(function (value) {
-                                data[value] = item.target['get' + value]();
-                            });
-                            historyData[historyIndex][item.name] = data;
-                        });
-                        historyIndex++;
-
-                        if (/~ECUI_CACHE=(\d+)/.test(loc)) {
-                            historyIndex = +RegExp.$1;
-                        } else {
-                            historyData.splice(historyIndex, historyData.length - historyIndex);
-                            loc += '~ECUI_CACHE=' + historyIndex;
-                            if (ieVersion < 9) {
-                                pauseStatus = true;
-                                history.back();
-                                var handle = util.timer(function () {
-                                    if (/~ECUI_CACHE=(\d+)/.test(location.href)) {
-                                        esr.setLocation(loc);
-                                        pauseStatus = false;
-                                        handle();
-                                    }
-                                }, -10);
-                                return;
-                            }
-                            history.replaceState('', '', '#' + loc);
-                            currLocation = loc;
-                        }
-                    }
-                    // ie下使用中间iframe作为中转控制
-                    // 其他浏览器直接调用控制器方法
-                    if (!addIEHistory(loc)) {
-                        esr.callRoute(loc);
-                    }
-                }
-            }
+            location.hash = loc;
         },
 
         /**
@@ -709,14 +746,16 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
                 if (route.view(context, function (name) {
                         if (name) {
                             render(route, name);
+                        } else {
+                            routeRequestCount--;
                         }
                         afterrender(route);
                         autoChildRoute(route);
                     }) !== false) {
+                    routeRequestCount--;
                     afterrender(route);
                     autoChildRoute(route);
                 }
-                routeRequestCount--;
             } else if (engine.getRenderer(route.view)) {
                 render(route);
             } else {

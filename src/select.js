@@ -22,7 +22,6 @@ _bRequired    - 是否必须选择
     var core = ecui,
         dom = core.dom,
         ui = core.ui,
-        util = core.util,
 
         ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined;
 //{/if}//

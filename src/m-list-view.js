@@ -25,7 +25,7 @@ _nBottomIndex  - 下部隐藏的选项序号
 //{/if}//
     function setEnterAndLeave() {
         var range = this.getRange();
-        if (!range.bottom) {
+        if (range && !range.bottom) {
             range.top = this.getHeight() - this.$$bodyHeight + this.$$footerHeight;
             range.bottom = -this.$$headerHeight;
         }
@@ -130,6 +130,19 @@ _nBottomIndex  - 下部隐藏的选项序号
             },
 
             /**
+             * @override
+             */
+            $dragend: function (event) {
+                ui.MScroll.prototype.$dragend.call(this, event);
+                if (!this._bLoading && this._sStatus === 'headercomplete') {
+                    this._bLoading = true;
+                    core.triggerEvent(this, 'refresh');
+                } else {
+                    this.reset();
+                }
+            },
+
+            /**
              * 拖拽的惯性时间计算。
              * @protected
              *
@@ -194,11 +207,13 @@ _nBottomIndex  - 下部隐藏的选项序号
                 top = this.getHeight() - this.$$bodyHeight;
                 if (y > -this.$$headerHeight) {
                     status = y < 0 ? 'headerenter' : 'headercomplete';
+                    this._eHeader.style.top = y + 'px';
                 } else if (y === -this.$$headerHeight) {
                     // 解决items不够填充整个listview区域，导致footercomplete的触发
                     status = '';
                 } else if (y < top + this.$$footerHeight) {
                     var status = y > top ? 'footerenter' : 'footercomplete';
+                    this._eFooter.style.bottom = (top - y) + 'px';
                 } else {
                     status = '';
                 }
@@ -228,7 +243,13 @@ _nBottomIndex  - 下部隐藏的选项序号
              * 拖拽到最底部事件。
              * @event
              */
-            $footercomplete: setComplete,
+            $footercomplete: function () {
+                setComplete.call(this);
+                if (!this._bLoading) {
+                    this._bLoading = true;
+                    core.triggerEvent(this, 'loaddata');
+                }
+            },
 
             /**
              * 拖拽到达底部区域事件。
@@ -284,18 +305,8 @@ _nBottomIndex  - 下部隐藏的选项序号
             $resize: function () {
                 ui.MScroll.prototype.$resize.call(this);
                 var style = this.getBody().style;
-                style.paddingTop = '';
-                style.paddingBottom = '';
-            },
-
-            /**
-             * 本控件新增选项只能从顶部或底部。
-             * @override
-             */
-            add: function (item, index) {
-                if (!index) {
-                    ui.Items.Methods.add.call(this, item, index);
-                }
+                style.paddingTop = this.$$bodyPadding[0] + 'px';
+                style.paddingBottom = this.$$bodyPadding[2] + 'px';
             },
 
             /**
@@ -336,10 +347,23 @@ _nBottomIndex  - 下部隐藏的选项序号
             },
 
             /**
-             * 本控件不支持删除选项的操作。
-             * @override
+             * 重新加载数据
+             * @public
+             *
+             * @param {Array} data 数据源
              */
-            remove: util.blank,
+            reload: function (data) {
+                this._nTopHidden = this._nBottomHidden = 0;
+                this._nTopIndex = this._nBottomIndex = 0;
+                this.preventAlterItems();
+                this.getItems().forEach(function (item) {
+                    ui.Items.Methods.remove.call(this, item);
+                    item.dispose();
+                }, this);
+                this.premitAlterItems();
+                this.add(data);
+                this.reset();
+            },
 
             /**
              * 复位。
@@ -348,23 +372,45 @@ _nBottomIndex  - 下部隐藏的选项序号
              */
             reset: function (callback) {
                 var y = this.getY(),
-                    top = this.getHeight() - this.$$bodyHeight + this.$$footerHeight,
+                    top = Math.min(-this.$$headerHeight, this.getHeight() - this.$$bodyHeight) + this.$$footerHeight,
                     options = {
-                        $: this.getBody(),
-                        onstep: callback && function (percent) {
-                            if (percent >= 1) {
-                                callback();
-                            }
+                        $: {
+                            body: this.getBody(),
+                            head: this._eHeader,
+                            foot: this._eFooter
+                        },
+                        onfinish: callback && function () {
+                            callback();
                         }
                     };
                 // 解决items不够填充整个listview区域，导致footercomplete的触发，应该先判断head，
                 if (y > -this.$$headerHeight) {
-                    this._oHandle = core.effect.grade('this.style.top->' + -this.$$headerHeight, 1000, options);
-                } else if (y < top) {
-                    this._oHandle = core.effect.grade('this.style.top->' + (top + this._nTopHidden), 1000, options);
+                    this._oHandle = core.effect.grade('this.body.style.top->' + -this.$$headerHeight + ';this.head.style.top->' + -this.$$headerHeight, 1000, options);
+                } else if (y !== -this.$$headerHeight && y < top) {
+                    // y !== -this.$$headerHeight解决items不够填充整个listview区域的问题
+                    this._oHandle = core.effect.grade('this.body.style.top->' + (top + this._nTopHidden) + ';this.foot.style.bottom->' + (y - top), 1000, options);
                 }
             }
         },
-        ui.Items
+        ui.Items,
+        {
+            /**
+             * 本控件新增选项只能从顶部或底部。
+             * @override
+             */
+            add: function (item, index) {
+                this._bLoading = false;
+                if (!index && (!(item instanceof Array) || item.length)) {
+                    ui.Items.Methods.add.call(this, item, index);
+                    setEnterAndLeave.call(this);
+                }
+            },
+
+            /**
+             * 本控件不支持删除选项的操作。
+             * @override
+             */
+            remove: util.blank
+        }
     );
 }());

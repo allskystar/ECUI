@@ -912,6 +912,18 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
             },
 
             /**
+             * 移除全部的行。
+             * @public
+             *
+             * @param {number} index 列序号，从0开始计数
+             */
+            removeAll: function () {
+                for (var i = this._aRows.length; i--; ) {
+                    this.removeRow(i);
+                }
+            },
+
+            /**
              * 移除一列并释放占用的空间。
              * @public
              *

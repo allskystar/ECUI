@@ -42,6 +42,7 @@ var ecui;
 
     document.write('<script type="text/javascript" src="src/messagebox.js"></script>');
 
+    document.write('<script type="text/javascript" src="src/anchor.js"></script>');
     document.write('<script type="text/javascript" src="src/decorate.js"></script>');
     document.write('<script type="text/javascript" src="src/effect.js"></script>');
     document.write('<script type="text/javascript" src="src/etpl.js"></script>');

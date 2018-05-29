@@ -437,10 +437,10 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                     if (activedControl) {
                         commonParent = getCommonParent(control, activedControl);
                         if (!isMobile || (track.lastClick && Date.now() - track.lastClick.time < 300)) {
-                            bubble(commonParent, 'click', event);
                             if (isMobile) {
                                 core.setFocused(activedControl);
                             }
+                            bubble(commonParent, 'click', event);
                         }
                         // 点击事件在同时响应鼠标按下与弹起周期的控件上触发(如果之间未产生鼠标移动事件)
                         // 模拟点击事件是为了解决控件的 Element 进行了 remove/append 操作后 click 事件不触发的问题

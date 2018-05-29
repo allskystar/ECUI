@@ -1,13 +1,15 @@
 /*<script>window.onload=function(){value=document.getElementsByTagName('TEXTAREA')[0].value;parent.postMessage({url:location.href.slice(7),text:value.slice(value.indexOf('\n')+1).replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&')},'*');}</script><textarea>*/
 .ui-mobile-listview-header {
     position: absolute !important;
-    top: 0px !important;
+    z-index: -1;
+    top: 0px;
     width: 100%;
     height: 100px;
 }
 .ui-mobile-listview-footer {
     position: absolute !important;
-    bottom: 0px !important;
+    z-index: -1;
+    bottom: 0px;
     width: 100%;
     height: 50px;
 }

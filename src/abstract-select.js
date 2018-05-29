@@ -38,7 +38,6 @@ _bRequired    - 是否必须选择
         ui.InputControl,
         function (el, options) {
             util.setDefault(options, 'readOnly', true);
-            util.setDefault(options, 'inputType', 'text');
 
             var oldEl = el;
             el = dom.insertBefore(

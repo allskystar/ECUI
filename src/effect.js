@@ -336,7 +336,7 @@ ECUI动画效果库，支持对CSS3动画效果的模拟并扩展了相应的功
          * 渐变处理。
          * @public
          *
-         * @param {Function|string} fn 处理渐变的函数或函数体，字符串描述的格式this.scrollTop->20或this.scrollTop->+(20)，后者表示相对增加20,前者表示到达20
+         * @param {Function|string} fn 处理渐变的函数或函数体，字符串描述的格式this.scrollTop->20或this.scrollTop->+(20)，后者表示相对增加20，前者表示到达20，一次改变多少个，使用;号分隔
          * @param {number} duration 渐变的总时长
          * @param {Object} options 渐变的参数，一般用于描述渐变的信息
          * @param {Function} transition 时间线函数
@@ -355,13 +355,12 @@ ECUI动画效果库，支持对CSS3动画效果的模拟并扩展了相应的功
                         list[0] = values[1];
                     }
 
-                    var name = list[0];
+                    var name = list[0],
+                        index = list[0].indexOf('.style.');
 
-                    if (list[0].indexOf('.style.') >= 0) {
-                        values = list[0].split('.');
-                        list[0] = 'ecui.dom.getStyle(' + values[0] + ',"' + values[2] + '")';
+                    if (index >= 0) {
+                        list[0] = 'ecui.dom.getStyle(' + list[0].slice(0, index) + ',"' + list[0].slice(index + 7) + '")';
                     }
-
                     values = new Function('$', 'return [' + list.join(',') + ']').call(options.$, options);
                     if (/-?[0-9]+(\.[0-9]+)?/.test(values[0])) {
                         var currValue = RegExp['$&'];
@@ -386,12 +385,16 @@ ECUI动画效果库，支持对CSS3动画效果的模拟并扩展了相应的功
                     } else {
                         percent = transition(currTime / duration);
                     }
+                    // 保存引用防止调用时options对象已经被释放
                     var tmpOptions = options;
-                    fn.call(options.$, percent, options);
+                    fn.call(tmpOptions.$, percent, tmpOptions);
                     if (tmpOptions.onstep) {
-                        tmpOptions.onstep.call(tmpOptions.$, percent);
+                        tmpOptions.onstep.call(tmpOptions.$, percent, tmpOptions);
                     }
                     if (percent >= 1) {
+                        if (tmpOptions.onfinish) {
+                            tmpOptions.onfinish.call(tmpOptions.$, tmpOptions);
+                        }
                         fn = options = transition = null;
                     }
                 }, -20);
@@ -406,7 +409,10 @@ ECUI动画效果库，支持对CSS3动画效果的模拟并扩展了相应的功
                     if (flag) {
                         fn.call(options.$, 1, options);
                         if (options.onstep) {
-                            options.onstep.call(options.$, 1);
+                            options.onstep.call(options.$, 1, options);
+                        }
+                        if (options.onfinish) {
+                            options.onfinish.call(options.$, options);
                         }
                     }
                 }

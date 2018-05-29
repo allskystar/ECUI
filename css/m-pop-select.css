@@ -9,6 +9,7 @@
         position: absolute !important;
         z-index: -1;
         opacity: 0;
+        display: none;
         top: 0;
     }
     font-size: 30px;
