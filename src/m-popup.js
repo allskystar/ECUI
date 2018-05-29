@@ -37,7 +37,10 @@
                         el = popup.getOuter(),
                         style = el.style,
                         width = view.width * data.enter[1],
-                        height = view.height * data.enter[0];
+                        height;
+
+                    view.height = util.toNumber(document.body.style.height);
+                    height = view.height * data.enter[0];
 
                     if (!dom.getParent(el)) {
                         // 第一次显示时需要进行下拉选项部分的初始化，将其挂载到 DOM 树中
