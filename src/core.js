@@ -959,6 +959,12 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                 }
             }
 
+            if (isMobile) {
+                dom.addEventListener(document, 'mousedown', function (event) {
+                    event.preventDefault();
+                }, true);
+            }
+
             dom.insertHTML(document.body, 'BEFOREEND', '<div class="ui-valid"><div></div></div>');
             // 检测Element宽度与高度的计算方式
             var el = document.body.lastChild;
