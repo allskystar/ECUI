@@ -159,7 +159,7 @@ _bRequired    - 是否必须选择
                             // 回车键选中，ESC键取消
                             if (which === 13) {
                                 if (focus.getParent() === this && this._cSelected !== focus) {
-                                    this.setSelected(this, focus);
+                                    this.setSelected(focus);
                                     core.triggerEvent(this, 'change', event);
                                 }
                             }

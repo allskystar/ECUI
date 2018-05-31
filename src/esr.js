@@ -137,6 +137,8 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
         if (route) {
             if (route.cache !== undefined) {
                 if (route.cache) {
+                    // 模块发生变化，缓存状态下同样更换引擎
+                    engine = loadStatus[name];
                     // 添加oncached事件，在路由已经cache的时候依旧执行
                     if (!route.oncached || route.oncached() !== false) {
                         var el = core.$(route.main);

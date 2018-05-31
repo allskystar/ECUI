@@ -112,8 +112,7 @@ _bRequired    - 是否必须选择
                         var parent = this.getParent();
                         parent._uOptions.hide();
                         if (this._cSelected !== this) {
-                            // this.setSelected(parent, this);
-                            parent.setSelected(parent, this);
+                            parent.setSelected(this);
                             core.triggerEvent(parent, 'change', event);
                         }
                     },
@@ -201,29 +200,28 @@ _bRequired    - 是否必须选择
              * 改变下拉框当前选中的项。
              * @private
              *
-             * @param {ecui.ui.Select} select 下拉框控件
              * @param {ecui.ui.Select.Item} item 新选中的项
              */
-            setSelected: function (select, item) {
+            setSelected: function (item) {
                 item = item || null;
-                if (item !== select._cSelected) {
-                    if (select._cSelected) {
-                        select._cSelected.alterClass('-selected');
+                if (item !== this._cSelected) {
+                    if (this._cSelected) {
+                        this._cSelected.alterClass('-selected');
                     }
                     if (item) {
                         item.alterClass('+selected');
-                        select._uText.setContent(item.getBody().innerHTML);
-                        ui.InputControl.prototype.setValue.call(select, item._sValue);
-                        if (select._uOptions.isShow()) {
+                        this._uText.setContent(item.getBody().innerHTML);
+                        ui.InputControl.prototype.setValue.call(this, item._sValue);
+                        if (this._uOptions.isShow()) {
                             core.setFocused(item);
                         }
-                        select.alterClass(item._sValue === '' ? '+placeholder' : '-placeholder');
+                        this.alterClass(item._sValue === '' ? '+placeholder' : '-placeholder');
                     } else {
-                        select._uText.setContent('');
-                        ui.InputControl.prototype.setValue.call(select, '');
-                        core.loseFocus(select._cSelected);
+                        this._uText.setContent('');
+                        ui.InputControl.prototype.setValue.call(this, '');
+                        core.loseFocus(this._cSelected);
                     }
-                    select._cSelected = item;
+                    this._cSelected = item;
                 }
             },
 
@@ -233,7 +231,7 @@ _bRequired    - 是否必须选择
              */
             $remove: function (event) {
                 if (event.child === this._cSelected) {
-                    this.setSelected(this);
+                    this.setSelected();
                 }
                 ui.InputControl.prototype.$remove.call(this, event);
             },
@@ -267,7 +265,7 @@ _bRequired    - 是否必须选择
              * @param {number} index 选项的序号
              */
             setSelectedIndex: function (index) {
-                this.setSelected(this, this.getItems()[index]);
+                this.setSelected(this.getItems()[index]);
             },
 
             /**
@@ -280,13 +278,13 @@ _bRequired    - 是否必须选择
             setValue: function (value) {
                 if (this.getItems().every(function (item) {
                         if (item._sValue === value) {
-                            this.setSelected(this, item);
+                            this.setSelected(item);
                             return false;
                         }
                         return true;
                     }, this)) {
                     // 找不到满足条件的项，将选中的值清除
-                    this.setSelected(this);
+                    this.setSelected();
                 }
             }
         },

@@ -37,7 +37,6 @@ _bRequired    - 是否必须选择
         function (el, options) {
             util.setDefault(options, 'enter', 'bottom');
             ui.$select.call(this, el, options);
-
         },
         {
             /**
