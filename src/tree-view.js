@@ -119,13 +119,13 @@ _aChildren     - 子控件集合
                     if (this._eChildren) {
                         if (this.isCollapsed()) {
                             this.expand();
-                            core.triggerEvent(this, 'expand');
+                            core.dispatchEvent(this, 'expand');
                         } else {
                             this.collapse();
-                            core.triggerEvent(this, 'collapse');
+                            core.dispatchEvent(this, 'collapse');
                         }
                     }
-                    core.triggerEvent(this, 'nodeclick', event);
+                    core.dispatchEvent(this, 'nodeclick', event);
                 }
             },
 
@@ -161,11 +161,11 @@ _aChildren     - 子控件集合
                     }
                     for (var control = event.getControl(); control; control = control.getParent()) {
                         if (control instanceof ui.TreeView) {
-                            core.triggerEvent(control, 'nodeover', event);
+                            core.dispatchEvent(control, 'nodeover', event);
                             break;
                         }
                     }
-                    core.triggerEvent(hovered, 'nodeout', event);
+                    core.dispatchEvent(hovered, 'nodeout', event);
                     hovered = control;
                 }
             },
@@ -180,9 +180,9 @@ _aChildren     - 子控件集合
                     if (this.contain(hovered)) {
                         return;
                     }
-                    core.triggerEvent(hovered, 'nodeout', event);
+                    core.dispatchEvent(hovered, 'nodeout', event);
                 }
-                core.triggerEvent(this, 'nodeover', event);
+                core.dispatchEvent(this, 'nodeover', event);
                 hovered = this;
             },
 

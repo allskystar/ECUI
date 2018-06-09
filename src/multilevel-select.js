@@ -74,7 +74,7 @@ _aSelect - 全部的下拉框控件列表
                             item.removeAll();
                         }
 
-                        core.triggerEvent(this.getParent(), 'change', event);
+                        core.dispatchEvent(this.getParent(), 'change', event);
                     }
                 }
             ),

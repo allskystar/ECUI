@@ -180,7 +180,7 @@ _eContainer      - 容器 DOM 元素
              */
             $itemclick: function (event) {
                 this.setSelected(event.item);
-                core.triggerEvent(this, 'change');
+                core.dispatchEvent(this, 'change');
             },
 
             /**

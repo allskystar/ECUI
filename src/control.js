@@ -12,7 +12,6 @@ _bFocusable         - 控件是否允许获取焦点
 _bDisabled          - 控件的状态，为true时控件不处理任何事件
 _bCached            - 控件是否已经读入缓存
 _bReady             - 控件是否已经完全生成
-_bTransparent       - 控件是否透明，在这种状态下，事件可以穿透控件到达控件下方的控件，但会影响效率，请谨慎使用
 _sUID               - 控件的内部ID
 _sPrimary           - 控件定义时的基本样式
 _sClass             - 控件的当前样式
@@ -31,7 +30,6 @@ _aStatus            - 控件当前的状态集合
         ui = core.ui,
         util = core.util,
 
-        isMobile = /(Android|iPhone|iPad|UCWEB|Fennec|Mobile)/i.test(navigator.userAgent),
         ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined,
 
         eventNames = ['mousedown', 'mouseover', 'mousemove', 'mouseout', 'mouseup', 'click', 'dblclick', 'focus', 'blur', 'activate', 'deactivate'];
@@ -53,12 +51,12 @@ _aStatus            - 控件当前的状态集合
         // 触发原来父控件的移除子控件事件
         if (parent !== oldParent) {
             if (oldParent) {
-                if (!core.triggerEvent(oldParent, 'remove', {child: control})) {
+                if (!core.dispatchEvent(oldParent, 'remove', {child: control})) {
                     return;
                 }
             }
             if (parent) {
-                if (!core.triggerEvent(parent, 'append', {child: control})) {
+                if (!core.dispatchEvent(parent, 'append', {child: control})) {
                     parent = parentElement = null;
                 }
             }
@@ -105,7 +103,6 @@ _aStatus            - 控件当前的状态集合
             this._bCapturable = options.capturable !== false;
             this._bUserSelect = options.userSelect !== false;
             this._bFocusable = options.focusable !== false;
-            this._bTransparent = !!options.transparent;
 
             this._aStatus = ['', ' '];
             this._sSubType = '';
@@ -120,9 +117,7 @@ _aStatus            - 控件当前的状态集合
              * @event
              */
             $activate: function () {
-                if (!isMobile) {
-                    this.alterClass('+active');
-                }
+                this.alterClass('+active');
             },
 
             /**
@@ -195,9 +190,7 @@ _aStatus            - 控件当前的状态集合
              * @event
              */
             $deactivate: function () {
-                if (!isMobile) {
-                    this.alterClass('-active');
-                }
+                this.alterClass('-active');
             },
 
             /**
@@ -385,9 +378,7 @@ _aStatus            - 控件当前的状态集合
              * @event
              */
             $mouseout: function () {
-                if (!isMobile) {
-                    this.alterClass('-hover');
-                }
+                this.alterClass('-hover');
             },
 
             /**
@@ -396,9 +387,7 @@ _aStatus            - 控件当前的状态集合
              * @event
              */
             $mouseover: function () {
-                if (!isMobile) {
-                    this.alterClass('+hover');
-                }
+                this.alterClass('+hover');
             },
 //{if 0}//
             /**
@@ -929,7 +918,7 @@ _aStatus            - 控件当前的状态集合
              */
             hide: function () {
                 if (this.isShow()) {
-                    core.triggerEvent(this, 'hide');
+                    core.dispatchEvent(this, 'hide');
                     return true;
                 }
                 return false;
@@ -960,7 +949,7 @@ _aStatus            - 控件当前的状态集合
 
                     if (waitReadyList === null) {
                         // 页面已经加载完毕，直接运行 $ready 方法
-                        core.triggerEvent(this, 'ready', {options: options});
+                        core.dispatchEvent(this, 'ready', {options: options});
                         this._bReady = true;
                     } else {
                         if (!waitReadyList) {
@@ -971,7 +960,7 @@ _aStatus            - 控件当前的状态集合
                             util.timer(
                                 function () {
                                     waitReadyList.forEach(function (item) {
-                                        core.triggerEvent(item.control, 'ready', {options: item.options});
+                                        core.dispatchEvent(item.control, 'ready', {options: item.options});
                                         item.control._bReady = true;
                                     });
                                     waitReadyList = null;
@@ -1074,16 +1063,6 @@ _aStatus            - 控件当前的状态集合
              */
             isShow: function () {
                 return !dom.hasClass(this.getOuter(), 'ui-hide') && !!this.getOuter().offsetWidth;
-            },
-
-            /**
-             * 判断是否处于透明状态。
-             * @public
-             *
-             * @return {boolean} 控件是否透明
-             */
-            isTransparent: function () {
-                return this._bTransparent;
             },
 
             /**
@@ -1217,16 +1196,6 @@ _aStatus            - 控件当前的状态集合
             },
 
             /**
-             * 设置控件是否处于透明状态。
-             * @public
-             *
-             * @param {boolean} transparent 控件是否透明
-             */
-            setTransparent: function (transparent) {
-                this._bTransparent = transparent;
-            },
-
-            /**
              * 显示控件。
              * 如果控件处于隐藏状态，调用 show 方法会触发 onshow 事件，控件转为显示状态。如果控件已经处于显示状态，则不执行任何操作。
              * @public
@@ -1235,7 +1204,7 @@ _aStatus            - 控件当前的状态集合
              */
             show: function () {
                 if (!this.isShow()) {
-                    core.triggerEvent(this, 'show');
+                    core.dispatchEvent(this, 'show');
                     return true;
                 }
                 return false;

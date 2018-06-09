@@ -44,7 +44,7 @@ _cFor - 被转发的控件对象
                     }, this)[0];
 
                 if (target && !target.isDisabled() && !target.contain(event.getControl())) {
-                    core.triggerEvent(target, 'click', event);
+                    core.dispatchEvent(target, 'click', event);
                 }
             },
 
@@ -75,7 +75,7 @@ _cFor - 被转发的控件对象
                     core.setFocused(target);
                 }
 
-                core.triggerEvent(target, item, event);
+                core.dispatchEvent(target, item, event);
             }
         };
     });

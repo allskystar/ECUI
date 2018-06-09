@@ -44,7 +44,7 @@ _eInput        - INPUT对象
             compositionend: function (event) {
                 event = core.wrapEvent(event);
                 var control = event.target.getControl();
-                core.triggerEvent(control, 'input', event);
+                core.dispatchEvent(control, 'input', event);
                 timer = util.timer(
                     function () {
                         control._bIME = false;
@@ -110,7 +110,7 @@ _eInput        - INPUT对象
                 event = core.wrapEvent(event);
                 var control = event.target.getControl();
                 if (!control._bIME) {
-                    core.triggerEvent(control, 'input', event);
+                    core.dispatchEvent(control, 'input', event);
                 }
             },
 
@@ -124,7 +124,7 @@ _eInput        - INPUT对象
                 if (ieVersion < 9) {
                     if (event.propertyName === 'value' && core.wrapEvent(event).target.type !== 'hidden') {
                         event = core.wrapEvent(event);
-                        core.triggerEvent(event.target.getControl(), 'input', event);
+                        core.dispatchEvent(event.target.getControl(), 'input', event);
                     }
                 }
             }
@@ -159,7 +159,7 @@ _eInput        - INPUT对象
 
         Array.prototype.forEach.call(this.elements, function (item) {
             if (item.getControl) {
-                core.triggerEvent(item.getControl(), 'submit', event);
+                core.dispatchEvent(item.getControl(), 'submit', event);
             }
         });
     }
@@ -171,7 +171,7 @@ _eInput        - INPUT对象
     function resetHandler() {
         Array.prototype.forEach.call(this.elements, function (item) {
             if (item.getControl) {
-                core.triggerEvent(item.getControl(), 'reset');
+                core.dispatchEvent(item.getControl(), 'reset');
             }
         });
     }
@@ -252,7 +252,7 @@ _eInput        - INPUT对象
                 dom.addEventListener(this._eInput, 'blur', events.blur);
 
                 if (this._bBlur) {
-                    core.triggerEvent(this, 'validate');
+                    core.dispatchEvent(this, 'validate');
                 }
             },
 
@@ -293,7 +293,7 @@ _eInput        - INPUT对象
             $error: function () {
                 for (var control = this; control = control.getParent(); ) {
                     if (control instanceof ui.InputGroup) {
-                        core.triggerEvent(control, 'error');
+                        core.dispatchEvent(control, 'error');
                         return false;
                     }
                 }
@@ -384,7 +384,7 @@ _eInput        - INPUT对象
              * @event
              */
             $submit: function (event) {
-                if (!core.triggerEvent(this, 'validate')) {
+                if (!core.dispatchEvent(this, 'validate')) {
                     event.preventDefault();
                 }
             },
@@ -414,6 +414,16 @@ _eInput        - INPUT对象
              */
             getName: function () {
                 return this._eInput.name;
+            },
+
+            /**
+             * 获取控件进行提交的值，默认使用 getValue 的返回值。
+             * @public
+             *
+             * @return {string} 控件的表单值
+             */
+            getFormValue: function () {
+                return this.getValue();
             },
 
             /**

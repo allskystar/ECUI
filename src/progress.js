@@ -41,7 +41,7 @@ _nMax    - 进度最大值
              */
             $ready: function (event) {
                 ui.Control.prototype.$ready.call(this, event);
-                core.triggerEvent(this, 'progress');
+                core.dispatchEvent(this, 'progress');
             },
 
             /**
@@ -75,7 +75,7 @@ _nMax    - 进度最大值
                 if (this._nMax !== max) {
                     this._nMax = max;
                     this._nValue = Math.min(this._nValue, this._nMax);
-                    core.triggerEvent(this, 'progress');
+                    core.dispatchEvent(this, 'progress');
                 }
             },
 
@@ -89,7 +89,7 @@ _nMax    - 进度最大值
                 value = Math.max(Math.min(this._nMax, value), 0);
                 if (this._nValue !== value) {
                     this._nValue = value;
-                    core.triggerEvent(this, 'progress');
+                    core.dispatchEvent(this, 'progress');
                 }
             }
         }

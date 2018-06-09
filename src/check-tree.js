@@ -71,7 +71,7 @@ _uCheckbox - 复选框控件
              */
             $ready: function (event) {
                 ui.TreeView.prototype.$ready.call(this, event);
-                core.triggerEvent(this._uCheckbox, 'ready');
+                core.dispatchEvent(this._uCheckbox, 'ready');
             },
 
             /**

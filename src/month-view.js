@@ -115,7 +115,7 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
                         var parent = this.getParent();
 
                         event.date = new Date(parent._nYear, parent._nMonth, this._nDay);
-                        if (core.triggerEvent(parent, 'dateclick', event)) {
+                        if (core.dispatchEvent(parent, 'dateclick', event)) {
                             parent._oDate = event.date;
                             setSelected(parent, this);
                         }
@@ -297,7 +297,7 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
                 }, this);
 
                 if (oldYear !== dateYear || oldMonth !== dateMonth) {
-                    core.triggerEvent(this, 'change');
+                    core.dispatchEvent(this, 'change');
                 }
             }
         }

@@ -1007,13 +1007,13 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
         ui.Table.prototype.Row.prototype[item] = function (event) {
             ui.Control.prototype[item].call(this, event);
             event.row = this;
-            core.triggerEvent(this.getParent(), 'row' + type, event);
+            core.dispatchEvent(this.getParent(), 'row' + type, event);
         };
 
         ui.Table.prototype.Cell.prototype[item] = function (event) {
             ui.Control.prototype[item].call(this, event);
             event.cell = this;
-            core.triggerEvent(this.getParent().getParent(), 'cell' + type, event);
+            core.dispatchEvent(this.getParent().getParent(), 'cell' + type, event);
         };
     });
 }());

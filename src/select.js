@@ -150,7 +150,7 @@ _bRequired    - 是否必须选择
                                         index = Math.min(Math.max(0, oldIndex + which - 39), list.length - 1);
                                     if (oldIndex !== index) {
                                         this.setSelectedIndex(index);
-                                        core.triggerEvent(this, 'change', event);
+                                        core.dispatchEvent(this, 'change', event);
                                     }
                                 }
                             }
@@ -160,7 +160,7 @@ _bRequired    - 是否必须选择
                             if (which === 13) {
                                 if (focus.getParent() === this && this._cSelected !== focus) {
                                     this.setSelected(focus);
-                                    core.triggerEvent(this, 'change', event);
+                                    core.dispatchEvent(this, 'change', event);
                                 }
                             }
                             this._uOptions.hide();

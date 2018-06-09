@@ -259,7 +259,7 @@ _ePlaceHolder - 为空时的提示信息标签
                 }
 
                 if (!result) {
-                    core.triggerEvent(this, 'error');
+                    core.dispatchEvent(this, 'error');
                 }
                 return result;
             },

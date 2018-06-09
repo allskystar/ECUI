@@ -136,7 +136,7 @@ _nBottomIndex  - 下部隐藏的选项序号
                 ui.MScroll.prototype.$dragend.call(this, event);
                 if (!this._bLoading && this._sStatus === 'headercomplete') {
                     this._bLoading = true;
-                    core.triggerEvent(this, 'refresh');
+                    core.dispatchEvent(this, 'refresh');
                 } else {
                     this.reset();
                 }
@@ -218,11 +218,11 @@ _nBottomIndex  - 下部隐藏的选项序号
                     status = '';
                 }
                 if (this._sStatus && this._sStatus.charAt(0) !== status.charAt(0)) {
-                    core.triggerEvent(this, this._sStatus.slice(0, 6) + 'leave');
+                    core.dispatchEvent(this, this._sStatus.slice(0, 6) + 'leave');
                 }
                 if (this._sStatus !== status) {
                     if (status) {
-                        core.triggerEvent(this, status);
+                        core.dispatchEvent(this, status);
                     }
                     this._sStatus = status;
                 }
@@ -247,7 +247,7 @@ _nBottomIndex  - 下部隐藏的选项序号
                 setComplete.call(this);
                 if (!this._bLoading) {
                     this._bLoading = true;
-                    core.triggerEvent(this, 'loaddata');
+                    core.dispatchEvent(this, 'loaddata');
                 }
             },
 

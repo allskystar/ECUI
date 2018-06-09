@@ -113,7 +113,7 @@ _bRequired    - 是否必须选择
                         parent._uOptions.hide();
                         if (this._cSelected !== this) {
                             parent.setSelected(this);
-                            core.triggerEvent(parent, 'change', event);
+                            core.dispatchEvent(parent, 'change', event);
                         }
                     },
 
@@ -243,7 +243,7 @@ _bRequired    - 是否必须选择
                 ui.InputControl.prototype.$validate.call(this);
 
                 if (this.getValue() === '' &&  this._bRequired) {
-                    core.triggerEvent(this, 'error');
+                    core.dispatchEvent(this, 'error');
                     return false;
                 }
             },

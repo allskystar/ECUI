@@ -18,7 +18,7 @@
                     ui.Calendar.prototype.$dateclick.call(this, event);
                     var parent = this.getParent();
                     parent.setValue(event.date);
-                    core.triggerEvent(parent, 'input', event);
+                    core.dispatchEvent(parent, 'input', event);
                     this.hide();
                 },
 

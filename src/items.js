@@ -97,7 +97,7 @@
                 this.$Items.$ready.call(this, event);
                 this.alterItems();
                 this.getItems().forEach(function (item) {
-                    core.triggerEvent(item, 'ready');
+                    core.dispatchEvent(item, 'ready');
                 });
             },
 
@@ -159,7 +159,7 @@
                     }
 
                     // 选项控件，直接添加
-                    if (core.triggerEvent(this, 'append', {child: item})) {
+                    if (core.dispatchEvent(this, 'append', {child: item})) {
                         body.appendChild(item.getOuter());
                         item.$setParent(this);
                         items.push(item);
@@ -250,7 +250,7 @@
                     item = namedMap[this.getUID()][item];
                 }
                 if (item) {
-                    if (core.triggerEvent(this, 'remove', {child: item})) {
+                    if (core.dispatchEvent(this, 'remove', {child: item})) {
                         dom.remove(item.getOuter());
                         item.$setParent();
                     } else {
@@ -306,7 +306,7 @@
             if (parent) {
                 event.item = this;
                 event.index = namedMap[parent.getUID()].indexOf(this);
-                core.triggerEvent(parent, 'item' + item.replace('mouse', ''), event);
+                core.dispatchEvent(parent, 'item' + item.replace('mouse', ''), event);
             }
         };
     });

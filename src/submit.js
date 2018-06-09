@@ -27,7 +27,7 @@
                 ui.Button.prototype.$click.call(this, event);
                 for (var parent = this.getParent(); parent; parent = parent.getParent()) {
                     if (parent instanceof ui.Dialog) {
-                        core.triggerEvent(parent, 'submit', event);
+                        core.dispatchEvent(parent, 'submit', event);
                         return;
                     }
                 }

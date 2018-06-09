@@ -10,6 +10,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
         fontSizeCache = [],
         loadScriptCount = 0,
         isMobile = /(Android|iPhone|iPad|UCWEB|Fennec|Mobile)/i.test(navigator.userAgent),
+        //{if 1}//isPointer = !!window.PointerEvent, // 使用pointer事件序列，请一定在需要滚动的元素上加上touch-action:none//{/if}//
         isStrict = document.compatMode === 'CSS1Compat',
         isWebkit = /webkit/i.test(navigator.userAgent),
         chromeVersion = /Chrome\/(\d+\.\d)/i.test(navigator.userAgent) ? +RegExp.$1 : undefined,
@@ -869,7 +870,13 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
             adjustFontSize: function (sheets) {
                 var fontSize = core.fontSize = util.toNumber(dom.getStyle(dom.getParent(document.body), 'font-size'));
                 sheets.forEach(function (item) {
-                    item = Array.prototype.slice.call(item.rules || item.cssRules);
+                    if (ieVersion) {
+                        for (i = 0, rule = item.rules || item.cssRules, item = []; value = rule[i++]; ) {
+                            item.push(value);
+                        }
+                    } else {
+                        item = Array.prototype.slice.call(item.rules || item.cssRules);
+                    }
                     for (var i = 0, rule; rule = item[i++]; ) {
                         if (rule.cssRules && rule.cssRules.length) {
                             item = item.concat(Array.prototype.slice.call(rule.cssRules));
@@ -1186,7 +1193,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              * @return {number} 对象的数值
              */
             toNumber: function (obj) {
-                if (obj.slice(-3) === 'rem') {
+                if (obj && obj.slice(-3) === 'rem') {
                     return Math.round(core.fontSize * +obj.slice(0, -3));
                 }
                 return parseInt(obj, 10) || 0;
