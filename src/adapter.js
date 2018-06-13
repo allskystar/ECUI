@@ -1196,7 +1196,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                 if (obj && obj.slice(-3) === 'rem') {
                     return Math.round(core.fontSize * +obj.slice(0, -3));
                 }
-                return parseInt(obj, 10) || 0;
+                return parseFloat(obj, 10) || 0;
             }
         }
     };

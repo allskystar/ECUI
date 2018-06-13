@@ -167,8 +167,8 @@ _aStatus            - 控件当前的状态集合
                 }
 
                 if (cacheSize !== false) {
-                    this.$$width = this._eMain.offsetWidth || util.toNumber(style.width) + (core.isContentBox() ? this.$getBasicWidth() : 0);
-                    this.$$height = this._eMain.offsetHeight || util.toNumber(style.height) + (core.isContentBox() ? this.$getBasicHeight() : 0);
+                    this.$$width = this._eMain.offsetWidth;
+                    this.$$height = this._eMain.offsetHeight;
                 }
             },
 //{if 0}//
@@ -281,6 +281,18 @@ _aStatus            - 控件当前的状态集合
             $focus: function () {
                 this.alterClass('+focus');
             },
+
+            /**
+             * 3D Touch 用力按下事件。
+             * @event
+             */
+            $forcedown: util.blank,
+
+            /**
+             * 3D Touch 释放弹起事件。
+             * @event
+             */
+            $forceup: util.blank,
 
             /**
              * 获取控件的基本高度。
@@ -493,8 +505,6 @@ _aStatus            - 控件当前的状态集合
                     this._eMain.style.height = value + 'px';
                     this.$$height = height;
                 }
-
-                this.initStructure();
             },
 
             /**
@@ -504,10 +514,7 @@ _aStatus            - 控件当前的状态集合
              */
             $show: function () {
                 dom.removeClass(this.getOuter(), 'ui-hide');
-                if (!this._bCached) {
-                    this.cache();
-                    this.initStructure();
-                }
+                this.cache();
             },
 
             /**
@@ -595,12 +602,18 @@ _aStatus            - 控件当前的状态集合
              *
              * @param {boolean} cacheSize 是否需要缓存控件的大小，如果控件是另一个控件的部件时，不缓存大小能加快渲染速度，默认缓存
              * @param {boolean} force 是否需要强制刷新缓存，相当于之前执行了 clearCache 方法，默认不强制刷新
+             * @return {boolean} 是否刷新缓存
              */
             cache: function (cacheSize, force) {
-                if (force || (this.getOuter().style.display !== 'none' && !this._bCached)) {
+                if (force || (this.getOuter().offsetWidth && !this._bCached)) {
                     this._bCached = true;
                     this.$cache(dom.getStyle(this._eMain), cacheSize);
+                    if (!force && this._bReady) {
+                        this.initStructure();
+                    }
+                    return true;
                 }
+                return false;
             },
 
             /**
@@ -780,7 +793,7 @@ _aStatus            - 控件当前的状态集合
              * @return {number} 控件的高度
              */
             getHeight: function () {
-                this.cache();
+                this.cache(true);
                 return this.$$height;
             },
 
@@ -879,7 +892,7 @@ _aStatus            - 控件当前的状态集合
              * @return {number} 控件的宽度
              */
             getWidth: function () {
-                this.cache();
+                this.cache(true);
                 return this.$$width;
             },
 
@@ -943,7 +956,7 @@ _aStatus            - 控件当前的状态集合
                     if (el.style.display === 'none') {
                         this.$hide();
                         el.style.display = '';
-                    } else {
+                    } else if (this._bCached) {
                         this.initStructure();
                     }
 
@@ -990,6 +1003,16 @@ _aStatus            - 控件当前的状态集合
              */
             isActived: function () {
                 return this.contain(core.getActived());
+            },
+
+            /**
+             * 判断是否已经缓存。
+             * @public
+             *
+             * @return {boolean} 控件是否已经缓存
+             */
+            isCached: function () {
+                return !!this._bCached;
             },
 
             /**
@@ -1186,13 +1209,15 @@ _aStatus            - 控件当前的状态集合
                 }
 
                 this.$setSize(width, height);
-
                 if (width) {
                     this._sWidth = this._eMain.style.width;
                 }
                 if (height) {
                     this._sHeight = this._eMain.style.height;
                 }
+
+                this.$resize();
+                this.initStructure();
             },
 
             /**
@@ -1205,6 +1230,11 @@ _aStatus            - 控件当前的状态集合
             show: function () {
                 if (!this.isShow()) {
                     core.dispatchEvent(this, 'show');
+                    core.query(function (item) {
+                        return this.contain(item);
+                    }.bind(this)).forEach(function (item) {
+                        item.cache();
+                    });
                     return true;
                 }
                 return false;

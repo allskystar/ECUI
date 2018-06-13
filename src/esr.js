@@ -134,12 +134,22 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
         var route = 'string' === typeof name ? routes[name] : name;
 
         if (route) {
+            if (options !== true) {
+                context = {};
+            }
+
+            for (var key in options) {
+                if (options.hasOwnProperty(key)) {
+                    context[key] = options[key];
+                }
+            }
+
             if (route.cache !== undefined) {
                 if (route.cache) {
                     // 模块发生变化，缓存状态下同样更换引擎
-                    engine = loadStatus[name];
+                    engine = loadStatus[name.split('.')[0]];
                     // 添加oncached事件，在路由已经cache的时候依旧执行
-                    if (!route.oncached || route.oncached() !== false) {
+                    if (!route.oncached || route.oncached(context) !== false) {
                         var el = core.$(route.main);
                         // TODO，如果没有，是否需要自动生成一个层?
                         if (el) {
@@ -161,16 +171,6 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
                 }
             }
             if (!route.onrender || route.onrender() !== false) {
-                if (options !== true) {
-                    context = {};
-                }
-
-                for (var key in options) {
-                    if (options.hasOwnProperty(key)) {
-                        context[key] = options[key];
-                    }
-                }
-
                 if (!route.model) {
                     esr.render(route);
                 } else if ('function' === typeof route.model) {
@@ -334,12 +334,12 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
                             return;
                         }
                         history.replaceState('', '', '#' + loc);
-                        currLocation = loc;
                     }
                 }
                 // ie下使用中间iframe作为中转控制
                 // 其他浏览器直接调用控制器方法
                 if (!addIEHistory(loc)) {
+                    currLocation = loc;
                     esr.callRoute(loc);
                 }
             }
@@ -543,7 +543,7 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
             options = options || {};
 
             var oldOptions = parseLocation(currLocation),
-                url = options[''] || oldOptions[''];
+                url = options[''] || oldOptions[''] || name;
 
             for (var key in options) {
                 if (options.hasOwnProperty(key)) {

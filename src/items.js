@@ -74,17 +74,6 @@
             /**
              * @override
              */
-            $cache: function (style, cacheSize) {
-                this.$Items.$cache.call(this, style, cacheSize);
-
-                namedMap[this.getUID()].forEach(function (item) {
-                    item.cache(true, true);
-                });
-            },
-
-            /**
-             * @override
-             */
             $dispose: function () {
                 delete namedMap[this.getUID()];
                 this.$Items.$dispose.call(this);
@@ -95,7 +84,9 @@
              */
             $ready: function (event) {
                 this.$Items.$ready.call(this, event);
-                this.alterItems();
+                if (this.isCached()) {
+                    this.alterItems();
+                }
                 this.getItems().forEach(function (item) {
                     core.dispatchEvent(item, 'ready');
                 });
@@ -187,8 +178,28 @@
              */
             alterItems: function () {
                 if (!namedMap[this.getUID()].preventCount) {
-                    this.$alterItems();
+                    if (this.isReady() && !this.isShow()) {
+                        this.clearCache();
+                    } else {
+                        this.$alterItems();
+                    }
                 }
+            },
+
+            /**
+             * @override
+             */
+            cache: function (cacheSize, force) {
+                if (this.$Items.cache.call(this, cacheSize, force)) {
+                    namedMap[this.getUID()].forEach(function (item) {
+                        item.cache(true, force);
+                    });
+                    if (this.isReady()) {
+                        this.$alterItems();
+                    }
+                    return true;
+                }
+                return false;
             },
 
             /**

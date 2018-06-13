@@ -42,6 +42,34 @@ _eContainer      - 容器 DOM 元素
     }
 
     /**
+     * 滑动事件处理。
+     * @private
+     *
+     * @param {ECUIEvent} event ECUI 事件对象
+     */
+    function swipe(event) {
+        var items = this.getItems(),
+            index = items.indexOf(this._cSelected);
+        if (event.type === 'swiperight') {
+            if (index) {
+                index--;
+            }
+        } else if (event.type === 'swipeleft') {
+            if (index < items.length - 1) {
+                index++;
+            }
+        }
+        if (items[index] !== this._cSelected) {
+            this.setSelected(items[index]);
+            core.dispatchEvent(this, 'change');
+            var el = dom.first(this._cSelected.getMain());
+            if (el && el.tagName === 'A' && el.href) {
+                location.href = el.href;
+            }
+        }
+    }
+
+    /**
      * 选项卡控件。
      * 每一个选项卡都包含一个头部区域与容器区域，选项卡控件存在互斥性，只有唯一的一个选项卡能被选中并显示容器区域。
      * options 属性：
@@ -178,9 +206,19 @@ _eContainer      - 容器 DOM 元素
             /**
              * @override
              */
+            $dispose: function () {
+                core.removeGestureListeners(this);
+                ui.Control.prototype.$dispose.call(this);
+            },
+
+            /**
+             * @override
+             */
             $itemclick: function (event) {
-                this.setSelected(event.item);
-                core.dispatchEvent(this, 'change');
+                if (event.item !== this._cSelected) {
+                    this.setSelected(event.item);
+                    core.dispatchEvent(this, 'change');
+                }
             },
 
             /**
@@ -192,6 +230,11 @@ _eContainer      - 容器 DOM 元素
                 if (!this._cSelected) {
                     this.setSelected(+(event.options.selected || 0));
                 }
+
+                core.addGestureListeners(this, {
+                    swipeleft: swipe,
+                    swiperight: swipe
+                });
             },
 
             /**
@@ -222,14 +265,14 @@ _eContainer      - 容器 DOM 元素
              * 设置被选中的选项卡。
              * @public
              *
-             * @param {number|ecui.ui.Tab.Item} 选项卡子选项的索引/选项卡子选项控件
+             * @param {number|ecui.ui.Tab.Item} item 选项卡子选项的索引/选项卡子选项控件
              */
             setSelected: function (item) {
                 if ('number' === typeof item) {
                     item = this.getItem(item);
                 }
 
-                if (this._cSelected !== item) {
+                if (item && this._cSelected !== item) {
                     if (this._cSelected) {
                         this._cSelected.alterClass('-selected');
                         if (this._cSelected._eContainer && (!item || this._cSelected._eContainer !== item._eContainer)) {

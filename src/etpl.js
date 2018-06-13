@@ -167,7 +167,7 @@
      */
     function parseTextBlock(source, open, close, greedy, onInBlock, onOutBlock) {
         var closeLen = close.length;
-        var level = 0;
+        var level = Math.max(greedy - 1, 0);
         var buf = [];
 
         source.split(open).forEach(function (text, i) {
@@ -251,8 +251,10 @@
                 // 加入默认filter
                 // 只有当处理forText时，需要加入默认filter
                 // 处理if/var/use等command时，不需要加入默认filter
-                if (forText && text.indexOf('|') < 0 && defaultFilter) {
-                    text += '|' + defaultFilter;
+                if (forText) {
+                    if (text.indexOf('|') < 0 && defaultFilter) {
+                        text += '|' + defaultFilter;
+                    }
                 }
 
                 // variableCode是一个A调用，然后通过循环，在外面包filter的调用
@@ -332,7 +334,34 @@
                 return '';
             }
 
-            return compileVariable(this.value, this.engine, 1);
+            var engine = this.engine;
+            var open = engine.options.variableOpen;
+            var code = [];
+
+            this.value.split(open.replace('$', '=')).forEach(function (text, i) {
+                if (i) {
+                    parseTextBlock(
+                        text,
+                        open,
+                        engine.options.variableClose,
+                        2,
+                        function (text) {
+                            code.push(
+                                RENDER_STRING_ADD_START,
+                                'f["' + engine.options.defaultFilter + '"](String(' + compileVariable(text, engine) + '))',
+                                RENDER_STRING_ADD_END
+                            );
+                        },
+                        function (text) {
+                            code.push(compileVariable(text, engine, 1));
+                        }
+                    );
+                } else {
+                    code.push(compileVariable(text, engine, 1));
+                }
+            });
+
+            return code.join('');
         },
 
         /**
