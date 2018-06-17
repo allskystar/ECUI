@@ -72,6 +72,7 @@
              *
              */
             $click: function (event) {
+                ui.Control.prototype.$click.call(this, event);
                 this._eFile.click();
             },
 

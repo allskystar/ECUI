@@ -1,5 +1,9 @@
 /*
 ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由不同的模板引擎处理，因此不同模块可以有同名的模板，可以将模块理解成一个命名空间。
+使用示例：
+<body data-ecui="load:esr">
+支持的参数：
+esr(cache=true,meta=true)
 ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价于<a>标签，callRoute不会记录url信息，等价于传统的ajax调用，change用于参数的部分改变，一般用于翻页操作仅改变少量页码信息。
 */
 (function () {
@@ -22,7 +26,7 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
         delegateRoutes = {},    // 路由赋值的委托，如果路由不存在，会保存在此处
         routeRequestCount = 0,  // 记录路由正在加载的数量，用于解决第一次加载时要全部加载完毕才允许init操作
         cacheList = [],
-        options,
+        esrOptions,
         routes = {},
         autoRender = {},        // 模拟MVVM双向绑定
         context = {},
@@ -33,7 +37,9 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
         requestVersion = 0,     // 请求的版本号，主路由切换时会更新，在多次提交时保证只有最后一次提交会触发渲染
         localStorage,
         metaVersion,
-        meta;
+        meta,
+        lastLayer,
+        lastRouteName;
 
     /**
      * 增加IE的history信息。
@@ -65,6 +71,10 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
      * @param {Object} route 路由对象
      */
     function afterrender(route) {
+        if (esrOptions.app) {
+            transition(route);
+        }
+
         if (route.onafterrender) {
             route.onafterrender(context);
         }
@@ -144,32 +154,20 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
                 }
             }
 
-            if (route.cache !== undefined) {
-                if (route.cache) {
-                    // 模块发生变化，缓存状态下同样更换引擎
-                    engine = loadStatus[name.split('.')[0]];
-                    // 添加oncached事件，在路由已经cache的时候依旧执行
-                    if (!route.oncached || route.oncached(context) !== false) {
-                        var el = core.$(route.main);
-                        // TODO，如果没有，是否需要自动生成一个层?
-                        if (el) {
-                            el = core.findControl(el);
-                            var layers = ui.Layer.allShown(),
-                                index = layers.indexOf(el);
-                            if (index < 0) {
-                                if (el instanceof ui.Layer) {
-                                    el.show();
-                                }
-                            } else {
-                                for (; ++index < layers.length; ) {
-                                    layers[index].hide();
-                                }
-                            }
-                        }
-                    }
-                    return;
+            if (route.cache && core.$(route.main).route === route.NAME) {
+                // 数据必须还在才触发缓存
+                // 模块发生变化，缓存状态下同样更换引擎
+                engine = loadStatus[name.split('.')[0]];
+                // 添加oncached事件，在路由已经cache的时候依旧执行
+                if (esrOptions.app) {
+                    transition(route);
                 }
+                if (route.oncached) {
+                    route.oncached(context);
+                }
+                return;
             }
+
             if (!route.onrender || route.onrender() !== false) {
                 if (!route.model) {
                     esr.render(route);
@@ -236,7 +234,7 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
                 document.body.appendChild(iframe);
                 setInterval(listener, 100);
             } else if (window.onhashchange !== undefined) {
-                ecui.dom.addEventListener(window, 'hashchange', listener);
+                dom.addEventListener(window, 'hashchange', listener);
                 listener();
             } else {
                 setInterval(listener, 100);
@@ -360,19 +358,21 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
         el.style.visibility = 'hidden';
 
         if (el.route && routes[el.route].ondispose) {
+            dom.removeClass(el, el.route.replace(/\./g, '-'));
             routes[el.route].ondispose();
+            el.route = null;
         }
         Array.prototype.forEach.call(el.all || el.getElementsByTagName('*'), function (item) {
-            if (item.route) {
-                item = routes[item.route];
-                if (item.ondispose) {
-                    item.ondispose();
-                }
+            if (item.route && routes[item.route].ondispose) {
+                routes[item.route].ondispose();
             }
         });
 
         core.dispose(el, true);
         el.innerHTML = engine.render(name || route.view, context);
+        if (route.NAME) {
+            dom.addClass(el, route.NAME.replace(/\./g, '-'));
+        }
         core.init(el);
 
         afterrender(route);
@@ -452,6 +452,65 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
             scope[list[i]].push(value);
         } else {
             scope[list[i]] = value;
+        }
+    }
+
+    /**
+     * APP 层切换动画处理。
+     * @private
+     *
+     * @param {object} route 路由对象，新的路由
+     */
+    function transition(route) {
+        function getLayer(route) {
+            for (var el = core.$(route.main); el; el = dom.getParent(el)) {
+                if (el.getControl && el.getControl() instanceof ui.Layer) {
+                    return el.getControl();
+                }
+            }
+        }
+
+        if (route.NAME !== lastRouteName) {
+            var layer = getLayer(route),
+                view = util.getView();
+
+            if (lastLayer) {
+                lastLayer.getMain().header.style.display = 'none';
+            }
+            layer.getMain().header.style.display = '';
+            layer.show();
+
+            // 路由权重在该项目中暂不考虑相等情况
+            if (lastLayer) {
+                if (route.transition === false) {
+                    // 当前路由不使用动画
+                    layer.setPosition(0);
+                } else {
+                    var position = routes[lastRouteName].weight < routes[route.NAME].weight ? view.width : -view.width;
+                    layer.setPosition(position);
+
+                    core.effect.grade(
+                        'this.from.style.left->' + -position + ';this.to.style.left->0',
+                        600,
+                        {
+                            $: {from: lastLayer.getMain(), to: layer.getMain()},
+                            onfinish: function () {
+                                // 在执行结束后，如果不同时common layer则隐藏from layer，并且去掉目标路由中的动画执行函数
+                                lastLayer.hide();
+                                if (this.to.id === 'common') {
+                                    core.$('backup').id = 'common';
+                                    this.to.id = 'backup';
+                                }
+                                lastLayer = layer;
+                            }
+                        }
+                    );
+                }
+            } else {
+                lastLayer = layer;
+            }
+
+            lastRouteName = route.NAME;
         }
     }
 
@@ -807,7 +866,7 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
                     util.extend(headers, esr.headers);
                 }
 
-                if (options.meta) {
+                if (esrOptions.meta) {
                     headers['x-enum-version'] = metaVersion;
                 }
 
@@ -863,7 +922,7 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
                                     key;
 
                                 // 枚举常量管理
-                                if (options.meta) {
+                                if (esrOptions.meta) {
                                     if (data.meta) {
                                         metaUpdate = true;
                                     }
@@ -927,7 +986,7 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
                 if (metaUpdate) {
                     // 枚举常量管理
                     io.ajax(
-                        options.meta,
+                        esrOptions.meta,
                         {
                             headers: {'x-enum-version': metaVersion},
                             onsuccess: function (text) {
@@ -1016,9 +1075,51 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
          * @public
          */
         load: function (value) {
-            options = JSON.parse('{' + decodeURIComponent(value.replace(/(\w+)\s*=\s*([^\s]+)\s*($|,)/g, '"$1":"$2"')) + '}');
+            function loadInit() {
+                dom.ready(function () {
+                    etpl.config({
+                        commandOpen: '<<<',
+                        commandClose: '>>>'
+                    });
+                    for (var el = document.body.firstChild; el; el = el.nextSibling) {
+                        if (el.nodeType === 8) {
+                            etpl.compile(el.textContent || el.nodeValue);
+                            dom.remove(el);
+                        }
+                    }
+                    etpl.config({
+                        commandOpen: '<!--',
+                        commandClose: '-->'
+                    });
 
-            if (options.meta) {
+                    if (esrOptions.app) {
+                        el = dom.last(dom.first(document.body));
+                        var children = dom.children(el.parentNode);
+                        for (var i = 1; i < children.length; i += 2) {
+                            children[i].header = children[i - 1];
+                            el.appendChild(children[i]);
+                        }
+                        el = core.$(parseLocation(esr.getLocation())['']);
+                        if (el) {
+                            el.getControl().show();
+                            el.header.style.display = '';
+                        }
+                    }
+
+                    if (esr.onready) {
+                        var defaultRoute = esr.onready();
+                    }
+                    if (defaultRoute) {
+                        callRoute(defaultRoute);
+                    } else {
+                        init();
+                    }
+                });
+            }
+
+            esrOptions = JSON.parse('{' + decodeURIComponent(value.replace(/(\w+)\s*=\s*([^\s]+)\s*($|,)/g, '"$1":"$2"')) + '}');
+
+            if (esrOptions.meta) {
                 if (window.localStorage) {
                     localStorage = window.localStorage;
                 } else {
@@ -1039,41 +1140,31 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
                 meta = JSON.parse(localStorage.getItem('esr_meta')) || {};
             }
 
-            if (options.cache) {
+            if (esrOptions.cache) {
                 historyCache = true;
             }
-
+//{if 0}//
+            if (esrOptions.app) {
+                io.ajax('.app-container.html', {
+                    cache: true,
+                    onsuccess: function (text) {
+                        dom.insertHTML(document.body, 'afterBegin', text);
+                        loadInit();
+                    },
+                    onerror: function () {
+                        console.log('找不到APP的布局文件，请确认.app-container.html文件是否存在');
+                        esrOptions.app = false;
+                        loadInit();
+                    }
+                });
+            }
+//{else}//            loadInit();
+//{/if}//
             for (var i = 0, links = document.getElementsByTagName('A'), el; el = links[i++]; i++) {
                 if (el.href.slice(-1) === '#') {
                     el.href = JAVASCRIPT + ':void(0)';
                 }
             }
-
-            dom.ready(function () {
-                etpl.config({
-                    commandOpen: '<<<',
-                    commandClose: '>>>'
-                });
-                for (var el = document.body.firstChild; el; el = el.nextSibling) {
-                    if (el.nodeType === 8) {
-                        etpl.compile(el.textContent || el.nodeValue);
-                        ecui.dom.remove(el);
-                    }
-                }
-                etpl.config({
-                    commandOpen: '<!--',
-                    commandClose: '-->'
-                });
-
-                if (esr.onready) {
-                    var defaultRoute = esr.onready();
-                }
-                if (defaultRoute) {
-                    callRoute(defaultRoute);
-                } else {
-                    init();
-                }
-            });
         }
     };
 

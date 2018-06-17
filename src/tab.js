@@ -74,6 +74,7 @@ _eContainer      - 容器 DOM 元素
      * 每一个选项卡都包含一个头部区域与容器区域，选项卡控件存在互斥性，只有唯一的一个选项卡能被选中并显示容器区域。
      * options 属性：
      * selected    选中的选项序号，默认为0
+     * gesture     是否支持手势切换，默认为true
      * @control
      */
     ui.Tab = core.inherits(
@@ -231,10 +232,12 @@ _eContainer      - 容器 DOM 元素
                     this.setSelected(+(event.options.selected || 0));
                 }
 
-                core.addGestureListeners(this, {
-                    swipeleft: swipe,
-                    swiperight: swipe
-                });
+                if (event.options.gesture !== false) {
+                    core.addGestureListeners(this, {
+                        swipeleft: swipe,
+                        swiperight: swipe
+                    });
+                }
             },
 
             /**

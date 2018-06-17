@@ -120,47 +120,83 @@
     };
 
     function load() {
+        function createStyle(cssText) {
+            var el = document.createElement('STYLE');
+            el.setAttribute('type', 'text/less');
+            if (ecui.ie < 10) {
+                var reg = ecui.ie > 6 ? new RegExp('[_' + (ecui.ie > 7 ? '\\*\\+' : '') + ']\\w+:[^;}]+[;}]', 'g') : null;
+                if (reg) {
+                    cssText = cssText.replace(reg, function (match) {
+                        return match.slice(-1) === '}' ? '}' : '';
+                    });
+                }
+                el.styleSheet.cssText = cssText;
+            } else {
+                el.innerHTML = cssText;
+            }
+            document.head.appendChild(el);
+        }
+        function loadRouteCss() {
+            ecui.io.ajax(moduleName + '/route.' + filename + '.css', {
+                cache: true,
+                onsuccess: function (cssText) {
+                    createStyle('.' + filename.replace(/\./g, '-') + '{' + cssText + '}');
+
+                    window.less.sheets = [];
+                    window.less.refresh(true, undefined, false);
+
+                    var stop = ecui.util.timer(function () {
+                        if (document.head.lastChild.getAttribute('type') !== 'text/less') {
+                            stop();
+                            ecui.io.ajax(moduleName + '/route.' + filename + '.html', {
+                                cache: true,
+                                onsuccess: function (data) {
+                                    ecui.esr.getEngine(moduleName).compile(data);
+                                    moduleRoute.splice(0, 1);
+                                    if (moduleRoute.length) {
+                                        load();
+                                    } else {
+                                        moduleCallback();
+                                    }
+                                }
+                            });
+                        }
+                    }, -1);
+                }
+            });
+        }
+
+        function loadLayer(url) {
+            ecui.io.ajax(url, {
+                cache: true,
+                onsuccess: function (text) {
+                    text = text.replace('<header', '<div style="display:none"');
+                    text = text.replace('<container', '<div ui="type:layer" style="display:none"');
+                    text = text.replace('</header>', '</div>');
+                    text = text.replace('</container>', '</div>');
+                    var el = ecui.dom.last(ecui.dom.first(document.body));
+                    ecui.dom.insertHTML(el, 'beforeBegin', text);
+                    ecui.init(el.parentNode);
+                    var children = ecui.dom.children(el.parentNode);
+                    children[children.length - 2].header = children[children.length - 3];
+                    el.appendChild(children[children.length - 2]);
+                    loadRouteCss();
+                },
+                onerror: loadRouteCss
+            });
+        }
+
         var filename = moduleRoute[0];
         oldLoadScriptFn(moduleName + '/route.' + filename + '.js', null, {cache: true});
 
-        ecui.io.ajax(moduleName + '/route.' + filename + '.css', {
+        ecui.io.ajax(moduleName + '/' + moduleName + '.css', {
             cache: true,
             onsuccess: function (cssText) {
-                var el = document.createElement('STYLE');
-                el.setAttribute('type', 'text/less');
-                if (ecui.ie < 10) {
-                    var reg = ecui.ie > 6 ? new RegExp('[_' + (ecui.ie > 7 ? '\\*\\+' : '') + ']\\w+:[^;}]+[;}]', 'g') : null;
-                    if (reg) {
-                        cssText = cssText.replace(reg, function (match) {
-                            return match.slice(-1) === '}' ? '}' : '';
-                        });
-                    }
-                    el.styleSheet.cssText = cssText;
-                } else {
-                    el.innerHTML = cssText;
-                }
-                document.head.appendChild(el);
-
-                window.less.sheets = [];
-                window.less.refresh(true, undefined, false);
-
-                var stop = ecui.util.timer(function () {
-                    if (document.head.lastChild.getAttribute('type') !== 'text/less') {
-                        stop();
-                        ecui.io.ajax(moduleName + '/route.' + filename + '.html', {
-                            cache: true,
-                            onsuccess: function (data) {
-                                ecui.esr.getEngine(moduleName).compile(data);
-                                moduleRoute.splice(0, 1);
-                                if (moduleRoute.length) {
-                                    load();
-                                } else {
-                                    moduleCallback();
-                                }
-                            }
-                        });
-                    }
-                }, -1);
+                createStyle(cssText);
+                loadLayer(moduleName + '/layer.' + filename + '.html');
+            },
+            onerror: function () {
+                loadLayer(moduleName + '/layer.' + filename + '.html');
             }
         });
     }

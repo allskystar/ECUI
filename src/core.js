@@ -96,6 +96,8 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                         type: pointerType,
                         pageX: event.pageX,
                         pageY: event.pageY,
+                        originalX: event.pageX,
+                        originalY: event.pageY,
                         target: event.target,
                         lastMoveTime: Date.now(),
                         speedX: 0,
@@ -105,7 +107,12 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                     pointers.push(event.track);
 
                     if (pointers.length === 1) {
-                        isMobileMoved = pointerType === 'mouse' ? undefined : false;
+                        if (pointerType === 'mouse') {
+                            isMobileMoved = undefined;
+                        } else {
+                            isMobileMoved = false;
+                            currEnv.mouseover(event);
+                        }
                         currEnv.mousedown(event);
                         onpressure(event, event.getNative().pressure >= 0.4);
                     }
@@ -113,7 +120,9 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             },
 
             pointermove: function (event) {
-                var track = tracks[event.pointerId];
+                var pointerId = event.pointerId,
+                    pointerType = event.pointerType,
+                    track = tracks[pointerId];
 
                 if (!track) {
                     track = {};
@@ -124,14 +133,20 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                 calcSpeed(track, event);
 
                 // 没有trackCount表示是纯粹的鼠标移动行为
-                if (!pointers.length || event.getNative().pointerId === trackId) {
+                if (!pointers.length || pointerId === trackId) {
                     // Pointer设备上纯点击也可能会触发move
                     if ((Math.sqrt(track.speedX * track.speedX + track.speedY * track.speedY) > HIGH_SPEED) && isMobileMoved === false) {
                         isMobileMoved = true;
                     }
 
                     event.track = track;
+                    event.target = getElementFromEvent(event.getNative());
                     currEnv.mousemove(event);
+                    if (pointerType !== 'mouse') {
+                        if (hoveredControl !== event.getControl()) {
+                            currEnv.mouseover(event);
+                        }
+                    }
                     onpressure(event, event.getNative().pressure >= 0.4);
                     ongesture(pointers, event);
                 }
@@ -172,6 +187,9 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
                         event.track = track;
                         currEnv.mouseup(event);
+                        if (event.getNative().pointerType !== 'mouse') {
+                            bubble(hoveredControl, 'mouseout', event, hoveredControl = null);
+                        }
                         trackId = null;
                         onpressure(event, false);
                         ongesture(pointers, event);
@@ -195,6 +213,8 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                     isMobileMoved = false;
 
                     var track = tracks[trackId = event.touches[0].identifier];
+                    track.originalX = track.pageX;
+                    track.originalY = track.pageY;
 
                     event = core.wrapEvent(event);
 
@@ -1174,18 +1194,16 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                         if (!track.swipe && Date.now() - track.lastClick.time < 500 && Math.sqrt(track.speedX * track.speedX + track.speedY * track.speedY) > HIGH_SPEED) {
                             track.swipe = true;
                             util.timer(function () {
-                                if (tracks[track.identifier] !== track) {
-                                    event.angle = track.angle;
-                                    if (event.angle > 160 && event.angle < 200) {
+                                if (tracks[track.identifier] !== track && Math.sqrt(Math.pow(track.lastX - track.originalX, 2) + Math.pow(track.lastY - track.originalY, 2)) > 100) {
+                                    event.angle = calcAngle(track.lastX - track.originalX, track.lastY - track.originalY);
+                                    if (event.angle > 150 && event.angle < 210) {
                                         callback('swipeleft');
-                                    } else if (event.angle > 340 || event.angle < 20) {
+                                    } else if (event.angle > 330 || event.angle < 30) {
                                         callback('swiperight');
-                                    } else if (event.angle > 70 && event.angle < 110) {
+                                    } else if (event.angle > 60 && event.angle < 120) {
                                         callback('swipeup');
-                                    } else if (event.angle > 250 && event.angle < 290) {
+                                    } else if (event.angle > 240 && event.angle < 300) {
                                         callback('swipedown');
-                                    }
-                                    if (event.type) {
                                     }
                                     callback('swipe');
                                 }
@@ -2144,6 +2162,10 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                 controls.forEach(function (item) {
                     item.object.init(item.options);
                 });
+
+                if (core.onready) {
+                    core.onready();
+                }
 
                 initRecursion--;
                 if (!initRecursion) {

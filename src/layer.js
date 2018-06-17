@@ -173,8 +173,4 @@ _bModal      - 是否使用showModal激活
             }
         }
     );
-
-    ui.Layer.allShown = function () {
-        return layers.slice();
-    };
 }());

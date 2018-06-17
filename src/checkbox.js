@@ -73,7 +73,6 @@ _bRequired       - 是否必须选择
             if (checkbox._cSubject) {
                 refresh(checkbox._cSubject);
             }
-            core.dispatchEvent(checkbox, 'change');
         }
     }
 
@@ -115,6 +114,7 @@ _bRequired       - 是否必须选择
                     }
                 }
                 this.setChecked(!!this._nStatus);
+                core.dispatchEvent(this, 'change');
             },
 
             /**
@@ -159,6 +159,7 @@ _bRequired       - 是否必须选择
                 if (event.which === 32) {
                     if (core.getKey() === 32) {
                         this.setChecked(!!this._nStatus);
+                        core.dispatchEvent(this, 'change');
                     }
                     event.exit();
                 }

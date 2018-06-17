@@ -7,11 +7,12 @@
 </div>
 
 @fields
-_nTop      - 允许滚动的顶部范围
-_nRight    - 允许滚动的右部范围
-_nBottom   - 允许滚动的底部范围
-_nLeft     - 允许滚动的左部范围
-_oRange    - 滚动结束后回弹的区域范围，格式为[top, right, bottom, left, Y轴滚动的最小单位(用于item-scroll), X轴滚动的最小单位(用于item-scroll)]
+_bScrolling - 滚动标记
+_nTop       - 允许滚动的顶部范围
+_nRight     - 允许滚动的右部范围
+_nBottom    - 允许滚动的底部范围
+_nLeft      - 允许滚动的左部范围
+_oRange     - 滚动结束后回弹的区域范围，格式为[top, right, bottom, left, Y轴滚动的最小单位(用于item-scroll), X轴滚动的最小单位(用于item-scroll)]
 */
 //{if 0}//
 (function () {
@@ -77,6 +78,14 @@ _oRange    - 滚动结束后回弹的区域范围，格式为[top, right, bottom
             /**
              * @override
              */
+            $dragend: function (event) {
+                ui.Control.prototype.$dragend.call(this, event);
+                this._bScrolling = false;
+            },
+
+            /**
+             * @override
+             */
             $dragmove: function (event) {
                 ui.Control.prototype.$dragmove.call(this, event);
                 var style = this.getBody().style;
@@ -90,6 +99,7 @@ _oRange    - 滚动结束后回弹的区域范围，格式为[top, right, bottom
              */
             $dragstart: function (event) {
                 ui.Control.prototype.$dragstart.call(this, event);
+                this._bScrolling = true;
                 event.preventDefault();
             },
 
@@ -115,6 +125,16 @@ _oRange    - 滚动结束后回弹的区域范围，格式为[top, right, bottom
              */
             getY: function () {
                 return this.getBody().offsetTop;
+            },
+
+            /**
+             * 是否正在滚动。
+             * @public
+             *
+             * @return {boolean} 是否正在滚动
+             */
+            isScrolling: function () {
+                return !!this._bScrolling;
             },
 
             /**

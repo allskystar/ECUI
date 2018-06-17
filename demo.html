@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 	<meta charset="UTF-8">
 	<title>样式规范</title>
     <!--[if lte IE 8]>
@@ -10,8 +11,46 @@
     <link rel="stylesheet/less" type="text/css" href="common.css">
     <script type="text/javascript" src="options.js"></script>
     <script type="text/javascript" src="ecui.js"></script>
+    <style>
+    .ui-modal, .ui-modal * {
+        pointer-events:none;
+    }
+    </style>
+    <script>
+    ecui.onready = function () {
+        ecui.get('ttt').onclick = function () {
+            document.getElementById('click').innerHTML=Date.now();
+        };
+        ecui.get('ttt').onmousedown = function () {
+            document.getElementById('mousedown').innerHTML=Date.now();
+        };
+        ecui.get('ttt').onmouseup = function () {
+            document.getElementById('touchend').innerHTML=Date.now();
+        };
+    };
+    </script>
 </head>
 <body>
+    <h2>事件穿透，红框是遮罩层</h2>
+    <a ui="type:control;id:ttt" href="javascript:void(document.getElementById('href').innerHTML=Date.now())"><div style="position:relative;width:200px;height:200px;border:1px solid black">
+        touchend: <span id="touchend"></span><br>
+        href: <span id="href"></span><br>
+        mousedown: <span id="mousedown"></span><br>
+        click: <span id="click"></span><br>
+    </div></a>
+    <div ui="type:control" style="position:absolute;left:30px;top:30px;width:80px;height:80px;border:1px solid red;pointer-events:none;content:'pointer-events:none';filter:pointer-events:none"></div>
+    <div ui="type:control" style="position:absolute;left:25px;top:25px;width:80px;height:80px;border:1px solid red;pointer-events:none;content:'pointer-events:none';filter:pointer-events:none"></div>
+    <div ui="type:control" style="position:absolute;left:20px;top:20px;width:80px;height:80px;border:1px solid red;pointer-events:none;content:'pointer-events:none';filter:pointer-events:none"></div>
+    <div ui="type:control" style="position:absolute;left:15px;top:15px;width:80px;height:80px;border:1px solid red;pointer-events:none;content:'pointer-events:none';filter:pointer-events:none"></div>
+    <div ui="type:control" style="position:absolute;left:10px;top:10px;width:80px;height:80px;border:1px solid red;pointer-events:none;content:'pointer-events:none';filter:pointer-events:none"></div>
+    <h2>移动端select与焦点图</h2>
+    <div ui="type:m-pop-select;name:sex;value:male">
+        <div ui="value:male">男</div>
+        <div ui="value:female">女</div>
+    </div>
+    <img ui="type:m-photo-hotspot" width="100px" src="http://www.baidu.com/img/bd_logo1.png">
+    <img ui="type:m-photo-hotspot" width="100px" src="http://img1.yixinfinance.com/taoche/yxgroup/common/images/yxgroup-logo.html.png">
+    <h2>PC端常用组件</h2>
     <!--table-->
     <div ui="type:table;id:test;left-lock:1;head-float:true;right-lock:1">
       <table style="width:600px">
@@ -85,6 +124,10 @@
     <select ui="type:select;capturable:false;disabled" class="">
         <option>管理员</option>
     </select>
+    <div ui="type:select">
+        <div ui="ext-anchor:a">管理员</div>
+        <div ui="ext-anchor:b">管理员</div>
+    </div>
     <br>
     <br>  
     <!--text-->  
@@ -130,7 +173,7 @@
     <br>
     <br>
     <!--tab-->
-    <div ui="type:tab;selected:1">
+    <div ui="type:tab;selected:1;ext-anchor:test">
         <!-- 包含容器的选项卡 -->
         <div>
             <strong>标题1</strong>
