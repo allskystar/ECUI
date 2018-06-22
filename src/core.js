@@ -9,9 +9,10 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
         util = core.util,
         ui = core.ui,
 
+        JAVASCRIPT = 'javascript',
         fontSizeCache = core.fontSizeCache,
         isMobile = /(Android|iPhone|iPad|UCWEB|Fennec|Mobile)/i.test(navigator.userAgent),
-        isPointer = !!window.PointerEvent, // 使用pointer事件序列，请一定在需要滚动的元素上加上touch-action:none
+        isPointer = !isMobile && !!window.PointerEvent, // 使用pointer事件序列，请一定在需要滚动的元素上加上touch-action:none
         isStrict = document.compatMode === 'CSS1Compat',
         ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined,
         chromeVersion = /Chrome\/(\d+\.\d)/i.test(navigator.userAgent) ? +RegExp.$1 : undefined,
@@ -370,27 +371,10 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             },
 
             // 鼠标点击时控件如果被屏弊需要取消点击事件的默认处理，此时链接将不能提交
-            click: function (event) {
+            click: function () {
                 if (activedControl !== undefined) {
                     // 如果undefined表示移动端长按导致触发了touchstart但没有触发touchend
                     activedControl = undefined;
-                }
-
-                event = core.wrapEvent(event);
-
-                if (isMobile) {
-                    for (var control = event.target; control; control = dom.getParent(control)) {
-                        if (control.tagName === 'A') {
-                            event.preventDefault();
-                            break;
-                        }
-                    }
-                }
-
-                control = event.getTarget();
-                if (control && control.isDisabled()) {
-                    // 取消点击的默认行为，只要外层的Control被屏蔽，内部的链接(A)与输入框(INPUT)全部不能再得到焦点
-                    event.preventDefault();
                 }
             },
 
@@ -513,6 +497,16 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             },
 
             mouseup: function (event) {
+                function blockAhref(el) {
+                    var href = el.href;
+                    if (href !== JAVASCRIPT + ':void(0)') {
+                        el.href = JAVASCRIPT + ':void(0)';
+                        util.timer(function () {
+                            el.href = href;
+                        }, 100);
+                    }
+                }
+
                 var track = event.track,
                     control = event.getControl(),
                     delay = track.lastClick && Date.now() - track.lastClick.time,
@@ -529,10 +523,30 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                     // dblclick 在 ie 下的事件触发顺序是 mousedown/mouseup/click/mouseup/dblclick
                     bubble(control, 'mouseup', event);
 
+                    for (var el = event.target; el; el = dom.getParent(el)) {
+                        if (el.tagName === 'A') {
+                            var target = core.findControl(el);
+                            if (target && target.isDisabled()) {
+                                blockAhref(el);
+                                break;
+                            }
+                        }
+                    }
+
                     if (activedControl) {
                         commonParent = getCommonParent(control, activedControl);
                         if (isMobileMoved === undefined || (isMobileMoved === false && delay < 300)) { // MouseEvent
                             bubble(commonParent, 'click', event);
+
+                            if (event.cancelBubble) {
+                                // 取消冒泡要阻止A标签提交
+                                for (el = control.getMain(); el; el = dom.getParent(el)) {
+                                    if (el.tagName === 'A') {
+                                        blockAhref(el);
+                                        break;
+                                    }
+                                }
+                            }
                         }
                         // 点击事件在同时响应鼠标按下与弹起周期的控件上触发(如果之间未产生鼠标移动事件)
                         // 模拟点击事件是为了解决控件的 Element 进行了 remove/append 操作后 click 事件不触发的问题
@@ -1146,9 +1160,13 @@ outer:          for (var caches = [], target = event.target, el; target; target 
         if (control.oncreate) {
             control.oncreate(options);
         }
-        allControls.push(control);
 
         if (options.id) {
+//{if 0}//
+            if (namedControls[options.id]) {
+                console.error('The identifier("' + options.id + '") has existed.');
+            }
+//{/if}//
             namedControls[options.id] = control;
             control.$ID = options.id;
             if (isGlobalId) {
@@ -1524,6 +1542,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
             }
 
             oncreate(control, options);
+            allControls.push(control);
             independentControls.push(control);
 
             // 处理所有的委托操作，参见delegate
@@ -1564,6 +1583,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
             var control = new UIClass(el, options);
             control.$setParent(parent);
             oncreate(control, options);
+            allControls.push(control);
 
             return control;
         },
@@ -2146,13 +2166,25 @@ outer:          for (var caches = [], target = event.target, el; target; target 
 
                 list.forEach(function (item) {
                     if (options = core.getOptions(item)) {
+                        if (item.getControl) {
+                            oncreate(item.getControl(), options);
+                            return;
+                        }
                         options.main = item;
                         item = options.type ?
                                 options.type.indexOf('.') < 0 ?
                                         ui[util.toCamelCase(options.type.charAt(0).toUpperCase() + options.type.slice(1))] :
                                         util.parseValue(options.type, ui) || util.parseValue(options.type) :
                                 ui.Control;
-                        controls.push({object: core.$create(item, options), options: options});
+//{if 0}//
+                        try {
+//{/if}//
+                            controls.push({object: core.$create(item, options), options: options});
+//{if 0}//
+                        } catch (e) {
+                            console.error('The type:' + options.type + ' can\'t constructor');
+                        }
+//{/if}//
                     }
                 });
 

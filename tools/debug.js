@@ -171,7 +171,7 @@
                 cache: true,
                 onsuccess: function (text) {
                     text = text.replace('<header', '<div style="display:none"');
-                    text = text.replace('<container', '<div ui="type:layer" style="display:none"');
+                    text = text.replace('<container', '<div ui="type:ecui.esr.AppLayer" style="display:none"');
                     text = text.replace('</header>', '</div>');
                     text = text.replace('</container>', '</div>');
                     var el = ecui.dom.last(ecui.dom.first(document.body));

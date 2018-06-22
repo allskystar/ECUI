@@ -73,6 +73,10 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
     function afterrender(route) {
         if (esrOptions.app) {
             transition(route);
+            var layer = getLayer(route);
+            if (layer) {
+                layer.location = currLocation;
+            }
         }
 
         if (route.onafterrender) {
@@ -125,6 +129,11 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
      * @param {Object} route 路由对象
      */
     function beforerender(route) {
+//{if 0}//
+        if (route.main === 'AppCommonContainer') {
+            core.dispose(core.$('AppBackupContainer'), true);
+        }
+//{/if}//
         if (route.onbeforerender) {
             route.onbeforerender(context);
         }
@@ -154,18 +163,27 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
                 }
             }
 
-            if (route.cache && core.$(route.main).route === route.NAME) {
-                // 数据必须还在才触发缓存
-                // 模块发生变化，缓存状态下同样更换引擎
-                engine = loadStatus[name.split('.')[0]];
-                // 添加oncached事件，在路由已经cache的时候依旧执行
-                if (esrOptions.app) {
-                    transition(route);
+            if (context.DENY_CACHE !== true) {
+                var layer = getLayer(route);
+                if (route.CACHE === undefined ? layer && layer.location === currLocation : route.CACHE) {
+                    // 数据必须还在才触发缓存
+                    // 模块发生变化，缓存状态下同样更换引擎
+                    engine = loadStatus[name.split('.')[0]];
+                    // 添加oncached事件，在路由已经cache的时候依旧执行
+                    if (esrOptions.app) {
+                        transition(route);
+                    }
+                    if (route.oncached) {
+                        route.oncached(context);
+                    }
+                    return;
                 }
-                if (route.oncached) {
-                    route.oncached(context);
-                }
-                return;
+            } else {
+                // 解决A标签下反复修改的问题
+                util.timer(function () {
+                    currLocation = esr.getLocation().replace('~DENY_CACHE', '');
+                    history.replaceState('', '', '#' + currLocation);
+                }, 100);
             }
 
             if (!route.onrender || route.onrender() !== false) {
@@ -209,6 +227,25 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
                 }
             );
         }
+    }
+
+    /**
+     * 获取路由对应的层，如果存在表示路由希望进行缓存。
+     * @private
+     *
+     * @param {object} route 路由对象
+     */
+    function getLayer(route) {
+        for (var el = core.$(route.main); el; el = dom.getParent(el)) {
+            if (el.getControl && el.getControl() instanceof esr.AppLayer) {
+                return el.getControl();
+            }
+            // 子路由不直接返回层
+            if (el.route && el.route !== route.NAME) {
+                break;
+            }
+        }
+        return null;
     }
 
     /**
@@ -275,7 +312,7 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
      */
     function redirect(loc) {
         if (pauseStatus) {
-            if (window.onhashchange) {
+            if (window.onhashchange !== undefined) {
                 setTimeout(listener, 100);
             }
         } else {
@@ -288,9 +325,11 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
             if (!loc) {
                 loc = esr.DEFAULT_PAGE;
                 if (historyCache) {
-                    loc += '~ECUI_CACHE=' + historyIndex;
+                    loc += '~CACHE_NUM=' + historyIndex;
                     if (!(ieVersion < 9)) {
-                        history.replaceState('', '', '#' + loc);
+                        util.timer(function () {
+                            history.replaceState('', '', '#' + loc);
+                        }, 100);
                         return;
                     }
                 }
@@ -314,16 +353,16 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
                     });
                     historyIndex++;
 
-                    if (/~ECUI_CACHE=(\d+)/.test(loc)) {
+                    if (/~CACHE_NUM=(\d+)/.test(loc)) {
                         historyIndex = +RegExp.$1;
                     } else {
                         historyData.splice(historyIndex, historyData.length - historyIndex);
-                        loc += '~ECUI_CACHE=' + historyIndex;
+                        loc += '~CACHE_NUM=' + historyIndex;
                         if (ieVersion < 9) {
                             pauseStatus = true;
                             history.back();
                             var handle = util.timer(function () {
-                                if (/~ECUI_CACHE=(\d+)/.test(location.href)) {
+                                if (/~CACHE_NUM=(\d+)/.test(location.href)) {
                                     esr.setLocation(loc);
                                     pauseStatus = false;
                                     handle();
@@ -331,7 +370,9 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
                             }, -10);
                             return;
                         }
-                        history.replaceState('', '', '#' + loc);
+                        util.timer(function () {
+                            history.replaceState('', '', '#' + loc);
+                        }, 100);
                     }
                 }
                 // ie下使用中间iframe作为中转控制
@@ -462,31 +503,19 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
      * @param {object} route 路由对象，新的路由
      */
     function transition(route) {
-        function getLayer(route) {
-            for (var el = core.$(route.main); el; el = dom.getParent(el)) {
-                if (el.getControl && el.getControl() instanceof ui.Layer) {
-                    return el.getControl();
-                }
-            }
-        }
-
         if (route.NAME !== lastRouteName) {
-            var layer = getLayer(route),
-                view = util.getView();
+            var layer = getLayer(route);
+            if (layer) {
+                if (lastLayer) {
+                    lastLayer.getMain().header.style.display = 'none';
+                }
+                layer.getMain().header.style.display = '';
+                layer.show();
 
-            if (lastLayer) {
-                lastLayer.getMain().header.style.display = 'none';
-            }
-            layer.getMain().header.style.display = '';
-            layer.show();
-
-            // 路由权重在该项目中暂不考虑相等情况
-            if (lastLayer) {
-                if (route.transition === false) {
-                    // 当前路由不使用动画
-                    layer.setPosition(0);
-                } else {
-                    var position = routes[lastRouteName].weight < routes[route.NAME].weight ? view.width : -view.width;
+                // 路由权重在该项目中暂不考虑相等情况
+                if (lastLayer) {
+                    var view = util.getView(),
+                        position = routes[lastRouteName].weight < routes[route.NAME].weight ? view.width : -view.width;
                     layer.setPosition(position);
 
                     core.effect.grade(
@@ -497,20 +526,20 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
                             onfinish: function () {
                                 // 在执行结束后，如果不同时common layer则隐藏from layer，并且去掉目标路由中的动画执行函数
                                 lastLayer.hide();
-                                if (this.to.id === 'common') {
-                                    core.$('backup').id = 'common';
-                                    this.to.id = 'backup';
+                                if (this.to.id === 'AppCommonContainer') {
+                                    core.$('AppBackupContainer').id = 'AppCommonContainer';
+                                    this.to.id = 'AppBackupContainer';
                                 }
                                 lastLayer = layer;
                             }
                         }
                     );
+                } else {
+                    lastLayer = layer;
                 }
-            } else {
-                lastLayer = layer;
-            }
 
-            lastRouteName = route.NAME;
+                lastRouteName = route.NAME;
+            }
         }
     }
 
@@ -545,6 +574,9 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
                 }
             }
         ),
+
+        // 布局层，用于加载结构
+        AppLayer: core.inherits(ui.Control),
 
         /**
          * 添加路由信息。
@@ -793,9 +825,6 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
                 });
             }
 
-            if (route.cache === false) {
-                route.cache = true;
-            }
             if (route.view === undefined) {
                 beforerender(route);
                 init();
@@ -883,7 +912,7 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
                         } else if (method[0] === 'FORM') {
                             valid = esr.parseObject(document.forms[item[0]], data);
                         } else {
-                            data = replace(item[0]);
+                            util.extend(data, replace(item[0]));
                         }
                     });
 
@@ -1093,6 +1122,10 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
                     });
 
                     if (esrOptions.app) {
+                        el = core.$('AppCommonContainer');
+                        el.id = 'AppBackupContainer';
+                        dom.insertHTML(el, 'afterEnd', dom.previous(el).outerHTML + el.outerHTML);
+                        el.id = 'AppCommonContainer';
                         el = dom.last(dom.first(document.body));
                         var children = dom.children(el.parentNode);
                         for (var i = 1; i < children.length; i += 2) {
@@ -1117,7 +1150,7 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
                 });
             }
 
-            esrOptions = JSON.parse('{' + decodeURIComponent(value.replace(/(\w+)\s*=\s*([^\s]+)\s*($|,)/g, '"$1":"$2"')) + '}');
+            esrOptions = JSON.parse('{' + decodeURIComponent(value.replace(/(\w+)\s*=\s*([A-Za-z0-9_]+)\s*($|,)/g, '"$1":"$2"$3')) + '}');
 
             if (esrOptions.meta) {
                 if (window.localStorage) {
@@ -1152,11 +1185,13 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
                         loadInit();
                     },
                     onerror: function () {
-                        console.log('找不到APP的布局文件，请确认.app-container.html文件是否存在');
+                        console.error('找不到APP的布局文件，请确认.app-container.html文件是否存在');
                         esrOptions.app = false;
                         loadInit();
                     }
                 });
+            } else {
+                loadInit();
             }
 //{else}//            loadInit();
 //{/if}//

@@ -203,6 +203,14 @@
                     buf = [];
                 }
             } else if (text) {
+                if (level) {
+                    closeIndex = text.indexOf(close);
+                    if (closeIndex >= 0) {
+                        onInBlock(text.slice(0, closeIndex));
+                        text = text.slice(closeIndex + closeLen);
+                        level--;
+                    }
+                }
                 onOutBlock(text);
             }
         });
@@ -340,22 +348,33 @@
 
             this.value.split(open.replace('$', '=')).forEach(function (text, i) {
                 if (i) {
+                    var firstOutput = true;
+                    var leftText = '';
                     parseTextBlock(
                         text,
                         open,
                         engine.options.variableClose,
                         2,
                         function (text) {
+                            text = firstOutput ? leftText + text : '${' + text + '}';
+                            firstOutput = false;
                             code.push(
                                 RENDER_STRING_ADD_START,
-                                'f["' + engine.options.defaultFilter + '"](String(' + compileVariable(text, engine) + '))',
+                                'f["' + engine.options.defaultFilter + '"](B(' + compileVariable(text, engine) + '))',
                                 RENDER_STRING_ADD_END
                             );
                         },
                         function (text) {
-                            code.push(compileVariable(text, engine, 1));
+                            if (firstOutput) {
+                                leftText = text;
+                            } else {
+                                code.push(compileVariable(text, engine, 1));
+                            }
                         }
                     );
+                    if (firstOutput && leftText) {
+                        code.push(compileVariable(leftText, engine, 1));
+                    }
                 } else {
                     code.push(compileVariable(text, engine, 1));
                 }

@@ -62,7 +62,7 @@ _eContainer      - 容器 DOM 元素
         if (items[index] !== this._cSelected) {
             this.setSelected(items[index]);
             core.dispatchEvent(this, 'change');
-            var el = dom.first(this._cSelected.getMain());
+            var el = this._cSelected.getMain();
             if (el && el.tagName === 'A' && el.href) {
                 location.href = el.href;
             }
@@ -116,8 +116,6 @@ _eContainer      - 容器 DOM 元素
                     if (el.tagName !== 'STRONG') {
                         var containerEl = el;
                         el = dom.first(el);
-                        el.className = containerEl.className;
-                        containerEl.className = '';
                     }
 
                     ui.Item.call(this, el, options);
@@ -228,8 +226,8 @@ _eContainer      - 容器 DOM 元素
             $ready: function (event) {
                 ui.Control.prototype.$ready.call(this, event.options);
 
-                if (!this._cSelected) {
-                    this.setSelected(+(event.options.selected || 0));
+                if (!this._cSelected && event.options.selected !== 'none') {
+                    this.setSelected(+(event.options.selected) || 0);
                 }
 
                 if (event.options.gesture !== false) {
@@ -275,7 +273,7 @@ _eContainer      - 容器 DOM 元素
                     item = this.getItem(item);
                 }
 
-                if (item && this._cSelected !== item) {
+                if (this._cSelected !== item) {
                     if (this._cSelected) {
                         this._cSelected.alterClass('-selected');
                         if (this._cSelected._eContainer && (!item || this._cSelected._eContainer !== item._eContainer)) {

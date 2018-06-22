@@ -52,12 +52,10 @@ else
 fi
 libpath="$lib"
 
-if [ ! -d $output ]
-then
-    mkdir $output
-fi
+rm -rf $output
+mkdir $output
 
-find . $* -type f -name "layer.*" | sed -e "s/\(\.\/\)\(.*\)/\<\!--{include file=\"\2\"}--\>/" > .layers
+find . -type f -name "layer.*" | sed -e "s/\(\.\/\)\(.*\)/\<\!--{include file=\"\2\"}--\>/" > .layers
 
 for file in `ls`
 do
@@ -132,7 +130,7 @@ s/\([^A-Za-z0-9_]\)ecui.esr.loadRoute('\([^']*\)');/\1\/\/{include file=\"route.
             else
                 if [ "${file##*.}" = "html" ]
                 then
-                    sed -e "s/<body.*data-ecui=.*app=true.*/&<!--{include file=\".app-container.html\"}-->/g" "$file" | java -jar "$libpath/smarty4j.jar" --left \<\!--{ --right }--\> --charset utf-8 | eval "sed -e \"s/stylesheet\/less[^\\\"]*/stylesheet/g\" -e \"s/<header/<div style=\\\"display:none\\\"/g\" -e \"s/<\/header/<\/div/g\" -e \"s/<container/<div ui=\\\"type:layer\\\" style=\\\"display:none\\\"/g\" -e \"s/<\/container/<\/div/g\" $reg_comment" > "$output/$file"
+                    sed -e "s/<body.*data-ecui=.*app=true.*/&<!--{include file=\".app-container.html\"}-->/g" "$file" | java -jar "$libpath/smarty4j.jar" --left \<\!--{ --right }--\> --charset utf-8 | eval "sed -e \"s/stylesheet\/less[^\\\"]*/stylesheet/g\" -e \"s/<header/<div style=\\\"display:none\\\"/g\" -e \"s/<\/header/<\/div/g\" -e \"s/<container/<div ui=\\\"type:ecui.esr.AppLayer\\\" style=\\\"display:none\\\"/g\" -e \"s/<\/container/<\/div/g\" $reg_comment" > "$output/$file"
                 else
                     cp "$file" "$output/"
                 fi
@@ -141,16 +139,17 @@ s/\([^A-Za-z0-9_]\)ecui.esr.loadRoute('\([^']*\)');/\1\/\/{include file=\"route.
     fi
 done
 
-if [ ! -d "$output/images/" ]
-then
-    mkdir "$output/images/"
-fi
-echo "copy images/"
-cp -R images/* "$output/images/"
-
 if [ $1 ]
 then
     cd $lib
+
+    if [ ! -d "$output/images/" ]
+    then
+        mkdir "$output/images/"
+    fi
+    echo "copy lib-fe/images/"
+    cp -R images/* "$output/images/"
+
     for file in `ls`
     do
         if [ -f $file ]
@@ -176,11 +175,9 @@ then
 
     cd $output
     tar -zcvf "../$1.tar.gz" *
-    #rm -rf $output
 else
     cd $output
     tar -zcvf "../output.tar.gz" *
-    rm -rf $output
 fi
 
 cd ..

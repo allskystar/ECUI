@@ -143,10 +143,9 @@
                             );
                         }
 
-                        item.className += UIClass.CLASS;
-
                         options.parent = this;
                         item = core.$fastCreate(UIClass, item, null, options);
+                        item.getMain().className += UIClass.CLASS;
                     }
 
                     // 选项控件，直接添加

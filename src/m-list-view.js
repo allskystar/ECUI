@@ -49,7 +49,7 @@ _nBottomIndex  - 下部隐藏的选项序号
 
             var body = this.getBody();
             this._eHeader = dom.insertBefore(dom.create({className: options.classes.join('-header ')}), body);
-            this._eFooter = dom.insertAfter(dom.create({className: options.classes.join('-footer ')}), body);
+            this._eFooter = dom.insertBefore(dom.create({className: options.classes.join('-footer ')}), body);
         },
         {
             HTML_LOADING: '正在加载...',
