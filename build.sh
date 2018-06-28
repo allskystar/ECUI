@@ -8,7 +8,7 @@ css_proc='lessc - --plugin=less-plugin-clean-css | python $libpath/less-funcs.py
 tpl_proc='java -jar $libpath/smarty4j.jar --left //{ --right }// --charset utf-8'
 compress_proc='java -jar $libpath/webpacker.jar --mode 1 --charset utf-8'
 reg_script="-e \"s/document.write('<script type=\\\"text\/javascript\\\" src=\([^>]*\)><\/script>');/\/\/{include file=\1}\/\//g\""
-reg_comment="-e \"s/[[:space:]]/ /g\" -e \"s/^ *//g\" -e \"s/ *$//g\" -e \"/^ *$/d\" -e \"/<\!-- *$/{N;s/\\n//;}\" -e \"s/<\!-- *-->//g\" -e \"/^ *$/d\" -e \"/<script>window.onload=/d\""
+reg_comment="-e \"s/[[:space:]]/ /g\" -e \"s/^ *//g\" -e \"s/ *$//g\" -e \"/^ *$/d\" -e \"/<script>window.onload=/d\""
 
 if [ $1 ]
 then
@@ -130,7 +130,11 @@ s/\([^A-Za-z0-9_]\)ecui.esr.loadRoute('\([^']*\)');/\1\/\/{include file=\"route.
             else
                 if [ "${file##*.}" = "html" ]
                 then
-                    sed -e "s/<body.*data-ecui=.*app=true.*/&<!--{include file=\".app-container.html\"}-->/g" "$file" | java -jar "$libpath/smarty4j.jar" --left \<\!--{ --right }--\> --charset utf-8 | eval "sed -e \"s/stylesheet\/less[^\\\"]*/stylesheet/g\" -e \"s/<header/<div style=\\\"display:none\\\"/g\" -e \"s/<\/header/<\/div/g\" -e \"s/<container/<div ui=\\\"type:ecui.esr.AppLayer\\\" style=\\\"display:none\\\"/g\" -e \"s/<\/container/<\/div/g\" $reg_comment" > "$output/$file"
+                    sed -e "s/\<\!--[[:space:]]*import:[[:space:]]*\([A-Za-z0-9._-]*\)[[:space:]]*--\>/\<\!--\\
+<!--{include file=\"\1\" assign=\"tpl\"}-->\\
+<!--{\$tpl|replace:\"\<\!--\":\"\<\<\<\"|replace:\"--\>\":\"\>\>\>\"}-->\\
+--\>/g" -e "s/<body.*data-ecui=.*app=true.*/&\\
+<!--{include file=\".app-container.html\"}-->/g" "$file" | java -jar "$libpath/smarty4j.jar" --left \<\!--{ --right }--\> --charset utf-8 | eval "sed -e \"s/stylesheet\/less[^\\\"]*/stylesheet/g\" -e \"s/<header/<div style=\\\"display:none\\\"/g\" -e \"s/<\/header/<\/div/g\" -e \"s/<container/<div ui=\\\"type:ecui.esr.AppLayer\\\" style=\\\"display:none\\\"/g\" -e \"s/<\/container/<\/div/g\" $reg_comment" > "$output/$file"
                 else
                     cp "$file" "$output/"
                 fi
@@ -139,16 +143,16 @@ s/\([^A-Za-z0-9_]\)ecui.esr.loadRoute('\([^']*\)');/\1\/\/{include file=\"route.
     fi
 done
 
+if [ ! -d "$output/images/" ]
+then
+    mkdir "$output/images/"
+fi
+echo "copy lib-fe/images/"
+cp -R $lib/images/* "$output/images/"
+
 if [ $1 ]
 then
     cd $lib
-
-    if [ ! -d "$output/images/" ]
-    then
-        mkdir "$output/images/"
-    fi
-    echo "copy lib-fe/images/"
-    cp -R images/* "$output/images/"
 
     for file in `ls`
     do

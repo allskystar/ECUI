@@ -57,12 +57,15 @@
             ui.Control.call(this, el, options);
             this._sUrl = options.url;
             this._eFile = el.getElementsByTagName('INPUT')[0];
+
+            core.$bind(this._eFile, this);
         },
         {
             /**
              * @override
              */
             $dispose: function () {
+                this._eFile.getControl = null;
                 this._eFile = null;
                 ui.Control.prototype.$dispose.call(this);
             },

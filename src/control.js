@@ -147,9 +147,8 @@ _aStatus            - 控件当前的状态集合
              * @protected
              *
              * @param {CssStyle} style 主元素的css样式对象
-             * @param {boolean} cacheSize 是否需要缓存控件的大小，如果控件是另一个控件的部件时，不缓存大小能加快渲染速度，默认缓存
              */
-            $cache: function (style, cacheSize) {
+            $cache: function (style) {
                 if (ieVersion < 8) {
                     var list = style.borderWidth.split(' ');
                     this.$$border = [util.toNumber(list[0])];
@@ -166,10 +165,8 @@ _aStatus            - 控件当前的状态集合
                     this.$$padding = [util.toNumber(style.paddingTop), util.toNumber(style.paddingRight), util.toNumber(style.paddingBottom), util.toNumber(style.paddingLeft)];
                 }
 
-                if (cacheSize !== false) {
-                    this.$$width = this._eMain.offsetWidth;
-                    this.$$height = this._eMain.offsetHeight;
-                }
+                this.$$width = this._eMain.offsetWidth;
+                this.$$height = this._eMain.offsetHeight;
             },
 //{if 0}//
             /**
@@ -420,7 +417,9 @@ _aStatus            - 控件当前的状态集合
              * options 初始化选项
              * @event
              */
-            $ready: util.blank,
+            $ready: function () {
+                this._bReady = true;
+            },
 
             /**
              * 移除子控件事件。
@@ -491,6 +490,8 @@ _aStatus            - 控件当前的状态集合
              * @param {number} height 高度，如果不需要设置则省略此参数
              */
             $setSize: function (width, height) {
+                this.cache();
+
                 var fixedSize = core.isContentBox() && this._eMain.tagName !== 'BUTTON' && this._eMain.tagName !== 'INPUT',
                     value;
 
@@ -526,7 +527,7 @@ _aStatus            - 控件当前的状态集合
              */
             alterClass: function (className) {
                 if (this._sClass) {
-                    var classes = this.getClasses(this);
+                    var classes = this.getClasses();
                     classes.push('');
 
                     if (className.charAt(0) === '+') {
@@ -600,18 +601,17 @@ _aStatus            - 控件当前的状态集合
              * cache 方法验证控件是否已经缓存，如果未缓存将调用 $cache 方法缓存控件属性的值。在子控件或者应用程序开发过程中，如果需要避开控件提供的方法直接操作 Element 对象，操作完成后必须调用 clearCache 方法清除控件的属性缓存，否则将引发错误。
              * @public
              *
-             * @param {boolean} cacheSize 是否需要缓存控件的大小，如果控件是另一个控件的部件时，不缓存大小能加快渲染速度，默认缓存
              * @param {boolean} force 是否需要强制刷新缓存，相当于之前执行了 clearCache 方法，默认不强制刷新
              * @return {boolean} 是否刷新缓存
              */
-            cache: function (cacheSize, force) {
+            cache: function (force) {
                 if (force || (this.getOuter().offsetWidth && !this._bCached)) {
                     if (this._bCached !== undefined) {
                         // 之前缓存过，因为clearCache方法标记为需要重新缓存，不需要再次主动执行initStructure方法
                         force = true;
                     }
                     this._bCached = true;
-                    this.$cache(dom.getStyle(this._eMain), cacheSize);
+                    this.$cache(dom.getStyle(this._eMain));
                     if (!force && this._bReady) {
                         this.initStructure();
                     }
@@ -797,7 +797,7 @@ _aStatus            - 控件当前的状态集合
              * @return {number} 控件的高度
              */
             getHeight: function () {
-                this.cache(true);
+                this.cache();
                 return this.$$height;
             },
 
@@ -896,7 +896,7 @@ _aStatus            - 控件当前的状态集合
              * @return {number} 控件的宽度
              */
             getWidth: function () {
-                this.cache(true);
+                this.cache();
                 return this.$$width;
             },
 
@@ -967,7 +967,6 @@ _aStatus            - 控件当前的状态集合
                     if (waitReadyList === null) {
                         // 页面已经加载完毕，直接运行 $ready 方法
                         core.dispatchEvent(this, 'ready', {options: options});
-                        this._bReady = true;
                     } else {
                         if (!waitReadyList) {
                             // 页面未加载完成，首先将 $ready 方法的调用存放在调用序列中
@@ -978,15 +977,12 @@ _aStatus            - 控件当前的状态集合
                                 function () {
                                     waitReadyList.forEach(function (item) {
                                         core.dispatchEvent(item.control, 'ready', {options: item.options});
-                                        item.control._bReady = true;
                                     });
                                     waitReadyList = null;
                                 }
                             );
                         }
-                        if (this.$ready !== util.blank || this.onready) {
-                            waitReadyList.push({control: this, options: options});
-                        }
+                        waitReadyList.push({control: this, options: options});
                     }
                 }
             },
@@ -1108,7 +1104,7 @@ _aStatus            - 控件当前的状态集合
              * @public
              */
             repaint: function () {
-                this.cache(true, true);
+                this.cache(true);
                 this.initStructure();
             },
 
@@ -1202,8 +1198,6 @@ _aStatus            - 控件当前的状态集合
              * @param {number} height 控件的高度
              */
             setSize: function (width, height) {
-                this.cache();
-
                 // 控件新的大小不允许小于最小值
                 if (width < this.getMinimumWidth()) {
                     width = 0;

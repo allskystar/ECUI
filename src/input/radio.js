@@ -224,6 +224,19 @@ _bRequired - 是否必须选择
                 if (this.isChecked() !== checked) {
                     setChecked(this, checked);
                 }
+            },
+
+            /**
+             * 设置控件的默认值，供form表单的reset方法使用。
+             * @public
+             *
+             * @param {boolean} value 是否选中
+             */
+            setDefaultValue: function (value) {
+                this.getItems().forEach(function (item) {
+                    item._bDefault = false;
+                });
+                this._bDefault = !!value;
             }
         }
     );

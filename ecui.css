@@ -21,7 +21,6 @@
 @import (less) "css/progress.css";
 @import (less) "css/progress-bar.css";
 @import (less) "css/progress-circle.css";
-@import (less) "css/retina.css";
 @import (less) "css/tab.css";
 @import (less) "css/table.css";
 @import (less) "css/tree-view.css";
@@ -44,8 +43,9 @@
 
 @import (less) "css/esr.css";
 
-@import (less) "css/m-popup.css";
 @import (less) "css/m-scroll.css";
-@import (less) "css/m-pop-select.css";
+@import (less) "css/m-panel.css";
+@import (less) "css/m-popup.css";
+@import (less) "css/m-options.css";
 @import (less) "css/m-select.css";
 @import (less) "css/m-list-view.css";

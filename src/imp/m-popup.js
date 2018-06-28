@@ -8,12 +8,17 @@
         ui = core.ui,
         util = core.util;
 //{/if}//
+    function hideHandler() {
+        core.mask();
+        core.removeEventListener(this, 'hide', hideHandler);
+    }
+
     var namedMap = {},
         position = {
-            top: [-1, 0],
-            bottom: [1, 0],
-            left: [0, -1],
-            right: [0, 1]
+            top: ['bottom', true],
+            bottom: ['top', true],
+            left: ['right', false],
+            right: ['left', false]
         },
         locked;
 
@@ -21,8 +26,9 @@
         NAME: '$MPopup',
 
         constructor: function (el, options) {
-            namedMap[this.getUID()] = namedMap[this.getUID()] || {};
-            namedMap[this.getUID()].enter = (position[options.enter || 'right'] || position.right).concat([options.scale ? Math.max(0, 1 - (options.scale.indexOf('%') > 0 ? +options.scale.slice(0, -1) / 100 : +options.scale)) : 0]);
+            var data = namedMap[this.getUID()] = namedMap[this.getUID()] || {};
+            data.enter = (position[options.enter || 'bottom'] || position.right).concat([options.scale ? Math.min(1, options.scale.indexOf('%') > 0 ? +options.scale.slice(0, -1) / 100 : +options.scale) : 0]);
+            data.mask = options.mask;
         },
 
         Methods: {
@@ -35,29 +41,54 @@
                         data = namedMap[this.getUID()],
                         popup = this.getPopup(),
                         el = popup.getOuter(),
-                        style = el.style,
-                        width = view.width * data.enter[1],
-                        height;
-
-                    view.height = util.toNumber(document.body.style.height);
-                    height = view.height * data.enter[0];
+                        style = el.style;
 
                     if (!dom.getParent(el)) {
                         // 第一次显示时需要进行下拉选项部分的初始化，将其挂载到 DOM 树中
                         document.body.appendChild(el);
-                        popup.cache(true, true);
                     }
 
                     this.$MPopup.$click.call(this, event);
 
                     if (dom.contain(this.getOuter(), event.target)) {
-                        style.top = height + 'px';
-                        style.left = width + 'px';
-                        popup.setSize(view.width, view.height);
+                        popup.show();
+                        if (data.mask) {
+                            core.mask(data.mask);
+                            core.addEventListener(popup, 'hide', hideHandler);
+
+                            util.timer(function () {
+                                core.addGestureListeners(popup, {
+                                    tap: function (event) {
+                                        if (!dom.contain(popup.getMain(), event.target)) {
+                                            popup.hide();
+                                            core.removeGestureListeners(popup);
+                                        }
+                                    }
+                                });
+                            }, 100);
+                        }
+
+                        style.top = style.right = style.bottom = style.left = 'auto';
+                        if (data.enter[1]) {
+                            var width = view.width,
+                                height = data.enter[2] ? view.height * data.enter[2] : popup.getHeight(),
+                                initValue = view.height + view.top,
+                                reverseValue = height;
+                        } else {
+                            style.top = view.top + 'px';
+                            width = data.enter[2] ? view.width * data.enter[2] : popup.getWidth();
+                            height = view.height;
+                            initValue = view.width + view.left;
+                            reverseValue = width;
+                        }
+                        if (data.enter[2]) {
+                            popup.setSize(width, height);
+                        }
+                        style[data.enter[0]] = initValue + 'px';
 
                         locked = true;
                         ecui.effect.grade(
-                            'round:this.style.left->' + (width * data.enter[2]) + ';round:this.style.top->' + (height * data.enter[2]),
+                            'round:this.style.' + data.enter[0] + '->' + Math.round(initValue - reverseValue),
                             1000,
                             {
                                 $: el,
@@ -66,8 +97,6 @@
                                 }
                             }
                         );
-
-                        popup.show();
                     }
                 }
             },

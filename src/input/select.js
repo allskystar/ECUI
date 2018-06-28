@@ -16,6 +16,7 @@ _cSelected    - 当前选中的选项
 _uText        - 下拉框的文本框
 _uOptions     - 下拉选择框
 _bRequired    - 是否必须选择
+_bAlterItems  - 是否延迟到显示时执行alterItems
 */
 (function () {
 //{if 0}//
@@ -55,41 +56,33 @@ _bRequired    - 是否必须选择
             ui.$select.call(this, el, options);
         },
         {
-
             /**
              * 选项框部件。
              * @unit
              */
             Options: core.inherits(
-                ui.Control,
+                ui.$select.prototype.Options,
                 {
+                    /**
+                     * 选项控件发生变化的处理。
+                     * @protected
+                     */
+                    $alterItems: function () {
+                        var select = this.getParent();
+
+                        // 设置options框的大小，如果没有元素，至少有一个单位的高度
+                        this.$setSize(select.getWidth(), (Math.min(select.getLength(), select._nOptionSize) || 1) * select.getBodyHeight() + this.getMinimumHeight());
+                    },
+
                     /**
                      * @override
                      */
                     $show: function () {
-                        ui.Control.prototype.$show.call(this);
+                        ui.$select.prototype.Options.prototype.$show.call(this);
                         refresh(this.getParent());
                     }
                 }
             ),
-
-            /**
-             * 选项控件发生变化的处理。
-             * 在 选项组接口 中，选项控件发生添加/移除操作时调用此方法。虚方法，子控件必须实现。
-             * @protected
-             */
-            $alterItems: function () {
-                if (dom.getParent(this._uOptions.getOuter())) {
-                    var step = this.getBodyHeight(),
-                        width = this.getWidth(),
-                        itemLength = this.getLength();
-
-                    // 为了设置激活状态样式, 因此必须控制下拉框中的选项必须在滚动条以内
-                    this.setItemSize(width - this._uOptions.getMinimumWidth() - (itemLength > this._nOptionSize ? core.getScrollNarrow() : 0), step);
-                    // 设置options框的大小，如果没有元素，至少有一个单位的高度
-                    this._uOptions.$setSize(width, (Math.min(itemLength, this._nOptionSize) || 1) * step + this._uOptions.getMinimumHeight());
-                }
-            },
 
             /**
              * 弹出层初始化。

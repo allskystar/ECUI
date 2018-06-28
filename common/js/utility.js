@@ -218,8 +218,10 @@ daikuan.setEditFormValue = function (data, form) {
     for (var i = 0, item; item = elements[i++]; ) {
         var name = item.name;
         // 使用ecui.util.parseValue解析数据，处理ecui.esr.CreateObject创建的对象数据的参数回填
-        var value = ecui.util.parseValue(name, data) + '';
+        var value = ecui.util.parseValue(name, data);
         if (name && value !== undefined) {
+            // 将value转换成字符串
+            value = value + '';
             if (ignore.indexOf(name.split('.')[0]) === -1) {
                 var _control = item.getControl && item.getControl();
                 if (_control) {
@@ -229,9 +231,9 @@ daikuan.setEditFormValue = function (data, form) {
                         _control.setChecked(value.indexOf(_control.getValue()) !== -1);
                     } else if (_control instanceof ecui.esr.CreateArray) {
                         if (elements[name][1]) {
-                            // 获取与ecui.esr.CreateArray控件的name相同第一个input元素
+                            //  获取与ecui.esr.CreateArray控件的name相同第一个input元素
                             var control = elements[name][1] && elements[name][1].getControl && elements[name][1].getControl();
-                            // 忽略Array复杂数据结构处理
+                            // 如果CreateArray对应的表单元素是Checkbox时不将那么添加到ignore忽略数组中，否则添加到ignore忽略数组中忽略Array复杂数据结构处理
                             if (!(control instanceof ecui.ui.Checkbox)) {
                                 ignore.push(name);
                             }

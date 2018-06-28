@@ -163,6 +163,9 @@ cities - 地区联动下拉框控件。
             getValue: function () {
                 return this._eInput.value === '000000' ? '' : this._eInput.value;
             },
+            getFormValue: function () {
+                return this.getValue();
+            },
             setValue: function (val) {
                 if (+val < 100000 || +val > 999999) {
                     val = '000000';

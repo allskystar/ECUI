@@ -4,7 +4,7 @@
 .ui-multi-select-options {
 	border: 1px solid #D6DBE6;
 	min-width: 200px;
-	.ui-select-item {
+	.ui-item {
 		display: inline-block;
 	}
 	.ui-multi-select-options-operate  {

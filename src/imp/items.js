@@ -87,9 +87,6 @@
                 if (this.isCached()) {
                     this.alterItems();
                 }
-                this.getItems().forEach(function (item) {
-                    core.dispatchEvent(item, 'ready');
-                });
             },
 
             /**
@@ -127,13 +124,24 @@
                     if (!(item instanceof ui.Item)) {
                         // 根据是字符串还是Element对象选择不同的初始化方式
                         if (dom.isElement(item)) {
-                            var options = core.getOptions(item) || {};
+                            var text = dom.getAttribute(item, core.getAttributeName()),
+                                options = core.getOptions(item) || {};
+                            if (options.type) {
+                                item.setAttribute(core.getAttributeName(), text);
+                                options = {};
+                            }
+                            if (!options.primary) {
+                                options.primary = item.className.trim().split(' ')[0] || UIClass.TYPES[0];
+                            }
                         } else {
                             if ('string' === typeof item) {
                                 options = {};
                                 options[this.TEXTNAME] = item;
                             } else {
                                 options = item;
+                            }
+                            if (!options.primary) {
+                                options.primary = UIClass.TYPES[0];
                             }
                             item = dom.create(
                                 {
@@ -168,6 +176,9 @@
                 this.premitAlterItems();
                 this.alterItems();
 
+                if (this.isReady()) {
+                    core.init(body);
+                }
                 return items;
             },
 
@@ -188,10 +199,10 @@
             /**
              * @override
              */
-            cache: function (cacheSize, force) {
-                if (this.$Items.cache.call(this, cacheSize, force)) {
+            cache: function (force) {
+                if (this.$Items.cache.call(this, force)) {
                     namedMap[this.getUID()].forEach(function (item) {
-                        item.cache(true, force);
+                        item.cache(force);
                     });
                     if (this.isReady()) {
                         this.$alterItems();
@@ -286,22 +297,6 @@
                 }, this);
                 this.premitAlterItems();
                 this.alterItems();
-            },
-
-            /**
-             * 设置控件内所有子选项控件的大小。
-             * @public
-             *
-             * @param {number} itemWidth 子选项控件的宽度
-             * @param {number} itemHeight 子选项控件的高度
-             */
-            setItemSize: function (itemWidth, itemHeight) {
-                namedMap[this.getUID()].forEach(function (item) {
-                    item.cache();
-                });
-                namedMap[this.getUID()].forEach(function (item) {
-                    item.$setSize(itemWidth, itemHeight);
-                });
             }
         }
     };

@@ -229,8 +229,8 @@ _eRight      - 右侧乐定行的Element元素
             /**
              * @override
              */
-            $cache: function (style, cacheSize) {
-                ui.Table.prototype.$cache.call(this, style, cacheSize);
+            $cache: function (style) {
+                ui.Table.prototype.$cache.call(this, style);
 
                 this.$$paddingLeft = 0;
 
@@ -242,11 +242,6 @@ _eRight      - 右侧乐定行的Element元素
                 for (i = this._nRight; i < list.length; ) {
                     this.$$paddingRight += list[i++].getWidth();
                 }
-
-                this._uLeftHead.cache(false, true);
-                this._uRightHead.cache(false, true);
-                this._uLeftMain.cache(false, true);
-                this._uRightMain.cache(false, true);
 
                 this.$$leftTDWidth = (safariVersion ? 1 : 0) + this._uLeftHead.$$border[1] + this._uLeftHead.$$border[3];
                 this.$$rightTDWidth = (safariVersion ? 1 : 0) + this._uRightHead.$$border[1] + this._uRightHead.$$border[3];

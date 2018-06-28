@@ -54,7 +54,11 @@ _aChildren     - 子控件集合
      */
     function createChild(el, parent, options) {
         el.className += parent.constructor.CLASS;
-        return core.$fastCreate(parent.constructor, el, null, util.extend(util.extend({}, options), core.getOptions(el) || {}));
+        options = util.extend({}, options);
+//{if 0}//
+        delete options.id;
+//{/if}//
+        return core.$fastCreate(parent.constructor, el, null, util.extend(options, core.getOptions(el) || {}));
     }
 
     /**
@@ -98,16 +102,6 @@ _aChildren     - 子控件集合
             refresh(this);
         },
         {
-            /**
-             * @override
-             */
-            $cache: function (style, cacheSize) {
-                ui.Control.prototype.$cache.call(this, style, cacheSize);
-                this._aChildren.forEach(function (item) {
-                    item.cache(true, true);
-                });
-            },
-
             /**
              * 控件点击时改变子树视图控件的显示/隐藏状态。
              * @override
@@ -346,16 +340,6 @@ _aChildren     - 子控件集合
                 // 这里需要考虑Tree位于上一个Tree的节点内部
                 for (var control = this, parent; (parent = control.getParent()) instanceof ui.TreeView && parent._aChildren.indexOf(control) >= 0; control = parent) {}
                 return control;
-            },
-
-            /**
-             * @override
-             */
-            init: function (options) {
-                ui.Control.prototype.init.call(this, options);
-                this._aChildren.forEach(function (item) {
-                    item.init(options);
-                });
             },
 
             /**

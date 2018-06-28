@@ -47,7 +47,6 @@ cities - 地区联动下拉框控件。
 
                 var optionsEl = dom.create(
                     {
-                        className: options.classes.join('-options ') + 'ui-popup ui-hide',
                         innerHTML: Array.prototype.map.call(
                             oldEl.options,
                             function (item) {
@@ -59,9 +58,9 @@ cities - 地区联动下拉框控件。
                 );
             } else {
                 optionsEl = oldEl;
-                optionsEl.className = options.classes.join('-options ') + 'ui-popup ui-hide';
                 oldEl.style.cssText = '';
             }
+            optionsEl.className = options.classes.join('-options ') + 'ui-popup ui-hide';
 
             dom.remove(oldEl);
 
@@ -79,7 +78,7 @@ cities - 地区联动下拉框控件。
             this._cSelected = [];
         },
         {
-            $change: function (event) {
+            $change: function () {
                 var text = [], value = [];
                 this._cSelected.forEach(function (item) {
                     text.push(item.getContent());
@@ -97,7 +96,6 @@ cities - 地区联动下拉框控件。
              */
             Item: core.inherits(
                 ui.Item,
-                'ui-select-item',
                 function (el, options) {
                     ui.Item.call(this, el, options);
                     this._sValue = options.value === undefined ? dom.getText(el) : String(options.value);
@@ -213,8 +211,6 @@ cities - 地区联动下拉框控件。
                         width = this.getWidth(),
                         itemLength = this.getLength();
 
-                    // 为了设置激活状态样式, 因此必须控制下拉框中的选项必须在滚动条以内
-                    this.setItemSize(width - this._uOptions.getMinimumWidth() - (itemLength > this._nOptionSize ? core.getScrollNarrow() : 0), step);
                     // 设置options框的大小，如果没有元素，至少有一个单位的高度
                     this._uOptions.$setSize(width, (Math.min(itemLength, this._nOptionSize) || 1) * step + this._uOptions.getMinimumHeight());
                 }

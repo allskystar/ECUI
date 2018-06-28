@@ -2,6 +2,7 @@
 .ui-cities {
 	position: relative;
 	font-size: 0px;
+	overflow: visible !important;
 	.ui-select {
 		background:url('images/ecui/arrow.png') no-repeat;
 		background-position: 100px center !important;

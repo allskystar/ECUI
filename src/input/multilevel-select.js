@@ -19,9 +19,9 @@ _aSelect - 全部的下拉框控件列表
      * @control
      */
     ui.MultilevelSelect = core.inherits(
-        ui.Control,
+        ui.InputControl,
         function (el, options) {
-            ui.Control.call(this, el, options);
+            ui.InputControl.call(this, el, options);
 
             this._aSelect = [];
             Array.prototype.slice.call(el.getElementsByTagName('SELECT')).forEach(function (item) {
@@ -54,27 +54,35 @@ _aSelect - 全部的下拉框控件列表
                      */
                     $change: function (event) {
                         ui.Select.prototype.$change.call(this, event);
+                        core.dispatchEvent(this.getParent(), 'change', event);
+                    },
 
-                        var selected = this.getSelected(),
-                            selects = this.getParent()._aSelect,
-                            index = selects.indexOf(this),
-                            item;
+                    /**
+                     * @override
+                     */
+                    setSelected: function (item) {
+                        ui.Select.prototype.setSelected.call(this, item);
 
-                        if (selected._aChildren) {
-                            item = selects[++index];
-                            item.removeAll();
-                            item.add(selected._aChildren);
-                            if (!(selected._aChildren[0] instanceof ui.Item)) {
-                                selected._aChildren = item.getItems();
+                        var parent = this.getParent(),
+                            index = parent._aSelect.indexOf(this);
+
+                        parent.$setValue(this.getValue());
+
+                        if (item && item._aChildren) {
+                            var select = parent._aSelect[++index];
+                            if (select) {
+                                select.removeAll();
+                                select.add(item._aChildren);
+                                if (!(item._aChildren[0] instanceof ui.Item)) {
+                                    item._aChildren = select.getItems();
+                                }
                             }
                         }
 
                         // 清除后续多级联动项
-                        for (; item = selects[++index]; ) {
-                            item.removeAll();
+                        for (; select = parent._aSelect[++index]; ) {
+                            select.removeAll();
                         }
-
-                        core.dispatchEvent(this.getParent(), 'change', event);
                     }
                 }
             ),

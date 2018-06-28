@@ -11,11 +11,6 @@
     <link rel="stylesheet/less" type="text/css" href="common.css">
     <script type="text/javascript" src="options.js"></script>
     <script type="text/javascript" src="ecui.js"></script>
-    <style>
-    .ui-modal, .ui-modal * {
-        pointer-events:none;
-    }
-    </style>
     <script>
     ecui.onready = function () {
         ecui.get('ttt').onclick = function () {
@@ -29,6 +24,20 @@
         };
     };
     </script>
+    <style>
+    .ui-mobile-calendar-popup .ui-mobile-confirm-layout {
+        width: 100%;
+        display: flex;
+    }
+    .ui-mobile-calendar-popup .ui-mobile-options {
+        flex: 1;
+        height: 210px;
+        content: "item-height:30px";
+    }
+    .ui-mobile-calendar-popup .ui-mobile-options .ui-item {
+        height: 30px;
+    }
+    </style>
 </head>
 <body>
     <h2>事件穿透，红框是遮罩层</h2>
@@ -43,8 +52,13 @@
     <div ui="type:control" style="position:absolute;left:20px;top:20px;width:80px;height:80px;border:1px solid red;pointer-events:none;content:'pointer-events:none';filter:pointer-events:none"></div>
     <div ui="type:control" style="position:absolute;left:15px;top:15px;width:80px;height:80px;border:1px solid red;pointer-events:none;content:'pointer-events:none';filter:pointer-events:none"></div>
     <div ui="type:control" style="position:absolute;left:10px;top:10px;width:80px;height:80px;border:1px solid red;pointer-events:none;content:'pointer-events:none';filter:pointer-events:none"></div>
+    <div ui="type:MCalendar">
+        <div ui="values:2000-2040;format:{0}年"></div>
+        <div ui="values:1-12"></div>
+        <div ui="values:1-31"></div>
+    </div>
     <h2>移动端select与焦点图</h2>
-    <div ui="type:m-pop-select;name:sex;value:male">
+    <div ui="type:m-select;name:sex;value:male">
         <div ui="value:male">男</div>
         <div ui="value:female">女</div>
     </div>

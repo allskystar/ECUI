@@ -67,14 +67,6 @@ _uCheckbox - 复选框控件
         },
         {
             /**
-             * @override
-             */
-            $ready: function (event) {
-                ui.TreeView.prototype.$ready.call(this, event);
-                core.dispatchEvent(this._uCheckbox, 'ready');
-            },
-
-            /**
              * 获取包括当前树控件在内的全部选中的子树控件。
              * @public
              *

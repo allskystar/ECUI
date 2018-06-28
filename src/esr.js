@@ -39,7 +39,21 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
         metaVersion,
         meta,
         lastLayer,
-        lastRouteName;
+        lastRouteName,
+
+        FormatInput = core.inherits(
+            ui.Control,
+            'ui-hide',
+            function (el, options) {
+                ui.Control.call(this, el, options);
+                this._sName = options.name;
+            },
+            {
+                getName: function () {
+                    return this._sName || this.getMain().name;
+                }
+            }
+        );
 
     /**
      * 增加IE的history信息。
@@ -131,7 +145,10 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
     function beforerender(route) {
 //{if 0}//
         if (route.main === 'AppCommonContainer') {
-            core.dispose(core.$('AppBackupContainer'), true);
+            var el = core.$('AppCommonContainer');
+            core.dispose(el, true);
+            core.$('AppBackupContainer').id = 'AppCommonContainer';
+            el.id = 'AppBackupContainer';
         }
 //{/if}//
         if (route.onbeforerender) {
@@ -237,12 +254,13 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
      */
     function getLayer(route) {
         for (var el = core.$(route.main); el; el = dom.getParent(el)) {
-            if (el.getControl && el.getControl() instanceof esr.AppLayer) {
-                return el.getControl();
-            }
             // 子路由不直接返回层
             if (el.route && el.route !== route.NAME) {
                 break;
+            }
+
+            if (el.getControl && el.getControl() instanceof esr.AppLayer) {
+                return el.getControl();
             }
         }
         return null;
@@ -412,6 +430,7 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
         core.dispose(el, true);
         el.innerHTML = engine.render(name || route.view, context);
         if (route.NAME) {
+            el.route = route.NAME;
             dom.addClass(el, route.NAME.replace(/\./g, '-'));
         }
         core.init(el);
@@ -421,7 +440,6 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
         el.style.visibility = '';
 
         if (route.NAME) {
-            el.route = route.NAME;
             autoChildRoute(route);
         } else {
             autoChildRoute(route);
@@ -526,10 +544,6 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
                             onfinish: function () {
                                 // 在执行结束后，如果不同时common layer则隐藏from layer，并且去掉目标路由中的动画执行函数
                                 lastLayer.hide();
-                                if (this.to.id === 'AppCommonContainer') {
-                                    core.$('AppBackupContainer').id = 'AppCommonContainer';
-                                    this.to.id = 'AppBackupContainer';
-                                }
                                 lastLayer = layer;
                             }
                         }
@@ -549,11 +563,7 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
 
         // 用于创建空对象，参见request方法
         CreateObject: core.inherits(
-            ui.Control,
-            function (el, options) {
-                ui.Control.call(this, el, options);
-                dom.addClass(el, 'ui-hide');
-            },
+            FormatInput,
             {
                 getFormValue: function () {
                     return {};
@@ -563,11 +573,7 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
 
         // 用于创建空数组，参见request方法
         CreateArray: core.inherits(
-            ui.Control,
-            function (el, options) {
-                ui.Control.call(this, el, options);
-                dom.addClass(el, 'ui-hide');
-            },
+            FormatInput,
             {
                 getFormValue: function () {
                     return [];
@@ -782,8 +788,8 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
                 if (item.name && ((item.type !== 'radio' && item.type !== 'checkbox') || item.checked)) {
                     if (item.getControl) {
                         var control = item.getControl();
-                        if (!control.isDisabled()) {
-                            setCacheData(data, item.name, control.getFormValue());
+                        if ((control instanceof ui.InputControl || control instanceof FormatInput) && !control.isDisabled()) {
+                            setCacheData(data, control.getName(), control.getFormValue());
                         }
                     } else if (!item.disabled) {
                         setCacheData(data, item.name, item.value);
@@ -1177,21 +1183,55 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
                 historyCache = true;
             }
 //{if 0}//
-            if (esrOptions.app) {
-                io.ajax('.app-container.html', {
-                    cache: true,
-                    onsuccess: function (text) {
-                        dom.insertHTML(document.body, 'afterBegin', text);
-                        loadInit();
-                    },
-                    onerror: function () {
-                        console.error('找不到APP的布局文件，请确认.app-container.html文件是否存在');
-                        esrOptions.app = false;
-                        loadInit();
+            var tplList = [];
+            for (el = document.body.firstChild; el; el = el.nextSibling) {
+                if (el.nodeType === 8) {
+                    if (/^\s*import:\s*([A-Za-z0-9.-_]+)\s*$/.test(el.textContent || el.nodeValue)) {
+                        tplList.push([el, RegExp.$1]);
                     }
-                });
-            } else {
-                loadInit();
+                }
+            }
+
+            (function loadTpl() {
+                if (tplList.length) {
+                    var item = tplList.splice(0, 1)[0];
+                    io.ajax(item[1], {
+                        cache: true,
+                        onsuccess: function (text) {
+                            dom.insertBefore(
+                                document.createComment(text.replace(/<!--/g, '<<<').replace(/-->/g, '>>>')),
+                                item[0]
+                            );
+                            dom.remove(item[0]);
+                            loadTpl();
+                        },
+                        onerror: function () {
+                            console.error('找不到文件' + item[1]);
+                            loadTpl();
+                        }
+                    });
+                } else {
+                    loadApp();
+                }
+            }());
+
+            function loadApp() {
+                if (esrOptions.app) {
+                    io.ajax('.app-container.html', {
+                        cache: true,
+                        onsuccess: function (text) {
+                            dom.insertHTML(document.body, 'afterBegin', text);
+                            loadInit();
+                        },
+                        onerror: function () {
+                            console.error('找不到APP的布局文件，请确认.app-container.html文件是否存在');
+                            esrOptions.app = false;
+                            loadInit();
+                        }
+                    });
+                } else {
+                    loadInit();
+                }
             }
 //{else}//            loadInit();
 //{/if}//

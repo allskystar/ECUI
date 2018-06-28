@@ -14,7 +14,8 @@ _eInput - 选项对应的input，form提交时使用
 (function () {
     var core = ecui,
         dom = core.dom,
-        ui = core.ui;
+        ui = core.ui,
+        util = core.util;
 //{/if}//
     /**
      * 多选框控件。
@@ -94,14 +95,7 @@ _eInput - 选项对应的input，form提交时使用
             /**
              * @override
              */
-            $alterItems: function () {
-                var items = this.getItems(),
-                    step = items.length && items[0].getHeight();
-
-                if (step) {
-                    this.setItemSize(this.getBodyWidth() - (items.length * step > this.getBodyHeight() ? core.getScrollNarrow() : 0), step);
-                }
-            },
+            $alterItems: util.blank,
 
             /**
              * 获取控件的表单项名称。

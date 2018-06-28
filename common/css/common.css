@@ -677,7 +677,7 @@ a {
         padding-left: 5px;
         display: block;
         border: none;
-        background-color: #fff;
+        /*background-color: #fff;*/
         color: #495362;
     }
 }
@@ -714,16 +714,16 @@ a {
 .ui-select-options {
     border: 1px solid #d7d8d9;
     background: #fff;
-    .ui-select-item {
+    .ui-item {
         text-indent: 5px;
         line-height: 28px;
         cursor: pointer;
     }
-    .ui-select-item-hover {
+    .ui-item-hover {
         background-color: #368cda;
         color: #fff;
     }
-    .ui-select-item-focus {
+    .ui-item-focus {
         background-color: #fff;
         color: #368cda;
     }

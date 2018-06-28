@@ -267,6 +267,16 @@ _bRequired       - 是否必须选择
             },
 
             /**
+             * 设置控件的默认值，供form表单的reset方法使用。
+             * @public
+             *
+             * @param {boolean} value 是否选中
+             */
+            setDefaultValue: function (value) {
+                this._bDefault = !!value;
+            },
+
+            /**
              * 设置主复选框。
              * setSubject 方法指定主复选框控件后，可以通过访问主复选框控件的 getDependents 方法获取列表，列表中即包含了当前的控件。请注意，控件从 DOM 树上被移除时，不会自动解除主从关系，联动可能出现异常，此时请调用 setSubject 方法传入空参数解除主从关系。
              * @public

@@ -438,6 +438,16 @@ _eInput        - INPUT对象
             },
 
             /**
+             * 设置控件的默认值，供form表单的reset方法使用。
+             * @public
+             *
+             * @param {string} value 是否选中
+             */
+            setDefaultValue: function (value) {
+                this._eInput.defaultValue = value;
+            },
+
+            /**
              * 设置控件的名称。
              * 输入控件可以在表单中被提交，setName 方法设置提交时用的表单项名称，表单项名称可以使用 getName 方法获取。
              * @public

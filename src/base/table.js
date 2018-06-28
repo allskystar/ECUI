@@ -551,9 +551,8 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
             /**
              * @override
              */
-            $cache: function (style, cacheSize) {
-                ui.Control.prototype.$cache.call(this, style, cacheSize);
-                this._uHead.cache(false, true);
+            $cache: function (style) {
+                ui.Control.prototype.$cache.call(this, style);
 
                 this.$$paddingTop = this._uHead.getBody().offsetHeight;
 
@@ -561,12 +560,8 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
                 this.$$tableWidth = table.offsetWidth;
                 this.$$tableHeight = table.offsetHeight;
 
-                this._aRows.forEach(function (item) {
-                    item.cache(true, true);
-                });
-
                 this._aHCells.forEach(function (item) {
-                    item.cache(true, true);
+                    item.cache(true);
                 });
             },
 
@@ -739,7 +734,6 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
                     }
                 }
 
-                col.cache();
                 col.setSize(options.width);
                 col._oOptions = util.extend({}, options);
 

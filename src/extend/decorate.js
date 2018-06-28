@@ -109,11 +109,10 @@ Decorate - 装饰器插件。
      * @protected
      *
      * @param {CssStyle} style 主元素的 Css 样式对象
-     * @param {boolean} cacheSize 是否需要缓存控件的大小，如果控件是另一个控件的部件时，不缓存大小能加快渲染速度，默认缓存
      */
-    decorates.Decorator.prototype.$cache = function (style, cacheSize) {
-        this._oInner.$cache(style, cacheSize, true);
-        ui.Control.prototype.$cache.call(this, dom.getStyle(this._eMain), false);
+    decorates.Decorator.prototype.$cache = function (style) {
+        this._oInner.$cache(style, true);
+        ui.Control.prototype.$cache.call(this, dom.getStyle(this._eMain));
         this._oInner.$$position = 'relative';
         this.$$position = style.position === 'absolute' ? 'absolute' : 'relative';
         this.$$layout = ';top:' + style.top + ';left:' + style.left + ';display:' + style.display + (ieVersion ? ';zoom:' + style.zoom : '');

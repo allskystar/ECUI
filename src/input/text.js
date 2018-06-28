@@ -99,8 +99,8 @@ _ePlaceHolder - 为空时的提示信息标签
             /**
              * @override
              */
-            $cache: function (style, cacheSize) {
-                ui.InputControl.prototype.$cache.call(this, style, cacheSize);
+            $cache: function (style) {
+                ui.InputControl.prototype.$cache.call(this, style);
                 if (this._ePlaceHolder) {
                     style = dom.getStyle(this._ePlaceHolder);
                     if (ieVersion < 8) {

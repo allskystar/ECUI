@@ -12,7 +12,6 @@
      * @public
      */
     function setPopupPosition() {
-        this.cache(true);
         var popupEl = this.getOuter();
         dom.remove(popupEl);
 
@@ -59,17 +58,6 @@
             $blur: function (event) {
                 this.$Popup.$blur.call(this, event);
                 namedMap[this.getUID()].hide();
-            },
-
-            /**
-             * @override
-             */
-            $cache: function (style, cacheSize) {
-                this.$Popup.$cache.call(this, style, cacheSize);
-                var popup = namedMap[this.getUID()];
-                if (dom.getParent(popup.getOuter())) {
-                    popup.cache(true, true);
-                }
             },
 
             /**
