@@ -13,6 +13,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
         //{if 1}//isPointer = !!window.PointerEvent, // 使用pointer事件序列，请一定在需要滚动的元素上加上touch-action:none//{/if}//
         isStrict = document.compatMode === 'CSS1Compat',
         isWebkit = /webkit/i.test(navigator.userAgent),
+        //{if 1}//iosVersion = /(iPhone|iPad).+OS (\d+)/i.test(navigator.userAgent) ?  +(RegExp.$2) : undefined,//{/if}//
         chromeVersion = /Chrome\/(\d+\.\d)/i.test(navigator.userAgent) ? +RegExp.$1 : undefined,
         ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined,
         firefoxVersion = /firefox\/(\d+\.\d)/i.test(navigator.userAgent) ? +RegExp.$1 : undefined,
@@ -195,20 +196,6 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
             },
 
             /**
-             * 获取 Element 对象的父 Element 对象。
-             * 在 IE 下，Element 对象被 removeChild 方法移除时，parentNode 仍然指向原来的父 Element 对象，与 W3C 标准兼容的属性应该是 parentElement。
-             * @public
-             *
-             * @param {HTMLElement} el Element 对象
-             * @return {HTMLElement} 父 Element 对象，如果没有，返回 null
-             */
-            getParent: ieVersion < 10 ? function (el) {
-                return el.parentElement;
-            } : function (el) {
-                return el.parentNode;
-            },
-
-            /**
              * 获取 Element 对象的页面位置。
              * getPosition 方法将返回指定 Element 对象的位置信息。属性如下：
              * left {number} X轴坐标
@@ -222,7 +209,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                 var top = 0,
                     left = 0,
                     body = document.body,
-                    html = dom.getParent(body);
+                    html = dom.parent(body);
 
                 if (ieVersion) {
                     if (!isStrict) {
@@ -258,7 +245,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                         top -= body.offsetTop;
                     }
 
-                    for (parent = dom.getParent(el); parent !== body; parent = dom.getParent(parent)) {
+                    for (parent = dom.parent(el); parent !== body; parent = dom.parent(parent)) {
                         left -= parent.scrollLeft;
                         if (!operaVersion) {
                             style = dom.getStyle(parent);
@@ -327,7 +314,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              * @return {HTMLElement} 被插入的 Element 对象
              */
             insertAfter: function (el, target) {
-                var parent = dom.getParent(target);
+                var parent = dom.parent(target);
                 return parent ? parent.insertBefore(el, target.nextSibling) : dom.remove(el);
             },
 
@@ -341,7 +328,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              * @return {HTMLElement} 被插入的 Element 对象
              */
             insertBefore: function (el, target) {
-                var parent = dom.getParent(target);
+                var parent = dom.parent(target);
                 return parent ? parent.insertBefore(el, target) : dom.remove(el);
             },
 
@@ -361,7 +348,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                 range.collapse(position.length > 9);
                 range.insertNode(range.createContextualFragment(html));
             } : ieVersion === 10 ? function (el, position, html) {
-                var parent = dom.getParent(el);
+                var parent = dom.parent(el);
                 if (!parent) {
                     dom.create().appendChild(el);
                 }
@@ -422,6 +409,20 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
             },
 
             /**
+             * 获取 Element 对象的父 Element 对象。
+             * 在 IE 下，Element 对象被 removeChild 方法移除时，parentNode 仍然指向原来的父 Element 对象，与 W3C 标准兼容的属性应该是 parentElement。
+             * @public
+             *
+             * @param {HTMLElement} el Element 对象
+             * @return {HTMLElement} 父 Element 对象，如果没有，返回 null
+             */
+            parent: ieVersion < 10 ? function (el) {
+                return el.parentElement;
+            } : function (el) {
+                return el.parentNode;
+            },
+
+            /**
              * 获取Element 对象的上一个兄弟节点。
              * @public
              *
@@ -444,7 +445,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              * @return {HTMLElement} 被移除的 Element 对象
              */
             remove: function (el) {
-                var parent = dom.getParent(el);
+                var parent = dom.parent(el);
                 if (parent) {
                     parent.removeChild(el);
                 }
@@ -867,7 +868,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              * @param {Array} sheets 样式对象列表
              */
             adjustFontSize: function (sheets) {
-                var fontSize = core.fontSize = util.toNumber(dom.getStyle(dom.getParent(document.body), 'font-size'));
+                var fontSize = core.fontSize = util.toNumber(dom.getStyle(dom.parent(document.body), 'font-size'));
                 sheets.forEach(function (item) {
                     if (ieVersion) {
                         for (i = 0, rule = item.rules || item.cssRules, item = []; value = rule[i++]; ) {
@@ -1008,7 +1009,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              */
             getView: function () {
                 var body = document.body,
-                    html = dom.getParent(body),
+                    html = dom.parent(body),
                     client = isStrict ? html : body,
                     scrollTop = html.scrollTop + body.scrollTop,
                     scrollLeft = html.scrollLeft + body.scrollLeft,

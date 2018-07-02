@@ -56,13 +56,13 @@ _bRequired    - 是否必须选择
                      */
                     $show: function () {
                         ui.$select.prototype.Options.prototype.$show.call(this);
+
                         var select = this.getParent();
 
                         this.getBody().style.top = (this.$$itemHeight * (this._nOptionSize - select.getItems().indexOf(select.getSelected()))) + 'px';
                         core.setFocused(select.getSelected());
                     }
                 },
-                ui.MScroll,
                 ui.MOptions
             ),
 

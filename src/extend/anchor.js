@@ -35,7 +35,7 @@ anchor - 锚点插件，使用ext-anchor的方式引用，指定的锚点名称�
             if (control.getMain()) {
                 if (control.isShow()) {
                     if (ieVersion < 8 || operaVersion) {
-                        document.body.scrollTop = dom.getPosition(control.getOuter()).top;
+                        core.getBody().scrollTop = dom.getPosition(control.getOuter()).top;
                     } else {
                         control.getOuter().scrollIntoView();
                     }

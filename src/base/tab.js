@@ -157,7 +157,7 @@ _eContainer      - 容器 DOM 元素
                     $setParent: function (parent) {
                         if (!parent) {
                             removeContainer(this);
-                        } else if (this._eContainer && dom.getParent(this._eContainer) !== parent.getMain()) {
+                        } else if (this._eContainer && dom.parent(this._eContainer) !== parent.getMain()) {
                             parent.getMain().appendChild(this._eContainer);
                         }
 

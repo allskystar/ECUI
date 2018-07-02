@@ -267,7 +267,7 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
                         var el = item.getOuter();
                         if (month = day >= begin && day <= end) {
                             if (index === 35 || index === 42) {
-                                dom.removeClass(dom.getParent(el), 'ui-extra');
+                                dom.removeClass(dom.parent(el), 'ui-extra');
                             }
                             dom.removeClass(el, 'ui-extra');
                             // 恢复选择的日期
@@ -277,7 +277,7 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
                             item.enable();
                         } else {
                             if (index === 35 || index === 42) {
-                                dom.addClass(dom.getParent(el), 'ui-extra');
+                                dom.addClass(dom.parent(el), 'ui-extra');
                             }
                             dom.addClass(el, 'ui-extra');
                             if (this._bExtra) {

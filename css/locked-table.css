@@ -1,18 +1,20 @@
 /*<script>window.onload=function(){value=document.getElementsByTagName('TEXTAREA')[0].value;parent.postMessage({url:location.href.slice(7),text:value.slice(value.indexOf('\n')+1).replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&')},'*');}</script><textarea>*/
 .ui-locked-table {
-	.ui-locked-table-fill {
-		position: absolute !important;
-		z-index: -1 !important;
-		height: 1px !important;
-		top: 0px;
-	}
-	.ui-locked-table-height {
-		padding: 0px !important;
-		border: 0px !important;
-		width: 0px !important;
-		background: transparent !important;
-	}
-	.ui-locked-table-body {
-		position: absolute;
-	}
+    .ui-locked-table-fill {
+        position: absolute !important;
+        top: 0px;
+        height: 1px !important;
+        z-index: -1 !important;
+    }
+
+    .ui-locked-table-height {
+        width: 0px !important;
+        padding: 0px !important;
+        border: 0px !important;
+        background: transparent !important;
+    }
+
+    .ui-locked-table-body {
+        position: absolute;
+    }
 }

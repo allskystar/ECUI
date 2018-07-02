@@ -2,24 +2,26 @@
 .ui-mobile-options {
     width: 100%;
     background: white;
-    content: "item-height:30px";
+    content: 'item-height:30px';
 
     .ui-mobile-options-mask {
         position: absolute !important;
         width: 100% !important;
         height: 100% !important;
-        background: linear-gradient(rgba(255,255,255,1),rgba(255,255,255,0),rgba(255,255,255,1));
+        background: linear-gradient(rgba(255, 255, 255, 1), rgba(255, 255, 255, 0), rgba(255, 255, 255, 1));
         z-index: 1;
         pointer-events: none;
     }
+
     .ui-mobile-scroll-body {
         .ui-item {
-            font-size: 18px;
             height: 30px;
+            font-size: 18px;
             line-height: 29px;
             text-align: center;
             pointer-events: none;
         }
+
         .ui-item-focus {
             font-weight: bold;
         }

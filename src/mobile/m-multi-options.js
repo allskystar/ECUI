@@ -118,7 +118,6 @@ _aOptions    - 选项框数组
                         }
                     )
                 },
-                ui.MScroll,
                 ui.MOptions,
                 {
                     /**

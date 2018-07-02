@@ -205,7 +205,7 @@ daikuan.showHint = function (type, msg) {
     var hintContainer = ecui.$('hintContainer') || ecui.dom.create({id: 'hintContainer'});
     ecui.dom.removeClass(hintContainer, 'ui-hide');
     hintContainer.innerHTML = ecui.util.stringFormat('<div class="{0}">{1}</div>', className, msg);
-    ecui.dom.insertAfter(hintContainer, ecui.dom.last(document.body));
+    ecui.dom.insertAfter(hintContainer, ecui.dom.last(ecui.getBody()));
     ecui.util.timer(function () {
         ecui.dom.addClass(hintContainer, 'ui-hide');
     }, 2000)

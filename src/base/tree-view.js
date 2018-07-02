@@ -109,18 +109,22 @@ _aChildren     - 子控件集合
             $click: function (event) {
                 ui.Control.prototype.$click.call(this, event);
 
-                if (event.getControl() === this) {
-                    if (this._eChildren) {
-                        if (this.isCollapsed()) {
-                            this.expand();
-                            core.dispatchEvent(this, 'expand');
-                        } else {
-                            this.collapse();
-                            core.dispatchEvent(this, 'collapse');
-                        }
+                for (var control = event.getControl(); control !== this; control = control.getParent()) {
+                    if (control instanceof ui.TreeView) {
+                        return;
                     }
-                    core.dispatchEvent(this, 'nodeclick', event);
                 }
+                core.dispatchEvent(this, 'nodeclick', event);
+            },
+
+            /**
+             * 收缩当前树视图控件的子树区域的默认处理。
+             * @protected
+             */
+            $collapse: function () {
+                this._bCollapsed = true;
+                dom.addClass(this._eChildren, 'ui-hide');
+                refresh(this);
             },
 
             /**
@@ -129,6 +133,16 @@ _aChildren     - 子控件集合
             $dispose: function () {
                 this._eChildren = null;
                 ui.Control.prototype.$dispose.call(this);
+            },
+
+            /**
+             * 展开当前树视图控件的子树区域的默认处理。
+             * @protected
+             */
+            $expand: function () {
+                this._bCollapsed = false;
+                dom.removeClass(this._eChildren, 'ui-hide');
+                refresh(this);
             },
 
             /**
@@ -186,6 +200,17 @@ _aChildren     - 子控件集合
              */
             $nodeclick: function () {
                 var root = this.getRoot();
+
+                if (this._eChildren) {
+                    if (this.isCollapsed()) {
+                        this.expand();
+                        core.dispatchEvent(this, 'expand');
+                    } else {
+                        this.collapse();
+                        core.dispatchEvent(this, 'collapse');
+                    }
+                }
+
                 if (root._cSelected !== this) {
                     if (root._cSelected) {
                         root._cSelected.alterClass('-selected');
@@ -302,9 +327,7 @@ _aChildren     - 子控件集合
              */
             collapse: function () {
                 if (this._eChildren && !this._bCollapsed) {
-                    this._bCollapsed = true;
-                    dom.addClass(this._eChildren, 'ui-hide');
-                    refresh(this);
+                    this.$collapse();
                 }
             },
 
@@ -314,9 +337,7 @@ _aChildren     - 子控件集合
              */
             expand: function () {
                 if (this._eChildren && this._bCollapsed) {
-                    this._bCollapsed = false;
-                    dom.removeClass(this._eChildren, 'ui-hide');
-                    refresh(this);
+                    this.$expand();
                 }
             },
 

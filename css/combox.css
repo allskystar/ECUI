@@ -1,15 +1,18 @@
 /*<script>window.onload=function(){value=document.getElementsByTagName('TEXTAREA')[0].value;parent.postMessage({url:location.href.slice(7),text:value.slice(value.indexOf('\n')+1).replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&')},'*');}</script><textarea>*/
 .ui-combox {
     position: relative;
+
     .ui-combox-text {
         position: absolute !important;
         overflow: hidden !important;
     }
+
     input {
         position: absolute !important;
         outline: none;
     }
 }
+
 .ui-combox-options {
     overflow: auto !important;
 }

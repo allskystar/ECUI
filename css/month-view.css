@@ -2,18 +2,22 @@
 .ui-monthview {
     table {
         thead td {
-            color: #8492A6;
+            color: #8492a6;
         }
+
         td.ui-today {
-            color: #368CDA;
+            color: #368cda;
         }
+
         td:hover {
             background: #368cda;
         }
+
         td.ui-calendar-date-selected {
-            background: #368cda;
             color: #fff;
+            background: #368cda;
         }
+
         td.ui-calendar-date-disabled {
             color: #dde3eb;
             background: #fff;

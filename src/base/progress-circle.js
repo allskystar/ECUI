@@ -36,7 +36,7 @@
              */
             $initStructure: function (width, height) {
                 ui.Progress.prototype.$initStructure.call(this, width, height);
-                var el = dom.getParent(this._ePath);
+                var el = dom.parent(this._ePath);
                 el.style.width = width + 'px';
                 el.style.height = height + 'px';
             },

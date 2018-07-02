@@ -5,10 +5,11 @@
         display: none;
     }
 }
+
 .ui-text-empty,
 .ui-text-error {
     .ui-placeholder {
-        z-index: 1;
         display: block;
+        z-index: 1;
     }
 }

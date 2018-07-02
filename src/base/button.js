@@ -43,7 +43,7 @@
                 if (el.tagName === 'BUTTON' || el.tagName === 'INPUT') {
                     return el.form;
                 }
-                for (; el; el = dom.getParent(el)) {
+                for (; el; el = dom.parent(el)) {
                     if (el.tagName === 'FORM') {
                         return el;
                     }

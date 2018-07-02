@@ -129,8 +129,8 @@ _bModal      - 是否使用showModal激活
             /**
              * @override
              */
-            setBodySize: function (width, height) {
-                ui.Control.prototype.setBodySize.call(this, width, height + this._uTitle.getHeight());
+            setClientSize: function (width, height) {
+                ui.Control.prototype.setClientSize.call(this, width, height + this._uTitle.getHeight());
             },
 
             /**

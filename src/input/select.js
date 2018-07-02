@@ -36,7 +36,7 @@ _bAlterItems  - 是否延迟到显示时执行alterItems
         if (select._cSelected) {
             core.setFocused(select._cSelected);
         }
-        select._uOptions.getBody().scrollTop = select.getBodyHeight() * select.getItems().indexOf(select._cSelected);
+        select._uOptions.getBody().scrollTop = select.getClientHeight() * select.getItems().indexOf(select._cSelected);
     }
 
     /**
@@ -71,7 +71,7 @@ _bAlterItems  - 是否延迟到显示时执行alterItems
                         var select = this.getParent();
 
                         // 设置options框的大小，如果没有元素，至少有一个单位的高度
-                        this.$setSize(select.getWidth(), (Math.min(select.getLength(), select._nOptionSize) || 1) * select.getBodyHeight() + this.getMinimumHeight());
+                        this.$setSize(select.getWidth(), (Math.min(select.getLength(), select._nOptionSize) || 1) * select.getClientHeight() + this.getMinimumHeight());
                     },
 
                     /**
@@ -125,7 +125,7 @@ _bAlterItems  - 是否延迟到显示时执行alterItems
 
                 var which = event.which,
                     list = this.getItems(),
-                    step = this.getBodyHeight(),
+                    step = this.getClientHeight(),
                     focus = core.getFocused();
 
                 if (which === core.getKey()) {

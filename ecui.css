@@ -1,51 +1,39 @@
 /*<script>window.onload=function(){value=document.getElementsByTagName('TEXTAREA')[0].value;parent.postMessage({url:location.href.slice(7),text:value.slice(value.indexOf('\n')+1).replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&')},'*');}</script><textarea>*/
 .inline-block() {
-	display: inline-block;
-	*display: inline;
-	*zoom: 1;
+    display: inline-block;
+    *display: inline;
+    *zoom: 1;
 }
-@import (less) "css/core.css";
-@import (less) "css/control.css";
-@import (less) "css/input-control.css";
-@import (less) "css/input-group.css";
+@import (less) 'css/core.css';
+@import (less) 'css/control.css';
+@import (less) 'css/input-control.css';
+@import (less) 'css/input-group.css';
 
-@import (less) "css/items.css";
-@import (less) "css/popup.css";
+@import (less) 'css/items.css';
+@import (less) 'css/popup.css';
 
-@import (less) "css/button.css";
-@import (less) "css/submit.css";
-@import (less) "css/cancel.css";
-@import (less) "css/dialog.css";
-@import (less) "css/label.css";
-@import (less) "css/month-view.css";
-@import (less) "css/progress.css";
-@import (less) "css/progress-bar.css";
-@import (less) "css/progress-circle.css";
-@import (less) "css/tab.css";
-@import (less) "css/table.css";
-@import (less) "css/tree-view.css";
+@import (less) 'css/button.css';
+@import (less) 'css/dialog.css';
+@import (less) 'css/month-view.css';
+@import (less) 'css/progress.css';
+@import (less) 'css/progress-bar.css';
+@import (less) 'css/tab.css';
+@import (less) 'css/table.css';
 
-@import (less) "css/text.css";
-@import (less) "css/checkbox.css";
-@import (less) "css/radio.css";
-@import (less) "css/select.css";
-@import (less) "css/combox.css";
-@import (less) "css/listbox.css";
+@import (less) 'css/text.css';
+@import (less) 'css/checkbox.css';
+@import (less) 'css/radio.css';
+@import (less) 'css/select.css';
+@import (less) 'css/combox.css';
 
-@import (less) "css/calendar.css";
-@import (less) "css/calendar-input.css";
-@import (less) "css/locked-table.css";
-@import (less) "css/check-tree.css";
-@import (less) "css/multilevel-select.css";
-@import (less) "css/upload.css";
+@import (less) 'css/calendar.css';
+@import (less) 'css/locked-table.css';
 
-@import (less) "css/messagebox.css";
+@import (less) 'css/esr.css';
 
-@import (less) "css/esr.css";
-
-@import (less) "css/m-scroll.css";
-@import (less) "css/m-panel.css";
-@import (less) "css/m-popup.css";
-@import (less) "css/m-options.css";
-@import (less) "css/m-select.css";
-@import (less) "css/m-list-view.css";
+@import (less) 'css/m-scroll.css';
+@import (less) 'css/m-panel.css';
+@import (less) 'css/m-popup.css';
+@import (less) 'css/m-options.css';
+@import (less) 'css/m-select.css';
+@import (less) 'css/m-list-view.css';

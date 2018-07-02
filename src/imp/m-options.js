@@ -19,6 +19,8 @@
     ui.MOptions = {
         NAME: '$MOptions',
 
+        SUPER: ui.MScroll,
+
         constructor: function (el, options) {
             dom.addClass(el, 'ui-mobile-options');
             dom.insertBefore(dom.create({
@@ -103,7 +105,7 @@
                 this.$MOptions.$show.call(this);
                 var height = this.$$itemHeight * (this._nOptionSize * 2 + 1);
                 this.getMain().style.height = height + 'px';
-                dom.getParent(this.getBody()).style.height = height + 'px';
+                dom.parent(this.getBody()).style.height = height + 'px';
                 this.$$height = height + this.getMinimumHeight();
             },
 

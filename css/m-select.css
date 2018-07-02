@@ -5,10 +5,10 @@
 
     input {
         position: absolute !important;
+        display: none;
+        top: 0px;
         z-index: -1;
         opacity: 0;
-        display: none;
-        top: 0;
     }
 
     .ui-mobile-select-text {

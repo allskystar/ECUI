@@ -206,8 +206,8 @@ cities - 地区联动下拉框控件。
              * @protected
              */
             $alterItems: function () {
-                if (dom.getParent(this._uOptions.getOuter())) {
-                    var step = this.getBodyHeight(),
+                if (dom.parent(this._uOptions.getOuter())) {
+                    var step = this.getClientHeight(),
                         width = this.getWidth(),
                         itemLength = this.getLength();
 

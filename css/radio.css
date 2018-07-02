@@ -2,9 +2,9 @@
 .ui-radio {
     input {
         position: relative !important;
-        width: 10px !important;
         left: -12px !important;
-        border-radius: 0;
+        width: 10px !important;
+        border-radius: 0px;
         opacity: 0;
     }
 }

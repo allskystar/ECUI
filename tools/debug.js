@@ -174,7 +174,7 @@
                     text = text.replace('<container', '<div ui="type:ecui.esr.AppLayer" style="display:none"');
                     text = text.replace('</header>', '</div>');
                     text = text.replace('</container>', '</div>');
-                    var el = ecui.dom.last(ecui.dom.first(document.body));
+                    var el = ecui.dom.last(ecui.dom.first(ecui.getBody()));
                     ecui.dom.insertHTML(el, 'beforeBegin', text);
                     ecui.init(el.parentNode);
                     var children = ecui.dom.children(el.parentNode);

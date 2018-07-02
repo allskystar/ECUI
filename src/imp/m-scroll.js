@@ -13,21 +13,23 @@
         NAME: '$MScroll',
 
         constructor: function (el, options) {
-            var bodyEl = dom.create(
-                    {
-                        className: options.classes.join('-body ') + 'ui-mobile-scroll-body'
-                    }
-                );
+            if (options.mode !== 'native') {
+                var bodyEl = dom.create(
+                        {
+                            className: options.classes.join('-body ') + 'ui-mobile-scroll-body'
+                        }
+                    );
 
-            for (; el.firstChild; ) {
-                bodyEl.appendChild(el.firstChild);
+                for (; el.firstChild; ) {
+                    bodyEl.appendChild(el.firstChild);
+                }
+
+                dom.addClass(el, 'ui-mobile-scroll');
+                el.appendChild(bodyEl);
+                this.$setBody(bodyEl);
             }
 
-            dom.addClass(el, 'ui-mobile-scroll');
-            el.appendChild(bodyEl);
-            this.$setBody(bodyEl);
-
-            namedMap[this.getUID()] = {};
+            namedMap[this.getUID()] = {mode: options.mode};
         },
 
         Methods: {
@@ -37,21 +39,23 @@
             $activate: function (event) {
                 this.$MScroll.$activate.call(this, event);
 
-                var body = this.getBody(),
-                    data = namedMap[this.getUID()];
+                var main = this.getMain(),
+                    body = this.getBody(),
+                    data = namedMap[this.getUID()],
+                    mode = data.mode !== 'native';
 
                 core.drag(
                     this,
                     event,
                     {
                         el: body,
-                        decelerate: 0.5,
+                        decelerate: 400,
                         absolute: true,
-                        left: data.left !== undefined ? data.left : this.getWidth() - body.offsetWidth,
+                        left: data.left !== undefined ? data.left : main.clientWidth - (mode ? body.offsetWidth : main.scrollWidth),
                         right: data.right !== undefined ? data.right : 0,
-                        top: data.top !== undefined ? data.top : this.getHeight() - body.offsetHeight,
+                        top: data.top !== undefined ? data.top : main.clientHeight - (mode ? body.offsetHeight : main.scrollHeight),
                         bottom: data.bottom !== undefined ? data.bottom : 0,
-                        limit: data.range || {}
+                        limit: data.range
                     }
                 );
             },
@@ -69,9 +73,15 @@
              */
             $dragmove: function (event) {
                 this.$MScroll.$dragmove.call(this, event);
-                var style = this.getBody().style;
-                style.left = event.x + 'px';
-                style.top = event.y + 'px';
+                if (namedMap[this.getUID()].mode !== 'native') {
+                    var style = this.getBody().style;
+                    style.left = event.x + 'px';
+                    style.top = event.y + 'px';
+                } else {
+                    style = this.getMain();
+                    style.scrollLeft = -event.x;
+                    style.scrollTop = -event.y;
+                }
                 event.preventDefault();
             },
 
@@ -114,14 +124,14 @@
              * @override
              */
             getX: function () {
-                return this.getBody().offsetLeft;
+                return namedMap[this.getUID()].mode !== 'native' ? this.getBody().offsetLeft : -this.getMain().scrollLeft;
             },
 
             /**
              * @override
              */
             getY: function () {
-                return this.getBody().offsetTop;
+                return namedMap[this.getUID()].mode !== 'native' ? this.getBody().offsetTop : -this.getMain().scrollTop;
             },
 
             /**

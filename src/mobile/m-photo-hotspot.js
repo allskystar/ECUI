@@ -40,9 +40,10 @@
      * @param {number} position 高清图片初始出现的位置(左右移动时不同)
      */
     function fillImage(img, hotspot, position) {
-        var viewWidth = document.body.clientWidth;
+        var body = core.getBody();
+        var viewWidth = body.clientWidth;
 
-        img.style.top = (document.body.clientHeight - hotspot.$$calcHeight) / 2 + 'px';
+        img.style.top = (body.clientHeight - hotspot.$$calcHeight) / 2 + 'px';
         img.style.left = ((viewWidth - hotspot.$$calcWidth) / 2 + position * viewWidth) + 'px';
         img.style.width = hotspot.$$calcWidth + 'px';
         img.src = hotspot.getHDImageUrl();
@@ -55,7 +56,7 @@
      * @param {ECUIEvent} event ECUI 事件对象
      */
     function swipe(event) {
-        var viewWidth = document.body.clientWidth;
+        var viewWidth = core.getBody().clientWidth;
         if (util.toNumber(currImg.style.width) !== currHotspot.$$calcWidth) {
             return;
         }
@@ -101,8 +102,9 @@
      * @param {ECUIEvent} event ECUI 事件对象
      */
     function zoom(event) {
-        var viewWidth = document.body.clientWidth,
-            viewHeight = document.body.clientHeight,
+        var body = core.getBody(),
+            viewWidth = body.clientWidth,
+            viewHeight = body.clientHeight,
             distance = event.to - event.from,
             width = Math.max(util.toNumber(currImg.style.width) + distance, currHotspot.$$calcWidth);
         currImg.style.width = width + 'px';
@@ -110,8 +112,8 @@
         if (width === currHotspot.$$calcWidth) {
             fillImage(currImg, currHotspot, 0);
         } else {
-            currImg.style.top = (util.toNumber(currImg.style.top) - distance / currHotspot.$$calcWidth * currHotspot.$$calcHeight * (event.pageY - (document.body.parentNode.scrollTop || document.body.scrollTop)) / viewHeight) + 'px';
-            currImg.style.left = (util.toNumber(currImg.style.left) - distance * (event.pageX - (document.body.parentNode.scrollLeft || document.body.scrollLeft)) / viewWidth) + 'px';
+            currImg.style.top = (util.toNumber(currImg.style.top) - distance / currHotspot.$$calcWidth * currHotspot.$$calcHeight * (event.pageY - (body.parentNode.scrollTop || body.scrollTop)) / viewHeight) + 'px';
+            currImg.style.left = (util.toNumber(currImg.style.left) - distance * (event.pageX - (body.parentNode.scrollLeft || body.scrollLeft)) / viewWidth) + 'px';
         }
     }
 
@@ -128,8 +130,9 @@
              */
             $cache: function (style) {
                 ui.Control.prototype.$cache.call(this, style, true);
-                var viewWidth = document.body.clientWidth,
-                    viewHeight = document.body.clientHeight,
+                var body = core.getBody(),
+                    viewWidth = body.clientWidth,
+                    viewHeight = body.clientHeight,
                     height = viewWidth / this.getWidth() * this.getHeight();
                 if (height > viewHeight) {
                     this.$$calcWidth = viewHeight / this.getHeight() * this.getWidth();
@@ -145,12 +148,13 @@
              * @override
              */
             $click: function (event) {
-                var viewWidth = document.body.clientWidth,
-                    viewHeight = document.body.clientHeight;
+                var body = core.getBody(),
+                    viewWidth = body.clientWidth,
+                    viewHeight = body.clientHeight;
 
                 ui.Control.prototype.$click.call(this, event);
-                document.body.appendChild(currImg);
-                document.body.appendChild(backupImg);
+                body.appendChild(currImg);
+                body.appendChild(backupImg);
                 fillImage(currImg, this, 0);
                 currHotspot = this;
                 core.mask(0.9);

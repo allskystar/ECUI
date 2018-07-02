@@ -120,7 +120,7 @@ _eRight      - 右侧乐定行的Element元素
         function (el, options) {
             ui.Table.call(this, el, options);
 
-            this._sTableWidth = dom.getParent(this.getBody()).style.width;
+            this._sTableWidth = dom.parent(this.getBody()).style.width;
 
             var i = 0,
                 headRows = this.getHRows(),
@@ -138,7 +138,7 @@ _eRight      - 右侧乐定行的Element元素
                 list[index] = '<tr class="' + item.className + '" style="' + item.style.cssText + '"><td class="ui-locked-table-height"></td></tr>';
             });
 
-            o = '<table cellspacing="0" class="ui-locked-table-{0} ui-locked-table-body ' + dom.getParent(this.getBody()).className + '"><tbody>' + list.splice(headRows.length, rows.length).join('') + '</tbody></table><table cellspacing="0" class="ui-locked-table-{0} ui-locked-table-head ' + this.$getSection('Head').getMain().className + '"><thead>' + list.join('') + '</thead></table>';
+            o = '<table cellspacing="0" class="ui-locked-table-{0} ui-locked-table-body ' + dom.parent(this.getBody()).className + '"><tbody>' + list.splice(headRows.length, rows.length).join('') + '</tbody></table><table cellspacing="0" class="ui-locked-table-{0} ui-locked-table-head ' + this.$getSection('Head').getMain().className + '"><thead>' + list.join('') + '</thead></table>';
             dom.insertHTML(
                 layout,
                 'beforeEnd',
@@ -210,9 +210,9 @@ _eRight      - 右侧乐定行的Element元素
 
                 if (this.$getSection('Head').getMain().style.position === 'fixed' || fixed) {
                     leftHeadStyle.position = rightHeadStyle.position = 'fixed';
-                    leftHeadStyle.top = rightHeadStyle.top = (Math.min(this.getBodyHeight() - this.$$paddingTop + top, Math.max(0, top))) + 'px';
+                    leftHeadStyle.top = rightHeadStyle.top = (Math.min(this.getClientHeight() - this.$$paddingTop + top, Math.max(0, top))) + 'px';
                     leftHeadStyle.left = left + 'px';
-                    rightHeadStyle.left = (Math.min(this.getBodyWidth(), this.$$tableWidth) - this.$$paddingRight + left - this.$$rightTDWidth - this.$$scrollFixed[0]) + 'px';
+                    rightHeadStyle.left = (Math.min(this.getClientWidth(), this.$$tableWidth) - this.$$paddingRight + left - this.$$rightTDWidth - this.$$scrollFixed[0]) + 'px';
                 }
 
                 if (fixed) {
@@ -221,8 +221,8 @@ _eRight      - 右侧乐定行的Element元素
                     rightMainStyle.left = rightHeadStyle.left;
                     var scrollTop = layout.scrollTop - this.$$paddingTop;
                     leftMainStyle.top = rightMainStyle.top = top - scrollTop + 'px';
-                    leftMainStyle.clip = 'rect(' + scrollTop + 'px ' + this.$$paddingLeft + 'px ' + (scrollTop + this.getBodyHeight() - this.$$scrollFixed[1]) + 'px 0px)';
-                    rightMainStyle.clip = 'rect(' + scrollTop + 'px ' + this.$$paddingRight + 'px ' + (scrollTop + this.getBodyHeight() - this.$$scrollFixed[1]) + 'px 0px)';
+                    leftMainStyle.clip = 'rect(' + scrollTop + 'px ' + this.$$paddingLeft + 'px ' + (scrollTop + this.getClientHeight() - this.$$scrollFixed[1]) + 'px 0px)';
+                    rightMainStyle.clip = 'rect(' + scrollTop + 'px ' + this.$$paddingRight + 'px ' + (scrollTop + this.getClientHeight() - this.$$scrollFixed[1]) + 'px 0px)';
                 }
             },
 
@@ -268,7 +268,7 @@ _eRight      - 右侧乐定行的Element元素
                     splitRow(this, item);
                 }, this);
 
-                var table = dom.getParent(this.getBody()),
+                var table = dom.parent(this.getBody()),
                     head = this.$getSection('Head').getMain().lastChild;
 
                 this._eFill.style.width = this.$$tableWidth + 'px';
@@ -276,7 +276,7 @@ _eRight      - 右侧乐定行的Element元素
                 this._uRightHead.getMain().style.width = this._uRightMain.getMain().style.width = (this.$$rightTDWidth + this.$$paddingRight) + 'px';
                 table.style.marginLeft = head.style.marginLeft = this.$$paddingLeft + 'px';
                 table.style.width = head.style.width = (this.$$tableWidth - this.$$paddingLeft - this.$$paddingRight) + 'px';
-                dom.getParent(head).style.width = this.$$tableWidth + 'px';
+                dom.parent(head).style.width = this.$$tableWidth + 'px';
             },
 
             /**
@@ -296,7 +296,7 @@ _eRight      - 右侧乐定行的Element元素
                     rightHead = this._uRightHead.getMain(),
                     leftMain = this._uLeftMain.getMain(),
                     rightMain = this._uRightMain.getMain(),
-                    table = dom.getParent(this.getBody()),
+                    table = dom.parent(this.getBody()),
                     head = this.$getSection('Head').getMain();
 
                 this._eFill.style.width = '';
@@ -326,7 +326,7 @@ _eRight      - 右侧乐定行的Element元素
 
                 leftHeadStyle.left = leftMainStyle.left = this.getLayout().scrollLeft + 'px';
                 rightHeadStyle.left = rightMainStyle.left = (Math.min(this.getWidth(), this.$$tableWidth) - this.$$paddingRight + this.getLayout().scrollLeft - this.$$rightTDWidth - this.$$scrollFixed[0]) + 'px';
-                leftMainStyle.top = rightMainStyle.top = (this.$$paddingTop + this.getLayout().scrollTop - dom.getParent(this.$getSection('Head').getOuter()).scrollTop) + 'px';
+                leftMainStyle.top = rightMainStyle.top = (this.$$paddingTop + this.getLayout().scrollTop - dom.parent(this.$getSection('Head').getOuter()).scrollTop) + 'px';
                 leftMainStyle.clip = rightMainStyle.clip = ieVersion < 8 ? 'rect(0,100%,100%,0)' : 'auto';
             },
 
@@ -412,7 +412,7 @@ _eRight      - 右侧乐定行的Element元素
     eventNames.forEach(function (item) {
         ui.LockedTable.prototype.Row.prototype['$' + item] = function (event) {
             ui.Table.prototype.Row.prototype['$' + item].call(this, event);
-            dom.getParent(this._eLeft).className = dom.getParent(this._eRight).className = this.getMain().className;
+            dom.parent(this._eLeft).className = dom.parent(this._eRight).className = this.getMain().className;
         };
     });
 }());

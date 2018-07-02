@@ -1,5 +1,6 @@
 var daikuan = {},
     ui = {};
+ecui.dom.getParent = ecui.dom.parent;
 ecui.ext.esr = ecui.ext.data;
 ecui.triggerEvent = ecui.dispatchEvent;
 document.write('<script type="text/javascript" src="common/js/utility.js"></script>');

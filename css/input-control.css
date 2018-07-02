@@ -2,9 +2,10 @@
 .ui-input {
     .inline-block();
     overflow: hidden !important;
-	input,
-	textarea {
-	    border: 0 !important;
-    	margin: 0 !important;
-	}
+
+    input,
+    textarea {
+        border: 0px !important;
+        margin: 0px !important;
+    }
 }

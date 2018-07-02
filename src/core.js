@@ -14,6 +14,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
         isToucher = document.ontouchstart !== undefined,
         isPointer = !!window.PointerEvent, // 使用pointer事件序列，请一定在需要滚动的元素上加上touch-action:none
         isStrict = document.compatMode === 'CSS1Compat',
+        iosVersion = /(iPhone|iPad).+OS (\d+)/i.test(navigator.userAgent) ?  +(RegExp.$2) : undefined,
         ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined,
         chromeVersion = /Chrome\/(\d+\.\d)/i.test(navigator.userAgent) ? +RegExp.$1 : undefined,
         firefoxVersion = /firefox\/(\d+\.\d)/i.test(navigator.userAgent) ? +RegExp.$1 : undefined,
@@ -31,6 +32,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
         initRecursion = 0,        // init 操作的递归次数
 
+        bodyElement,
         maskElements = [],        // 遮罩层组
         unmasks = [],             // 用于取消庶罩层的函数列表
 
@@ -71,7 +73,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                     style.width = width + 'px';
                     style.height = height + 'px';
 
-                    var fontSize = util.toNumber(dom.getStyle(dom.getParent(document.body), 'font-size'));
+                    var fontSize = util.toNumber(dom.getStyle(dom.parent(document.body), 'font-size'));
                     fontSizeCache.forEach(function (item) {
                         item[0]['font-size'] = (Math.round(fontSize * item[1] / 2) * 2) + 'px';
                     });
@@ -97,8 +99,10 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                             type: pointerType,
                             pageX: event.pageX,
                             pageY: event.pageY,
-                            originalX: event.pageX,
-                            originalY: event.pageY,
+                            clientX: event.clientX,
+                            clientY: event.clientY,
+                            originalX: event.clientX,
+                            originalY: event.clientY,
                             target: event.target,
                             lastMoveTime: Date.now(),
                             speedX: 0,
@@ -184,6 +188,8 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                         // 鼠标右键点击不触发事件
                         track.pageX = event.pageX;
                         track.pageY = event.pageY;
+                        track.clientX = event.clientX;
+                        track.clientY = event.clientY;
                         track.target = event.target;
 
                         if (isTouchMoved) {
@@ -237,13 +243,15 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                     isTouchMoved = false;
 
                     var track = tracks[trackId = event.touches[0].identifier];
-                    track.originalX = track.pageX;
-                    track.originalY = track.pageY;
+                    track.originalX = track.clientX;
+                    track.originalY = track.clientY;
 
                     event = core.wrapEvent(event);
 
                     event.pageX = track.pageX;
                     event.pageY = track.pageY;
+                    event.clientX = track.clientX;
+                    event.clientY = track.clientY;
                     event.target = track.target;
                     event.track = track;
                     track.lastMoveTime = Date.now();
@@ -262,12 +270,14 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                     var track = tracks[item.identifier];
                     event.pageX = item.pageX;
                     event.pageY = item.pageY;
+                    event.clientX = item.clientX;
+                    event.clientY = item.clientY;
                     event.target = getElementFromEvent(item);
 
                     calcSpeed(track, event);
 
                     if (item.identifier === trackId) {
-                        if (isTouchMoved === false) {
+                        if ((Math.sqrt(track.speedX * track.speedX + track.speedY * track.speedY) > HIGH_SPEED) && isTouchMoved === false) {
                             isTouchMoved = true;
                         }
 
@@ -304,6 +314,8 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                         event.track = track;
                         event.pageX = item.pageX;
                         event.pageY = item.pageY;
+                        event.clientX = item.clientX;
+                        event.clientY = item.clientY;
                         event.target = getElementFromEvent(item);
                         currEnv.mouseup(event);
                         bubble(hoveredControl, 'mouseout', event, hoveredControl = null);
@@ -542,7 +554,8 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                     // dblclick 在 ie 下的事件触发顺序是 mousedown/mouseup/click/mouseup/dblclick
                     bubble(control, 'mouseup', event);
 
-                    for (var el = event.target; el; el = dom.getParent(el)) {
+                    for (var el = event.target; el; el = dom.parent(el)) {
+                        // 移动端浏览器可能不触发A标签上的onclick事件，但实际上A标签已经被使用
                         if (el.tagName === 'A') {
                             var target = core.findControl(el);
                             if (target && target.isDisabled()) {
@@ -559,7 +572,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
                             if (event.cancelBubble) {
                                 // 取消冒泡要阻止A标签提交
-                                for (el = control.getMain(); el; el = dom.getParent(el)) {
+                                for (el = control.getMain(); el; el = dom.parent(el)) {
                                     if (el.tagName === 'A') {
                                         blockAhref(el);
                                         break;
@@ -584,7 +597,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                     activedControl = undefined;
 
                     if (isTouchMoved !== undefined && delay < 300) {
-                        for (control = event.target; control; control = dom.getParent(control)) {
+                        for (control = event.target; control; control = dom.parent(control)) {
                             if (control.tagName === 'A' && control.href) {
                                 location.href = control.href;
                                 break;
@@ -601,7 +614,8 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             mousedown: util.blank,
 
             mousemove: function (event) {
-                dragmove(event.track, currEnv, event.pageX, event.pageY);
+                dragmove(event.track, currEnv, event.clientX, event.clientY);
+                core.wrapEvent(event).preventDefault();
             },
 
             mouseover: util.blank,
@@ -610,8 +624,8 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                 var track = event.track,
                     target = currEnv.target,
                     uid = target.getUID(),
-                    mx = event.pageX,
-                    my = event.pageY,
+                    mx = event.clientX,
+                    my = event.clientY,
                     start = Date.now(),
                     vx = track.speedX || 0,
                     vy = track.speedY || 0,
@@ -682,10 +696,12 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
         if (event) {
             this.pageX = event.pageX;
             this.pageY = event.pageY;
+            this.clientX = event.clientX;
+            this.clientY = event.clientY;
             this.which = event.which;
             if (ieVersion <= 10) {
 outer:          for (var caches = [], target = event.target, el; target; target = getElementFromEvent(event)) {
-                    for (el = target;; el = dom.getParent(el)) {
+                    for (el = target;; el = dom.parent(el)) {
                         if (!el) {
                             break outer;
                         }
@@ -799,7 +815,6 @@ outer:          for (var caches = [], target = event.target, el; target; target 
      */
     function bubble(start, type, event, end) {
         event = event || new ECUIEvent(type);
-        event.cancelBubble = false;
         start = start || null;
         end = end || null;
         for (; start !== end; start = start.getParent()) {
@@ -843,18 +858,18 @@ outer:          for (var caches = [], target = event.target, el; target; target 
     function calcSpeed(track, event) {
         var time = Date.now(),
             delay = time - track.lastMoveTime > 500,
-            offsetX = event.pageX - track.pageX,
-            offsetY = event.pageY - track.pageY,
+            offsetX = event.clientX - track.clientX,
+            offsetY = event.clientY - track.clientY,
             speed = 1000 / (time - track.lastMoveTime);
 
         track.speedX = delay ? 0 : offsetX * speed;
         track.speedY = delay ? 0 : offsetY * speed;
         track.angle = calcAngle(offsetX, offsetY);
         track.lastMoveTime = time;
-        track.lastX = track.pageX;
-        track.lastY = track.pageY;
-        track.pageX = event.pageX;
-        track.pageY = event.pageY;
+        track.lastX = track.clientX;
+        track.lastY = track.clientY;
+        track.clientX = event.clientX;
+        track.clientY = event.clientY;
     }
 
     /**
@@ -1016,7 +1031,6 @@ outer:          for (var caches = [], target = event.target, el; target; target 
      * @return {HTMLElement} 事件所在的 DOM 元素
      */
     function getElementFromEvent(event) {
-        event = event instanceof ECUIEvent ? event.getNative() : event;
         return chromeVersion || ieVersion || safariVersion ? document.elementFromPoint(event.clientX, event.clientY) : document.elementFromPoint(event.pageX, event.pageY);
     }
 
@@ -1038,15 +1052,30 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                 }
             }
 
-            dom.insertHTML(document.body, 'BEFOREEND', '<div class="ui-valid"><div></div></div>');
+            var body = document.body,
+                el;
+
+            if (safariVersion && iosVersion > 10) {
+                bodyElement = dom.create({
+                    id: body.id,
+                    className: 'SAFARI-BODY-FIXED'
+                });
+                for (; body.firstChild; ) {
+                    bodyElement.appendChild(body.firstChild);
+                }
+                body.appendChild(bodyElement);
+                body.id = '';
+            }
+
+            dom.insertHTML(body, 'BEFOREEND', '<div class="ui-valid"><div></div></div>');
             // 检测Element宽度与高度的计算方式
-            var el = document.body.lastChild;
+            el = body.lastChild;
             flgFixedOffset = el.lastChild.offsetTop;
             flgFixedSize = el.offsetWidth !== 80;
             scrollNarrow = el.offsetWidth - el.clientWidth - 2;
             dom.remove(el);
 
-            var options = core.getOptions(document.body, 'data-ecui') || {};
+            var options = core.getOptions(body, 'data-ecui') || {};
 
             ecuiName = options.name || ecuiName;
             isGlobalId = options.globalId;
@@ -1081,7 +1110,8 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                 }
             );
 
-            core.init(document.body);
+            core.init(body);
+            body = el = null;
 
             return true;
         }
@@ -1100,6 +1130,8 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                 identifier: item.identifier,
                 pageX: item.pageX,
                 pageY: item.pageY,
+                clientX: item.clientX,
+                clientY: item.clientY,
                 target: item.target,
                 speedX: 0,
                 speedY: 0
@@ -1241,8 +1273,8 @@ outer:          for (var caches = [], target = event.target, el; target; target 
 
                         event.fromX = track.lastX;
                         event.fromY = track.lastY;
-                        event.toX = track.pageX;
-                        event.toY = track.pageY;
+                        event.toX = track.clientX;
+                        event.toY = track.clientY;
                         callback('panmove');
                     } else {
                         if (isTouchMoved === false && Date.now() - track.lastClick.time < 300 && Math.sqrt(track.speedX * track.speedX + track.speedY * track.speedY) < HIGH_SPEED) {
@@ -1265,17 +1297,17 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                         angle = Math.abs((track1.angle + track2.angle - 180) / 2 - angle);
                         // 对last夹角的计算判断运动是不是在两指的一个延长线上，否则可能是旋转产生的效果
                         if (angle < 60) {
-                            event.pageX = (track1.pageX + track2.pageX) / 2;
-                            event.pageY = (track1.pageY + track2.pageY) / 2;
+                            event.clientX = (track1.clientX + track2.clientX) / 2;
+                            event.clientY = (track1.clientY + track2.clientY) / 2;
                             event.from = Math.sqrt(Math.pow(track2.lastX - track1.lastX, 2) + Math.pow(track2.lastY - track1.lastY, 2));
-                            event.to = Math.sqrt(Math.pow(track2.pageX - track1.pageX, 2) + Math.pow(track2.pageY - track1.pageY, 2));
+                            event.to = Math.sqrt(Math.pow(track2.clientX - track1.clientX, 2) + Math.pow(track2.clientY - track1.clientY, 2));
                             if (event.from < event.to) {
                                 callback('pinchout');
                             } else if (event.from > event.to) {
                                 callback('pinchin');
                             }
                         } else if (Math.abs(angle - 90) < 60 &&
-                                Math.sqrt(Math.pow(track2.pageX - track1.pageX, 2) + Math.pow(track2.pageY - track1.pageY, 2)) -
+                                Math.sqrt(Math.pow(track2.clientX - track1.clientX, 2) + Math.pow(track2.clientY - track1.clientY, 2)) -
                                     Math.sqrt(Math.pow(track2.lastX - track1.lastX, 2) + Math.pow(track2.lastY - track1.lastY, 2)) < 10) {
                             event.angle = (track2.angle + track1.angle) / 2 - (calcAngle(track2.lastX, track2.lastY) + calcAngle(track1.lastX, track1.lastY)) / 2;
                             callback('rotate');
@@ -1362,6 +1394,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
             return;
         }
         event = core.wrapEvent(event);
+        core.dispatchEvent(event.getControl(), 'scroll', event);
         independentControls.forEach(function (item) {
             core.dispatchEvent(item, 'scroll', event);
         });
@@ -1549,7 +1582,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                     control.appendTo(parent);
                 }
             } else {
-                control.$setParent(core.findControl(dom.getParent(control.getOuter())));
+                control.$setParent(core.findControl(dom.parent(control.getOuter())));
             }
 
             oncreate(control, options);
@@ -1768,6 +1801,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
             }
 
             delete event.returnValue;
+            delete event.cancelBubble;
             if ((control['on' + name] && control['on' + name](event) === false) || event.returnValue === false || (control['$' + name] && control['$' + name](event) === false)) {
                 event.preventDefault();
             }
@@ -1810,7 +1844,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
             if (isControl) {
                 core.$clearState(control);
             } else {
-                parent = core.findControl(dom.getParent(control));
+                parent = core.findControl(dom.parent(control));
                 // 以下判断需要考虑control.getOuter()物理上不属于control但逻辑上属于的情况
                 if (focusedControl && contain(control, focusedControl)) {
                     core.setFocused(parent);
@@ -1869,7 +1903,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
          * @param {Object} options 控件拖拽的参数，省略参数时，控件默认只允许在 offsetParent 定义的区域内拖拽，如果 offsetParent 是 body，则只允许在当前浏览器可视范围内拖拽
          */
         drag: function (control, event, options) {
-            if (activedControl !== undefined) {
+            if (activedControl !== undefined && currEnv.type !== 'drag') {
                 // 控件之前处于惯性状态必须停止
                 var uid = control.getUID();
                 if (inertiaHandles[uid]) {
@@ -1878,7 +1912,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                 }
 
                 // 判断鼠标没有mouseup
-                var parent = control.getOuter().offsetParent,
+                var parent = control.getOuter().offsetParent || document.documentElement,
                     style = dom.getStyle(parent);
 
                 // 拖拽范围默认不超出上级元素区域
@@ -1905,8 +1939,8 @@ outer:          for (var caches = [], target = event.target, el; target; target 
 
                 dragEnv.target = control;
                 setEnv(dragEnv);
-                event.track.logicX = event.pageX;
-                event.track.logicY = event.pageY;
+                event.track.logicX = event.clientX;
+                event.track.logicY = event.clientY;
 
                 if (core.dispatchEvent(control, 'dragstart', event)) {
                     control.setPosition(x, y);
@@ -1925,7 +1959,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
          * @return {ecui.ui.Control} ECUI 控件对象，如果不能找到，返回 null
          */
         findControl: function (el) {
-            for (; el; el = dom.getParent(el)) {
+            for (; el; el = dom.parent(el)) {
                 if (el.getControl) {
                     return el.getControl();
                 }
@@ -1969,6 +2003,17 @@ outer:          for (var caches = [], target = event.target, el; target; target 
         },
 
         /**
+         * 获取当前的 Body 区域。
+         * safari 浏览器为了屏弊高版本下默认的手势滚动，会在 BODY 标签内嵌入一个额外的层。
+         * @public
+         *
+         * @return {HTMLElement} BODY区域
+         */
+        getBody: function () {
+            return bodyElement || document.body;
+        },
+
+        /**
          * 获取自定义样式。
          * 标签自身的 content 样式没有意义，所以可以用于自定义样式的扩展。在 IE 9以下浏览器中，使用 filter 自定义样式。
          * @public
@@ -1978,8 +2023,9 @@ outer:          for (var caches = [], target = event.target, el; target; target 
          * @return {string} 自定义样式值
          */
         getCustomStyle: function (style, name) {
-            new RegExp('(^|"|\\s*)' + name + '\\s*:([^;"]+)(;|"|$)').test(style[ieVersion < 9 ? 'filter' : 'content']);
-            return RegExp.$2.trim();
+            var text = ieVersion < 9 ? style.filter : style.content.trim().slice(1, -1);
+            new RegExp('(^|\\s*)' + name + '\\s*:([^;]+)(;|$)').test(text);
+            return (RegExp.$2 || '').trim();
         },
 
         /**
@@ -2147,7 +2193,19 @@ outer:          for (var caches = [], target = event.target, el; target; target 
             }
             subClass.CLASS = subClass.TYPES.length ? ' ' + subClass.TYPES.join(' ') + ' ' : ' ';
 
-            Array.prototype.slice.call(arguments, index).forEach(function (item) {
+            for (var superMethods = [], item; item = arguments[index++]; ) {
+                if (item.NAME) {
+                    if (item.SUPER) {
+                        if (item.SUPER instanceof Array) {
+                            superMethods.push.apply(this, item.SUPER);
+                        } else {
+                            superMethods.push(item.SUPER);
+                        }
+                    }
+                }
+                superMethods.push(item);
+            }
+            superMethods.forEach(function (item) {
                 if (item.NAME) {
                     if (item.constructor) {
                         subClass.interfaces.push(item.constructor);
@@ -2284,7 +2342,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
          * @return {Function} 用于关闭当前遮罩层的函数
          */
         mask: function (opacity, zIndex) {
-            var el = document.body,
+            var el = core.getBody(),
                 view = util.getView();
 
             if (ieVersion < 9) {
@@ -2338,7 +2396,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                             util.timer(dom.remove, 1000, null, el);
                             el.style.display = 'none';
                             if (!maskElements.length) {
-                                dom.removeClass(document.body, 'ui-modal');
+                                dom.removeClass(core.getBody(), 'ui-modal');
                             }
                         }
                         el = null;
@@ -2487,6 +2545,8 @@ outer:          for (var caches = [], target = event.target, el; target; target 
          * event 方法将浏览器产生的鼠标与键盘事件标准化并添加 ECUI 框架需要的信息到事件对象中。标准化的属性如下：
          * pageX           {number} 鼠标的X轴坐标
          * pageY           {number} 鼠标的Y轴坐标
+         * clientX           {number} 鼠标当前区域的X轴坐标
+         * clientY           {number} 鼠标当前区域的Y轴坐标
          * which           {number} 触发事件的按键码
          * target          {HTMLElement} 触发事件的 Element 对象
          * returnValue     {boolean}  是否进行默认处理
@@ -2508,7 +2568,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
             }
 
             var body = document.body,
-                html = dom.getParent(body);
+                html = dom.parent(body);
 
             if (ieVersion < 9) {
                 event = window.event;

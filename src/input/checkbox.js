@@ -108,7 +108,7 @@ _bRequired       - 是否必须选择
              */
             $click: function (event) {
                 ui.InputControl.prototype.$click.call(this, event);
-                for (var el = this.getMain(); el; el = dom.getParent(el)) {
+                for (var el = this.getMain(); el; el = dom.parent(el)) {
                     if (el.tagName === 'LABEL') {
                         return;
                     }

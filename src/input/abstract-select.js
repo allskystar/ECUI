@@ -167,7 +167,7 @@ _bRequired    - 是否必须选择
              * @protected
              */
             $alterItems: function () {
-                if (dom.getParent(this._uOptions.getOuter()) && this._uOptions.isShow()) {
+                if (dom.parent(this._uOptions.getOuter()) && this._uOptions.isShow()) {
                     this._uOptions.$alterItems();
                     this._bAlterItems = false;
                 } else {

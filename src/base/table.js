@@ -63,7 +63,7 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
      */
     function createCell(main) {
         // 获取单元格所属的行控件
-        var row = dom.getParent(main).getControl(),
+        var row = dom.parent(main).getControl(),
             table = row.getParent();
 
         return core.$fastCreate(table.Cell, main, row, util.extend({}, table._aHCells[row._aElements.indexOf(main)]._oOptions));
@@ -538,12 +538,12 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
                         top = pos.top - view.top,
                         left = pos.left - view.left - this._eLayout.scrollLeft;
 
-                    top = Math.min(this.getBodyHeight() - this.$$paddingTop + top, Math.max(0, top));
+                    top = Math.min(this.getClientHeight() - this.$$paddingTop + top, Math.max(0, top));
                     if (!top || dom.contain(this.getMain(), event.target)) {
                         style.position = 'fixed';
                         style.top = top + 'px';
                         style.left = left + 'px';
-                        style.clip = 'rect(0px ' + (this._eLayout.scrollLeft + this.getBodyWidth() - this.$$scrollFixed[0]) + 'px ' + this.$$paddingTop + 'px ' + this._eLayout.scrollLeft + 'px)';
+                        style.clip = 'rect(0px ' + (this._eLayout.scrollLeft + this.getClientWidth() - this.$$scrollFixed[0]) + 'px ' + this.$$paddingTop + 'px ' + this._eLayout.scrollLeft + 'px)';
                     }
                 }
             },
@@ -556,7 +556,7 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
 
                 this.$$paddingTop = this._uHead.getBody().offsetHeight;
 
-                var table = dom.getParent(this.getBody());
+                var table = dom.parent(this.getBody());
                 this.$$tableWidth = table.offsetWidth;
                 this.$$tableHeight = table.offsetHeight;
 
@@ -613,7 +613,7 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
                 }, this);
 
                 dom.insertBefore(this._uHead.getBody(), this._uHead.getMain().lastChild.lastChild);
-                dom.getParent(this.getBody()).style.marginTop = this.$$paddingTop + 'px';
+                dom.parent(this.getBody()).style.marginTop = this.$$paddingTop + 'px';
                 if (this.getMain().style.height) {
                     this._eLayout.style.height = height + 'px';
                 }
@@ -644,7 +644,7 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
                 });
 
                 dom.insertBefore(this._uHead.getBody(), this.getBody());
-                dom.getParent(this.getBody()).style.marginTop = '';
+                dom.parent(this.getBody()).style.marginTop = '';
                 this._eLayout.style.height = '';
             },
 
@@ -657,7 +657,7 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
                 if (this._bHeadFloat) {
                     var style = this._uHead.getOuter().style;
                     style.position = '';
-                    style.top = (Math.min(this.getBodyHeight() - this.$$paddingTop, Math.max(0, util.getView().top - dom.getPosition(this.getOuter()).top)) + this._eLayout.scrollTop) + 'px';
+                    style.top = (Math.min(this.getClientHeight() - this.$$paddingTop, Math.max(0, util.getView().top - dom.getPosition(this.getOuter()).top)) + this._eLayout.scrollTop) + 'px';
                     style.left = '0px';
                     style.clip = ieVersion < 8 ? 'rect(0,100%,100%,0)' : 'auto';
                 }
@@ -972,7 +972,7 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
                     row.hide();
                     for (; this._aHCells[i]; i++) {
                         if (o = row._aElements[i]) {
-                            if (dom.getParent(o) !== body) {
+                            if (dom.parent(o) !== body) {
                                 rowNext._aElements[i] = o;
                                 for (; row._aElements[++i] === null; ) {
                                     rowNext._aElements[i] = null;

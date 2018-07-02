@@ -62,7 +62,7 @@ _aStatus            - 控件当前的状态集合
             }
         }
 
-        if (parentElement !== dom.getParent(el)) {
+        if (parentElement !== dom.parent(el)) {
             if (parentElement) {
                 parentElement.appendChild(el);
             } else {
@@ -730,28 +730,6 @@ _aStatus            - 控件当前的状态集合
             },
 
             /**
-             * 获取控件内层可使用区域的高度。
-             * getBodyHeight 方法返回能被子控件与文本填充的控件区域高度，相当于盒子模型的 content 区域的高度。
-             * @public
-             *
-             * @return {number} 控件内层可使用区域的宽度
-             */
-            getBodyHeight: function () {
-                return this.getHeight() - this.getMinimumHeight();
-            },
-
-            /**
-             * 获取控件内层可使用区域的宽度。
-             * getBodyWidth 方法返回能被子控件与文本填充的控件区域宽度，相当于盒子模型的 content 区域的宽度。
-             * @public
-             *
-             * @return {number} 控件内层可使用区域的宽度
-             */
-            getBodyWidth: function () {
-                return this.getWidth() - this.getMinimumWidth();
-            },
-
-            /**
              * 获取控件的当前样式。
              * getClass 方法返回控件当前使用的样式，扩展样式分别附加在类型样式与当前样式之后，从而实现控件的状态样式改变，详细的描述请参见 alterClass 方法。当前样式与 getPrimary 方法返回的基本样式存在区别，在控件生成初期，当前样式等于基本样式，基本样式在初始化后无法改变，setClass 方法改变当前样式。
              * @public
@@ -778,6 +756,28 @@ _aStatus            - 控件当前的状态集合
                     );
                 }
                 return classes;
+            },
+
+            /**
+             * 获取控件内层可使用区域的高度。
+             * getClientHeight 方法返回能被子控件与文本填充的控件区域高度，相当于盒子模型的 content 区域的高度。
+             * @public
+             *
+             * @return {number} 控件内层可使用区域的宽度
+             */
+            getClientHeight: function () {
+                return this.getHeight() - this.getMinimumHeight();
+            },
+
+            /**
+             * 获取控件内层可使用区域的宽度。
+             * getClientWidth 方法返回能被子控件与文本填充的控件区域宽度，相当于盒子模型的 content 区域的宽度。
+             * @public
+             *
+             * @return {number} 控件内层可使用区域的宽度
+             */
+            getClientWidth: function () {
+                return this.getWidth() - this.getMinimumWidth();
             },
 
             /**
@@ -992,7 +992,7 @@ _aStatus            - 控件当前的状态集合
              * @public
              */
             initStructure: function () {
-                this.$initStructure(this.getBodyWidth(), this.getBodyHeight());
+                this.$initStructure(this.getClientWidth(), this.getClientHeight());
             },
 
             /**
@@ -1124,7 +1124,7 @@ _aStatus            - 控件当前的状态集合
              * @param {number} width 宽度
              * @param {number} height 高度
              */
-            setBodySize: function (width, height) {
+            setClientSize: function (width, height) {
                 this.setSize(width && width + this.getMinimumWidth(), height && height + this.getMinimumHeight());
             },
 
