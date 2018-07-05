@@ -19,7 +19,7 @@ then
             mkdir release
         fi
         echo "build ecui-2.0.0"
-        path=""
+        libpath="."
         cat ecui.css | eval $css_proc > release/ecui-2.0.0.css
         eval "sed $reg_script ecui.js" | eval $tpl_proc | eval $compress_proc > release/ecui-2.0.0.js
         exit 0
@@ -55,7 +55,38 @@ libpath="$lib"
 rm -rf $output
 mkdir $output
 
-find . -type f -name "layer.*" | sed -e "s/\(\.\/\)\(.*\)/\<\!--{include file=\"\2\"}--\>/" > .layers
+if [ -f .layers.html ]
+then
+    rm .layers.html
+fi
+for file in `find . -type f -name "layer.*.html"`
+do
+    name=${file##*layer.}
+    eval "sed -e \"s/ui=\\\"type:NS\./ui=\\\"type:ecui.ns.${name%%.*}.ui./g\" -e \"s/\<container/<container id=\\\"${name%.*}\\\"/\" $file" >> .layers.html
+done
+
+find . -type f -name "layer.*.css" | sed -e "/./{
+h
+s/\(.*\)layer\.\(.*\)\.css/#\2{/
+s/\./\\\./g
+G
+s/\(\.\/\)\(.*\)/@import (less) '\2';\\
+}/
+}" > .layers.css
+
+echo -e "(function (NS) {" > .layers.js
+for file in `find . -type f -name "layer.*.js"`
+do
+    name=${file#*/}
+    name=${name%%/*}
+    if [ ! "$name" = "$last" ]
+    then
+        echo -e "NS = ecui.ns['${name}'] = ecui.ns['${name}'] || {};\nNS.data = NS.data || {};" >> .layers.js
+    fi
+    last=name
+    echo "//{include file=\"${name}/${file##*/}\"}//" >> .layers.js
+done
+echo -e "}());" >> .layers.js
 
 for file in `ls`
 do
@@ -70,7 +101,7 @@ do
 	        then
 	            mkdir "../$output/$file"
 	        fi
-	        sed -e "s/\([^A-Za-z0-9_]*\)ecui.esr.loadRoute('\([^']*\)');/\1\/\/{include file='route.\2.js'}\/\//g" -e "s/\([^A-Za-z0-9_]*\)ecui.esr.loadClass('\([^']*\)');/\1\/\/{include file='class.\2.js'}\/\//g" "$file.js" | eval $tpl_proc | eval $compress_proc > "../$output/$file/$file.js"
+            echo -e "(function (NS) {\n//{include file=\"${file}.js\"}//\n}(ecui.ns['${file}']));" | eval $tpl_proc | sed -e "s/\([^A-Za-z0-9_]*\)ecui.esr.loadRoute('\([^']*\)');/\1\/\/{include file='route.\2.js'}\/\//g" -e "s/\([^A-Za-z0-9_]*\)ecui.esr.loadClass('\([^']*\)');/\1\/\/{include file='class.\2.js'}\/\//g" | eval $tpl_proc | eval $compress_proc > "../$output/$file/$file.js"
             if [ -f "$file.css" ]
             then
                 value="/*{include file=\"$file.css\"}*/\
@@ -91,7 +122,7 @@ s/\([^A-Za-z0-9_]\)ecui.esr.loadRoute('\([^']*\)');/\1\/\/{include file=\"route.
 }" | eval $tpl_proc | eval $css_proc > "../$output/$file/$file.css"
 	        sed -e "s/\/\/.*//g" -e "s/\([^A-Za-z0-9_]\)\(ecui.esr.loadRoute('\([^']*\)');\)/\1\\
 \2\\
-/g" "$file.js" | grep "ecui.esr.loadRoute" | sed -e "s/\([^A-Za-z0-9_]*\)ecui.esr.loadRoute('\([^']*\)');/\1\/\/{include file='route.\2.html'}\/\//g" | eval $tpl_proc | eval "sed $reg_comment" > "../$output/$file/$file.html"
+/g" "$file.js" | grep "ecui.esr.loadRoute" | sed -e "s/\([^A-Za-z0-9_]*\)ecui.esr.loadRoute('\([^']*\)');/\1\/\/{include file='route.\2.html'}\/\//g" | eval $tpl_proc | eval "sed -e \"s/ui=\\\"type:NS\./ui=\\\"type:ecui.ns.${file}.ui./g\"" | eval "sed $reg_comment" > "../$output/$file/$file.html"
 	    else
 	    	if [ ! -f ".buildignore" ]
             then
@@ -126,7 +157,7 @@ s/\([^A-Za-z0-9_]\)ecui.esr.loadRoute('\([^']*\)');/\1\/\/{include file=\"route.
         else
             if [ "${file##*.}" = "css" ]
             then
-                cat "$file" | eval $css_proc > "$output/$file"
+                cat "$file" | java -jar $libpath/smarty4j.jar --left /\*{ --right }\*/ --charset utf-8 | eval $css_proc > "$output/$file"
             else
                 if [ "${file##*.}" = "html" ]
                 then

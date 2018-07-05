@@ -64,12 +64,11 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              * @param {Object} obj 响应事件的对象
              * @param {string} type 事件类型
              * @param {Function} func 事件处理函数
-             * @param {Object|boolean} options 对支持 addEventListener 的浏览器有效，IE9以下无效
              */
             addEventListener: ieVersion < 9 ? function (obj, type, func) {
                 obj.attachEvent('on' + type, func);
-            } : function (obj, type, func, options) {
-                obj.addEventListener(type, func, options !== undefined ? options : true);
+            } : function (obj, type, func) {
+                obj.addEventListener(type, func, {passive: false});
             },
 
             /**
@@ -484,12 +483,11 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              * @param {Object} obj 响应事件的对象
              * @param {string} type 事件类型
              * @param {Function} func 事件处理函数
-             * @param {Object|boolean} options 对支持 addEventListener 的浏览器有效，IE9以下无效
              */
             removeEventListener: ieVersion < 9 ? function (obj, type, func) {
                 obj.detachEvent('on' + type, func);
-            } : function (obj, type, func, options) {
-                obj.removeEventListener(type, func, options !== undefined ? options : true);
+            } : function (obj, type, func) {
+                obj.removeEventListener(type, func, {passive: false});
             },
 
             /**
@@ -936,23 +934,6 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
             }()),
 
             /**
-             * 对象属性复制。
-             * @public
-             *
-             * @param {Object} target 目标对象
-             * @param {Object} source 源对象
-             * @return {Object} 目标对象
-             */
-            extend: function (target, source) {
-                for (var key in source) {
-                    if (source.hasOwnProperty(key)) {
-                        target[key] = source[key];
-                    }
-                }
-                return target;
-            },
-
-            /**
              * 格式化日期对象。
              * @public
              *
@@ -1041,7 +1022,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                     Clazz = new Function();
 
                 Clazz.prototype = superClass.prototype;
-                util.extend(subClass.prototype = new Clazz(), oldPrototype);
+                Object.assign(subClass.prototype = new Clazz(), oldPrototype);
                 subClass.prototype.constructor = subClass;
                 subClass.superClass = superClass.prototype;
 
@@ -1322,18 +1303,30 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
     } catch (ignore) {
     }
 
-    (function () {
-        function extend(des, src) {
-            if (src) {
-                util.extend(des, src);
-            }
-        }
+    // es6 部分函数兼容
+    if (!Object.assign) {
+        Object.assign = function (target) {
+            Array.prototype.slice.call(arguments, 1).forEach(function (source) {
+                if (source) {
+                    for (var key in source) {
+                        if (source.hasOwnProperty(key)) {
+                            if (source[key] !== null && source[key] !== undefined) {
+                                target[key] = source[key];
+                            }
+                        }
+                    }
+                }
+            });
+            return target;
+        };
+    }
 
+    (function () {
         if (patch) {
-            extend(core.dom, patch.dom);
-            extend(core.ext, patch.ext);
-            extend(core.io, patch.io);
-            extend(core.util, patch.util);
+            Object.assign(core.dom, patch.dom);
+            Object.assign(core.ext, patch.ext);
+            Object.assign(core.io, patch.io);
+            Object.assign(core.util, patch.util);
             patch = null;
         }
     }());

@@ -66,7 +66,7 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
         var row = dom.parent(main).getControl(),
             table = row.getParent();
 
-        return core.$fastCreate(table.Cell, main, row, util.extend({}, table._aHCells[row._aElements.indexOf(main)]._oOptions));
+        return core.$fastCreate(table.Cell, main, row, Object.assign({}, table._aHCells[row._aElements.indexOf(main)]._oOptions));
     }
 
     /**
@@ -244,7 +244,7 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
                                 }
                                 if (el) {
                                     if (i < headRowCount) {
-                                        util.extend(options, core.getOptions(el));
+                                        Object.assign(options, core.getOptions(el));
                                         cols[j] = core.$fastCreate(this.HCell, el, this);
                                     } else {
                                         el.getControl = getControlBuilder();
@@ -735,7 +735,7 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
                 }
 
                 col.setSize(options.width);
-                col._oOptions = util.extend({}, options);
+                col._oOptions = Object.assign({}, options);
 
                 return col;
             },

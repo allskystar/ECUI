@@ -106,15 +106,6 @@ _aOptions    - 选项框数组
                         function (el, options) {
                             ui.Control.call(this, el, options);
                             this._sValue = options.value || this.getContent();
-                        },
-                        {
-                            /**
-                             * @override
-                             */
-                            $focus: function (event) {
-                                ui.Control.prototype.$focus.call(this, event);
-                                this.getParent().setSelected(this);
-                            }
                         }
                     )
                 },
@@ -136,25 +127,6 @@ _aOptions    - 选项框数组
                      */
                     getValue: function () {
                         return this._cSelect ? this._cSelect._sValue : '';
-                    },
-
-                    /**
-                     * 设置选中控件。
-                     * @public
-                     *
-                     * @param {ecui.ui.MMultiOptions.Options.Item} item 选中的控件
-                     */
-                    setSelected: function (item) {
-                        item = item || null;
-                        if (this._cSelect !== item) {
-                            if (this._cSelect) {
-                                this._cSelect.alterClass('-selected');
-                            }
-                            if (item) {
-                                item.alterClass('+selected');
-                            }
-                            this._cSelect = item;
-                        }
                     },
 
                     /**

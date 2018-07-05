@@ -195,7 +195,9 @@ _bRequired    - 是否必须选择
             $initStructure: function (width, height) {
                 ui.InputControl.prototype.$initStructure.call(this, width, height);
                 // 设置文本区域
-                this._uText.$setSize(width, height);
+                if (this._uText.isCached()) {
+                    this._uText.$setSize(width, height);
+                }
             },
 
             /**
@@ -214,35 +216,6 @@ _bRequired    - 是否必须选择
                 var el = this.getInput();
                 el.value = el.defaultValue;
                 ui.InputControl.prototype.$reset.call(this);
-            },
-
-            /**
-             * 改变下拉框当前选中的项。
-             * @private
-             *
-             * @param {ecui.ui.Select.Item} item 新选中的项
-             */
-            setSelected: function (item) {
-                item = item || null;
-                if (item !== this._cSelected) {
-                    if (this._cSelected) {
-                        this._cSelected.alterClass('-selected');
-                    }
-                    if (item) {
-                        item.alterClass('+selected');
-                        this._uText.setContent(item.getBody().innerHTML);
-                        ui.InputControl.prototype.setValue.call(this, item._sValue);
-                        if (this._uOptions.isShow()) {
-                            core.setFocused(item);
-                        }
-                        this.alterClass(item._sValue === '' ? '+placeholder' : '-placeholder');
-                    } else {
-                        this._uText.setContent('');
-                        ui.InputControl.prototype.setValue.call(this, '');
-                        core.loseFocus(this._cSelected);
-                    }
-                    this._cSelected = item;
-                }
             },
 
             /**
@@ -276,6 +249,35 @@ _bRequired    - 是否必须选择
              */
             getSelected: function () {
                 return this._cSelected || null;
+            },
+
+            /**
+             * 改变下拉框当前选中的项。
+             * @private
+             *
+             * @param {ecui.ui.Select.Item} item 新选中的项
+             */
+            setSelected: function (item) {
+                item = item || null;
+                if (item !== this._cSelected) {
+                    if (this._cSelected) {
+                        this._cSelected.alterClass('-selected');
+                    }
+                    if (item) {
+                        item.alterClass('+selected');
+                        this._uText.setContent(item.getBody().innerHTML);
+                        ui.InputControl.prototype.setValue.call(this, item._sValue);
+                        if (this._uOptions.isShow()) {
+                            core.setFocused(item);
+                        }
+                        this.alterClass(item._sValue === '' ? '+placeholder' : '-placeholder');
+                    } else {
+                        this._uText.setContent('');
+                        ui.InputControl.prototype.setValue.call(this, '');
+                        core.loseFocus(this._cSelected);
+                    }
+                    this._cSelected = item;
+                }
             },
 
             /**

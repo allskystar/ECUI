@@ -1222,7 +1222,7 @@
 
         this.config(options);
         this.targets = {};
-        this.filters = util.extend({}, DEFAULT_FILTERS);
+        this.filters = Object.assign({}, DEFAULT_FILTERS);
     }
 
     /**
@@ -1238,7 +1238,7 @@
      * @param {string=} options.namingConflict target名字冲突时的处理策略
      */
     Engine.prototype.config = function (options) {
-        util.extend(this.options, options);
+        Object.assign(this.options, options);
     };
 
    /**

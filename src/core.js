@@ -78,11 +78,21 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                         item[0]['font-size'] = (Math.round(fontSize * item[1] / 2) * 2) + 'px';
                     });
 
-                    repaint();
-                } else if (style.height !== height + 'px') {
-                    if (!isToucher) {
-                        style.height = height + 'px';
+                    if (!iosVersion) {
+                        repaint();
                     }
+                } else if (style.height !== height + 'px') {
+                    style.height = height + 'px';
+
+                    if (iosVersion) {
+                        repaint();
+                    }
+                } else if (isToucher) {
+                    util.timer(events.orientationchange, 200);
+                }
+
+                if (document.activeElement && document.activeElement.scrollIntoViewIfNeeded) {
+                    document.activeElement.scrollIntoViewIfNeeded(false);
                 }
             },
 
@@ -290,10 +300,6 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                         ongesture(event.getNative().touches, event);
                     }
                 });
-
-                if (event.getNative().touches.length > 1) {
-                    event.preventDefault();
-                }
             },
 
             touchend: function (event) {
@@ -481,7 +487,11 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                         }
                     }
 
-                    onmousedown(control, event);
+                    if (!isScrollClick(event)) {
+                        bubble(activedControl = control, 'activate', event);
+                    }
+                    bubble(control, 'mousedown', event);
+                    onselectstart(control, event);
                 } else {
                     target = event.target;
                     if (control = event.getTarget()) {
@@ -615,7 +625,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
             mousemove: function (event) {
                 dragmove(event.track, currEnv, event.clientX, event.clientY);
-                core.wrapEvent(event).preventDefault();
+                event.preventDefault();
             },
 
             mouseover: util.blank,
@@ -725,7 +735,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
         }
     }
 
-    util.extend(ECUIEvent.prototype, {
+    Object.assign(ECUIEvent.prototype, {
         /**
          * 终止全部事件操作。
          * @public
@@ -1042,30 +1052,33 @@ outer:          for (var caches = [], target = event.target, el; target; target 
      */
     function initEnvironment() {
         if (scrollNarrow === undefined) {
+            if (isToucher) {
+                (function () {
+                    var getView = util.getView;
+                    util.getView = function () {
+                        // 解决软键盘弹起时的高度计算问题，这个值已经被 orientationchange 写入了body的style中
+                        var view = getView();
+                        view.height = util.toNumber(document.body.style.height);
+                        return view;
+                    };
+                }());
+
+                events.orientationchange();
+                util.adjustFontSize(Array.prototype.slice.call(document.styleSheets));
+            }
+
             // 设置全局事件处理
             for (var key in events) {
                 if (events.hasOwnProperty(key)) {
                     var type = key.slice(0, 5);
                     if (!((type === 'mouse' && (isPointer || isToucher)) || (type === 'touch' && !isToucher) || (type === 'point' && !isPointer))) {
-                        dom.addEventListener(document, key, events[key], chromeVersion > 30 ? {passive: false} : true);
+                        dom.addEventListener(document, key, events[key]);
                     }
                 }
             }
 
             var body = document.body,
                 el;
-
-            if (safariVersion && iosVersion > 10) {
-                bodyElement = dom.create({
-                    id: body.id,
-                    className: 'SAFARI-BODY-FIXED'
-                });
-                for (; body.firstChild; ) {
-                    bodyElement.appendChild(body.firstChild);
-                }
-                body.appendChild(bodyElement);
-                body.id = '';
-            }
 
             dom.insertHTML(body, 'BEFOREEND', '<div class="ui-valid"><div></div></div>');
             // 检测Element宽度与高度的计算方式
@@ -1080,6 +1093,22 @@ outer:          for (var caches = [], target = event.target, el; target; target 
             ecuiName = options.name || ecuiName;
             isGlobalId = options.globalId;
 
+            if (safariVersion && iosVersion > 100) {
+                bodyElement = dom.create({
+                    id: body.id,
+                    className: 'SAFARI-BODY-FIXED'
+                });
+                bodyElement.setAttribute(ecuiName, dom.getAttribute(body, ecuiName));
+                body.removeAttribute(ecuiName);
+                for (; body.firstChild; ) {
+                    bodyElement.appendChild(body.firstChild);
+                }
+                body.appendChild(bodyElement);
+                body.id = '';
+            }
+
+            document.body.scrollTop = 100;
+            document.body.parentNode.scrollTop = 100;
             if (options.load) {
                 for (var text = options.load; /^\s*(\w+)\s*(\([^)]+\))?\s*($|,)/.test(text); ) {
                     text = RegExp['$\''];
@@ -1090,7 +1119,9 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                 }
             }
 
-            dom.addEventListener(window, 'resize', events.orientationchange);
+            if (!isToucher) {
+                dom.addEventListener(window, 'resize', events.orientationchange);
+            }
             dom.addEventListener(window, 'scroll', onscroll);
             dom.addEventListener(
                 window,
@@ -1320,21 +1351,6 @@ outer:          for (var caches = [], target = event.target, el; target; target 
     }
 
     /**
-     * 处理鼠标点击。
-     * @private
-     *
-     * @param {ecui.ui.Control} control 需要操作的控件
-     * @param {ECUIEvent} event 事件对象
-     */
-    function onmousedown(control, event) {
-        if (!isScrollClick(event)) {
-            bubble(activedControl = control, 'activate', event);
-        }
-        bubble(control, 'mousedown', event);
-        onselectstart(control, event);
-    }
-
-    /**
      * 滚轮事件处理。
      * @private
      *
@@ -1394,7 +1410,10 @@ outer:          for (var caches = [], target = event.target, el; target; target 
             return;
         }
         event = core.wrapEvent(event);
-        core.dispatchEvent(event.getControl(), 'scroll', event);
+        var control = event.getControl();
+        if (control) {
+            core.dispatchEvent(control, 'scroll', event);
+        }
         independentControls.forEach(function (item) {
             core.dispatchEvent(item, 'scroll', event);
         });
@@ -1488,10 +1507,10 @@ outer:          for (var caches = [], target = event.target, el; target; target 
      */
     function setEnv(env) {
         envStack.push(currEnv);
-        currEnv = util.extend(util.extend({}, currEnv), env);
+        currEnv = Object.assign({}, currEnv, env);
     }
 
-    util.extend(core, {
+    Object.assign(core, {
         /**
          * 使一个 Element 对象与一个 ECUI 控件 在逻辑上绑定。
          * 一个 Element 对象只能绑定一个 ECUI 控件，Element 对象通过 getControl方法获取绑定的 ECUI 控件，重复绑定会自动取消之前的绑定。
@@ -1794,7 +1813,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                 if (event instanceof ECUIEvent) {
                     event.type = name;
                 } else {
-                    event = util.extend(new ECUIEvent(name), event);
+                    event = Object.assign(new ECUIEvent(name), event);
                 }
             } else {
                 event = new ECUIEvent(name);
@@ -1916,7 +1935,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                     style = dom.getStyle(parent);
 
                 // 拖拽范围默认不超出上级元素区域
-                util.extend(
+                Object.assign(
                     dragEnv,
                     parent.tagName === 'BODY' || parent.tagName === 'HTML' ? util.getView() : {
                         top: 0,
@@ -1925,7 +1944,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                         left: 0
                     }
                 );
-                util.extend(dragEnv, options);
+                Object.assign(dragEnv, options);
 
                 var x = dragEnv.x !== undefined ? dragEnv.x : control.getX(),
                     y = dragEnv.y !== undefined ? dragEnv.y : control.getY();
@@ -1942,11 +1961,9 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                 event.track.logicX = event.clientX;
                 event.track.logicY = event.clientY;
 
-                if (core.dispatchEvent(control, 'dragstart', event)) {
+                if (core.dispatchEvent(control, 'dragstart', {track: event.track})) {
                     control.setPosition(x, y);
                 }
-
-                event.preventDefault();
             }
         },
 
@@ -2068,7 +2085,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
          * @return {Object} 所有被命名的控件集合
          */
         getNamedControls: function () {
-            return util.extend({}, namedControls);
+            return Object.assign({}, namedControls);
         },
 
         /**
@@ -2214,11 +2231,11 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                     var Clazz = new Function();
                     Clazz.prototype = superClass.prototype;
                     var prototype = new Clazz();
-                    util.extend(prototype, subClass.prototype);
+                    Object.assign(prototype, subClass.prototype);
                     subClass.prototype[item.NAME] = prototype;
                     item = item.Methods;
                 }
-                util.extend(subClass.prototype, item);
+                Object.assign(subClass.prototype, item);
             });
 
             // 释放闭包占用的资源
@@ -2235,25 +2252,11 @@ outer:          for (var caches = [], target = event.target, el; target; target 
          */
         init: function (el) {
             if (!initEnvironment() && el) {
-                if (isToucher) {
-                    events.orientationchange();
-                    util.adjustFontSize(Array.prototype.slice.call(document.styleSheets));
-                    (function () {
-                        var getView = util.getView;
-                        util.getView = function () {
-                            // 解决软键盘弹起时的高度计算问题，这个值已经被 orientationchange 写入了body的style中
-                            var view = getView();
-                            view.height = util.toNumber(document.body.style.height);
-                            return view;
-                        };
-                    }());
-                }
-
                 var list = dom.getAttribute(el, ecuiName) ? [el] : [],
                     controls = [],
                     options;
 
-                if (!initRecursion) {
+                if (!isToucher && !initRecursion) {
                     // 第一层 init 循环的时候需要关闭resize事件监听，防止反复的重入
                     dom.removeEventListener(window, 'resize', events.orientationchange);
                 }
@@ -2302,7 +2305,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                 }
 
                 initRecursion--;
-                if (!initRecursion) {
+                if (!isToucher && !initRecursion) {
                     dom.addEventListener(window, 'resize', events.orientationchange);
                 }
 

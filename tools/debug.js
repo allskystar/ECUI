@@ -151,7 +151,7 @@
                             ecui.io.ajax(moduleName + '/route.' + filename + '.html', {
                                 cache: true,
                                 onsuccess: function (data) {
-                                    ecui.esr.getEngine(moduleName).compile(data);
+                                    ecui.esr.getEngine(moduleName).compile(data.replace(/ui="type:NS\./g, 'ui="type:ecui.ns.' + moduleName + '.ui.'));
                                     moduleRoute.splice(0, 1);
                                     if (moduleRoute.length) {
                                         load();
@@ -167,23 +167,44 @@
         }
 
         function loadLayer(url) {
-            ecui.io.ajax(url, {
-                cache: true,
-                onsuccess: function (text) {
-                    text = text.replace('<header', '<div style="display:none"');
-                    text = text.replace('<container', '<div ui="type:ecui.esr.AppLayer" style="display:none"');
-                    text = text.replace('</header>', '</div>');
-                    text = text.replace('</container>', '</div>');
-                    var el = ecui.dom.last(ecui.dom.first(ecui.getBody()));
-                    ecui.dom.insertHTML(el, 'beforeBegin', text);
-                    ecui.init(el.parentNode);
-                    var children = ecui.dom.children(el.parentNode);
-                    children[children.length - 2].header = children[children.length - 3];
-                    el.appendChild(children[children.length - 2]);
-                    loadRouteCss();
-                },
-                onerror: loadRouteCss
-            });
+            ecui.io.loadScript(url.replace('.html', '.js'), loadLayerHTML, {onerror: loadLayerHTML});
+
+            function loadLayerHTML() {
+                ecui.io.ajax(url, {
+                    cache: true,
+                    onsuccess: function (text) {
+                        text = text.replace('<header', '<div style="display:none"');
+                        text = text.replace('<container', '<div ui="type:ecui.esr.AppLayer" style="display:none" id="' + filename + '"');
+                        text = text.replace('</header>', '</div>');
+                        text = text.replace('</container>', '</div>');
+                        var el = ecui.dom.last(ecui.dom.first(ecui.getBody()));
+                        ecui.dom.insertHTML(el, 'beforeBegin', etpl.compile(text.replace(/ui="type:NS\./g, 'ui="type:ecui.ns.' + moduleName + '.ui.'))(ecui.esr.getContext()));
+                        ecui.init(el.parentNode);
+                        var children = ecui.dom.children(el.parentNode);
+                        children[children.length - 2].header = children[children.length - 3];
+                        el.appendChild(children[children.length - 2]);
+
+                        ecui.io.ajax(url.replace('.html', '.css'), {
+                            cache: true,
+                            onsuccess: function (text) {
+                                createStyle('#' + filename.replace(/\./g, '\\.') + '{' + text + '}');
+
+                                window.less.sheets = [];
+                                window.less.refresh(true, undefined, false);
+
+                                var stop = ecui.util.timer(function () {
+                                    if (document.head.lastChild.getAttribute('type') !== 'text/less') {
+                                        stop();
+                                        loadRouteCss();
+                                    }
+                                }, -1);
+                            },
+                            onerror: loadRouteCss
+                        });
+                    },
+                    onerror: loadRouteCss
+                });
+            }
         }
 
         var filename = moduleRoute[0];

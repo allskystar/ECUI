@@ -396,7 +396,7 @@ daikuan.setPageData = function (context, listNmae) {
 daikuan.TableListRoute = function (route) {
     this.model = [route.NAME.slice(0, -5) + '@FORM ' + route.url];
     this.main = route.NAME.slice(0, -9) + '_table';
-    ecui.util.extend(this, route);
+    Object.assign(this, route);
 }
 daikuan.TableListRoute.prototype.onbeforerequest = function (context) {
     context.pageNo = context.pageNo || +this.searchParm.pageNo;

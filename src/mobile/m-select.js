@@ -87,8 +87,12 @@ _bRequired    - 是否必须选择
              * 确认事件的默认处理。
              * @event
              */
-            $confirm: function () {
-                this.setSelected(core.getFocused());
+            $confirm: function (event) {
+                var item = core.getFocused();
+                if (this.getSelected() !== item) {
+                    this.setSelected(item);
+                    core.dispatchEvent(this, 'change', event);
+                }
             }
         },
         ui.MPopup

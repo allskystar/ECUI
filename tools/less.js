@@ -633,7 +633,7 @@ function loadStyles(modifyVars) {
     for (var i = 0; i < styles.length; i++) {
         style = styles[i];
         if (style.type.match(typePattern)) {
-            var instanceOptions = ecui.util.extend({}, options);
+            var instanceOptions = Object.assign({}, options);
             instanceOptions.modifyVars = modifyVars;
             var lessText = style.innerHTML || '';
             instanceOptions.filename = document.location.href.replace(/#.*$/, '');
@@ -659,7 +659,7 @@ function loadStyles(modifyVars) {
 
 function loadStyleSheet(sheet, callback, reload, remaining, modifyVars) {
 
-    var instanceOptions = ecui.util.extend({}, options);
+    var instanceOptions = Object.assign({}, options);
     addDataAttr(instanceOptions, sheet);
     instanceOptions.mime = sheet.type;
 

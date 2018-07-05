@@ -351,10 +351,10 @@ _eInput        - INPUT对象
             $setParent: function (parent) {
                 ui.Control.prototype.$setParent.call(this, parent);
                 if (parent = this._eInput.form) {
-                    if (!parent.getControl) {
+                    if (parent.getControl === undefined) {
                         dom.addEventListener(parent, 'submit', submitHandler);
                         dom.addEventListener(parent, 'reset', resetHandler);
-                        parent.getControl = util.blank;
+                        parent.getControl = null;
                     }
                 }
             },

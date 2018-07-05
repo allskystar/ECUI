@@ -18,3 +18,84 @@
 @placeholder: #c0ccda;/* 输入框提示文字 */
 @link: #368cda;/* 链接文字 */
 @warning: #d0021b;/* 警示、出错文字 */
+
+
+
+/*set color tone*/
+/*背景色*/
+@bgblue:#2784E2;            //蓝色背景 (用于底部层级：未点击背景色一级色/点击背景色二级色)
+// @bgblue:#368CDA;
+
+@bgactiveblue:#2E7BC2;      //蓝色背景点击色 (用于底部层级：点击背景色一级色)
+
+@bgLightblueDark:#2784E2;    //蓝色背景(用于底部层级：未点击背景色一级色/点击背景色一级色)
+@bglightblue:#3CA0FB;       //蓝色背景 (用于底部层级：未点击背景色二级色/点击背景色三级色)
+@bglightblue2:#6CB4FD;      //浅蓝色背景(用于底部层级：未点击背景色三级)
+
+@bglightblue3:#F7FCFF;      //浅蓝色背景(用于底部层级：点击背景色四级色)
+@bgtagblue:#DBF1FF;         //浅蓝色背景(用于tag)
+
+@bggrey:#F8F8F8;            //浅灰色背景(用于按钮,底部层级点击背景色)
+@bggrey2:#cccccc;           //浅灰色背景
+@bgdarkgrey:#f4f4f4;        //深灰色背景(用于按钮,底部层级点击背景色)
+@bgdeletegrey:#EFF2F7;      //灰色背景（由于删除按钮）
+@bgunactiveGrey:#D0D7DE;    //灰色背景不可点击色
+
+@bgfff:#ffffff;             //白色背景
+@bgf1: #f1f1f1;             //客户详情客户信息头像icon背景色
+
+@bggreen:#34BE85;           //绿色背景
+@bglightgreen:#56bb17;      //青绿色背景
+@bglightgreen2:#E1F5ED;     //浅绿色背景(用于tag)
+
+@bglightorange:#FFECE8;     //浅橘色背景
+@bglightred:#FBE0E3;        //浅红色背景
+@bgred:#D0021B;             //红色背景
+
+@bgblack:#666666;           //黑色背景
+@bgblack0:#000000;          //黑色背景  适用于列表页，车辆编号信息透明条 opacity：0.6
+
+/*字体*/
+@fontfff:#ffffff;           //白色字体
+@font000:#000000;           //黑色字体(突出色，需要突出的标题，多用于弹框)
+@fontblack:#242527;         //灰色字体(主色，标题突出的颜色)
+@fontblue:#2784E2;          //蓝色字体(主色，logo色，当前选中及按钮色)
+// @fontblue:#368CDA;
+
+@fontlightgreen:#56bb17;    //青绿色字体(采购成功按钮)
+@fontgreen:#34BE85;         //绿色字体(库存管理)
+
+@fontgrey:#8492A6;          //灰色字体
+@fontlightgrey:#ACBACA;     //浅灰色字体
+@fontlightgrey2:#757E8B;    //浅灰色字体
+@fontccc: #CCCCCC;          //客户详情头像文字颜色
+
+@fontred:#D0021B;           //红色字体(采购失败按钮)
+@fontlightred:#F7634F;      //浅红色字体
+@fontorange:#FF8062;        //橘色字体
+@fontTime:#FF7700;          //倒计时字体
+@fontplaceHolder: #999999;
+/*边框*/
+@borderwhite:#ffffff;              //白色边框
+@borderblue:#2784E2;              //蓝色边框
+// @borderblue:#368CDA;
+@borderlightblue:#A9D3FA;         //浅蓝色边框
+
+@bordergrey:#ACBACA;              //灰色边框(牌证管理)
+@borderlightgrey:#D3DCE6;         //浅灰色边框
+@borderlightgrey2:#EFF2F7;         //浅灰色边框
+@borderlightgrey3:#cccccc;         //浅灰色边框
+
+@bordergreen:#34BE85;             //绿色边框
+@borderlightgreen:#56BB17;        //青绿色边框
+
+@borderred:#D0021B;               //红色边框
+@borderorange:#FF8468;            //橘色边框
+
+@ordermsg:#fff2a8;
+@orderborder:#f6d023;
+@color8: #888888;
+
+@font333: #333333;
+
+
