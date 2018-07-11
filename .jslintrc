@@ -1,0 +1,23 @@
+{
+    "ass": true,
+    "bitwise": true,
+    "browser": true,
+    "couch": false,
+    "empty": true,
+    "es5": false,
+    "evil": true,
+    "funcredef": true,
+    "funcscope": true,
+    "indent": 4,
+    "latedef": true,
+    "node": false,
+    "nomen": true,
+    "plusplus": true,
+    "quotmark": "single",
+    "regexp": true,
+    "sloppy": true,
+    "todo": true,
+    "vars": true,
+
+    "predef": ["ecui", "etpl", "FeatureFlags", "less", "NS"]
+}
