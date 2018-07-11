@@ -9,10 +9,13 @@
 
     input {
         position: absolute !important;
-        outline: none;
+        display: block !important;
+        .width100rate();
+        outline: none !important;
     }
 }
 
 .ui-combox-options {
     overflow: auto !important;
+    overflow-x: hidden !important;
 }

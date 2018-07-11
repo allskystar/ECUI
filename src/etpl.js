@@ -41,7 +41,7 @@
      *
      * @inner
      * @const
-     * @type {Object}
+     * @type {object}
      */
     var DEFAULT_FILTERS = {
         /**
@@ -421,7 +421,7 @@
         /**
          * 节点open，解析开始
          *
-         * @param {Object} context 语法分析环境对象
+         * @param {object} context 语法分析环境对象
          */
         open: function (context) {
             var parent = context.stack.top();
@@ -434,7 +434,7 @@
         /**
          * 节点闭合，解析结束
          *
-         * @param {Object} context 语法分析环境对象
+         * @param {object} context 语法分析环境对象
          */
         close: function (context) {
             if (context.stack.top() === this) {
@@ -477,7 +477,7 @@
      * 命令自动闭合
      *
      * @inner
-     * @param {Object} context 语法分析环境对象
+     * @param {object} context 语法分析环境对象
      * @param {Function=} CommandType 自闭合的节点类型
      * @return {Command} 被闭合的节点
      */
@@ -550,7 +550,7 @@
      * @param {Engine} engine 引擎实例
      */
     function TargetCommand(value, engine) {
-        if (!/^\s*([a-z0-9\/_-]+)\s*(\(\s*master\s*=\s*([a-z0-9\.\/_-]+)\s*\))?\s*/i.test(value)) {
+        if (!/^\s*([a-z0-9\/._-]+)\s*(\(\s*master\s*=\s*([a-z0-9\.\/_-]+)\s*\))?\s*/i.test(value)) {
             throw new Error('Invalid ' + this.type + ' syntax: ' + value);
         }
 
@@ -881,7 +881,7 @@
      *
      * @inner
      * @param {TargetCommand} target target节点对象
-     * @param {Object} context 语法分析环境对象
+     * @param {object} context 语法分析环境对象
      */
     function addTargetToContext(target, context) {
         context.target = target;
@@ -905,7 +905,7 @@
     /**
      * target节点open，解析开始
      *
-     * @param {Object} context 语法分析环境对象
+     * @param {object} context 语法分析环境对象
      */
     TargetCommand.prototype.open = function (context) {
         autoCloseCommand(context);
@@ -917,7 +917,7 @@
     /**
      * Var/Use节点open，解析开始
      *
-     * @param {Object} context 语法分析环境对象
+     * @param {object} context 语法分析环境对象
      */
     VarCommand.prototype.open = UseCommand.prototype.open = function (context) {
         context.stack.top().addChild(this);
@@ -926,7 +926,7 @@
     /**
      * Block节点open，解析开始
      *
-     * @param {Object} context 语法分析环境对象
+     * @param {object} context 语法分析环境对象
      */
     BlockCommand.prototype.open = function (context) {
         Command.prototype.open.call(this, context);
@@ -936,7 +936,7 @@
     /**
      * elif节点open，解析开始
      *
-     * @param {Object} context 语法分析环境对象
+     * @param {object} context 语法分析环境对象
      */
     ElifCommand.prototype.open = function (context) {
         var elseCommand = new ElseCommand();
@@ -950,7 +950,7 @@
     /**
      * else节点open，解析开始
      *
-     * @param {Object} context 语法分析环境对象
+     * @param {object} context 语法分析环境对象
      */
     ElseCommand.prototype.open = function (context) {
         var ifCommand = autoCloseCommand(context, IfCommand);
@@ -961,7 +961,7 @@
     /**
      * import节点open，解析开始
      *
-     * @param {Object} context 语法分析环境对象
+     * @param {object} context 语法分析环境对象
      */
     ImportCommand.prototype.open = function (context) {
         this.parent = context.stack.top();
@@ -975,14 +975,14 @@
      * 节点解析结束
      * 由于var/use节点无需闭合，处理时不会入栈，所以将close置为空函数
      *
-     * @param {Object} context 语法分析环境对象
+     * @param {object} context 语法分析环境对象
      */
     UseCommand.prototype.close = VarCommand.prototype.close = function () {};
 
     /**
      * 节点解析结束
      *
-     * @param {Object} context 语法分析环境对象
+     * @param {object} context 语法分析环境对象
      */
     ImportCommand.prototype.close = function (context) {
         Command.prototype.close.call(this, context);
@@ -993,7 +993,7 @@
     /**
      * 节点闭合，解析结束
      *
-     * @param {Object} context 语法分析环境对象
+     * @param {object} context 语法分析环境对象
      */
     TargetCommand.prototype.close = function (context) {
         Command.prototype.close.call(this, context);
@@ -1006,7 +1006,7 @@
      * ImportCommand的自动结束逻辑为，在其开始位置后马上结束
      * 所以，其自动结束时children应赋予其所属的parent
      *
-     * @param {Object} context 语法分析环境对象
+     * @param {object} context 语法分析环境对象
      */
     ImportCommand.prototype.autoClose = function (context) {
         // move children to parent
@@ -1028,7 +1028,7 @@
     /**
      * 节点open前的处理动作：节点不在target中时，自动创建匿名target
      *
-     * @param {Object} context 语法分析环境对象
+     * @param {object} context 语法分析环境对象
      */
     UseCommand.prototype.beforeOpen = ImportCommand.prototype.beforeOpen = VarCommand.prototype.beforeOpen = ForCommand.prototype.beforeOpen = FilterCommand.prototype.beforeOpen = BlockCommand.prototype.beforeOpen = IfCommand.prototype.beforeOpen = TextNode.prototype.beforeAdd = function (context) {
         if (context.stack[0]) {
@@ -1169,7 +1169,7 @@
     /**
      * 命令类型集合
      *
-     * @type {Object}
+     * @type {object}
      */
     var commandTypes = {};
 
@@ -1228,7 +1228,7 @@
     /**
      * 配置引擎参数，设置的参数将被合并到现有参数中
      *
-     * @param {Object} options 参数对象
+     * @param {object} options 参数对象
      * @param {string=} options.commandOpen 命令语法起始串
      * @param {string=} options.commandClose 命令语法结束串
      * @param {string=} options.variableOpen 变量语法起始串

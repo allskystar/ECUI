@@ -201,7 +201,7 @@ _aStatus            - 控件当前的状态集合
                 core.$clearState(this);
 
                 var el = this.getMain();
-                Array.prototype.forEach.call(el.all || el.getElementsByTagName('*'), function (item) {
+                Array.prototype.slice.call(el.all || el.getElementsByTagName('*')).forEach(function (item) {
                     if (item.disabled === false) {
                         var tabIndex = dom.getAttribute(item, 'tabIndex') || '';
                         if (tabIndex !== '-1') {
@@ -255,7 +255,7 @@ _aStatus            - 控件当前的状态集合
                 this.alterClass('-disabled');
 
                 var el = this.getMain();
-                Array.prototype.forEach.call(el.all || el.getElementsByTagName('*'), function (item) {
+                Array.prototype.slice.call(el.all || el.getElementsByTagName('*')).forEach(function (item) {
                     if (item.disabled !== undefined) {
                         var tabIndex = dom.getAttribute(item, '_tabIndex');
                         if (tabIndex !== null) {
@@ -446,7 +446,7 @@ _aStatus            - 控件当前的状态集合
                     if (style.width === 'auto' && style.display === 'block') {
                         this._eMain.style.width = '100%';
                         if (event.type !== 'repaint') {
-                            this._eMain.style.width = this._eMain.offsetWidth - (core.isContentBox() ? this.$getBasicWidth() * 2 : 0) + 'px';
+                            this._eMain.style.width = this._eMain.offsetWidth - (core.isContentBox(this._eMain) ? this.$getBasicWidth() * 2 : 0) + 'px';
                         } else {
                             event.repaint = true;
                         }
@@ -492,7 +492,7 @@ _aStatus            - 控件当前的状态集合
             $setSize: function (width, height) {
                 this.cache();
 
-                var fixedSize = core.isContentBox() && this._eMain.tagName !== 'BUTTON' && this._eMain.tagName !== 'INPUT',
+                var fixedSize = core.isContentBox(this._eMain),
                     value;
 
                 // 防止负宽度IE下出错
@@ -911,9 +911,7 @@ _aStatus            - 控件当前的状态集合
              * @return {number} X轴坐标
              */
             getX: function () {
-                var el = this.getOuter();
-
-                return this.isShow() ? el.offsetLeft - core.calcLeftRevise(el) : 0;
+                return this.isShow() ? this.getOuter().offsetLeft : 0;
             },
 
             /**
@@ -924,9 +922,7 @@ _aStatus            - 控件当前的状态集合
              * @return {number} Y轴坐标
              */
             getY: function () {
-                var el = this.getOuter();
-
-                return this.isShow() ? el.offsetTop - core.calcTopRevise(el) : 0;
+                return this.isShow() ? this.getOuter().offsetTop : 0;
             },
 
             /**
@@ -949,7 +945,7 @@ _aStatus            - 控件当前的状态集合
              * init 方法在控件缓存读取后调用，有关控件生成的完整过程描述请参见 基础控件。
              * @public
              *
-             * @param {Object} options 初始化选项(参见 ECUI 控件)
+             * @param {object} options 初始化选项(参见 ECUI 控件)
              */
             init: function (options) {
                 if (!this._bReady) {

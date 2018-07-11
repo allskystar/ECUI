@@ -57,8 +57,7 @@ _bRequired    - 是否必须选择
 
                 var optionsEl = dom.create(
                     {
-                        innerHTML: Array.prototype.map.call(
-                            oldEl.options,
+                        innerHTML: Array.prototype.slice.call(oldEl.options).map(
                             function (item) {
                                 var optionText = dom.getAttribute(item, core.getAttributeName());
                                 return '<div ' + core.getAttributeName() + '="value:' + util.encodeHTML(item.value) + (optionText ? ';' + util.encodeHTML(optionText) : '') + '">' + util.encodeHTML(item.text) + '</div>';

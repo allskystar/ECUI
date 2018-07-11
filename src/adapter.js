@@ -8,7 +8,6 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
         //{if 1}//JAVASCRIPT = 'javascript',//{/if}//
         patch = ecui,
         fontSizeCache = [],
-        loadScriptCount = 0,
         //{if 1}//isToucher = document.ontouchstart !== undefined,//{/if}//
         //{if 1}//isPointer = !!window.PointerEvent, // 使用pointer事件序列，请一定在需要滚动的元素上加上touch-action:none//{/if}//
         isStrict = document.compatMode === 'CSS1Compat',
@@ -61,7 +60,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              * 挂载事件。
              * @public
              *
-             * @param {Object} obj 响应事件的对象
+             * @param {object} obj 响应事件的对象
              * @param {string} type 事件类型
              * @param {Function} func 事件处理函数
              */
@@ -142,6 +141,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              * @public
              *
              * @param {string} cssText css文本
+             * @return {HTMLElement} 创建的 style 元素
              */
             createStyleSheet: function (cssText) {
                 var el = document.createElement('STYLE');
@@ -162,6 +162,8 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                 document.head.appendChild(el);
 
                 util.adjustFontSize([document.styleSheets[document.styleSheets.length - 1]]);
+
+                return el;
             },
 
             /**
@@ -202,7 +204,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              * @public
              *
              * @param {HTMLElement} el Element 对象
-             * @return {Object} 位置信息
+             * @return {object} 位置信息
              */
             getPosition: function (el) {
                 var top = 0,
@@ -360,7 +362,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              * 判断一个对象是否为 DOM 元素。
              * @public
              *
-             * @param {Object} obj 对象
+             * @param {object} obj 对象
              * @return {boolean} 是否为 DOM 元素
              */
             isElement: ieVersion < 9 ? function (obj) {
@@ -480,7 +482,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              * 卸载事件。
              * @public
              *
-             * @param {Object} obj 响应事件的对象
+             * @param {object} obj 响应事件的对象
              * @param {string} type 事件类型
              * @param {Function} func 事件处理函数
              */
@@ -562,7 +564,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              * method    {string}   请求类型，默认为GET
              * async     {boolean}  是否异步请求，默认为true(异步)
              * data      {string}   需要发送的数据，主要用于POST
-             * headers   {Object}   要设置的http request header
+             * headers   {object}   要设置的http request header
              * timeout   {number}   超时时间
              * nocache   {boolean}  是否需要缓存，默认为false(缓存)
              * onupload  {Function} 如果xhr支持upload.onprogress，上传过程中触发
@@ -571,7 +573,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              * @public
              *
              * @param {string} url 发送请求的url
-             * @param {Object} options 选项
+             * @param {object} options 选项
              */
             ajax: function (url, options) {
                 function stateChangeHandler() {
@@ -701,11 +703,10 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              *
              * @param {string} url 加载数据的url
              * @param {Function} callback 数据加载结束时调用的函数或函数名
-             * @param {Object} options 选项
+             * @param {object} options 选项
              */
             loadScript: function (url, callback, options) {
                 function removeScriptTag() {
-                    loadScriptCount--;
                     if (stop) {
                         stop();
                     }
@@ -716,7 +717,6 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                     scr = null;
                 }
 
-                loadScriptCount++;
                 options = options || {};
 
                 if (!options.cache) {
@@ -738,7 +738,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                     if (scr.readyState === undefined || scr.readyState === 'loaded' || scr.readyState === 'complete') {
                         scriptLoaded = 1;
                         try {
-                            if (callback && loadScriptCount === 1) {
+                            if (callback) {
                                 callback();
                             }
                         } finally {
@@ -776,7 +776,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              * @param {string} url 长连接的地址
              * @param {Function} callback 每接受一个正确的数据报文时产生的回调函数，数据报文是一个紧凑的json字符串，使用\n分隔不同的数据报文
              * @param {Function} onerror io失败时的处理
-             * @return {Object} 操作对象，使用close关闭长连接
+             * @return {object} 操作对象，使用close关闭长连接
              */
             openSocket: function (url, callback, onerror) {
                 var recvbuf = '',
@@ -898,20 +898,24 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
             blank: new Function(),
 
             /**
-             * 对目标字符串进行 html 编码。
-             * encodeHTML 方法对四个字符进行编码，分别是 &<>"
+             * 检测表单有没有未提交的修改。
              * @public
              *
-             * @param {string} source 目标字符串
-             * @return {string} 结果字符串
+             * @param {FormElement} form 表单元素
+             * @return {boolean} 是否有更改
              */
-            encodeHTML: function (source) {
-                return source.replace(
-                    /[&<>"']/g,
-                    function (match) {
-                        return '&#' + match.charCodeAt(0) + ';';
+            checkUpdate: function (form) {
+                var update = false;
+                Array.prototype.slice.call(form.elements).forEach(function (item) {
+                    if (item.type !== 'radio' && item.type !== 'checkbox') {
+                        if (item.defaultValue !== item.value) {
+                            update = true;
+                        }
+                    } else if (item.defaultChecked !== item.checked) {
+                        update = true;
                     }
-                );
+                });
+                return update;
             },
 
             /**
@@ -932,6 +936,23 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                     );
                 };
             }()),
+
+            /**
+             * 对目标字符串进行 html 编码。
+             * encodeHTML 方法对四个字符进行编码，分别是 &<>"
+             * @public
+             *
+             * @param {string} source 目标字符串
+             * @return {string} 结果字符串
+             */
+            encodeHTML: function (source) {
+                return source.replace(
+                    /[&<>"']/g,
+                    function (match) {
+                        return '&#' + match.charCodeAt(0) + ';';
+                    }
+                );
+            },
 
             /**
              * 格式化日期对象。
@@ -986,7 +1007,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              * pageHeight {number} 页面的高度
              * @public
              *
-             * @return {Object} 浏览器可视区域信息
+             * @return {object} 浏览器可视区域信息
              */
             getView: function () {
                 var body = document.body,
@@ -1015,7 +1036,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              *
              * @param {Function} subClass 子类
              * @param {Function} superClass 父类
-             * @return {Object} subClass 的 prototype 属性
+             * @return {object} subClass 的 prototype 属性
              */
             inherits: function (subClass, superClass) {
                 var oldPrototype = subClass.prototype,
@@ -1034,8 +1055,8 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              * @public
              *
              * @param {string} name 描述值的字符串
-             * @param {Object} namespace 初始的命名空间，默认从window开始
-             * @return {Object} 命名空间中指定的值，如果不存在返回undefined
+             * @param {object} namespace 初始的命名空间，默认从window开始
+             * @return {object} 命名空间中指定的值，如果不存在返回undefined
              */
             parseValue: function (name, namespace) {
                 namespace = namespace || window;
@@ -1053,7 +1074,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              * @public
              *
              * @param {Array} array 数组对象
-             * @param {Object} obj 需要移除的对象
+             * @param {object} obj 需要移除的对象
              */
             remove: function (array, obj) {
                 for (var i = array.length; i--; ) {
@@ -1068,9 +1089,9 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              * 如果对象的属性已经被设置，setDefault 方法不进行任何处理，否则将默认值设置到指定的属性上。
              * @public
              *
-             * @param {Object} obj 被设置的对象
+             * @param {object} obj 被设置的对象
              * @param {string} key 属性名
-             * @param {Object} value 属性的默认值
+             * @param {object} value 属性的默认值
              */
             setDefault: function (obj, key, value) {
                 if (!obj.hasOwnProperty(key)) {
@@ -1102,8 +1123,8 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              *
              * @param {Function} func 定时器需要调用的函数
              * @param {number} delay 定时器延迟调用的毫秒数，如果为负数表示需要连续触发
-             * @param {Object} caller 调用者，在 func 被执行时，this 指针指向的对象，可以为空
-             * @param {Object} ... 向 func 传递的参数
+             * @param {object} caller 调用者，在 func 被执行时，this 指针指向的对象，可以为空
+             * @param {object} ... 向 func 传递的参数
              * @return {Function} 用于关闭定时器的方法
              */
             timer: function (func, delay, caller) {
@@ -1170,7 +1191,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              * toNumber 方法会省略数值的符号，例如字符串 9px 将当成数值的 9，不能识别的数值将默认为 0。
              * @public
              *
-             * @param {Object} obj 需要转换的对象
+             * @param {object} obj 需要转换的对象
              * @return {number} 对象的数值
              */
             toNumber: function (obj) {
@@ -1303,8 +1324,10 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
     } catch (ignore) {
     }
 
-    // es6 部分函数兼容
-    if (!Object.assign) {
+    try {
+        new Function('let a')();
+    } catch (e) {
+        // es6 部分函数兼容
         Object.assign = function (target) {
             Array.prototype.slice.call(arguments, 1).forEach(function (source) {
                 if (source) {
@@ -1318,6 +1341,14 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                 }
             });
             return target;
+        };
+
+        String.prototype.startsWith = function (s) {
+            return this.indexOf(s) === 0;
+        };
+
+        String.prototype.endsWith = function (s) {
+            return this.lastIndexOf(s) === this.length - s.length;
         };
     }
 

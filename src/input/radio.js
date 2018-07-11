@@ -36,8 +36,7 @@ _bRequired - 是否必须选择
      */
     function refresh(radio, checked) {
         if (checked !== undefined) {
-            var el = radio.getInput();
-            el.defaultChecked = el.checked = checked;
+            radio.getInput().checked = checked;
         }
         radio.alterSubType(radio.isChecked() ? 'checked' : '');
     }
@@ -191,7 +190,7 @@ _bRequired - 是否必须选择
                 }
                 if (inputEl.form) {
                     // 必须 name 也不为空，否则 form[o] 的值在部分浏览器下将是空
-                    Array.prototype.forEach.call(inputEl.form[inputEl.name], function (item) {
+                    Array.prototype.slice.call(inputEl.form[inputEl.name]).forEach(function (item) {
                         if (item.getControl) {
                             result.push(item.getControl());
                         }
@@ -214,6 +213,13 @@ _bRequired - 是否必须选择
             },
 
             /**
+             * @override
+             */
+            saveToDefault: function () {
+                this._bDefault = this.getInput().defaultChecked = this.isChecked();
+            },
+
+            /**
              * 设置单选框控件选中状态。
              * 将控件设置成为选中状态，会取消同一个单选框控件组的其它控件的选中状态。
              * @public
@@ -224,19 +230,6 @@ _bRequired - 是否必须选择
                 if (this.isChecked() !== checked) {
                     setChecked(this, checked);
                 }
-            },
-
-            /**
-             * 设置控件的默认值，供form表单的reset方法使用。
-             * @public
-             *
-             * @param {boolean} value 是否选中
-             */
-            setDefaultValue: function (value) {
-                this.getItems().forEach(function (item) {
-                    item._bDefault = false;
-                });
-                this._bDefault = !!value;
             }
         }
     );

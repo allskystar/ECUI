@@ -66,8 +66,7 @@ _bRequired       - 是否必须选择
 
             checkbox._nStatus = status;
 
-            var el = checkbox.getInput();
-            el.defaultChecked = el.checked = !status;
+            checkbox.getInput().checked = !status;
 
             // 如果有主复选框，刷新主复选框的状态
             if (checkbox._cSubject) {
@@ -251,6 +250,13 @@ _bRequired       - 是否必须选择
             },
 
             /**
+             * @override
+             */
+            saveToDefault: function () {
+                this._bDefault = this.getInput().defaultChecked = this.isChecked();
+            },
+
+            /**
              * 设置复选框控件选中状态。
              * @public
              *
@@ -264,16 +270,6 @@ _bRequired       - 是否必须选择
                     item.setChecked(checked);
                     item._cSubject = this;
                 }, this);
-            },
-
-            /**
-             * 设置控件的默认值，供form表单的reset方法使用。
-             * @public
-             *
-             * @param {boolean} value 是否选中
-             */
-            setDefaultValue: function (value) {
-                this._bDefault = !!value;
             },
 
             /**

@@ -146,7 +146,7 @@ _nBottomIndex  - 下部隐藏的选项序号
              * 拖拽的惯性时间计算。
              * @protected
              *
-             * @param {Object} speed 速度对象，x/y 值分别表示 x/y 方向上的速度分量
+             * @param {object} speed 速度对象，x/y 值分别表示 x/y 方向上的速度分量
              */
             $draginertia: function (speed) {
                 return Math.min(2, Math.abs(speed.y / 400));
@@ -301,6 +301,7 @@ _nBottomIndex  - 下部隐藏的选项序号
                                 foot: this._eFooter
                             },
                             onfinish: callback && function () {
+                                this._sStatus = '';
                                 callback();
                             }
                         };
@@ -322,6 +323,15 @@ _nBottomIndex  - 下部隐藏的选项序号
         ui.MScroll,
         ui.Items,
         {
+            /**
+             * @override
+             */
+            $activate: function (event) {
+                if (!this._bLoading || this._sStatus !== 'headercomplete') {
+                    ui.MScroll.Methods.$activate.call(this, event);
+                }
+            },
+
             /**
              * @override
              */

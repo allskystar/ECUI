@@ -4,6 +4,32 @@
     *display: inline;
     *zoom: 1;
 }
+
+.width100rate() {
+    width: 100% !important;
+    padding-right: 0px !important;
+    padding-left: 0px !important;
+    border-right-width: 0px !important;
+    border-left-width: 0px !important;
+    margin-right: 0px !important;
+    margin-left: 0px !important;
+}
+
+.height100rate() {
+    height: 100% !important;
+    padding-top: 0px !important;
+    padding-bottom: 0px !important;
+    border-top-width: 0px !important;
+    border-bottom-width: 0px !important;
+    margin-top: 0px !important;
+    margin-bottom: 0px !important;
+}
+
+.m-width100rate() {
+    box-sizing: border-box !important;
+    width: 100% !important;
+}
+
 @import (less) 'css/core.css';
 @import (less) 'css/control.css';
 @import (less) 'css/input-control.css';
@@ -14,10 +40,8 @@
 
 @import (less) 'css/button.css';
 @import (less) 'css/dialog.css';
-@import (less) 'css/month-view.css';
 @import (less) 'css/progress.css';
 @import (less) 'css/progress-bar.css';
-@import (less) 'css/tab.css';
 @import (less) 'css/table.css';
 
 @import (less) 'css/text.css';
@@ -26,12 +50,13 @@
 @import (less) 'css/select.css';
 @import (less) 'css/combox.css';
 
-@import (less) 'css/calendar.css';
 @import (less) 'css/locked-table.css';
 
+@import (less) 'css/messagebox.css';
 @import (less) 'css/esr.css';
 
 @import (less) 'css/m-scroll.css';
+@import (less) 'css/m-confirm.css';
 @import (less) 'css/m-panel.css';
 @import (less) 'css/m-popup.css';
 @import (less) 'css/m-options.css';

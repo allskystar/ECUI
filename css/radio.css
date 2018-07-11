@@ -5,7 +5,7 @@
         left: -12px !important;
         width: 10px !important;
         border-radius: 0px;
-        opacity: 0;
+        opacity: 0 !important;
     }
 }
 

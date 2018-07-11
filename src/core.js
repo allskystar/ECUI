@@ -26,7 +26,6 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
         ecuiName = 'ui',          // Element 中用于自动渲染的 ecui 属性名称
         isGlobalId,               // 是否自动将 ecui 的标识符全局化
 
-        flgFixedOffset,           // 在计算相对位置时，是否需要修正边框样式的影响
         flgFixedSize,             // 在计算盒子模型时，是否需要修正宽高
         scrollNarrow,             // 浏览器滚动条相对窄的一边的长度
 
@@ -247,6 +246,11 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
             // 触屏事件到鼠标事件的转化，与touch相关的事件由于ie浏览器会触发两轮touch与mouse的事件，所以需要屏弊一个
             touchstart: function (event) {
+                if (document.body !== event.target) {
+                    dom.addEventListener(event.target, 'touchmove', RemovedDomTouchBubble);
+                    dom.addEventListener(event.target, 'touchend', RemovedDomTouchBubble);
+                }
+
                 initTouchTracks(event);
 
                 if (event.touches.length === 1) {
@@ -303,6 +307,9 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             },
 
             touchend: function (event) {
+                dom.removeEventListener(event.target, 'touchmove', RemovedDomTouchBubble);
+                dom.removeEventListener(event.target, 'touchend', RemovedDomTouchBubble);
+
                 var track = tracks[trackId];
 
                 initTouchTracks(event);
@@ -695,8 +702,20 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
     }
 
     /**
+     * 解决touch事件中如果目标元素被移除touch事件冒泡丢失的问题。
+     * @private
+     *
+     * @param {Event} event 浏览器原生事件对象，忽略将自动填充
+     */
+    function RemovedDomTouchBubble(event) {
+        if (!dom.contain(document.body, this)) {
+            events[event.type](event);
+        }
+    }
+
+    /**
      * 创建 ECUI 事件对象。
-     * @public
+     * @private
      *
      * @param {string} type 事件类型
      * @param {Event} event 浏览器原生事件对象，忽略将自动填充
@@ -767,7 +786,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
          * 获取原生的事件对象。
          * @public
          *
-         * @return {Object} 原生的事件对象
+         * @return {object} 原生的事件对象
          */
         getNative: function () {
             return this._oNative;
@@ -897,6 +916,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
             }
         } catch (ignore) {
         }
+        util.remove(singletons, control);
         core.dispatchEvent(control, 'dispose');
     }
 
@@ -905,7 +925,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
      * @private
      *
      * @param {ECUIEvent} ECUI 事件对象
-     * @param {Object} ECUI 框架运行环境
+     * @param {object} ECUI 框架运行环境
      * @param {ecui.ui.Control} target 被拖拽的 ECUI 控件
      */
     function dragend(event, env, target) {
@@ -961,7 +981,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
      * @private
      *
      * @param {Event} track 事件跟踪对象
-     * @param {Object} env ECUI 框架运行环境
+     * @param {object} env ECUI 框架运行环境
      * @param {number} x 需要移动到的 X 坐标
      * @param {number} y 需要移动到的 Y 坐标
      */
@@ -1083,7 +1103,6 @@ outer:          for (var caches = [], target = event.target, el; target; target 
             dom.insertHTML(body, 'BEFOREEND', '<div class="ui-valid"><div></div></div>');
             // 检测Element宽度与高度的计算方式
             el = body.lastChild;
-            flgFixedOffset = el.lastChild.offsetTop;
             flgFixedSize = el.offsetWidth !== 80;
             scrollNarrow = el.offsetWidth - el.clientWidth - 2;
             dom.remove(el);
@@ -1228,7 +1247,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
      * @private
      *
      * @param {ecui.ui.Control} control
-     * @param {Object} options 控件初始化选项
+     * @param {object} options 控件初始化选项
      */
     function oncreate(control, options) {
         if (control.oncreate) {
@@ -1238,7 +1257,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
         if (options.id) {
 //{if 0}//
             if (namedControls[options.id]) {
-                console.error('The identifier("' + options.id + '") has existed.');
+                console.warn('The identifier("' + options.id + '") has existed.');
             }
 //{/if}//
             namedControls[options.id] = control;
@@ -1503,7 +1522,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
      * 设置 ecui 环境。
      * @private
      *
-     * @param {Object} env 环境描述对象
+     * @param {object} env 环境描述对象
      */
     function setEnv(env) {
         envStack.push(currEnv);
@@ -1553,7 +1572,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
          * @protected
          *
          * @param {Function} UIClass 控件的构造函数
-         * @param {Object} options 初始化选项(参见 ECUI 控件)
+         * @param {object} options 初始化选项(参见 ECUI 控件)
          * @return {ecui.ui.Control} ECUI 控件
          */
         $create: function (UIClass, options) {
@@ -1628,7 +1647,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
          * @param {Function} UIClass 控件的构造函数
          * @param {HTMLElement} el 控件对应的 Element 对象
          * @param {ecui.ui.Control} parent 控件的父控件
-         * @param {Object} options 初始化选项(参见 ECUI 控件)
+         * @param {object} options 初始化选项(参见 ECUI 控件)
          * @return {ecui.ui.Control} ECUI 控件
          */
         $fastCreate: function (UIClass, el, parent, options) {
@@ -1687,62 +1706,10 @@ outer:          for (var caches = [], target = event.target, el; target; target 
          * @public
          *
          * @param {ecui.ui.Control} control ECUI 控件
-         * @param {Object} listeners 手势监听函数集合
+         * @param {object} listeners 手势监听函数集合
          */
         addGestureListeners: function (control, listeners) {
             gestureListeners.push([control, listeners]);
-        },
-
-        /**
-         * 获取高度修正值(即计算 padding, border 样式对 height 样式的影响)。
-         * IE 的盒子模型不完全遵守 W3C 标准，因此，需要使用 calcHeightRevise 方法计算 offsetHeight 与实际的 height 样式之间的修正值。
-         * @public
-         *
-         * @param {CssStyle} style CssStyle 对象
-         * @return {number} 高度修正值
-         */
-        calcHeightRevise: function (style) {
-            return isStrict ? util.toNumber(style.borderTopWidth) + util.toNumber(style.borderBottomWidth) + util.toNumber(style.paddingTop) + util.toNumber(style.paddingBottom)
-                : 0;
-        },
-
-        /**
-         * 获取左定位修正值(即计算 border 样式对 left 样式的影响)。
-         * opera 等浏览器，offsetLeft 与 left 样式的取值受到了 border 样式的影响，因此，需要使用 calcLeftRevise 方法计算 offsetLeft 与实际的 left 样式之间的修正值。
-         * @public
-         *
-         * @param {HTMLElement} el Element 对象
-         * @return {number} 左定位修正值
-         */
-        calcLeftRevise: function (el) {
-            var style = dom.getStyle(el.offsetParent);
-            return !firefoxVersion || (style.overflow !== 'visible' && dom.getStyle(el, 'position') === 'absolute') ? util.toNumber(style.borderLeftWidth) * flgFixedOffset : 0;
-        },
-
-        /**
-         * 获取上定位修正值(即计算 border 样式对 top 样式的影响)。
-         * opera 等浏览器，offsetTop 与 top 样式的取值受到了 border 样式的影响，因此，需要使用 calcTopRevise 方法计算 offsetTop 与实际的 top 样式之间的修正值。
-         * @public
-         *
-         * @param {HTMLElement} el Element 对象
-         * @return {number} 上定位修正值
-         */
-        calcTopRevise: function (el) {
-            var style = dom.getStyle(el.offsetParent);
-            return !firefoxVersion || (style.overflow !== 'visible' && dom.getStyle(el, 'position') === 'absolute') ? util.toNumber(style.borderTopWidth) * flgFixedOffset : 0;
-        },
-
-        /**
-         * 获取宽度修正值(即计算 padding,border 样式对 width 样式的影响)。
-         * IE 的盒子模型不完全遵守 W3C 标准，因此，需要使用 calcWidthRevise 方法计算 offsetWidth 与实际的 width 样式之间的修正值。
-         * @public
-         *
-         * @param {CssStyle} style CssStyle 对象
-         * @return {number} 宽度修正值
-         */
-        calcWidthRevise: function (style) {
-            return isStrict ? util.toNumber(style.borderLeftWidth) + util.toNumber(style.borderRightWidth) + util.toNumber(style.paddingLeft) + util.toNumber(style.paddingRight)
-                : 0;
         },
 
         /**
@@ -1755,7 +1722,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
          * @public
          *
          * @param {Function} UIClass 控件的构造函数
-         * @param {Object} options 初始化选项(参见 ECUI 控件)
+         * @param {object} options 初始化选项(参见 ECUI 控件)
          * @return {ecui.ui.Control} ECUI 控件
          */
         create: function (UIClass, options) {
@@ -1771,9 +1738,9 @@ outer:          for (var caches = [], target = event.target, el; target; target 
          * @public
          *
          * @param {string} targetId 被委托的 ECUI 控件 标识符，即在标签的 ecui 属性中定义的 id 值
-         * @param {Object} caller 委托的对象
+         * @param {object} caller 委托的对象
          * @param {Function} func 调用的函数
-         * @param {Object} ... 调用的参数
+         * @param {object} ... 调用的参数
          */
         delegate: function (targetId, caller, func) {
             if (targetId) {
@@ -1919,7 +1886,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
          *
          * @param {ecui.ui.Control} control 需要进行拖拽的 ECUI 控件对象
          * @param {ECUIEvent} event 事件对象
-         * @param {Object} options 控件拖拽的参数，省略参数时，控件默认只允许在 offsetParent 定义的区域内拖拽，如果 offsetParent 是 body，则只允许在当前浏览器可视范围内拖拽
+         * @param {object} options 控件拖拽的参数，省略参数时，控件默认只允许在 offsetParent 定义的区域内拖拽，如果 offsetParent 是 body，则只允许在当前浏览器可视范围内拖拽
          */
         drag: function (control, event, options) {
             if (activedControl !== undefined && currEnv.type !== 'drag') {
@@ -2082,7 +2049,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
          * 获取所有被命名的控件。
          * @public
          *
-         * @return {Object} 所有被命名的控件集合
+         * @return {object} 所有被命名的控件集合
          */
         getNamedControls: function () {
             return Object.assign({}, namedControls);
@@ -2094,7 +2061,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
          *
          * @param {HTMLElement} el Element 对象
          * @param {string} attributeName 当前的初始化属性名(参见 getAttributeName 方法)
-         * @return {Object} 初始化选项对象
+         * @return {object} 初始化选项对象
          */
         getOptions: function (el, attributeName) {
             attributeName = attributeName || ecuiName;
@@ -2139,7 +2106,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
          * @param {Function} UIClass 控件的构造函数
          * @param {HTMLElement} el 控件对应的 Element 对象
          * @param {ecui.ui.Control} parent 控件的父控件
-         * @param {Object} options 初始化选项(参见 ECUI 控件)
+         * @param {object} options 初始化选项(参见 ECUI 控件)
          * @return {ecui.ui.Control} ECUI 控件
          */
         getSingleton: function (UIClass, el, parent, options) {
@@ -2148,9 +2115,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                     return item;
                 }
             }
-            item = core.$fastCreate(UIClass, el, parent, options);
-            singletons.push(item);
-            return item;
+            return core.$fastCreate(UIClass, el, parent, options);
         },
 
         /**
@@ -2159,16 +2124,26 @@ outer:          for (var caches = [], target = event.target, el; target; target 
          * @public
          *
          * @param {Function} superClass 父控件类
+         * @param {boolean} singleton 是否单例
          * @param {string} type 子控件的类型样式
          * @param {Function} constructor 子控件的标准构造函数，如果忽略将直接调用父控件类的构造函数
-         * @param {Object} ... 控件扩展的方法
+         * @param {object} ... 控件扩展的方法
          * @return {Function} 新控件的构造函数
          */
-        inherits: function (superClass, type, constructor) {
-            var index = 3,
+        inherits: function (superClass, singleton, type, constructor) {
+            var index = 4,
+                realSingleton = singleton,
                 realType = type,
                 realConstructor = constructor,
                 subClass = function (el, options) {
+                    if (realSingleton) {
+                        for (var i = 0, item; item = singletons[i++]; ) {
+                            if (item.constructor === subClass) {
+                                return item;
+                            }
+                        }
+                    }
+
                     subClass.constructor.call(this, el, options);
                     el = this.getMain();
                     subClass.interfaces.forEach(function (constructor) {
@@ -2177,12 +2152,23 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                     if (subClass.afterinterfaces) {
                         subClass.afterinterfaces.call(this, el, options);
                     }
+
+                    if (realSingleton) {
+                        singletons.push(this);
+                    }
                 };
+
+            if ('boolean' !== typeof realSingleton) {
+                index--;
+                realConstructor = realType;
+                realType = realSingleton;
+                realSingleton = false;
+            }
 
             if ('string' !== typeof realType) {
                 index--;
+                realConstructor = realType;
                 realType = '';
-                realConstructor = type;
             }
 
             if (realConstructor instanceof Array) {
@@ -2262,7 +2248,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                 }
                 initRecursion++;
 
-                Array.prototype.forEach.call(el.all || el.getElementsByTagName('*'), function (item) {
+                Array.prototype.slice.call(el.all || el.getElementsByTagName('*')).forEach(function (item) {
                     if (dom.getAttribute(item, ecuiName)) {
                         list.push(item);
                     }
@@ -2286,7 +2272,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                             controls.push({object: core.$create(item, options), options: options});
 //{if 0}//
                         } catch (e) {
-                            console.error('The type:' + options.type + ' can\'t constructor');
+                            console.warn('The type:' + options.type + ' can\'t constructor');
                             throw e;
                         }
 //{/if}//
@@ -2317,9 +2303,15 @@ outer:          for (var caches = [], target = event.target, el; target; target 
         /**
          * 默认的盒子模型是否为ContentBox状态
          * @public
+         *
+         * @param {HTMLElement} el DOM 对象
+         * @return {boolean} 是否为CSS2.1默认的盒子模型
          */
-        isContentBox: function () {
-            return flgFixedSize;
+        isContentBox: function (el) {
+            if (ieVersion < 8) {
+                return el.tagName === 'INPUT' || el.tagName === 'BUTTON' ? false : flgFixedSize;
+            }
+            return dom.getStyle(el, 'boxSizing') === 'content-box';
         },
 
         /**
@@ -2337,32 +2329,23 @@ outer:          for (var caches = [], target = event.target, el; target; target 
 
         /**
          * 使用或取消一个层遮罩整个浏览器可视化区域。
-         * 遮罩层的 z-index 样式默认取值为 32767，请不要将 Element 对象的 z-index 样式设置大于 32767。当框架中至少一个遮罩层工作时，body 标签将增加一个样式 ecui-mask，IE6/7 的原生 select 标签可以使用此样式进行隐藏，解决强制置顶的问题。如果不传入任何参数，将关闭最近打开的一个遮罩层，如果要关闭指定的遮罩层，请直接调用返回的函数。
+         * 遮罩层的 z-index 样式默认取值为 32000，请不要将 Element 对象的 z-index 样式设置大于 32000。当框架中至少一个遮罩层工作时，body 标签将增加一个样式 ecui-mask，IE6/7 的原生 select 标签可以使用此样式进行隐藏，解决强制置顶的问题。如果不传入任何参数，将关闭最近打开的一个遮罩层，如果要关闭指定的遮罩层，请直接调用返回的函数。
          * @public
          *
          * @param {number} opacity 透明度，如 0.5，如果省略参数将关闭遮罩层
-         * @param {number} zIndex 遮罩层的 zIndex 样式值，如果省略使用 32767
+         * @param {number} zIndex 遮罩层的 zIndex 样式值，如果省略使用 32000
          * @return {Function} 用于关闭当前遮罩层的函数
          */
         mask: function (opacity, zIndex) {
-            var el = core.getBody(),
-                view = util.getView();
-
-            if (ieVersion < 9) {
-                // 宽度向前扩展2屏，向后扩展2屏，是为了解决翻屏滚动的剧烈闪烁问题
-                // 不直接设置为整个页面的大小，是为了解决IE下过大的遮罩层不能半透明的问题
-                var top = Math.max(view.top - view.height * 2, 0),
-                    left = Math.max(view.left - view.width * 2, 0),
-                    text = ';top:' + top + 'px;left:' + left + 'px;width:' + Math.min(view.width * 5, view.pageWidth - left) + 'px;height:' + Math.min(view.height * 5, view.pageHeight - top) + 'px;display:';
-            } else {
-                text = ';top:' + view.top + 'px;left:' + view.left + 'px;width:' + view.width + 'px;height:' + view.height + 'px;display:';
-            }
+            var el = core.getBody();
 
             if ('boolean' === typeof opacity) {
+                var view = util.getView(),
+                    text = ';top:' + view.top + 'px;left:' + view.left + 'px;width:' + view.width + 'px;height:' + view.height + 'px;display:' + (opacity ? 'block' : 'none');
+
                 // 仅简单的显示或隐藏当前的屏蔽层，用于resize时的重绘
-                text += opacity ? 'block' : 'none';
                 maskElements.forEach(function (item) {
-                    item.style.cssText += text;
+                    item.style.display = text;
                 });
             } else if (opacity === undefined) {
                 unmasks.pop()();
@@ -2371,13 +2354,15 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                 if (!maskElements.length) {
                     dom.addClass(el, 'ui-modal');
                 }
+
+                view = util.getView();
                 maskElements.push(
                     el = el.appendChild(
                         dom.create(
                             {
                                 className: 'ui-mask',
                                 style: {
-                                    cssText: text + 'block;z-index:' + (zIndex || 32767)
+                                    cssText: ';top:' + view.top + 'px;left:' + view.left + 'px;width:' + view.width + 'px;height:' + view.height + 'px;display:block;z-index:' + (zIndex || 32000)
                                 }
                             }
                         )
@@ -2425,7 +2410,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
          * @public
          *
          * @param {Function} fn 查询函数
-         * @param {Object} thisArg fn执行过程中的this对象
+         * @param {object} thisArg fn执行过程中的this对象
          * @return {Array} 控件列表
          */
         query: function (fn, thisArg) {

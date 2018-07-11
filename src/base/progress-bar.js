@@ -36,15 +36,6 @@ _eMask   - 完成的进度比例内容区域
             /**
              * @override
              */
-            $initStructure: function (width, height) {
-                ui.Progress.prototype.$initStructure.call(this, width, height);
-                this._eMask.style.width = width + 'px';
-                this._eMask.style.height = height + 'px';
-            },
-
-            /**
-             * @override
-             */
             $progress: function () {
                 this._eMask.style.clip = 'rect(0px,' + Math.round(this.getValue() * this.getWidth() / this.getMax()) + 'px,' + this.getHeight() + 'px,0px)';
             }

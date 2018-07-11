@@ -49,7 +49,7 @@ _aChildren     - 子控件集合
      *
      * @param {HTMLElement} el 子树的 Element 对象
      * @param {ecui.ui.TreeView} parent 父树视图控件
-     * @param {Object} options 初始化选项，参见 create 方法
+     * @param {object} options 初始化选项，参见 create 方法
      * @return {ecui.ui.TreeView} 子树视图控件
      */
     function createChild(el, parent, options) {
@@ -282,7 +282,7 @@ _aChildren     - 子控件集合
              *
              * @param {string|ecui.ui.TreeView} item 子树视图控件的 html 内容/树视图控件
              * @param {number} index 子树视图控件需要添加的位置序号，不指定将添加在最后
-             * @param {Object} options 子树视图控件初始化选项
+             * @param {object} options 子树视图控件初始化选项
              * @return {ecui.ui.TreeView} 添加的树视图控件
              */
             add: function (item, index, options) {

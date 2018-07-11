@@ -84,7 +84,7 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
 
             ui.Control.call(this, el, options);
 
-            this._aCells = Array.prototype.map.call(el.getElementsByTagName('TD'), function (item, index) {
+            this._aCells = Array.prototype.slice.call(el.getElementsByTagName('TD')).map(function (item, index) {
                 return core.$fastCreate(index < 7 ? ui.Control : this.Date, item, this);
             }, this);
 

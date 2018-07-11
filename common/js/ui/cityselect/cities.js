@@ -105,7 +105,7 @@ cities - 地区联动下拉框控件。
      * 初始化多级联动下拉框控件。
      * @public
      *
-     * @param {Object} options 初始化选项
+     * @param {object} options 初始化选项
      */
     ui.Cities = core.inherits(
         ui.MultilevelSelect,

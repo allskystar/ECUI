@@ -60,12 +60,7 @@ _eContainer      - 容器 DOM 元素
             }
         }
         if (items[index] !== this._cSelected) {
-            this.setSelected(items[index]);
-            core.dispatchEvent(this, 'change');
-            var el = this._cSelected.getMain();
-            if (el && el.tagName === 'A' && el.href) {
-                location.href = el.href;
-            }
+            core.dispatchEvent(items[index], 'click', event);
         }
     }
 

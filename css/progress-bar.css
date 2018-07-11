@@ -4,7 +4,7 @@
         position: absolute !important;
         top: 0px !important;
         left: 0px !important;
-        padding: 0px !important;
-        border: 0px !important;
+        .width100rate();
+        .height100rate();
     }
 }

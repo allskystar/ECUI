@@ -671,7 +671,7 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
              * title   {string} 列的标题
              * @public
              *
-             * @param {Object} options 列的初始化选项
+             * @param {object} options 列的初始化选项
              * @param {number} index 被添加的列的位置序号，如果不合法将添加在末尾
              * @return {ecui.ui.Table.HCell} 表头单元格控件
              */

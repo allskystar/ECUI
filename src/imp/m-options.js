@@ -65,7 +65,7 @@
              * 拖拽的惯性时间计算。
              * @protected
              *
-             * @param {Object} speed 速度对象，x/y 值分别表示 x/y 方向上的速度分量
+             * @param {object} speed 速度对象，x/y 值分别表示 x/y 方向上的速度分量
              */
             $draginertia: function (speed) {
                 speed = speed.y;
@@ -106,7 +106,7 @@
             $show: function () {
                 this.$MOptions.$show.call(this);
                 var height = this.$$itemHeight * (this._nOptionSize * 2 + 1);
-                this.getMain().style.height = height + 'px';
+//                this.getMain().style.height = height + 'px';
                 dom.parent(this.getBody()).style.height = height + 'px';
                 this.$$height = height + this.getMinimumHeight();
             },

@@ -1,14 +1,13 @@
 /*<script>window.onload=function(){value=document.getElementsByTagName('TEXTAREA')[0].value;parent.postMessage({url:location.href.slice(7),text:value.slice(value.indexOf('\n')+1).replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&')},'*');}</script><textarea>*/
 .ui-mobile-select {
     position: relative;
-    font-size: 30px;
 
     input {
         position: absolute !important;
-        display: none;
-        top: 0px;
-        z-index: -1;
-        opacity: 0;
+        display: none !important;
+        top: 0px !important;
+        z-index: -1 !important;
+        opacity: 0 !important;
     }
 
     .ui-mobile-select-text {

@@ -11,6 +11,7 @@ _aSelect - 全部的下拉框控件列表
 //{if 0}//
 (function () {
     var core = ecui,
+        dom = core.dom,
         ui = core.ui,
         util = core.util;
 //{/if}//
@@ -36,6 +37,10 @@ _aSelect - 全部的下拉框控件列表
              */
             Select: core.inherits(
                 ui.Select,
+                function (el, options) {
+                    this._sUrl = dom.getAttribute(el, 'href');
+                    ui.Select.call(this, el, options);
+                },
                 {
                     /**
                      * 选项部件。
@@ -68,13 +73,29 @@ _aSelect - 全部的下拉框控件列表
 
                         parent.$setValue(this.getValue());
 
-                        if (item && item._aChildren) {
+                        if (item) {
                             var select = parent._aSelect[++index];
-                            if (select) {
-                                select.removeAll();
-                                select.add(item._aChildren);
-                                if (!(item._aChildren[0] instanceof ui.Item)) {
-                                    item._aChildren = select.getItems();
+                            if (item._aChildren) {
+                                if (select) {
+                                    select.removeAll();
+                                    select.add(item._aChildren);
+                                    if (!(item._aChildren[0] instanceof ui.Item)) {
+                                        item._aChildren = select.getItems();
+                                    }
+                                }
+                            } else if (select) {
+                                var args = [select._sUrl];
+                                if (args[0]) {
+                                    parent._aSelect.forEach(function (item) {
+                                        args.push(item.getValue());
+                                    });
+
+                                    select = parent._aSelect[++index];
+                                    select.removeAll();
+                                    core.request(util.stringFormat.apply(null, args), function (data) {
+                                        select.add(data);
+                                        item._aChildren = select.getItems();
+                                    });
                                 }
                             }
                         }
@@ -108,7 +129,7 @@ _aSelect - 全部的下拉框控件列表
              * 设置多级联动的数据。
              * @public
              *
-             * @param {Object} data 多级联动数据，是一个数组，每一项都包含code,value属性，children属性可以不包含，如果包含，结构与data相同
+             * @param {object} data 多级联动数据，是一个数组，每一项都包含code,value属性，children属性可以不包含，如果包含，结构与data相同
              */
             setData: function (data) {
                 this._aSelect.forEach(function (item) {

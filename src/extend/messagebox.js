@@ -7,52 +7,64 @@
         dom = core.dom,
         ui = core.ui;
 //{/if}//
-    var instance,
-        buttonInstances = [];
-
-    /**
-     * 消息框点击事件处理。
-     * @private
-     *
-     * @param {Event} event 事件对象
-     */
-    function onclick(event) {
-        instance.hide();
-        if (this._fAction) {
-            this._fAction(event);
-        }
-    }
+    var buttonInstances = [],
+        instanceClass,
+        MessageBox = core.inherits(
+            ui.Dialog,
+            true,
+            'ui-messagebox',
+            {
+                $hide: function (event) {
+                    ui.Dialog.prototype.$hide.call(this, event);
+                    dom.removeClass(this.getOuter(), instanceClass);
+                }
+            }
+        ),
+        Button = core.inherits(
+            ui.Button,
+            {
+                /**
+                 * @override
+                 */
+                $click: function (event) {
+                    ui.Button.prototype.$click.call(this, event);
+                    core.getSingleton(MessageBox).hide();
+                }
+            }
+        );
 
     /**
      * 消息框初始化。
      * @protected
      *
+     * @param {string} className 弹出框样式
      * @param {string} text 提示信息文本
      * @param {Array} buttonTexts 按钮的文本数组
      * @param {Function} ... 按钮的点击事件处理函数，顺序与参数中按钮文本定义的顺序一致
      */
-    core.$messagebox = function (text, buttonTexts) {
-        if (!instance) {
-            el = dom.create(
-                {
-                    className: 'ui-messagebox ui-hide',
-                    innerHTML: '<div class="ui-messagebox-text"></div><div class="ui-messagebox-buttons"></div>'
-                }
-            );
-            instance = core.create(ui.Dialog, {main: el, parent: core.getBody()});
-        }
-
-        var el = instance.getBody(),
-            elContent = instance.getBody().firstChild,
-            elButton = elContent.nextSibling,
+    core.$messagebox = function (className, text, buttonTexts) {
+        var instance = core.getSingleton(MessageBox, dom.create({
+                className: MessageBox.CLASS + 'ui-hide',
+                innerHTML: '<div class="ui-messagebox-content"></div><div class="ui-messagebox-buttons"></div>'
+            })),
+            outer = instance.getOuter(),
+            body = instance.getBody(),
+            elContent = body.firstChild,
+            elButton = body.lastChild,
             args = arguments;
+
+        if (!dom.parent(outer)) {
+            core.getBody().appendChild(outer);
+        }
 
         if (!instance.isShow()) {
             for (; buttonTexts.length > buttonInstances.length; ) {
-                buttonInstances.push(core.create(ui.Button, {element: dom.create(), parent: elButton}));
+                buttonInstances.push(core.create(Button, {element: dom.create(), parent: elButton}));
             }
 
+            core.dispose(elContent);
             elContent.innerHTML = text;
+            core.init(elContent);
 
             buttonInstances.forEach(function (item, index) {
                 if (index < buttonTexts.length) {
@@ -61,16 +73,32 @@
                 } else {
                     item.hide();
                 }
-                item._fAction = args[index + 2];
-                item.onclick = onclick;
+                item.onclick = args[index + 3];
             });
 
-            instance.getOuter().style.visibility = 'hidden';
-            instance.showModal(0);
-            instance.setClientSize(el.scrollWidth, el.scrollHeight);
+            dom.addClass(outer, className + ' ui-messagebox-origin');
+            dom.removeClass(outer, 'ui-messagebox-text');
+            outer.style.width = '';
+            outer.style.height = '';
+            instance.showModal(0.5);
+            for (var width = 0, child = elContent.firstChild; child; child = child.nextSibling) {
+                if (child.nodeType === 1 && dom.getStyle(child, 'display') !== 'inline') {
+                    width = Math.max(width, child.offsetWidth);
+                }
+            }
+            dom.children(elContent).forEach(function (item) {
+                dom.addClass(item, 'ui-messagebox-block');
+            });
+            dom.removeClass(outer, 'ui-messagebox-origin');
+            if (!width) {
+                dom.addClass(outer, 'ui-messagebox-text');
+                width = body.scrollWidth;
+            }
+            instance.setClientSize(width, body.scrollHeight);
             instance.center();
-            instance.getOuter().style.visibility = '';
         }
+
+        instanceClass = className;
     };
 
     /**
@@ -81,8 +109,7 @@
      * @param {Function} onok 确认按钮点击事件处理函数
      */
     core.alert = function (text, onok) {
-        core.$messagebox(text, ['确定'], onok);
-        return instance;
+        core.$messagebox('ui-messagebox-alert', text, ['确定'], onok);
     };
 
     /**
@@ -94,7 +121,16 @@
      * @param {Function} oncancel 取消按钮点击事件处理函数
      */
     core.confirm = function (text, onok, oncancel) {
-        core.$messagebox(text, ['确定', '取消'], onok, oncancel);
-        return instance;
+        core.$messagebox('ui-messagebox-confirm', text, ['确定', '取消'], onok, oncancel);
+    };
+
+    /**
+     * 检查消息框是否正在工作。
+     * @public
+     *
+     * @return {boolean} 消息框是否正在工作
+     */
+    core.hasMessageBox = function () {
+        return instanceClass !== undefined && core.getSingleton(MessageBox).isShow();
     };
 }());

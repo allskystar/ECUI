@@ -8,11 +8,23 @@ module.exports = {
     message: 'Property ordering is not alphabetized',
 
     orders: [
-        'position', 'display', 'float', 'visibility', 'overflow',
+        'position', 'float', 'display', 'visibility', 'flex', 'flex-direction', 'flex-grow',
         'top', 'right', 'bottom', 'left', 'z-index',
-        'width', 'height', 'padding', 'border', 'margin',
-        'font', 'color', 'line-height', 'letter-spacing', 'text-align',
-        'background'
+        'box-sizing', 'overflow', 'overflow-x', 'overflow-y',
+        'width', 'min-width', 'max-width', 'height', 'min-height', 'max-height',
+        'padding', 'padding-top', 'padding-right', 'padding-bottom', 'padding-left',
+        'border', 'border-width', 'border-style', 'border-color',
+        'border-top', 'border-top-width', 'border-top-style', 'border-top-color',
+        'border-right', 'border-right-width', 'border-right-style', 'border-right-color',
+        'border-bottom', 'border-bottom-width', 'border-bottom-style', 'border-bottom-color',
+        'border-left', 'border-left-width', 'border-left-style', 'border-left-color',
+        'border-radius', 'border-spacing',
+        'margin', 'margin-top', 'margin-right', 'margin-bottom', 'margin-left',
+        'font', 'font-family', 'font-size', 'font-style', 'font-weight', 'font-variant',
+        'color', 'text-align', 'vertical-align', 'line-height', 'text-indent', 'letter-spacing',
+        'word-break', 'white-space', 'text-overflow',
+        'background', 'background-color', 'background-image', 'background-repeat', 'background-position',
+        'background-size', 'background-clip', 'background-origin', 'background-attachment'
     ].reverse(),
 
     lint: function propertyOrderingLinter (config, node) {
@@ -40,17 +52,9 @@ module.exports = {
 
             // Check for proper ordering
             if (previousProp) {
-                let currentSplit = currentProperty.split('-');
-                let previousSplit = previousProp.split('-');
-                let i = 0;
-                for (; i < currentSplit.length; i++) {
-                    if (currentSplit[i] !== previousSplit[i]) {
-                        break;
-                    }
-                }
-                let currentName = currentSplit[i];
-                let previousName = previousSplit[i];
-                if (this.orders.indexOf(currentName) > this.orders.indexOf(previousName) || (this.orders.indexOf(previousName) === -1 && this.orders.indexOf(previousProp) === -1 && previousProp.localeCompare(currentProperty) > 0)) {
+                let prevIndex = this.orders.indexOf(previousProp);
+                let currIndex = this.orders.indexOf(currentProperty);
+                if ((currIndex > prevIndex) || (prevIndex === -1 && previousProp.localeCompare(currentProperty) > 0)) {
                     results.push({
                         column: child.source.start.column,
                         line: child.source.start.line,

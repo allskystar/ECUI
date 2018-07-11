@@ -19,7 +19,7 @@ cities - 地区联动下拉框控件。
      * 初始化多项选择控件。
      * @public
      *
-     * @param {Object} options 初始化选项
+     * @param {object} options 初始化选项
      */
     ui.MultiSelect = core.inherits(
         ui.Text,
@@ -47,8 +47,7 @@ cities - 地区联动下拉框控件。
 
                 var optionsEl = dom.create(
                     {
-                        innerHTML: Array.prototype.map.call(
-                            oldEl.options,
+                        innerHTML: Array.prototype.slice.call(oldEl.options).map(
                             function (item) {
                                 var optionText = dom.getAttribute(item, core.getAttributeName());
                                 return '<div ' + core.getAttributeName() + '="value:' + util.encodeHTML(item.value) + (optionText ? ';' + util.encodeHTML(optionText) : '') + '">' + util.encodeHTML(item.text) + '</div>';
@@ -66,7 +65,6 @@ cities - 地区联动下拉框控件。
 
             el.innerHTML = '<div class="' + options.classes.join('-text ') + '"></div>';
             this._uText = el.firstChild;
-            console.log(this._uText);
             ui.InputControl.call(this, el, options);
             this.getInput().readOnly = true;
             this._uOptions = core.$fastCreate(this.Options, optionsEl, this);
@@ -161,8 +159,8 @@ cities - 地区联动下拉框控件。
                         el,
                         'BEFOREEND',
                         '<div class="' + options.classes.join('-operate ') + '"><div class="' +
-                            options.classes.join('-cancel ') + 'ui-button">取消</div><div class="' +
-                            options.classes.join('-sure ') + 'ui-button">确定</div></div>'
+                            options.classes.join('-cancel ') + ui.Button.CLASS + '">取消</div><div class="' +
+                            options.classes.join('-sure ') + ui.Button.CLASS + '">确定</div></div>'
                     );
                     var buttons = dom.children(el.lastChild);
                     this._uCancel = core.$fastCreate(this.Button, buttons[0], this);
@@ -196,7 +194,7 @@ cities - 地区联动下拉框控件。
                                 parent.hide();
                             }
                         }
-                    ),
+                    )
                 }
             ),
 
@@ -214,7 +212,7 @@ cities - 地区联动下拉框控件。
                     // 设置options框的大小，如果没有元素，至少有一个单位的高度
                     this._uOptions.$setSize(width, (Math.min(itemLength, this._nOptionSize) || 1) * step + this._uOptions.getMinimumHeight());
                 }
-            },
+            }
         },
         ui.Popup,
         ui.Items

@@ -157,11 +157,21 @@ _eInput        - INPUT对象
     function submitHandler(event) {
         event = core.wrapEvent(event);
 
-        Array.prototype.forEach.call(this.elements, function (item) {
+        var elements = Array.prototype.slice.call(this.elements);
+
+        elements.forEach(function (item) {
             if (item.getControl) {
                 core.dispatchEvent(item.getControl(), 'submit', event);
             }
         });
+
+        if (event.returnValue !== false) {
+            elements.forEach(function (item) {
+                if (item.getControl && item.name) {
+                    item.getControl().saveToDefault();
+                }
+            });
+        }
     }
 
     /**
@@ -169,7 +179,7 @@ _eInput        - INPUT对象
      * @private
      */
     function resetHandler() {
-        Array.prototype.forEach.call(this.elements, function (item) {
+        Array.prototype.slice.call(this.elements).forEach(function (item) {
             if (item.getControl) {
                 core.dispatchEvent(item.getControl(), 'reset');
             }
@@ -438,13 +448,11 @@ _eInput        - INPUT对象
             },
 
             /**
-             * 设置控件的默认值，供form表单的reset方法使用。
+             * 保存控件的值为默认值，供form表单的reset方法使用。
              * @public
-             *
-             * @param {string} value 是否选中
              */
-            setDefaultValue: function (value) {
-                this._eInput.defaultValue = value;
+            saveToDefault: function () {
+                this._eInput.defaultValue = this._eInput.value;
             },
 
             /**

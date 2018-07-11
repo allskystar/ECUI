@@ -89,7 +89,7 @@
                         locked = true;
                         ecui.effect.grade(
                             'round:this.style.' + data.enter[0] + '->' + Math.round(initValue - reverseValue),
-                            1000,
+                            400,
                             {
                                 $: el,
                                 onfinish: function () {

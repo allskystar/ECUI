@@ -338,7 +338,7 @@ ECUI动画效果库，支持对CSS3动画效果的模拟并扩展了相应的功
          *
          * @param {Function|string} fn 处理渐变的函数或函数体，字符串描述的格式this.scrollTop->20或this.scrollTop->+(20)，后者表示相对增加20，前者表示到达20，一次改变多少个，使用;号分隔
          * @param {number} duration 渐变的总时长
-         * @param {Object} options 渐变的参数，一般用于描述渐变的信息
+         * @param {object} options 渐变的参数，一般用于描述渐变的信息
          * @param {Function} transition 时间线函数
          * @return {Function} 停止渐变或直接执行渐变到最后
          */

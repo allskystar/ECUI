@@ -7,7 +7,7 @@
     overflow: hidden !important;
 
     .ui-table-layout {
-        position: relative !important;
+        position: relative;
         overflow: auto !important;
     }
 

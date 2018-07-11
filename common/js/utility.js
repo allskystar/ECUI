@@ -391,7 +391,7 @@ daikuan.setPageData = function (context, listNmae) {
  * 列表路由对象。
  * @public
  *
- * @param {Object} route 路由对象
+ * @param {object} route 路由对象
  */
 daikuan.TableListRoute = function (route) {
     this.model = [route.NAME.slice(0, -5) + '@FORM ' + route.url];

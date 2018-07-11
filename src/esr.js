@@ -5,6 +5,7 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
 支持的参数：
 esr(cache=true,meta=true)
 ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价于<a>标签，callRoute不会记录url信息，等价于传统的ajax调用，change用于参数的部分改变，一般用于翻页操作仅改变少量页码信息。
+btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要使用自动跳转，并带上HISTORY参数，如#/index~HISTORY=1
 */
 (function () {
 //{if 0}//
@@ -20,9 +21,9 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
         ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined,
         firefoxVersion = /firefox\/(\d+\.\d)/i.test(navigator.userAgent) ? +RegExp.$1 : undefined;
 //{/if}//
-    var historyCache,
-        historyIndex = 0,
+    var historyIndex = 0,
         historyData = [],
+        leaveUrl,
         delegateRoutes = {},    // 路由赋值的委托，如果路由不存在，会保存在此处
         routeRequestCount = 0,  // 记录路由正在加载的数量，用于解决第一次加载时要全部加载完毕才允许init操作
         cacheList = [],
@@ -30,6 +31,8 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
         routes = {},
         autoRender = {},        // 模拟MVVM双向绑定
         context = {},
+        global = {},
+        globalListeners = {},
         currLocation = '',
         pauseStatus,
         loadStatus = {},
@@ -40,6 +43,7 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
         meta,
         lastLayer,
         lastRouteName,
+        unloadNames = [],
 
         FormatInput = core.inherits(
             ui.Control,
@@ -51,7 +55,9 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
             {
                 getName: function () {
                     return this._sName || this.getMain().name;
-                }
+                },
+
+                saveToDefault: util.blank
             }
         );
 
@@ -82,7 +88,7 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
      * 渲染结束事件的处理。
      * @private
      *
-     * @param {Object} route 路由对象
+     * @param {object} route 路由对象
      */
     function afterrender(route) {
         if (esrOptions.app) {
@@ -97,7 +103,7 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
             route.onafterrender(context);
         }
 
-        if (historyCache) {
+        if (esrOptions.cache) {
             // 除了这里有刷新，在控件初始化时也可以刷新回填
             var data = historyData[historyIndex] = historyData[historyIndex] || {};
             cacheList.forEach(function (item) {
@@ -119,7 +125,7 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
      * 自动加载子路由。
      * @private
      *
-     * @param {Object} route 路由对象
+     * @param {object} route 路由对象
      */
     function autoChildRoute(route) {
         if (route.children) {
@@ -140,7 +146,7 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
      * 渲染开始事件的处理。
      * @private
      *
-     * @param {Object} route 路由对象
+     * @param {object} route 路由对象
      */
     function beforerender(route) {
         if (route.main === 'AppCommonContainer') {
@@ -157,11 +163,27 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
     }
 
     /**
+     * 计算相对的url值。
+     * @private
+     *
+     * @param {string} url 用于计算的url
+     */
+    function calcUrl(url) {
+        if (url.charAt(0) === '/') {
+            return url;
+        }
+        var baseUrl = esr.getLocation().split('~')[0].slice(1).split('/');
+        url = url.split('../');
+        baseUrl.splice(baseUrl.length - url.length, url.length, url.pop());
+        return baseUrl.join('/');
+    }
+
+    /**
      * 调用指定的路由。
      * @private
      *
      * @param {string} name 路由名称
-     * @param {Object} options 参数
+     * @param {object} options 参数
      */
     function callRoute(name, options) {
         routeRequestCount++;
@@ -169,13 +191,16 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
         // 供onready时使用，此时name为route
         if ('string' === typeof name) {
             var route = routes[name],
-                moduleName = name.split('.')[0];
-//{if 1}//            var NS = core.ns[moduleName];
+                moduleName = getModuleName(name);
+//{if 1}//            var NS = core.ns['_' + moduleName.replace(/\//g, '_')];
 //{else}//
-            NS = core.ns[moduleName];
+            NS = core.ns['_' + moduleName.replace(/\//g, '_')];
 //{/if}//
             if (options !== true) {
-                context = {NS: (NS || {}).data};
+                context = {
+                    NS: (NS || {}).data,
+                    Global: Object.assign({}, global)
+                };
             }
         } else {
             route = name;
@@ -190,10 +215,11 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
 
             if (context.DENY_CACHE !== true) {
                 var layer = getLayer(route);
+
                 if (route.CACHE === undefined ? layer && layer.location === currLocation : route.CACHE) {
                     // 数据必须还在才触发缓存
                     // 模块发生变化，缓存状态下同样更换引擎
-                    engine = loadStatus[name.split('.')[0]] || etpl;
+                    engine = loadStatus[getModuleName(route.NAME)] || etpl;
                     // 添加oncached事件，在路由已经cache的时候依旧执行
                     if (esrOptions.app) {
                         transition(route);
@@ -240,7 +266,7 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
                 NS.data = NS.data || {};
                 NS.ui = NS.ui || {};
             } else {
-                NS = core.ns[moduleName] = {
+                NS = core.ns['_' + moduleName.replace(/\//g, '_')] = {
                     data: {},
                     ui: {}
                 };
@@ -248,7 +274,7 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
             context.NS = NS.data;
 
             io.loadScript(
-                moduleName + '/' + moduleName + '.js',
+                moduleName + '_define_.js',
                 function () {
                     pauseStatus = false;
                     callRoute(name, options);
@@ -271,6 +297,12 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
      * @param {object} route 路由对象
      */
     function getLayer(route) {
+//{if 0}//
+        if (!route.main && route.NAME) {
+            var main = route.NAME.slice(1).replace(/[._]/g, '-').replace(/\//g, '_');
+            route.main = core.$(main) ? main : esr.DEFAULT_MAIN;
+        }
+//{/if}//
         for (var el = core.$(route.main); el; el = dom.parent(el)) {
             // 子路由不直接返回层
             if (el.route && el.route !== route.NAME) {
@@ -285,11 +317,13 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
     }
 
     /**
-     * 事件监听处理函数。
+     * 获取模块名称。
      * @private
+     *
+     * @param {string} routeName 路由名称
      */
-    function listener() {
-        redirect(esr.getLocation());
+    function getModuleName(routeName) {
+        return routeName.slice(1, routeName.lastIndexOf('/') + 1);
     }
 
     /**
@@ -316,11 +350,19 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
     }
 
     /**
+     * 事件监听处理函数。
+     * @private
+     */
+    function listener() {
+        redirect(esr.getLocation());
+    }
+
+    /**
      * 解析地址。
      * @private
      *
      * @param {string} loc 地址
-     * @return {Object} 地址信息，其中''的值表示路由名称
+     * @return {object} 地址信息，其中''的值表示路由名称
      */
     function parseLocation(loc) {
         var list = loc.split('~'),
@@ -360,22 +402,58 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
 
             if (!loc) {
                 loc = esr.DEFAULT_PAGE;
-                if (historyCache) {
-                    loc += '~CACHE_NUM=' + historyIndex;
-                    if (!(ieVersion < 9)) {
-                        util.timer(function () {
-                            history.replaceState('', '', '#' + loc);
-                        }, 100);
-                        return;
-                    }
-                }
             }
 
             // 与当前location相同时不进行route
             if (currLocation !== loc) {
+                if (currLocation) {
+                    if (leaveUrl === undefined) {
+                        var currRoute = esr.getRoute(currLocation.split('~')[0]);
+                        if (!/~ALLOW_LEAVE(~|$)/.test(loc) && currRoute && currRoute.onleave) {
+                            if (currRoute.onleave(
+                                    context,
+                                    function (forward) {
+                                        if (forward) {
+                                            history.go(/~HISTORY=(\d+)/.test(leaveUrl) ? +RegExp.$1 - historyIndex : 1);
+                                            leaveUrl = '';
+                                        } else {
+                                            leaveUrl = undefined;
+                                        }
+                                    }
+                                ) === false) {
+                                leaveUrl = loc;
+                            }
+                        }
+                    }
+
+                    if (core.hasMessageBox() || leaveUrl) {
+                        history.go(/~HISTORY=(\d+)/.test(loc) ? historyIndex - +RegExp.$1 : -1);
+                        return;
+                    }
+                }
+
+                leaveUrl = undefined;
+                unloadNames.forEach(function (name) {
+                    delete loadStatus[name];
+                    name = '/' + name;
+                    Array.prototype.slice.call(document.getElementsByTagName('STYLE')).forEach(function (item) {
+                        if (dom.getAttribute(item, 'module') === name) {
+                            dom.remove(item);
+                        }
+                    });
+                    for (var key in routes) {
+                        if (routes.hasOwnProperty(key)) {
+                            if (key.startsWith(name) && key.slice(name.length).indexOf('/') < 0) {
+                                delete routes[key];
+                            }
+                        }
+                    }
+                });
+                unloadNames = [];
+
                 requestVersion++;
 
-                if (historyCache) {
+                if (esrOptions.cache) {
                     cacheList = cacheList.filter(function (item) {
                         return item.target.getMain();
                     });
@@ -387,30 +465,37 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
                         });
                         historyData[historyIndex][item.name] = data;
                     });
-                    historyIndex++;
-
-                    if (/~CACHE_NUM=(\d+)/.test(loc)) {
-                        historyIndex = +RegExp.$1;
-                    } else {
-                        historyData.splice(historyIndex, historyData.length - historyIndex);
-                        loc += '~CACHE_NUM=' + historyIndex;
-                        if (ieVersion < 9) {
-                            pauseStatus = true;
-                            history.back();
-                            var handle = util.timer(function () {
-                                if (/~CACHE_NUM=(\d+)/.test(location.href)) {
-                                    esr.setLocation(loc);
-                                    pauseStatus = false;
-                                    handle();
-                                }
-                            }, -10);
-                            return;
-                        }
-                        util.timer(function () {
-                            history.replaceState('', '', '#' + loc);
-                        }, 100);
-                    }
                 }
+
+                historyIndex++;
+
+                if (/~HISTORY=(\d+)/.test(loc)) {
+                    historyIndex = +RegExp.$1;
+                } else {
+                    if (esrOptions.cache) {
+                        historyData.splice(historyIndex, historyData.length - historyIndex);
+                    }
+                    loc += '~HISTORY=' + historyIndex;
+                    if (ieVersion < 9) {
+                        pauseStatus = true;
+                        if (historyIndex === 1) {
+                            // IE第一次进入，不能back，否则会退出框架
+                            history.back();
+                        }
+                        var handle = util.timer(function () {
+                            if (/~HISTORY=(\d+)/.test(location.href)) {
+                                esr.setLocation(loc);
+                                pauseStatus = false;
+                                handle();
+                            }
+                        }, -10);
+                        return;
+                    }
+                    util.timer(function () {
+                        history.replaceState('', '', '#' + loc);
+                    }, 100);
+                }
+
                 // ie下使用中间iframe作为中转控制
                 // 其他浏览器直接调用控制器方法
                 if (!addIEHistory(loc)) {
@@ -425,7 +510,7 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
      * 渲染。
      * @private
      *
-     * @param {Object} route 路由对象
+     * @param {object} route 路由对象
      * @param {string} name 模板名
      */
     function render(route, name) {
@@ -435,11 +520,11 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
         el.style.visibility = 'hidden';
 
         if (el.route && routes[el.route].ondispose) {
-            dom.removeClass(el, el.route.replace(/\./g, '-'));
+            dom.removeClass(el, el.route.slice(1).replace(/[._]/g, '-').replace(/\//g, '_'));
             routes[el.route].ondispose();
             el.route = null;
         }
-        Array.prototype.forEach.call(el.all || el.getElementsByTagName('*'), function (item) {
+        Array.prototype.slice.call(el.all || el.getElementsByTagName('*')).forEach(function (item) {
             if (item.route && routes[item.route].ondispose) {
                 routes[item.route].ondispose();
             }
@@ -449,7 +534,7 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
         el.innerHTML = engine.render(name || route.view, context);
         if (route.NAME) {
             el.route = route.NAME;
-            dom.addClass(el, route.NAME.replace(/\./g, '-'));
+            dom.addClass(el, route.NAME.slice(1).replace(/[._]/g, '-').replace(/\//g, '_'));
         }
         core.init(el);
 
@@ -543,7 +628,6 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
             var layer = getLayer(route);
             if (layer) {
                 var layerEl = layer.getMain();
-
                 // 路由权重在该项目中暂不考虑相等情况
                 if (lastLayer) {
                     var lastLayerEl = lastLayer.getMain();
@@ -576,7 +660,7 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
                         pauseStatus = true;
                         core.effect.grade(
                             fn,
-                            600,
+                            400,
                             {
                                 $: {from: lastLayerEl, to: layerEl},
                                 onfinish: function () {
@@ -608,7 +692,7 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
     }
 
     var esr = core.esr = {
-        DEFAULT_PAGE: 'index',
+        DEFAULT_PAGE: '/index',
         DEFAULT_MAIN: 'main',
 
         // 用于创建空对象，参见request方法
@@ -635,25 +719,47 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
         AppLayer: core.inherits(ui.Control),
 
         /**
+         * 监听全局变量变化。
+         * @public
+         *
+         * @param {string} name 全局变量名称
+         * @param {Function} fn 监听函数
+         */
+        addGlobalListener: function (name, fn) {
+            globalListeners[name] = globalListeners[name] || [];
+            globalListeners[name].push(fn);
+            if (global[name]) {
+                fn(global[name]);
+            }
+        },
+
+        /**
          * 添加路由信息。
          * @public
          *
          * @param {string} name 路由名称
-         * @param {Object} route 路由对象
+         * @param {object} route 路由对象
          */
         addRoute: function (name, route) {
-            if (route) {
-                route.NAME = name;
-            } else {
+            if (!route) {
                 route = name;
                 name = route.NAME;
             }
-            route.main = route.main || esr.DEFAULT_MAIN;
+//{if 0}//
+            if (name.indexOf('/') >= 0) {
+                throw new Error('The route\'s name can\'t contain \'/\'');
+            }
+//{/if}//
             route.view = route.view || name;
+            name = route.NAME = '/' + getModuleName(esr.getLocation()) + name;
+//{if 1}//            if (!route.main) {//{/if}//
+//{if 1}//                var main = name.slice(1).replace(/[._]/g, '-').replace(/\//g, '_');//{/if}//
+//{if 1}//                route.main = core.$(main) ? main : esr.DEFAULT_MAIN;//{/if}//
+//{if 1}//            }//{/if}//
             routes[name] = route;
 
             if (esrOptions.app && route.weight === undefined) {
-                route.weight = name === esr.DEFAULT_PAGE ? 0 : name.split('.').length;
+                route.weight = name.split(/[\/.]/).length - 2;
             }
 
             if (delegateRoutes[name]) {
@@ -688,7 +794,7 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
          * @public
          *
          * @param {string} name 路由名
-         * @param {Object} options 需要改变的参数
+         * @param {object} options 需要改变的参数
          */
         change: function (name, options) {
             options = options || {};
@@ -730,7 +836,7 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
          *
          * @param {string} routeName 被委托的路由名称
          * @param {string} name 委托的属性名称
-         * @param {Object} value 委托的属性值
+         * @param {object} value 委托的属性值
          */
         delegate: function (routeName, name, value) {
             if (routes[routeName]) {
@@ -826,10 +932,10 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
          * @public
          *
          * @param {string} name 路由名
-         * @return {Object} 路由信息
+         * @return {object} 路由信息
          */
         getRoute: function (name) {
-            return routes[name];
+            return routes[calcUrl(name)];
         },
 
         /**
@@ -842,8 +948,10 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
          * @return {boolean} 校验是否通过
          */
         parseObject: function (form, data, validate) {
-            var valid = true;
-            Array.prototype.slice.call(form.elements).forEach(function (item) {
+            var valid = true,
+                elements = Array.prototype.slice.call(form.elements);
+
+            elements.forEach(function (item) {
                 if (validate !== false && item.getControl && !item.getControl().isDisabled()) {
                     if (!core.dispatchEvent(item.getControl(), 'validate')) {
                         valid = false;
@@ -852,7 +960,7 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
                 if (item.name && ((item.type !== 'radio' && item.type !== 'checkbox') || item.checked)) {
                     if (item.getControl) {
                         var control = item.getControl();
-                        if ((control instanceof ui.InputControl || control instanceof FormatInput) && !control.isDisabled()) {
+                        if (control.getName && control.getFormValue && !control.isDisabled()) {
                             setCacheData(data, control.getName(), control.getFormValue());
                         }
                     } else if (!item.disabled) {
@@ -860,6 +968,14 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
                     }
                 }
             });
+
+            if (valid) {
+                elements.forEach(function (item) {
+                    if (item.getControl && item.name) {
+                        item.getControl().saveToDefault();
+                    }
+                });
+            }
             return valid;
         },
 
@@ -870,18 +986,18 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
          * @param {string} loc location位置
          */
         redirect: function (loc) {
-            location.hash = loc;
+            location.hash = calcUrl(loc);
         },
 
         /**
          * 渲染。
          * @public
          *
-         * @param {Object} route 路由对象
+         * @param {object} route 路由对象
          */
         render: function (route) {
             function loadTPL() {
-                io.ajax(moduleName + '/' + moduleName + '.html', {
+                io.ajax(moduleName + '_define_.html', {
                     cache: true,
                     onsuccess: function (data) {
                         pauseStatus = false;
@@ -919,7 +1035,7 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
                 render(route);
             } else {
                 // 如果在当前引擎找不到模板，有可能是主路由切换，也可能是主路由不存在
-                var moduleName = route.NAME.split('.')[0];
+                var moduleName = getModuleName(route.NAME);
                 engine = loadStatus[moduleName];
 
                 if (engine instanceof etpl.Engine) {
@@ -933,10 +1049,10 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
                     loadTPL();
                 } else if (!engine) {
                     pauseStatus = true;
-                    io.ajax(moduleName + '/' + moduleName + '.css', {
+                    io.ajax(moduleName + '_define_.css', {
                         cache: true,
                         onsuccess: function (data) {
-                            dom.createStyleSheet(data);
+                            dom.createStyleSheet(data).setAttribute('module', '/' + moduleName);
                             loadStatus[moduleName] = true;
                             loadTPL();
                         },
@@ -1135,11 +1251,32 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
         },
 
         /**
+         * 设置常量数据。
+         * @public
+         *
+         * @param {string} name 数据名
+         * @param {object} value 数据值
+         */
+        setGlobal: function (name, value) {
+//{if 0}//
+            if (global[name]) {
+                console.warn('The name("' + name + '") has existed.');
+            }
+//{/if}//
+            global[name] = value;
+            if (globalListeners[name]) {
+                globalListeners[name].forEach(function (item) {
+                    item(value);
+                });
+            }
+        },
+
+        /**
          * 设置数据。
          * @public
          *
          * @param {string} name 数据名
-         * @param {Object} value 数据值
+         * @param {object} value 数据值
          */
         setData: function (name, value) {
             context[name] = value;
@@ -1171,46 +1308,61 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
         },
 
         /**
+         * 卸载一个已经加载的模块。
+         * @public
+         *
+         * @param {string} name 模块名或路由名
+         */
+        unload: function (name) {
+            unloadNames.push(getModuleName(name));
+        },
+
+        /**
          * 加载ESR框架。
          * @public
          */
         load: function (value) {
             function loadInit() {
+                etpl.config({
+                    commandOpen: '<<<',
+                    commandClose: '>>>'
+                });
+
+                for (var el = body.firstChild; el; el = el.nextSibling) {
+                    if (el.nodeType === 8) {
+                        etpl.compile(el.textContent || el.nodeValue);
+                        dom.remove(el);
+                    }
+                }
+
+                if (esrOptions.app) {
+                    el = core.$('AppCommonContainer');
+                    el.id = 'AppBackupContainer';
+                    dom.insertHTML(el, 'afterEnd', dom.previous(el).outerHTML + el.outerHTML);
+                    el.id = 'AppCommonContainer';
+                    el = dom.last(dom.first(body));
+                    var children = dom.children(el.parentNode);
+                    for (var i = 1, item; item = children[i]; i += 2) {
+                        item.header = children[i - 1];
+                        var first = item.firstChild;
+                        if (first && first === item.lastChild && first.nodeType === 8) {
+                            item.innerHTML = etpl.compile(first.textContent || first.nodeValue)({NS: (core.ns['_' + item.id.slice(0, item.id.lastIndexOf('_') + 1)] || {}).data});
+                        }
+                        el.appendChild(item);
+                    }
+                    el = core.$((getModuleName(esr.getLocation().split('~')[0]) || esr.DEFAULT_PAGE.slice(1)).replace(/\//g, '_'));
+                    if (el) {
+                        dom.removeClass(el, 'ui-hide');
+                        el.header.style.display = '';
+                    }
+                }
+
+                etpl.config({
+                    commandOpen: '<!--',
+                    commandClose: '-->'
+                });
+
                 dom.ready(function () {
-                    etpl.config({
-                        commandOpen: '<<<',
-                        commandClose: '>>>'
-                    });
-                    for (var el = body.firstChild; el; el = el.nextSibling) {
-                        if (el.nodeType === 8) {
-                            etpl.compile(el.textContent || el.nodeValue);
-                            dom.remove(el);
-                        }
-                    }
-                    etpl.config({
-                        commandOpen: '<!--',
-                        commandClose: '-->'
-                    });
-
-                    if (esrOptions.app) {
-                        el = core.$('AppCommonContainer');
-                        el.id = 'AppBackupContainer';
-                        dom.insertHTML(el, 'afterEnd', dom.previous(el).outerHTML + el.outerHTML);
-                        el.id = 'AppCommonContainer';
-                        el = dom.last(dom.first(body));
-                        var children = dom.children(el.parentNode);
-                        for (var i = 1, item; item = children[i]; i += 2) {
-                            item.header = children[i - 1];
-                            item.innerHTML = etpl.compile(item.innerHTML)({NS: (core.ns[item.id.split('.')[0]] || {}).data});
-                            el.appendChild(item);
-                        }
-                        el = core.$(parseLocation(esr.getLocation())['']);
-                        if (el) {
-                            el.getControl().show();
-                            el.header.style.display = '';
-                        }
-                    }
-
                     if (esr.onready) {
                         var defaultRoute = esr.onready();
                     }
@@ -1245,10 +1397,6 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
                 metaVersion = localStorage.getItem('esr_meta_version') || '0';
                 meta = JSON.parse(localStorage.getItem('esr_meta')) || {};
             }
-
-            if (esrOptions.cache) {
-                historyCache = true;
-            }
 //{if 0}//
             var tplList = [];
             for (el = body.firstChild; el; el = el.nextSibling) {
@@ -1273,7 +1421,7 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
                             loadTpl();
                         },
                         onerror: function () {
-                            console.error('找不到文件' + item[1]);
+                            console.warn('找不到文件' + item[1]);
                             loadTpl();
                         }
                     });
@@ -1291,7 +1439,7 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
                             loadInit();
                         },
                         onerror: function () {
-                            console.error('找不到APP的布局文件，请确认.app-container.html文件是否存在');
+                            console.warn('找不到APP的布局文件，请确认.app-container.html文件是否存在');
                             esrOptions.app = false;
                             loadInit();
                         }
@@ -1318,7 +1466,7 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
      * @param {string} value 插件的参数，格式为 缓存名[属性名1,属性名2,...]
      */
     ext.cache = function (control, value) {
-        if (historyCache) {
+        if (esrOptions.cache) {
             if (value = /^(\w+)\[([\w,]+)\]$/.exec(value)) {
                 var name = value[1],
                     values = value[2].split(',').map(function (item) {
@@ -1330,16 +1478,6 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
                     name: name,
                     values: values
                 });
-
-                // 除去这里做回填，渲染结束时也会自动回填，是为了处理路由没有刷新的组件
-/*                var data = historyData[historyIndex] = historyData[historyIndex] || {};
-                if (data[name]) {
-                    values.forEach(function (value) {
-                        if (data[name].hasOwnProperty(value)) {
-                            control['set' + value](data[name][value]);
-                        }
-                    });
-                }*/
             }
         }
     };
@@ -1352,10 +1490,10 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
      * @param {string} value 插件的参数，格式为 变量名@#模板名 或 变量名@js函数名 ，表示指定的变量变化时，需要刷新控件内部HTML
      */
     ext.data = function (control, value) {
-        if (value = /^(\w+)(\*?@)(#\w*|[\w\.]*\(\))$/.exec(value)) {
+        if (value = /^([\w,]+)(\*?@)(#\w*|[\w\.]*\(\))$/.exec(value)) {
             if (value[3].charAt(0) !== '#') {
                 if (value[3].length === 2) {
-                    var setData = control.getContent().trim(),
+                    var setData = util.decodeHTML(control.getContent().trim()),
                         renderer = new Function('$', setData.charAt(0) === '=' ? 'this.setContent(' + setData.slice(1) + ')' : setData);
                 } else {
                     renderer = util.parseValue(value[3].slice(0, -2));
@@ -1372,24 +1510,34 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
                 };
             }
 
-            if (autoRender[value[1]]) {
-                autoRender[value[1]].push([control, setData]);
-            } else {
-                autoRender[value[1]] = [[control, setData]];
-            }
-
-            core.addEventListener(control, 'dispose', function () {
-                for (var i = 0, item; item = autoRender[value[1]][i]; i++) {
-                    if (item[0] === this) {
-                        autoRender[value[1]].splice(i, 1);
-                        break;
-                    }
+            value[1] = value[1].split(',');
+            value[1].forEach(function (item) {
+                if (autoRender[item]) {
+                    autoRender[item].push([control, setData]);
+                } else {
+                    autoRender[item] = [[control, setData]];
                 }
             });
 
-            if (context[value[1]] !== undefined) {
-                setData.call(control, context[value[1]]);
-            } else {
+            core.addEventListener(control, 'dispose', function () {
+                value[1].forEach(function (item) {
+                    for (var i = 0, data; data = autoRender[item][i]; i++) {
+                        if (data[0] === this) {
+                            autoRender[item].splice(i, 1);
+                            break;
+                        }
+                    }
+                });
+            });
+
+            var nodata = true;
+            value[1].forEach(function (item) {
+                if (context[item] !== undefined) {
+                    setData.call(control, context[item]);
+                    nodata = false;
+                }
+            });
+            if (nodata) {
                 core.dispose(control.getBody(), true);
                 control.setContent('');
             }
@@ -1398,4 +1546,31 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
 
     // 模块独立的命名空间集合
     core.ns = {};
+
+    // 向框架注入request方法
+    core.request = core.request || function (url, onsuccess, onerror) {
+        var sysContext = context;
+        context = {};
+        esr.request(
+            url,
+            function () {
+                try {
+                    if (onsuccess) {
+                        onsuccess(context);
+                    }
+                } catch (ignore) {
+                }
+                context = sysContext;
+            },
+            function () {
+                try {
+                    if (onerror) {
+                        onerror();
+                    }
+                } catch (ignore) {
+                }
+                context = sysContext;
+            }
+        );
+    };
 }());

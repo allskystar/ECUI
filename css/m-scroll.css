@@ -6,5 +6,5 @@
 
 .ui-mobile-scroll-body {
     position: absolute !important;
-    width: 100%;
+    .m-width100rate();
 }

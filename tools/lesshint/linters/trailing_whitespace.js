@@ -20,6 +20,7 @@ module.exports = {
 
         let levels = 0;
         let comment = false;
+        let lastEmptyLine = false;
 
         node.split('\n').forEach((line, index) => {
             if (/[ \t]+$/g.test(line)) {
@@ -31,6 +32,8 @@ module.exports = {
             }
 
             if (line.trim().length) {
+                lastEmptyLine = false;
+
                 let start = 0;
                 if (comment) {
                     start = line.indexOf('*/');
@@ -72,6 +75,14 @@ module.exports = {
                         }
                     }
                 }
+            } else if (lastEmptyLine) {
+                results.push({
+                    column: 1,
+                    line: index + 1, // Since index is zero-based
+                    message: "The multi-line shouldn't be empty."
+                });
+            } else {
+                lastEmptyLine = true;
             }
         });
 

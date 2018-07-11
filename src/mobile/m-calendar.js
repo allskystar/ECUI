@@ -55,8 +55,8 @@ _uDate   - 日部件
                 if (value) {
                     value = value.split('-');
                     this._uYear.setValue(value[0]);
-                    this._uMonth.setValue(value[1]);
-                    this._uDate.setValue(value[2]);
+                    this._uMonth.setValue(+value[1]);
+                    this._uDate.setValue(+value[2]);
                 } else {
                     value = new Date();
                     this._uYear.setValue(value.getFullYear());
@@ -71,7 +71,10 @@ _uDate   - 日部件
              * @event
              */
             $confirm: function () {
-                this.setValue(this._uYear.getValue() + '-' + this._uMonth.getValue() + '-' + this._uDate.getValue());
+                var month = this._uMonth.getValue(),
+                    date = this._uDate.getValue();
+
+                this.setValue(this._uYear.getValue() + '-' + (+month < 10 ? '0' + month : month) + '-' + (+date < 10 ? '0' + date : date));
             }
         }
     );

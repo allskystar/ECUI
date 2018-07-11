@@ -2,7 +2,9 @@
 .ui-checkbox {
     input {
         position: relative !important;
-        opacity: 0;
+        left: -12px !important;
+        width: 10px !important;
+        opacity: 0 !important;
     }
 }
 

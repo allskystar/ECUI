@@ -10,6 +10,7 @@
 //{/if}//
     var Calendar = core.inherits(
             ui.Calendar,
+            true,
             {
                 /**
                  * @override

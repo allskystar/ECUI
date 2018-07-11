@@ -104,7 +104,7 @@
      * Returns the data associated to the given document
      * @private
      * @param {Document} ownerDocument The document.
-     * @returns {Object} An object of data.
+     * @returns {object} An object of data.
      */
     function getExpandoData(ownerDocument) {
         var data = expandoData[ownerDocument[expando]];
@@ -122,7 +122,7 @@
      * @memberOf html5
      * @param {String} nodeName name of the element
      * @param {Document|DocumentFragment} ownerDocument The context document.
-     * @returns {Object} The shived element.
+     * @returns {object} The shived element.
      */
     function createElement(nodeName, ownerDocument, data) {
         if (!ownerDocument) {
@@ -158,7 +158,7 @@
      * returns a shived DocumentFragment for the given document
      * @memberOf html5
      * @param {Document} ownerDocument The context document.
-     * @returns {Object} The shived DocumentFragment.
+     * @returns {object} The shived DocumentFragment.
      */
     function createDocumentFragment(ownerDocument, data) {
         if (!ownerDocument) {
@@ -182,7 +182,7 @@
      * Shivs the `createElement` and `createDocumentFragment` methods of the document.
      * @private
      * @param {Document|DocumentFragment} ownerDocument The document.
-     * @param {Object} data of the document.
+     * @param {object} data of the document.
      */
     function shivMethods(ownerDocument, data) {
         if (!data.cache) {

@@ -30,7 +30,7 @@ _bModal      - 是否使用showModal激活
         // 改变当前窗体之后的全部窗体z轴位置，将当前窗体置顶
         var num = layers.length - modalCount;
         layers.forEach(function (item, index) {
-            item.getOuter().style.zIndex = index >= num ? 32769 + (index - num) * 2 : 4095 + index;
+            item.getOuter().style.zIndex = index >= num ? 32009 + (index - num) * 2 : 4095 + index;
         });
     }
 
@@ -41,7 +41,6 @@ _bModal      - 是否使用showModal激活
      */
     ui.Layer = core.inherits(
         ui.Control,
-        'ui-layer',
         {
             /**
              * 销毁窗体时需要先关闭窗体，并不再保留窗体的索引。
@@ -129,13 +128,6 @@ _bModal      - 是否使用showModal激活
             /**
              * @override
              */
-            setClientSize: function (width, height) {
-                ui.Control.prototype.setClientSize.call(this, width, height + this._uTitle.getHeight());
-            },
-
-            /**
-             * @override
-             */
             show: function () {
                 if (modalCount && layers.indexOf(this) < layers.length - modalCount) {
                     // 如果已经使用showModal，对原来不是showModal的窗体进行处理
@@ -163,7 +155,7 @@ _bModal      - 是否使用showModal激活
                     }
 
                     this.center();
-                    core.mask(opacity !== undefined ? opacity : 0.5, 32766 + modalCount * 2);
+                    core.mask(opacity !== undefined ? opacity : 0.5, 32006 + modalCount * 2);
 
                     this._bModal = true;
                     if (!ui.Control.prototype.show.call(this)) {

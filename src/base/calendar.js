@@ -33,10 +33,10 @@ _eTitle        - 日历头部信息提示区
                 'AFTERBEGIN',
                 '<div class="' + options.classes.join('-header ') + '"><div class="' +
                     options.classes.join('-title ') + '"></div><div class="' +
-                    options.classes.join('-prev-year ') + 'ui-button">&lt;&lt;</div><div class="' +
-                    options.classes.join('-prev-month ') + 'ui-button">&lt;</div><div class="' +
-                    options.classes.join('-next-month ') + 'ui-button">&gt;</div><div class="' +
-                    options.classes.join('-next-year ') + 'ui-button">&gt;&gt;</div></div>'
+                    options.classes.join('-prev-year ') + ui.Button.CLASS + '">&lt;&lt;</div><div class="' +
+                    options.classes.join('-prev-month ') + ui.Button.CLASS + '">&lt;</div><div class="' +
+                    options.classes.join('-next-month ') + ui.Button.CLASS + '">&gt;</div><div class="' +
+                    options.classes.join('-next-year ') + ui.Button.CLASS + '">&gt;&gt;</div></div>'
             );
 
             // 获取el所有直属节点

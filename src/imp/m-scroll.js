@@ -148,7 +148,7 @@
              * 设置滚动范围。
              * @public
              *
-             * @param {Object} range 允许滚动的范围
+             * @param {object} range 允许滚动的范围
              */
             setScrollRange: function (range) {
                 var data = namedMap[this.getUID()];
@@ -162,7 +162,7 @@
              * 设置正常显示范围，用于拖拽结束后归位。
              * @public
              *
-             * @param {Object} range 正常显示范围
+             * @param {object} range 正常显示范围
              */
             setRange: function (range) {
                 namedMap[this.getUID()].range = range;
