@@ -1126,8 +1126,6 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                 body.id = '';
             }
 
-            document.body.scrollTop = 100;
-            document.body.parentNode.scrollTop = 100;
             if (options.load) {
                 for (var text = options.load; /^\s*(\w+)\s*(\([^)]+\))?\s*($|,)/.test(text); ) {
                     text = RegExp['$\''];

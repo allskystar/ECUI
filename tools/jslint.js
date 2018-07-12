@@ -1246,6 +1246,9 @@ klass:              do {
             },
 
 // token -- this is called by advance to get the next token.
+            seek: function (offset) {
+                character += offset;
+            },
 
             token: function () {
                 var first, i, snippet;
@@ -2998,34 +3001,69 @@ klass:              do {
     }, true);
 
     prefix('(', function (that) {
-        step_in('expression');
-        no_space();
-        edge();
-        if (next_token.id === 'function') {
-            next_token.immed = true;
-        }
-        var value = expression(0);
-        value.paren = true;
-        no_space();
-        step_out(')', that);
-        if (value.id === 'function') {
-            switch (next_token.id) {
-            case '(':
-                next_token.warn('move_invocation');
+        var currTokens = [],
+            currToken = next_token,
+            es6 = false;
+
+        while (true) {
+            if (currToken.id === '(end)') {
                 break;
-            case '.':
-            case '[':
-                next_token.warn('unexpected_a');
+            }
+            if (currToken.id === ')') {
+                currToken = lex.token();
+                currTokens.push(currToken);
+                if (currToken.id === '=') {
+                    currToken = lex.token();
+                    currTokens.push(currToken);
+                    if (currToken.id === '>') {
+                        es6 = true;
+                    }
+                }
                 break;
-            default:
-                that.warn('bad_wrap');
             }
-        } else if (!value.arity) {
-            if (!option.closure || !that.comments) {
-                that.warn('unexpected_a');
-            }
+            currToken = lex.token();
+            currTokens.push(currToken);
         }
-        return value;
+
+        if (es6) {
+            lex.seek(-3);
+            lookahead.push(next_token);
+            lookahead = lookahead.concat(currTokens.slice(0, -2));
+            next_token = token;
+            do_function(token);
+            return token;
+        } else {
+            lookahead = lookahead.concat(currTokens);
+
+            step_in('expression');
+            no_space();
+            edge();
+            if (next_token.id === 'function') {
+                next_token.immed = true;
+            }
+            var value = expression(0);
+            value.paren = true;
+            no_space();
+            step_out(')', that);
+            if (value.id === 'function') {
+                switch (next_token.id) {
+                case '(':
+                    next_token.warn('move_invocation');
+                    break;
+                case '.':
+                case '[':
+                    next_token.warn('unexpected_a');
+                    break;
+                default:
+                    that.warn('bad_wrap');
+                }
+            } else if (!value.arity) {
+                if (!option.closure || !that.comments) {
+                    that.warn('unexpected_a');
+                }
+            }
+            return value;
+        }
     });
 
     infix('.', 170, function (left, that) {
@@ -3288,9 +3326,14 @@ klass:              do {
                 if (typeof i !== 'string') {
                     next_token.stop('missing_property');
                 }
-                advance(':');
-                spaces();
-                name.first = expression(10);
+                if (next_token.id === '(') {
+                    no_space();
+                    do_function(next_token);
+                } else {
+                    advance(':');
+                    spaces();
+                    name.first = expression(10);
+                }
             }
             that.first.push(name);
             if (seen[i] === true) {
