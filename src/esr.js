@@ -41,8 +41,9 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
         localStorage,
         metaVersion,
         meta,
-        lastLayer,
-        lastRouteName,
+        currLayer,
+        currRouteName,
+        currRouteWeight,
         unloadNames = [],
 
         FormatInput = core.inherits(
@@ -624,28 +625,28 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
      * @param {object} route 路由对象，新的路由
      */
     function transition(route) {
-        if (route.NAME !== lastRouteName) {
+        if (route.NAME !== currRouteName) {
             var layer = getLayer(route);
             if (layer) {
                 var layerEl = layer.getMain();
                 // 路由权重在该项目中暂不考虑相等情况
-                if (lastLayer) {
-                    var lastLayerEl = lastLayer.getMain();
-                    lastLayerEl.header.style.display = 'none';
+                if (currLayer) {
+                    var currLayerEl = currLayer.getMain();
+                    currLayerEl.header.style.display = 'none';
 
-                    if (routes[lastRouteName].weight !== routes[route.NAME].weight) {
+                    if (currRouteWeight !== route.weight) {
                         var view = util.getView(),
-                            position = routes[lastRouteName].weight < routes[route.NAME].weight ? view.width : -view.width,
+                            position = currRouteWeight < route.weight ? view.width : -view.width,
                             fn;
 
                         if (esrOptions.transition === 'cover') {
                             if (position > 0) {
-                                lastLayerEl.style.zIndex = 5;
+                                currLayerEl.style.zIndex = 5;
                                 layerEl.style.zIndex = 10;
                                 layer.setPosition(position);
                                 fn = 'this.to.style.left->0';
                             } else {
-                                lastLayerEl.style.zIndex = 10;
+                                currLayerEl.style.zIndex = 10;
                                 layerEl.style.zIndex = 5;
                                 layer.setPosition(0);
                                 fn = 'this.from.style.left->' + (-position);
@@ -662,11 +663,11 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                             fn,
                             400,
                             {
-                                $: {from: lastLayerEl, to: layerEl},
+                                $: {from: currLayerEl, to: layerEl},
                                 onfinish: function () {
                                     // 在执行结束后，如果不同时common layer则隐藏from layer，并且去掉目标路由中的动画执行函数
-                                    lastLayer.hide();
-                                    lastLayer = layer;
+                                    currLayer.hide();
+                                    currLayer = layer;
                                     pauseStatus = false;
                                     if (esrOptions.transition === 'cover') {
                                         core.mask();
@@ -676,17 +677,18 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                         );
                     } else {
                         // weight相等不触发动画
-                        lastLayer.hide();
-                        lastLayer = layer;
+                        currLayer.hide();
+                        currLayer = layer;
                     }
                 } else {
-                    lastLayer = layer;
+                    currLayer = layer;
                 }
 
                 layerEl.header.style.display = '';
                 layer.show();
 
-                lastRouteName = route.NAME;
+                currRouteName = route.NAME;
+                currRouteWeight = route.weight;
             }
         }
     }
@@ -717,6 +719,16 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
 
         // 布局层，用于加载结构
         AppLayer: core.inherits(ui.Control),
+
+        Back: core.inherits(
+            ui.Button,
+            {
+                $click: function (event) {
+                    ui.Button.prototype.$click.call(this, event);
+                    transition(esr.getRoute(esr.getLocation().split('~')[0]));
+                }
+            }
+        ),
 
         /**
          * 监听全局变量变化。
@@ -1248,6 +1260,35 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
             } else {
                 onsuccess();
             }
+        },
+
+        /**
+         * 打开选择框。
+         * @public
+         *
+         * @param {ecui.ui.Control} control 选择框对应的控件
+         * @param {string} title 选择框标题
+         */
+        select: function (control, title) {
+            var container = core.$('AppSelectContainer');
+
+            if (title !== undefined) {
+                esr.setData('AppSelectTitle', title);
+            }
+
+            if (container.innerControl) {
+                container.innerControl.setParent();
+            }
+            if (control) {
+                control.setParent(container.getControl());
+            }
+            container.innerControl = control;
+
+            transition({
+                NAME: 'AppSelect',
+                main: 'AppSelectContainer',
+                weight: 1000
+            });
         },
 
         /**
