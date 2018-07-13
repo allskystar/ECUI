@@ -1270,25 +1270,27 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
          * @param {string} title 选择框标题
          */
         select: function (control, title) {
-            var container = core.$('AppSelectContainer');
+            if (esrOptions.app) {
+                var container = core.$('AppSelectContainer');
 
-            if (title !== undefined) {
-                esr.setData('AppSelectTitle', title);
-            }
+                if (title !== undefined) {
+                    esr.setData('AppSelectTitle', title);
+                }
 
-            if (container.innerControl) {
-                container.innerControl.setParent();
-            }
-            if (control) {
-                control.setParent(container.getControl());
-            }
-            container.innerControl = control;
+                if (container.innerControl) {
+                    container.innerControl.setParent();
+                }
+                if (control) {
+                    control.setParent(container.getControl());
+                }
+                container.innerControl = control;
 
-            transition({
-                NAME: 'AppSelect',
-                main: 'AppSelectContainer',
-                weight: 1000
-            });
+                transition({
+                    NAME: 'AppSelect',
+                    main: 'AppSelectContainer',
+                    weight: 1000
+                });
+            }
         },
 
         /**
