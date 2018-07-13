@@ -45,6 +45,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
         currRouteName,
         currRouteWeight,
         unloadNames = [],
+        selectedControl,
 
         FormatInput = core.inherits(
             ui.Control,
@@ -725,7 +726,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
             {
                 $click: function (event) {
                     ui.Button.prototype.$click.call(this, event);
-                    transition(esr.getRoute(esr.getLocation().split('~')[0]));
+                    esr.hideSelect();
                 }
             }
         ),
@@ -948,6 +949,21 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
          */
         getRoute: function (name) {
             return routes[calcUrl(name)];
+        },
+
+        /**
+         * 隐藏选择框。
+         * @public
+         */
+        hideSelect: function () {
+            if (esrOptions.app) {
+                if (selectedControl) {
+                    selectedControl.setParent(core.$('AppSelectContainer').getControl());
+                    selectedControl = null;
+                }
+
+                transition(esr.getRoute(esr.getLocation().split('~')[0]));
+            }
         },
 
         /**
@@ -1263,35 +1279,6 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
         },
 
         /**
-         * 打开选择框。
-         * @public
-         *
-         * @param {ecui.ui.Control} control 选择框对应的控件
-         * @param {string} title 选择框标题
-         */
-        select: function (control, title) {
-            if (esrOptions.app) {
-                var container = core.$('AppSelectContainer');
-
-                esr.setData('AppSelectTitle', title || '');
-
-                if (container.innerControl) {
-                    container.innerControl.setParent();
-                }
-                if (control) {
-                    control.setParent(container.getControl());
-                }
-                container.innerControl = control;
-
-                transition({
-                    NAME: 'AppSelect',
-                    main: 'AppSelectContainer',
-                    weight: 1000
-                });
-            }
-        },
-
-        /**
          * 设置常量数据。
          * @public
          *
@@ -1346,6 +1333,32 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                 location.hash = loc;
             }
             currLocation = loc;
+        },
+
+        /**
+         * 显示选择框。
+         * @public
+         *
+         * @param {ecui.ui.Control} control 选择框对应的控件
+         * @param {string} title 选择框标题
+         */
+        showSelect: function (control, title) {
+            if (esrOptions.app) {
+                var container = core.$('AppSelectContainer');
+
+                esr.setData('AppSelectTitle', title || '');
+
+                if (control) {
+                    control.setParent(container.getControl());
+                    selectedControl = control;
+                }
+
+                transition({
+                    NAME: 'AppSelect',
+                    main: 'AppSelectContainer',
+                    weight: 1000
+                });
+            }
         },
 
         /**
