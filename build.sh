@@ -40,12 +40,12 @@ then
 
     if [ ! -d "$1/common" ]
     then
-        ln -s ../lib-fe/common "$1/common"
+        ln -s ../ECUI/common "$1/common"
     fi
 
     cd $1
     output="../output-$1"
-    lib="../lib-fe"
+    lib="../ECUI"
 else
     output="../output"
     lib="."
@@ -199,7 +199,7 @@ if [ ! -d "$output/images/" ]
 then
     mkdir "$output/images/"
 fi
-echo "copy lib-fe/images/"
+echo "copy ECUI/images/"
 cp -R $lib/images/* "$output/images/"
 
 if [ $1 ]
