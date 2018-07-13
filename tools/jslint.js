@@ -1246,10 +1246,6 @@ klass:              do {
             },
 
 // token -- this is called by advance to get the next token.
-            seek: function (offset) {
-                character += offset;
-            },
-
             token: function () {
                 var first, i, snippet;
 
@@ -3026,12 +3022,66 @@ klass:              do {
         }
 
         if (es6) {
-            lex.seek(-3);
             lookahead.push(next_token);
-            lookahead = lookahead.concat(currTokens.slice(0, -2));
+            lookahead = lookahead.concat(currTokens);
             next_token = token;
-            do_function(token);
-            return token;
+
+            var func = token,
+                old_funct = funct,
+                old_option = option,
+                old_scope = scope,
+                master;
+
+            scope = Object.create(old_scope);
+            funct = {
+                closure: [],
+                global: [],
+                level: old_funct.level + 1,
+                line: next_token.line,
+                loopage: 0,
+                name: '\'' + (anonname || '').replace(nx, sanitize) + '\'',
+                outer: [],
+                scope: scope
+            };
+            funct.parameter = function_parameters();
+            func.function = funct;
+            option = Object.create(old_option);
+            functions.push(funct);
+            func.writeable = false;
+            one_space();
+            advance('=');
+            no_space();
+            advance('>');
+            one_space();
+            func.block = block('function');
+            for (var len = funct.parameter.length, used = false; len--; ) {
+                master = scope[funct.parameter[len]];
+                used = used || master.used;
+                master.used = used;
+            }
+            Object.keys(scope).forEach(function (name) {
+                master = scope[name];
+                if (master.kind === 'undef') {
+                    if (old_scope !== global_scope) {
+                        master.function = old_funct;
+                        old_scope[name] = master;
+                    } else {
+                        for (var i = 0; i < master.tokens.length; i++) {
+                            master.tokens[i].warn('used_before_a');
+                        }
+                    }
+                } else if (!master.used && master.kind !== 'exception' &&
+                        (master.kind !== 'parameter' || !option.unparam)) {
+                    master.warn('unused_a');
+                } else if (!master.init) {
+                    master.warn('uninitialized_a');
+                }
+            });
+            funct = old_funct;
+            option = old_option;
+            scope = old_scope;
+
+            return func;
         } else {
             lookahead = lookahead.concat(currTokens);
 
