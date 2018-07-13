@@ -52,9 +52,17 @@ module.exports = {
 
             // Check for proper ordering
             if (previousProp) {
-                let prevIndex = this.orders.indexOf(previousProp);
-                let currIndex = this.orders.indexOf(currentProperty);
-                if ((currIndex > prevIndex) || (prevIndex === -1 && previousProp.localeCompare(currentProperty) > 0)) {
+                let previousPropName = previousProp.replace(/-webkit-/, '');
+                let currentPropertyName = currentProperty.replace(/-webkit-/, '');
+                let prevIndex = this.orders.indexOf(previousPropName);
+                let currIndex = this.orders.indexOf(currentPropertyName);
+                if (previousPropName !== previousProp) {
+                    previousPropName += '-';
+                }
+                if (currentPropertyName !== currentProperty) {
+                    currentPropertyName += '-';
+                }
+                if ((currIndex > prevIndex) || (prevIndex === -1 && previousPropName.localeCompare(currentPropertyName) > 0)) {
                     results.push({
                         column: child.source.start.column,
                         line: child.source.start.line,
