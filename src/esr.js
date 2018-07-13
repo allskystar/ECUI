@@ -1273,9 +1273,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
             if (esrOptions.app) {
                 var container = core.$('AppSelectContainer');
 
-                if (title !== undefined) {
-                    esr.setData('AppSelectTitle', title);
-                }
+                esr.setData('AppSelectTitle', title || '');
 
                 if (container.innerControl) {
                     container.innerControl.setParent();
