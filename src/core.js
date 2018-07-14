@@ -2113,7 +2113,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                     return item;
                 }
             }
-            return core.$fastCreate(UIClass, el, parent, options);
+            return core.$fastCreate(UIClass, 'function' === typeof el ? el() : el, parent, options);
         },
 
         /**

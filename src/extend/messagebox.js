@@ -43,10 +43,15 @@
      * @param {Function} ... 按钮的点击事件处理函数，顺序与参数中按钮文本定义的顺序一致
      */
     core.$messagebox = function (className, text, buttonTexts) {
-        var instance = core.getSingleton(MessageBox, dom.create({
-                className: MessageBox.CLASS + 'ui-hide',
-                innerHTML: '<div class="ui-messagebox-content"></div><div class="ui-messagebox-buttons"></div>'
-            })),
+        var instance = core.getSingleton(
+                MessageBox,
+                function () {
+                    return dom.create({
+                        className: MessageBox.CLASS + 'ui-hide',
+                        innerHTML: '<div class="ui-messagebox-content"></div><div class="ui-messagebox-buttons"></div>'
+                    });
+                }
+            ),
             outer = instance.getOuter(),
             body = instance.getBody(),
             elContent = body.firstChild,

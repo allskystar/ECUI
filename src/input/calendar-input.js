@@ -53,7 +53,12 @@
         function (el, options) {
             ui.Text.call(this, el, options);
             this.getInput().readOnly = true;
-            this.setPopup(core.getSingleton(Calendar, dom.create({className: Calendar.CLASS + 'ui-popup ui-hide'})));
+            this.setPopup(core.getSingleton(
+                Calendar,
+                function () {
+                    return dom.create({className: Calendar.CLASS + 'ui-popup ui-hide'});
+                }
+            ));
         },
         {
             /**
