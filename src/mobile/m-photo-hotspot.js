@@ -13,22 +13,22 @@
         currImg = dom.create(
             'IMG',
             {
-                style: {
-                    position: 'fixed',
-                    zIndex: 65535
-                }
+                className: 'ui-mobile-photo-hotspot-image',
             }
         ),
         backupImg = dom.create(
             'IMG',
             {
+                className: 'ui-mobile-photo-hotspot-image',
                 style: {
-                    position: 'fixed',
-                    zIndex: 65535,
                     display: 'none'
                 }
             }
         ),
+        title = dom.create({
+            className: 'ui-mobile-photo-hotspot-title',
+            innerHTML: '<span class="ui-mobile-photo-hotspot-text"></span><span class="ui-mobile-photo-hotspot-count"></span>'
+        }),
         tapHandle;
 
     /**
@@ -47,6 +47,12 @@
         img.style.left = ((viewWidth - hotspot.$$calcWidth) / 2 + position * viewWidth) + 'px';
         img.style.width = hotspot.$$calcWidth + 'px';
         img.src = hotspot.getHDImageUrl();
+
+        var items = core.query(function (item) {
+            return item instanceof ui.MPhotoHotspot;
+        });
+        title.firstChild.innerHTML = hotspot.getMain().title;
+        title.lastChild.innerHTML = items.indexOf(hotspot) + '/' + items.length;
     }
 
     /**
@@ -155,6 +161,7 @@
                 ui.Control.prototype.$click.call(this, event);
                 body.appendChild(currImg);
                 body.appendChild(backupImg);
+                body.appendChild(title);
                 fillImage(currImg, this, 0);
                 currHotspot = this;
                 core.mask(0.9);
@@ -185,6 +192,7 @@
                                 tapHandle = util.timer(function () {
                                     dom.remove(currImg);
                                     dom.remove(backupImg);
+                                    dom.remove(title);
                                     core.removeGestureListeners(null);
                                     core.mask();
                                     tapHandle = null;
