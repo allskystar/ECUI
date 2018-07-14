@@ -14,10 +14,20 @@
 //{/if}//
     var currImage;
 
-    function autoNext(control) {
-        control._oHandle = util.timer(next, control._nDelay, control);
+    /**
+     * 准备轮播下一张图片。
+     * @private
+     *
+     * @param {ecui.ui.MCarousel} carousel 轮播图控件
+     */
+    function autoNext(carousel) {
+        carousel._oHandle = util.timer(next, carousel._nDelay, carousel);
     }
 
+    /**
+     * 自动轮播下一张图片。
+     * @private
+     */
     function next() {
         this._oHandle = core.effect.grade(
             'this.scrollLeft->+(' + this.getClientWidth() + ')',
@@ -32,20 +42,33 @@
         );
     }
 
-    function refresh(control) {
-        var main = control.getMain(),
+    /**
+     * 刷新图片的编号，轮播图只有当前图是显示的，别的图都是隐藏的。
+     * @private
+     *
+     * @param {ecui.ui.MCarousel} carousel 轮播图控件
+     */
+    function refresh(carousel) {
+        var main = carousel.getMain(),
             left = main.scrollLeft,
-            width = control.getClientWidth();
+            width = carousel.getClientWidth();
 
         if (left < width) {
-            show(control, main.firstChild.index);
+            show(carousel, main.firstChild.index);
         } else if (left > width) {
-            show(control, main.lastChild.index);
+            show(carousel, main.lastChild.index);
         }
     }
 
-    function show(control, index) {
-        var main = control.getMain(),
+    /**
+     * 显示指定编号的图片，轮播图只有当前图是显示的，别的图都是隐藏的。
+     * @private
+     *
+     * @param {ecui.ui.MCarousel} carousel 轮播图控件
+     * @param {number} index 图片编号
+     */
+    function show(carousel, index) {
+        var main = carousel.getMain(),
             imgs = dom.children(main),
             count = imgs.length - 2;
 
@@ -59,7 +82,7 @@
         imgs[count + 1].index = (index + 1) % count;
         imgs[count + 1].src = imgs[imgs[count + 1].index + 1].src;
 
-        main.scrollLeft = control.getClientWidth();
+        main.scrollLeft = carousel.getClientWidth();
     }
 
     /**
