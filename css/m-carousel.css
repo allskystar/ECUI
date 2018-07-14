@@ -1,0 +1,9 @@
+.ui-mobile-carousel {
+    white-space: nowrap !important;
+}
+
+.ui-mobile-carousel img {
+    display: inline;
+    width: 100% !important;
+    height: 100% !important;
+}
