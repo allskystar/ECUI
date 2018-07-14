@@ -148,6 +148,7 @@ _bAlterItems  - 是否延迟到显示时执行alterItems
                             }
                             event.exit();
                         } else if (which === 27 || (which === 13 && this._uOptions.isShow())) {
+                            this._uOptions.hide();
                             // 回车键选中，ESC键取消
                             if (which === 13) {
                                 if (focus.getParent() === this && this._cSelected !== focus) {
@@ -155,7 +156,6 @@ _bAlterItems  - 是否延迟到显示时执行alterItems
                                     core.dispatchEvent(this, 'change', event);
                                 }
                             }
-                            this._uOptions.hide();
                             event.exit();
                         }
                     }

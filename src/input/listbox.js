@@ -87,7 +87,8 @@ _eInput - 选项对应的input，form提交时使用
                      * @param {boolean} status 是否选中，默认为选中
                      */
                     setSelected: function (status) {
-                        this.alterClass('selected', this._eInput.disabled = status === false);
+                        this._eInput.disabled = status === false;
+                        this.alterClass(status !== false ? '+selected' : '-selected');
                     }
                 }
             ),
