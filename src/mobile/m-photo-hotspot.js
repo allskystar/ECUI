@@ -13,7 +13,7 @@
         currImg = dom.create(
             'IMG',
             {
-                className: 'ui-mobile-photo-hotspot-image',
+                className: 'ui-mobile-photo-hotspot-image'
             }
         ),
         backupImg = dom.create(

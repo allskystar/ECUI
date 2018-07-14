@@ -36,6 +36,7 @@
         var main = control.getMain(),
             left = main.scrollLeft,
             width = control.getClientWidth();
+
         if (left < width) {
             show(control, main.firstChild.index);
         } else if (left > width) {
@@ -49,10 +50,10 @@
             count = imgs.length - 2;
 
         if (currImage) {
-            currImage.style.display = '';
+            currImage.style.display = 'none';
         }
         currImage = imgs[index + 1];
-        currImage.style.display = 'inline';
+        currImage.style.display = '';
         imgs[0].index = (index + count - 1) % count;
         imgs[0].src = imgs[imgs[0].index + 1].src;
         imgs[count + 1].index = (index + 1) % count;
@@ -88,17 +89,6 @@
                     this._nDelay = options.delay * 1000;
                     autoNext(this);
                 }
-                dom.insertBefore(dom.create('IMG', {
-                    style: {
-                        display: 'inline'
-                    }
-                }), el.firstChild);
-                dom.insertAfter(dom.create('IMG', {
-                    style: {
-                        display: 'inline'
-                    }
-                }), el.lastChild);
-                show(this, 0);
             }
         },
         {
@@ -130,6 +120,25 @@
                 if (this._nDelay) {
                     autoNext(this);
                 }
+                var main = this.getMain();
+                if (main.firstChild !== main.lastChild) {
+                    refresh(this);
+                }
+            },
+
+            /**
+             * @override
+             */
+            $ready: function (event) {
+                ui.MPanel.prototype.$ready.call(this, event);
+
+                var main = this.getMain();
+                dom.children(main).forEach(function (item) {
+                    item.style.display = 'none';
+                });
+                dom.insertBefore(dom.create('IMG'), main.firstChild);
+                dom.insertAfter(dom.create('IMG'), main.lastChild);
+                show(this, 0);
             }
         }
     );
