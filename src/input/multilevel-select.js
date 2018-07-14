@@ -78,8 +78,11 @@ _aSelect - 全部的下拉框控件列表
                             if (item._aChildren) {
                                 if (select) {
                                     select.removeAll();
-                                    select.add(item._aChildren);
-                                    if (!(item._aChildren[0] instanceof ui.Item)) {
+                                    if (item._aChildren[0] instanceof ui.Item) {
+                                        select.add(item._aChildren);
+                                    } else {
+                                        core.dispatchEvent(parent, 'request', {data: item._aChildren, owner: select});
+                                        select.add(item._aChildren);
                                         item._aChildren = select.getItems();
                                     }
                                 }
@@ -90,9 +93,9 @@ _aSelect - 全部的下拉框控件列表
                                         args.push(item.getValue());
                                     });
 
-                                    select = parent._aSelect[++index];
                                     select.removeAll();
                                     core.request(util.stringFormat.apply(null, args), function (data) {
+                                        core.dispatchEvent(parent, 'request', {data: data, owner: select});
                                         select.add(data);
                                         item._aChildren = select.getItems();
                                     });
@@ -115,6 +118,12 @@ _aSelect - 全部的下拉框控件列表
             $change: util.blank,
 
             /**
+             * 请求返回事件，如果数据需要进行处理，请在此实现。
+             * @event
+             */
+            $request: util.blank,
+
+            /**
              * 获取指定的下拉框对象。
              * @public
              *
@@ -135,6 +144,7 @@ _aSelect - 全部的下拉框控件列表
                 this._aSelect.forEach(function (item) {
                     item.removeAll(true);
                 });
+                core.dispatchEvent(this, 'request', {data: data, owner: this._aSelect[0]});
                 this._aSelect[0].add(data);
             }
         }
