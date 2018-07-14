@@ -42,7 +42,7 @@
     }
     </style>
 </head>
-<body class="test//test">
+<body>
     <div ui="type:m-panel" style="overflow:auto;height:100%">
     <form name="testForm">
         <input value="123" style="border:1px solid black;width:120px;height:20px;">
@@ -64,8 +64,17 @@
         <div ui="values:1-12"></div>
         <div ui="values:1-31"></div>
     </div>
+    <div ui="type:multi-select;name:index" style="width:200px;height:30px;border:1px solid black">
+        <div style="display:block">1</div>
+        <div style="display:block">2</div>
+        <div style="display:block">3</div>
+        <div style="display:block">4</div>
+        <div style="display:block">5</div>
+        <div style="display:block">6</div>
+        <div style="display:block">7</div>
+    </div>
     <h2>移动端select与焦点图</h2>
-    <div ui="type:m-select;name:sex;value:male">
+    <div ui="type:select;name:sex;value:male,female">
         <div ui="value:male">男</div>
         <div ui="value:female">女</div>
         <div>测试选项A</div>

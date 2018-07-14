@@ -71,6 +71,16 @@ _eInput - 选项对应的input，form提交时使用
                     },
 
                     /**
+                     * 获取选项的值。
+                     * @public
+                     *
+                     * @return {string} 选项的值
+                     */
+                    getValue: function () {
+                        return this._eInput.value;
+                    },
+
+                    /**
                      * 判断多选框的选项控件是否被选中。
                      * @public
                      *
