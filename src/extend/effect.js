@@ -362,10 +362,13 @@ ECUI动画效果库，支持对CSS3动画效果的模拟并扩展了相应的功
                         list[0] = 'ecui.dom.getStyle(' + list[0].slice(0, index) + ',"' + list[0].slice(index + 7) + '")';
                     }
                     values = new Function('$', 'return [' + list.join(',') + ']').call(options.$, options);
+                    if (list[1].startsWith('+(')) {
+                        values[1] += values[0];
+                    }
                     if (/-?[0-9]+(\.[0-9]+)?/.test(values[0])) {
                         var currValue = RegExp['$&'];
                         if (+currValue !== values[1]) {
-                            result.push(name + '=' + (RegExp.leftContext ? '"' + RegExp.leftContext.replace('"', '\\"') + '"+' : '') + math + '(' + currValue + '+(' + values[1] + (list[1].slice(0, 2) !== '+(' ? '-(' + currValue + ')' : '') + ')*p)' + (RegExp.rightContext ? '+"' + RegExp.rightContext.replace('"', '\\"') + '"' : ''));
+                            result.push(name + '=' + (RegExp.leftContext ? '"' + RegExp.leftContext.replace('"', '\\"') + '"+' : '') + math + '(' + currValue + '+(' + values[1] + '-(' + currValue + ')' + ')*p)' + (RegExp.rightContext ? '+"' + RegExp.rightContext.replace('"', '\\"') + '"' : ''));
                         }
                     }
                 });
