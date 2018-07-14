@@ -1,6 +1,6 @@
 /*
 @example
-<div ui="type:carousel">
+<div ui="type:carousel;delay:5">
     <img src="...">
     ...
 </div>
@@ -65,6 +65,8 @@
     /**
      * 按钮控件。
      * 缺省设置不可选中内容。
+     * options 属性：
+     * delay   轮播延时，单位s
      * @control
      */
     ui.MCarousel = core.inherits(
