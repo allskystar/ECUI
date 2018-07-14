@@ -52,7 +52,7 @@
             return item instanceof ui.MPhotoHotspot;
         });
         title.firstChild.innerHTML = hotspot.getMain().title;
-        title.lastChild.innerHTML = items.indexOf(hotspot) + '/' + items.length;
+        title.lastChild.innerHTML = (items.indexOf(hotspot) + 1) + '/' + items.length;
     }
 
     /**
