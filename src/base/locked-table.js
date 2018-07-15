@@ -282,8 +282,8 @@ _eRight      - 右侧乐定行的Element元素
             /**
              * @override
              */
-            $resize: function () {
-                ui.Table.prototype.$resize.call(this);
+            $resize: function (event) {
+                ui.Table.prototype.$resize.call(this, event);
 
                 this._aHeadRows.forEach(function (item) {
                     restoreRow(this, item);

@@ -630,8 +630,8 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
             /**
              * @override
              */
-            $resize: function () {
-                ui.Control.prototype.$resize.call(this);
+            $resize: function (event) {
+                ui.Control.prototype.$resize.call(this, event);
 
                 this._aHeadRows.forEach(function (item) {
                     resizeRow(item);

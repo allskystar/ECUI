@@ -157,8 +157,8 @@ _nDelay   - 延迟时间，如果不自动轮播这个值为0
             /**
              * @override
              */
-            $ready: function (event) {
-                ui.MPanel.prototype.$ready.call(this, event);
+            $initStructure: function (width, height) {
+                ui.MPanel.prototype.$initStructure.call(this, width, height);
 
                 var main = this.getMain();
                 dom.children(main).forEach(function (item) {
@@ -167,6 +167,17 @@ _nDelay   - 延迟时间，如果不自动轮播这个值为0
                 dom.insertBefore(dom.create('IMG'), main.firstChild);
                 dom.insertAfter(dom.create('IMG'), main.lastChild);
                 show(this, 0);
+            },
+
+            /**
+             * @override
+             */
+            $resize: function (event) {
+                ui.MPanel.prototype.$resize.call(this, event);
+
+                var main = this.getMain();
+                main.removeChild(main.firstChild);
+                main.removeChild(main.lastChild);
             }
         }
     );
