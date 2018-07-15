@@ -86,6 +86,8 @@ _nDelay   - 延迟时间，如果不自动轮播这个值为0
         imgs[count + 1].src = imgs[imgs[count + 1].index + 1].src;
 
         main.scrollLeft = carousel.getClientWidth();
+
+        core.dispatchEvent(carousel, 'change', {index: index, image: currImage});
     }
 
     /**
