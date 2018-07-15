@@ -164,8 +164,10 @@ _nDelay   - 延迟时间，如果不自动轮播这个值为0
                 dom.children(main).forEach(function (item) {
                     item.style.display = 'none';
                 });
-                dom.insertBefore(dom.create('IMG'), main.firstChild);
-                dom.insertAfter(dom.create('IMG'), main.lastChild);
+                if (main.firstChild !== main.lastChild) {
+                    dom.insertBefore(dom.create('IMG'), main.firstChild);
+                    dom.insertAfter(dom.create('IMG'), main.lastChild);
+                }
                 show(this, 0);
             },
 
@@ -176,8 +178,10 @@ _nDelay   - 延迟时间，如果不自动轮播这个值为0
                 ui.MPanel.prototype.$resize.call(this, event);
 
                 var main = this.getMain();
-                main.removeChild(main.firstChild);
-                main.removeChild(main.lastChild);
+                if (main.firstChild !== main.lastChild) {
+                    main.removeChild(main.firstChild);
+                    main.removeChild(main.lastChild);
+                }
             }
         }
     );
