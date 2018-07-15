@@ -25,18 +25,10 @@ _eInput - 选项对应的input，form提交时使用
         ui.Control,
         'ui-multi-select',
         function (el, options) {
-            var optionsEl = el;
-            el = dom.insertBefore(
-                dom.create({
-                    className: el.className,
-                    style: {
-                        cssText: el.style.cssText
-                    }
-                }),
-                el
-            );
-            optionsEl.className = this.Options.CLASS + options.classes.join('-options ') + 'ui-popup ui-hide';
-            optionsEl.style.cssText = '';
+            var optionsEl = dom.create({className: this.Options.CLASS + options.classes.join('-options ') + 'ui-popup ui-hide'});
+            for (; el.firstChild; ) {
+                optionsEl.appendChild(el.firstChild);
+            }
             ui.Control.call(this, el, options);
             this.setPopup(core.$fastCreate(this.Options, optionsEl, this, {name: options.name}));
             this._sName = options.name || '';
@@ -74,7 +66,6 @@ _eInput - 选项对应的input，form提交时使用
              */
             $change: function () {
                 var items = this.getSelected().map(function (item) {
-                    console.log(item);
                     return item.getValue();
                 });
                 this.setContent(items.length ? items.join(',') : '');

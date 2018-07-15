@@ -32,6 +32,10 @@ _aSelect - 全部的下拉框控件列表
             }, this);
         },
         {
+            /**
+             * 选择框部件。
+             * @unit
+             */
             Select: core.inherits(
                 ui.MPanel,
                 function (el, options) {
@@ -40,6 +44,10 @@ _aSelect - 全部的下拉框控件列表
                     this._cSelected = null;
                 },
                 {
+                    /**
+                     * 选择框选项部件。
+                     * @unit
+                     */
                     Item: core.inherits(
                         ui.Item,
                         function (el, options) {
@@ -48,6 +56,9 @@ _aSelect - 全部的下拉框控件列表
                             this._aChildren = options.children;
                         },
                         {
+                            /**
+                             * @override
+                             */
                             $click: function (event) {
                                 ui.Item.prototype.$click.call(this, event);
 
@@ -65,11 +76,27 @@ _aSelect - 全部的下拉框控件列表
                                     select.setSelected(this);
                                 }
                             },
+
+                            /**
+                             * 获取选项的值。
+                             * @public
+                             *
+                             * @return {string} 选项的值
+                             */
                             getValue: function () {
                                 return this._sValue;
                             }
                         }
                     ),
+
+                    $alterItems: util.blank,
+
+                    /**
+                     * 设置选中的项。
+                     * @public
+                     *
+                     * @param {ecui.ui.Item} item 选中的项
+                     */
                     setSelected: function (item) {
                         item = item || null;
                         if (this._cSelected !== item) {
@@ -124,10 +151,16 @@ _aSelect - 全部的下拉框控件列表
                             }
                         }
                     },
+
+                    /**
+                     * 获取选中的项。
+                     * @public
+                     *
+                     * @return {ecui.ui.Item} 选中的项
+                     */
                     getSelected: function () {
                         return this._cSelected;
-                    },
-                    $alterItems: util.blank
+                    }
                 },
                 ui.Items
             ),

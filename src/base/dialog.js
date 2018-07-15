@@ -1,6 +1,8 @@
 /*
 @example
 <div ui="type:dialog">
+  <!-- 标题可以省略 -->
+  <strong>标题</strong>
   <!-- 这里放滚动的内容 -->
   ...
 </div>
@@ -27,41 +29,29 @@ _uClose     - 关闭按钮
         ui.Layer,
         'ui-dialog',
         function (el, options) {
-            var bodyEl = el,
-                titleEl = dom.first(el);
+            var bodyEl = dom.create({className: options.classes.join('-body ')}),
+                titleEl = dom.first(el),
+                closeEl;
 
-            if (titleEl && titleEl.tagName !== 'STRONG') {
-                titleEl = undefined;
-            }
-
-            el = dom.insertBefore(
-                dom.create(
-                    {
-                        // 生成标题控件与内容区域控件对应的Element对象
-                        className: el.className,
-                        style: {
-                            cssText: bodyEl.style.cssText
-                        },
-                        innerHTML: '<div class="' + options.classes.join('-close ') + '"></div>' + (titleEl ? '' : '<strong class="' + options.classes.join('-title ') + '"></strong>')
-                    }
-                ),
-                el
-            );
-
-            if (titleEl) {
+            if (titleEl && titleEl.tagName === 'STRONG') {
                 titleEl.className += ' ' + options.classes.join('-title ');
-                el.appendChild(titleEl);
+                el.remove(titleEl);
             } else {
-                titleEl = el.lastChild;
+                titleEl = dom.create('STRONG', {className: options.classes.join('-title ')});
             }
 
-            bodyEl.className = options.classes.join('-body ');
-            bodyEl.style.cssText = '';
+            for (; el.firstChild; ) {
+                bodyEl.appendChild(el.firstChild);
+            }
+
+            el.innerHTML = '<div class="' + options.classes.join('-close ') + '"></div>';
+            closeEl = el.lastChild;
+            el.appendChild(titleEl);
             el.appendChild(bodyEl);
 
             ui.Layer.call(this, el, options);
 
-            this._uClose = core.$fastCreate(this.Close, el.firstChild, this);
+            this._uClose = core.$fastCreate(this.Close, closeEl, this);
             this._uTitle = core.$fastCreate(this.Title, titleEl, this, {userSelect: false});
             this.$setBody(bodyEl);
         },

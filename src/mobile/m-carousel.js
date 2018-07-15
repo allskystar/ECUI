@@ -4,6 +4,9 @@
     <img src="...">
     ...
 </div>
+
+@fields
+_nDelay   - 延迟时间，如果不自动轮播这个值为0
 */
 (function () {
 //{if 0}//

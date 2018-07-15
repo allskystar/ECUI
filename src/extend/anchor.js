@@ -1,5 +1,8 @@
 /*
 anchor - 锚点插件，使用ext-anchor的方式引用，指定的锚点名称可以被ext.anchor.go方法跳转，ext.anchor.find方法用于查找指定区域所有的锚点名称。
+@example:
+[HTML]:<div ui="ext-anchor:title">...</div>
+[JS]:ext.anchor.go('title');
 */
 (function () {
 //{if 0}//

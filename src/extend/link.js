@@ -1,5 +1,7 @@
 /*
 link - 链接插件，使用ext-link使用，具体的跳转地址写在DOM元素的href属性中(与A标签类似)，点击完成跳转。
+@example:
+<div ui="ext-link" href="...">...</div>
 */
 (function () {
 //{if 0}//
