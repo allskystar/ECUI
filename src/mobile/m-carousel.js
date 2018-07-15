@@ -161,14 +161,14 @@ _nDelay   - 延迟时间，如果不自动轮播这个值为0
                 ui.MPanel.prototype.$initStructure.call(this, width, height);
 
                 var main = this.getMain();
-                dom.children(main).forEach(function (item) {
-                    item.style.display = 'none';
-                });
                 if (main.firstChild !== main.lastChild) {
+                    dom.children(main).forEach(function (item) {
+                        item.style.display = 'none';
+                    });
                     dom.insertBefore(dom.create('IMG'), main.firstChild);
                     dom.insertAfter(dom.create('IMG'), main.lastChild);
+                    show(this, 0);
                 }
-                show(this, 0);
             },
 
             /**
