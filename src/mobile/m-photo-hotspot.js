@@ -79,9 +79,11 @@
         if (index !== nextIndex) {
             fillImage(currImg, currHotspot, 0);
             backupImg.style.display = '';
-            fillImage(backupImg, items[nextIndex], event.type === 'swiperight' ? -1 : 1);
+
+            var position = event.type === 'swiperight' ? 1 : -1;
+            fillImage(backupImg, items[nextIndex], -position);
             core.effect.grade(
-                'this.from.style.left->' + (event.type === 'swiperight' ? 1 : -1) * viewWidth + ';this.to.style.left->0',
+                'this.from.style.left->' + position * viewWidth + ';this.to.style.left->0',
                 300,
                 {
                     $: {from: currImg, to: backupImg},
