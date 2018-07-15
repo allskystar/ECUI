@@ -72,20 +72,16 @@
         var index = items.indexOf(currHotspot),
             nextIndex = index;
         if (event.type === 'swiperight') {
-            if (index > 0) {
-                nextIndex = index - 1;
-            }
+            nextIndex = index > 0 ? index - 1 : items.length - 1;
         } else if (event.type === 'swipeleft') {
-            if (index < items.length - 1) {
-                nextIndex = index + 1;
-            }
+            nextIndex = index < items.length - 1 ? index + 1 : 0;
         }
         if (index !== nextIndex) {
             fillImage(currImg, currHotspot, 0);
             backupImg.style.display = '';
-            fillImage(backupImg, items[nextIndex], nextIndex - index);
+            fillImage(backupImg, items[nextIndex], event.type === 'swiperight' ? -1 : 1);
             core.effect.grade(
-                'this.from.style.left->' + (index - nextIndex) * viewWidth + ';this.to.style.left->0',
+                'this.from.style.left->' + (event.type === 'swiperight' ? 1 : -1) * viewWidth + ';this.to.style.left->0',
                 300,
                 {
                     $: {from: currImg, to: backupImg},
