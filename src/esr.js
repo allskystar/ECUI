@@ -958,7 +958,12 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
         hideSelect: function () {
             if (esrOptions.app) {
                 if (selectedControl) {
-                    selectedControl.setParent(core.$('AppSelectContainer').getControl());
+                    var container = core.$('AppSelectContainer');
+                    if (selectedControl instanceof ui.Control) {
+                        selectedControl.setParent(container.getControl());
+                    } else {
+                        core.dispose(container, true);
+                    }
                     selectedControl = null;
                 }
 
@@ -1339,17 +1344,23 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
          * 显示选择框。
          * @public
          *
-         * @param {ecui.ui.Control} control 选择框对应的控件
+         * @param {ecui.ui.Control|string} control 选择框对应的控件或HTML片断
          * @param {string} title 选择框标题
          */
         showSelect: function (control, title) {
             if (esrOptions.app) {
                 var container = core.$('AppSelectContainer');
+                container.innerHTML = '';
 
                 esr.setData('AppSelectTitle', title || '');
 
                 if (control) {
-                    control.setParent(container.getControl());
+                    if (control instanceof ui.Control) {
+                        control.setParent(container.getControl());
+                    } else {
+                        container.innerHTML = control;
+                        core.init(container);
+                    }
                     selectedControl = control;
                 }
 
