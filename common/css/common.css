@@ -556,13 +556,13 @@ a {
 }
 
 .ui-tab-item-selected {
-    height: 38px;
-    border: 1px solid #acbaca;
-    border-bottom: 1px solid #ffffff;
+    height: 40px;
+//    border: 1px solid #acbaca;
+//    border-bottom: 1px solid #ffffff;
     border-radius: 4px 4px 0px 0px;
     color: #495362;
     text-align: center;
-    line-height: 38px;
+    line-height: 40px;
 }
 
 .ui-table {

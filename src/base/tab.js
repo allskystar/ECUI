@@ -13,6 +13,7 @@
 
 @fields
 _cSelected       - 当前选中的选项卡
+_eBar            - 下划线变量
 _eContainer      - 容器 DOM 元素
 */
 (function () {
@@ -69,6 +70,7 @@ _eContainer      - 容器 DOM 元素
      * 每一个选项卡都包含一个头部区域与容器区域，选项卡控件存在互斥性，只有唯一的一个选项卡能被选中并显示容器区域。
      * options 属性：
      * selected    选中的选项序号，默认为0
+     * bar         是否需要下划线，默认为false
      * gesture     是否支持手势切换，默认为true
      * @control
      */
@@ -81,6 +83,9 @@ _eContainer      - 容器 DOM 元素
                 titleEl.appendChild(el.firstChild);
             }
             el.appendChild(titleEl);
+            if (options.bar) {
+                this._eBar = dom.create({className: 'ui-tab-bar'});
+            }
 
             ui.Control.call(this, el, options);
 
@@ -191,6 +196,7 @@ _eContainer      - 容器 DOM 元素
              * @override
              */
             $dispose: function () {
+                this._eBar = null;
                 core.removeGestureListeners(this);
                 ui.Control.prototype.$dispose.call(this);
             },
@@ -209,9 +215,7 @@ _eContainer      - 容器 DOM 元素
              * @override
              */
             $ready: function (event) {
-                ui.Control.prototype.$ready.call(this, event.options);
-
-                if (!this._cSelected && event.options.selected !== 'none') {
+                if (!this._cSelected) {
                     this.setSelected(+(event.options.selected) || 0);
                 }
 
@@ -221,6 +225,8 @@ _eContainer      - 容器 DOM 元素
                         swiperight: swipe
                     });
                 }
+
+                ui.Control.prototype.$ready.call(this, event.options);
             },
 
             /**
@@ -258,7 +264,7 @@ _eContainer      - 容器 DOM 元素
                     item = this.getItem(item);
                 }
 
-                if (this._cSelected !== item) {
+                if (item && this._cSelected !== item) {
                     if (this._cSelected) {
                         this._cSelected.alterClass('-selected');
                         if (this._cSelected._eContainer && (!item || this._cSelected._eContainer !== item._eContainer)) {
@@ -274,6 +280,35 @@ _eContainer      - 容器 DOM 元素
                     }
 
                     this._cSelected = item;
+
+                    if (this._eBar) {
+                        if (this.isReady()) {
+                            var main = this.getMain(),
+                                parent = dom.parent(this._eBar),
+                                left = this._eBar.offsetLeft,
+                                top = this._eBar.offsetTop,
+                                width = this._eBar.offsetWidth;
+
+                            if (parent !== main) {
+                                this.$$barMargin = parent.getControl().getClientWidth() - width;
+                            }
+
+                            var toLeft = item.getX() + this.$$barMargin / 2,
+                                toWidth = item.getWidth() - this.$$barMargin;
+
+                            this._eBar.style.top = top + 'px';
+                            this._eBar.style.left = left + 'px';
+                            this._eBar.style.width = width + 'px';
+                            this.getMain().appendChild(this._eBar);
+
+                            util.timer(function () {
+                                this._eBar.style.left = toLeft + 'px';
+                                this._eBar.style.width = toWidth + 'px';
+                            }, 0, this);
+                        } else {
+                            item.getBody().appendChild(this._eBar);
+                        }
+                    }
                 }
             }
         },
