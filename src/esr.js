@@ -624,8 +624,9 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
      * @private
      *
      * @param {object} route 路由对象，新的路由
+     * @param {Function} onfinish 执行完后的回调函数
      */
-    function transition(route) {
+    function transition(route, onfinish) {
         if (route.NAME !== currRouteName) {
             var layer = getLayer(route);
             if (layer) {
@@ -672,6 +673,9 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                                     pauseStatus = false;
                                     if (esrOptions.transition === 'cover') {
                                         core.mask();
+                                    }
+                                    if (onfinish) {
+                                        onfinish();
                                     }
                                 }
                             }
@@ -736,13 +740,13 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
          * @public
          *
          * @param {string} name 全局变量名称
-         * @param {Function} fn 监听函数
+         * @param {Function} listener 监听函数
          */
-        addGlobalListener: function (name, fn) {
+        addGlobalListener: function (name, listener) {
             globalListeners[name] = globalListeners[name] || [];
-            globalListeners[name].push(fn);
+            globalListeners[name].push(listener);
             if (global[name]) {
-                fn(global[name]);
+                listener(global[name]);
             }
         },
 
@@ -957,17 +961,19 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
          */
         hideSelect: function () {
             if (esrOptions.app) {
-                if (selectedControl) {
+                transition(esr.getRoute(esr.getLocation().split('~')[0]), function () {
                     var container = core.$('AppSelectContainer');
-                    if (selectedControl instanceof ui.Control) {
-                        selectedControl.setParent(container.getControl());
-                    } else {
-                        core.dispose(container, true);
+                    if (selectedControl) {
+                        if (selectedControl instanceof ui.Control) {
+                            selectedControl.setParent();
+                        } else {
+                            core.dispose(container, true);
+                            container.innerHTML = '';
+                        }
+                        selectedControl = null;
                     }
-                    selectedControl = null;
-                }
-
-                transition(esr.getRoute(esr.getLocation().split('~')[0]));
+                    core.removeControlListeners(core.findControl(container));
+                });
             }
         },
 
@@ -1344,24 +1350,30 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
          * 显示选择框。
          * @public
          *
-         * @param {ecui.ui.Control|string} control 选择框对应的控件或HTML片断
+         * @param {ecui.ui.Control|string} content 选择框对应的控件或HTML片断
+         * @param {ecui.ui.Control} onconfirm 操作成功后执行回调的函数
          * @param {string} title 选择框标题
          */
-        showSelect: function (control, title) {
+        showSelect: function (content, onconfirm, title) {
             if (esrOptions.app) {
                 var container = core.$('AppSelectContainer');
-                container.innerHTML = '';
+                core.addEventListener(core.findControl(container), 'confirm', function (event) {
+                    esr.hideSelect();
+                    if (onconfirm) {
+                        onconfirm(event);
+                    }
+                });
 
                 esr.setData('AppSelectTitle', title || '');
 
-                if (control) {
-                    if (control instanceof ui.Control) {
-                        control.setParent(container.getControl());
+                if (content) {
+                    if (content instanceof ui.Control) {
+                        content.setParent(container.getControl());
                     } else {
-                        container.innerHTML = control;
+                        container.innerHTML = content;
                         core.init(container);
                     }
-                    selectedControl = control;
+                    selectedControl = content;
                 }
 
                 transition({

@@ -6,7 +6,6 @@
 </div>
 
 @fields
-_cOwner  - 需要监听选择框结果的父控件
 _aSelect - 全部的下拉框控件列表
 */
 //{if 0}//
@@ -63,15 +62,16 @@ _aSelect - 全部的下拉框控件列表
                                 ui.Item.prototype.$click.call(this, event);
 
                                 var select = this.getParent(),
-                                    multi = select.getParent();
+                                    multi = select.getParent(),
+                                    parent = multi.getParent();
 
-                                if (multi._cOwner && multi._aSelect.indexOf(select) === multi._aSelect.length - 1) {
+                                if (parent && multi._aSelect.indexOf(select) === multi._aSelect.length - 1) {
                                     multi._aSelect.forEach(function (item, index) {
                                         if (index) {
                                             item.hide();
                                         }
                                     });
-                                    core.dispatchEvent(multi._cOwner, 'confirm', {selected: this});
+                                    core.dispatchEvent(parent, 'confirm', {selected: this});
                                 } else {
                                     select.setSelected(this);
                                 }
@@ -187,15 +187,13 @@ _aSelect - 全部的下拉框控件列表
              * @public
              *
              * @param {object} data 多级联动数据，是一个数组，每一项都包含code,value属性，children属性可以不包含，如果包含，结构与data相同
-             * @param {object} owner 需要监听的最后一项选择的父控件，选择最后一项后将自动触发此控件的confirm事件
              */
-            setData: function (data, owner) {
+            setData: function (data) {
                 this._aSelect.forEach(function (item) {
                     item.removeAll(true);
                 });
                 core.dispatchEvent(this, 'request', {data: data, owner: this._aSelect[0]});
                 this._aSelect[0].add(data);
-                this._cOwner = owner;
             }
         }
     );
