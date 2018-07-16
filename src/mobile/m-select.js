@@ -89,7 +89,7 @@ _bRequired    - 是否必须选择
              */
             $confirm: function (event) {
                 var item = core.getFocused();
-                if (this.getSelected() !== item) {
+                if ((item === null || item instanceof this.Item) && this.getSelected() !== item) {
                     this.setSelected(item);
                     core.dispatchEvent(this, 'change', event);
                 }

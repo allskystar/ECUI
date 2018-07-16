@@ -2517,9 +2517,9 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                         // 允许获得焦点的控件必须是当前激活的控件，或者它没有焦点的时候才允许获得
                         // 典型的用例是滚动条，滚动条不需要获得焦点，如果滚动条的父控件没有焦点
                         // 父控件获得焦点，否则焦点不发生变化
-                        var parent = getCommonParent(focusedControl, control);
+                        var parent = getCommonParent(focusedControl, target);
                         bubble(focusedControl, 'blur', null, parent);
-                        bubble(focusedControl = control, 'focus', null, parent);
+                        bubble(focusedControl = target, 'focus', null, parent);
                     }
                     break;
                 }
