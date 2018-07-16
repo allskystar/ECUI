@@ -63,15 +63,18 @@ _aSelect - 全部的下拉框控件列表
 
                                 var select = this.getParent(),
                                     multi = select.getParent(),
-                                    parent = multi.getParent();
+                                    parent = multi.getParent(),
+                                    items = [];
 
                                 if (parent && multi._aSelect.indexOf(select) === multi._aSelect.length - 1) {
                                     multi._aSelect.forEach(function (item, index) {
                                         if (index) {
                                             item.hide();
                                         }
+                                        items.push(item.getSelected());
                                     });
-                                    core.dispatchEvent(parent, 'confirm', {selected: this});
+                                    items[items.length - 1] = this;
+                                    core.dispatchEvent(parent, 'confirm', {item: this, items: items});
                                 } else {
                                     select.setSelected(this);
                                 }
