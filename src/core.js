@@ -30,6 +30,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
         scrollNarrow,             // 浏览器滚动条相对窄的一边的长度
 
         initRecursion = 0,        // init 操作的递归次数
+        readyList = [],
 
         bodyElement,
         maskElements = [],        // 遮罩层组
@@ -1711,6 +1712,32 @@ outer:          for (var caches = [], target = event.target, el; target; target 
         },
 
         /**
+         * 在元素显示时进行下级控件的缓存处理。
+         * @public
+         *
+         * @param {HTMLElement} el 切换为显示状态的 DOM 元素
+         */
+        cacheAtShow: function (el) {
+            core.query(function (item) {
+                return dom.contain(el, item.getMain());
+            }).sort(function (a, b) {
+                var ia = 0,
+                    ib = 0,
+                    parent;
+
+                for (parent = a; parent; parent = parent.getParent()) {
+                    ia++;
+                }
+                for (parent = b; parent; parent = parent.getParent()) {
+                    ib++;
+                }
+                return ib - ia;
+            }).forEach(function (item) {
+                item.cache();
+            });
+        },
+
+        /**
          * 创建 ECUI 控件。
          * 标准的创建 ECUI 控件 的工厂方法，适用于少量创建控件，生成的控件不需要任何额外的调用即可正常的显示，对于批量创建控件，请使用 $create 方法。options 对象支持的属性如下：
          * id        {string} 当前控件的 id，提供给 delegate 与 get 方法使用
@@ -2284,13 +2311,18 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                     item.object.init(item.options);
                 });
 
-                if (core.onready) {
-                    core.onready();
-                }
-
                 initRecursion--;
-                if (!isToucher && !initRecursion) {
-                    dom.addEventListener(window, 'resize', events.orientationchange);
+                if (!initRecursion) {
+                    if (readyList) {
+                        readyList.forEach(function (item) {
+                            item();
+                        });
+                        readyList = null;
+                    }
+
+                    if (!isToucher) {
+                        dom.addEventListener(window, 'resize', events.orientationchange);
+                    }
                 }
 
                 // 防止循环引用
@@ -2413,6 +2445,16 @@ outer:          for (var caches = [], target = event.target, el; target; target 
          */
         query: function (fn, thisArg) {
             return independentControls.filter(fn, thisArg);
+        },
+
+        /**
+         * 框架加载完成后需要调用的函数。
+         * @public
+         *
+         * @param {Function} fn 需要调用的函数
+         */
+        ready: function (fn) {
+            readyList.push(fn);
         },
 
         /**

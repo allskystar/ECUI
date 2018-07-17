@@ -32,27 +32,64 @@
         tapHandle;
 
     /**
+     * 计算图片最适合大小。
+     * @private
+     *
+     * @param {ecui.ui.MPhotoHotspot} hotspot 焦点图对象
+     * @param {number} imgWidth 高清图片初始宽度
+     * @param {number} imgHeight 高清图片初始高度
+     */
+    function calcSize(hotspot, imgWidth, imgHeight) {
+        var body = core.getBody(),
+            viewWidth = body.clientWidth,
+            viewHeight = body.clientHeight,
+            height = viewWidth / imgWidth * imgHeight;
+
+        if (height > viewHeight) {
+            hotspot.$$calcWidth = viewHeight / imgHeight * imgWidth;
+            hotspot.$$calcHeight = viewHeight;
+        } else {
+            hotspot.$$calcWidth = viewWidth;
+            hotspot.$$calcHeight = height;
+        }
+
+        hotspot._bLoaded = true;
+    }
+
+    /**
      * 高清图片填充。
      * @private
      *
      * @param {HTMLElement} img 图片元素
-     * @param {ecui.ui.MPhotoHotspot} hotspot 热点图对象
+     * @param {ecui.ui.MPhotoHotspot} hotspot 焦点图对象
      * @param {number} position 高清图片初始出现的位置(左右移动时不同)
      */
     function fillImage(img, hotspot, position) {
-        var body = core.getBody();
-        var viewWidth = body.clientWidth;
+        var data = hotspot._bLoaded ? hotspot : ui.MPhotoHotspot.DEFAULT,
+            body = core.getBody(),
+            viewWidth = body.clientWidth,
+            items = core.query(function (item) {
+                return item instanceof ui.MPhotoHotspot;
+            });
 
-        img.style.top = (body.clientHeight - hotspot.$$calcHeight) / 2 + 'px';
-        img.style.left = ((viewWidth - hotspot.$$calcWidth) / 2 + position * viewWidth) + 'px';
-        img.style.width = hotspot.$$calcWidth + 'px';
-        img.src = hotspot.getHDImageUrl();
+        img.style.top = (body.clientHeight - data.$$calcHeight) / 2 + 'px';
+        img.style.left = ((viewWidth - data.$$calcWidth) / 2 + position * viewWidth) + 'px';
+        img.style.width = data.$$calcWidth + 'px';
+        img.src = data.getHDImageUrl();
 
-        var items = core.query(function (item) {
-            return item instanceof ui.MPhotoHotspot;
-        });
+        hotspot.$$calcWidth = data.$$calcWidth;
+        hotspot.$$calcHeight = data.$$calcHeight;
         title.firstChild.innerHTML = hotspot.getMain().title;
         title.lastChild.innerHTML = (items.indexOf(hotspot) + 1) + '/' + items.length;
+    }
+
+    /**
+     * 图片加载事件。
+     * @private
+     */
+    function load() {
+        calcSize(this.getControl(), this.width, this.height);
+        dom.removeEventListener(this, 'load', load);
     }
 
     /**
@@ -76,6 +113,7 @@
         } else if (event.type === 'swipeleft') {
             nextIndex = index < items.length - 1 ? index + 1 : 0;
         }
+
         if (index !== nextIndex) {
             fillImage(currImg, currHotspot, 0);
             backupImg.style.display = '';
@@ -128,25 +166,11 @@
      */
     ui.MPhotoHotspot = core.inherits(
         ui.Control,
+        function (el, options) {
+            dom.addEventListener(el, 'load', load);
+            ui.Control.call(this, el, options);
+        },
         {
-            /**
-             * @override
-             */
-            $cache: function (style) {
-                ui.Control.prototype.$cache.call(this, style, true);
-                var body = core.getBody(),
-                    viewWidth = body.clientWidth,
-                    viewHeight = body.clientHeight,
-                    height = viewWidth / this.getWidth() * this.getHeight();
-                if (height > viewHeight) {
-                    this.$$calcWidth = viewHeight / this.getHeight() * this.getWidth();
-                    this.$$calcHeight = viewHeight;
-                } else {
-                    this.$$calcWidth = viewWidth;
-                    this.$$calcHeight = height;
-                }
-            },
-
             /**
              * 点击时控件开始焦点图处理。
              * @override
@@ -212,4 +236,16 @@
             }
         }
     );
+
+    ui.MPhotoHotspot.DEFAULT = {
+        width: 750,
+        height: 562,
+        getHDImageUrl: function () {
+            return 'images/ecui/fail.png';
+        }
+    };
+
+    core.ready(function () {
+        calcSize(ui.MPhotoHotspot.DEFAULT, ui.MPhotoHotspot.DEFAULT.width, ui.MPhotoHotspot.DEFAULT.height);
+    });
 }());

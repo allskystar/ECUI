@@ -276,6 +276,7 @@ _eContainer      - 容器 DOM 元素
                         item.alterClass('+selected');
                         if (item._eContainer && (!this._cSelected || this._cSelected._eContainer !== item._eContainer)) {
                             dom.removeClass(item._eContainer, 'ui-hide');
+                            core.cacheAtShow(item._eContainer);
                         }
                     }
 

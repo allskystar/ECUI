@@ -142,6 +142,7 @@ _aChildren     - 子控件集合
             $expand: function () {
                 this._bCollapsed = false;
                 dom.removeClass(this._eChildren, 'ui-hide');
+                core.cacheAtShow(this._eChildren);
                 refresh(this);
             },
 
