@@ -167,7 +167,11 @@
     ui.MPhotoHotspot = core.inherits(
         ui.Control,
         function (el, options) {
-            dom.addEventListener(el, 'load', load);
+            if (el.width) {
+                calcSize(this, el.width, el.height);
+            } else {
+                dom.addEventListener(el, 'load', load);
+            }
             ui.Control.call(this, el, options);
         },
         {
