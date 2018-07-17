@@ -203,6 +203,10 @@
                 ecui.io.ajax(url, {
                     cache: true,
                     onsuccess: function (text) {
+                        if (!text) {
+                            loadRouteCss();
+                            return;
+                        }
                         text = text.replace('<header', '<div style="display:none"');
                         text = text.replace('<container', '<div ui="type:ecui.esr.AppLayer" style="display:none" id="' + moduleName.replace(/[._]/g, '-').replace(/\//g, '_') + filename.replace(/[._]/g, '-') + '"');
                         text = text.replace('</header>', '</div>');
