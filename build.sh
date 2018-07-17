@@ -132,9 +132,9 @@ do
         file=""
     fi
 
-    text=`echo "$text" | awk '{gsub(/ecui\.esr\.loadRoute\("([^"]*)"\);/,"&\n");print}' | grep "ecui.esr.loadRoute("`
+    text=`echo "$text" | awk '{gsub(/ecui\.esr\.loadRoute\("([^"]*)"\)(;)?/,"&\n");print}' | grep "ecui.esr.loadRoute("`
     echo -e "$file\n$text" | sed -e "s/.*ecui\.esr\.loadRoute(\"\([^\"]*\)\").*/$reg\1 \1/" | awk '{if(substr($1,1,2)!="//" && $2){gsub(/[\._]/,"-",$1);gsub(/\//,"_",$1);printf "."$1"{//{include file=\"";if(match($2,/.*\./)){gsub(/\./,"/",$2);printf substr($2,1,RLENGTH)"route."substr($2,RLENGTH+1)}else{printf "route."$2}print ".css\"}//}"}else{print}}' | eval $js_merge | eval $css_compile > "$outpath/${module}_define_.css"
-    echo "$text" | awk '{if(gsub(/(.*ecui\.esr\.loadRoute\("|"\)(;)*$)/,"")){match($1,/.*\./);value=$1;gsub(/\./,"/");print "//{include file=\""substr($1,1,RLENGTH)"route."substr($1,RLENGTH+1)".html\" assign=\"tpl\"}////{\$tpl|regex_replace:\"<!--\\s*target:\\s*([^>]+)-->\":\"<!-- target: "substr(value,1,RLENGTH)"\$1 -->\"}//"}else{print "//{include file=\""$1".html\"}//"}}' | sed -e "s/.*ecui.esr.loadRoute(\"\([^\"]*\)\").*/\/\/{include file='route.\1.html'}\/\//g" | eval $js_merge | eval "sed -e \"s/ui=\\\"type:NS\./ui=\\\"type:ecui.ns._$ns.ui./g\"" | eval $html_compress > "$outpath/${module}_define_.html"
+    echo "$text" | awk '{if(gsub(/(.*ecui\.esr\.loadRoute\("|"\)(;)*$)/,"")){match($1,/.*\./);value=$1;gsub(/\./,"/");print "//{include file=\""substr($1,1,RLENGTH)"route."substr($1,RLENGTH+1)".html\" assign=\"tpl\"}////{\$tpl|regex_replace:\"<!--\\s*target:\\s*([^>]+)\\s*-->\":\"<!-- target: "substr(value,1,RLENGTH)"\$1 -->\"}//"}else{print "//{include file=\""$1".html\"}//"}}' | sed -e "s/.*ecui.esr.loadRoute(\"\([^\"]*\)\").*/\/\/{include file='route.\1.html'}\/\//g" | eval $js_merge | eval "sed -e \"s/ui=\\\"type:NS\./ui=\\\"type:ecui.ns._$ns.ui./g\"" | eval $html_compress > "$outpath/${module}_define_.html"
 
     if [ $module ]
     then
