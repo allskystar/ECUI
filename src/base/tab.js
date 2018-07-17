@@ -291,19 +291,15 @@ _eContainer      - 容器 DOM 元素
 
                             if (parent !== main) {
                                 this.$$barMargin = parent.getControl().getClientWidth() - width;
+                                this._eBar.style.top = top + 'px';
+                                this._eBar.style.left = left + 'px';
+                                this._eBar.style.width = width + 'px';
+                                main.appendChild(this._eBar);
                             }
 
-                            var toLeft = item.getX() + this.$$barMargin / 2,
-                                toWidth = item.getWidth() - this.$$barMargin;
-
-                            this._eBar.style.top = top + 'px';
-                            this._eBar.style.left = left + 'px';
-                            this._eBar.style.width = width + 'px';
-                            this.getMain().appendChild(this._eBar);
-
                             util.timer(function () {
-                                this._eBar.style.left = toLeft + 'px';
-                                this._eBar.style.width = toWidth + 'px';
+                                this._eBar.style.left = (item.getX() + this.$$barMargin / 2) + 'px';
+                                this._eBar.style.width = (item.getWidth() - this.$$barMargin) + 'px';
                             }, 0, this);
                         } else {
                             item.getBody().appendChild(this._eBar);

@@ -23,6 +23,7 @@ _aOptions    - 选项框数组
         function (el, options) {
             util.setDefault(options, 'enter', 'bottom');
             util.setDefault(options, 'mask', '0.5');
+            util.setDefault(options, 'readOnly', true);
 
             var popupEl = dom.create({
                     className: options.classes.join('-popup ') + 'ui-popup ui-hide'
