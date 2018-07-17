@@ -5,6 +5,11 @@
         display: none !important;
         .width100rate();
     }
+
+    input {
+        width: 100%;
+        height: 100%;
+    }
 }
 
 .ui-text-empty,

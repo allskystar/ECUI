@@ -196,8 +196,6 @@ _ePlaceHolder - 为空时的提示信息标签
             $initStructure: function (width, height) {
                 ui.InputControl.prototype.$initStructure.call(this, width, height);
                 var input = this.getInput();
-                input.style.width = width + 'px';
-                input.style.height = height + 'px';
                 if (ieVersion < 9 && input.tagName === 'INPUT') {
                     input.style.lineHeight = height + 'px';
                 }
