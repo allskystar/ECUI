@@ -121,6 +121,13 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                 }
             });
         }
+
+        if (route.NAME) {
+            autoChildRoute(route);
+        } else {
+            autoChildRoute(route);
+            init();
+        }
     }
 
     /**
@@ -548,12 +555,6 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
 
         el.style.visibility = '';
 
-        if (route.NAME) {
-            autoChildRoute(route);
-        } else {
-            autoChildRoute(route);
-            init();
-        }
         routeRequestCount--;
     }
 
@@ -1066,7 +1067,6 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
 
             if (route.view === undefined) {
                 beforerender(route);
-                init();
                 afterrender(route);
                 routeRequestCount--;
             } else if ('function' === typeof route.view) {
@@ -1075,14 +1075,12 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                         if (name) {
                             render(route, name);
                         } else {
+                            afterrender(route);
                             routeRequestCount--;
                         }
-                        afterrender(route);
-                        autoChildRoute(route);
                     }) !== false) {
-                    routeRequestCount--;
                     afterrender(route);
-                    autoChildRoute(route);
+                    routeRequestCount--;
                 }
             } else if (engine.getRenderer(route.view)) {
                 render(route);

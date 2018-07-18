@@ -410,8 +410,8 @@ _nBottomIndex  - 下部隐藏的选项序号
             setPosition: function (x, y) {
                 var top = ui.MScroll.Methods.getY.call(this);
 
-                if (top < -screen.availHeight * 0.5) {
-                    for (; top < -screen.availHeight * 0.5; ) {
+                if (top < -screen.availHeight * 1.5) {
+                    for (; top < -screen.availHeight * 1.5; ) {
                         var item = this.getItem(this._nTopIndex++),
                             height = item.getHeight();
 

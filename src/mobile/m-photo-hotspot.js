@@ -193,7 +193,7 @@
                 body.appendChild(title);
                 currHotspot = this;
                 fillImage(currImg, this, 0);
-                core.mask(0.9);
+                core.mask(1);
                 util.timer(function () {
                     core.addGestureListeners(null, {
                         swipeleft: swipe,
