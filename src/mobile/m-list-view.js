@@ -56,6 +56,7 @@ _nBottomIndex  - 下部隐藏的选项序号
         {
             HTML_LOADING: '正在加载...',
             HTML_REFRESH: '下拉刷新',
+            HTML_PREPARE: '准备刷新',
             HTML_LOADED: '加载完成',
             HTML_NODATA: '没有更多数据',
 
@@ -183,7 +184,10 @@ _nBottomIndex  - 下部隐藏的选项序号
              * 拖拽到最顶部事件。
              * @event
              */
-            $headercomplete: setComplete,
+            $headercomplete: function () {
+                setComplete.call(this);
+                this._eHeader.innerHTML = this.HTML_PREPARE;
+            },
 
             /**
              * 拖拽到达顶部区域事件。
