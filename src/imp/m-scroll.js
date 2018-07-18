@@ -13,23 +13,21 @@
         NAME: '$MScroll',
 
         constructor: function (el, options) {
-            if (options.mode !== 'native') {
-                var bodyEl = dom.create(
-                        {
-                            className: options.classes.join('-body ') + 'ui-mobile-scroll-body'
-                        }
-                    );
+            var bodyEl = dom.create(
+                    {
+                        className: options.classes.join('-body ') + 'ui-mobile-scroll-body'
+                    }
+                );
 
-                for (; el.firstChild; ) {
-                    bodyEl.appendChild(el.firstChild);
-                }
-
-                dom.addClass(el, 'ui-mobile-scroll');
-                el.appendChild(bodyEl);
-                this.$setBody(bodyEl);
+            for (; el.firstChild; ) {
+                bodyEl.appendChild(el.firstChild);
             }
 
-            namedMap[this.getUID()] = {mode: options.mode};
+            dom.addClass(el, 'ui-mobile-scroll');
+            el.appendChild(bodyEl);
+            this.$setBody(bodyEl);
+
+            namedMap[this.getUID()] = {x: 0, y: 0};
         },
 
         Methods: {
@@ -41,8 +39,7 @@
 
                 var main = this.getMain(),
                     body = this.getBody(),
-                    data = namedMap[this.getUID()],
-                    mode = data.mode !== 'native';
+                    data = namedMap[this.getUID()];
 
                 core.drag(
                     this,
@@ -51,9 +48,9 @@
                         el: body,
                         decelerate: 400,
                         absolute: true,
-                        left: data.left !== undefined ? data.left : main.clientWidth - (mode ? body.offsetWidth : main.scrollWidth),
+                        left: data.left !== undefined ? data.left : main.clientWidth - body.offsetWidth,
                         right: data.right !== undefined ? data.right : 0,
-                        top: data.top !== undefined ? data.top : main.clientHeight - (mode ? body.offsetHeight : main.scrollHeight),
+                        top: data.top !== undefined ? data.top : main.clientHeight - body.offsetHeight,
                         bottom: data.bottom !== undefined ? data.bottom : 0,
                         limit: data.range
                     }
@@ -71,27 +68,9 @@
             /**
              * @override
              */
-            $dragmove: function (event) {
-                this.$MScroll.$dragmove.call(this, event);
-                if (namedMap[this.getUID()].mode !== 'native') {
-                    var style = this.getBody().style;
-                    style.left = event.x + 'px';
-                    style.top = event.y + 'px';
-                } else {
-                    style = this.getMain();
-                    style.scrollLeft = -event.x;
-                    style.scrollTop = -event.y;
-                }
-                event.preventDefault();
-            },
-
-            /**
-             * @override
-             */
             $dragstart: function (event) {
                 this.$MScroll.$dragstart.call(this, event);
                 namedMap[this.getUID()].scrolling = true;
-                event.preventDefault();
             },
 
             /**
@@ -124,14 +103,14 @@
              * @override
              */
             getX: function () {
-                return namedMap[this.getUID()].mode !== 'native' ? this.getBody().offsetLeft : -this.getMain().scrollLeft;
+                return namedMap[this.getUID()].x;
             },
 
             /**
              * @override
              */
             getY: function () {
-                return namedMap[this.getUID()].mode !== 'native' ? this.getBody().offsetTop : -this.getMain().scrollTop;
+                return namedMap[this.getUID()].y;
             },
 
             /**
@@ -142,6 +121,18 @@
              */
             isScrolling: function () {
                 return !!namedMap[this.getUID()].scrolling;
+            },
+
+            /**
+             * @override
+             */
+            setPosition: function (x, y) {
+                var data = namedMap[this.getUID()];
+                if (data.x !== x || data.y !== y) {
+                    data.x = x;
+                    data.y = y;
+                    this.getBody().style.transform = 'translate(' + x + 'px,' + y + 'px)';
+                }
             },
 
             /**

@@ -32,11 +32,15 @@ _nDelay   - 延迟时间，如果不自动轮播这个值为0
      * @private
      */
     function next() {
+        var x = this.getX(),
+            width = this.getClientWidth();
+
         this._oHandle = core.effect.grade(
-            'this.scrollLeft->+(' + this.getClientWidth() + ')',
+            function (percent) {
+                this.setPosition(x - width * percent, 0);
+            }.bind(this),
             1000,
             {
-                $: this.getMain(),
                 onfinish: function () {
                     autoNext(this);
                     refresh(this);
@@ -52,14 +56,14 @@ _nDelay   - 延迟时间，如果不自动轮播这个值为0
      * @param {ecui.ui.MCarousel} carousel 轮播图控件
      */
     function refresh(carousel) {
-        var main = carousel.getMain(),
-            left = main.scrollLeft,
+        var body = carousel.getBody(),
+            x = -carousel.getX(),
             width = carousel.getClientWidth();
 
-        if (left < width) {
-            show(carousel, main.firstChild.index);
-        } else if (left > width) {
-            show(carousel, main.lastChild.index);
+        if (x < width) {
+            show(carousel, body.firstChild.index);
+        } else if (x > width) {
+            show(carousel, body.lastChild.index);
         }
     }
 
@@ -71,8 +75,7 @@ _nDelay   - 延迟时间，如果不自动轮播这个值为0
      * @param {number} index 图片编号
      */
     function show(carousel, index) {
-        var main = carousel.getMain(),
-            imgs = dom.children(main),
+        var imgs = dom.children(carousel.getBody()),
             count = imgs.length - 2;
 
         if (currImage) {
@@ -85,7 +88,7 @@ _nDelay   - 延迟时间，如果不自动轮播这个值为0
         imgs[count + 1].index = (index + 1) % count;
         imgs[count + 1].src = imgs[imgs[count + 1].index + 1].src;
 
-        main.scrollLeft = carousel.getClientWidth();
+        carousel.setPosition(-carousel.getClientWidth(), 0);
 
         core.dispatchEvent(carousel, 'change', {index: index, image: currImage});
     }
@@ -102,6 +105,8 @@ _nDelay   - 延迟时间，如果不自动轮播这个值为0
         'ui-mobile-carousel',
         function (el, options) {
             ui.MPanel.call(this, el, options);
+
+            el = this.getBody();
 
             Array.prototype.slice.call(el.childNodes).forEach(function (item) {
                 if (item.nodeType !== 1) {
@@ -150,8 +155,8 @@ _nDelay   - 延迟时间，如果不自动轮播这个值为0
                 if (this._nDelay) {
                     autoNext(this);
                 }
-                var main = this.getMain();
-                if (main.firstChild !== main.lastChild) {
+                var el = this.getBody();
+                if (el.firstChild !== el.lastChild) {
                     refresh(this);
                 }
             },
@@ -162,13 +167,13 @@ _nDelay   - 延迟时间，如果不自动轮播这个值为0
             $initStructure: function (width, height) {
                 ui.MPanel.prototype.$initStructure.call(this, width, height);
 
-                var main = this.getMain();
-                if (main.firstChild !== main.lastChild) {
-                    dom.children(main).forEach(function (item) {
+                var el = this.getBody();
+                if (el.firstChild !== el.lastChild) {
+                    dom.children(el).forEach(function (item) {
                         item.style.display = 'none';
                     });
-                    dom.insertBefore(dom.create('IMG'), main.firstChild);
-                    dom.insertAfter(dom.create('IMG'), main.lastChild);
+                    dom.insertBefore(dom.create('IMG'), el.firstChild);
+                    dom.insertAfter(dom.create('IMG'), el.lastChild);
                     show(this, 0);
                 }
             },
@@ -179,10 +184,10 @@ _nDelay   - 延迟时间，如果不自动轮播这个值为0
             $resize: function (event) {
                 ui.MPanel.prototype.$resize.call(this, event);
 
-                var main = this.getMain();
-                if (main.firstChild !== main.lastChild) {
-                    main.removeChild(main.firstChild);
-                    main.removeChild(main.lastChild);
+                var el = this.getBody();
+                if (el.firstChild !== el.lastChild) {
+                    el.removeChild(el.firstChild);
+                    el.removeChild(el.lastChild);
                 }
             }
         }

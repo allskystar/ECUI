@@ -100,7 +100,7 @@ _oTimer         - 定时器
                     if (time <= 0) {
                         this._oTimer();
                     }
-                }, -100, this);
+                }, -1, this);
             },
 
             /**

@@ -31,6 +31,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
         initRecursion = 0,        // init 操作的递归次数
         readyList = [],
+        dragEvent,
 
         bodyElement,
         maskElements = [],        // 遮罩层组
@@ -922,11 +923,36 @@ outer:          for (var caches = [], target = event.target, el; target; target 
     }
 
     /**
+     * 拖拽的动画帧处理，对低版本浏览器也提供了兼容。
+     * @private
+     *
+     * @param {ecui.ui.Control} target 被拖拽的 ECUI 控件
+     * @param {ECUIEvent} event ECUI 事件对象
+     */
+    function dragAnimationFrame(target, event) {
+        if (window.requestAnimationFrame) {
+            if (!dragEvent) {
+                window.requestAnimationFrame(function () {
+                    if (core.dispatchEvent(target, 'dragmove', dragEvent)) {
+                        target.setPosition(dragEvent.x, dragEvent.y);
+                    }
+                    dragEvent = null;
+                });
+            }
+            dragEvent = event;
+        } else {
+            if (core.dispatchEvent(target, 'dragmove', event)) {
+                target.setPosition(event.x, event.y);
+            }
+        }
+    }
+
+    /**
      * 拖拽结束事件处理。
      * @private
      *
-     * @param {ECUIEvent} ECUI 事件对象
-     * @param {object} ECUI 框架运行环境
+     * @param {ECUIEvent} event ECUI 事件对象
+     * @param {object} env ECUI 框架运行环境
      * @param {ecui.ui.Control} target 被拖拽的 ECUI 控件
      */
     function dragend(event, env, target) {
@@ -956,7 +982,9 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                         event.x = Math.round(options.x + percent * (expectX - options.x));
                         event.y = Math.round(options.y + percent * (expectY - options.y));
                         event.inertia = true;
-                        core.dispatchEvent(target, 'dragmove', event);
+
+                        dragAnimationFrame(target, event);
+
                         if (percent >= 1) {
                             inertiaHandles[uid]();
                             core.dispatchEvent(target, 'dragend', event);
@@ -994,15 +1022,13 @@ outer:          for (var caches = [], target = event.target, el; target; target 
 
         var target = env.target,
             // 计算期待移到的位置
-            expectX = env.originalX + x - track.logicX,
-            expectY = env.originalY + y - track.logicY,
+            expectX = Math.round(env.originalX + x - track.logicX),
+            expectY = Math.round(env.originalY + y - track.logicY),
             // 计算实际允许移到的位置
             realX = Math.min(Math.max(expectX, env.left), env.right),
             realY = Math.min(Math.max(expectY, env.top), env.bottom);
 
-        if (core.dispatchEvent(target, 'dragmove', {x: realX, y: realY, inertia: env !== currEnv})) {
-            target.setPosition(realX, realY);
-        }
+        dragAnimationFrame(target, {x: realX, y: realY, inertia: env !== currEnv});
 
         track.x = realX;
         track.y = realY;
@@ -1956,6 +1982,8 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                 if (core.dispatchEvent(control, 'dragstart', {track: event.track})) {
                     control.setPosition(x, y);
                 }
+
+                event.preventDefault();
             }
         },
 

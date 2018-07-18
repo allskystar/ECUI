@@ -1128,20 +1128,32 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              * @return {Function} 用于关闭定时器的方法
              */
             timer: function (func, delay, caller) {
-                function build() {
-                    return (delay < 0 ? setInterval : setTimeout)(
-                        function () {
-                            func.apply(caller, args);
-                            // 使用delay<0而不是delay>=0，是防止delay没有值的时候，不进入分支
-                            if (!delay || delay > 0) {
-                                func = caller = args = null;
-                            }
-                        },
-                        Math.abs(delay)
-                    );
+                function callFunc() {
+                    if (func) {
+                        func.apply(caller, args);
+                    }
+                    if (delay === -1) {
+                        if (func) {
+                            handle = window.requestAnimationFrame(callFunc);
+                        }
+                    } else if (delay >= 0) {
+                        func = caller = args = null;
+                    }
                 }
 
-                delay = delay || 0;
+                function build() {
+                    return delay === -1 ?
+                            window.requestAnimationFrame(callFunc) :
+                            (delay < 0 ? setInterval : setTimeout)(callFunc, Math.abs(delay));
+                }
+
+                if (delay === -1) {
+                    if (!window.requestAnimationFrame) {
+                        delay = -20;
+                    }
+                } else {
+                    delay = delay || 0;
+                }
 
                 var args = Array.prototype.slice.call(arguments, 3),
                     handle = build(),
@@ -1154,7 +1166,11 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                  * @param {boolean} pause 是否暂时停止定时器，如果参数是 true，再次调用函数并传入参数 true 恢复运行。
                  */
                 return function (pause) {
-                    (delay < 0 ? clearInterval : clearTimeout)(handle);
+                    if (delay === -1) {
+                        window.cancelAnimationFrame(handle);
+                    } else {
+                        (delay < 0 ? clearInterval : clearTimeout)(handle);
+                    }
                     if (pause) {
                         if (pausing) {
                             handle = build();

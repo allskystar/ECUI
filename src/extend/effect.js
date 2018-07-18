@@ -213,7 +213,7 @@ ECUI动画效果库，支持对CSS3动画效果的模拟并扩展了相应的功
                             }
                         }
                     },
-                    -20
+                    -1
                 );
 
             return function () {
@@ -400,7 +400,7 @@ ECUI动画效果库，支持对CSS3动画效果的模拟并扩展了相应的功
                         }
                         fn = options = transition = null;
                     }
-                }, -20);
+                }, -1);
 
             if ('function' !== typeof transition) {
                 transition = effect.FN_CubicBezier.apply(null, __ECUI__CubicBezier[transition || 'ease'] || transition);

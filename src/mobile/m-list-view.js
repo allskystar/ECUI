@@ -107,8 +107,8 @@ _nBottomIndex  - 下部隐藏的选项序号
                 );
                 if (this.isReady()) {
                     top = Math.min(top + this._nTopHidden, 0);
-                    if (util.toNumber(body.style.top) < top) {
-                        body.style.top = top + 'px';
+                    if (ui.MScroll.Methods.getY.call(this) < top) {
+                        ui.MScroll.Methods.setPosition.call(this, 0, top);
                     }
                 }
             },
@@ -295,24 +295,38 @@ _nBottomIndex  - 下部隐藏的选项序号
                     var y = this.getY(),
                         top = Math.min(0, this.getHeight() - this.$$bodyHeight + this.$$headerHeight),
                         options = {
-                            $: {
-                                body: this.getBody(),
-                                head: this._eHeader,
-                                foot: this._eFooter
-                            },
                             onfinish: callback && function () {
                                 this._sStatus = '';
                                 callback();
-                            }
+                            }.bind(this)
                         };
 
                     top = top ? top - this.$$footerHeight : 0;
                     // 解决items不够填充整个listview区域，导致footercomplete的触发，应该先判断head，
                     if (y > 0) {
-                        this._oHandle = core.effect.grade('this.body.style.top->0;this.head.style.top->' + -this.$$headerHeight, 1000, options);
+                        y = ui.MScroll.Methods.getY.call(this);
+                        top = util.toNumber(this._eHeader.style.top);
+
+                        this._oHandle = core.effect.grade(
+                            function (percent) {
+                                ui.MScroll.Methods.setPosition.call(this, 0, y * (1 - percent));
+                                this._eHeader.style.top = (top + (-this.$$headerHeight - top) * percent) + 'px';
+                            }.bind(this),
+                            1000,
+                            options
+                        );
                     } else if (y < top) {
+                        y = ui.MScroll.Methods.getY.call(this);
+                        var bottom = util.toNumber(this._eFooter.style.bottom);
                         // y !== 0解决items不够填充整个listview区域的问题
-                        this._oHandle = core.effect.grade('this.body.style.top->' + (top - this.$$footerHeight + this._nTopHidden) + ';this.foot.style.bottom->' + -this.$$footerHeight, 1000, options);
+                        this._oHandle = core.effect.grade(
+                            function (percent) {
+                                ui.MScroll.Methods.setPosition.call(this, 0, y + (top - this.$$footerHeight + this._nTopHidden - y) * percent);
+                                this._eFooter.style.bottom = (bottom + (-this.$$footerHeight - bottom) * percent) + 'px';
+                            }.bind(this),
+                            1000,
+                            options
+                        );
                     } else {
                         this._eHeader.style.top = -this.$$headerHeight + 'px';
                         this._eFooter.style.bottom = -this.$$footerHeight + 'px';
@@ -352,12 +366,48 @@ _nBottomIndex  - 下部隐藏的选项序号
             /**
              * @override
              */
-            $dragmove: function (event) {
-                var y = event.y,
-                    top = util.toNumber(this.getBody().style.top);
+            $dragstart: function (event) {
+                ui.MScroll.Methods.$dragstart.call(this, event);
+                this._oHandle();
+                this._sStatus = '';
+            },
 
-                if (top < -screen.availHeight * 1.5) {
-                    for (; top < -screen.availHeight * 1.5; ) {
+            /**
+             * 本控件新增选项只能从顶部或底部。
+             * @override
+             */
+            add: function (item, index) {
+                this._bLoading = false;
+                var oldLength = this.getLength();
+                ui.Items.Methods.add.call(this, item, index);
+                setEnterAndLeave.call(this);
+                if (this.isReady()) {
+                    this._eFooter.style.bottom = '0px';
+                    this._eFooter.innerHTML = oldLength === this.getLength() ? this.HTML_NODATA : this.HTML_LOADED;
+                }
+            },
+
+            /**
+             * @override
+             */
+            getY: function () {
+                return ui.MScroll.Methods.getY.call(this) - this._nTopHidden;
+            },
+
+            /**
+             * 本控件不支持删除选项的操作。
+             * @override
+             */
+            remove: util.blank,
+
+            /**
+             * @override
+             */
+            setPosition: function (x, y) {
+                var top = ui.MScroll.Methods.getY.call(this);
+
+                if (top < -screen.availHeight * 0.5) {
+                    for (; top < -screen.availHeight * 0.5; ) {
                         var item = this.getItem(this._nTopIndex++),
                             height = item.getHeight();
 
@@ -397,9 +447,8 @@ _nBottomIndex  - 下部隐藏的选项序号
                         top -= height;
                     }
                 }
-                event.y += this._nTopHidden;
 
-                ui.MScroll.Methods.$dragmove.call(this, event);
+                ui.MScroll.Methods.setPosition.call(this, x, y + this._nTopHidden);
 
                 top = this.getHeight() - this.$$bodyHeight;
                 if (y > 0) {
@@ -423,44 +472,7 @@ _nBottomIndex  - 下部隐藏的选项序号
                     }
                     this._sStatus = status;
                 }
-            },
-
-            /**
-             * @override
-             */
-            $dragstart: function (event) {
-                ui.MScroll.Methods.$dragstart.call(this, event);
-                this._oHandle();
-                this._sStatus = '';
-            },
-
-            /**
-             * 本控件新增选项只能从顶部或底部。
-             * @override
-             */
-            add: function (item, index) {
-                this._bLoading = false;
-                var oldLength = this.getLength();
-                ui.Items.Methods.add.call(this, item, index);
-                setEnterAndLeave.call(this);
-                if (this.isReady()) {
-                    this._eFooter.style.bottom = '0px';
-                    this._eFooter.innerHTML = oldLength === this.getLength() ? this.HTML_NODATA : this.HTML_LOADED;
-                }
-            },
-
-            /**
-             * @override
-             */
-            getY: function () {
-                return ui.MScroll.Methods.getY.call(this) - this._nTopHidden;
-            },
-
-            /**
-             * 本控件不支持删除选项的操作。
-             * @override
-             */
-            remove: util.blank
+            }
         }
     );
 }());

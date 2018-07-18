@@ -140,7 +140,7 @@ _aOptions    - 选项框数组
                         value = String(value);
                         for (var i = 0, item; item = this._aItems[i]; i++) {
                             if (item._sValue === value) {
-                                this.getBody().style.top = (3 - i) * this.$$itemHeight + 'px';
+                                this.setPosition(0, (3 - i) * this.$$itemHeight);
                                 this.setSelected(item);
                                 return;
                             }

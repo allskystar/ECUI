@@ -59,7 +59,7 @@ _bRequired    - 是否必须选择
 
                         var select = this.getParent();
 
-                        this.getBody().style.top = (this.$$itemHeight * (this._nOptionSize - select.getItems().indexOf(select.getSelected()))) + 'px';
+                        this.setPosition(0, this.$$itemHeight * (this._nOptionSize - select.getItems().indexOf(select.getSelected())));
                         core.setFocused(select.getSelected());
                     }
                 },
