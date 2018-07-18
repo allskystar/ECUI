@@ -69,7 +69,7 @@
             body = core.getBody(),
             viewWidth = body.clientWidth,
             items = core.query(function (item) {
-                return item instanceof ui.MPhotoHotspot;
+                return item instanceof ui.MPhotoHotspot && item._sGroup === currHotspot._sGroup;
             });
 
         img.style.top = (body.clientHeight - data.$$calcHeight) / 2 + 'px';
@@ -104,7 +104,7 @@
             return;
         }
         var items = core.query(function (item) {
-            return item instanceof ui.MPhotoHotspot;
+            return item instanceof ui.MPhotoHotspot && item._sGroup === currHotspot._sGroup;
         });
         var index = items.indexOf(currHotspot),
             nextIndex = index;
@@ -162,6 +162,8 @@
     /**
      * 热点图控件。
      * 实现了对原生 ImgElement 的功能扩展，点击时图片会自动放大并使用高清图，可以对同页面全部的热点图进行切换。
+     * options 属性：
+     * group     分组，默认为空
      * @control
      */
     ui.MPhotoHotspot = core.inherits(
@@ -173,6 +175,7 @@
                 dom.addEventListener(el, 'load', load);
             }
             ui.Control.call(this, el, options);
+            this._sGroup = options.group;
         },
         {
             /**
@@ -188,8 +191,8 @@
                 body.appendChild(currImg);
                 body.appendChild(backupImg);
                 body.appendChild(title);
-                fillImage(currImg, this, 0);
                 currHotspot = this;
+                fillImage(currImg, this, 0);
                 core.mask(0.9);
                 util.timer(function () {
                     core.addGestureListeners(null, {
