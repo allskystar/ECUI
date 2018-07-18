@@ -1993,6 +1993,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                 if (core.dispatchEvent(control, 'dragstart', {track: event.track})) {
                     control.setPosition(x, y);
                 }
+                //这里不能preventDefault事件，否则input的软键盘无法出现
             }
         },
 
