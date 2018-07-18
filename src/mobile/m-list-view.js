@@ -61,6 +61,12 @@ _nBottomIndex  - 下部隐藏的选项序号
             HTML_NODATA: '没有更多数据',
 
             /**
+             * 选项部件
+             * @unit
+             */
+            Item: core.inherits(ui.Item),
+
+            /**
              * @override
              */
             $alterItems: function () {

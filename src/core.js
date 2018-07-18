@@ -1039,7 +1039,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
             realX = Math.min(Math.max(expectX, env.left), env.right),
             realY = Math.min(Math.max(expectY, env.top), env.bottom);
 
-        dragAnimationFrame(target, {x: realX, y: realY, inertia: env !== currEnv});
+        dragAnimationFrame(target, {track: track, x: realX, y: realY, inertia: env !== currEnv});
 
         track.x = realX;
         track.y = realY;

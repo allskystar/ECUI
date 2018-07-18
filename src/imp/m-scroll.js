@@ -143,10 +143,18 @@
              */
             setScrollRange: function (range) {
                 var data = namedMap[this.getUID()];
-                data.left = range.left;
-                data.top = range.top;
-                data.right = range.right;
-                data.bottom = range.bottom;
+                if (range.left !== undefined) {
+                    data.left = range.left;
+                }
+                if (range.top !== undefined) {
+                    data.top = range.top;
+                }
+                if (range.right !== undefined) {
+                    data.right = range.right;
+                }
+                if (range.bottom !== undefined) {
+                    data.bottom = range.bottom;
+                }
             },
 
             /**
