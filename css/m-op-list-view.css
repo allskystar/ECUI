@@ -1,0 +1,18 @@
+.ui-mobile-op-listview {
+    .ui-item {
+        width: 100% !important;
+        white-space: nowrap !important;
+
+        > * {
+            display: inline-block !important;
+        }
+
+        > *:first-child {
+            width: 100% !important;
+        }
+
+        > *:first-child + * {
+            vertical-align: top;
+        }
+    }
+}

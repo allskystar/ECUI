@@ -62,6 +62,14 @@
                         }, this);
                     },
 
+                    $click: function (event) {
+                        ui.MListView.prototype.Item.prototype.$click.call(this, event);
+                        if (this.getParent()._cItem) {
+                            core.effect.grade('this.setPosition(#this.getX()->0#)', 400, {$: this.getParent()._cItem});
+                            this.getParent()._cItem = null;
+                        }
+                    },
+
                     $initStructure: function (width, height) {
                         ui.MListView.prototype.Item.prototype.$initStructure.call(this, width, height);
                         height = this.getClientHeight();
@@ -86,7 +94,8 @@
                     },
 
                     setPosition: function (x) {
-                        var sum = this.$$sumWidth;
+                        var sum = this.$$sumWidth,
+                            offset = 0;
                         if (x < -sum * 3 / 4) {
                             Object.assign(this.getParent().getRange(), {left: -sum, right: -sum});
                         } else {
@@ -94,8 +103,9 @@
                         }
                         dom.children(this.getBody()).forEach(function (item, index) {
                             if (index) {
-                                item.style.transform = 'translateX(' + (x * sum / this.$$sumWidth) + 'px)';
+                                item.style.transform = 'translateX(' + (x * sum / this.$$sumWidth - offset) + 'px)';
                                 sum -= this.$$opWidth[index - 1];
+                                offset += this.$$opWidth[index - 1];
                             } else {
                                 item.style.transform = 'translateX(' + x + 'px)';
                             }
