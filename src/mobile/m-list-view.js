@@ -309,7 +309,7 @@ _nBottomIndex  - 下部隐藏的选项序号
 
                         this._oHandle = core.effect.grade(
                             function (percent) {
-                                ui.MScroll.Methods.setPosition.call(this, 0, y * (1 - percent));
+                                ui.MScroll.Methods.setPosition.call(this, 0, Math.round(y * (1 - percent)));
                                 this._eHeader.style.top = (top + (-this.$$headerHeight - top) * percent) + 'px';
                             }.bind(this),
                             1000,
@@ -321,7 +321,7 @@ _nBottomIndex  - 下部隐藏的选项序号
                         // y !== 0解决items不够填充整个listview区域的问题
                         this._oHandle = core.effect.grade(
                             function (percent) {
-                                ui.MScroll.Methods.setPosition.call(this, 0, y + (top - this.$$footerHeight + this._nTopHidden - y) * percent);
+                                ui.MScroll.Methods.setPosition.call(this, 0, Math.round(y + (top - this.$$footerHeight + this._nTopHidden - y) * percent));
                                 this._eFooter.style.bottom = (bottom + (-this.$$footerHeight - bottom) * percent) + 'px';
                             }.bind(this),
                             1000,

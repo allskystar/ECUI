@@ -32,15 +32,11 @@ _nDelay   - 延迟时间，如果不自动轮播这个值为0
      * @private
      */
     function next() {
-        var x = this.getX(),
-            width = this.getClientWidth();
-
         this._oHandle = core.effect.grade(
-            function (percent) {
-                this.setPosition(x - width * percent, 0);
-            }.bind(this),
+            'this.setPosition(#this.getX()->+(' + (-this.getClientWidth()) + ')#,0)',
             1000,
             {
+                $: this,
                 onfinish: function () {
                     autoNext(this);
                     refresh(this);

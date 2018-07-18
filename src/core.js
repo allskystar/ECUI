@@ -936,6 +936,9 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                     if (core.dispatchEvent(target, 'dragmove', dragEvent)) {
                         target.setPosition(dragEvent.x, dragEvent.y);
                     }
+                    if (dragEvent.dragend) {
+                        core.dispatchEvent(target, 'dragend', dragEvent);
+                    }
                     dragEvent = null;
                 });
             }
@@ -987,7 +990,11 @@ outer:          for (var caches = [], target = event.target, el; target; target 
 
                         if (percent >= 1) {
                             inertiaHandles[uid]();
-                            core.dispatchEvent(target, 'dragend', event);
+                            if (dragEvent) {
+                                dragEvent.dragend = true;
+                            } else {
+                                core.dispatchEvent(target, 'dragend', event);
+                            }
                             delete inertiaHandles[uid];
                         }
                     },
@@ -1001,7 +1008,11 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                 return;
             }
         }
-        core.dispatchEvent(target, 'dragend', event);
+        if (dragEvent) {
+            dragEvent.dragend = true;
+        } else {
+            core.dispatchEvent(target, 'dragend', event);
+        }
         delete inertiaHandles[uid];
     }
 
