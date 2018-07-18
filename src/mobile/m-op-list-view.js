@@ -62,12 +62,36 @@
                         }, this);
                     },
 
+                    $initStructure: function (width, height) {
+                        ui.MListView.prototype.Item.prototype.$initStructure.call(this, width, height);
+                        height = this.getClientHeight();
+                        dom.children(this.getBody()).forEach(function (item, index) {
+                            if (index) {
+                                item.style.height = height + 'px';
+                            }
+                        });
+                    },
+
+                    $resize: function (event) {
+                        ui.MListView.prototype.Item.prototype.$resize.call(this, event);
+                        dom.children(this.getBody()).forEach(function (item, index) {
+                            if (index) {
+                                item.style.height = '';
+                            }
+                        });
+                    },
+
                     getX: function () {
                         return +this.getBody().firstChild.style.transform.replace(/translateX\((-?[0-9.]+)px\)/, '$1');
                     },
 
                     setPosition: function (x) {
                         var sum = this.$$sumWidth;
+                        if (x < -sum * 3 / 4) {
+                            Object.assign(this.getParent().getRange(), {left: -sum, right: -sum});
+                        } else {
+                            Object.assign(this.getParent().getRange(), {left: 0, right: 0});
+                        }
                         dom.children(this.getBody()).forEach(function (item, index) {
                             if (index) {
                                 item.style.transform = 'translateX(' + (x * sum / this.$$sumWidth) + 'px)';

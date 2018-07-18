@@ -1349,9 +1349,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                 if (source) {
                     for (var key in source) {
                         if (source.hasOwnProperty(key)) {
-                            if (source[key] !== null && source[key] !== undefined) {
-                                target[key] = source[key];
-                            }
+                            target[key] = source[key];
                         }
                     }
                 }
