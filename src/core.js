@@ -1993,8 +1993,6 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                 if (core.dispatchEvent(control, 'dragstart', {track: event.track})) {
                     control.setPosition(x, y);
                 }
-
-                event.preventDefault();
             }
         },
 
