@@ -153,11 +153,13 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
     function beforerender(route) {
         if (route.main === 'AppCommonContainer') {
             var el = core.$('AppCommonContainer');
+            if (el.route !== route.NAME) {
 //{if 0}//
-            core.dispose(el, true);
+                core.dispose(el, true);
 //{/if}//
-            core.$('AppBackupContainer').id = 'AppCommonContainer';
-            el.id = 'AppBackupContainer';
+                core.$('AppBackupContainer').id = 'AppCommonContainer';
+                el.id = 'AppBackupContainer';
+            }
         }
         if (route.onbeforerender) {
             route.onbeforerender(context);
@@ -174,7 +176,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
         if (url.charAt(0) === '/') {
             return url;
         }
-        var baseUrl = esr.getLocation().split('~')[0].slice(1).split('/');
+        var baseUrl = esr.getLocation().split('~')[0].split('/');
         url = url.split('../');
         baseUrl.splice(baseUrl.length - url.length, url.length, url.pop());
         return baseUrl.join('/');
@@ -192,6 +194,8 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
 
         // 供onready时使用，此时name为route
         if ('string' === typeof name) {
+            name = calcUrl(name);
+
             var route = routes[name],
                 moduleName = getModuleName(name);
 //{if 1}//            var NS = core.ns['_' + moduleName.replace(/\//g, '_')];
