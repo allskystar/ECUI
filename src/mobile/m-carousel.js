@@ -33,7 +33,7 @@ _nDelay   - 延迟时间，如果不自动轮播这个值为0
      */
     function next() {
         this._oHandle = core.effect.grade(
-            'this.setPosition(#this.getX()->+(' + (-this.getClientWidth()) + ')#,0)',
+            'this.setPosition(#round:this.getX()->+(' + (-this.getClientWidth()) + ')#,0)',
             1000,
             {
                 $: this,
