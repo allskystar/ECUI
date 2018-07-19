@@ -28,7 +28,9 @@ _aOptions    - 选项框数组
             var popupEl = dom.create({
                     className: options.classes.join('-popup ') + 'ui-popup ui-hide'
                 }),
-                children = dom.children(el);
+                children = dom.children(el).filter(function (item) {
+                    return item.tagName !== 'INPUT';
+                });
 
             ui.InputControl.call(this, el, options);
 
