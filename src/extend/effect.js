@@ -343,7 +343,7 @@ ECUI动画效果库，支持对CSS3动画效果的模拟并扩展了相应的功
          * @return {Function} 停止渐变或直接执行渐变到最后
          */
         grade: function (fn, duration, options, transition) {
-            function analyser(stat) {
+            function analyser(stat, flag) {
                 var list = stat.split('->'),
                     math = '',
                     values = list[0].split(':');
@@ -353,39 +353,44 @@ ECUI动画效果库，支持对CSS3动画效果的模拟并扩展了相应的功
                     list[0] = values[1];
                 }
 
-                var name = list[0],
+                var name = flag ? '' : list[0] + '=',
                     index = list[0].indexOf('.style.');
 
                 if (index >= 0) {
                     list[0] = 'ecui.dom.getStyle(' + list[0].slice(0, index) + ',"' + list[0].slice(index + 7) + '")';
                 }
                 values = new Function('$', 'return [' + list.join(',') + ']').call(options.$, options);
-                if (list[1].startsWith('+(')) {
-                    values[1] += values[0];
+
+                if (/-?[0-9]+(\.[0-9]+)?/.test(values[0])) {
+                    var currValue = +RegExp['$&'];
+
+                    if (list[1].startsWith('+(')) {
+                        values[1] += currValue;
+                    }
+
+                    if (+currValue !== values[1]) {
+                        return name + (RegExp.leftContext ? '"' + RegExp.leftContext.replace('"', '\\"') + '"+' : '') + math + '(' + currValue + '+(' + values[1] + '-(' + currValue + ')' + ')*p)' + (RegExp.rightContext ? '+"' + RegExp.rightContext.replace('"', '\\"') + '"' : '');
+                    }
                 }
 
-                values.push(math);
-                values.push(name);
-                return values;
+                return '##';
             }
 
             if ('string' === typeof fn) {
                 var result = [];
                 fn.replace(/#.+?#/g, function (item) {
-                    var values = analyser(item.slice(1, -1));
-                    return values[2] + '(' + values[0] + '+(' + values[1] + '-(' + values[0] + ')' + ')*p)';
+                    return analyser(item.slice(1, -1), true);
                 }).split(';').forEach(function (item) {
                     if (item.indexOf('->') < 0) {
-                        result.push(item);
+                        if (item.indexOf('##') < 0) {
+                            result.push(item);
+                        }
                         return;
                     }
 
-                    var values = analyser(item);
-                    if (/-?[0-9]+(\.[0-9]+)?/.test(values[0])) {
-                        var currValue = RegExp['$&'];
-                        if (+currValue !== values[1]) {
-                            result.push(values[3] + '=' + (RegExp.leftContext ? '"' + RegExp.leftContext.replace('"', '\\"') + '"+' : '') + values[2] + '(' + currValue + '+(' + values[1] + '-(' + currValue + ')' + ')*p)' + (RegExp.rightContext ? '+"' + RegExp.rightContext.replace('"', '\\"') + '"' : ''));
-                        }
+                    var value = analyser(item);
+                    if (value !== '##') {
+                        result.push(value);
                     }
                 });
                 if (!result.length) {
