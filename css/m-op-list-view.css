@@ -5,14 +5,11 @@
 
         > * {
             display: inline-block !important;
+            vertical-align: top;
         }
 
         > *:first-child {
             width: 100% !important;
-        }
-
-        > *:first-child + * {
-            vertical-align: top;
         }
     }
 }

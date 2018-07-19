@@ -8,18 +8,17 @@
 </ul>
 
 @fields
+_bOperate - 操作状态，如果为true表示处理左右滑动，如果是false表示处理上下滑动，如果是undefined表示不确定
+_cItem    - 当前处于激活的选项
 */
-(function () {
 //{if 0}//
+(function () {
     var core = ecui,
         dom = core.dom,
-        ui = core.ui,
-        util = core.util,
-
-        ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined;
+        ui = core.ui;
 //{/if}//
     /**
-     * 移动端列表展示控件。
+     * 移动端可操作列表展示控件。
      * @control
      */
     ui.MOpListView = core.inherits(
@@ -41,18 +40,26 @@
                     });
                 },
                 {
+                    /**
+                     * @override
+                     */
                     $activate: function (event) {
                         ui.MListView.prototype.Item.prototype.$activate.call(this, event);
-                        this.getParent().setScrollRange({left: -this.$$sumWidth});
-                        this.getParent().setRange({left: 0, right: 0});
-                        if (this.getParent()._cItem !== this) {
-                            if (this.getParent()._cItem) {
-                                core.effect.grade('this.setPosition(#this.getX()->0#)', 400, {$: this.getParent()._cItem});
+
+                        var parent = this.getParent();
+                        parent.setScrollRange({left: -this.$$sumWidth});
+                        parent.setRange({left: 0, right: 0});
+                        if (parent._cItem !== this) {
+                            if (parent._cItem) {
+                                core.effect.grade('this.setPosition(#this.getX()->0#)', 400, {$: parent._cItem});
                             }
-                            this.getParent()._cItem = this;
+                            parent._cItem = this;
                         }
                     },
 
+                    /**
+                     * @override
+                     */
                     $cache: function (style) {
                         ui.MListView.prototype.Item.prototype.$cache.call(this, style);
                         this.$$sumWidth = 0;
@@ -62,14 +69,22 @@
                         }, this);
                     },
 
+                    /**
+                     * @override
+                     */
                     $click: function (event) {
                         ui.MListView.prototype.Item.prototype.$click.call(this, event);
-                        if (this.getParent()._cItem) {
-                            core.effect.grade('this.setPosition(#this.getX()->0#)', 400, {$: this.getParent()._cItem});
-                            this.getParent()._cItem = null;
+
+                        var parent = this.getParent();
+                        if (parent._cItem) {
+                            core.effect.grade('this.setPosition(#this.getX()->0#)', 400, {$: parent._cItem});
+                            parent._cItem = null;
                         }
                     },
 
+                    /**
+                     * @override
+                     */
                     $initStructure: function (width, height) {
                         ui.MListView.prototype.Item.prototype.$initStructure.call(this, width, height);
                         height = this.getClientHeight();
@@ -80,6 +95,9 @@
                         });
                     },
 
+                    /**
+                     * @override
+                     */
                     $resize: function (event) {
                         ui.MListView.prototype.Item.prototype.$resize.call(this, event);
                         dom.children(this.getBody()).forEach(function (item, index) {
@@ -89,18 +107,22 @@
                         });
                     },
 
+                    /**
+                     * @override
+                     */
                     getX: function () {
                         return +this.getBody().firstChild.style.transform.replace(/translateX\((-?[0-9.]+)px\)/, '$1');
                     },
 
+                    /**
+                     * @override
+                     */
                     setPosition: function (x) {
                         var sum = this.$$sumWidth,
-                            offset = 0;
-                        if (x < -sum * 3 / 4) {
-                            Object.assign(this.getParent().getRange(), {left: -sum, right: -sum});
-                        } else {
-                            Object.assign(this.getParent().getRange(), {left: 0, right: 0});
-                        }
+                            offset = 0,
+                            limit = x < -sum * 3 / 4 ? -sum : 0;
+
+                        Object.assign(this.getParent().getRange(), {left: limit, right: limit});
                         dom.children(this.getBody()).forEach(function (item, index) {
                             if (index) {
                                 item.style.transform = 'translateX(' + (x * sum / this.$$sumWidth - offset) + 'px)';
@@ -114,6 +136,9 @@
                 }
             ),
 
+            /**
+             * @override
+             */
             $dragmove: function (event) {
                 ui.MListView.prototype.$dragmove.call(this, event);
                 if (this._bOperate === undefined) {
@@ -121,11 +146,17 @@
                 }
             },
 
+            /**
+             * @override
+             */
             $dragstart: function (event) {
                 ui.MListView.prototype.$dragstart.call(this, event);
                 this._bOperate = this.getStatus() ? false : undefined;
             },
 
+            /**
+             * @override
+             */
             getX: function () {
                 if (this._cItem) {
                     return this._cItem.getX();
@@ -133,6 +164,9 @@
                 return this.getX();
             },
 
+            /**
+             * @override
+             */
             setPosition: function (x, y) {
                 if (this._bOperate === false) {
                     ui.MListView.prototype.setPosition.call(this, 0, y);
@@ -142,4 +176,6 @@
             }
         }
     );
+//{if 0}//
 }());
+//{/if}//
