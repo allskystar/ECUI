@@ -5,11 +5,17 @@ then
     exit -1
 fi
 
+if [ $2 ]
+then
+    assign_js="awk '{if(NR==1){print \"//{assign var=$2 value=true}//\"}print}' |"
+    assign_css="awk '{if(NR==1){print \"/*{assign var=$2 value=true}*/\"}print}' |"
+fi
+
 js_write_repl="sed -e \"s/document.write('<script type=\\\"text\/javascript\\\" src=\([^>]*\)><\/script>');/\/\/{include file=\1}\/\//g\""
-js_merge='java -jar $libpath/smarty4j.jar --left //{ --right }// --charset utf-8'
+js_merge=$assign_js' java -jar $libpath/smarty4j.jar --left //{ --right }// --charset utf-8'
 js_compress='java -jar $libpath/webpacker.jar --mode 1 --charset utf-8'
-css_merge='java -jar $libpath/smarty4j.jar --left /\*{ --right }\*/ --charset utf-8'
-css_compile='lessc - --plugin=less-plugin-clean-css | python $libpath/less-funcs.py "$2"'
+css_merge=$assign_css' java -jar $libpath/smarty4j.jar --left /\*{ --right }\*/ --charset utf-8'
+css_compile='lessc - --plugin=less-plugin-clean-css | python $libpath/less-funcs.py "$3"'
 html_compress="sed -e \"s/stylesheet\/less[^\\\"]*/stylesheet/g\" -e \"s/[[:space:]]/ /g\" -e \"s/^ *//g\" -e \"s/ *$//g\" -e \"/^ *$/d\" -e \"/<script>window.onload=/d\""
 
 if [ $1 ]

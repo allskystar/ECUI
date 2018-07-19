@@ -993,6 +993,15 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                         selectedControl = null;
                     }
                     core.removeControlListeners(core.findControl(container));
+
+                    pauseStatus = true;
+                    history.go(-1);
+                    util.timer(function () {
+                        if (currLocation !== esr.getLocation()) {
+                            currLocation = esr.getLocation();
+                            pauseStatus = false;
+                        }
+                    });
                 });
             }
         },
@@ -1392,6 +1401,8 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                     }
                     selectedControl = content;
                 }
+
+                esr.setLocation(esr.getLocation().split('~')[0] + '~ALLOW_LEAVE');
 
                 transition({
                     NAME: 'AppSelect',
