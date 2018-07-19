@@ -731,7 +731,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
         AppLayer: core.inherits(ui.Control),
 
         Back: core.inherits(
-            ui.Button,
+            ui.Control,
             {
                 $click: function (event) {
                     ui.Button.prototype.$click.call(this, event);
@@ -929,10 +929,10 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
          * 获取常量数据。
          * @public
          *
-         * @param {string} name 数据名
+         * @return {object} 常量数据
          */
-        getGlobal: function (name) {
-            return global[name];
+        getGlobal: function () {
+            return Object.assign({}, global);
         },
 
         /**
@@ -1616,7 +1616,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                             break;
                         }
                     }
-                });
+                }, this);
             });
 
             var nodata = true;
