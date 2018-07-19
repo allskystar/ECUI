@@ -422,7 +422,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                 if (currLocation) {
                     if (leaveUrl === undefined) {
                         var currRoute = esr.getRoute(currLocation.split('~')[0]);
-                        if (!/~ALLOW_LEAVE(~|$)/.test(loc) && currRoute && currRoute.onleave) {
+                        if (!/~ALLOW_LEAVE(~|$)/.test(currLocation) && currRoute && currRoute.onleave) {
                             if (currRoute.onleave(
                                     context,
                                     function (forward) {

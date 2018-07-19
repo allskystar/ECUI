@@ -134,6 +134,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                             isTouchMoved = false;
                             tracks[pointerId] = track;
                         }
+                        checkActived(event);
                         currEnv.mousedown(event);
                         onpressure(event, event.getNative().pressure >= 0.4);
                     }
@@ -271,6 +272,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                     event.target = track.target;
                     event.track = track;
                     track.lastMoveTime = Date.now();
+                    checkActived(event);
                     currEnv.mouseover(event);
                     currEnv.mousedown(event);
                     onpressure(event, event.getNative().touches[0].force === 1);
@@ -358,14 +360,6 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                 event = core.wrapEvent(event);
                 // 仅监听鼠标左键
                 if (event.which === 1) {
-                    if (activedControl) {
-                        // 如果按下鼠标左键后，使用ALT+TAB使浏览器失去焦点然后松开鼠标左键，
-                        // 需要恢复激活控件状态，第一次点击失效
-                        bubble(activedControl, 'deactivate');
-                        activedControl = undefined;
-                        // 这里不能return，要考虑请求来自于其它环境的情况
-                    }
-
                     // 为了兼容beforescroll事件，同时考虑到scroll执行效率问题，自己手动触发滚动条事件
                     if (isScrollClick(event)) {
                         onbeforescroll(event);
@@ -383,6 +377,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
                     event.track = tracks;
                     tracks.lastMoveTime = Date.now();
+                    checkActived(event);
                     currEnv.mousedown(event);
                 }
             },
@@ -901,6 +896,25 @@ outer:          for (var caches = [], target = event.target, el; target; target 
         track.lastY = track.clientY;
         track.clientX = event.clientX;
         track.clientY = event.clientY;
+    }
+
+    /**
+     * 检测不正常的事件链，比如没有触发pointerup/touchend/mouseup。
+     * @private
+     *
+     * @param {ecui.ui.Control} control 控件
+     */
+    function checkActived(event) {
+        // 如果按下鼠标左键后，使用ALT+TAB使浏览器失去焦点然后松开鼠标左键，
+        // 需要恢复激活控件状态，第一次点击失效
+        if (activedControl !== undefined) {
+            if (currEnv.type === 'drag') {
+                currEnv.mouseup(event);
+            } else {
+                bubble(activedControl, 'deactivate', event);
+                activedControl = undefined;
+            }
+        }
     }
 
     /**
