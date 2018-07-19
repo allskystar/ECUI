@@ -32,6 +32,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
         initRecursion = 0,        // init 操作的递归次数
         readyList = [],
         dragEvent,
+        orientationHandle,
 
         bodyElement,
         maskElements = [],        // 遮罩层组
@@ -66,35 +67,33 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
         events = {
             // 屏幕旋转
             orientationchange: function () {
-                var width = document.documentElement.clientWidth,
-                    height = document.documentElement.clientHeight,
-                    style = document.body.style;
-
-                if (style.width !== width + 'px') {
-                    style.width = width + 'px';
-                    style.height = height + 'px';
-
-                    var fontSize = util.toNumber(dom.getStyle(dom.parent(document.body), 'font-size'));
-                    fontSizeCache.forEach(function (item) {
-                        item[0]['font-size'] = (Math.round(fontSize * item[1] / 2) * 2) + 'px';
-                    });
-
-                    if (!iosVersion) {
-                        repaint();
-                    }
-                } else if (style.height !== height + 'px') {
-                    style.height = height + 'px';
-
-                    if (iosVersion) {
-                        repaint();
-                    }
-                } else if (isToucher) {
-                    util.timer(events.orientationchange, 200);
+                if (orientationHandle) {
+                    orientationHandle();
                 }
 
-                if (document.activeElement && document.activeElement.scrollIntoViewIfNeeded) {
-                    document.activeElement.scrollIntoViewIfNeeded(false);
-                }
+                orientationHandle = util.timer(function () {
+                    var width = document.documentElement.clientWidth,
+                        height = document.documentElement.clientHeight,
+                        style = document.body.style;
+
+                    if (style.width !== width + 'px') {
+                        style.width = width + 'px';
+                        style.height = height + 'px';
+
+                        var fontSize = util.toNumber(dom.getStyle(dom.parent(document.body), 'font-size'));
+                        fontSizeCache.forEach(function (item) {
+                            item[0]['font-size'] = (Math.round(fontSize * item[1] / 2) * 2) + 'px';
+                        });
+
+                        repaint();
+                    } else if (style.height !== height + 'px') {
+                        if (isToucher) {
+                            style.top = (height - util.toNumber(style.height)) + 'px';
+                        } else {
+                            style.height = height + 'px';
+                        }
+                    }
+                }, 1000);
             },
 
             // pad pro/surface pro等设备上的事件处理
@@ -1124,6 +1123,9 @@ outer:          for (var caches = [], target = event.target, el; target; target 
      */
     function initEnvironment() {
         if (scrollNarrow === undefined) {
+            var body = document.body,
+                el;
+
             if (isToucher) {
                 (function () {
                     var getView = util.getView;
@@ -1134,10 +1136,12 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                         return view;
                     };
                 }());
-
-                events.orientationchange();
-                util.adjustFontSize(Array.prototype.slice.call(document.styleSheets));
             }
+
+            body.style.width = document.documentElement.clientWidth + 'px';
+            body.style.height = document.documentElement.clientHeight + 'px';
+
+            util.adjustFontSize(Array.prototype.slice.call(document.styleSheets));
 
             // 设置全局事件处理
             for (var key in events) {
@@ -1148,9 +1152,6 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                     }
                 }
             }
-
-            var body = document.body,
-                el;
 
             dom.insertHTML(body, 'BEFOREEND', '<div class="ui-valid"><div></div></div>');
             // 检测Element宽度与高度的计算方式
