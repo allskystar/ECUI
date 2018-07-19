@@ -123,7 +123,7 @@ _aSelect - 全部的下拉框控件列表
                                             select.add(item._aChildren);
                                             item._aChildren = select.getItems();
                                         }
-                                        select.getOuter().style.left = '100%';
+                                        select.getOuter().style.left = util.getView().width + 'px';
                                         select.show();
                                         core.effect.grade('this.style.left->' + 100 * index, 400, { $: select.getOuter() });
                                     }
@@ -135,7 +135,7 @@ _aSelect - 全部的下拉框控件列表
                                         });
 
                                         select.removeAll();
-                                        select.getOuter().style.left = '100%';
+                                        select.getOuter().style.left = util.getView().width + 'px';
                                         core.request(util.stringFormat.apply(null, args), function (data) {
                                             core.dispatchEvent(parent, 'request', {data: data, owner: select});
                                             select.add(data);
