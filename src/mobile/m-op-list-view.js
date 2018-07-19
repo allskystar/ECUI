@@ -164,10 +164,14 @@ _cItem    - 当前处于激活的选项
                 return this.getX();
             },
 
+            /**
+             * @override
+             */
             reload: function (data) {
                 ui.MListView.prototype.reload.call(this, data);
                 this._cItem = null;
             },
+
             /**
              * @override
              */
