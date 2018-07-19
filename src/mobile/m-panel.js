@@ -2,10 +2,12 @@
 @example
 <div ui="type:m-panel"><!-- 这里放任意内容 --></div>
 */
-//{if 0}//
 (function () {
+//{if 0}//
     var core = ecui,
-        ui = core.ui;
+        dom = core.dom,
+        ui = core.ui,
+        util = core.util;
 //{/if}//
     /**
      * 移动端容器控件。
@@ -15,8 +17,27 @@
     ui.MPanel = core.inherits(
         ui.Control,
         'ui-panel',
-        ui.MScroll
+        ui.MScroll,
+        {
+            refresh: function () {
+                var main = this.getMain(),
+                    body = this.getBody();
+
+                this.setPosition(Math.max(this.getX(), main.clientWidth - body.scrollWidth), Math.max(this.getY(), main.clientHeight - body.scrollHeight));
+            }
+        }
     );
-//{if 0}//
+
+    var oldRemove = dom.remove;
+    dom.remove = function (el) {
+        for (var parent = dom.parent(el); parent; parent = dom.parent(parent)) {
+            if (parent.getControl) {
+                var control = parent.getControl();
+                if (control instanceof ui.MPanel) {
+                    util.timer(control.refresh, 0, control);
+                }
+            }
+        }
+        return oldRemove(el);
+    };
 }());
-//{/if}//
