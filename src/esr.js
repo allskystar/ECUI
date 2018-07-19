@@ -229,7 +229,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
             if (context.DENY_CACHE !== true) {
                 var layer = getLayer(route);
 
-                if (route.CACHE === undefined ? layer && layer.location === currLocation : route.CACHE) {
+                if (route.CACHE && layer && layer.location === currLocation) {
                     // 数据必须还在才触发缓存
                     // 模块发生变化，缓存状态下同样更换引擎
                     engine = loadStatus[getModuleName(route.NAME)] || etpl;
@@ -241,6 +241,11 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                         route.oncached(context);
                     }
                     return;
+                }
+
+                if (route.CACHE === undefined && layer && route.main !== 'AppCommonContainer') {
+                    // 位于层内且不在公共层，缓存数据
+                    route.CACHE = true;
                 }
             } else {
                 // 解决A标签下反复修改的问题
