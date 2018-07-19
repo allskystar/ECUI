@@ -97,7 +97,7 @@ _oTimer         - 定时器
                     this._nDown = Math.max(0, this._nDown + (lastTime - time) / 1000);
                     lastTime = time;
                     this.setContent(formatTime(this._nDown));
-                    if (time <= 0) {
+                    if (this._nDown <= 0) {
                         this._oTimer();
                     }
                 }, -1, this);
