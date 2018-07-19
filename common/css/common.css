@@ -816,3 +816,46 @@ a {
 .ui-mobile-select {
     font-size: 30px;
 }
+
+/*<script>window.onload=function(){value=document.getElementsByTagName('TEXTAREA')[0].value;parent.postMessage({url:location.href.slice(7),text:value.slice(value.indexOf('\n')+1).replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&')},'*');}</script><textarea>*/
+.ui-couple-slider {
+    width: 240px;
+    height: 4px;
+    padding: 4px 0px;
+    margin: 0px;
+
+    .ui-couple-slider-bg {
+        background: #cccccc;
+    }
+
+    .ui-couple-slider-slider {
+        top: 0px;
+        left: 0px;
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        background-color: #ffffff;
+        box-shadow: 0.5px 0.5px 2px 1px rgba(0, 0, 0, 0.32);
+        cursor: pointer;
+        transform: translate(-7px, -1px);
+        transition: left 0.3s linear;
+        will-change: transform;
+    }
+
+    .ui-couple-slider-mask {
+        top: 4px;
+        width: 0px;
+        height: 4px;
+        background: #3498db;
+        transition: left 0.3s linear, width 0.3s linear;
+    }
+}
+
+.ui-drag {
+    .ui-couple-slider {
+        .ui-couple-slider-slider,
+        .ui-couple-slider-mask {
+            transition-duration: 0s;
+        }
+    }
+}

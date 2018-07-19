@@ -1,0 +1,21 @@
+/*<script>window.onload=function(){value=document.getElementsByTagName('TEXTAREA')[0].value;parent.postMessage({url:location.href.slice(7),text:value.slice(value.indexOf('\n')+1).replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&')},'*');}</script><textarea>*/
+.ui-couple-slider {
+    position: relative;
+
+    input {
+        display: none !important;
+    }
+
+    .ui-couple-slider-bg {
+        .width100rate();
+        .height100rate();
+    }
+
+    .ui-couple-slider-slider {
+        position: absolute !important;
+    }
+
+    .ui-couple-slider-mask {
+        position: absolute !important;
+    }
+}

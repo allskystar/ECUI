@@ -305,9 +305,7 @@
     eventNames.slice(0, 7).forEach(function (item) {
         ui.Item.prototype['$' + item] = function (event) {
             ui.Control.prototype['$' + item].call(this, event);
-
             var parent = this.getParent();
-
             if (parent) {
                 event.item = this;
                 event.index = namedMap[parent.getUID()].indexOf(this);

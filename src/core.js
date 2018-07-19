@@ -908,6 +908,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
         // 需要恢复激活控件状态，第一次点击失效
         if (activedControl !== undefined) {
             if (currEnv.type === 'drag') {
+                dom.removeClass(core.getBody(), 'ui-drag');
                 currEnv.mouseup(event);
             } else {
                 bubble(activedControl, 'deactivate', event);
@@ -951,6 +952,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                     }
                     if (dragEvent.dragend) {
                         core.dispatchEvent(target, 'dragend', dragEvent);
+                        dom.removeClass(core.getBody(), 'ui-drag');
                     }
                     dragEvent = null;
                 });
@@ -972,6 +974,16 @@ outer:          for (var caches = [], target = event.target, el; target; target 
      * @param {ecui.ui.Control} target 被拖拽的 ECUI 控件
      */
     function dragend(event, env, target) {
+        function finish() {
+            if (dragEvent) {
+                dragEvent.dragend = true;
+            } else {
+                core.dispatchEvent(target, 'dragend', event);
+                dom.removeClass(core.getBody(), 'ui-drag');
+            }
+            delete inertiaHandles[uid];
+        }
+
         if (!target.getMain()) {
             // 控件已经被销毁，不要发送事件
             return;
@@ -1003,12 +1015,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
 
                         if (percent >= 1) {
                             inertiaHandles[uid]();
-                            if (dragEvent) {
-                                dragEvent.dragend = true;
-                            } else {
-                                core.dispatchEvent(target, 'dragend', event);
-                            }
-                            delete inertiaHandles[uid];
+                            finish();
                         }
                     },
                     500,
@@ -1021,12 +1028,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                 return;
             }
         }
-        if (dragEvent) {
-            dragEvent.dragend = true;
-        } else {
-            core.dispatchEvent(target, 'dragend', event);
-        }
-        delete inertiaHandles[uid];
+        finish();
     }
 
     /**
@@ -1967,6 +1969,8 @@ outer:          for (var caches = [], target = event.target, el; target; target 
          */
         drag: function (control, event, options) {
             if (activedControl !== undefined && currEnv.type !== 'drag') {
+                dom.addClass(core.getBody(), 'ui-drag');
+
                 // 控件之前处于惯性状态必须停止
                 var uid = control.getUID();
                 if (inertiaHandles[uid]) {

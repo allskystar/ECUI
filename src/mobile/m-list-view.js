@@ -57,6 +57,7 @@ _nBottomIndex  - 下部隐藏的选项序号
             HTML_LOADING: '正在加载...',
             HTML_REFRESH: '下拉刷新',
             HTML_PREPARE: '准备刷新',
+            HTML_REFRESHED: '刷新完成',
             HTML_LOADED: '加载完成',
             HTML_NODATA: '没有更多数据',
 
@@ -290,6 +291,7 @@ _nBottomIndex  - 下部隐藏的选项序号
                 }, this);
                 this.premitAlterItems();
                 this.add(data);
+                this._eHeader.innerHTML = this.HTML_REFRESHED;
                 this.reset();
                 this._eFooter.innerHTML = '';
             },
