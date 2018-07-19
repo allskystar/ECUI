@@ -647,27 +647,23 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                     currLayerEl.header.style.display = 'none';
 
                     if (currRouteWeight !== route.weight) {
-                        var view = util.getView(),
-                            position = currRouteWeight < route.weight ? view.width : -view.width,
+                        var position = currRouteWeight < route.weight ? 1 : -1,
                             fn;
 
                         if (esrOptions.transition === 'cover') {
                             if (position > 0) {
                                 currLayerEl.style.zIndex = 5;
                                 layerEl.style.zIndex = 10;
-                                layer.setPosition(position);
-                                fn = 'this.to.style.left->0';
+                                fn = 'this.to.style.left=#' + (position * 100) + '->0#+"%"';
                             } else {
                                 currLayerEl.style.zIndex = 10;
                                 layerEl.style.zIndex = 5;
-                                layer.setPosition(0);
-                                fn = 'this.from.style.left->' + (-position);
+                                fn = 'this.from.style.left=#0->' + (-position * 100) + '#+"%"';
                             }
                             layerEl.header.style.zIndex = 10;
                             core.mask(0.5, 7);
                         } else {
-                            layer.setPosition(position);
-                            fn = 'this.from.style.left->' + -position + ';this.to.style.left->0';
+                            fn = 'this.from.style.left=#0->' + (-position * 100) + '#+"%";this.to.style.left=#' + (position * 100) + '->0#+"%"';
                         }
 
                         pauseStatus = true;
