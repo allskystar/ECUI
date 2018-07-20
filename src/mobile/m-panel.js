@@ -23,7 +23,7 @@
                 var main = this.getMain(),
                     body = this.getBody();
 
-                this.setPosition(Math.max(this.getX(), main.clientWidth - body.scrollWidth), Math.max(this.getY(), main.clientHeight - body.scrollHeight));
+                this.setPosition(Math.max(this.getX(), main.clientWidth - body.scrollWidth), Math.min(0, Math.max(this.getY(), main.clientHeight - body.scrollHeight)));
             }
         }
     );
