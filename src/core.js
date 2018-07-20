@@ -316,7 +316,8 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                 dom.removeEventListener(event.target, 'touchmove', RemovedDomTouchBubble);
                 dom.removeEventListener(event.target, 'touchend', RemovedDomTouchBubble);
 
-                var track = tracks[trackId];
+                var track = tracks[trackId],
+                    noPrimaryEnd = true;
 
                 initTouchTracks(event);
 
@@ -346,8 +347,14 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                             // 同一个位置事件元素发生了变化，阻止事件穿透
                             event.preventDefault();
                         }
+
+                        noPrimaryEnd = false;
                     }
                 });
+
+                if (noPrimaryEnd) {
+                    event.preventDefault();
+                }
 
                 if (trackId && !tracks[trackId]) {
                     tracks[trackId] = track;

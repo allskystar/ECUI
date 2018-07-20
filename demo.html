@@ -25,21 +25,6 @@
     };
     </script>
     <style>
-    .ui-mobile-calendar-popup .ui-mobile-confirm-layout {
-        width: 100%;
-        display: flex;
-    }
-    .ui-mobile-calendar-popup .ui-mobile-options {
-        flex: 1;
-        height: 210px;
-        content: "item-height:30px";
-    }
-    .ui-mobile-calendar-popup .ui-mobile-options .ui-item {
-        height: 30px;
-    }
-    .ui-mobile-calendar-popup .ui-mobile-options .ui-item-focus {
-        font-weight: bold;
-    }
     </style>
 </head>
 <body>
@@ -84,8 +69,10 @@
         <div>测试选项E</div>
         <div>测试选项F</div>
     </div>
-    <img ui="type:m-photo-hotspot" width="100px" src="http://www.baidu.com/img/bd_logo1.png" title="百度">
-    <img ui="type:m-photo-hotspot" width="100px" src="http://img1.yixinfinance.com/taoche/yxgroup/common/images/yxgroup-logo.html.png" title="易鑫">
+    <div ui="type:m-carousel" style="width:100%;height:120px" id="test">
+        <img ui="type:m-photo-hotspot" src="http://www.baidu.com/img/bd_logo1.png" title="百度">
+        <img ui="type:m-photo-hotspot" src="http://img1.yixinfinance.com/taoche/yxgroup/common/images/yxgroup-logo.html.png" title="易鑫">
+    </div>
     <h2>PC端常用组件</h2>
     <!--table-->
     <div ui="type:table;id:test;left-lock:1;head-float:true;right-lock:1">
