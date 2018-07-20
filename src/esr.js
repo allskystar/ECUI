@@ -425,9 +425,14 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
             // 与当前location相同时不进行route
             if (currLocation !== loc) {
                 if (currLocation) {
+                    if (core.hasMessageBox() || leaveUrl) {
+                        history.go(/~HISTORY=(\d+)/.test(loc) ? historyIndex - +RegExp.$1 : -1);
+                        return;
+                    }
+
                     if (leaveUrl === undefined) {
                         var currRoute = esr.getRoute(currLocation.split('~')[0]);
-                        if (!/~ALLOW_LEAVE(~|$)/.test(currLocation) && currRoute && currRoute.onleave) {
+                        if (currRoute && currRoute.onleave) {
                             if (currRoute.onleave(
                                     context,
                                     function (forward) {
@@ -439,7 +444,9 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                                         }
                                     }
                                 ) === false) {
-                                leaveUrl = loc;
+                                if (!/~ALLOW_LEAVE(~|$)/.test(currLocation)) {
+                                    leaveUrl = loc;
+                                }
                             }
                         }
                     }
