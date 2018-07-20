@@ -650,6 +650,8 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                 var layerEl = layer.getMain();
                 // 路由权重在该项目中暂不考虑相等情况
                 if (currLayer) {
+                    core.$clearState(currLayer);
+
                     var currLayerEl = currLayer.getMain();
                     currLayerEl.header.style.display = 'none';
 
@@ -661,16 +663,16 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                             if (position > 0) {
                                 currLayerEl.style.zIndex = 5;
                                 layerEl.style.zIndex = 10;
-                                fn = 'this.to.style.left=#' + (position * 100) + '->0#+"%"';
+                                fn = 'this.to.style.left=#' + (position * 100) + '->0%#';
                             } else {
                                 currLayerEl.style.zIndex = 10;
                                 layerEl.style.zIndex = 5;
-                                fn = 'this.from.style.left=#0->' + (-position * 100) + '#+"%"';
+                                fn = 'this.from.style.left=#0->' + (-position * 100) + '%#';
                             }
                             layerEl.header.style.zIndex = 10;
                             core.mask(0.5, 7);
                         } else {
-                            fn = 'this.from.style.left=#0->' + (-position * 100) + '#+"%";this.to.style.left=#' + (position * 100) + '->0#+"%"';
+                            fn = 'this.from.style.left=#0->' + (-position * 100) + '%#;this.to.style.left=#' + (position * 100) + '->0%#';
                         }
 
                         pauseStatus = true;
@@ -1210,11 +1212,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                                 }
                             }
 
-                            if (esr.onparsedata) {
-                                data = esr.onparsedata(url, data);
-                            } else {
-                                data = data.data;
-                            }
+                            data = esr.onparsedata ? esr.onparsedata(url, data) : data.data;
 
                             if (varName) {
                                 esr.setData(varName, data);
