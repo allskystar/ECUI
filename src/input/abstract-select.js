@@ -177,6 +177,14 @@ _bRequired    - 是否必须选择
             /**
              * @override
              */
+            $blur: function (event) {
+                this._uOptions.hide();
+                ui.InputControl.prototype.$blur.call(this, event);
+            },
+
+            /**
+             * @override
+             */
             $cache: function (style) {
                 ui.InputControl.prototype.$cache.call(this, style);
                 this._uText.cache(true);

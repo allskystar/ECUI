@@ -18,27 +18,18 @@ _nDelay   - 延迟时间，如果不自动轮播这个值为0
     var currImage;
 
     /**
-     * 准备轮播下一张图片。
-     * @private
-     *
-     * @param {ecui.ui.MCarousel} carousel 轮播图控件
-     */
-    function autoNext(carousel) {
-        carousel._oHandle = util.timer(next, carousel._nDelay, carousel);
-    }
-
-    /**
      * 自动轮播下一张图片。
      * @private
      */
     function next() {
+        var x = this.getX();
         this._oHandle = core.effect.grade(
-            'this.setPosition(#round:this.getX()->+(' + (-this.getClientWidth()) + ')#,0)',
+            'this.setPosition(#round:' + x + '->' + (x - this.getClientWidth()) + '#,0)',
             1000,
             {
                 $: this,
                 onfinish: function () {
-                    autoNext(this);
+                    this.start();
                     refresh(this);
                 }.bind(this)
             }
@@ -118,7 +109,7 @@ _nDelay   - 延迟时间，如果不自动轮播这个值为0
             if (el.firstChild !== el.lastChild) {
                 if (options.delay) {
                     this._nDelay = options.delay * 1000;
-                    autoNext(this);
+                    this.start();
                 }
             }
         },
@@ -129,7 +120,7 @@ _nDelay   - 延迟时间，如果不自动轮播这个值为0
             $activate: function (event) {
                 ui.MPanel.prototype.$activate.call(this, event);
                 if (this._nDelay) {
-                    this._oHandle();
+                    this.stop();
                 }
             },
 
@@ -146,10 +137,18 @@ _nDelay   - 延迟时间，如果不自动轮播这个值为0
             /**
              * @override
              */
+            $dispose: function () {
+                this.stop();
+                ui.MPanel.prototype.$dispose.call(this);
+            },
+
+            /**
+             * @override
+             */
             $dragend: function (event) {
                 ui.MPanel.prototype.$dragend.call(this, event);
                 if (this._nDelay) {
-                    autoNext(this);
+                    this.start();
                 }
                 var el = this.getBody();
                 if (el.firstChild !== el.lastChild) {
@@ -185,6 +184,22 @@ _nDelay   - 延迟时间，如果不自动轮播这个值为0
                     el.removeChild(el.firstChild);
                     el.removeChild(el.lastChild);
                 }
+            },
+
+            /**
+             * 准备轮播下一张图片。
+             * @public
+             */
+            start: function () {
+                this._oHandle = util.timer(next, this._nDelay, this);
+            },
+
+            /**
+             * 停止轮播下一张图片。
+             * @public
+             */
+            stop: function () {
+                this._oHandle();
             }
         }
     );

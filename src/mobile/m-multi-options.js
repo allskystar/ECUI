@@ -154,6 +154,14 @@ _aOptions    - 选项框数组
         },
         {
             /**
+             * @override
+             */
+            $blur: function (event) {
+                this.getPopup().hide();
+                ui.InputControl.prototype.$blur.call(this, event);
+            },
+
+            /**
              * 获取选项控件。
              * @public
              *

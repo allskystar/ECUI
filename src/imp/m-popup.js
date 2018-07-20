@@ -84,11 +84,10 @@
                         if (data.enter[2]) {
                             popup.setSize(width, height);
                         }
-                        style[data.enter[0]] = initValue + 'px';
 
                         locked = true;
                         ecui.effect.grade(
-                            'round:this.style.' + data.enter[0] + '->' + Math.round(initValue - reverseValue),
+                            'this.style.' + data.enter[0] + '=#' + initValue + '->' + Math.round(initValue - reverseValue) + 'px#',
                             400,
                             {
                                 $: el,

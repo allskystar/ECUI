@@ -121,7 +121,7 @@
             var position = event.type === 'swiperight' ? 1 : -1;
             fillImage(backupImg, items[nextIndex], -position);
             core.effect.grade(
-                'this.from.style.left->' + position * viewWidth + ';this.to.style.left->0',
+                'this.from.style.left=#this.from.style.left->' + (position * viewWidth) + 'px#;this.to.style.left=#this.to.style.left->0px#',
                 300,
                 {
                     $: {from: currImg, to: backupImg},
