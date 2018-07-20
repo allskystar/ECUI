@@ -161,7 +161,7 @@ _cItem    - 当前处于激活的选项
                 if (this._cItem) {
                     return this._cItem.getX();
                 }
-                return this.getX();
+                return ui.MListView.prototype.getX.call(this);
             },
 
             /**

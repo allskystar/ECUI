@@ -62,6 +62,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
         eventListeners = {},      // 控件事件监听描述对象
         eventStack = {},          // 事件调用堆栈记录，防止事件重入
+        ghostClick,
 
         envStack = [],            // 高优先级事件调用时，保存上一个事件环境的栈
         events = {
@@ -256,6 +257,8 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                 initTouchTracks(event);
 
                 if (event.touches.length === 1) {
+                    ghostClick = false;
+
                     isTouchMoved = false;
 
                     var track = tracks[trackId = event.touches[0].identifier];
@@ -339,7 +342,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                         onpressure(event, false);
                         ongesture(event.getNative().changedTouches, event);
 
-                        if (event.target !== getElementFromEvent(item)) {
+                        if (ghostClick || event.target !== getElementFromEvent(item)) {
                             // 同一个位置事件元素发生了变化，阻止事件穿透
                             event.preventDefault();
                         }
@@ -947,14 +950,16 @@ outer:          for (var caches = [], target = event.target, el; target; target 
         if (window.requestAnimationFrame) {
             if (!dragEvent) {
                 window.requestAnimationFrame(function () {
-                    if (core.dispatchEvent(target, 'dragmove', dragEvent)) {
-                        target.setPosition(dragEvent.x, dragEvent.y);
+                    if (dragEvent) {
+                        if (core.dispatchEvent(target, 'dragmove', dragEvent)) {
+                            target.setPosition(dragEvent.x, dragEvent.y);
+                        }
+                        if (dragEvent.dragend) {
+                            core.dispatchEvent(target, 'dragend', dragEvent);
+                            dom.removeClass(core.getBody(), 'ui-drag');
+                        }
+                        dragEvent = null;
                     }
-                    if (dragEvent.dragend) {
-                        core.dispatchEvent(target, 'dragend', dragEvent);
-                        dom.removeClass(core.getBody(), 'ui-drag');
-                    }
-                    dragEvent = null;
                 });
             }
             dragEvent = event;
@@ -1969,6 +1974,8 @@ outer:          for (var caches = [], target = event.target, el; target; target 
          */
         drag: function (control, event, options) {
             if (activedControl !== undefined && currEnv.type !== 'drag') {
+                dragEvent = null;
+
                 dom.addClass(core.getBody(), 'ui-drag');
 
                 // 控件之前处于惯性状态必须停止
@@ -2490,6 +2497,14 @@ outer:          for (var caches = [], target = event.target, el; target; target 
          */
         pause: function () {
             pauseCount++;
+        },
+
+        /**
+         * 强行阻止事件穿透。
+         * @public
+         */
+        preventGhostClick: function () {
+            ghostClick = true;
         },
 
         /**
