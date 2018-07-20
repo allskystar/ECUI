@@ -336,67 +336,35 @@ ECUI动画效果库，支持对CSS3动画效果的模拟并扩展了相应的功
          * 渐变处理。
          * @public
          *
-         * @param {Function|string} fn 处理渐变的函数或函数体，字符串描述的格式this.scrollTop->20或this.scrollTop->+(20)，后者表示相对增加20，前者表示到达20，一次改变多少个，使用;号分隔，支持语法this.setPosition(#this.getX()->0#,#this.getY()->+(0)#)
+         * @param {Function|string} fn 处理渐变的函数或函数体，字符串描述的格式例如this.style.left=#0->100%#，一次改变多少个，使用;号分隔
          * @param {number} duration 渐变的总时长
          * @param {object} options 渐变的参数，一般用于描述渐变的信息
          * @param {Function} transition 时间线函数
          * @return {Function} 停止渐变或直接执行渐变到最后
          */
         grade: function (fn, duration, options, transition) {
-            function analyser(stat, flag) {
-                var list = stat.split('->'),
-                    math = '',
-                    values = list[0].split(':');
-
-                if (values.length > 1) {
-                    math = 'Math.' + values[0];
-                    list[0] = values[1];
-                }
-
-                var name = flag ? '' : list[0] + '=',
-                    index = list[0].indexOf('.style.');
-
-                if (index >= 0) {
-                    list[0] = 'ecui.dom.getStyle(' + list[0].slice(0, index) + ',"' + list[0].slice(index + 7) + '")';
-                }
-                values = new Function('$', 'return [' + list.join(',') + ']').call(options.$, options);
-
-                if (/-?[0-9]+(\.[0-9]+)?/.test(values[0])) {
-                    var currValue = +RegExp['$&'];
-
-                    if (list[1].startsWith('+(')) {
-                        values[1] += currValue;
-                    }
-
-                    if (+currValue !== values[1]) {
-                        return name + (RegExp.leftContext ? '"' + RegExp.leftContext.replace('"', '\\"') + '"+' : '') + math + '(' + currValue + '+(' + values[1] + '-(' + currValue + ')' + ')*p)' + (RegExp.rightContext ? '+"' + RegExp.rightContext.replace('"', '\\"') + '"' : '');
-                    }
-                }
-
-                return '##';
-            }
-
             if ('string' === typeof fn) {
-                var result = [];
-                fn.replace(/#.+?#/g, function (item) {
-                    return analyser(item.slice(1, -1), true);
-                }).split(';').forEach(function (item) {
-                    if (item.indexOf('->') < 0) {
-                        if (item.indexOf('##') < 0) {
-                            result.push(item);
-                        }
-                        return;
+                fn = new Function('p', '$', fn.replace(/#.+?#/g, function (item) {
+                    item = item.slice(1, -1);
+
+                    var list = item.split('->'),
+                        math = '',
+                        value = list[0].split(':');
+
+                    if (value.length > 1) {
+                        math = 'Math.' + value[0];
+                        list[0] = value[1];
                     }
 
-                    var value = analyser(item);
-                    if (value !== '##') {
-                        result.push(value);
-                    }
-                });
-                if (!result.length) {
-                    return;
-                }
-                fn = new Function('p', '$', result.join(';'));
+                    var currValue = new Function('$', 'return ' + list[0]).call(options.$, options);
+                    /-?[0-9]+(\.[0-9]+)?/.test(currValue);
+                    currValue = +RegExp['$&'];
+
+                    /-?[0-9]+(\.[0-9]+)?/.test(list[1]);
+                    value = +RegExp['$&'];
+
+                    return (RegExp.leftContext ? '"' + RegExp.leftContext.replace('"', '\\"') + '"+' : '') + math + '(' + currValue + '+(' + value + '-(' + currValue + ')' + ')*p)' + (RegExp.rightContext ? '+"' + RegExp.rightContext.replace('"', '\\"') + '"' : '');
+                }));
             }
 
             var startTime = Date.now(),
