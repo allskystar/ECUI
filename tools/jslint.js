@@ -509,7 +509,9 @@ var JSLINT = (function () {
                 "function itself.",
             wrap_regexp: "Wrap the /regexp/ literal in parens to " +
                 "disambiguate the slash operator.",
-            write_is_wrong: "document.write can be a form of eval."
+            write_is_wrong: "document.write can be a form of eval.",
+            expected_a_before_b: "Expected '{a}' before '{b}'.",
+            wrap_parameter: "Wrap the parameter in parens."
         },
         closure = array_to_object([
             'goog'
@@ -626,7 +628,7 @@ var JSLINT = (function () {
 // comment todo
         tox = /^\W*to\s*do(?:\W|$)/i,
 // token
-        tx = /^\s*([(){}\[\]\?.,:;'"~#@`]|={1,3}|\/(\*(jslint|properties|property|members?|globals?)?|=|\/)?|\*[\/=]?|\+(?:=|\++)?|-(?:=|-+)?|[\^%]=?|&[&=]?|\|[|=]?|>{1,3}=?|<(?:[\/=!]|\!(\[|--)?|<=?)?|\!(\!|==?)?|[a-zA-Z_$][a-zA-Z0-9_$]*|[0-9]+(?:[xX][0-9a-fA-F]+|\.[0-9]*)?(?:[eE][+\-]?[0-9]+)?)/;
+        tx = /^\s*([(){}\[\]\?.,:;'"~#@`]|=>|={1,3}|\/(\*(jslint|properties|property|members?|globals?)?|=|\/)?|\*[\/=]?|\+(?:=|\++)?|-(?:=|-+)?|[\^%]=?|&[&=]?|\|[|=]?|>{1,3}=?|<(?:[\/=!]|\!(\[|--)?|<=?)?|\!(\!|==?)?|[a-zA-Z_$][a-zA-Z0-9_$]*|[0-9]+(?:[xX][0-9a-fA-F]+|\.[0-9]*)?(?:[eE][+\-]?[0-9]+)?)/;
 
 
     if (typeof String.prototype.entityify !== 'function') {
@@ -924,8 +926,9 @@ var JSLINT = (function () {
                         at = -1;
                         break;
                     case '\'':
+                    case '`':
                         if (json_mode) {
-                            warn('unexpected_a', line, character, '\\\'');
+                            warn('unexpected_a', line, character, '\\' + ch);
                         }
                         break;
                     case 'u':
@@ -1273,7 +1276,8 @@ klass:              do {
                         switch (snippet) {
 
 //      string
-
+                        case '`':
+                            return string(snippet);
                         case '"':
                             if (option.quotmark === 'single') {
                                 warn('singlequote', line, character);
@@ -2996,6 +3000,14 @@ klass:              do {
         return that;
     }, true);
 
+    infix('=>', 170, function (left) {
+        left.stop('wrap_parameter');
+    });
+
+    prefix('=>', function (that) {
+        that.stop('expected_a_before_b', '()', '=>');
+    });
+
     prefix('(', function (that) {
         var currTokens = [],
             currToken = next_token,
@@ -3005,15 +3017,14 @@ klass:              do {
             if (currToken.id === '(end)') {
                 break;
             }
+            if (currToken.id === '(') {
+                break;
+            }
             if (currToken.id === ')') {
                 currToken = lex.token();
                 currTokens.push(currToken);
-                if (currToken.id === '=') {
-                    currToken = lex.token();
-                    currTokens.push(currToken);
-                    if (currToken.id === '>') {
-                        es6 = true;
-                    }
+                if (currToken.id === '=>') {
+                    es6 = true;
                 }
                 break;
             }
@@ -3026,8 +3037,7 @@ klass:              do {
             lookahead = lookahead.concat(currTokens);
             next_token = token;
 
-            var func = token,
-                old_funct = funct,
+            var old_funct = funct,
                 old_option = option,
                 old_scope = scope,
                 master;
@@ -3044,16 +3054,18 @@ klass:              do {
                 scope: scope
             };
             funct.parameter = function_parameters();
-            func.function = funct;
+            that.function = funct;
             option = Object.create(old_option);
             functions.push(funct);
-            func.writeable = false;
+            that.writeable = false;
             one_space();
-            advance('=');
-            no_space();
-            advance('>');
+            advance('=>');
             one_space();
-            func.block = block('function');
+            if (next_token.id === '{') {
+                that.block = block('function');
+            } else {
+                that.block = expression(0);
+            }
             for (var len = funct.parameter.length, used = false; len--; ) {
                 master = scope[funct.parameter[len]];
                 used = used || master.used;
@@ -3081,7 +3093,8 @@ klass:              do {
             option = old_option;
             scope = old_scope;
 
-            return func;
+            that.arity = 'statement';
+            return that;
         } else {
             lookahead = lookahead.concat(currTokens);
 
