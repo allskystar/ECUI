@@ -57,6 +57,10 @@
             keyboardHandle = util.blank;
 
         dom.addEventListener(document, 'focusin', function (event) {
+            if (event.target.readOnly || event.target.tagName === 'SELECT' || (event.target.tagName === 'INPUT' && (event.target.type === 'radio' || event.target.type === 'checkbox'))) {
+                return;
+            }
+
             event = core.wrapEvent(event);
 
             if (keyboardHeight) {
@@ -89,6 +93,10 @@
         });
 
         dom.addEventListener(document, 'focusout', function (event) {
+            if (event.target.readOnly || event.target.tagName === 'SELECT' || (event.target.tagName === 'INPUT' && (event.target.type === 'radio' || event.target.type === 'checkbox'))) {
+                return;
+            }
+
             keyboardHandle();
             document.body.style.height = (util.toNumber(document.body.style.height) + keyboardHeight) + 'px';
             var panel = findPanel(core.wrapEvent(event).getControl());
