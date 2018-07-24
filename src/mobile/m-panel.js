@@ -11,7 +11,7 @@
 
         isToucher = document.ontouchstart !== undefined,
         iosVersion = /(iPhone|iPad).+OS (\d+)/i.test(navigator.userAgent) ?  +(RegExp.$2) : undefined,
-        safariVersion = /(\d+\.\d)(\.\d)?\s+.*safari/i.test(navigator.userAgent) && !/chrome/i.test(navigator.userAgent) ? +RegExp.$1 : undefined;
+        safariVersion = !/(chrome|crios|ucbrowser)/i.test(navigator.userAgent) && /(\d+\.\d)(\.\d)?\s+.*safari/i.test(navigator.userAgent) ? +RegExp.$1 : undefined;
 //{/if}//
     /**
      * 移动端容器控件。
@@ -56,55 +56,71 @@
     if (isToucher) {
         if (iosVersion) {
             var keyboardHeight = 0,
-                keyboardHandle = util.blank;
+                keyboardHandle = util.blank,
+                focusout,
+                basicHeight;
+
+            core.ready(function () {
+                basicHeight = util.toNumber(document.body.style.height);
+            });
 
             dom.addEventListener(document, 'focusin', function (event) {
+                keyboardHandle();
+
                 if (event.target.readOnly || event.target.tagName === 'SELECT' || (event.target.tagName === 'INPUT' && (event.target.type === 'radio' || event.target.type === 'checkbox'))) {
                     return;
                 }
 
-                event = core.wrapEvent(event);
+                var control = core.wrapEvent(event).getControl(),
+                    panel = findPanel(control);
 
                 if (keyboardHeight) {
-                    util.timer(function () {
-                        var lastScrollY = window.scrollY;
-                        document.body.style.height = (util.toNumber(document.body.style.height) - keyboardHeight) + 'px';
-                        window.scrollTo(0, 0);
-                        var panel = findPanel(event.getControl());
+                    keyboardHandle = util.timer(function () {
+                        document.body.style.height = (basicHeight - keyboardHeight) + 'px';
+
                         if (panel) {
-                            panel.setPosition(panel.getX(), panel.getY() - lastScrollY);
+                            panel.setPosition(panel.getX(), Math.max(panel.getY(), dom.getPosition(panel.getOuter()).top - dom.getPosition(control.getOuter()).top + (panel.getHeight() - keyboardHeight - control.getHeight()) / 2));
+                            window.scrollTo(0, 0);
                         }
-                    }, 300);
+                    }, focusout ? 100 : 500);
                 } else {
                     keyboardHandle = util.timer(function () {
-                        var lastScrollY = window.scrollY;
+                        var lastScrollY = window.scrollY + (panel ? panel.getMain().scrollTop : 0);
                         document.body.style.visibility = 'hidden';
                         window.scrollTo(0, 100000000);
                         util.timer(function () {
                             keyboardHeight = window.scrollY + document.body.clientHeight - document.body.scrollHeight - (safariVersion ? 45 : 0);
                             document.body.style.visibility = '';
-                            document.body.style.height = (util.toNumber(document.body.style.height) - keyboardHeight) + 'px';
-                            window.scrollTo(0, 0);
-                            var panel = findPanel(event.getControl());
+                            document.body.style.height = (basicHeight - keyboardHeight) + 'px';
+
                             if (panel) {
                                 panel.setPosition(panel.getX(), panel.getY() - lastScrollY);
+                                window.scrollTo(0, 0);
+                            } else {
+                                window.scrollTo(0, lastScrollY);
                             }
+                            panel.getMain().scrollTop = 0;
                         }, 100);
-                    }, 300);
+                    }, 500);
                 }
             });
 
             dom.addEventListener(document, 'focusout', function (event) {
+                keyboardHandle();
+
                 if (event.target.readOnly || event.target.tagName === 'SELECT' || (event.target.tagName === 'INPUT' && (event.target.type === 'radio' || event.target.type === 'checkbox'))) {
                     return;
                 }
 
-                keyboardHandle();
-                document.body.style.height = (util.toNumber(document.body.style.height) + keyboardHeight) + 'px';
-                var panel = findPanel(core.wrapEvent(event).getControl());
-                if (panel) {
-                    panel.refresh();
-                }
+                focusout = true;
+                keyboardHandle = util.timer(function () {
+                    focusout = false;
+                    document.body.style.height = basicHeight + 'px';
+                    var panel = findPanel(core.wrapEvent(event).getControl());
+                    if (panel) {
+                        panel.refresh();
+                    }
+                }, 100);
             });
         } else {
             // android，处理软键盘问题
@@ -116,6 +132,7 @@
                         panel = findPanel(control);
 
                     if (panel) {
+                        panel.getMain().scrollTop = 0;
                         panel.setPosition(panel.getX(), panel.getY() - window.scrollY);
                         window.scrollTo(0, 0);
                     }

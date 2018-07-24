@@ -154,7 +154,9 @@ _eInput        - INPUT对象
             }
             dom.addEventListener(el, 'blur', events.blur);
         } else {
-            control.focus();
+            if (document.activeElement !== el) {
+                control.focus();
+            }
         }
     }
 
