@@ -675,7 +675,10 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                         }
 
                         pauseStatus = true;
-                        core.preventGhostClick();
+
+                        currLayer.disable();
+                        layer.disable();
+
                         core.effect.grade(
                             fn,
                             400,
@@ -683,6 +686,9 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                                 $: {from: currLayerEl, to: layerEl},
                                 onfinish: function () {
                                     // 在执行结束后，如果不同时common layer则隐藏from layer，并且去掉目标路由中的动画执行函数
+                                    currLayer.enable();
+                                    layer.enable();
+
                                     currLayer.hide();
                                     currLayer = layer;
                                     pauseStatus = false;
