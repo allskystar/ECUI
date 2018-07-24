@@ -20,23 +20,12 @@ _eInput        - INPUT对象
         ui = core.ui,
         util = core.util,
 
+        isToucher = document.ontouchstart !== undefined,
         ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined;
 //{/if}//
     var timer = util.blank,
         // INPUT事件集合对象
         events = {
-            /**
-             * 失去焦点事件处理。
-             * @private
-             */
-            blur: function (event) {
-                var control = core.wrapEvent(event).target.getControl();
-                // INPUT失去焦点，但控件未失去焦点，不需要触发blur
-                if (!control.contain(core.getFocused())) {
-                    control.blur();
-                }
-            },
-
             /**
              * 输入结束事件处理。
              * @private
@@ -84,25 +73,6 @@ _eInput        - INPUT对象
             },
 
             /**
-             * 获得焦点事件处理。
-             * @private
-             */
-            focus: function (event) {
-                var el = core.wrapEvent(event).target,
-                    control = el.getControl();
-                if (control.isDisabled()) {
-                    dom.removeEventListener(el, 'blur', events.blur);
-                    try {
-                        el.blur();
-                    } catch (ignore) {
-                    }
-                    dom.addEventListener(el, 'blur', events.blur);
-                } else {
-                    control.focus();
-                }
-            },
-
-            /**
              * 输入内容事件处理。
              * @private
              */
@@ -130,6 +100,14 @@ _eInput        - INPUT对象
             }
         };
 
+    if (isToucher) {
+        events.focusin = focus;
+        events.focusout = blur;
+    } else {
+        events.blur = blur;
+        events.focus = focus;
+    }
+
     /**
      * 为控件的 INPUT 节点绑定事件。
      * @private
@@ -145,6 +123,38 @@ _eInput        - INPUT对象
                     dom.addEventListener(input._eInput, name, events[name]);
                 }
             }
+        }
+    }
+
+    /**
+     * INPUT 失去焦点的处理。
+     * @private
+     *
+     * @param {Event} event 事件对象
+     */
+    function blur(event) {
+        core.wrapEvent(event).target.getControl().blur();
+    }
+
+    /**
+     * INPUT 获得焦点的处理。
+     * @private
+     *
+     * @param {Event} event 事件对象
+     */
+    function focus(event) {
+        var el = core.wrapEvent(event).target,
+            control = el.getControl();
+
+        if (control.isDisabled()) {
+            dom.removeEventListener(el, 'blur', events.blur);
+            try {
+                el.blur();
+            } catch (ignore) {
+            }
+            dom.addEventListener(el, 'blur', events.blur);
+        } else {
+            control.focus();
         }
     }
 
