@@ -691,6 +691,10 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                                     currLayer.enable();
                                     layer.enable();
 
+                                    if (document.activeElement && document.activeElement.blur) {
+                                        document.activeElement.blur();
+                                    }
+
                                     currLayer.hide();
                                     currLayer = layer;
                                     pauseStatus = false;
