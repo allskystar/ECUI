@@ -97,12 +97,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                         style.height = height + 'px';
                         if (isToucher) {
                             // android 软键盘弹出和收起
-                            if (height < currHeight) {
-                                // 软键盘弹出，当前控件必须在可显示区域显示
-                                if (document.activeElement && document.activeElement.scrollIntoViewIfNeeded) {
-                                    document.activeElement.scrollIntoViewIfNeeded();
-                                }
-                            } else {
+                            if (height >= currHeight) {
                                 // 软键盘收起，失去焦点
                                 if (document.activeElement && document.activeElement.blur) {
                                     document.activeElement.blur();

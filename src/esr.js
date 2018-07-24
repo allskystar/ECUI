@@ -653,6 +653,10 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                 if (currLayer) {
                     core.$clearState(currLayer);
 
+                    if (document.activeElement && document.activeElement.blur) {
+                        document.activeElement.blur();
+                    }
+
                     var currLayerEl = currLayer.getMain();
                     currLayerEl.header.style.display = 'none';
 
@@ -690,10 +694,6 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                                     // 在执行结束后，如果不同时common layer则隐藏from layer，并且去掉目标路由中的动画执行函数
                                     currLayer.enable();
                                     layer.enable();
-
-                                    if (document.activeElement && document.activeElement.blur) {
-                                        document.activeElement.blur();
-                                    }
 
                                     currLayer.hide();
                                     currLayer = layer;
@@ -749,15 +749,6 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
         // 布局层，用于加载结构
         AppLayer: core.inherits(ui.Control),
 
-        Back: core.inherits(
-            ui.Control,
-            {
-                $click: function (event) {
-                    ui.Button.prototype.$click.call(this, event);
-                    esr.hideSelect();
-                }
-            }
-        ),
 
         /**
          * 监听全局变量变化。

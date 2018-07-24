@@ -9,6 +9,7 @@
         ui = core.ui,
         util = core.util,
 
+        isToucher = document.ontouchstart !== undefined,
         iosVersion = /(iPhone|iPad).+OS (\d+)/i.test(navigator.userAgent) ?  +(RegExp.$2) : undefined,
         safariVersion = /(\d+\.\d)(\.\d)?\s+.*safari/i.test(navigator.userAgent) && !/chrome/i.test(navigator.userAgent) ? +RegExp.$1 : undefined;
 //{/if}//
@@ -52,57 +53,81 @@
         }
     }
 
-    if (iosVersion) {
-        var keyboardHeight = 0,
-            keyboardHandle = util.blank;
+    if (isToucher) {
+        if (iosVersion) {
+            var keyboardHeight = 0,
+                keyboardHandle = util.blank;
 
-        dom.addEventListener(document, 'focusin', function (event) {
-            if (event.target.readOnly || event.target.tagName === 'SELECT' || (event.target.tagName === 'INPUT' && (event.target.type === 'radio' || event.target.type === 'checkbox'))) {
-                return;
-            }
+            dom.addEventListener(document, 'focusin', function (event) {
+                if (event.target.readOnly || event.target.tagName === 'SELECT' || (event.target.tagName === 'INPUT' && (event.target.type === 'radio' || event.target.type === 'checkbox'))) {
+                    return;
+                }
 
-            event = core.wrapEvent(event);
+                event = core.wrapEvent(event);
 
-            if (keyboardHeight) {
-                util.timer(function () {
-                    var lastScrollY = window.scrollY;
-                    document.body.style.height = (util.toNumber(document.body.style.height) - keyboardHeight) + 'px';
-                    window.scrollTo(0, 0);
-                    var panel = findPanel(event.getControl());
-                    if (panel) {
-                        panel.setPosition(panel.getX(), panel.getY() - lastScrollY);
-                    }
-                }, 500);
-            } else {
-                keyboardHandle = util.timer(function () {
-                    var lastScrollY = window.scrollY;
-                    document.body.style.visibility = 'hidden';
-                    window.scrollTo(0, 100000000);
+                if (keyboardHeight) {
                     util.timer(function () {
-                        keyboardHeight = window.scrollY - (safariVersion ? 45 : 0);
-                        document.body.style.visibility = '';
+                        var lastScrollY = window.scrollY;
                         document.body.style.height = (util.toNumber(document.body.style.height) - keyboardHeight) + 'px';
                         window.scrollTo(0, 0);
                         var panel = findPanel(event.getControl());
                         if (panel) {
                             panel.setPosition(panel.getX(), panel.getY() - lastScrollY);
                         }
-                    }, 100);
-                }, 500);
-            }
-        });
+                    }, 500);
+                } else {
+                    keyboardHandle = util.timer(function () {
+                        var lastScrollY = window.scrollY;
+                        document.body.style.visibility = 'hidden';
+                        window.scrollTo(0, 100000000);
+                        util.timer(function () {
+                            keyboardHeight = window.scrollY + document.body.clientHeight - document.body.scrollHeight - (safariVersion ? 45 : 0);
+                            document.body.style.visibility = '';
+                            document.body.style.height = (util.toNumber(document.body.style.height) - keyboardHeight) + 'px';
+                            window.scrollTo(0, 0);
+                            var panel = findPanel(event.getControl());
+                            if (panel) {
+                                panel.setPosition(panel.getX(), panel.getY() - lastScrollY);
+                            }
+                        }, 100);
+                    }, 500);
+                }
+            });
 
-        dom.addEventListener(document, 'focusout', function (event) {
-            if (event.target.readOnly || event.target.tagName === 'SELECT' || (event.target.tagName === 'INPUT' && (event.target.type === 'radio' || event.target.type === 'checkbox'))) {
-                return;
-            }
+            dom.addEventListener(document, 'focusout', function (event) {
+                if (event.target.readOnly || event.target.tagName === 'SELECT' || (event.target.tagName === 'INPUT' && (event.target.type === 'radio' || event.target.type === 'checkbox'))) {
+                    return;
+                }
 
-            keyboardHandle();
-            document.body.style.height = (util.toNumber(document.body.style.height) + keyboardHeight) + 'px';
-            var panel = findPanel(core.wrapEvent(event).getControl());
-            if (panel) {
-                panel.refresh();
-            }
-        });
+                keyboardHandle();
+                document.body.style.height = (util.toNumber(document.body.style.height) + keyboardHeight) + 'px';
+                var panel = findPanel(core.wrapEvent(event).getControl());
+                if (panel) {
+                    panel.refresh();
+                }
+            });
+        } else {
+            // android，处理软键盘问题
+            dom.addEventListener(window, 'resize', function () {
+                if (document.documentElement.clientHeight < util.toNumber(document.body.style.height)) {
+                    document.activeElement.scrollIntoViewIfNeeded();
+
+                    var control = core.findControl(document.activeElement),
+                        panel = findPanel(control);
+
+                    if (panel) {
+                        panel.setPosition(panel.getX(), panel.getY() - window.scrollY);
+                        window.scrollTo(0, 0);
+                    }
+                }
+            });
+
+            dom.addEventListener(document, 'focusout', function (event) {
+                var panel = findPanel(core.wrapEvent(event).getControl());
+                if (panel) {
+                    panel.refresh();
+                }
+            });
+        }
     }
 }());
