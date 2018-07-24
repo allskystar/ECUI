@@ -34,18 +34,23 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
         context = {},
         global = {},
         globalListeners = {},
+
         currLocation = '',
         pauseStatus,
         loadStatus = {},
         engine = etpl,
         requestVersion = 0,     // 请求的版本号，主路由切换时会更新，在多次提交时保证只有最后一次提交会触发渲染
+
         localStorage,
         metaVersion,
         meta,
+
         currLayer,
         currRouteName,
         currRouteWeight,
+
         unloadNames = [],
+
         selectedControl,
         selectedLocation,
 
@@ -1470,7 +1475,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                     commandClose: '-->'
                 });
 
-                dom.ready(function () {
+                core.ready(function () {
                     if (esr.onready) {
                         var defaultRoute = esr.onready();
                     }
@@ -1545,11 +1550,13 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                         onsuccess: function (text) {
                             dom.insertHTML(body, 'AFTERBEGIN', text);
                             loadInit();
+                            core.init(document.body);
                         },
                         onerror: function () {
                             console.warn('找不到APP的布局文件，请确认.app-container.html文件是否存在');
                             esrOptions.app = false;
                             loadInit();
+                            core.init(document.body);
                         }
                     });
                 } else {

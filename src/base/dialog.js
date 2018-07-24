@@ -35,7 +35,7 @@ _uClose     - 关闭按钮
 
             if (titleEl && titleEl.tagName === 'STRONG') {
                 titleEl.className += ' ' + options.classes.join('-title ');
-                el.remove(titleEl);
+                dom.remove(titleEl);
             } else {
                 titleEl = dom.create('STRONG', {className: options.classes.join('-title ')});
             }

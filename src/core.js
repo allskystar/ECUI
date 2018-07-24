@@ -2544,7 +2544,11 @@ outer:          for (var caches = [], target = event.target, el; target; target 
          * @param {Function} fn 需要调用的函数
          */
         ready: function (fn) {
-            readyList.push(fn);
+            if (readyList) {
+                readyList.push(fn);
+            } else {
+                fn();
+            }
         },
 
         /**
