@@ -5,6 +5,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 //{if 0}//
     var core = ecui,
         dom = core.dom,
+        effect = core.effect,
         ext = core.ext,
         util = core.util,
         ui = core.ui,
@@ -1016,7 +1017,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
             }
 
             if (x !== expectX || y !== expectY) {
-                inertiaHandles[uid] = core.effect.grade(
+                inertiaHandles[uid] = effect.grade(
                     function (percent, options) {
                         event.x = Math.round(options.x + percent * (expectX - options.x));
                         event.y = Math.round(options.y + percent * (expectY - options.y));

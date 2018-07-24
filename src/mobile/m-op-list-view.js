@@ -15,6 +15,7 @@ _cItem    - 当前处于激活的选项
 (function () {
     var core = ecui,
         dom = core.dom,
+        effect = core.effect,
         ui = core.ui;
 //{/if}//
     /**
@@ -51,7 +52,7 @@ _cItem    - 当前处于激活的选项
                         parent.setRange({left: 0, right: 0});
                         if (parent._cItem !== this) {
                             if (parent._cItem) {
-                                core.effect.grade('this.setPosition(#this.getX()->0#)', 400, {$: parent._cItem});
+                                effect.grade('this.setPosition(#this.getX()->0#)', 400, {$: parent._cItem});
                             }
                             parent._cItem = this;
                         }
@@ -77,7 +78,7 @@ _cItem    - 当前处于激活的选项
 
                         var parent = this.getParent();
                         if (parent && parent._cItem) {
-                            core.effect.grade('this.setPosition(#this.getX()->0#)', 400, {$: parent._cItem});
+                            effect.grade('this.setPosition(#this.getX()->0#)', 400, {$: parent._cItem});
                             parent._cItem = null;
                         }
                     },

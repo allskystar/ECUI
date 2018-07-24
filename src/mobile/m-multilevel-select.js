@@ -12,6 +12,7 @@ _aSelect - 全部的下拉框控件列表
 (function () {
     var core = ecui,
         dom = core.dom,
+        effect = core.effect,
         ui = core.ui,
         util = core.util;
 //{/if}//
@@ -124,7 +125,7 @@ _aSelect - 全部的下拉框控件列表
                                             item._aChildren = select.getItems();
                                         }
                                         select.show();
-                                        core.effect.grade('this.style.left=#100->' + (25 * index) + '%#', 400, { $: select.getOuter() });
+                                        effect.grade('this.style.left=#100->' + (25 * index) + '%#', 400, { $: select.getOuter() });
                                     }
                                 } else if (select) {
                                     var args = [select._sUrl];
@@ -139,7 +140,7 @@ _aSelect - 全部的下拉框控件列表
                                             select.add(data);
                                             item._aChildren = select.getItems();
                                             select.show();
-                                            core.effect.grade('this.style.left=#100->' + (25 * index) + '%#', 400, { $: select.getOuter() });
+                                            effect.grade('this.style.left=#100->' + (25 * index) + '%#', 400, { $: select.getOuter() });
                                         });
                                     }
                                 }

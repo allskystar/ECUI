@@ -11,6 +11,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
 //{if 0}//
     var core = ecui,
         dom = core.dom,
+        effect = core.effect,
         ext = core.ext,
         io = core.io,
         ui = core.ui,
@@ -679,7 +680,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                         currLayer.disable();
                         layer.disable();
 
-                        core.effect.grade(
+                        effect.grade(
                             fn,
                             400,
                             {

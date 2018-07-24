@@ -6,6 +6,7 @@
 //{if 0}//
     var core = ecui,
         dom = core.dom,
+        effect = core.effect,
         ui = core.ui,
         util = core.util;
 //{/if}//
@@ -120,7 +121,7 @@
 
             var position = event.type === 'swiperight' ? 1 : -1;
             fillImage(backupImg, items[nextIndex], -position);
-            core.effect.grade(
+            effect.grade(
                 'this.from.style.left=#this.from.style.left->' + (position * viewWidth) + 'px#;this.to.style.left=#this.to.style.left->0px#',
                 300,
                 {

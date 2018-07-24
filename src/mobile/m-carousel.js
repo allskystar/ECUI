@@ -12,6 +12,7 @@ _nDelay   - 延迟时间，如果不自动轮播这个值为0
 //{if 0}//
     var core = ecui,
         dom = core.dom,
+        effect = core.effect,
         ui = core.ui,
         util = core.util;
 //{/if}//
@@ -23,7 +24,7 @@ _nDelay   - 延迟时间，如果不自动轮播这个值为0
      */
     function next() {
         var x = this.getX();
-        this._oHandle = core.effect.grade(
+        this._oHandle = effect.grade(
             'this.setPosition(#round:' + x + '->' + (x - this.getClientWidth()) + '#,0)',
             1000,
             {

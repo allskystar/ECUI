@@ -556,6 +556,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                 }
             }
         },
+        effect: {},
         ext: {},
         io: {
             /**
@@ -1221,6 +1222,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
 
     var core = ecui,
         dom = core.dom,
+        //{if 1}//effect = core.effect,//{/if}//
         //{if 1}//ext = core.ext,//{/if}//
         io = core.io,
         //{if 1}//ui = core.ui,//{/if}//

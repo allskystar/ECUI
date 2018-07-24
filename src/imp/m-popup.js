@@ -5,6 +5,7 @@
 //{if 0}//
     var core = ecui,
         dom = core.dom,
+        effect = core.effect,
         ui = core.ui,
         util = core.util;
 //{/if}//
@@ -86,7 +87,7 @@
                         }
 
                         locked = true;
-                        ecui.effect.grade(
+                        effect.grade(
                             'this.style.' + data.enter[0] + '=#' + initValue + '->' + Math.round(initValue - reverseValue) + 'px#',
                             400,
                             {

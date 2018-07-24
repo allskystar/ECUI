@@ -4,6 +4,7 @@ ECUI动画效果库，支持对CSS3动画效果的模拟并扩展了相应的功
 (function () {
 //{if 0}//
     var core = ecui,
+        effect = core.effect,
         util = core.util;
 
     var __ECUI__StyleFixer = {
@@ -38,7 +39,7 @@ ECUI动画效果库，支持对CSS3动画效果的模拟并扩展了相应的功
             'ease-in-out': [0.42, 0, 0.58, 1]
         };
 
-    var effect = core.effect = {
+    Object.assign(core.effect, {
 
         /**
          * 三次贝塞尔曲线构造函数。
@@ -151,7 +152,7 @@ ECUI动画效果库，支持对CSS3动画效果的模拟并扩展了相应的功
                                 return [
                                     parseInt(value.charAt(1) + value.charAt(1), 16),
                                     parseInt(value.charAt(2) + value.charAt(2), 16),
-                                    parseInt(value.charAt(3) + value.charAt(3), 16),
+                                    parseInt(value.charAt(3) + value.charAt(3), 16)
                                 ];
                             }
                             return [
@@ -411,5 +412,5 @@ ECUI动画效果库，支持对CSS3动画效果的模拟并扩展了相应的功
                 fn = options = transition = null;
             };
         }
-    };
+    });
 }());

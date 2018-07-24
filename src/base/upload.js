@@ -14,6 +14,7 @@
 //{if 0}//
     var core = ecui,
         dom = core.dom,
+        io = core.io,
         ui = core.ui;
 //{/if}//
     /**
@@ -32,7 +33,7 @@
             var data = new FormData();
             data.append(this._eFile.name, file);
 
-            ecui.io.ajax(this._sUrl, {
+            io.ajax(this._sUrl, {
                 method: 'POST',
                 data: data,
                 onupload: progress ? function (event) {

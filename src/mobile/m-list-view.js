@@ -18,6 +18,7 @@ _nBottomIndex  - 下部隐藏的选项序号
 //{if 0}//
     var core = ecui,
         dom = core.dom,
+        effect = core.effect,
         ui = core.ui,
         util = core.util,
 
@@ -319,7 +320,7 @@ _nBottomIndex  - 下部隐藏的选项序号
                         y = ui.MScroll.Methods.getY.call(this);
                         top = util.toNumber(this._eHeader.style.top);
 
-                        this._oHandle = core.effect.grade(
+                        this._oHandle = effect.grade(
                             function (percent) {
                                 ui.MScroll.Methods.setPosition.call(this, 0, Math.round(y * (1 - percent)));
                                 this._eHeader.style.top = (top + (-this.$$headerHeight - top) * percent) + 'px';
@@ -331,7 +332,7 @@ _nBottomIndex  - 下部隐藏的选项序号
                         y = ui.MScroll.Methods.getY.call(this);
                         var bottom = util.toNumber(this._eFooter.style.bottom);
                         // y !== 0解决items不够填充整个listview区域的问题
-                        this._oHandle = core.effect.grade(
+                        this._oHandle = effect.grade(
                             function (percent) {
                                 ui.MScroll.Methods.setPosition.call(this, 0, Math.round(y + (top - this.$$footerHeight + this._nTopHidden - y) * percent));
                                 this._eFooter.style.bottom = (bottom + (-this.$$footerHeight - bottom) * percent) + 'px';
