@@ -407,10 +407,25 @@ _nBottomIndex  - 下部隐藏的选项序号
             },
 
             /**
-             * 本控件不支持删除选项的操作。
              * @override
              */
-            remove: util.blank,
+            remove: function (item) {
+                var index = 'number' === typeof item ? item : this.getItems().indexOf(item);
+                item = this.getItem(index);
+                if (item) {
+                    var height = item.getHeight();
+                    if (index < this._nTopIndex) {
+                        this._nTopIndex--;
+                        this._nTopHidden -= height;
+                    } else if (index >= this._nBottomIndex) {
+                        this._nBottomHidden -= height;
+                    }
+                    this._nBottomIndex--;
+                    this.$$bodyHeight -= height;
+                    this.setPosition(this.getX(), this.getY());
+                    ui.Items.Methods.remove.call(this, item);
+                }
+            },
 
             /**
              * @override
