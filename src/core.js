@@ -342,8 +342,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                         trackId = undefined;
                         onpressure(event, false);
                         ongesture(event.getNative().changedTouches, event);
-
-                        if (ghostClick || event.target !== getElementFromEvent(item)) {
+                        if (ghostClick || !event.target || event.target.value === undefined || event.target !== getElementFromEvent(item)) {
                             // 同一个位置事件元素发生了变化，阻止事件穿透
                             event.preventDefault();
                         }
@@ -1392,7 +1391,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                         event.toY = track.clientY;
                         callback('panmove');
                     } else {
-                        if (isTouchMoved === false && Date.now() - track.lastClick.time < 300 && Math.sqrt(track.speedX * track.speedX + track.speedY * track.speedY) < HIGH_SPEED) {
+                        if (isTouchMoved === false && track.lastClick && Date.now() - track.lastClick.time < 300 && Math.sqrt(track.speedX * track.speedX + track.speedY * track.speedY) < HIGH_SPEED) {
                             callback('tap');
                         }
                     }

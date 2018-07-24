@@ -651,6 +651,7 @@ function loadStyles(modifyVars) {
                             } else {
                                 style.innerHTML = lessFuncs(style, result.css);
                             }
+                            ecui.util.adjustFontSize([document.styleSheets[document.styleSheets.length - 1]]);
                         }
                     }, null, style));
         }

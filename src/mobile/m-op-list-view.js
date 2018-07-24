@@ -76,7 +76,7 @@ _cItem    - 当前处于激活的选项
                         ui.MListView.prototype.Item.prototype.$click.call(this, event);
 
                         var parent = this.getParent();
-                        if (parent._cItem) {
+                        if (parent && parent._cItem) {
                             core.effect.grade('this.setPosition(#this.getX()->0#)', 400, {$: parent._cItem});
                             parent._cItem = null;
                         }

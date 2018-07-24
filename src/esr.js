@@ -46,6 +46,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
         currRouteWeight,
         unloadNames = [],
         selectedControl,
+        selectedLocation,
 
         FormatInput = core.inherits(
             ui.Control,
@@ -275,7 +276,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                     }
                     esr.request(route.model, function () {
                         esr.render(route);
-                    });
+                    }, route.onerror || esr.onerror);
                 }
             }
         } else {
@@ -998,14 +999,8 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                     }
                     core.removeControlListeners(core.findControl(container));
 
-                    pauseStatus = true;
                     history.go(-1);
-                    util.timer(function () {
-                        if (currLocation !== esr.getLocation()) {
-                            currLocation = esr.getLocation();
-                            pauseStatus = false;
-                        }
-                    });
+                    currLocation = selectedLocation;
                 });
             }
         },
@@ -1240,9 +1235,9 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                             }
                         }
                     },
-                    onerror: function () {
+                    onerror: function (xhr) {
                         count--;
-                        err.push({url: varUrl, name: varName});
+                        err.push({url: varUrl, name: varName, xhr: xhr});
                         if (!count) {
                             if (onerror(err) === false) {
                                 return;
@@ -1402,7 +1397,8 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                     selectedControl = content;
                 }
 
-                esr.setLocation(esr.getLocation().split('~')[0] + '~ALLOW_LEAVE');
+                selectedLocation = esr.getLocation();
+                esr.setLocation(selectedLocation.split('~')[0] + '~ALLOW_LEAVE');
 
                 transition({
                     NAME: 'AppSelect',
