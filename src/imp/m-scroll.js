@@ -7,7 +7,8 @@
         dom = core.dom,
         ui = core.ui;
 //{/if}//
-    var namedMap = {};
+    var namedMap = {},
+        tx = /(\-?\d+)px\s*,\s*(\-?\d+)/;
 
     ui.MScroll = {
         NAME: '$MScroll',
@@ -103,14 +104,15 @@
              * @override
              */
             getX: function () {
-                return namedMap[this.getUID()].x;
+                return (tx.test(this.getBody().style.transform) ? +RegExp.$1 : 0) - this.getMain().scrollLeft;
             },
 
             /**
              * @override
              */
             getY: function () {
-                return namedMap[this.getUID()].y;
+                console.log(this.getBody().style.transform, tx.test(this.getBody().style.transform), RegExp.$2);
+                return (tx.test(this.getBody().style.transform) ? +RegExp.$2 : 0) - this.getMain().scrollTop;
             },
 
             /**
@@ -127,10 +129,10 @@
              * @override
              */
             setPosition: function (x, y) {
-                var data = namedMap[this.getUID()];
-                if (data.x !== x || data.y !== y) {
-                    data.x = x;
-                    data.y = y;
+                var main = this.getMain();
+                if (this.getX() !== x || this.getY() !== y) {
+                    main.scrollLeft = 0;
+                    main.scrollTop = 0;
                     this.getBody().style.transform = 'translate(' + x + 'px,' + y + 'px)';
                 }
             },
