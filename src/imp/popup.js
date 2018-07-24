@@ -52,15 +52,6 @@
 
         Methods: {
             /**
-             * 下拉框控件失去激活时，隐藏弹层。
-             * @override
-             */
-            $blur: function (event) {
-                this.$Popup.$blur.call(this, event);
-                namedMap[this.getUID()].hide();
-            },
-
-            /**
              * @override
              */
             $click: function (event) {
