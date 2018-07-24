@@ -95,9 +95,7 @@
              */
             $dragmove: function (event) {
                 this.$MOptions.$dragmove.call(this, event);
-                var item = getItems(this)[Math.round(-event.y / this.$$itemHeight) + this._nOptionSize];
-                core.setFocused(item);
-                this.setSelected(item);
+                this.setSelected(getItems(this)[Math.round(-event.y / this.$$itemHeight) + this._nOptionSize]);
             },
 
             /**
@@ -144,6 +142,9 @@
                     }
                     if (item) {
                         item.alterClass('+selected');
+                        core.setFocused(item);
+                    } else {
+                        core.setFocused(this);
                     }
                     this._cSelect = item;
                 }

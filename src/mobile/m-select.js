@@ -57,10 +57,14 @@ _bRequired    - 是否必须选择
                     $show: function () {
                         ui.$select.prototype.Options.prototype.$show.call(this);
 
-                        var select = this.getParent();
+                        var select = this.getParent(),
+                            item = select.getSelected();
 
-                        this.setPosition(0, this.$$itemHeight * (this._nOptionSize - select.getItems().indexOf(select.getSelected())));
-                        core.setFocused(select.getSelected());
+                        this.setPosition(0, this.$$itemHeight * (this._nOptionSize - select.getItems().indexOf(item)));
+
+                        if (item) {
+                            core.setFocused(item);
+                        }
                     }
                 },
                 ui.MOptions

@@ -281,7 +281,7 @@ _bRequired    - 是否必须选择
                     } else {
                         this._uText.setContent('');
                         ui.InputControl.prototype.setValue.call(this, '');
-                        core.loseFocus(this._cSelected);
+                        core.setFocused(this);
                     }
                     this._cSelected = item;
                 }
