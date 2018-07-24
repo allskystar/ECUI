@@ -230,9 +230,9 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                 }
             }
 
-            if (context.DENY_CACHE !== true) {
-                var layer = getLayer(route);
+            var layer = getLayer(route);
 
+            if (context.DENY_CACHE !== true) {
                 if (route.CACHE && layer && layer.location === currLocation) {
                     // 数据必须还在才触发缓存
                     // 模块发生变化，缓存状态下同样更换引擎
@@ -246,17 +246,18 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                     }
                     return;
                 }
-
-                if (route.CACHE === undefined && layer && route.main !== 'AppCommonContainer') {
-                    // 位于层内且不在公共层，缓存数据
-                    route.CACHE = true;
-                }
             } else {
                 // 解决A标签下反复修改的问题
+                currLocation = esr.getLocation().replace('~DENY_CACHE', '');
+                delete context.DENY_CACHE;
                 util.timer(function () {
-                    currLocation = esr.getLocation().replace('~DENY_CACHE', '');
                     history.replaceState('', '', '#' + currLocation);
                 }, 100);
+            }
+
+            if (route.CACHE === undefined && layer && route.main !== 'AppCommonContainer') {
+                // 位于层内且不在公共层，缓存数据
+                route.CACHE = true;
             }
 
             if (!route.onrender || route.onrender() !== false) {
@@ -498,6 +499,13 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
 
                 if (/~HISTORY=(\d+)/.test(loc)) {
                     historyIndex = +RegExp.$1;
+
+                    // ie下使用中间iframe作为中转控制
+                    // 其他浏览器直接调用控制器方法
+                    if (!addIEHistory(loc)) {
+                        currLocation = loc;
+                        esr.callRoute(loc);
+                    }
                 } else {
                     if (esrOptions.cache) {
                         historyData.splice(historyIndex, historyData.length - historyIndex);
@@ -520,14 +528,13 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                     }
                     util.timer(function () {
                         history.replaceState('', '', '#' + loc);
+                        // ie下使用中间iframe作为中转控制
+                        // 其他浏览器直接调用控制器方法
+                        if (!addIEHistory(loc)) {
+                            currLocation = loc;
+                            esr.callRoute(loc);
+                        }
                     }, 100);
-                }
-
-                // ie下使用中间iframe作为中转控制
-                // 其他浏览器直接调用控制器方法
-                if (!addIEHistory(loc)) {
-                    currLocation = loc;
-                    esr.callRoute(loc);
                 }
             }
         }

@@ -74,7 +74,7 @@
                         if (panel) {
                             panel.setPosition(panel.getX(), panel.getY() - lastScrollY);
                         }
-                    }, 500);
+                    }, 300);
                 } else {
                     keyboardHandle = util.timer(function () {
                         var lastScrollY = window.scrollY;
@@ -90,7 +90,7 @@
                                 panel.setPosition(panel.getX(), panel.getY() - lastScrollY);
                             }
                         }, 100);
-                    }, 500);
+                    }, 300);
                 }
             });
 

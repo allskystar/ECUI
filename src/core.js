@@ -86,16 +86,19 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                         });
 
                         style.width = width + 'px';
-                        style.height = height + 'px';
 
-                        if (currWidth) {
-                            // 第一次进入不需要repaint
-                            repaint();
+                        if (isToucher) {
+                            style.height = height + 'px';
+                            if (currWidth) {
+                                // 第一次进入不需要repaint
+                                repaint();
+                            }
                         }
                     } else if (style.height !== height + 'px') {
-                        var currHeight = util.toNumber(style.height);
-                        style.height = height + 'px';
                         if (isToucher) {
+                            var currHeight = util.toNumber(style.height);
+                            style.height = height + 'px';
+
                             // android 软键盘弹出和收起
                             if (height >= currHeight) {
                                 // 软键盘收起，失去焦点
@@ -105,7 +108,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                             }
                         }
                     }
-                }, 500);
+                }, 300);
             },
 
             // pad pro/surface pro等设备上的事件处理
@@ -407,7 +410,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                 if (scrollHandler) {
                     scrollHandler();
                     scrollHandler = null;
-                    util.timer(onscroll, 500, this, event);
+                    util.timer(onscroll, 300, this, event);
                 }
 
                 calcSpeed(tracks, event);
@@ -431,7 +434,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                     if (scrollHandler) {
                         scrollHandler();
                         scrollHandler = null;
-                        util.timer(onscroll, 500, this, event);
+                        util.timer(onscroll, 300, this, event);
                     }
 
                     event.track = tracks;
@@ -2390,8 +2393,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                     item.object.init(item.options);
                 });
 
-                initRecursion--;
-                if (!initRecursion) {
+                if (initRecursion === 1) {
                     if (readyList) {
                         readyList.forEach(function (item) {
                             item();
@@ -2400,6 +2402,8 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                     }
 
                     dom.addEventListener(window, 'resize', events.orientationchange);
+
+                    initRecursion--;
                 }
 
                 // 防止循环引用
