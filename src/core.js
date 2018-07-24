@@ -79,23 +79,38 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                         style = document.body.style;
 
                     if (style.width !== width + 'px') {
-                        style.width = width + 'px';
-                        style.height = height + 'px';
-
-                        var fontSize = util.toNumber(dom.getStyle(dom.parent(document.body), 'font-size'));
+                        var currWidth = style.width,
+                            fontSize = util.toNumber(dom.getStyle(dom.parent(document.body), 'font-size'));
                         fontSizeCache.forEach(function (item) {
                             item[0]['font-size'] = (Math.round(fontSize * item[1] / 2) * 2) + 'px';
                         });
 
-                        repaint();
+                        style.width = width + 'px';
+                        style.height = height + 'px';
+
+                        if (currWidth) {
+                            // 第一次进入不需要repaint
+                            repaint();
+                        }
                     } else if (style.height !== height + 'px') {
+                        var currHeight = util.toNumber(style.height);
+                        style.height = height + 'px';
                         if (isToucher) {
-                            style.top = (height - util.toNumber(style.height)) + 'px';
-                        } else {
-                            style.height = height + 'px';
+                            // android 软键盘弹出和收起
+                            if (height < currHeight) {
+                                // 软键盘弹出，当前控件必须在可显示区域显示
+                                if (document.activeElement && document.activeElement.scrollIntoViewIfNeeded) {
+                                    document.activeElement.scrollIntoViewIfNeeded();
+                                }
+                            } else {
+                                // 软键盘收起，失去焦点
+                                if (document.activeElement && document.activeElement.blur) {
+                                    document.activeElement.blur();
+                                }
+                            }
                         }
                     }
-                }, 1000);
+                }, 500);
             },
 
             // pad pro/surface pro等设备上的事件处理
@@ -1203,9 +1218,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                 }
             }
 
-            if (!isToucher) {
-                dom.addEventListener(window, 'resize', events.orientationchange);
-            }
+            dom.addEventListener(window, 'resize', events.orientationchange);
             dom.addEventListener(window, 'scroll', onscroll);
             dom.addEventListener(
                 window,
@@ -2338,7 +2351,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                     controls = [],
                     options;
 
-                if (!isToucher && !initRecursion) {
+                if (!initRecursion) {
                     // 第一层 init 循环的时候需要关闭resize事件监听，防止反复的重入
                     dom.removeEventListener(window, 'resize', events.orientationchange);
                 }
@@ -2391,9 +2404,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                         readyList = null;
                     }
 
-                    if (!isToucher) {
-                        dom.addEventListener(window, 'resize', events.orientationchange);
-                    }
+                    dom.addEventListener(window, 'resize', events.orientationchange);
                 }
 
                 // 防止循环引用
