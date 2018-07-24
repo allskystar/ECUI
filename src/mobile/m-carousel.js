@@ -24,7 +24,7 @@ _nDelay   - 延迟时间，如果不自动轮播这个值为0
      */
     function next() {
         var x = this.getX();
-        this._oHandle = effect.grade(
+        this.stop = effect.grade(
             'this.setPosition(#round:' + x + '->' + (x - this.getClientWidth()) + '#,0)',
             1000,
             {
@@ -192,16 +192,14 @@ _nDelay   - 延迟时间，如果不自动轮播这个值为0
              * @public
              */
             start: function () {
-                this._oHandle = util.timer(next, this._nDelay, this);
+                this.stop = util.timer(next, this._nDelay, this);
             },
 
             /**
              * 停止轮播下一张图片。
              * @public
              */
-            stop: function () {
-                this._oHandle();
-            }
+            stop: util.blank
         }
     );
 }());
