@@ -51,9 +51,6 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
 
         unloadNames = [],
 
-        selectedControl,
-        selectedLocation,
-
         FormatInput = core.inherits(
             ui.Control,
             'ui-hide',
@@ -646,9 +643,8 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
      * @private
      *
      * @param {object} route 路由对象，新的路由
-     * @param {Function} onfinish 执行完后的回调函数
      */
-    function transition(route, onfinish) {
+    function transition(route) {
         if (route.NAME !== currRouteName) {
             var layer = getLayer(route);
             if (layer) {
@@ -700,9 +696,6 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                                     pauseStatus = false;
                                     if (esrOptions.transition === 'cover') {
                                         core.mask();
-                                    }
-                                    if (onfinish) {
-                                        onfinish();
                                     }
                                 }
                             }
@@ -990,31 +983,6 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
          */
         getRoute: function (name) {
             return routes[calcUrl(name)];
-        },
-
-        /**
-         * 隐藏选择框。
-         * @public
-         */
-        hideSelect: function () {
-            if (esrOptions.app) {
-                transition(esr.getRoute(esr.getLocation().split('~')[0]), function () {
-                    var container = core.$('AppSelectContainer');
-                    if (selectedControl) {
-                        if (selectedControl instanceof ui.Control) {
-                            selectedControl.setParent();
-                        } else {
-                            core.dispose(container, true);
-                            container.innerHTML = '';
-                        }
-                        selectedControl = null;
-                    }
-                    core.removeControlListeners(core.findControl(container));
-
-                    history.go(-1);
-                    currLocation = selectedLocation;
-                });
-            }
         },
 
         /**
@@ -1389,28 +1357,41 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
          */
         showSelect: function (content, onconfirm, title) {
             if (esrOptions.app) {
-                var container = core.$('AppSelectContainer');
-                core.addEventListener(core.findControl(container), 'confirm', function (event) {
-                    esr.hideSelect();
+                var container = core.$('AppSelectContainer'),
+                    layer = core.findControl(container),
+                    lastLocation = esr.getLocation();
+
+                core.addEventListener(layer, 'confirm', function (event) {
                     if (onconfirm) {
                         onconfirm(event);
                     }
+                    history.go(-1);
+                });
+                core.addEventListener(layer, 'hide', function () {
+                    if (content) {
+                        if (content instanceof ui.Control) {
+                            content.setParent();
+                        } else {
+                            core.dispose(container, true);
+                            container.innerHTML = '';
+                        }
+                        content = null;
+                    }
+                    core.removeControlListeners(core.findControl(container));
                 });
 
                 esr.setData('AppSelectTitle', title || '');
 
                 if (content) {
                     if (content instanceof ui.Control) {
-                        content.setParent(container.getControl());
+                        content.setParent(layer);
                     } else {
                         container.innerHTML = content;
                         core.init(container);
                     }
-                    selectedControl = content;
                 }
 
-                selectedLocation = esr.getLocation();
-                esr.setLocation(selectedLocation.split('~')[0] + '~ALLOW_LEAVE');
+                esr.setLocation(lastLocation.split('~')[0] + '~ALLOW_LEAVE');
 
                 transition({
                     NAME: 'AppSelect',
