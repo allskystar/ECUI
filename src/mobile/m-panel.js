@@ -7,7 +7,10 @@
     var core = ecui,
         dom = core.dom,
         ui = core.ui,
-        util = core.util;
+        util = core.util,
+
+        iosVersion = /(iPhone|iPad).+OS (\d+)/i.test(navigator.userAgent) ?  +(RegExp.$2) : undefined,
+        safariVersion = /(\d+\.\d)(\.\d)?\s+.*safari/i.test(navigator.userAgent) && !/chrome/i.test(navigator.userAgent) ? +RegExp.$1 : undefined;
 //{/if}//
     /**
      * 移动端容器控件。
@@ -40,4 +43,58 @@
         }
         return oldRemove(el);
     };
+
+    function findPanel(control) {
+        for (; control; control = control.getParent()) {
+            if (control instanceof ui.MPanel) {
+                return control;
+            }
+        }
+    }
+
+    if (iosVersion) {
+        var keyboardHeight = 0,
+            keyboardHandle = util.blank;
+
+        dom.addEventListener(document, 'focusin', function (event) {
+            event = core.wrapEvent(event);
+
+            if (keyboardHeight) {
+                util.timer(function () {
+                    var lastScrollY = window.scrollY;
+                    document.body.style.height = (util.toNumber(document.body.style.height) - keyboardHeight) + 'px';
+                    window.scrollTo(0, 0);
+                    var panel = findPanel(event.getControl());
+                    if (panel) {
+                        panel.setPosition(panel.getX(), panel.getY() - lastScrollY);
+                    }
+                }, 500);
+            } else {
+                keyboardHandle = util.timer(function () {
+                    var lastScrollY = window.scrollY;
+                    document.body.style.visibility = 'hidden';
+                    window.scrollTo(0, 100000000);
+                    util.timer(function () {
+                        keyboardHeight = window.scrollY - (safariVersion ? 45 : 0);
+                        document.body.style.visibility = '';
+                        document.body.style.height = (util.toNumber(document.body.style.height) - keyboardHeight) + 'px';
+                        window.scrollTo(0, 0);
+                        var panel = findPanel(event.getControl());
+                        if (panel) {
+                            panel.setPosition(panel.getX(), panel.getY() - lastScrollY);
+                        }
+                    }, 100);
+                }, 500);
+            }
+        });
+
+        dom.addEventListener(document, 'focusout', function (event) {
+            keyboardHandle();
+            document.body.style.height = (util.toNumber(document.body.style.height) + keyboardHeight) + 'px';
+            var panel = findPanel(core.wrapEvent(event).getControl());
+            if (panel) {
+                panel.refresh();
+            }
+        });
+    }
 }());
