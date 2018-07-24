@@ -264,12 +264,16 @@ _eInput        - INPUT对象
             $blur: function (event) {
                 ui.Control.prototype.$blur.call(this, event);
 
-                dom.removeEventListener(this._eInput, 'blur', events.blur);
+                if (events.blur) {
+                    dom.removeEventListener(this._eInput, 'blur', events.blur);
+                }
                 try {
                     this._eInput.blur();
                 } catch (ignore) {
                 }
-                dom.addEventListener(this._eInput, 'blur', events.blur);
+                if (events.blur) {
+                    dom.addEventListener(this._eInput, 'blur', events.blur);
+                }
 
                 if (this._bBlur) {
                     core.dispatchEvent(this, 'validate');
@@ -339,12 +343,16 @@ _eInput        - INPUT对象
                 }
                 util.timer(
                     function () {
-                        dom.removeEventListener(this._eInput, 'focus', events.focus);
+                        if (events.focus) {
+                            dom.removeEventListener(this._eInput, 'focus', events.focus);
+                        }
                         try {
                             this._eInput.focus();
                         } catch (ignore) {
                         }
-                        dom.addEventListener(this._eInput, 'focus', events.focus);
+                        if (events.focus) {
+                            dom.addEventListener(this._eInput, 'focus', events.focus);
+                        }
                     },
                     0,
                     this
