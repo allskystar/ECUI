@@ -16,10 +16,10 @@
 
     var namedMap = {},
         position = {
-            top: ['bottom', true],
-            bottom: ['top', true],
-            left: ['right', false],
-            right: ['left', false]
+            top: ['top', true],
+            bottom: ['bottom', true],
+            left: ['left', false],
+            right: ['right', false]
         },
         locked;
 
@@ -73,13 +73,11 @@
                         if (data.enter[1]) {
                             var width = view.width,
                                 height = data.enter[2] ? view.height * data.enter[2] : popup.getHeight(),
-                                initValue = view.height + view.top,
                                 reverseValue = height;
                         } else {
                             style.top = view.top + 'px';
                             width = data.enter[2] ? view.width * data.enter[2] : popup.getWidth();
                             height = view.height;
-                            initValue = view.width + view.left;
                             reverseValue = width;
                         }
                         if (data.enter[2]) {
@@ -88,7 +86,7 @@
 
                         locked = true;
                         effect.grade(
-                            'this.style.' + data.enter[0] + '=#' + initValue + '->' + Math.round(initValue - reverseValue) + 'px#',
+                            'this.style.' + data.enter[0] + '=#' + (-reverseValue) + '->0px#',
                             400,
                             {
                                 $: el,

@@ -54,22 +54,22 @@
     }
 
     if (isToucher) {
-        if (iosVersion) {
-            var keyboardHeight = 0,
-                keyboardHandle = util.blank,
-                focusout,
-                basicHeight;
+        var keyboardHeight = 0,
+            keyboardHandle = util.blank,
+            focusout,
+            basicHeight;
 
+        if (iosVersion) {
             core.ready(function () {
                 basicHeight = util.toNumber(document.body.style.height);
             });
 
             dom.addEventListener(document, 'focusin', function (event) {
-                keyboardHandle();
-
                 if (event.target.readOnly || event.target.tagName === 'SELECT' || (event.target.tagName === 'INPUT' && (event.target.type === 'radio' || event.target.type === 'checkbox'))) {
                     return;
                 }
+
+                keyboardHandle();
 
                 var target = event.target,
                     panel = findPanel(target);
@@ -117,20 +117,21 @@
             });
 
             dom.addEventListener(document, 'focusout', function (event) {
-                keyboardHandle();
-
                 if (event.target.readOnly || event.target.tagName === 'SELECT' || (event.target.tagName === 'INPUT' && (event.target.type === 'radio' || event.target.type === 'checkbox'))) {
                     return;
+                }
+
+                keyboardHandle();
+
+                document.body.style.height = basicHeight + 'px';
+                var panel = findPanel(event.target);
+                if (panel) {
+                    panel.refresh();
                 }
 
                 focusout = event.target;
                 keyboardHandle = util.timer(function () {
                     focusout = null;
-                    document.body.style.height = basicHeight + 'px';
-                    var panel = findPanel(event.target);
-                    if (panel) {
-                        panel.refresh();
-                    }
                 }, 300);
             });
         } else {
@@ -139,12 +140,17 @@
                 if (document.documentElement.clientHeight < util.toNumber(document.body.style.height)) {
                     document.activeElement.scrollIntoViewIfNeeded();
 
-                    var panel = findPanel(document.activeElement);
+                    focusout = findPanel(document.activeElement);
 
-                    if (panel) {
-                        panel.setPosition(panel.getX(), panel.getY() - window.scrollY);
+                    if (focusout) {
+                        focusout.setPosition(focusout.getX(), focusout.getY() - window.scrollY);
                         window.scrollTo(0, 0);
                     }
+                } else if (focusout) {
+                    keyboardHandle = util.timer(function () {
+                        focusout.refresh();
+                        focusout = null;
+                    }, 500);
                 }
             });
 
@@ -154,6 +160,22 @@
                     panel.refresh();
                 }
             });
+
+            var oldShow = core.esr.AppLayer.prototype.$show;
+            core.esr.AppLayer.prototype.$show = function () {
+                oldShow.apply(this, arguments);
+                core.query(function (item) {
+                    return item instanceof ui.MPanel && item.isShow() && this.contain(item);
+                }.bind(this)).forEach(function (item) {
+                    item.refresh();
+                });
+            };
+
+            var oldHide = core.esr.AppLayer.prototype.$hide;
+            core.esr.AppLayer.prototype.$hide = function () {
+                oldHide.apply(this, arguments);
+                keyboardHandle();
+            };
         }
     }
 }());

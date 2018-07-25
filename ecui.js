@@ -2,8 +2,10 @@ var ecui;
 (function () {
     document.write('<script type="text/javascript" src="src/adapter.js"></script>');
     document.write('<script type="text/javascript" src="src/effect.js"></script>');
+    document.write('<script type="text/javascript" src="src/etpl.js"></script>');
     document.write('<script type="text/javascript" src="src/core.js"></script>');
     document.write('<script type="text/javascript" src="src/control.js"></script>');
+    document.write('<script type="text/javascript" src="src/esr.js"></script>');
 
     document.write('<script type="text/javascript" src="src/imp/items.js"></script>');
     document.write('<script type="text/javascript" src="src/imp/popup.js"></script>');
@@ -59,9 +61,6 @@ var ecui;
     document.write('<script type="text/javascript" src="src/mobile/m-photo-hotspot.js"></script>');
     document.write('<script type="text/javascript" src="src/mobile/m-multilevel-select.js"></script>');
     document.write('<script type="text/javascript" src="src/mobile/m-carousel.js"></script>');
-
-    document.write('<script type="text/javascript" src="src/etpl.js"></script>');
-    document.write('<script type="text/javascript" src="src/esr.js"></script>');
 //{if 0}//
     var ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined;
     document.write('<script type="text/javascript" src="tools/debug.js"></script>');
