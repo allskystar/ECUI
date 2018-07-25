@@ -211,8 +211,13 @@ daikuan.showHint = function (type, msg) {
     }, 2000)
 };
 
-// 录入表单反显数据
-daikuan.setEditFormValue = function (data, form) {
+/**
+ * 录入表单反显数据
+ * @param {object}  data        回填的的数据
+ * @param {form}    form        要回填的表格元素
+ * @param {Boolean} isDefault   是否要设置为默认值
+ */
+daikuan.setEditFormValue = function (data, form, isDefault) {
     var elements = form.elements;
     var ignore = [], arr_obj_ignore = [];
     for (var i = 0, item; item = elements[i++]; ) {
@@ -226,9 +231,15 @@ daikuan.setEditFormValue = function (data, form) {
                 var _control = item.getControl && item.getControl();
                 if (_control) {
                     if (_control instanceof ecui.ui.Radio) {
+
                         _control.setChecked(value === _control.getValue());
                     } else if (_control instanceof ecui.ui.Checkbox) {
-                        _control.setChecked(value.indexOf(_control.getValue()) !== -1);
+                        if (value instanceof Array) {
+                            _control.setChecked(value.indexOf(_control.getValue()) !== -1);
+                        } else {
+                            // 当不是复选的时候 返回的不是数组,是string 
+                            _control.setChecked(value === _control.getValue());
+                        }
                     } else if (_control instanceof ecui.esr.CreateArray) {
                         if (elements[name][1]) {
                             //  获取与ecui.esr.CreateArray控件的name相同第一个input元素
@@ -263,6 +274,10 @@ daikuan.setEditFormValue = function (data, form) {
                     item.value = value;
                 }
             }
+        }
+
+        if (isDefault && item.getControl && item.name) {
+            item.getControl().saveToDefault();
         }
     }
 };
