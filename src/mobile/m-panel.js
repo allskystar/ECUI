@@ -75,10 +75,19 @@
                     panel = findPanel(target);
 
                 if (keyboardHeight) {
+                    var stop = util.timer(function () {
+                        document.body.scrollTop = 0;
+                        document.documentElement.scrollTop = 0;
+                    }, -1);
+
+                    util.timer(function () {
+                        stop();
+                    }, 500);
+
                     keyboardHandle = util.timer(function () {
                         if (panel) {
                             if (focusout) {
-                                panel.setPosition(panel.getX(), Math.min(0, Math.max(panel.getY() - window.scrollY, dom.getPosition(panel.getOuter()).top - target.offsetTop + (panel.getHeight() - keyboardHeight - target.offsetHeight) / 2)));
+                                panel.setPosition(panel.getX(), Math.min(0, panel.getY() - window.scrollY));
                             } else {
                                 document.body.style.height = (basicHeight - keyboardHeight) + 'px';
                                 panel.setPosition(panel.getX(), panel.getY() - window.scrollY);
@@ -114,9 +123,9 @@
                     return;
                 }
 
-                focusout = true;
+                focusout = event.target;
                 keyboardHandle = util.timer(function () {
-                    focusout = false;
+                    focusout = null;
                     document.body.style.height = basicHeight + 'px';
                     var panel = findPanel(event.target);
                     if (panel) {
