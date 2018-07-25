@@ -45,8 +45,8 @@
         return oldRemove(el);
     };
 
-    function findPanel(control) {
-        for (; control; control = control.getParent()) {
+    function findPanel(el) {
+        for (var control = core.findControl(el); control; control = control.getParent()) {
             if (control instanceof ui.MPanel) {
                 return control;
             }
@@ -71,21 +71,24 @@
                     return;
                 }
 
-                var control = core.wrapEvent(event).getControl(),
-                    panel = findPanel(control);
+                var target = event.target,
+                    panel = findPanel(target);
 
                 if (keyboardHeight) {
                     keyboardHandle = util.timer(function () {
-                        document.body.style.height = (basicHeight - keyboardHeight) + 'px';
-
                         if (panel) {
-                            panel.setPosition(panel.getX(), Math.max(panel.getY(), dom.getPosition(panel.getOuter()).top - dom.getPosition(control.getOuter()).top + (panel.getHeight() - keyboardHeight - control.getHeight()) / 2));
+                            if (focusout) {
+                                panel.setPosition(panel.getX(), Math.min(0, Math.max(panel.getY() - window.scrollY, dom.getPosition(panel.getOuter()).top - target.offsetTop + (panel.getHeight() - keyboardHeight - target.offsetHeight) / 2)));
+                            } else {
+                                document.body.style.height = (basicHeight - keyboardHeight) + 'px';
+                                panel.setPosition(panel.getX(), panel.getY() - window.scrollY);
+                            }
                             window.scrollTo(0, 0);
                         }
-                    }, focusout ? 100 : 500);
+                    }, 500);
                 } else {
                     keyboardHandle = util.timer(function () {
-                        var lastScrollY = window.scrollY + (panel ? panel.getMain().scrollTop : 0);
+                        var lastScrollY = window.scrollY;
                         document.body.style.visibility = 'hidden';
                         window.scrollTo(0, 100000000);
                         util.timer(function () {
@@ -99,7 +102,6 @@
                             } else {
                                 window.scrollTo(0, lastScrollY);
                             }
-                            panel.getMain().scrollTop = 0;
                         }, 100);
                     }, 500);
                 }
@@ -116,11 +118,11 @@
                 keyboardHandle = util.timer(function () {
                     focusout = false;
                     document.body.style.height = basicHeight + 'px';
-                    var panel = findPanel(core.wrapEvent(event).getControl());
+                    var panel = findPanel(event.target);
                     if (panel) {
                         panel.refresh();
                     }
-                }, 100);
+                }, 300);
             });
         } else {
             // android，处理软键盘问题
@@ -128,11 +130,9 @@
                 if (document.documentElement.clientHeight < util.toNumber(document.body.style.height)) {
                     document.activeElement.scrollIntoViewIfNeeded();
 
-                    var control = core.findControl(document.activeElement),
-                        panel = findPanel(control);
+                    var panel = findPanel(document.activeElement);
 
                     if (panel) {
-                        panel.getMain().scrollTop = 0;
                         panel.setPosition(panel.getX(), panel.getY() - window.scrollY);
                         window.scrollTo(0, 0);
                     }
@@ -140,7 +140,7 @@
             });
 
             dom.addEventListener(document, 'focusout', function (event) {
-                var panel = findPanel(core.wrapEvent(event).getControl());
+                var panel = findPanel(event.target);
                 if (panel) {
                     panel.refresh();
                 }

@@ -111,7 +111,6 @@
              * @override
              */
             getY: function () {
-                console.log(this.getBody().style.transform, tx.test(this.getBody().style.transform), RegExp.$2);
                 return (tx.test(this.getBody().style.transform) ? +RegExp.$2 : 0) - this.getMain().scrollTop;
             },
 
