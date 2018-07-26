@@ -50,7 +50,7 @@ _nBottomIndex  - 下部隐藏的选项序号
             function (el, options) {
                 var body = this.getBody();
                 this._eHeader = dom.insertBefore(dom.create({className: options.classes.join('-header ')}), body);
-                this._eFooter = dom.insertBefore(dom.create({className: options.classes.join('-footer ')}), body);
+                this._eFooter = dom.insertAfter(dom.create({className: options.classes.join('-footer ')}), body);
                 this._oHandle = util.blank;
             }
         ],
@@ -115,9 +115,9 @@ _nBottomIndex  - 下部隐藏的选项序号
                     }
                 );
                 if (this.isReady()) {
-                    top = Math.min(top + this._nTopHidden, 0);
-                    if (ui.MScroll.Methods.getY.call(this) < top) {
-                        ui.MScroll.Methods.setPosition.call(this, 0, top);
+                    var y = this.getY();
+                    if (y <= top || (y > 0 && !top)) {
+                        this.setPosition(0, top);
                     }
                 }
             },
@@ -218,6 +218,7 @@ _nBottomIndex  - 下部隐藏的选项序号
             $initStructure: function (width, height) {
                 ui.Control.prototype.$initStructure.call(this, width, height);
                 this.alterClass(this.getLength() ? '-empty' : '+empty');
+                this.setPosition(this.getX(), 0);
             },
 
             /**
@@ -293,7 +294,7 @@ _nBottomIndex  - 下部隐藏的选项序号
                 this.premitAlterItems();
                 this.add(data);
                 this._eHeader.innerHTML = this.HTML_REFRESHED;
-                this.reset();
+                this.setPosition(0, 0);
                 this._eFooter.innerHTML = '';
             },
 
@@ -305,44 +306,31 @@ _nBottomIndex  - 下部隐藏的选项序号
             reset: function (callback) {
                 if (!this.isScrolling()) {
                     this._oHandle();
-                    var y = this.getY(),
-                        top = Math.min(0, this.getHeight() - this.$$bodyHeight + this.$$headerHeight),
+                    var status = this._sStatus.slice(0, 6),
+                        main = this.getMain(),
                         options = {
-                            onfinish: callback && function () {
-                                this._sStatus = '';
-                                callback();
-                            }.bind(this)
+                            $: this,
+                            onfinish: function () {
+                                if (callback) {
+                                    callback();
+                                }
+                            }
                         };
 
-                    top = top ? top - this.$$footerHeight : 0;
-                    // 解决items不够填充整个listview区域，导致footercomplete的触发，应该先判断head，
-                    if (y > 0) {
-                        y = ui.MScroll.Methods.getY.call(this);
-                        top = util.toNumber(this._eHeader.style.top);
-
+                    if (status === 'header') {
+                        options.y = this.getY();
                         this._oHandle = effect.grade(
-                            function (percent) {
-                                ui.MScroll.Methods.setPosition.call(this, 0, Math.round(y * (1 - percent)));
-                                this._eHeader.style.top = (top + (-this.$$headerHeight - top) * percent) + 'px';
-                            }.bind(this),
-                            1000,
+                            'this.setPosition(0,#$.y->0#)',
+                            400,
                             options
                         );
-                    } else if (y < top) {
-                        y = ui.MScroll.Methods.getY.call(this);
-                        var bottom = util.toNumber(this._eFooter.style.bottom);
-                        // y !== 0解决items不够填充整个listview区域的问题
+                    } else if (status === 'footer') {
+                        options.y = ui.MScroll.Methods.getY.call(this);
                         this._oHandle = effect.grade(
-                            function (percent) {
-                                ui.MScroll.Methods.setPosition.call(this, 0, Math.round(y + (top - this.$$footerHeight + this._nTopHidden - y) * percent));
-                                this._eFooter.style.bottom = (bottom + (-this.$$footerHeight - bottom) * percent) + 'px';
-                            }.bind(this),
-                            1000,
+                            'ecui.ui.MScroll.Methods.setPosition.call(this,0,#$.y->' + (main.clientHeight - main.scrollHeight + this.$$footerHeight) + '#)',
+                            400,
                             options
                         );
-                    } else {
-                        this._eHeader.style.top = -this.$$headerHeight + 'px';
-                        this._eFooter.style.bottom = -this.$$footerHeight + 'px';
                     }
                 }
             }
@@ -364,15 +352,16 @@ _nBottomIndex  - 下部隐藏的选项序号
              */
             $dragend: function (event) {
                 ui.MScroll.Methods.$dragend.call(this, event);
-                if (!this._bLoading && this._sStatus === 'headercomplete') {
-                    // 可以选择是否需要防止重复提交
-                    if (core.dispatchEvent(this, 'refresh')) {
-                        this._bLoading = true;
-                    }
-                } else {
-                    util.timer(function () {
+                if (!this._bLoading) {
+                    if (this._sStatus === 'headercomplete') {
+                        // 可以选择是否需要防止重复提交
+                        if (core.dispatchEvent(this, 'refresh')) {
+                            this._bLoading = true;
+                        }
+                    } else if (this._sStatus === 'footercomplete') {
+                        setEnterAndLeave.call(this);
                         this.reset();
-                    }.bind(this));
+                    }
                 }
             },
 
@@ -395,8 +384,12 @@ _nBottomIndex  - 下部隐藏的选项序号
                 ui.Items.Methods.add.call(this, item, index);
                 setEnterAndLeave.call(this);
                 if (this.isReady()) {
-                    this._eFooter.style.bottom = '0px';
-                    this._eFooter.innerHTML = oldLength === this.getLength() ? this.HTML_NODATA : this.HTML_LOADED;
+                    if (oldLength === this.getLength()) {
+                        this._eFooter.innerHTML = this.HTML_NODATA;
+                        this.reset();
+                    } else {
+                        this._eFooter.innerHTML = this.HTML_LOADED;
+                    }
                 }
             },
 
@@ -404,7 +397,7 @@ _nBottomIndex  - 下部隐藏的选项序号
              * @override
              */
             getY: function () {
-                return ui.MScroll.Methods.getY.call(this) - this._nTopHidden;
+                return ui.MScroll.Methods.getY.call(this) - this._nTopHidden + this.$$headerHeight;
             },
 
             /**
@@ -476,18 +469,18 @@ _nBottomIndex  - 下部隐藏的选项序号
                     }
                 }
 
-                ui.MScroll.Methods.setPosition.call(this, x, y + this._nTopHidden);
+                this._eHeader.style.transform = 'translateY(' + (y - this.$$headerHeight) + 'px)';
+                this._eFooter.style.transform = this.isScrolling() ? 'translateY(' + (y + this._nTopHidden - this.$$headerHeight) + 'px)' : '';
+                ui.MScroll.Methods.setPosition.call(this, x, y + this._nTopHidden - this.$$headerHeight);
 
                 top = this.getHeight() - this.$$bodyHeight;
                 if (y > 0) {
                     status = y < this.$$headerHeight ? 'headerenter' : 'headercomplete';
-                    this._eHeader.style.top = (y - this.$$headerHeight) + 'px';
                 } else if (y === 0) {
                     // 解决items不够填充整个listview区域，导致footercomplete的触发
                     status = '';
                 } else if (y < top) {
                     var status = y > top + this.$$footerHeight ? 'footerenter' : 'footercomplete';
-                    this._eFooter.style.bottom = (top - this.$$footerHeight - y) + 'px';
                 } else {
                     status = '';
                 }

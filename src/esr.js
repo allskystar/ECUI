@@ -760,7 +760,6 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
         // 布局层，用于加载结构
         AppLayer: core.inherits(ui.Control),
 
-
         /**
          * 监听全局变量变化。
          * @public

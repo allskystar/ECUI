@@ -49,9 +49,9 @@
                         el: body,
                         decelerate: 400,
                         absolute: true,
-                        left: data.left !== undefined ? data.left : main.clientWidth - body.scrollWidth,
+                        left: data.left !== undefined ? data.left : main.clientWidth - Math.max(main.scrollWidth, body.scrollWidth),
                         right: data.right !== undefined ? data.right : 0,
-                        top: data.top !== undefined ? data.top : main.clientHeight - body.scrollHeight,
+                        top: data.top !== undefined ? data.top : main.clientHeight - Math.max(main.scrollHeight, body.scrollHeight),
                         bottom: data.bottom !== undefined ? data.bottom : 0,
                         limit: data.range
                     }
@@ -64,6 +64,7 @@
             $dragend: function (event) {
                 this.$MScroll.$dragend.call(this, event);
                 namedMap[this.getUID()].scrolling = false;
+                this.setPosition(this.getX(), this.getY());
             },
 
             /**
@@ -104,14 +105,16 @@
              * @override
              */
             getX: function () {
-                return (tx.test(this.getBody().style.transform) ? +RegExp.$1 : 0) - this.getMain().scrollLeft;
+                var main = this.getMain();
+                return (tx.test(this.getBody().style.transform) ? +RegExp.$1 : 0) - (main.offsetWidth ? main.scrollLeft : namedMap[this.getUID()].scrollLeft || 0);
             },
 
             /**
              * @override
              */
             getY: function () {
-                return (tx.test(this.getBody().style.transform) ? +RegExp.$2 : 0) - this.getMain().scrollTop;
+                var main = this.getMain();
+                return (tx.test(this.getBody().style.transform) ? +RegExp.$2 : 0) - (main.offsetWidth ? main.scrollTop : namedMap[this.getUID()].scrollTop || 0);
             },
 
             /**
@@ -129,10 +132,24 @@
              */
             setPosition: function (x, y) {
                 var main = this.getMain();
-                if (this.getX() !== x || this.getY() !== y) {
-                    main.scrollLeft = 0;
-                    main.scrollTop = 0;
-                    this.getBody().style.transform = 'translate(' + x + 'px,' + y + 'px)';
+                if (this.isScrolling()) {
+                    // 滚动状态使用transform解决输入框的光标问题
+                    if (this.getX() !== x || this.getY() !== y) {
+                        main.scrollLeft = namedMap[this.getUID()].scrollLeft = 0;
+                        main.scrollTop = namedMap[this.getUID()].scrollTop = 0;
+                        this.getBody().style.transform = 'translate(' + x + 'px,' + y + 'px)';
+                    }
+                } else {
+                    // 滚动结束使用scrollxxx解决删除时自动复位的问题
+                    var style = this.getBody().style;
+                    style.transform = '';
+                    namedMap[this.getUID()].scrollLeft = main.scrollLeft = -x;
+                    namedMap[this.getUID()].scrollTop = main.scrollTop = -y;
+                    x += main.scrollLeft;
+                    y += main.scrollTop;
+                    if (x || y) {
+                        style.transform = 'translate(' + x + 'px,' + y + 'px)';
+                    }
                 }
             },
 
