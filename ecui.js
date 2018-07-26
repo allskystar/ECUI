@@ -49,7 +49,6 @@ var ecui;
     document.write('<script type="text/javascript" src="src/extend/anchor.js"></script>');
     document.write('<script type="text/javascript" src="src/extend/link.js"></script>');
     document.write('<script type="text/javascript" src="src/extend/m-confirm.js"></script>');
-    document.write('<script type="text/javascript" src="src/extend/decorate.js"></script>');
     document.write('<script type="text/javascript" src="src/extend/messagebox.js"></script>');
 
     document.write('<script type="text/javascript" src="src/mobile/m-panel.js"></script>');

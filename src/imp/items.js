@@ -89,7 +89,6 @@
                 this.$Items.$remove.call(this, event);
                 if (event.returnValue !== false) {
                     util.remove(this.$ItemsData.items, event.child);
-                    this.alterItems();
                 }
             },
 
