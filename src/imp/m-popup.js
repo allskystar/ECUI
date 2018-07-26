@@ -14,8 +14,7 @@
         core.removeEventListener(this, 'hide', hideHandler);
     }
 
-    var namedMap = {},
-        position = {
+    var position = {
             top: ['top', true],
             bottom: ['bottom', true],
             left: ['left', false],
@@ -27,9 +26,8 @@
         NAME: '$MPopup',
 
         constructor: function (el, options) {
-            var data = namedMap[this.getUID()] = namedMap[this.getUID()] || {};
-            data.enter = (position[options.enter || 'bottom'] || position.right).concat([options.scale ? Math.min(1, options.scale.indexOf('%') > 0 ? +options.scale.slice(0, -1) / 100 : +options.scale) : 0]);
-            data.mask = options.mask;
+            this.$MPopupData.enter = (position[options.enter || 'bottom'] || position.right);
+            this.$MPopupData.mask = options.mask;
         },
 
         Methods: {
@@ -39,7 +37,7 @@
             $click: function (event) {
                 if (!locked) {
                     var view = util.getView(),
-                        data = namedMap[this.getUID()],
+                        data = this.$MPopupData,
                         popup = this.getPopup(),
                         el = popup.getOuter(),
                         style = el.style;
@@ -72,11 +70,11 @@
                         style.top = style.right = style.bottom = style.left = 'auto';
                         if (data.enter[1]) {
                             var width = view.width,
-                                height = data.enter[2] ? view.height * data.enter[2] : popup.getHeight(),
+                                height = popup.getHeight(),
                                 reverseValue = height;
                         } else {
                             style.top = view.top + 'px';
-                            width = data.enter[2] ? view.width * data.enter[2] : popup.getWidth();
+                            width = popup.getWidth();
                             height = view.height;
                             reverseValue = width;
                         }
@@ -104,7 +102,6 @@
              */
             $dispose: function () {
                 this.setPopup();
-                delete namedMap[this.getUID()];
                 this.$MPopup.$dispose.call(this);
             },
 
@@ -128,7 +125,7 @@
              * @return {ecui.ui.Control} 弹出层控件
              */
             getPopup: function () {
-                return namedMap[this.getUID()].popup;
+                return this.$MPopupData.popup;
             },
 
             /**
@@ -138,11 +135,10 @@
              * @param {ecui.ui.Control} control 弹出层控件
              */
             setPopup: function (control) {
-                namedMap[this.getUID()] = namedMap[this.getUID()] || {};
                 if (control) {
-                    namedMap[this.getUID()].popup = control;
+                    this.$MPopupData.popup = control;
                 } else {
-                    delete namedMap[this.getUID()].popup;
+                    delete this.$MPopupData.popup;
                 }
             }
         }

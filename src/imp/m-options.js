@@ -23,7 +23,7 @@
 
         constructor: function (el, options) {
             dom.addClass(el, 'ui-mobile-options');
-            dom.insertBefore(dom.create({
+            this.$MOptionsData.mask = dom.insertBefore(dom.create({
                 className: options.classes.join('-mask ') + 'ui-mobile-options-mask'
             }), this.getBody());
         },
@@ -126,6 +126,14 @@
              */
             setOptionSize: function (value) {
                 this._nOptionSize = value;
+            },
+
+            /**
+             * @override
+             */
+            setPosition: function (x, y) {
+                this.$MOptions.setPosition.call(this, x, y);
+                this.$MOptionsData.mask.style.top = this.getMain().scrollTop + 'px';
             },
 
             /**

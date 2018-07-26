@@ -7,8 +7,7 @@
         dom = core.dom,
         ui = core.ui;
 //{/if}//
-    var namedMap = {},
-        tx = /(\-?\d+)px\s*,\s*(\-?\d+)/;
+    var tx = /(\-?\d+)px\s*,\s*(\-?\d+)/;
 
     ui.MScroll = {
         NAME: '$MScroll',
@@ -27,8 +26,6 @@
             dom.addClass(el, 'ui-mobile-scroll');
             el.appendChild(bodyEl);
             this.$setBody(bodyEl);
-
-            namedMap[this.getUID()] = {x: 0, y: 0};
         },
 
         Methods: {
@@ -40,7 +37,7 @@
 
                 var main = this.getMain(),
                     body = this.getBody(),
-                    data = namedMap[this.getUID()];
+                    data = this.$MScrollData;
 
                 core.drag(
                     this,
@@ -63,7 +60,7 @@
              */
             $dragend: function (event) {
                 this.$MScroll.$dragend.call(this, event);
-                namedMap[this.getUID()].scrolling = false;
+                this.$MScrollData.scrolling = false;
                 this.setPosition(this.getX(), this.getY());
             },
 
@@ -72,7 +69,7 @@
              */
             $dragstart: function (event) {
                 this.$MScroll.$dragstart.call(this, event);
-                namedMap[this.getUID()].scrolling = true;
+                this.$MScrollData.scrolling = true;
             },
 
             /**
@@ -82,7 +79,7 @@
              * @return {Array} 正常显示范围
              */
             getRange: function () {
-                return namedMap[this.getUID()].range;
+                return this.$MScrollData.range;
             },
 
             /**
@@ -92,12 +89,11 @@
              * @return {Array} 正常显示范围
              */
             getScrollRange: function () {
-                var data = namedMap[this.getUID()];
                 return {
-                    left: data.left,
-                    top: data.top,
-                    right: data.right,
-                    bottom: data.bottom
+                    left: this.$MScrollData.left,
+                    top: this.$MScrollData.top,
+                    right: this.$MScrollData.right,
+                    bottom: this.$MScrollData.bottom
                 };
             },
 
@@ -106,7 +102,7 @@
              */
             getX: function () {
                 var main = this.getMain();
-                return (tx.test(this.getBody().style.transform) ? +RegExp.$1 : 0) - (main.offsetWidth ? main.scrollLeft : namedMap[this.getUID()].scrollLeft || 0);
+                return (tx.test(this.getBody().style.transform) ? +RegExp.$1 : 0) - (main.offsetWidth ? main.scrollLeft : this.$MScrollData.scrollLeft || 0);
             },
 
             /**
@@ -114,7 +110,7 @@
              */
             getY: function () {
                 var main = this.getMain();
-                return (tx.test(this.getBody().style.transform) ? +RegExp.$2 : 0) - (main.offsetWidth ? main.scrollTop : namedMap[this.getUID()].scrollTop || 0);
+                return (tx.test(this.getBody().style.transform) ? +RegExp.$2 : 0) - (main.offsetWidth ? main.scrollTop : this.$MScrollData.scrollTop || 0);
             },
 
             /**
@@ -124,7 +120,7 @@
              * @return {boolean} 是否正在滚动
              */
             isScrolling: function () {
-                return !!namedMap[this.getUID()].scrolling;
+                return !!this.$MScrollData.scrolling;
             },
 
             /**
@@ -135,16 +131,16 @@
                 if (this.isScrolling()) {
                     // 滚动状态使用transform解决输入框的光标问题
                     if (this.getX() !== x || this.getY() !== y) {
-                        main.scrollLeft = namedMap[this.getUID()].scrollLeft = 0;
-                        main.scrollTop = namedMap[this.getUID()].scrollTop = 0;
+                        main.scrollLeft = this.$MScrollData.scrollLeft = 0;
+                        main.scrollTop = this.$MScrollData.scrollTop = 0;
                         this.getBody().style.transform = 'translate(' + x + 'px,' + y + 'px)';
                     }
                 } else {
                     // 滚动结束使用scrollxxx解决删除时自动复位的问题
                     var style = this.getBody().style;
                     style.transform = '';
-                    namedMap[this.getUID()].scrollLeft = main.scrollLeft = -x;
-                    namedMap[this.getUID()].scrollTop = main.scrollTop = -y;
+                    this.$MScrollData.scrollLeft = main.scrollLeft = -x;
+                    this.$MScrollData.scrollTop = main.scrollTop = -y;
                     x += main.scrollLeft;
                     y += main.scrollTop;
                     if (x || y) {
@@ -160,18 +156,17 @@
              * @param {object} range 允许滚动的范围
              */
             setScrollRange: function (range) {
-                var data = namedMap[this.getUID()];
                 if (range.left !== undefined) {
-                    data.left = range.left;
+                    this.$MScrollData.left = range.left;
                 }
                 if (range.top !== undefined) {
-                    data.top = range.top;
+                    this.$MScrollData.top = range.top;
                 }
                 if (range.right !== undefined) {
-                    data.right = range.right;
+                    this.$MScrollData.right = range.right;
                 }
                 if (range.bottom !== undefined) {
-                    data.bottom = range.bottom;
+                    this.$MScrollData.bottom = range.bottom;
                 }
             },
 
@@ -182,7 +177,7 @@
              * @param {object} range 正常显示范围
              */
             setRange: function (range) {
-                namedMap[this.getUID()].range = range;
+                this.$MScrollData.range = range;
             }
         }
     };

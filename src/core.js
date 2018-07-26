@@ -2251,10 +2251,15 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                         }
                     }
 
+                    subClass.interfaces.forEach(function (imp) {
+                        this[imp.NAME + 'Data'] = {};
+                    }, this);
                     subClass.constructor.call(this, el, options);
                     el = this.getMain();
-                    subClass.interfaces.forEach(function (constructor) {
-                        constructor.call(this, el, options);
+                    subClass.interfaces.forEach(function (imp) {
+                        if (imp.constructor) {
+                            imp.constructor.call(this, el, options);
+                        }
                     }, this);
                     if (subClass.afterinterfaces) {
                         subClass.afterinterfaces.call(this, el, options);
@@ -2317,9 +2322,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
             }
             superMethods.forEach(function (item) {
                 if (item.NAME) {
-                    if (item.constructor) {
-                        subClass.interfaces.push(item.constructor);
-                    }
+                    subClass.interfaces.push(item);
                     // 对接口的处理
                     var Clazz = new Function();
                     Clazz.prototype = superClass.prototype;

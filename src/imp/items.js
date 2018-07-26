@@ -10,8 +10,6 @@
 
         eventNames = ['mousedown', 'mouseover', 'mousemove', 'mouseout', 'mouseup', 'click', 'dblclick', 'focus', 'blur', 'activate', 'deactivate'];
 //{/if}//
-    var namedMap = {};
-
     /**
      * 选项控件。
      * 用于弹出菜单、下拉框、交换框等控件的单个选项，通常不直接初始化。选项控件必须用在使用选项组接口(Items)的控件中。
@@ -42,7 +40,8 @@
         NAME: '$Items',
 
         constructor: function () {
-            (namedMap[this.getUID()] = []).preventCount = 0;
+            this.$ItemsData.prevent = 0;
+            this.$ItemsData.items = [];
 
             this.preventAlterItems();
 
@@ -65,18 +64,10 @@
                 if (event.child instanceof (this.Item || ui.Item)) {
                     this.$Items.$append.call(this, event);
                     if (event.returnValue !== false) {
-                        namedMap[this.getUID()].push(event.child);
+                        this.$ItemsData.items.push(event.child);
                         this.alterItems();
                     }
                 }
-            },
-
-            /**
-             * @override
-             */
-            $dispose: function () {
-                delete namedMap[this.getUID()];
-                this.$Items.$dispose.call(this);
             },
 
             /**
@@ -97,7 +88,7 @@
                 core.$clearState(event.child);
                 this.$Items.$remove.call(this, event);
                 if (event.returnValue !== false) {
-                    util.remove(namedMap[this.getUID()], event.child);
+                    util.remove(this.$ItemsData.items, event.child);
                     this.alterItems();
                 }
             },
@@ -112,7 +103,7 @@
              * @return {Array} 子选项控件数组
              */
             add: function (item, index) {
-                var list = namedMap[this.getUID()],
+                var list = this.$ItemsData.items,
                     items = [],
                     UIClass = this.Item || ui.Item,
                     el = list[index] ? list[index].getOuter() : null,
@@ -187,7 +178,7 @@
              * @public
              */
             alterItems: function () {
-                if (!namedMap[this.getUID()].preventCount) {
+                if (!this.$ItemsData.prevent) {
                     if (this.isReady() && !this.isShow()) {
                         this.clearCache();
                     } else {
@@ -201,7 +192,7 @@
              */
             cache: function (force) {
                 if (this.$Items.cache.call(this, force)) {
-                    namedMap[this.getUID()].forEach(function (item) {
+                    this.$ItemsData.items.forEach(function (item) {
                         item.cache(force);
                     });
                     if (this.isReady()) {
@@ -220,7 +211,7 @@
              * @return {ecui.ui.Item} 子选项控件
              */
             getItem: function (index) {
-                return namedMap[this.getUID()][index] || null;
+                return this.$ItemsData.items[index] || null;
             },
 
             /**
@@ -230,7 +221,7 @@
              * @return {Array} 子选项控件数组
              */
             getItems: function () {
-                return namedMap[this.getUID()].slice();
+                return this.$ItemsData.items.slice();
             },
 
             /**
@@ -240,7 +231,7 @@
              * @return {Number} 子选项数量
              */
             getLength: function () {
-                return namedMap[this.getUID()].length;
+                return this.$ItemsData.items.length;
             },
 
             /**
@@ -248,7 +239,7 @@
              * @public
              */
             premitAlterItems: function () {
-                namedMap[this.getUID()].preventCount--;
+                this.$ItemsData.prevent--;
             },
 
             /**
@@ -256,7 +247,7 @@
              * @public
              */
             preventAlterItems: function () {
-                namedMap[this.getUID()].preventCount++;
+                this.$ItemsData.prevent++;
             },
 
             /**
@@ -268,7 +259,7 @@
              */
             remove: function (item) {
                 if ('number' === typeof item) {
-                    item = namedMap[this.getUID()][item];
+                    item = this.$ItemsData.items[item];
                 }
                 if (item) {
                     if (core.dispatchEvent(this, 'remove', {child: item})) {
@@ -308,7 +299,7 @@
             var parent = this.getParent();
             if (parent) {
                 event.item = this;
-                event.index = namedMap[parent.getUID()].indexOf(this);
+                event.index = parent.$ItemsData.items.indexOf(this);
                 core.dispatchEvent(parent, 'item' + item.replace('mouse', ''), event);
             }
         };
