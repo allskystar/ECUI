@@ -797,6 +797,7 @@ a {
             height: 30px;
         }
 
+        .ui-item-selected,
         .ui-item-focus {
             font-weight: bold;
         }
