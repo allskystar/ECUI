@@ -14,6 +14,7 @@ _uDate   - 日部件
 //{if 0}//
 (function () {
     var core = ecui,
+        dom = core.dom,
         ui = core.ui;
 //{/if}//
     /**
@@ -51,19 +52,21 @@ _uDate   - 日部件
              */
             $click: function (event) {
                 ui.MMultiOptions.prototype.$click.call(this, event);
-                var value = this.getValue();
-                if (value) {
-                    value = value.split('-');
-                    this._uYear.setValue(value[0]);
-                    this._uMonth.setValue(+value[1]);
-                    this._uDate.setValue(+value[2]);
-                } else {
-                    value = new Date();
-                    this._uYear.setValue(value.getFullYear());
-                    this._uMonth.setValue(value.getMonth() + 1);
-                    this._uDate.setValue(value.getDate());
+                if (dom.contain(this.getMain(), event.target)) {
+                    var value = this.getValue();
+                    if (value) {
+                        value = value.split('-');
+                        this._uYear.setValue(value[0]);
+                        this._uMonth.setValue(+value[1]);
+                        this._uDate.setValue(+value[2]);
+                    } else {
+                        value = new Date();
+                        this._uYear.setValue(value.getFullYear());
+                        this._uMonth.setValue(value.getMonth() + 1);
+                        this._uDate.setValue(value.getDate());
+                    }
+                    core.dispatchEvent(this, 'change');
                 }
-                core.dispatchEvent(this, 'change');
             },
 
             /**
