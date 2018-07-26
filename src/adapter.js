@@ -884,7 +884,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                             if (value && value.slice(-3) === 'rem') {
                                 value = +value.slice(0, -3);
                                 fontSizeCache.push([rule.style, value]);
-                                rule.style['font-size'] = (Math.round(fontSize * value / 2) * 2) + 'px';
+                                rule.style['font-size'] = Math.round(fontSize * value) + 'px';
                             }
                         }
                     }
