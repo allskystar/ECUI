@@ -262,10 +262,14 @@
                     item = this.$ItemsData.items[item];
                 }
                 if (item) {
+                    this.preventAlterItems();
                     if (core.dispatchEvent(this, 'remove', {child: item})) {
                         dom.remove(item.getOuter());
                         item.$setParent();
+                        this.premitAlterItems();
+                        this.alterItems();
                     } else {
+                        this.premitAlterItems();
                         item = null;
                     }
                 }
