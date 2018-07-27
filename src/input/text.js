@@ -191,6 +191,26 @@ _ePlaceHolder - 为空时的提示信息标签
             },
 
             /**
+             * 获取允许的最大值。
+             * @protected
+             *
+             * @return {number} 允许的最大值，如果没有限制返回undefined
+             */
+            $getMaxValue: function () {
+                return this._nMaxValue;
+            },
+
+            /**
+             * 获取允许的最小值。
+             * @protected
+             *
+             * @return {number} 允许的最大值，如果没有限制返回undefined
+             */
+            $getMinValue: function () {
+                return this._nMinValue;
+            },
+
+            /**
              * @override
              */
             $initStructure: function (width, height) {
