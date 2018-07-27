@@ -1012,13 +1012,13 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                         valid = false;
                     }
                 }
-                if (item.name && ((item.type !== 'radio' && item.type !== 'checkbox') || item.checked)) {
+                if (item.name) {
                     if (item.getControl) {
                         var control = item.getControl();
-                        if (control.getName && control.getFormValue && !control.isDisabled()) {
+                        if (control.getName && control.getFormValue && !control.isDisabled() && (!control.isFormChecked || control.isFormChecked())) {
                             setCacheData(data, control.getName(), control.getFormValue());
                         }
-                    } else if (!item.disabled) {
+                    } else if (!item.disabled && ((item.type !== 'radio' && item.type !== 'checkbox') || item.checked)) {
                         setCacheData(data, item.name, item.value);
                     }
                 }

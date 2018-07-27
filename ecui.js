@@ -35,6 +35,7 @@ var ecui;
     document.write('<script type="text/javascript" src="src/input/input-group.js"></script>');
     document.write('<script type="text/javascript" src="src/input/label.js"></script>');
     document.write('<script type="text/javascript" src="src/input/text.js"></script>');
+    document.write('<script type="text/javascript" src="src/input/number.js"></script>');
     document.write('<script type="text/javascript" src="src/input/checkbox.js"></script>');
     document.write('<script type="text/javascript" src="src/input/radio.js"></script>');
     document.write('<script type="text/javascript" src="src/input/abstract-select.js"></script>');

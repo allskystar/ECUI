@@ -250,6 +250,16 @@ _bRequired       - 是否必须选择
             },
 
             /**
+             * 判断控件在提交时是否选中，默认返回 isChecked 的值。
+             * @public
+             *
+             * @return {boolean} 是否选中
+             */
+            isFormChecked: function () {
+                return this.isChecked();
+            },
+
+            /**
              * @override
              */
             saveToDefault: function () {
