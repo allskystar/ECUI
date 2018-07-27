@@ -146,11 +146,6 @@
              * @override
              */
             setPosition: function (x, y) {
-                if (y < this.$MScrollData.top) {
-                    y -= Math.round((y - this.$MScrollData.top) / 2);
-                } else if (y > this.$MScrollData.bottom) {
-                    y -= Math.round((y - this.$MscrollData.bottom) / 2);
-                }
                 var main = this.getMain();
                 if (this.isScrolling()) {
                     // 滚动状态使用transform解决输入框的光标问题

@@ -192,10 +192,7 @@ _nBottomIndex  - 下部隐藏的选项序号
              * 拖拽到最顶部事件。
              * @event
              */
-            $headercomplete: function () {
-                setComplete.call(this);
-                this._eHeader.innerHTML = this.HTML_PREPARE;
-            },
+            $headercomplete: setComplete,
 
             /**
              * 拖拽到达顶部区域事件。
@@ -294,7 +291,7 @@ _nBottomIndex  - 下部隐藏的选项序号
                 this.premitAlterItems();
                 this.add(data);
                 this._eHeader.innerHTML = this.HTML_REFRESHED;
-                this.setPosition(0, 0);
+                this.reset();
                 this._eFooter.innerHTML = '';
             },
 
@@ -356,6 +353,7 @@ _nBottomIndex  - 下部隐藏的选项序号
                     if (this._sStatus === 'headercomplete') {
                         // 可以选择是否需要防止重复提交
                         if (core.dispatchEvent(this, 'refresh')) {
+                            this._eHeader.innerHTML = this.HTML_PREPARE;
                             this._bLoading = true;
                         }
                     } else if (this._sStatus === 'footercomplete') {

@@ -82,7 +82,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                         var currWidth = style.width,
                             fontSize = util.toNumber(dom.getStyle(dom.parent(document.body), 'font-size'));
                         fontSizeCache.forEach(function (item) {
-                            item[0]['font-size'] = (Math.round(fontSize * item[1] / 2) * 2) + 'px';
+                            item[0]['font-size'] = Math.round(fontSize * item[1]) + 'px';
                         });
 
                         style.width = width + 'px';
@@ -963,10 +963,27 @@ outer:          for (var caches = [], target = event.target, el; target; target 
      * 拖拽的动画帧处理，对低版本浏览器也提供了兼容。
      * @private
      *
+     * @param {object} env ECUI 框架运行环境
      * @param {ecui.ui.Control} target 被拖拽的 ECUI 控件
      * @param {ECUIEvent} event ECUI 事件对象
      */
-    function dragAnimationFrame(target, event) {
+    function dragAnimationFrame(env, target, event) {
+        if (!event.reset && env.limit) {
+            var scale = 1 - 1 / (env.limitRatio || 3);
+
+            if (event.x < env.limitLeft) {
+                event.x -= Math.round((event.x - env.limitLeft) * scale);
+            } else if (event.x > env.limitRight) {
+                event.x -= Math.round((event.x - env.limitRight) * scale);
+            }
+
+            if (event.y < env.limitTop) {
+                event.y -= Math.round((event.y - env.limitTop) * scale);
+            } else if (event.y > env.limitBottom) {
+                event.y -= Math.round((event.y - env.limitBottom) * scale);
+            }
+        }
+
         if (window.requestAnimationFrame) {
             if (!dragEvent) {
                 window.requestAnimationFrame(function () {
@@ -1016,12 +1033,13 @@ outer:          for (var caches = [], target = event.target, el; target; target 
         var uid = target.getUID();
 
         if (env.limit) {
-            var range = 'function' === typeof env.limit ? env.limit.call(target) : env.limit,
+            var range = env.limit,
                 el = env.el || target.getOuter(),
                 x = target.getX(),
                 y = target.getY(),
                 expectX = Math.min(range.right === undefined ? x : range.right, Math.max(range.left === undefined ? x : range.left, x)),
                 expectY = Math.min(range.bottom === undefined ? y : range.bottom, Math.max(range.top === undefined ? y : range.top, y));
+
             if (range.stepX) {
                 expectX = Math.round(expectX / range.stepX) * range.stepX;
             }
@@ -1035,8 +1053,9 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                         event.x = Math.round(options.x + percent * (expectX - options.x));
                         event.y = Math.round(options.y + percent * (expectY - options.y));
                         event.inertia = true;
+                        event.reset = true;
 
-                        dragAnimationFrame(target, event);
+                        dragAnimationFrame(env, target, event);
 
                         if (percent >= 1) {
                             inertiaHandles[uid]();
@@ -1079,7 +1098,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
             realX = Math.min(Math.max(expectX, env.left), env.right),
             realY = Math.min(Math.max(expectY, env.top), env.bottom);
 
-        dragAnimationFrame(target, {track: track, x: realX, y: realY, inertia: env !== currEnv});
+        dragAnimationFrame(env, target, {track: track, x: realX, y: realY, inertia: env !== currEnv});
 
         track.x = realX;
         track.y = realY;
@@ -2028,6 +2047,18 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                 }
                 dragEnv.originalX = x;
                 dragEnv.originalY = y;
+
+                if (dragEnv.limit) {
+                    dragEnv.limitRatio = dragEnv.limit.ratio || 3;
+                    dragEnv.limitLeft = dragEnv.limit.left === undefined ? dragEnv.left : dragEnv.limit.left;
+                    dragEnv.left += (dragEnv.left - dragEnv.limitLeft) * (dragEnv.limitRatio - 1);
+                    dragEnv.limitRight = dragEnv.limit.right === undefined ? dragEnv.right : dragEnv.limit.right;
+                    dragEnv.right += (dragEnv.right - dragEnv.limitRight) * (dragEnv.limitRatio - 1);
+                    dragEnv.limitTop = dragEnv.limit.top === undefined ? dragEnv.top : dragEnv.limit.top;
+                    dragEnv.top += (dragEnv.top - dragEnv.limitTop) * (dragEnv.limitRatio - 1);
+                    dragEnv.limitBottom = dragEnv.limit.bottom === undefined ? dragEnv.bottom : dragEnv.limit.bottom;
+                    dragEnv.bottom += (dragEnv.bottom - dragEnv.limitBottom) * (dragEnv.limitRatio - 1);
+                }
 
                 dragEnv.target = control;
                 setEnv(dragEnv);

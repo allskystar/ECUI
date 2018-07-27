@@ -247,6 +247,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                     if (route.oncached) {
                         route.oncached(context);
                     }
+                    dom.removeClass(document.body, 'ui-loading');
                     return;
                 }
             } else {
