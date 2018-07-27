@@ -142,6 +142,12 @@
                     }, 500);
                 }
             });
+
+            dom.addEventListener(document, 'focusout', function () {
+                if (focusout) {
+                    focusout.getBody().style.transform = '';
+                }
+            });
         }
     }
 }());
