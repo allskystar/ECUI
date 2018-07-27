@@ -2455,7 +2455,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
 
             if ('boolean' === typeof opacity) {
                 var view = util.getView(),
-                    text = ';top:' + view.top + 'px;left:' + view.left + 'px;width:' + view.width + 'px;height:' + view.height + 'px;display:' + (opacity ? 'block' : 'none');
+                    text = ';top:' + (view.top - view.height) + 'px;left:' + (view.left - view.width) + 'px;width:' + (view.width * 3) + 'px;height:' + (view.height * 3) + 'px;display:' + (opacity ? 'block' : 'none');
 
                 // 仅简单的显示或隐藏当前的屏蔽层，用于resize时的重绘
                 maskElements.forEach(function (item) {
@@ -2476,7 +2476,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                             {
                                 className: 'ui-mask',
                                 style: {
-                                    cssText: ';top:' + view.top + 'px;left:' + view.left + 'px;width:' + view.width + 'px;height:' + view.height + 'px;display:block;z-index:' + (zIndex || 32000)
+                                    cssText: ';top:' + (view.top - view.height) + 'px;left:' + (view.left - view.width) + 'px;width:' + (view.width * 3) + 'px;height:' + (view.height * 3) + 'px;display:block;z-index:' + (zIndex || 32000)
                                 }
                             }
                         )
