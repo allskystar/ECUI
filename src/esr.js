@@ -97,6 +97,9 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
      * @param {object} route 路由对象
      */
     function afterrender(route) {
+        routeRequestCount--;
+        dom.removeClass(document.body, 'ui-loading');
+
         if (esrOptions.app) {
             transition(route);
             var layer = getLayer(route);
@@ -480,6 +483,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                 unloadNames = [];
 
                 requestVersion++;
+                dom.addClass(document.body, 'ui-loading');
 
                 if (esrOptions.cache) {
                     cacheList = cacheList.filter(function (item) {
@@ -575,8 +579,6 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
         afterrender(route);
 
         el.style.visibility = '';
-
-        routeRequestCount--;
     }
 
     /**
@@ -1066,19 +1068,16 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
             if (route.view === undefined) {
                 beforerender(route);
                 afterrender(route);
-                routeRequestCount--;
             } else if ('function' === typeof route.view) {
                 beforerender(route);
                 if (route.view(context, function (name) {
                         if (name) {
                             render(route, name);
                         } else {
-                            afterrender(route);
-                            routeRequestCount--;
+                            afterrender(route);;
                         }
                     }) !== false) {
                     afterrender(route);
-                    routeRequestCount--;
                 }
             } else if (engine.getRenderer(route.view)) {
                 render(route);
