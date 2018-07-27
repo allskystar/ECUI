@@ -61,7 +61,16 @@
             $dragend: function (event) {
                 this.$MScroll.$dragend.call(this, event);
                 this.$MScrollData.scrolling = false;
+                this.$MScrollData.inertia = false;
                 this.setPosition(this.getX(), this.getY());
+            },
+
+            /**
+             * @override
+             */
+            $dragmove: function (event) {
+                this.$MScroll.$dragmove.call(this, event);
+                this.$MScrollData.inertia = event.inertia;
             },
 
             /**
@@ -114,6 +123,16 @@
             },
 
             /**
+             * 是否处于惯性移动状态。
+             * @public
+             *
+             * @return {boolean} 是否处于惯性移动状态
+             */
+            isInertia: function () {
+                return !!this.$MScrollData.inertia;
+            },
+
+            /**
              * 是否正在滚动。
              * @public
              *
@@ -127,6 +146,11 @@
              * @override
              */
             setPosition: function (x, y) {
+                if (y < this.$MScrollData.top) {
+                    y -= Math.round((y - this.$MScrollData.top) / 2);
+                } else if (y > this.$MScrollData.bottom) {
+                    y -= Math.round((y - this.$MscrollData.bottom) / 2);
+                }
                 var main = this.getMain();
                 if (this.isScrolling()) {
                     // 滚动状态使用transform解决输入框的光标问题

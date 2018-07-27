@@ -8,7 +8,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
         //{if 1}//JAVASCRIPT = 'javascript',//{/if}//
         patch = ecui,
         fontSizeCache = [],
-        //{if 1}//isToucher = document.ontouchstart !== undefined,//{/if}//
+        isToucher = document.ontouchstart !== undefined,
         //{if 1}//isPointer = !!window.PointerEvent, // 使用pointer事件序列，请一定在需要滚动的元素上加上touch-action:none//{/if}//
         isStrict = document.compatMode === 'CSS1Compat',
         isWebkit = /webkit/i.test(navigator.userAgent),
@@ -1367,7 +1367,13 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
             return this.lastIndexOf(s) === this.length - s.length;
         };
     }
-
+//{if 0}//
+    if (isToucher) {
+        dom.addEventListener(document, 'contextmenu', function (event) {
+            event.preventDefault();
+        });
+    }
+//{/if}//
     (function () {
         if (patch) {
             Object.assign(core.dom, patch.dom);

@@ -475,7 +475,7 @@ _nBottomIndex  - 下部隐藏的选项序号
 
                 top = this.getHeight() - this.$$bodyHeight;
                 if (y > 0) {
-                    status = y < this.$$headerHeight ? 'headerenter' : 'headercomplete';
+                    status = y < this.$$headerHeight || this.isInertia() ? 'headerenter' : 'headercomplete';
                 } else if (y === 0) {
                     // 解决items不够填充整个listview区域，导致footercomplete的触发
                     status = '';
