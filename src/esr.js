@@ -692,12 +692,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
 
                         pauseStatus = true;
 
-                        var className = currLayerEl.className;
-                        currLayer.disable();
-                        currLayerEl.className = className;
-                        className = layerEl.className;
-                        layer.disable();
-                        layerEl.className = className;
+                        core.disable();
 
                         effect.grade(
                             fn,
@@ -706,8 +701,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                                 $: {from: currLayerEl, to: layerEl},
                                 onfinish: function () {
                                     // 在执行结束后，如果不同时common layer则隐藏from layer，并且去掉目标路由中的动画执行函数
-                                    currLayer.enable();
-                                    layer.enable();
+                                    core.enable();
 
                                     currLayer.hide();
                                     currLayer = layer;

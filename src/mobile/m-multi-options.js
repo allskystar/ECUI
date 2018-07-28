@@ -34,7 +34,7 @@ _aOptions    - 选项框数组
 
             ui.InputControl.call(this, el, options);
 
-            this.setPopup(core.$fastCreate(this.Popup, popupEl, this, {ext: {'m-confirm': true}}));
+            this.setPopup(core.$fastCreate(this.Popup, popupEl, this));
 
             this._aOptions = [];
             children.forEach(function (item) {
@@ -60,7 +60,8 @@ _aOptions    - 选项框数组
                             item.cache();
                         });
                     }
-                }
+                },
+                ui.MConfirm
             ),
 
             /**

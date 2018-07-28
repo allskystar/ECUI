@@ -41,7 +41,7 @@ _bRequired    - 是否必须选择
 
             var unit = this.$getSection('Options');
             unit.setOptionSize(options.optionSize || 3);
-            core.ext['m-confirm'](unit);
+            core.ext.MConfirm(unit);
         },
         {
             /**
@@ -67,7 +67,8 @@ _bRequired    - 是否必须选择
                         }
                     }
                 },
-                ui.MOptions
+                ui.MOptions,
+                ui.MConfirm
             ),
 
             /**

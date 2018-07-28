@@ -692,10 +692,19 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                 } else {
                     dragend(event, currEnv, target);
                 }
-                core.restore();
+                restore();
 
                 currEnv.mouseup(event);
             }
+        },
+
+        disableEnv = {
+            type: 'disable',
+            mousedown: util.blank,
+            mousemove: util.blank,
+            mouseout: util.blank,
+            mouseover: util.blank,
+            mouseup: util.blank
         };
 
     if (ieVersion < 9) {
@@ -1603,6 +1612,15 @@ outer:          for (var caches = [], target = event.target, el; target; target 
     }
 
     /**
+     * 恢复当前框架的状态到上一个状态。
+     * restore 用于恢复调用特殊操作如 drag 与 disable 后改变的框架环境，包括各框架事件处理函数的恢复、控件的焦点设置等。
+     * @private
+     */
+    function restore() {
+        currEnv = envStack.pop();
+    }
+
+    /**
      * 设置 ecui 环境。
      * @private
      *
@@ -1866,6 +1884,16 @@ outer:          for (var caches = [], target = event.target, el; target; target 
         },
 
         /**
+         * 框架停止接收事件。
+         * @public
+         */
+        disable: function () {
+            if (currEnv.type !== 'disable') {
+                setEnv(disableEnv);
+            }
+        },
+
+        /**
          * 触发事件。
          * dispatchEvent 会根据事件返回值或 event 的新状态决定是否触发默认事件处理。
          * @public
@@ -2058,6 +2086,16 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                     control.setPosition(x, y);
                 }
                 //这里不能preventDefault事件，否则input的软键盘无法出现
+            }
+        },
+
+        /**
+         * 框架恢复接收事件。
+         * @public
+         */
+        enable: function () {
+            if (currEnv.type === 'disable') {
+                restore();
             }
         },
 
@@ -2614,15 +2652,6 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                     gestureListeners.splice(i, 1);
                 }
             }
-        },
-
-        /**
-         * 恢复当前框架的状态到上一个状态。
-         * restore 用于恢复调用特殊操作如 drag 与 intercept 后改变的框架环境，包括各框架事件处理函数的恢复、控件的焦点设置等。
-         * @public
-         */
-        restore: function () {
-            currEnv = envStack.pop();
         },
 
         /**
