@@ -6,21 +6,12 @@ body {
     margin: 0px !important;
 }
 
-.SAFARI-BODY-FIXED {
-    position: fixed !important;
-    top: 0px !important;
-    left: 0px !important;
-    .width100rate();
-    .height100rate();
-    margin: 0px !important;
-}
-
 .ui-valid {
     position: absolute !important;
     visibility: hidden !important;
-    overflow: scroll !important;
     top: -90px !important;
     left: -90px !important;
+    overflow: scroll !important;
     width: 80px !important;
     height: 80px !important;
     border: 1px solid !important;

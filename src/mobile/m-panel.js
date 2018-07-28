@@ -20,7 +20,7 @@
      */
     ui.MPanel = core.inherits(
         ui.Control,
-        'ui-panel',
+        'ui-mobile-panel',
         ui.MScroll,
         {
             refresh: function () {
