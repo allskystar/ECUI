@@ -59,7 +59,7 @@
             args = arguments;
 
         if (!dom.parent(outer)) {
-            core.getBody().appendChild(outer);
+            document.body.appendChild(outer);
         }
 
         if (!instance.isShow()) {

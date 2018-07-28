@@ -15,7 +15,7 @@
         var popupEl = this.getOuter();
         dom.remove(popupEl);
 
-        for (var el = owner.getOuter(), container = dom.parent(el); container !== core.getBody(); container = dom.parent(container)) {
+        for (var el = owner.getOuter(), container = dom.parent(el); container !== document.body; container = dom.parent(container)) {
             if (container.scrollHeight !== container.clientHeight) {
                 break;
             }
@@ -69,7 +69,7 @@
 
                         if (!dom.parent(el)) {
                             // 第一次显示时需要进行下拉选项部分的初始化，将其挂载到 DOM 树中
-                            core.getBody().appendChild(el);
+                            document.body.appendChild(el);
                             popup.show();
                             if (this.$initPopup) {
                                 this.$initPopup();

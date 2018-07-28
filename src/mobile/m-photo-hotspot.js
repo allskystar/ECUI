@@ -41,9 +41,8 @@
      * @param {number} imgHeight 高清图片初始高度
      */
     function calcSize(hotspot, imgWidth, imgHeight) {
-        var body = core.getBody(),
-            viewWidth = body.clientWidth,
-            viewHeight = body.clientHeight,
+        var viewWidth = document.body.clientWidth,
+            viewHeight = document.body.clientHeight,
             height = viewWidth / imgWidth * imgHeight;
 
         if (height > viewHeight) {
@@ -67,13 +66,12 @@
      */
     function fillImage(img, hotspot, position) {
         var data = hotspot._bLoaded ? hotspot : ui.MPhotoHotspot.DEFAULT,
-            body = core.getBody(),
-            viewWidth = body.clientWidth,
+            viewWidth = document.body.clientWidth,
             items = core.query(function (item) {
                 return item instanceof ui.MPhotoHotspot && item._sGroup === currHotspot._sGroup;
             });
 
-        img.style.top = (body.clientHeight - data.$$calcHeight) / 2 + 'px';
+        img.style.top = (document.body.clientHeight - data.$$calcHeight) / 2 + 'px';
         img.style.left = ((viewWidth - data.$$calcWidth) / 2 + position * viewWidth) + 'px';
         img.style.width = data.$$calcWidth + 'px';
         img.src = data.getHDImageUrl();
@@ -100,7 +98,7 @@
      * @param {ECUIEvent} event ECUI 事件对象
      */
     function swipe(event) {
-        var viewWidth = core.getBody().clientWidth;
+        var viewWidth = document.body.clientWidth;
         if (util.toNumber(currImg.style.width) !== currHotspot.$$calcWidth) {
             return;
         }
@@ -145,9 +143,8 @@
      * @param {ECUIEvent} event ECUI 事件对象
      */
     function zoom(event) {
-        var body = core.getBody(),
-            viewWidth = body.clientWidth,
-            viewHeight = body.clientHeight,
+        var viewWidth = document.body.clientWidth,
+            viewHeight = document.body.clientHeight,
             distance = event.to - event.from,
             width = Math.max(util.toNumber(currImg.style.width) + distance, currHotspot.$$calcWidth);
         currImg.style.width = width + 'px';
@@ -184,7 +181,7 @@
              * @override
              */
             $click: function (event) {
-                var body = core.getBody(),
+                var body = document.body,
                     viewWidth = body.clientWidth,
                     viewHeight = body.clientHeight;
 

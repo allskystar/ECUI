@@ -1075,7 +1075,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                         if (name) {
                             render(route, name);
                         } else {
-                            afterrender(route);;
+                            afterrender(route);
                         }
                     }) !== false) {
                     afterrender(route);
@@ -1427,7 +1427,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                     commandClose: '>>>'
                 });
 
-                for (var el = body.firstChild; el; el = el.nextSibling) {
+                for (var el = document.body.firstChild; el; el = el.nextSibling) {
                     if (el.nodeType === 8) {
                         etpl.compile(el.textContent || el.nodeValue);
                         dom.remove(el);
@@ -1439,7 +1439,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                     el.id = 'AppBackupContainer';
                     dom.insertHTML(el, 'afterEnd', dom.previous(el).outerHTML + el.outerHTML);
                     el.id = 'AppCommonContainer';
-                    el = dom.last(dom.first(body));
+                    el = dom.last(dom.first(document.body));
                     var children = dom.children(el.parentNode);
                     for (var i = 1, item; item = children[i]; i += 2) {
                         item.header = children[i - 1];
@@ -1473,7 +1473,6 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                 });
             }
 
-            var body = core.getBody();
             esrOptions = JSON.parse('{' + decodeURIComponent(value.replace(/(\w+)\s*=\s*([A-Za-z0-9_]+)\s*($|,)/g, '"$1":"$2"$3')) + '}');
 
             if (esrOptions.meta) {
@@ -1498,7 +1497,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
             }
 //{if 0}//
             var tplList = [];
-            for (el = body.firstChild; el; el = el.nextSibling) {
+            for (el = document.body.firstChild; el; el = el.nextSibling) {
                 if (el.nodeType === 8) {
                     if (/^\s*import:\s*([A-Za-z0-9.-_]+)\s*$/.test(el.textContent || el.nodeValue)) {
                         tplList.push([el, RegExp.$1]);
@@ -1534,7 +1533,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                     io.ajax('.app-container.html', {
                         cache: true,
                         onsuccess: function (text) {
-                            dom.insertHTML(body, 'AFTERBEGIN', text);
+                            dom.insertHTML(document.body, 'AFTERBEGIN', text);
                             loadInit();
                             core.init(document.body);
                         },

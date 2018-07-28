@@ -44,7 +44,7 @@
 
                     if (!dom.parent(el)) {
                         // 第一次显示时需要进行下拉选项部分的初始化，将其挂载到 DOM 树中
-                        core.getBody().appendChild(el);
+                        document.body.appendChild(el);
                     }
 
                     this.$MPopup.$click.call(this, event);

@@ -34,7 +34,6 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
         dragEvent,
         orientationHandle,
 
-        bodyElement,
         maskElements = [],        // 遮罩层组
         unmasks = [],             // 用于取消庶罩层的函数列表
 
@@ -936,7 +935,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
         // 需要恢复激活控件状态，第一次点击失效
         if (activedControl !== undefined) {
             if (currEnv.type === 'drag') {
-                dom.removeClass(core.getBody(), 'ui-drag');
+                dom.removeClass(document.body, 'ui-drag');
                 currEnv.mouseup(event);
             } else {
                 bubble(activedControl, 'deactivate', event);
@@ -998,7 +997,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                         }
                         if (dragEvent.dragend) {
                             core.dispatchEvent(target, 'dragend', dragEvent);
-                            dom.removeClass(core.getBody(), 'ui-drag');
+                            dom.removeClass(document.body, 'ui-drag');
                         }
                         dragEvent = null;
                     }
@@ -1026,7 +1025,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                 dragEvent.dragend = true;
             } else {
                 core.dispatchEvent(target, 'dragend', event);
-                dom.removeClass(core.getBody(), 'ui-drag');
+                dom.removeClass(document.body, 'ui-drag');
             }
             delete inertiaHandles[uid];
         }
@@ -1174,8 +1173,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
      */
     function initEnvironment() {
         if (scrollNarrow === undefined) {
-            var body = document.body,
-                el;
+            var el;
 
             if (isToucher) {
                 (function () {
@@ -1189,8 +1187,8 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                 }());
             }
 
-            body.style.width = document.documentElement.clientWidth + 'px';
-            body.style.height = document.documentElement.clientHeight + 'px';
+            document.body.style.width = document.documentElement.clientWidth + 'px';
+            document.body.style.height = document.documentElement.clientHeight + 'px';
 
             util.adjustFontSize(Array.prototype.slice.call(document.styleSheets));
 
@@ -1204,14 +1202,14 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                 }
             }
 
-            dom.insertHTML(body, 'BEFOREEND', '<div class="ui-valid"><div></div></div>');
+            dom.insertHTML(document.body, 'BEFOREEND', '<div class="ui-valid"><div></div></div>');
             // 检测Element宽度与高度的计算方式
-            el = body.lastChild;
+            el = document.body.lastChild;
             flgFixedSize = el.offsetWidth !== 80;
             scrollNarrow = el.offsetWidth - el.clientWidth - 2;
             dom.remove(el);
 
-            var options = core.getOptions(body, 'data-ecui') || {};
+            var options = core.getOptions(document.body, 'data-ecui') || {};
 
             ecuiName = options.name || ecuiName;
             isGlobalId = options.globalId;
@@ -1246,8 +1244,8 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                 }
             );
 
-            core.init(body);
-            body = el = null;
+            core.init(document.body);
+            el = null;
 
             return true;
         }
@@ -2004,7 +2002,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
             if (activedControl !== undefined && currEnv.type !== 'drag') {
                 dragEvent = null;
 
-                dom.addClass(core.getBody(), 'ui-drag');
+                dom.addClass(document.body, 'ui-drag');
 
                 // 控件之前处于惯性状态必须停止
                 var uid = control.getUID();
@@ -2113,17 +2111,6 @@ outer:          for (var caches = [], target = event.target, el; target; target 
          */
         getAttributeName: function () {
             return ecuiName;
-        },
-
-        /**
-         * 获取当前的 Body 区域。
-         * safari 浏览器为了屏弊高版本下默认的手势滚动，会在 BODY 标签内嵌入一个额外的层。
-         * @public
-         *
-         * @return {HTMLElement} BODY区域
-         */
-        getBody: function () {
-            return bodyElement || document.body;
         },
 
         /**
@@ -2473,7 +2460,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
          * @return {Function} 用于关闭当前遮罩层的函数
          */
         mask: function (opacity, zIndex) {
-            var el = core.getBody();
+            var el = document.body;
 
             if ('boolean' === typeof opacity) {
                 var view = util.getView(),
@@ -2520,7 +2507,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                             util.timer(dom.remove, 1000, null, el);
                             el.style.display = 'none';
                             if (!maskElements.length) {
-                                dom.removeClass(core.getBody(), 'ui-modal');
+                                dom.removeClass(document.body, 'ui-modal');
                             }
                         }
                         el = null;
