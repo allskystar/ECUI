@@ -703,7 +703,9 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             mousedown: function (event) {
                 event.preventDefault();
             },
-            mousemove: util.blank,
+            mousemove: function (event) {
+                event.preventDefault();
+            },
             mouseout: util.blank,
             mouseover: util.blank,
             mouseup: util.blank

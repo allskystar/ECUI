@@ -5,6 +5,7 @@
 //{if 0}//
     var core = ecui,
         dom = core.dom,
+        effect = core.effect,
         ext = core.ext,
         ui = core.ui,
         util = core.util,
@@ -210,21 +211,64 @@
         }
     };
 
+    function scrollListener(fn) {
+        function scrollHandle() {
+            if (lastScrollY === window.scrollY &&
+                    !scrolls.filter(function (item) {
+                        if (item.top !== item.el.scrollTop) {
+                            item.top = item.el.scrollTop;
+                            return true;
+                        }
+                    }).length) {
+                window.cancelAnimationFrame(handle);
+                handle = window.requestAnimationFrame(function () {
+                    // 多延迟一帧，防止出错
+                    window.requestAnimationFrame(fn);
+                    dom.removeEventListener(window, 'scroll', scrollHandle);
+                    scrolls.forEach(function (item) {
+                        dom.removeEventListener(item.el, 'scroll', scrollHandle);
+                    });
+                });
+            } else {
+                lastScrollY = window.scrollY;
+                window.cancelAnimationFrame(handle);
+                handle = window.requestAnimationFrame(scrollHandle);
+            }
+        }
+
+        var lastScrollY = window.scrollY,
+            scrolls = [],
+            handle;
+
+        for (var el = document.activeElement; el; el = dom.parent(el)) {
+            scrolls.push({
+                el: el,
+                top: el.scrollTop
+            });
+        }
+
+        dom.addEventListener(window, 'scroll', scrollHandle);
+        scrolls.forEach(function (item) {
+            dom.addEventListener(item.el, 'scroll', scrollHandle);
+        });
+    }
+
     if (isToucher) {
         if (iosVersion) {
             var topList = [],
                 bottomList = [],
                 keyboardHandle = util.blank,
                 scroll,
-                fixed = function () {
+                fixed = function (scrollY) {
+                    scrollY = scrollY === undefined ? window.scrollY : scrollY;
                     if (window.scrollY > keyboardHeight) {
                         window.scrollTo(0, keyboardHeight);
                     }
                     topList.forEach(function (item) {
-                        item.getMain().style.transform = 'translateY(' + window.scrollY + 'px)';
+                        item.getMain().style.transform = 'translateY(' + scrollY + 'px)';
                     });
                     bottomList.forEach(function (item) {
-                        item.getMain().style.transform = 'translateY(' + (window.scrollY - keyboardHeight) + 'px)';
+                        item.getMain().style.transform = 'translateY(' + (scrollY - keyboardHeight) + 'px)';
                     });
                 };
 
@@ -257,6 +301,8 @@
                     return;
                 }
 
+                var lastScrollY;
+
                 keyboardHandle();
 
                 // 缓存panel的大小
@@ -271,51 +317,55 @@
                 });
 
                 if (keyboardHeight) {
-                    topList.concat(bottomList).forEach(function (item) {
-                        item.getMain().style.visibility = 'hidden';
-                    });
-                    util.timer(function () {
-                        topList.concat(bottomList).forEach(function (item) {
-                            item.getMain().style.visibility = '';
-                        });
+                    lastScrollY = Math.min(window.scrollY, keyboardHeight);
+                    scrollListener(function () {
+                        for (scroll = core.findControl(document.activeElement); scroll; scroll = scroll.getParent()) {
+                            if (scroll.$MScroll) {
+                                var scrollTop = dom.getPosition(scroll.getMain()).top,
+                                    scrollHeight = scroll.getHeight() - keyboardHeight,
+                                    activeTop = dom.getPosition(document.activeElement).top - window.scrollY,
+                                    activeHeight = document.activeElement.offsetHeight;
 
-                        var timerHandle = util.timer(fixed, -1);
-
-                        util.timer(function () {
-                            for (scroll = core.findControl(document.activeElement); scroll; scroll = scroll.getParent()) {
-                                if (scroll.$MScroll) {
-                                    var scrollTop = dom.getPosition(scroll.getMain()).top,
-                                        scrollHeight = scroll.getHeight() - keyboardHeight,
-                                        activeTop = dom.getPosition(document.activeElement).top - window.scrollY,
-                                        activeHeight = document.activeElement.offsetHeight;
-
-                                    if (activeTop < scrollTop || activeTop + activeHeight > scrollTop + scrollHeight) {
-                                        scroll.setPosition(scroll.getX(), scroll.getY() - activeTop + (scrollHeight - activeHeight) / 2);
-                                    }
-                                    break;
+                                if (activeTop < scrollTop || activeTop + activeHeight > scrollTop + scrollHeight) {
+                                    scroll.setPosition(scroll.getX(), scroll.getY() - activeTop + (scrollHeight - activeHeight) / 2);
                                 }
+                                break;
                             }
-                            timerHandle();
-                        }, 500);
-                    }, 300);
+                        }
 
-                    // 软键盘切换INPUT，已经有高度，恢复状态
-                    core.enable();
+                        // 反向动画抵消ios的滚屏动画效果，如果webview关闭了滚屏动画，需要执行fixed()消除抖动
+                        fixed(lastScrollY);
+                        effect.grade(function (precent, options) {
+                            fixed(lastScrollY + Math.round((options.to - lastScrollY) * precent));
+                        }, 200, {to: window.scrollY});
+
+                        core.enable();
+                    });
                 } else {
                     core.disable();
-                    keyboardHandle = util.timer(function () {
-                        var lastScrollY = window.scrollY;
+
+                    scrollListener(function () {
+                        // 第一次触发，开始测试软键盘高度
+                        lastScrollY = window.scrollY;
                         document.body.style.visibility = 'hidden';
-                        window.scrollTo(0, 100000000);
-                        util.timer(function () {
+                        scrollListener(function () {
+                            // 第二次触发，计算软键盘高度
                             keyboardHeight = window.scrollY + document.body.clientHeight - document.body.scrollHeight - (safariVersion ? 45 : 0);
                             document.body.style.visibility = '';
+                            // 复位
                             window.scrollTo(0, lastScrollY);
                             fixed();
-                        }, 100);
-                        core.enable();
-                    }, 1000);
+                            // 计算成功解除框架事件锁定
+                            core.enable();
+                        });
+                        window.scrollTo(0, 100000);
+                    });
                 }
+
+                keyboardHandle = util.timer(function () {
+                    // 一秒后强制解除框架事件锁定
+                    core.enable();
+                }, 1000);
             });
 
             dom.addEventListener(document, 'focusout', function (event) {
