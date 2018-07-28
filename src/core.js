@@ -700,7 +700,9 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
         disableEnv = {
             type: 'disable',
-            mousedown: util.blank,
+            mousedown: function (event) {
+                event.preventDefault();
+            },
             mousemove: util.blank,
             mouseout: util.blank,
             mouseover: util.blank,

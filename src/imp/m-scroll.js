@@ -215,7 +215,11 @@
             var topList = [],
                 bottomList = [],
                 keyboardHandle = util.blank,
+                scroll,
                 fixed = function () {
+                    if (window.scrollY > keyboardHeight) {
+                        window.scrollTo(0, keyboardHeight);
+                    }
                     topList.forEach(function (item) {
                         item.getMain().style.transform = 'translateY(' + window.scrollY + 'px)';
                     });
@@ -227,6 +231,24 @@
             dom.addEventListener(window, 'keyboardchange', function (event) {
                 keyboardHandle();
                 keyboardHeight = event.data - (safariVersion ? 45 : 0);
+
+                core.query(function (item) {
+                    return item.$MScroll;
+                }).forEach(function (item) {
+                    if (item.$MScrollData.top) {
+                        item.setPosition(
+                            item.getX(),
+                            Math.max(
+                                item.$MScrollData.top + window.scrollY - keyboardHeight,
+                                Math.min(
+                                    (item.$MScrollData.bottom !== undefined ? item.$MScrollData.bottom : 0) + window.scrollY,
+                                    item.getY()
+                                )
+                            )
+                        );
+                    }
+                });
+
                 fixed();
             });
 
@@ -249,11 +271,33 @@
                 });
 
                 if (keyboardHeight) {
-                    var timerHandle = util.timer(fixed, -1);
-
+                    topList.concat(bottomList).forEach(function (item) {
+                        item.getMain().style.visibility = 'hidden';
+                    });
                     util.timer(function () {
-                        timerHandle();
-                    }, 1000);
+                        topList.concat(bottomList).forEach(function (item) {
+                            item.getMain().style.visibility = '';
+                        });
+
+                        var timerHandle = util.timer(fixed, -1);
+
+                        util.timer(function () {
+                            for (scroll = core.findControl(document.activeElement); scroll; scroll = scroll.getParent()) {
+                                if (scroll.$MScroll) {
+                                    var scrollTop = dom.getPosition(scroll.getMain()).top,
+                                        scrollHeight = scroll.getHeight() - keyboardHeight,
+                                        activeTop = dom.getPosition(document.activeElement).top - window.scrollY,
+                                        activeHeight = document.activeElement.offsetHeight;
+
+                                    if (activeTop < scrollTop || activeTop + activeHeight > scrollTop + scrollHeight) {
+                                        scroll.setPosition(scroll.getX(), scroll.getY() - activeTop + (scrollHeight - activeHeight) / 2);
+                                    }
+                                    break;
+                                }
+                            }
+                            timerHandle();
+                        }, 500);
+                    }, 300);
 
                     // 软键盘切换INPUT，已经有高度，恢复状态
                     core.enable();
@@ -281,25 +325,24 @@
 
                 keyboardHandle();
 
+                core.query(function (item) {
+                    return item.$MScroll;
+                }).forEach(function (item) {
+                    item.setPosition(item.getX(), Math.max(item.$MScrollData.top, Math.min(0, item.getY())));
+                    if (item.$MScrollData.cacheTop) {
+                        item.$MScrollData.cacheTop = false;
+                        delete item.$MScrollData.top;
+                    }
+                });
+                topList.concat(bottomList).forEach(function (item) {
+                    item.getMain().style.transform = '';
+                });
+
                 core.disable();
                 keyboardHandle = util.timer(function () {
-                    // 判断是否软键盘切换INPUT引起的
-                    core.query(function (item) {
-                        return item.$MScroll;
-                    }).forEach(function (item) {
-                        item.setPosition(item.getX(), Math.max(item.$MScrollData.top, Math.min(0, item.getY())));
-                        if (item.$MScrollData.cacheTop) {
-                            item.$MScrollData.cacheTop = false;
-                            delete item.$MScrollData.top;
-                        }
-                    });
-                    topList.concat(bottomList).forEach(function (item) {
-                        item.getMain().style.transform = '';
-                    });
-
                     keyboardHeight = 0;
                     core.enable();
-                }, 300);
+                }, 1000);
             });
 
             ext.iosFixed = function (control, value) {
@@ -315,8 +358,6 @@
                 });
             };
         } else {
-            var scroll;
-
             // android，处理软键盘问题
             dom.addEventListener(window, 'resize', function () {
                 if (document.documentElement.clientHeight < util.toNumber(document.body.style.height)) {
@@ -328,6 +369,7 @@
                             if (scroll.$MScroll) {
                                 scroll.setPosition(scroll.getX(), scroll.getY() - window.scrollY);
                                 window.scrollTo(0, 0);
+                                break;
                             }
                         }
                     }
