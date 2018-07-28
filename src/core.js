@@ -15,7 +15,6 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
         isToucher = document.ontouchstart !== undefined,
         isPointer = !!window.PointerEvent, // 使用pointer事件序列，请一定在需要滚动的元素上加上touch-action:none
         isStrict = document.compatMode === 'CSS1Compat',
-        iosVersion = /(iPhone|iPad).+OS (\d+)/i.test(navigator.userAgent) ?  +(RegExp.$2) : undefined,
         ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined,
         chromeVersion = /Chrome\/(\d+\.\d)/i.test(navigator.userAgent) ? +RegExp.$1 : undefined,
         firefoxVersion = /firefox\/(\d+\.\d)/i.test(navigator.userAgent) ? +RegExp.$1 : undefined,
@@ -351,6 +350,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                         event.clientX = item.clientX;
                         event.clientY = item.clientY;
                         event.target = getElementFromEvent(item);
+
                         currEnv.mouseup(event);
                         bubble(hoveredControl, 'mouseout', event, hoveredControl = null);
                         trackId = undefined;
@@ -670,7 +670,9 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                 if (inertia) {
                     var ax = vx / inertia,
                         ay = vy / inertia,
-                        env = currEnv;
+                        env = currEnv,
+                        startX = track.x,
+                        startY = track.y;
 
                     inertiaHandles[uid] = util.timer(function () {
                         var event = new ECUIEvent(),
@@ -682,6 +684,9 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                         dragmove(track, env, Math.round(mx + vx * t - ax * t * t / 2), Math.round(my + vy * t - ay * t * t / 2));
                         if (t >= inertia || (x === track.x && y === track.y)) {
                             inertiaHandles[uid]();
+                            if (dragEvent && startX === x && startY === y) {
+                                dragEvent.inertia = false;
+                            }
                             dragend(event, env, target);
                         }
                     }, -20);
@@ -1210,20 +1215,6 @@ outer:          for (var caches = [], target = event.target, el; target; target 
 
             ecuiName = options.name || ecuiName;
             isGlobalId = options.globalId;
-
-            if (safariVersion && iosVersion > 100) {
-                bodyElement = dom.create({
-                    id: body.id,
-                    className: 'SAFARI-BODY-FIXED'
-                });
-                bodyElement.setAttribute(ecuiName, dom.getAttribute(body, ecuiName));
-                body.removeAttribute(ecuiName);
-                for (; body.firstChild; ) {
-                    bodyElement.appendChild(body.firstChild);
-                }
-                body.appendChild(bodyElement);
-                body.id = '';
-            }
 
             if (options.load) {
                 for (var text = options.load; /^\s*(\w+)\s*(\([^)]+\))?\s*($|,)/.test(text); ) {
