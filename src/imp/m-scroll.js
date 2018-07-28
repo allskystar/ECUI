@@ -281,24 +281,25 @@
 
                 keyboardHandle();
 
-                core.query(function (item) {
-                    return item.$MScroll && item.isShow();
-                }).forEach(function (item) {
-                    item.setPosition(item.getX(), Math.max(item.$MScrollData.top, Math.min(0, item.getY())));
-                    if (item.$MScrollData.cacheTop) {
-                        item.$MScrollData.cacheTop = false;
-                        delete item.$MScrollData.top;
-                    }
-                });
-                topList.concat(bottomList).forEach(function (item) {
-                    item.getMain().style.transform = '';
-                });
-
                 core.disable();
                 keyboardHandle = util.timer(function () {
+                    // 判断是否软键盘切换INPUT引起的
+                    core.query(function (item) {
+                        return item.$MScroll;
+                    }).forEach(function (item) {
+                        item.setPosition(item.getX(), Math.max(item.$MScrollData.top, Math.min(0, item.getY())));
+                        if (item.$MScrollData.cacheTop) {
+                            item.$MScrollData.cacheTop = false;
+                            delete item.$MScrollData.top;
+                        }
+                    });
+                    topList.concat(bottomList).forEach(function (item) {
+                        item.getMain().style.transform = '';
+                    });
+
                     keyboardHeight = 0;
                     core.enable();
-                }, 1000);
+                }, 300);
             });
 
             ext.iosFixed = function (control, value) {
