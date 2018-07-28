@@ -211,7 +211,7 @@
                         text = text.replace('<container', '<div ui="type:ecui.esr.AppLayer" style="display:none" id="' + moduleName.replace(/[._]/g, '-').replace(/\//g, '_') + filename.replace(/[._]/g, '-') + '"');
                         text = text.replace('</header>', '</div>');
                         text = text.replace('</container>', '</div>');
-                        var el = ecui.dom.last(ecui.dom.first(ecui.getBody()));
+                        var el = ecui.dom.last(ecui.dom.first(document.body));
                         ecui.dom.insertHTML(el, 'beforeBegin', etpl.compile(text.replace(/ui="type:NS\./g, 'ui="type:ecui.ns._' + moduleName.replace(/[._]/g, '-').replace(/\//g, '_') + '.ui.'))(ecui.esr.getContext()));
                         ecui.init(el.parentNode);
                         var children = ecui.dom.children(el.parentNode);
