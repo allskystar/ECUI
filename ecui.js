@@ -9,6 +9,7 @@ var ecui;
 
     document.write('<script type="text/javascript" src="src/imp/items.js"></script>');
     document.write('<script type="text/javascript" src="src/imp/popup.js"></script>');
+    document.write('<script type="text/javascript" src="src/imp/m-confirm.js"></script>');
     document.write('<script type="text/javascript" src="src/imp/m-scroll.js"></script>');
     document.write('<script type="text/javascript" src="src/imp/m-popup.js"></script>');
     document.write('<script type="text/javascript" src="src/imp/m-options.js"></script>');
@@ -49,7 +50,6 @@ var ecui;
 
     document.write('<script type="text/javascript" src="src/extend/anchor.js"></script>');
     document.write('<script type="text/javascript" src="src/extend/link.js"></script>');
-    document.write('<script type="text/javascript" src="src/extend/m-confirm.js"></script>');
     document.write('<script type="text/javascript" src="src/extend/messagebox.js"></script>');
 
     document.write('<script type="text/javascript" src="src/mobile/m-panel.js"></script>');
