@@ -430,6 +430,26 @@ _eInput        - INPUT对象
             $validate: util.blank,
 
             /**
+             * 获取控件进行提交的名称，默认使用 getName 的返回值。
+             * @public
+             *
+             * @return {string} 控件的表单名称
+             */
+            getFormName: function () {
+                return this.getName();
+            },
+
+            /**
+             * 获取控件进行提交的值，默认使用 getValue 的返回值。
+             * @public
+             *
+             * @return {string} 控件的表单值
+             */
+            getFormValue: function () {
+                return this.getValue();
+            },
+
+            /**
              * 获取控件的输入元素。
              * @public
              *
@@ -448,16 +468,6 @@ _eInput        - INPUT对象
              */
             getName: function () {
                 return this._eInput.name;
-            },
-
-            /**
-             * 获取控件进行提交的值，默认使用 getValue 的返回值。
-             * @public
-             *
-             * @return {string} 控件的表单值
-             */
-            getFormValue: function () {
-                return this.getValue();
             },
 
             /**
