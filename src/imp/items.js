@@ -20,6 +20,28 @@
         'ui-item',
         {
             /**
+             * @override
+             */
+            $setParent: function (parent) {
+                var oldParent = this.getParent();
+                if (oldParent) {
+                    for (var key in oldParent) {
+                        if (oldParent.hasOwnProperty(key)) {
+                            if (oldParent[key] === this) {
+                                oldParent[key] = null;
+                            }
+                        }
+                    }
+                }
+
+                if (!parent) {
+                    this.clearStatus();
+                }
+
+                ui.Control.prototype.$setParent.call(this, parent);
+            },
+
+            /**
              * 选项控件的父控件必须实现 Items 接口，同时选项控件有父控件时不能设置别的父控件。
              * @override
              */
