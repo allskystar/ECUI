@@ -558,10 +558,14 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
         var el = core.$(route.main);
         el.style.visibility = 'hidden';
 
-        if (el.route && routes[el.route].ondispose) {
-            dom.removeClass(el, el.route.slice(1).replace(/[._]/g, '-').replace(/\//g, '_'));
-            routes[el.route].ondispose();
+        if (el.route) {
+            var elRoute = routes[el.route];
+            dom.removeClass(el, (elRoute.alias ? calcUrl(elRoute.alias) : elRoute.NAME).slice(1).replace(/[._]/g, '-').replace(/\//g, '_'));
             el.route = null;
+
+            if (elRoute.ondispose) {
+                elRoute.ondispose();
+            }
         }
         Array.prototype.slice.call(el.all || el.getElementsByTagName('*')).forEach(function (item) {
             if (item.route && routes[item.route].ondispose) {
@@ -573,7 +577,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
         el.innerHTML = engine.render(name || route.view, context);
         if (route.NAME) {
             el.route = route.NAME;
-            dom.addClass(el, route.NAME.slice(1).replace(/[._]/g, '-').replace(/\//g, '_'));
+            dom.addClass(el, (route.alias ? calcUrl(route.alias) : route.NAME).slice(1).replace(/[._]/g, '-').replace(/\//g, '_'));
         }
         core.init(el);
 
