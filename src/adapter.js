@@ -12,13 +12,13 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
         //{if 1}//isPointer = !!window.PointerEvent, // 使用pointer事件序列，请一定在需要滚动的元素上加上touch-action:none//{/if}//
         isStrict = document.compatMode === 'CSS1Compat',
         isWebkit = /webkit/i.test(navigator.userAgent),
-        iosVersion = /(iPhone|iPad).+OS (\d+)/i.test(navigator.userAgent) ?  +(RegExp.$2) : undefined,
-        isWebview = iosVersion ? !/\)\s*Version\//i.test(navigator.userAgent) : /\)\s*Version\//i.test(navigator.userAgent),
+        //{if 1}//iosVersion = /(iPhone|iPad).+OS (\d+)/i.test(navigator.userAgent) ?  +(RegExp.$2) : undefined,//{/if}//
         chromeVersion = /Chrome\/(\d+\.\d)/i.test(navigator.userAgent) ? +RegExp.$1 : undefined,
         ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined,
         firefoxVersion = /firefox\/(\d+\.\d)/i.test(navigator.userAgent) ? +RegExp.$1 : undefined,
         operaVersion = /opera\/(\d+\.\d)/i.test(navigator.userAgent) ? +RegExp.$1 : undefined,
-        safariVersion = !/(chrome|crios|ucbrowser)/i.test(navigator.userAgent) && /(\d+\.\d)(\.\d)?\s+.*safari/i.test(navigator.userAgent) ? +RegExp.$1 : undefined;
+        safariVersion = !/(chrome|crios|ucbrowser)/i.test(navigator.userAgent) && /(\d+\.\d)(\.\d)?\s+.*safari/i.test(navigator.userAgent) ? +RegExp.$1 : undefined,
+        isWebview = safariVersion ? !/\)\s*Version\//.test(navigator.userAgent) : /\)\s*Version\//.test(navigator.userAgent);
 
     ecui = {
 //{if 0}//
@@ -37,12 +37,12 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
 
         strict: isStrict,
         webkit: isWebkit,
-        inapp: isWebview,
         chrome: chromeVersion,
         ie: ieVersion,
         firefox: firefoxVersion,
         opera: operaVersion,
         safari: safariVersion,
+        inapp: isWebview,
 
         dom: {
             /**
