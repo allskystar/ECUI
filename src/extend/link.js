@@ -24,9 +24,11 @@ link - 链接插件，使用ext-link使用，具体的跳转地址写在DOM元�
     var linkElement = dom.create('A');
 
     /**
-     * 链接控件。
-     * 用来取代A标签，解决A标签不能嵌套的问题。
-     * @control
+     * 链接插件加载。
+     * @public
+     *
+     * @param {ecui.ui.Control} control 需要应用插件的控件
+     * @param {string} value 插件的参数
      */
     ext.link = function (control) {
         core.addEventListener(control, 'click', onclick);

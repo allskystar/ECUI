@@ -7,6 +7,11 @@ var ecui;
     document.write('<script type="text/javascript" src="src/control.js"></script>');
     document.write('<script type="text/javascript" src="src/esr.js"></script>');
 
+    document.write('<script type="text/javascript" src="src/extend/anchor.js"></script>');
+    document.write('<script type="text/javascript" src="src/extend/ios-fixed.js"></script>');
+    document.write('<script type="text/javascript" src="src/extend/link.js"></script>');
+    document.write('<script type="text/javascript" src="src/extend/messagebox.js"></script>');
+
     document.write('<script type="text/javascript" src="src/imp/items.js"></script>');
     document.write('<script type="text/javascript" src="src/imp/popup.js"></script>');
     document.write('<script type="text/javascript" src="src/imp/m-confirm.js"></script>');
@@ -47,10 +52,6 @@ var ecui;
     document.write('<script type="text/javascript" src="src/input/multilevel-select.js"></script>');
     document.write('<script type="text/javascript" src="src/input/multi-select.js"></script>');
     document.write('<script type="text/javascript" src="src/input/couple-slider.js"></script>');
-
-    document.write('<script type="text/javascript" src="src/extend/anchor.js"></script>');
-    document.write('<script type="text/javascript" src="src/extend/link.js"></script>');
-    document.write('<script type="text/javascript" src="src/extend/messagebox.js"></script>');
 
     document.write('<script type="text/javascript" src="src/mobile/m-panel.js"></script>');
     document.write('<script type="text/javascript" src="src/mobile/m-select.js"></script>');

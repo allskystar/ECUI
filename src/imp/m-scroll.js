@@ -213,21 +213,15 @@
 
     function scrollListener(fn) {
         function scrollHandle() {
-            if (lastScrollY === window.scrollY &&
-                    !scrolls.filter(function (item) {
-                        if (item.top !== item.el.scrollTop) {
-                            item.top = item.el.scrollTop;
-                            return true;
-                        }
-                    }).length) {
+//{if 0}//
+            firstHandle();
+//{/if}//
+            if (lastScrollY === window.scrollY) {
                 window.cancelAnimationFrame(handle);
                 handle = window.requestAnimationFrame(function () {
                     // 多延迟一帧，防止出错
                     window.requestAnimationFrame(fn);
                     dom.removeEventListener(window, 'scroll', scrollHandle);
-                    scrolls.forEach(function (item) {
-                        dom.removeEventListener(item.el, 'scroll', scrollHandle);
-                    });
                 });
             } else {
                 lastScrollY = window.scrollY;
@@ -237,38 +231,34 @@
         }
 
         var lastScrollY = window.scrollY,
-            scrolls = [],
+//{if 0}//
+            // 保证模拟器上100ms后至少能触发一次
+            firstHandle = util.timer(scrollHandle, 100),
+//{/if}//
             handle;
 
-        for (var el = document.activeElement; el; el = dom.parent(el)) {
-            scrolls.push({
-                el: el,
-                top: el.scrollTop
-            });
-        }
-
         dom.addEventListener(window, 'scroll', scrollHandle);
-        scrolls.forEach(function (item) {
-            dom.addEventListener(item.el, 'scroll', scrollHandle);
-        });
     }
 
     if (isToucher) {
         if (iosVersion) {
-            var topList = [],
-                bottomList = [],
+            var iosfixedList,
                 keyboardHandle = util.blank,
                 scroll,
                 fixed = function (scrollY) {
-                    scrollY = scrollY === undefined ? window.scrollY : scrollY;
                     if (window.scrollY > keyboardHeight) {
-                        window.scrollTo(0, keyboardHeight);
+//{if 0}//
+                        if (window.outerHeight) {
+//{/if}//
+                            // 不在ios模拟器中运行
+                            window.scrollTo(0, keyboardHeight);
+//{if 0}//
+                        }
+//{/if}//
                     }
-                    topList.forEach(function (item) {
-                        item.getMain().style.transform = 'translateY(' + scrollY + 'px)';
-                    });
-                    bottomList.forEach(function (item) {
-                        item.getMain().style.transform = 'translateY(' + (scrollY - keyboardHeight) + 'px)';
+                    scrollY = scrollY === undefined ? window.scrollY : scrollY;
+                    iosfixedList.forEach(function (item) {
+                        item.control.getMain().style.transform = 'translateY(' + (item.top ? scrollY : scrollY - keyboardHeight) + 'px)';
                     });
                 };
 
@@ -305,6 +295,10 @@
 
                 keyboardHandle();
 
+                if (!iosfixedList) {
+                    iosfixedList = ext.iosFixed.getVisibles();
+                }
+
                 // 缓存panel的大小
                 core.query(function (item) {
                     return item.$MScroll && item.isShow();
@@ -317,7 +311,15 @@
                 });
 
                 if (keyboardHeight) {
-                    lastScrollY = Math.min(window.scrollY, keyboardHeight);
+//{if 0}//
+                    if (window.outerHeight) {
+//{/if}//
+                        lastScrollY = Math.min(window.scrollY, keyboardHeight);
+//{if 0}//
+                    } else {
+                        lastScrollY = window.scrollY;
+                    }
+//{/if}//
                     scrollListener(function () {
                         for (scroll = core.findControl(document.activeElement); scroll; scroll = scroll.getParent()) {
                             if (scroll.$MScroll) {
@@ -345,6 +347,34 @@
                     core.disable();
 
                     scrollListener(function () {
+//{if 0}//
+                        if (!window.outerHeight) {
+                            // 在模拟器内运行
+                            switch (screen.height) {
+                            case 568:
+                                // iphone 5s/se
+                                keyboardHeight = 253;
+                                break;
+                            case 667:
+                                // iphone 6/7/8
+                                keyboardHeight = 258;
+                                break;
+                            case 736:
+                                // iphone 6/7/8 plus
+                                keyboardHeight = 271;
+                                break;
+                            case 812:
+                                //iphoneX
+                                keyboardHeight = 294;
+                                break;
+                            default:
+                                window.alert('不能识别的型号');
+                            }
+                            fixed();
+                            core.enable();
+                            return;
+                        }
+//{/if}//
                         // 第一次触发，开始测试软键盘高度
                         lastScrollY = window.scrollY;
                         document.body.style.visibility = 'hidden';
@@ -384,29 +414,17 @@
                         delete item.$MScrollData.top;
                     }
                 });
-                topList.concat(bottomList).forEach(function (item) {
-                    item.getMain().style.transform = '';
+                iosfixedList.forEach(function (item) {
+                    item.control.getMain().style.transform = '';
                 });
 
                 core.disable();
                 keyboardHandle = util.timer(function () {
                     keyboardHeight = 0;
+                    iosfixedList = null;
                     core.enable();
                 }, 1000);
             });
-
-            ext.iosFixed = function (control, value) {
-                if (value === 'bottom') {
-                    bottomList.push(control);
-                } else {
-                    topList.push(control);
-                }
-
-                core.addEventListener(control, 'dispose', function () {
-                    util.remove(topList, this);
-                    util.remove(bottomList, this);
-                });
-            };
         } else {
             // android，处理软键盘问题
             dom.addEventListener(window, 'resize', function () {
