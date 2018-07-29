@@ -146,10 +146,10 @@
                 item = item || null;
                 if (this._cSelect !== item) {
                     if (this._cSelect) {
-                        this._cSelect.alterClass('-selected');
+                        this._cSelect.alterStatus('-selected');
                     }
                     if (item) {
-                        item.alterClass('+selected');
+                        item.alterStatus('+selected');
                         core.setFocused(item);
                     } else {
                         core.setFocused(this);

@@ -108,10 +108,10 @@ _aSelect - 全部的下拉框控件列表
                                 index = parent._aSelect.indexOf(this);
 
                             if (this._cSelected) {
-                                this._cSelected.alterClass('-selected');
+                                this._cSelected.alterStatus('-selected');
                             }
                             if (item) {
-                                item.alterClass('+selected');
+                                item.alterStatus('+selected');
 
                                 var select = parent._aSelect[++index];
                                 if (item._aChildren) {

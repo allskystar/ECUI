@@ -77,7 +77,7 @@ _nBottomIndex  - 下部隐藏的选项序号
                     var items = this.getItems(),
                         body = this.getBody();
 
-                    this.alterClass(items.length ? '-empty' : '+empty');
+                    this.alterStatus(items.length ? '-empty' : '+empty');
                     this.$$bodyHeight = body.offsetHeight + this._nTopHidden + this._nBottomHidden;
                     items.map(function (item) {
                         item.cache();
@@ -214,7 +214,7 @@ _nBottomIndex  - 下部隐藏的选项序号
              */
             $initStructure: function (width, height) {
                 ui.Control.prototype.$initStructure.call(this, width, height);
-                this.alterClass(this.getLength() ? '-empty' : '+empty');
+                this.alterStatus(this.getLength() ? '-empty' : '+empty');
                 this.setPosition(this.getX(), 0);
             },
 

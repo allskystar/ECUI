@@ -111,7 +111,7 @@ cities - 地区联动下拉框控件。
                         } else {
                             parent._uOptions._cSelected.splice(index, 1);
                         }
-                        this.alterClass((index === -1) ? '+selected' : '-selected');
+                        this.alterStatus((index === -1) ? '+selected' : '-selected');
                         // core.triggerEvent(parent, 'change', event);
                     },
 

@@ -44,11 +44,11 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
     function setSelected(view, cell) {
         if (view._cSelected !== cell) {
             if (view._cSelected) {
-                view._cSelected.alterClass('-selected');
+                view._cSelected.alterStatus('-selected');
             }
 
             if (cell) {
-                cell.alterClass('+selected');
+                cell.alterStatus('+selected');
             }
             view._cSelected = cell;
         }

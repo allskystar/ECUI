@@ -214,9 +214,9 @@ _aChildren     - 子控件集合
 
                 if (root._cSelected !== this) {
                     if (root._cSelected) {
-                        root._cSelected.alterClass('-selected');
+                        root._cSelected.alterStatus('-selected');
                     }
-                    this.alterClass('+selected');
+                    this.alterStatus('+selected');
                     root._cSelected = this;
                 }
             },
@@ -227,7 +227,7 @@ _aChildren     - 子控件集合
              * @event
              */
             $nodeout: function () {
-                this.alterClass('-nodehover');
+                this.alterStatus('-nodehover');
             },
 
             /**
@@ -236,7 +236,7 @@ _aChildren     - 子控件集合
              * @event
              */
             $nodeover: function () {
-                this.alterClass('+nodehover');
+                this.alterStatus('+nodehover');
             },
 
             /**
@@ -249,7 +249,7 @@ _aChildren     - 子控件集合
                 if (oldParent) {
                     var root = this.getRoot();
                     if (this.contain(root._cSelected)) {
-                        root._cSelected.alterClass('-selected');
+                        root._cSelected.alterStatus('-selected');
                         root._cSelected = null;
                     }
 

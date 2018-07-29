@@ -266,14 +266,14 @@ _eContainer      - 容器 DOM 元素
 
                 if (item && this._cSelected !== item) {
                     if (this._cSelected) {
-                        this._cSelected.alterClass('-selected');
+                        this._cSelected.alterStatus('-selected');
                         if (this._cSelected._eContainer && (!item || this._cSelected._eContainer !== item._eContainer)) {
                             dom.addClass(this._cSelected._eContainer, 'ui-hide');
                         }
                     }
 
                     if (item) {
-                        item.alterClass('+selected');
+                        item.alterStatus('+selected');
                         if (item._eContainer && (!this._cSelected || this._cSelected._eContainer !== item._eContainer)) {
                             dom.removeClass(item._eContainer, 'ui-hide');
                             core.cacheAtShow(item._eContainer);

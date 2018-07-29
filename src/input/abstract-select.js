@@ -268,16 +268,16 @@ _bRequired    - 是否必须选择
                 item = item || null;
                 if (item !== this._cSelected) {
                     if (this._cSelected) {
-                        this._cSelected.alterClass('-selected');
+                        this._cSelected.alterStatus('-selected');
                     }
                     if (item) {
-                        item.alterClass('+selected');
+                        item.alterStatus('+selected');
                         this._uText.setContent(item.getBody().innerHTML);
                         ui.InputControl.prototype.setValue.call(this, item._sValue);
                         if (this._uOptions.isShow()) {
                             core.setFocused(item);
                         }
-                        this.alterClass(item._sValue === '' ? '+placeholder' : '-placeholder');
+                        this.alterStatus(item._sValue === '' ? '+placeholder' : '-placeholder');
                     } else {
                         this._uText.setContent('');
                         ui.InputControl.prototype.setValue.call(this, '');

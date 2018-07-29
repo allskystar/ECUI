@@ -98,7 +98,7 @@ _eInput - 选项对应的input，form提交时使用
                      */
                     setSelected: function (status) {
                         this._eInput.disabled = status === false;
-                        this.alterClass(status !== false ? '+selected' : '-selected');
+                        this.alterStatus(status !== false ? '+selected' : '-selected');
                     }
                 }
             ),
