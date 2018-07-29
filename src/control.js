@@ -661,11 +661,11 @@ _aStatus            - 控件当前的状态集合
                     var classes = this.getClasses();
                     classes.push('');
 
-                    this._aStatus.forEach(function (item) {
+                    this._aStatus.slice(2).forEach(function (item) {
                         dom.removeClass(this._eMain, classes.join(item));
                     }, this);
 
-                    this._aStatus = [];
+                    this._aStatus = this._aStatus.slice(0, 2);
                 }
             },
 
