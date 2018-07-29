@@ -1437,16 +1437,18 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                     el.id = 'AppBackupContainer';
                     dom.insertHTML(el, 'afterEnd', dom.previous(el).outerHTML + el.outerHTML);
                     el.id = 'AppCommonContainer';
-                    el = dom.last(dom.first(document.body));
-                    var children = dom.children(el.parentNode);
+                    var content = dom.last(dom.first(document.body)),
+                        header = dom.previous(content),
+                        children = dom.children(el.parentNode).slice(0, -2);
                     for (var i = 1, item; item = children[i]; i += 2) {
-                        item.header = children[i - 1];
+                        header.appendChild(item.header = children[i - 1]);
+                        content.appendChild(item);
                         var first = item.firstChild;
                         if (first && first === item.lastChild && first.nodeType === 8) {
                             item.innerHTML = etpl.compile(first.textContent || first.nodeValue)({NS: (core.ns['_' + item.id.slice(0, item.id.lastIndexOf('_') + 1)] || {}).data});
                         }
-                        el.appendChild(item);
                     }
+
                     el = core.$((getModuleName(esr.getLocation().split('~')[0]) || esr.DEFAULT_PAGE.slice(1)).replace(/\//g, '_'));
                     if (el) {
                         dom.removeClass(el, 'ui-hide');

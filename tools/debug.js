@@ -212,11 +212,9 @@
                         text = text.replace('</header>', '</div>');
                         text = text.replace('</container>', '</div>');
                         var el = ecui.dom.last(ecui.dom.first(document.body));
-                        ecui.dom.insertHTML(el, 'beforeBegin', etpl.compile(text.replace(/ui="type:NS\./g, 'ui="type:ecui.ns._' + moduleName.replace(/[._]/g, '-').replace(/\//g, '_') + '.ui.'))(ecui.esr.getContext()));
+                        ecui.dom.insertHTML(el, 'beforeEnd', etpl.compile(text.replace(/ui="type:NS\./g, 'ui="type:ecui.ns._' + moduleName.replace(/[._]/g, '-').replace(/\//g, '_') + '.ui.'))(ecui.esr.getContext()));
+                        ecui.dom.previous(el).appendChild(ecui.dom.last(el).header = ecui.dom.previous(ecui.dom.last(el)));
                         ecui.init(el.parentNode);
-                        var children = ecui.dom.children(el.parentNode);
-                        children[children.length - 2].header = children[children.length - 3];
-                        el.appendChild(children[children.length - 2]);
 
                         ecui.io.ajax(url.replace('.html', '.css'), {
                             cache: true,

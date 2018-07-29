@@ -5,7 +5,6 @@
 //{if 0}//
     var core = ecui,
         dom = core.dom,
-        effect = core.effect,
         ext = core.ext,
         ui = core.ui,
         util = core.util,
@@ -213,9 +212,7 @@
 
     function scrollListener(fn) {
         function scrollHandle() {
-//{if 0}//
             firstHandle();
-//{/if}//
             if (lastScrollY === window.scrollY) {
                 window.cancelAnimationFrame(handle);
                 handle = window.requestAnimationFrame(function () {
@@ -231,10 +228,8 @@
         }
 
         var lastScrollY = window.scrollY,
-//{if 0}//
-            // 保证模拟器上100ms后至少能触发一次
-            firstHandle = util.timer(scrollHandle, 100),
-//{/if}//
+            // 保证300ms后至少能触发一次执行
+            firstHandle = util.timer(scrollHandle, 300),
             handle;
 
         dom.addEventListener(window, 'scroll', scrollHandle);
@@ -253,19 +248,17 @@
                 keyboardHandle = util.blank,
                 scroll,
                 fixed = function (scrollY) {
-                    if (window.scrollY > keyboardHeight) {
 //{if 0}//
-                        if (!isSimulator) {
+                    if (!isSimulator) {
 //{/if}//
-                            // 不在ios模拟器中运行
-                            window.scrollTo(0, keyboardHeight);
+                        // 解除滚动下方的白条与半像素问题
+                        window.scrollTo(0, Math.min(keyboardHeight, window.scrollY));
 //{if 0}//
-                        }
-//{/if}//
                     }
+//{/if}//
                     scrollY = scrollY === undefined ? window.scrollY : scrollY;
                     iosfixedList.forEach(function (item) {
-                        item.control.getMain().style.transform = 'translateY(' + (item.top ? scrollY : scrollY - keyboardHeight) + 'px)';
+                        item.control.getMain().style.transform = 'translateY(' + (item.top ? (scrollY + item.control.getMain().scrollTop) : scrollY - keyboardHeight) + 'px)';
                     });
                 };
 
@@ -336,17 +329,28 @@
                                     activeHeight = document.activeElement.offsetHeight;
 
                                 if (activeTop < scrollTop || activeTop + activeHeight > scrollTop + scrollHeight) {
-                                    scroll.setPosition(scroll.getX(), scroll.getY() - activeTop + (scrollHeight - activeHeight) / 2);
+                                    scroll.setPosition(scroll.getX(), scroll.getY() - activeTop + Math.round((scrollHeight - activeHeight) / 2));
                                 }
                                 break;
                             }
                         }
 
                         // 反向动画抵消ios的滚屏动画效果，如果webview关闭了滚屏动画，需要执行fixed()消除抖动
-                        fixed(lastScrollY);
-                        effect.grade(function (precent, options) {
-                            fixed(lastScrollY + Math.round((options.to - lastScrollY) * precent));
-                        }, 200, {to: window.scrollY});
+                        if (lastScrollY !== window.scrollY) {
+                            iosfixedList.forEach(function (item) {
+                                item.control.getMain().style.visibility = 'hidden';
+                            });
+                            util.timer(function () {
+                                iosfixedList.forEach(function (item) {
+                                    item.control.getMain().style.visibility = '';
+                                });
+                            }, 200);
+                        }
+                        fixed();
+                        // fixed(lastScrollY);
+                        // effect.grade(function (precent, options) {
+                        //     fixed(lastScrollY + Math.round((options.to - lastScrollY) * precent));
+                        // }, 200, {to: window.scrollY});
 
                         core.enable();
                     });
