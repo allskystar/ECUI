@@ -242,13 +242,20 @@
 
     if (isToucher) {
         if (iosVersion) {
+//{if 0}//
+            var isSimulator = true;
+            try {
+                isSimulator = !window.localStorage;
+            } catch (ignore) {
+            }
+//{/if}//
             var iosfixedList,
                 keyboardHandle = util.blank,
                 scroll,
                 fixed = function (scrollY) {
                     if (window.scrollY > keyboardHeight) {
 //{if 0}//
-                        if (window.outerHeight) {
+                        if (!isSimulator) {
 //{/if}//
                             // 不在ios模拟器中运行
                             window.scrollTo(0, keyboardHeight);
@@ -312,12 +319,12 @@
 
                 if (keyboardHeight) {
 //{if 0}//
-                    if (window.outerHeight) {
+                    if (isSimulator) {
+                        lastScrollY = window.scrollY;
+                    } else {
 //{/if}//
                         lastScrollY = Math.min(window.scrollY, keyboardHeight);
 //{if 0}//
-                    } else {
-                        lastScrollY = window.scrollY;
                     }
 //{/if}//
                     scrollListener(function () {
@@ -348,7 +355,7 @@
 
                     scrollListener(function () {
 //{if 0}//
-                        if (!window.outerHeight) {
+                        if (isSimulator) {
                             // 在模拟器内运行
                             switch (screen.height) {
                             case 568:
