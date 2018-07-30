@@ -42,6 +42,9 @@ MConfirm - 确认按钮插件。
             el.appendChild(layout);
             el.appendChild(title);
             dom.addClass(el, 'ui-mobile-confirm');
+            if (el === this.getBody()) {
+                this.$setBody(layout);
+            }
             core.$fastCreate(SubmitButton, title.lastChild, this, {focusable: false});
         }
     };
