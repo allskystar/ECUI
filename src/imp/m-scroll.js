@@ -235,32 +235,33 @@
         dom.addEventListener(window, 'scroll', scrollHandle);
     }
 
+//{if 0}//
+    var isSimulator = true;
+    try {
+        isSimulator = !window.localStorage;
+    } catch (ignore) {
+    }
+//{/if}//
+    function fixed(scrollY) {
+//{if 0}//
+        if (!isSimulator) {
+//{/if}//
+            // 解除滚动下方的白条与半像素问题
+            window.scrollTo(0, Math.min(keyboardHeight, window.scrollY));
+//{if 0}//
+        }
+//{/if}//
+        scrollY = scrollY === undefined ? window.scrollY : scrollY;
+        iosfixedList.forEach(function (item) {
+            item.control.getMain().style.transform = 'translateY(' + (item.top ? scrollY : scrollY - keyboardHeight) + 'px)';
+        });
+    }
+
     if (isToucher) {
         if (iosVersion) {
-//{if 0}//
-            var isSimulator = true;
-            try {
-                isSimulator = !window.localStorage;
-            } catch (ignore) {
-            }
-//{/if}//
             var iosfixedList,
                 keyboardHandle = util.blank,
-                scroll,
-                fixed = function (scrollY) {
-//{if 0}//
-                    if (!isSimulator) {
-//{/if}//
-                        // 解除滚动下方的白条与半像素问题
-                        window.scrollTo(0, Math.min(keyboardHeight, window.scrollY));
-//{if 0}//
-                    }
-//{/if}//
-                    scrollY = scrollY === undefined ? window.scrollY : scrollY;
-                    iosfixedList.forEach(function (item) {
-                        item.control.getMain().style.transform = 'translateY(' + (item.top ? (scrollY + item.control.getMain().scrollTop) : scrollY - keyboardHeight) + 'px)';
-                    });
-                };
+                scroll;
 
             dom.addEventListener(window, 'keyboardchange', function (event) {
                 keyboardHandle();
