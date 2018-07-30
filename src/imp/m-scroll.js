@@ -215,37 +215,48 @@
      * @private
      */
     function scrollListener(fn) {
-        function scrollHandle() {
+
+        function onscroll() {
             checkHandle();
-            keyboardHandle();
+            waitHandle();
+
             if (lastScrollY === window.scrollY) {
                 window.cancelAnimationFrame(handle);
                 handle = window.requestAnimationFrame(function () {
-                    fn();
-                    window.onscroll = null;
+                    if (fn) {
+                        fn();
+                    }
+                    dom.removeEventListener(window, 'scroll', onscroll);
                 });
             } else {
                 lastScrollY = window.scrollY;
                 window.cancelAnimationFrame(handle);
-                handle = window.requestAnimationFrame(scrollHandle);
+                handle = window.requestAnimationFrame(onscroll);
             }
         }
 
         keyboardHandle();
-        window.onscroll = null;
 
         var lastScrollY = window.scrollY,
-            handle,
+            waitHandle = util.timer(onscroll, 1000),
             checkHandle = util.timer(function () {
                 if (window.scrollY !== lastScrollY) {
-                    keyboardHandle();
-                    scrollHandle();
+                    waitHandle();
+                    onscroll();
                 }
-            }, -20);
+            }, -20),
+            handle;
 
         // 保证1s后至少能触发一次执行
-        keyboardHandle = util.timer(scrollHandle, 1000);
-        window.onscroll = scrollHandle;
+        dom.addEventListener(window, 'scroll', onscroll);
+
+        return function () {
+            waitHandle();
+            checkHandle();
+            window.cancelAnimationFrame(handle);
+            dom.removeEventListener(window, 'scroll', onscroll);
+            fn = null;
+        };
     }
 //{if 0}//
     var isSimulator = true;
@@ -334,7 +345,7 @@
 //{if 0}//
                     }
 //{/if}//
-                    scrollListener(function () {
+                    keyboardHandle = scrollListener(function () {
                         for (scroll = core.findControl(document.activeElement); scroll; scroll = scroll.getParent()) {
                             if (scroll.$MScroll) {
                                 var main = scroll.getMain(),
@@ -372,7 +383,7 @@
                 } else {
                     core.disable();
 
-                    scrollListener(function () {
+                    keyboardHandle = scrollListener(function () {
 //{if 0}//
                         if (isSimulator) {
                             // 在模拟器内运行
@@ -409,7 +420,7 @@
                             document.body.style.visibility = '';
                         }, 500);
 
-                        scrollListener(function () {
+                        keyboardHandle = scrollListener(function () {
                             // 第二次触发，计算软键盘高度
                             keyboardHeight = window.scrollY + document.body.clientHeight - document.body.scrollHeight - (safariVersion ? 45 : 0);
                             document.body.style.visibility = '';
@@ -435,7 +446,6 @@
                 }
 
                 keyboardHandle();
-                window.onscroll = null;
 
                 iosfixedList.forEach(function (item) {
                     item.control.getMain().style.transform = '';
