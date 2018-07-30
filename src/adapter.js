@@ -1370,6 +1370,20 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
             return this.lastIndexOf(s) === this.length - s.length;
         };
     }
+
+    /**
+     * 当前是否需要处理IOS软键盘。
+     * @public
+     *
+     * @param {HTMLElement} target 用于判断的元素对象，如果为空使用 document.activeElement
+     * @return {boolean} 是否需要处理IOS软键盘
+     */
+    util.hasIOSKeyboard = iosVersion ? function (target) {
+        target = target || document.activeElement;
+        return !(target.readOnly || target.tagName === 'SELECT' || (target.tagName === 'INPUT' && (target.type === 'radio' || target.type === 'checkbox')));
+    } : function () {
+        return false;
+    };
 //{if 0}//
     if (isToucher) {
         dom.addEventListener(document, 'contextmenu', function (event) {

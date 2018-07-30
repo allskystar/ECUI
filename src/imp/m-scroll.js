@@ -154,7 +154,7 @@
              */
             setPosition: function (x, y) {
                 var main = this.getMain();
-                if (document.activeElement.value !== undefined) {
+                if (util.hasIOSKeyboard()) {
                     // 解决光标问题
                     if (this.getX() !== x || this.getY() !== y) {
                         main.scrollLeft = this.$MScrollData.scrollLeft = 0;
@@ -210,6 +210,10 @@
         }
     };
 
+    /**
+     * 滚动监听。
+     * @private
+     */
     function scrollListener(fn) {
         function scrollHandle() {
             firstHandle();
@@ -234,7 +238,6 @@
 
         dom.addEventListener(window, 'scroll', scrollHandle);
     }
-
 //{if 0}//
     var isSimulator = true;
     try {
@@ -288,11 +291,12 @@
             });
 
             dom.addEventListener(document, 'focusin', function (event) {
-                if (event.target.readOnly || event.target.tagName === 'SELECT' || (event.target.tagName === 'INPUT' && (event.target.type === 'radio' || event.target.type === 'checkbox'))) {
+                var target = event.target,
+                    lastScrollY;
+
+                if (!util.hasIOSKeyboard(target)) {
                     return;
                 }
-
-                var lastScrollY;
 
                 keyboardHandle();
 
@@ -411,7 +415,7 @@
             });
 
             dom.addEventListener(document, 'focusout', function (event) {
-                if (event.target.readOnly || event.target.tagName === 'SELECT' || (event.target.tagName === 'INPUT' && (event.target.type === 'radio' || event.target.type === 'checkbox'))) {
+                if (!util.hasIOSKeyboard(event.target)) {
                     return;
                 }
 
