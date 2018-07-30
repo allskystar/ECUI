@@ -15,6 +15,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
         isToucher = document.ontouchstart !== undefined,
         isPointer = !!window.PointerEvent, // 使用pointer事件序列，请一定在需要滚动的元素上加上touch-action:none
         isStrict = document.compatMode === 'CSS1Compat',
+        iosVersion = /(iPhone|iPad).+OS (\d+)/i.test(navigator.userAgent) ?  +(RegExp.$2) : undefined,
         ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined,
         chromeVersion = /Chrome\/(\d+\.\d)/i.test(navigator.userAgent) ? +RegExp.$1 : undefined,
         firefoxVersion = /firefox\/(\d+\.\d)/i.test(navigator.userAgent) ? +RegExp.$1 : undefined,
@@ -31,7 +32,8 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
         initRecursion = 0,        // init 操作的递归次数
         readyList = [],
-        dragEvent,
+        inputClickTime = 0,
+        inputClickHandle = util.blank,
         orientationHandle,
 
         maskElements = [],        // 遮罩层组
@@ -266,6 +268,25 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                     dom.addEventListener(event.target, 'touchend', RemovedDomTouchBubble);
                 }
 
+                if (iosVersion) {
+                    if (Date.now() - inputClickTime < 400) {
+                        // 400ms内产生两次点击，避免input得到焦点但是无法弹出软键盘
+                        inputClickHandle();
+                        inputClickHandle = util.timer(function () {
+                            if (util.hasIOSKeyboard(document.activeElement)) {
+                                var e = document.createEvent('HTMLEvents');
+                                e.initEvent('focusout', true, true);
+                                e.target = document.activeElement;
+                                document.dispatchEvent(e);
+                                document.activeElement.blur();
+                            }
+                        }, 1000);
+                    }
+                    if (util.hasIOSKeyboard(event.target)) {
+                        inputClickTime = Date.now();
+                    }
+                }
+
                 initTouchTracks(event);
 
                 if (event.touches.length === 1) {
@@ -355,9 +376,11 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                         trackId = undefined;
                         onpressure(event, false);
                         ongesture(event.getNative().changedTouches, event);
-                        if (ghostClick || !event.target || event.target.value === undefined || event.target !== getElementFromEvent(item)) {
-                            // 同一个位置事件元素发生了变化，阻止事件穿透
-                            event.preventDefault();
+                        if (!util.hasIOSKeyboard(event.getNative().target)) {
+                            if (ghostClick || !event.target || event.target !== getElementFromEvent(item)) {
+                                // 同一个位置事件元素发生了变化，阻止事件穿透
+                                event.preventDefault();
+                            }
                         }
 
                         noPrimaryEnd = false;
@@ -650,7 +673,9 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
             mousemove: function (event) {
                 dragmove(event.track, currEnv, event.clientX, event.clientY);
-                event.preventDefault();
+                if (!util.hasIOSKeyboard(event.getNative().target) || Date.now() - currEnv.startTime > 400) {
+                    event.preventDefault();
+                }
             },
 
             mouseover: util.blank,
@@ -683,8 +708,8 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                         dragmove(track, env, Math.round(mx + vx * t - ax * t * t / 2), Math.round(my + vy * t - ay * t * t / 2));
                         if (t >= inertia || (x === track.x && y === track.y)) {
                             inertiaHandles[uid]();
-                            if (dragEvent && startX === x && startY === y) {
-                                dragEvent.inertia = false;
+                            if (env.event && startX === x && startY === y) {
+                                env.event.inertia = false;
                             }
                             dragend(event, env, target);
                         }
@@ -700,11 +725,13 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
         disableEnv = {
             type: 'disable',
-            mousedown: function (event) {
-                event.preventDefault();
+            mousedown: function () {
+                currEnv.startTime = Date.now();
             },
             mousemove: function (event) {
-                event.preventDefault();
+                if (!util.hasIOSKeyboard(event.getNative().target) || Date.now() - currEnv.startTime > 400) {
+                    event.preventDefault();
+                }
             },
             mouseout: util.blank,
             mouseover: util.blank,
@@ -1002,21 +1029,21 @@ outer:          for (var caches = [], target = event.target, el; target; target 
         }
 
         if (window.requestAnimationFrame) {
-            if (!dragEvent) {
+            if (!env.event) {
                 window.requestAnimationFrame(function () {
-                    if (dragEvent) {
-                        if (core.dispatchEvent(target, 'dragmove', dragEvent)) {
-                            target.setPosition(dragEvent.x, dragEvent.y);
+                    if (env.event) {
+                        if (core.dispatchEvent(target, 'dragmove', env.event)) {
+                            target.setPosition(env.event.x, env.event.y);
                         }
-                        if (dragEvent.dragend) {
-                            core.dispatchEvent(target, 'dragend', dragEvent);
+                        if (env.event.dragend) {
+                            core.dispatchEvent(target, 'dragend', env.event);
                             dom.removeClass(document.body, 'ui-drag');
                         }
-                        dragEvent = null;
+                        env.event = null;
                     }
                 });
             }
-            dragEvent = event;
+            env.event = event;
         } else {
             if (core.dispatchEvent(target, 'dragmove', event)) {
                 target.setPosition(event.x, event.y);
@@ -2085,6 +2112,8 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                 setEnv(dragEnv);
                 event.track.logicX = event.clientX;
                 event.track.logicY = event.clientY;
+
+                dragEnv.startTime = Date.now();
 
                 if (core.dispatchEvent(control, 'dragstart', {track: event.track})) {
                     control.setPosition(x, y);

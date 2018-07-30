@@ -41,7 +41,6 @@ _bRequired    - 是否必须选择
 
             var unit = this.$getSection('Options');
             unit.setOptionSize(options.optionSize || 3);
-            core.ext.MConfirm(unit);
         },
         {
             /**

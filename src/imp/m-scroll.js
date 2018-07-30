@@ -154,7 +154,7 @@
              */
             setPosition: function (x, y) {
                 var main = this.getMain();
-                if (document.activeElement.value !== undefined) {
+                if (util.hasIOSKeyboard()) {
                     // 解决光标问题
                     if (this.getX() !== x || this.getY() !== y) {
                         main.scrollLeft = this.$MScrollData.scrollLeft = 0;
@@ -210,15 +210,19 @@
         }
     };
 
+    /**
+     * 滚动监听。
+     * @private
+     */
     function scrollListener(fn) {
         function scrollHandle() {
-            firstHandle();
+            checkHandle();
+            keyboardHandle();
             if (lastScrollY === window.scrollY) {
                 window.cancelAnimationFrame(handle);
                 handle = window.requestAnimationFrame(function () {
-                    // 多延迟一帧，防止出错
-                    window.requestAnimationFrame(fn);
-                    dom.removeEventListener(window, 'scroll', scrollHandle);
+                    fn();
+                    window.onscroll = null;
                 });
             } else {
                 lastScrollY = window.scrollY;
@@ -227,40 +231,49 @@
             }
         }
 
-        var lastScrollY = window.scrollY,
-            // 保证300ms后至少能触发一次执行
-            firstHandle = util.timer(scrollHandle, 300),
-            handle;
+        keyboardHandle();
+        window.onscroll = null;
 
-        dom.addEventListener(window, 'scroll', scrollHandle);
+        var lastScrollY = window.scrollY,
+            handle,
+            checkHandle = util.timer(function () {
+                if (window.scrollY !== lastScrollY) {
+                    keyboardHandle();
+                    scrollHandle();
+                }
+            }, -20);
+
+        // 保证1s后至少能触发一次执行
+        keyboardHandle = util.timer(scrollHandle, 1000);
+        window.onscroll = scrollHandle;
+    }
+//{if 0}//
+    var isSimulator = true;
+    try {
+        isSimulator = !window.localStorage;
+    } catch (ignore) {
+    }
+//{/if}//
+    function fixed(scrollY) {
+//{if 0}//
+        if (!isSimulator) {
+//{/if}//
+            // 解除滚动下方的白条与半像素问题
+            window.scrollTo(0, Math.min(keyboardHeight, window.scrollY));
+//{if 0}//
+        }
+//{/if}//
+        scrollY = scrollY === undefined ? window.scrollY : scrollY;
+        iosfixedList.forEach(function (item) {
+            item.control.getMain().style.transform = 'translateY(' + (item.top ? scrollY : scrollY - keyboardHeight) + 'px)';
+        });
     }
 
     if (isToucher) {
         if (iosVersion) {
-//{if 0}//
-            var isSimulator = true;
-            try {
-                isSimulator = !window.localStorage;
-            } catch (ignore) {
-            }
-//{/if}//
             var iosfixedList,
                 keyboardHandle = util.blank,
-                scroll,
-                fixed = function (scrollY) {
-//{if 0}//
-                    if (!isSimulator) {
-//{/if}//
-                        // 解除滚动下方的白条与半像素问题
-                        window.scrollTo(0, Math.min(keyboardHeight, window.scrollY));
-//{if 0}//
-                    }
-//{/if}//
-                    scrollY = scrollY === undefined ? window.scrollY : scrollY;
-                    iosfixedList.forEach(function (item) {
-                        item.control.getMain().style.transform = 'translateY(' + (item.top ? (scrollY + item.control.getMain().scrollTop) : scrollY - keyboardHeight) + 'px)';
-                    });
-                };
+                scroll;
 
             dom.addEventListener(window, 'keyboardchange', function (event) {
                 keyboardHandle();
@@ -287,11 +300,12 @@
             });
 
             dom.addEventListener(document, 'focusin', function (event) {
-                if (event.target.readOnly || event.target.tagName === 'SELECT' || (event.target.tagName === 'INPUT' && (event.target.type === 'radio' || event.target.type === 'checkbox'))) {
+                var target = event.target,
+                    lastScrollY;
+
+                if (!util.hasIOSKeyboard(target)) {
                     return;
                 }
-
-                var lastScrollY;
 
                 keyboardHandle();
 
@@ -323,10 +337,11 @@
                     scrollListener(function () {
                         for (scroll = core.findControl(document.activeElement); scroll; scroll = scroll.getParent()) {
                             if (scroll.$MScroll) {
-                                var scrollTop = dom.getPosition(scroll.getMain()).top,
+                                var main = scroll.getMain(),
+                                    scrollTop = dom.getPosition(main).top,
                                     scrollHeight = scroll.getHeight() - keyboardHeight,
-                                    activeTop = dom.getPosition(document.activeElement).top - window.scrollY,
-                                    activeHeight = document.activeElement.offsetHeight;
+                                    activeTop = dom.getPosition(target).top + main.scrollTop - window.scrollY + scroll.getY(),
+                                    activeHeight = target.offsetHeight;
 
                                 if (activeTop < scrollTop || activeTop + activeHeight > scrollTop + scrollHeight) {
                                     scroll.setPosition(scroll.getX(), scroll.getY() - activeTop + Math.round((scrollHeight - activeHeight) / 2));
@@ -389,6 +404,11 @@
                         // 第一次触发，开始测试软键盘高度
                         lastScrollY = window.scrollY;
                         document.body.style.visibility = 'hidden';
+
+                        util.timer(function () {
+                            document.body.style.visibility = '';
+                        }, 500);
+
                         scrollListener(function () {
                             // 第二次触发，计算软键盘高度
                             keyboardHeight = window.scrollY + document.body.clientHeight - document.body.scrollHeight - (safariVersion ? 45 : 0);
@@ -403,38 +423,40 @@
                     });
                 }
 
-                keyboardHandle = util.timer(function () {
+                util.timer(function () {
                     // 一秒后强制解除框架事件锁定
                     core.enable();
                 }, 1000);
             });
 
             dom.addEventListener(document, 'focusout', function (event) {
-                if (event.target.readOnly || event.target.tagName === 'SELECT' || (event.target.tagName === 'INPUT' && (event.target.type === 'radio' || event.target.type === 'checkbox'))) {
+                if (!util.hasIOSKeyboard(event.target)) {
                     return;
                 }
 
                 keyboardHandle();
+                window.onscroll = null;
 
-                core.query(function (item) {
-                    return item.$MScroll;
-                }).forEach(function (item) {
-                    item.setPosition(item.getX(), Math.max(item.$MScrollData.top, Math.min(0, item.getY())));
-                    if (item.$MScrollData.cacheTop) {
-                        item.$MScrollData.cacheTop = false;
-                        delete item.$MScrollData.top;
-                    }
-                });
                 iosfixedList.forEach(function (item) {
                     item.control.getMain().style.transform = '';
                 });
 
                 core.disable();
                 keyboardHandle = util.timer(function () {
+                    core.query(function (item) {
+                        return item.$MScroll;
+                    }).forEach(function (item) {
+                        item.setPosition(item.getX(), Math.max(item.$MScrollData.top, Math.min(0, item.getY())));
+                        if (item.$MScrollData.cacheTop) {
+                            item.$MScrollData.cacheTop = false;
+                            delete item.$MScrollData.top;
+                        }
+                    });
+
                     keyboardHeight = 0;
                     iosfixedList = null;
                     core.enable();
-                }, 1000);
+                }, 300);
             });
         } else {
             // android，处理软键盘问题

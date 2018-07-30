@@ -467,8 +467,8 @@ _nBottomIndex  - 下部隐藏的选项序号
                     }
                 }
 
-                this._eHeader.style.transform = document.activeElement.value !== undefined ? 'translateY(' + (y - this.$$headerHeight) + 'px)' : '';
-                this._eFooter.style.transform = document.activeElement.value !== undefined ? 'translateY(' + (y + this._nTopHidden - this.$$headerHeight) + 'px)' : '';
+                this._eHeader.style.transform = 'translateY(' + (y - this.$$headerHeight) + 'px)';
+                this._eFooter.style.transform = util.hasIOSKeyboard() ? 'translateY(' + (y + this._nTopHidden - this.$$headerHeight) + 'px)' : '';
                 ui.MScroll.Methods.setPosition.call(this, x, y + this._nTopHidden - this.$$headerHeight);
 
                 top = this.getHeight() - this.$$bodyHeight;

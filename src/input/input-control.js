@@ -347,22 +347,20 @@ _eInput        - INPUT对象
                     this.alterSubType('');
                     this._bError = false;
                 }
-                util.timer(
-                    function () {
-                        if (events.focus) {
+                if (!isToucher) {
+                    util.timer(
+                        function () {
                             dom.removeEventListener(this._eInput, 'focus', events.focus);
-                        }
-                        try {
-                            this._eInput.focus();
-                        } catch (ignore) {
-                        }
-                        if (events.focus) {
+                            try {
+                                this._eInput.focus();
+                            } catch (ignore) {
+                            }
                             dom.addEventListener(this._eInput, 'focus', events.focus);
-                        }
-                    },
-                    0,
-                    this
-                );
+                        },
+                        0,
+                        this
+                    );
+                }
             },
 
             /**
@@ -430,6 +428,26 @@ _eInput        - INPUT对象
             $validate: util.blank,
 
             /**
+             * 获取控件进行提交的名称，默认使用 getName 的返回值。
+             * @public
+             *
+             * @return {string} 控件的表单名称
+             */
+            getFormName: function () {
+                return this.getName();
+            },
+
+            /**
+             * 获取控件进行提交的值，默认使用 getValue 的返回值。
+             * @public
+             *
+             * @return {string} 控件的表单值
+             */
+            getFormValue: function () {
+                return this.getValue();
+            },
+
+            /**
              * 获取控件的输入元素。
              * @public
              *
@@ -448,16 +466,6 @@ _eInput        - INPUT对象
              */
             getName: function () {
                 return this._eInput.name;
-            },
-
-            /**
-             * 获取控件进行提交的值，默认使用 getValue 的返回值。
-             * @public
-             *
-             * @return {string} 控件的表单值
-             */
-            getFormValue: function () {
-                return this.getValue();
             },
 
             /**

@@ -59,7 +59,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                 this._sName = options.name;
             },
             {
-                getName: function () {
+                getFormName: function () {
                     return this._sName || this.getMain().name;
                 },
 
@@ -98,11 +98,18 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
      */
     function afterrender(route) {
         routeRequestCount--;
+
         dom.removeClass(document.body, 'ui-loading');
 
         if (esrOptions.app) {
             transition(route);
             var layer = getLayer(route);
+
+            if (route.CACHE === undefined && layer && route.main !== 'AppCommonContainer') {
+                // 位于层内且不在公共层，缓存数据
+                route.CACHE = true;
+            }
+
             if (layer) {
                 layer.location = currLocation;
             }
@@ -257,11 +264,6 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                 util.timer(function () {
                     history.replaceState('', '', '#' + currLocation);
                 }, 100);
-            }
-
-            if (route.CACHE === undefined && layer && route.main !== 'AppCommonContainer') {
-                // 位于层内且不在公共层，缓存数据
-                route.CACHE = true;
             }
 
             if (!route.onrender || route.onrender() !== false) {
@@ -464,6 +466,15 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                     }
                 }
 
+                if (dom.hasClass(document.body, 'ui-loading')) {
+                    if (currLocation.replace(/~(HISTORY=(\d+))/, '') === loc.replace(/~(ALLOW_LEAVE|DENY_CACHE|HISTORY=(\d+))/g, '')) {
+                        history.back();
+                        return;
+                    }
+                } else {
+                    dom.addClass(document.body, 'ui-loading');
+                }
+
                 leaveUrl = undefined;
                 unloadNames.forEach(function (name) {
                     delete loadStatus[name];
@@ -484,7 +495,6 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                 unloadNames = [];
 
                 requestVersion++;
-                dom.addClass(document.body, 'ui-loading');
 
                 if (esrOptions.cache) {
                     cacheList = cacheList.filter(function (item) {
@@ -1013,8 +1023,8 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                 if (item.name) {
                     if (item.getControl) {
                         var control = item.getControl();
-                        if (control.getName && control.getFormValue && !control.isDisabled() && (!control.isFormChecked || control.isFormChecked())) {
-                            setCacheData(data, control.getName(), control.getFormValue());
+                        if (control.getFormName && control.getFormValue && !control.isDisabled() && (!control.isFormChecked || control.isFormChecked())) {
+                            setCacheData(data, control.getFormName(), control.getFormValue());
                         }
                     } else if (!item.disabled && ((item.type !== 'radio' && item.type !== 'checkbox') || item.checked)) {
                         setCacheData(data, item.name, item.value);
@@ -1368,7 +1378,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                     if (onconfirm) {
                         onconfirm(event);
                     }
-                    history.go(-1);
+                    history.back();
                 });
                 core.addEventListener(layer, 'hide', function () {
                     if (content) {
