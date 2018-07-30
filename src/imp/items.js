@@ -26,16 +26,14 @@
                 var oldParent = this.getParent();
                 if (oldParent) {
                     for (var key in oldParent) {
-                        if (oldParent.hasOwnProperty(key)) {
-                            if (oldParent[key] === this) {
+                        if (oldParent[key] === this) {
+                            if (key.charAt(0) === '_' && oldParent['set' + key.slice(2)]) {
+                                oldParent['set' + key.slice(2)]();
+                            } else if (oldParent.hasOwnProperty(key)) {
                                 oldParent[key] = null;
                             }
                         }
                     }
-                }
-
-                if (!parent) {
-                    this.clearStatus();
                 }
 
                 ui.Control.prototype.$setParent.call(this, parent);
