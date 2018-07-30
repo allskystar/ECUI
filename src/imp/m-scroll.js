@@ -421,21 +421,22 @@
 
                 keyboardHandle();
 
-                core.query(function (item) {
-                    return item.$MScroll;
-                }).forEach(function (item) {
-                    item.setPosition(item.getX(), Math.max(item.$MScrollData.top, Math.min(0, item.getY())));
-                    if (item.$MScrollData.cacheTop) {
-                        item.$MScrollData.cacheTop = false;
-                        delete item.$MScrollData.top;
-                    }
-                });
                 iosfixedList.forEach(function (item) {
                     item.control.getMain().style.transform = '';
                 });
 
                 core.disable();
                 keyboardHandle = util.timer(function () {
+                    core.query(function (item) {
+                        return item.$MScroll;
+                    }).forEach(function (item) {
+                        item.setPosition(item.getX(), Math.max(item.$MScrollData.top, Math.min(0, item.getY())));
+                        if (item.$MScrollData.cacheTop) {
+                            item.$MScrollData.cacheTop = false;
+                            delete item.$MScrollData.top;
+                        }
+                    });
+
                     keyboardHeight = 0;
                     iosfixedList = null;
                     core.enable();
