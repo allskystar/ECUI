@@ -328,10 +328,11 @@
                     scrollListener(function () {
                         for (scroll = core.findControl(document.activeElement); scroll; scroll = scroll.getParent()) {
                             if (scroll.$MScroll) {
-                                var scrollTop = dom.getPosition(scroll.getMain()).top,
+                                var main = scroll.getMain(),
+                                    scrollTop = dom.getPosition(main).top,
                                     scrollHeight = scroll.getHeight() - keyboardHeight,
-                                    activeTop = dom.getPosition(document.activeElement).top - window.scrollY,
-                                    activeHeight = document.activeElement.offsetHeight;
+                                    activeTop = dom.getPosition(target).top + main.scrollTop - window.scrollY + scroll.getY(),
+                                    activeHeight = target.offsetHeight;
 
                                 if (activeTop < scrollTop || activeTop + activeHeight > scrollTop + scrollHeight) {
                                     scroll.setPosition(scroll.getX(), scroll.getY() - activeTop + Math.round((scrollHeight - activeHeight) / 2));
