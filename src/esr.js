@@ -101,14 +101,15 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
 
         dom.removeClass(document.body, 'ui-loading');
 
-        if (route.CACHE === undefined && layer && route.main !== 'AppCommonContainer') {
-            // 位于层内且不在公共层，缓存数据
-            route.CACHE = true;
-        }
-
         if (esrOptions.app) {
             transition(route);
             var layer = getLayer(route);
+
+            if (route.CACHE === undefined && layer && route.main !== 'AppCommonContainer') {
+                // 位于层内且不在公共层，缓存数据
+                route.CACHE = true;
+            }
+
             if (layer) {
                 layer.location = currLocation;
             }
