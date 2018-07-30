@@ -238,6 +238,7 @@
         keyboardHandle();
 
         var lastScrollY = window.scrollY,
+            // 保证1s后至少能触发一次执行
             waitHandle = util.timer(onscroll, 1000),
             checkHandle = util.timer(function () {
                 if (window.scrollY !== lastScrollY) {
@@ -247,7 +248,6 @@
             }, -20),
             handle;
 
-        // 保证1s后至少能触发一次执行
         dom.addEventListener(window, 'scroll', onscroll);
 
         return function () {
