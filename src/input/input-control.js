@@ -182,11 +182,7 @@ _eInput        - INPUT对象
         });
 
         if (event.returnValue !== false) {
-            elements.forEach(function (item) {
-                if (item.getControl && item.name) {
-                    item.getControl().saveToDefault();
-                }
-            });
+            ui.InputControl.saveToDefault(elements);
         }
     }
 
@@ -514,4 +510,26 @@ _eInput        - INPUT对象
             }
         }
     );
+
+    /**
+     * 设置控件的默认值。
+     * 如果表单元素类型是 radio 或者 checkbox，不进行 ECUI 控件化是无法真正设置成默认值的。
+     * @public
+     *
+     * @param {Array} element 全部的表单元素
+     */
+    ui.InputControl.saveToDefault = function (elements) {
+        elements.forEach(function (item) {
+            if (item.getControl) {
+                var control = item.getControl();
+                if (control.saveToDefault) {
+                    control.saveToDefault();
+                }
+            } else if (item.type === 'radio' || item.type === 'checkbox') {
+                item.defaultChecked = item.checked;
+            } else {
+                item.defaultValue = item.value;
+            }
+        });
+    };
 }());

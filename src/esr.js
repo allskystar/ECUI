@@ -1033,11 +1033,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
             });
 
             if (valid) {
-                elements.forEach(function (item) {
-                    if (item.getControl && item.name) {
-                        item.getControl().saveToDefault();
-                    }
-                });
+                ui.InputControl.saveToDefault(elements);
             }
             return valid;
         },
