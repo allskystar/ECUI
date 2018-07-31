@@ -1630,7 +1630,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                         setData.call(this, context[item]);
                         nodata = false;
                     }
-                });
+                }, this);
                 if (nodata) {
                     this.setContent('');
                 }
