@@ -29,7 +29,6 @@ ios-fixed - ios下的fixed定位插件，修复软键盘不能正确定位的问
 
         Events: {
             dispose: function () {
-                console.log('dispose');
                 util.remove(topList, this);
                 util.remove(bottomList, this);
             }

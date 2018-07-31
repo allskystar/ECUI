@@ -306,6 +306,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                     event.clientY = track.clientY;
                     event.target = track.target;
                     event.track = track;
+
                     track.lastMoveTime = Date.now();
                     checkActived(event);
                     currEnv.mouseover(event);
@@ -691,6 +692,9 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                     vy = track.speedY || 0,
                     inertia = target.$draginertia ? target.$draginertia({x: vx, y: vy}) : currEnv.decelerate ? Math.sqrt(vx * vx + vy * vy) / currEnv.decelerate : 0;
 
+                event = new ECUIEvent();
+                event.track = track;
+
                 if (inertia) {
                     var ax = vx / inertia,
                         ay = vy / inertia,
@@ -699,8 +703,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                         startY = track.y;
 
                     inertiaHandles[uid] = util.timer(function () {
-                        var event = new ECUIEvent(),
-                            time = (Date.now() - start) / 1000,
+                        var time = (Date.now() - start) / 1000,
                             t = Math.min(time, inertia),
                             x = track.x,
                             y = track.y;
@@ -1061,8 +1064,8 @@ outer:          for (var caches = [], target = event.target, el; target; target 
      */
     function dragend(event, env, target) {
         function finish() {
-            if (dragEvent) {
-                dragEvent.dragend = true;
+            if (env.event) {
+                env.event.dragend = true;
             } else {
                 core.dispatchEvent(target, 'dragend', event);
                 dom.removeClass(document.body, 'ui-drag');
@@ -2069,8 +2072,6 @@ outer:          for (var caches = [], target = event.target, el; target; target 
          */
         drag: function (control, event, options) {
             if (activedControl !== undefined && currEnv.type !== 'drag') {
-                dragEvent = null;
-
                 dom.addClass(document.body, 'ui-drag');
 
                 // 控件之前处于惯性状态必须停止
@@ -2118,16 +2119,16 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                     dragEnv.bottom += (dragEnv.bottom - dragEnv.limitBottom) * (dragEnv.limitRatio - 1);
                 }
 
+                dragEnv.startTime = Date.now();
+
                 dragEnv.target = control;
                 setEnv(dragEnv);
                 event.track.logicX = event.clientX;
                 event.track.logicY = event.clientY;
-
-                dragEnv.startTime = Date.now();
-
                 if (core.dispatchEvent(control, 'dragstart', {track: event.track})) {
                     control.setPosition(x, y);
                 }
+
                 //这里不能preventDefault事件，否则input的软键盘无法出现
             }
         },

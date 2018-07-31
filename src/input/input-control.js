@@ -366,6 +366,14 @@ _eInput        - INPUT对象
             $input: util.blank,
 
             /**
+             * @override
+             */
+            $ready: function (event) {
+                ui.Control.prototype.$ready.call(this, event);
+                this.saveToDefault();
+            },
+
+            /**
              * 重置事件。
              * @event
              */
