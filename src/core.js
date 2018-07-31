@@ -1394,8 +1394,18 @@ outer:          for (var caches = [], target = event.target, el; target; target 
         if (options.ext) {
             for (var key in options.ext) {
                 if (options.ext.hasOwnProperty(key)) {
-                    if (ext[key]) {
-                        ext[key](control, options.ext[key], options);
+                    var extend = ext[key];
+                    if (extend) {
+                        if (extend.constructor) {
+                            extend.constructor.call(control, options.ext[key], options);
+                        }
+                        if (extend.Events) {
+                            for (var name in extend.Events) {
+                                if (extend.Events.hasOwnProperty(name)) {
+                                    core.addEventListener(control, name, extend.Events[name]);
+                                }
+                            }
+                        }
                     }
                 }
             }

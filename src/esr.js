@@ -1564,88 +1564,91 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
         }
     };
 
-    /**
-     * esr数据缓存插件加载。
-     * @public
-     *
-     * @param {ecui.ui.Control} control 需要应用插件的控件
-     * @param {string} value 插件的参数，格式为 缓存名[属性名1,属性名2,...]
-     */
-    ext.cache = function (control, value) {
-        if (esrOptions.cache) {
-            if (value = /^(\w+)\[([\w,]+)\]$/.exec(value)) {
-                var name = value[1],
-                    values = value[2].split(',').map(function (item) {
-                        return item.charAt(0).toUpperCase() + util.toCamelCase(item.slice(1));
-                    });
+    ext.cache = {
+        /**
+         * esr数据缓存插件初始化。
+         * @public
+         *
+         * @param {string} value 插件的参数，格式为 缓存名[属性名1,属性名2,...]
+         */
+        constructor: function (value) {
+            if (esrOptions.cache) {
+                if (value = /^(\w+)\[([\w,]+)\]$/.exec(value)) {
+                    var name = value[1],
+                        values = value[2].split(',').map(function (item) {
+                            return item.charAt(0).toUpperCase() + util.toCamelCase(item.slice(1));
+                        });
 
-                cacheList.push({
-                    target: control,
-                    name: name,
-                    values: values
-                });
+                    cacheList.push({
+                        target: this,
+                        name: name,
+                        values: values
+                    });
+                }
             }
         }
     };
 
-    /**
-     * esr数据名跟踪插件加载。
-     * @public
-     *
-     * @param {ecui.ui.Control} control 需要应用插件的控件
-     * @param {string} value 插件的参数，格式为 变量名@#模板名 或 变量名@js函数名 ，表示指定的变量变化时，需要刷新控件内部HTML
-     */
-    ext.data = function (control, value) {
-        if (value = /^([\w,]+)(\*?@)(#\w*|[\w\.]*\(\))$/.exec(value)) {
-            if (value[3].charAt(0) !== '#') {
-                if (value[3].length === 2) {
-                    var setData = util.decodeHTML(control.getContent().trim()),
-                        renderer = new Function('$', setData.charAt(0) === '=' ? 'this.setContent(' + setData.slice(1) + ')' : setData);
+    ext.data = {
+        /**
+         * esr数据名跟踪插件初始化。
+         * @public
+         *
+         * @param {string} value 插件的参数，格式为 变量名@#模板名 或 变量名@js函数名 ，表示指定的变量变化时，需要刷新控件内部HTML
+         */
+        constructor: function (value) {
+            if (value = /^([\w,]+)(\*?@)(#\w*|[\w\.]*\(\))$/.exec(value)) {
+                if (value[3].charAt(0) !== '#') {
+                    if (value[3].length === 2) {
+                        var setData = util.decodeHTML(this.getContent().trim()),
+                            renderer = new Function('$', setData.charAt(0) === '=' ? 'this.setContent(' + setData.slice(1) + ')' : setData);
+                    } else {
+                        renderer = util.parseValue(value[3].slice(0, -2));
+                    }
+                    setData = function (data) {
+                        renderer.call(this, value[2].length > 1 ? context : data);
+                    };
                 } else {
-                    renderer = util.parseValue(value[3].slice(0, -2));
+                    renderer = value[3].length < 2 ? engine.compile(this.getContent().replace(/\$([\w.]+)/g, '${$1}')) : engine.getRenderer(value[3].slice(1));
+                    setData = function (data) {
+                        this.setContent(renderer(value[2].length > 1 ? context : data));
+                    };
                 }
-                setData = function (data) {
-                    renderer.call(this, value[2].length > 1 ? context : data);
-                };
-            } else {
-                renderer = value[3].length < 2 ? engine.compile(control.getContent().replace(/\$([\w.]+)/g, '${$1}')) : engine.getRenderer(value[3].slice(1));
-                setData = function (data) {
-                    core.dispose(this.getBody(), true);
-                    this.setContent(renderer(value[2].length > 1 ? context : data));
-                    core.init(this.getBody());
-                };
-            }
 
-            value[1] = value[1].split(',');
-            value[1].forEach(function (item) {
-                if (autoRender[item]) {
-                    autoRender[item].push([control, setData]);
-                } else {
-                    autoRender[item] = [[control, setData]];
-                }
-            });
-
-            core.addEventListener(control, 'dispose', function () {
+                value[1] = value[1].split(',');
                 value[1].forEach(function (item) {
-                    for (var i = 0, data; data = autoRender[item][i]; i++) {
-                        if (data[0] === this) {
-                            autoRender[item].splice(i, 1);
-                            break;
-                        }
+                    if (autoRender[item]) {
+                        autoRender[item].push([this, setData]);
+                    } else {
+                        autoRender[item] = [[this, setData]];
                     }
                 }, this);
-            });
 
-            var nodata = true;
-            value[1].forEach(function (item) {
-                if (context[item] !== undefined) {
-                    setData.call(control, context[item]);
-                    nodata = false;
+                var nodata = true;
+                value[1].forEach(function (item) {
+                    if (context[item] !== undefined) {
+                        setData.call(this, context[item]);
+                        nodata = false;
+                    }
+                });
+                if (nodata) {
+                    this.setContent('');
                 }
-            });
-            if (nodata) {
-                core.dispose(control.getBody(), true);
-                control.setContent('');
+            }
+        },
+
+        Events: {
+            dispose: function () {
+                for (var key in autoRender) {
+                    if (autoRender.hasOwnProperty(key)) {
+                        for (var i = 0, data; data = autoRender[key][i]; i++) {
+                            if (data[0] === this) {
+                                autoRender[key].splice(i, 1);
+                                break;
+                            }
+                        }
+                    }
+                }
             }
         }
     };
