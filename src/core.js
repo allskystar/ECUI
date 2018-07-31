@@ -690,10 +690,10 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                     start = Date.now(),
                     vx = track.speedX || 0,
                     vy = track.speedY || 0,
-                    inertia = target.$draginertia ? target.$draginertia({x: vx, y: vy}) : currEnv.decelerate ? Math.sqrt(vx * vx + vy * vy) / currEnv.decelerate : 0;
+                    inertia = target.$draginertia ? target.$draginertia({x: vx, y: vy}) : currEnv.decelerate ? Math.sqrt(vx * vx + vy * vy) / currEnv.decelerate : 0,
+                    dragEvent = new ECUIEvent();
 
-                event = new ECUIEvent();
-                event.track = track;
+                dragEvent.track = track;
 
                 if (inertia) {
                     var ax = vx / inertia,
@@ -714,11 +714,11 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                             if (env.event && startX === x && startY === y) {
                                 env.event.inertia = false;
                             }
-                            dragend(event, env, target);
+                            dragend(dragEvent, env, target);
                         }
                     }, -20);
                 } else {
-                    dragend(event, currEnv, target);
+                    dragend(dragEvent, currEnv, target);
                 }
                 restore();
 
