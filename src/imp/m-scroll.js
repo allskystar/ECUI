@@ -281,11 +281,11 @@
     }
 
     if (isToucher) {
-        if (iosVersion) {
-            var iosfixedList,
-                keyboardHandle = util.blank,
-                scroll;
+        var iosfixedList,
+            keyboardHandle = util.blank,
+            scroll;
 
+        if (iosVersion) {
             dom.addEventListener(window, 'keyboardchange', function (event) {
                 keyboardHandle();
                 keyboardHeight = event.data - (safariVersion ? 45 : 0);
@@ -349,13 +349,23 @@
                         for (scroll = core.findControl(document.activeElement); scroll; scroll = scroll.getParent()) {
                             if (scroll.$MScroll) {
                                 var main = scroll.getMain(),
+                                    scrollY = scroll.getY(),
                                     scrollTop = dom.getPosition(main).top,
                                     scrollHeight = scroll.getHeight() - keyboardHeight,
-                                    activeTop = dom.getPosition(target).top + main.scrollTop - window.scrollY + scroll.getY(),
+                                    activeTop = dom.getPosition(target).top + main.scrollTop - window.scrollY + scrollY,
                                     activeHeight = target.offsetHeight;
 
                                 if (activeTop < scrollTop || activeTop + activeHeight > scrollTop + scrollHeight) {
-                                    scroll.setPosition(scroll.getX(), scroll.getY() - activeTop + Math.round((scrollHeight - activeHeight) / 2));
+                                    scroll.setPosition(
+                                        scroll.getX(),
+                                        Math.max(
+                                            scroll.$MScrollData.top + window.scrollY - keyboardHeight,
+                                            Math.min(
+                                                (scroll.$MScrollData.bottom !== undefined ? scroll.$MScrollData.bottom : 0) + window.scrollY,
+                                                scrollY - activeTop + Math.round((scrollHeight - activeHeight) / 2)
+                                            )
+                                        )
+                                    );
                                 }
                                 break;
                             }
@@ -471,24 +481,68 @@
         } else {
             // android，处理软键盘问题
             dom.addEventListener(window, 'resize', function () {
-                if (document.documentElement.clientHeight < util.toNumber(document.body.style.height)) {
+                var height = document.documentElement.clientHeight,
+                    currHeight = util.toNumber(document.body.style.height),
+                    target = document.activeElement;
+
+                if (height < currHeight) {
                     // 打开软键盘
-                    document.activeElement.scrollIntoViewIfNeeded();
+                    target.scrollIntoViewIfNeeded();
 
                     if (window.scrollY) {
                         for (scroll = core.findControl(document.activeElement); scroll; scroll = scroll.getParent()) {
                             if (scroll.$MScroll) {
-                                scroll.setPosition(scroll.getX(), scroll.getY() - window.scrollY);
+                                var main = scroll.getMain();
+                                scroll.setPosition(scroll.getX(), Math.max(main.clientHeight - main.scrollHeight, scroll.getY() - window.scrollY));
                                 window.scrollTo(0, 0);
                                 break;
                             }
                         }
                     }
+
+                    keyboardHandle();
+
+                    keyboardHandle = util.timer(function () {
+                        for (scroll = core.findControl(document.activeElement); scroll; scroll = scroll.getParent()) {
+                            if (scroll.$MScroll) {
+                                var scrollY = scroll.getY(),
+                                    scrollTop = dom.getPosition(main).top,
+                                    scrollHeight = scroll.getHeight() + height - currHeight,
+                                    activeTop = dom.getPosition(target).top + main.scrollTop + scrollY,
+                                    activeHeight = target.offsetHeight;
+
+                                if (activeTop < scrollTop + activeHeight) {
+                                    // 处理微信提示信息的问题
+                                    scroll.setPosition(
+                                        scroll.getX(),
+                                        Math.min(
+                                            scroll.$MScrollData.bottom !== undefined ? scroll.$MScrollData.bottom : 0,
+                                            scrollY + scrollHeight + activeHeight - activeHeight
+                                        )
+                                    );
+                                } else if (activeTop + activeHeight > scrollTop + scrollHeight) {
+                                    scroll.setPosition(
+                                        scroll.getX(),
+                                        Math.max(
+                                            (scroll.$MScrollData.top !== undefined ? scroll.$MScrollData.top : scrollHeight - main.scrollHeight + (tx.test(scroll.getBody().style.transform) ? +RegExp.$2 : 0)),
+                                            scrollY - Math.ceil((activeTop + activeHeight - scrollTop - scrollHeight) / height) * height + activeHeight
+                                        )
+                                    );
+                                }
+                                break;
+                            }
+                        }
+                    }, 100);
                 } else if (scroll) {
                     util.timer(function () {
                         scroll = null;
                     }, 1000);
                 }
+            });
+
+            dom.addEventListener(window, 'focusin', function () {
+                // 解决软键盘状态下切换的情况
+                document.activeElement.scrollIntoViewIfNeeded();
             });
 
             dom.addEventListener(document, 'focusout', function () {
