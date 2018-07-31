@@ -286,7 +286,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                     }
                     esr.request(route.model, function () {
                         esr.render(route);
-                    }, route.onerror || esr.onerror);
+                    }, route.onerror || esr.onerror || util.blank);
                 }
             }
         } else {
@@ -1368,7 +1368,9 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
             if (esrOptions.app) {
                 var container = core.$('AppSelectContainer'),
                     layer = core.findControl(container),
-                    lastLocation = esr.getLocation();
+                    lastLocation = esr.getLocation(),
+                    parentElement,
+                    nextElement;
 
                 core.addEventListener(layer, 'confirm', function (event) {
                     if (onconfirm) {
@@ -1380,9 +1382,13 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                     if (content) {
                         if (content instanceof ui.Control) {
                             content.setParent();
-                        } else {
+                        } else if ('string' === typeof content) {
                             core.dispose(container, true);
                             container.innerHTML = '';
+                        } else {
+                            if (parentElement) {
+                                parentElement.insertBefore(content, nextElement);
+                            }
                         }
                         content = null;
                     }
@@ -1394,9 +1400,13 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                 if (content) {
                     if (content instanceof ui.Control) {
                         content.setParent(layer);
-                    } else {
+                    } else if ('string' === typeof content) {
                         container.innerHTML = content;
                         core.init(container);
+                    } else {
+                        parentElement = dom.parent(content);
+                        nextElement = dom.next(content);
+                        container.appendChild(content);
                     }
                 }
 
@@ -1632,7 +1642,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                     }
                 }, this);
                 if (nodata) {
-                    this.setContent('');
+                    this.getBody().innerHTML = '';
                 }
             }
         },

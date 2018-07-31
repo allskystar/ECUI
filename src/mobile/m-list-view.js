@@ -147,6 +147,7 @@ _nBottomIndex  - 下部隐藏的选项序号
              * @override
              */
             $dispose: function () {
+                this._oHandle();
                 this._eHeader = this._eFooter = null;
                 ui.Control.prototype.$dispose.call(this);
             },

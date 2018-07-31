@@ -1177,9 +1177,13 @@ _aStatus            - 控件当前的状态集合
              * @param {string} html HTML 片断
              */
             setContent: function (html) {
-                core.dispose(this._eBody, true);
-                this._eBody.innerHTML = html;
-                core.init(this._eBody);
+                if (this.isReady()) {
+                    core.dispose(this._eBody, true);
+                    this._eBody.innerHTML = html;
+                    core.init(this._eBody);
+                } else {
+                    this._eBody.innerHTML = html;
+                }
             },
 
             /**

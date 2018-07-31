@@ -263,7 +263,7 @@ _bRequired       - 是否必须选择
              * @override
              */
             saveToDefault: function () {
-                this._bDefault = this.getInput().defaultChecked = this.isChecked();
+                this._bDefault = this.getInput().defaultChecked = this.getInput().checked;
             },
 
             /**

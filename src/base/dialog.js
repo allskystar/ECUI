@@ -138,7 +138,7 @@ _uClose     - 关闭按钮
              * @param {string} text 窗体标题
              */
             setTitle: function (text) {
-                this._uTitle.setContent(text || '');
+                this._uTitle.getBody().innerHTML = text || '';
             }
         }
     );

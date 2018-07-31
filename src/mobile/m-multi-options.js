@@ -91,7 +91,7 @@ _aOptions    - 选项框数组
                             break;
                         }
                     }
-                    this.setContent(ret.join(''));
+                    this.getBody().innerHTML = ret.join('');
 
                     this._aItems = [];
                     dom.children(el).forEach(function (item) {

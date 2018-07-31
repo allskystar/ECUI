@@ -46,7 +46,7 @@ _oTimer         - 定时器
             this._nTime = +options.time;
             this._bMillisecond = !!options.millisecond;
             this._bImmediate = !!options.immediate;
-            this.setContent(formatTime(this._nTime));
+            this.getBody().innerHTML = formatTime(this._nTime);
         },
         {
             /**
@@ -65,7 +65,7 @@ _oTimer         - 定时器
              */
             reset: function () {
                 this.stop();
-                this.setContent(formatTime(this._nTime));
+                this.getBody().innerHTML = formatTime(this._nTime);
             },
 
             /**
@@ -96,7 +96,7 @@ _oTimer         - 定时器
                     var time = Date.now();
                     this._nDown = Math.max(0, this._nDown + (lastTime - time) / 1000);
                     lastTime = time;
-                    this.setContent(formatTime(this._nDown));
+                    this.getBody().innerHTML = formatTime(this._nDown);
                     if (this._nDown <= 0) {
                         this._oTimer();
                     }

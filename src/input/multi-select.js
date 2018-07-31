@@ -68,7 +68,7 @@ _eInput - 选项对应的input，form提交时使用
                 var items = this.getSelected().map(function (item) {
                     return item.getValue();
                 });
-                this.setContent(items.length ? items.join(',') : '');
+                this.getBody().innerHTML = items.length ? items.join(',') : '';
             },
 
             /**

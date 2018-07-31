@@ -89,7 +89,7 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
             }, this);
 
             this.WEEKNAMES.forEach(function (item, index) {
-                this._aCells[index].setContent(item);
+                this._aCells[index].getBody().innerHTML = item;
             }, this);
 
             this._bExtra = options.extra === 'disable';
@@ -291,7 +291,7 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
                             dom.removeClass(el, 'ui-today');
                         }
 
-                        item.setContent(month ? day : day > lastDayOfCurrMonth ? day - lastDayOfCurrMonth : lastDayOfLastMonth + day);
+                        item.getBody().innerHTML = month ? day : day > lastDayOfCurrMonth ? day - lastDayOfCurrMonth : lastDayOfLastMonth + day;
                         item._nDay = day++;
                     }
                 }, this);

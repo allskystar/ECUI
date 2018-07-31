@@ -272,14 +272,14 @@ _bRequired    - 是否必须选择
                     }
                     if (item) {
                         item.alterStatus('+selected');
-                        this._uText.setContent(item.getBody().innerHTML);
+                        this._uText.getBody().innerHTML = item.getBody().innerHTML;
                         ui.InputControl.prototype.setValue.call(this, item._sValue);
                         if (this._uOptions.isShow()) {
                             core.setFocused(item);
                         }
                         this.alterStatus(item._sValue === '' ? '+placeholder' : '-placeholder');
                     } else {
-                        this._uText.setContent('');
+                        this._uText.getBody().innerHTML = '';
                         ui.InputControl.prototype.setValue.call(this, '');
                         core.setFocused(this);
                     }

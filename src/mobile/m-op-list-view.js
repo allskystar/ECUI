@@ -16,7 +16,8 @@ _cItem    - 当前处于激活的选项
     var core = ecui,
         dom = core.dom,
         effect = core.effect,
-        ui = core.ui;
+        ui = core.ui,
+        util = core.util;
 //{/if}//
     /**
      * 移动端可操作列表展示控件。
@@ -39,6 +40,7 @@ _cItem    - 当前处于激活的选项
                             dom.remove(item);
                         }
                     });
+                    this._oHandle = util.blank;
                 },
                 {
                     /**
@@ -52,7 +54,7 @@ _cItem    - 当前处于激活的选项
                         parent.setRange({left: 0, right: 0});
                         if (parent._cItem !== this) {
                             if (parent._cItem) {
-                                effect.grade('this.setPosition(#this.getX()->0#)', 400, {$: parent._cItem});
+                                parent._cItem._oHandle = effect.grade('this.setPosition(#this.getX()->0#)', 400, {$: parent._cItem});
                             }
                             parent._cItem = this;
                         }
@@ -78,9 +80,17 @@ _cItem    - 当前处于激活的选项
 
                         var parent = this.getParent();
                         if (parent && parent._cItem) {
-                            effect.grade('this.setPosition(#this.getX()->0#)', 400, {$: parent._cItem});
+                            parent._cItem._oHandle = effect.grade('this.setPosition(#this.getX()->0#)', 400, {$: parent._cItem});
                             parent._cItem = null;
                         }
+                    },
+
+                    /**
+                     * @override
+                     */
+                    $dispose: function () {
+                        this._oHandle();
+                        ui.Control.prototype.$dispose.call(this);
                     },
 
                     /**
