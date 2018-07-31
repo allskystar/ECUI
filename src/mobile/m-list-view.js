@@ -27,7 +27,7 @@ _nBottomIndex  - 下部隐藏的选项序号
     function setEnterAndLeave() {
         var range = this.getRange();
         if (range && range.bottom) {
-            range.top = this.getHeight() - this.$$bodyHeight;
+            range.top = Math.min(0, this.getHeight() - this.$$bodyHeight);
             range.bottom = 0;
         }
     }
