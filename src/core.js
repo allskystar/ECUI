@@ -32,7 +32,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
         initRecursion = 0,        // init 操作的递归次数
         readyList = [],
-        inputClickTime = 0,
+        lastTouchTime = 0,
         blurHandle = util.blank,
         orientationHandle,
 
@@ -268,12 +268,12 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                 }
 
                 if (iosVersion) {
-                    if (Date.now() - inputClickTime < 400) {
+                    if (Date.now() - lastTouchTime < 400) {
                         // 400ms内产生两次点击，避免input得到焦点但是无法弹出软键盘
                         blurActiveElement();
                     }
                     if (util.hasIOSKeyboard(event.target)) {
-                        inputClickTime = Date.now();
+                        lastTouchTime = Date.now();
                     }
                 }
 
@@ -672,18 +672,13 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
             mousemove: function (event) {
                 dragmove(event.track, currEnv, event.clientX, event.clientY);
-                event.preventDefault();
-                if (!currEnv.startTime) {
-                    currEnv.startTime = util.hasIOSKeyboard(event.getNative().target) && document.activeElement !== event.getNative().target ? Date.now() : 0;
-                }
+                disableEnv.mousemove(event);
             },
 
             mouseover: util.blank,
 
             mouseup: function (event) {
-                if (util.hasIOSKeyboard(event.getNative().target) && Date.now() - currEnv.startTime <= 400) {
-                    blurActiveElement();
-                }
+                disableEnv.mouseup(event);
 
                 var track = event.track,
                     target = currEnv.target,
@@ -732,18 +727,19 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
         disableEnv = {
             type: 'disable',
             mousedown: function () {
-                currEnv.startTime = 0;
+                currEnv.startTime = Date.now();
+                currEnv.isMoved = false;
             },
             mousemove: function (event) {
                 event.preventDefault();
-                if (!currEnv.startTime) {
-                    currEnv.startTime = util.hasIOSKeyboard(event.getNative().target) && document.activeElement !== event.getNative().target ? Date.now() : 0;
+                if (util.hasIOSKeyboard(event.getNative().target) && document.activeElement !== event.getNative().target) {
+                    currEnv.isMoved = true;
                 }
             },
             mouseout: util.blank,
             mouseover: util.blank,
             mouseup: function (event) {
-                if (util.hasIOSKeyboard(event.getNative().target) && Date.now() - currEnv.startTime <= 400) {
+                if (util.hasIOSKeyboard(event.getNative().target) && currEnv.isMoved && Date.now() - currEnv.startTime <= 400) {
                     blurActiveElement();
                 }
             }
@@ -2144,10 +2140,10 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                     dragEnv.bottom += (dragEnv.bottom - dragEnv.limitBottom) * (dragEnv.limitRatio - 1);
                 }
 
-                dragEnv.startTime = 0;
-
                 dragEnv.target = control;
                 setEnv(dragEnv);
+                disableEnv.mousedown(event);
+
                 event.track.logicX = event.clientX;
                 event.track.logicY = event.clientY;
                 if (core.dispatchEvent(control, 'dragstart', {track: event.track})) {
