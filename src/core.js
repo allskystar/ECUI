@@ -63,7 +63,6 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
         eventListeners = {},      // 控件事件监听描述对象
         eventStack = {},          // 事件调用堆栈记录，防止事件重入
-        ghostClick,
 
         envStack = [],            // 高优先级事件调用时，保存上一个事件环境的栈
         events = {
@@ -280,8 +279,6 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                 initTouchTracks(event);
 
                 if (event.touches.length === 1) {
-                    ghostClick = false;
-
                     isTouchMoved = false;
 
                     var track = tracks[trackId = event.touches[0].identifier];
@@ -368,18 +365,14 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                         event.clientX = item.clientX;
                         event.clientY = item.clientY;
 
-                        var target = getElementFromEvent(item);
-
                         currEnv.mouseup(event);
                         bubble(hoveredControl, 'mouseout', event, hoveredControl = null);
                         trackId = undefined;
                         onpressure(event, false);
                         ongesture(event.getNative().changedTouches, event);
                         if (!util.hasIOSKeyboard(event.getNative().target)) {
-                            if (ghostClick || !event.target || target !== getElementFromEvent(item)) {
-                                // 同一个位置事件元素发生了变化，阻止事件穿透
-                                event.preventDefault();
-                            }
+                            // 未点击到需要弹出软键盘的区域，阻止事件穿透
+                            event.preventDefault();
                         }
 
                         noPrimaryEnd = false;
@@ -2629,14 +2622,6 @@ outer:          for (var caches = [], target = event.target, el; target; target 
          */
         pause: function () {
             pauseCount++;
-        },
-
-        /**
-         * 强行阻止事件穿透。
-         * @public
-         */
-        preventGhostClick: function () {
-            ghostClick = true;
         },
 
         /**
