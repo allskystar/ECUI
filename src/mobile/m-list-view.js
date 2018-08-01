@@ -216,7 +216,7 @@ _nBottomIndex  - 下部隐藏的选项序号
             $initStructure: function (width, height) {
                 ui.Control.prototype.$initStructure.call(this, width, height);
                 this.alterStatus(this.getLength() ? '-empty' : '+empty');
-                this.setPosition(this.getX(), 0);
+                this.setPosition(0, 0);
             },
 
             /**
@@ -416,7 +416,7 @@ _nBottomIndex  - 下部隐藏的选项序号
                     this._nBottomIndex--;
                     this.$$bodyHeight -= height;
                     ui.Items.Methods.remove.call(this, item);
-                    this.setPosition(this.getX(), this.getY());
+                    this.setPosition(0, this.getY());
                 }
             },
 
