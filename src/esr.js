@@ -98,8 +98,9 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
      */
     function afterrender(route) {
         routeRequestCount--;
-
-        dom.removeClass(document.body, 'ui-loading');
+        if (!routeRequestCount) {
+            dom.removeClass(document.body, 'ui-loading');
+        }
 
         if (esrOptions.app) {
             transition(route);
@@ -211,6 +212,9 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
      * @param {object} options 参数
      */
     function callRoute(name, options) {
+        if (!routeRequestCount) {
+            dom.addClass(document.body, 'ui-loading');
+        }
         routeRequestCount++;
 
         // 供onready时使用，此时name为route
@@ -254,7 +258,11 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                     if (route.oncached) {
                         route.oncached(context);
                     }
-                    dom.removeClass(document.body, 'ui-loading');
+
+                    routeRequestCount--;
+                    if (!routeRequestCount) {
+                        dom.removeClass(document.body, 'ui-loading');
+                    }
                     return;
                 }
             } else {
@@ -471,8 +479,6 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                         history.back();
                         return;
                     }
-                } else {
-                    dom.addClass(document.body, 'ui-loading');
                 }
 
                 leaveUrl = undefined;
