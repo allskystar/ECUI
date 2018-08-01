@@ -1465,7 +1465,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                         }
                     }
 
-                    el = core.$((getModuleName(esr.getLocation().split('~')[0]) || esr.DEFAULT_PAGE.slice(1)).replace(/\//g, '_'));
+                    el = core.$((esr.getLocation().split('~')[0].slice(1) || esr.DEFAULT_PAGE.slice(1)).replace(/[._]/g, '-').replace(/\//g, '_'));
                     if (el) {
                         dom.removeClass(el, 'ui-hide');
                         el.header.style.display = '';
