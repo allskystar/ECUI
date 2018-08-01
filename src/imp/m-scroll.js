@@ -284,7 +284,7 @@
         fromHeight = fromHeight || 0;
         toHeight = toHeight || 0;
 
-        for (scroll = core.findControl(document.activeElement); scroll; scroll = scroll.getParent()) {
+        for (var scroll = core.findControl(document.activeElement); scroll; scroll = scroll.getParent()) {
             if (scroll.$MScroll) {
                 var main = scroll.getMain(),
                     scrollY = scroll.getY(),
@@ -294,30 +294,25 @@
                     activeHeight = document.activeElement.offsetHeight,
                     // 处理微信提示信息的高度
                     infoHeight = /MicroMessanger/.test(navigator.userAgent) ? 30 : 0,
-                    y;
+                    y = 0;
 
-                if (activeHeight > 50) {
-                    // textarea简单居中
-                    y = scrollTop - activeTop + Math.round((scrollHeight - activeHeight) / 2);
-                } else if (activeTop < scrollTop + infoHeight) {
-                    y = scrollHeight;
+                if (activeTop < scrollTop + infoHeight) {
+                    y = Math.floor((activeHeight > 50 ? scrollHeight - activeHeight : activeHeight) / 2) - activeTop + scrollTop + infoHeight;
                 } else if (activeTop + activeHeight > scrollTop + scrollHeight) {
-                    y = activeHeight - Math.ceil((activeTop + activeHeight - scrollTop - scrollHeight) / toHeight) * toHeight;
+                    y = activeTop - scrollTop - scrollHeight + Math.floor((activeHeight > 50 ? scrollHeight - activeHeight : activeHeight) / 2);
                 }
 
-                if (!y) {
-                    scroll.setPosition(
-                        scroll.getX(),
-                        Math.min(
-                            (scroll.$MScrollData.bottom !== undefined ? scroll.$MScrollData.bottom : 0) + window.scrollY,
-                            Math.max(
-                                // ios下data.top已经提前计算好，android下window.scrollY与keyboardHeight恒为零
-                                (scroll.$MScrollData.top !== undefined ? scroll.$MScrollData.top : scrollHeight - main.scrollHeight + (util.hasIOSKeyboard() && tx.test(scroll.getBody().style.transform) ? +RegExp.$2 : 0)) + window.scrollY - keyboardHeight,
-                                scrollY + y                            
-                            )
+                scroll.setPosition(
+                    scroll.getX(),
+                    Math.min(
+                        (scroll.$MScrollData.bottom !== undefined ? scroll.$MScrollData.bottom : 0) + window.scrollY,
+                        Math.max(
+                            // ios下data.top已经提前计算好，android下window.scrollY与keyboardHeight恒为零
+                            (scroll.$MScrollData.top !== undefined ? scroll.$MScrollData.top : scrollHeight - main.scrollHeight + (util.hasIOSKeyboard() && tx.test(scroll.getBody().style.transform) ? +RegExp.$2 : 0)) + window.scrollY - keyboardHeight,
+                            scrollY + y
                         )
-                    );
-                }
+                    )
+                );
 
                 break;
             }
@@ -332,9 +327,9 @@
         if (iosVersion) {
             dom.addEventListener(window, 'keyboardchange', function (event) {
                 keyboardHandle();
-                scrollIntoViewIfNeeded(keyboardHeight, event.data);
                 keyboardHeight = event.data - (safariVersion ? 45 : 0);
                 fixed();
+                scrollIntoViewIfNeeded(keyboardHeight, event.data);
             });
 
             dom.addEventListener(document, 'focusin', function (event) {
@@ -373,8 +368,6 @@
                     }
 //{/if}//
                     keyboardHandle = scrollListener(function () {
-                        scrollIntoViewIfNeeded(keyboardHeight);
-
                         if (lastScrollY !== window.scrollY) {
                             iosfixedList.forEach(function (item) {
                                 item.control.getMain().style.visibility = 'hidden';
@@ -386,6 +379,8 @@
                             }, 200);
                         }
                         fixed();
+                        scrollIntoViewIfNeeded(keyboardHeight);
+
                         // 反向动画抵消ios的滚屏动画效果，如果webview关闭了滚屏动画，需要执行fixed()消除抖动
                         // fixed(lastScrollY);
                         // effect.grade(function (precent, options) {
@@ -441,9 +436,9 @@
                             // 复位
                             window.scrollTo(0, lastScrollY);
 
+                            fixed();
                             scrollIntoViewIfNeeded(keyboardHeight);
 
-                            fixed();
                             // 计算成功解除框架事件锁定
                             core.enable();
                         });
@@ -464,6 +459,14 @@
 
                 keyboardHandle();
 
+                for (var scroll = core.findControl(event.target); scroll; scroll = scroll.getParent()) {
+                    if (scroll.$MScroll) {
+                        // 终止之前可能存在的惯性状态，并设置滚动层的位置
+                        core.drag(scroll);
+                        break;
+                    }
+                }
+
                 iosfixedList.forEach(function (item) {
                     item.control.getMain().style.transform = '';
                 });
@@ -479,6 +482,21 @@
                             delete item.$MScrollData.top;
                         }
                     });
+
+                    if (scroll) {
+                        var main = scroll.getMain();
+                        scroll.setPosition(
+                            scroll.getX(),
+                            Math.min(
+                                (scroll.$MScrollData.bottom !== undefined ? scroll.$MScrollData.bottom : 0) + window.scrollY,
+                                Math.max(
+                                    // ios下data.top已经提前计算好，android下window.scrollY与keyboardHeight恒为零
+                                    (scroll.$MScrollData.top !== undefined ? scroll.$MScrollData.top : main.clientHeight - main.scrollHeight + (util.hasIOSKeyboard() && tx.test(scroll.getBody().style.transform) ? +RegExp.$2 : 0)) + window.scrollY - keyboardHeight,
+                                    scroll.getY()
+                                )
+                            )
+                        );
+                    }
 
                     keyboardHeight = 0;
                     iosfixedList = null;

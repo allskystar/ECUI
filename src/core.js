@@ -1618,13 +1618,13 @@ outer:          for (var caches = [], target = event.target, el; target; target 
             return item.getParent() === resizeList && item.isShow();
         }
 
+        // 拖拽状态时不进行窗体大小改变
+        if (currEnv.type === 'drag') {
+            return;
+        }
+
         // 隐藏所有遮罩层
         core.mask(false);
-
-        // 改变窗体大小需要清空拖拽状态
-        if (currEnv.type === 'drag') {
-            currEnv.mouseup(new ECUIEvent('mouseup'));
-        }
 
         independentControls.forEach(function (item) {
             core.dispatchEvent(item, 'repaint');
@@ -2085,15 +2085,15 @@ outer:          for (var caches = [], target = event.target, el; target; target 
          * @param {object} options 控件拖拽的参数，省略参数时，控件默认只允许在 offsetParent 定义的区域内拖拽，如果 offsetParent 是 body，则只允许在当前浏览器可视范围内拖拽
          */
         drag: function (control, event, options) {
-            if (activedControl !== undefined && currEnv.type !== 'drag') {
-                dom.addClass(document.body, 'ui-drag');
+            // 控件之前处于惯性状态必须停止
+            var uid = control.getUID();
+            if (inertiaHandles[uid]) {
+                inertiaHandles[uid]();
+                delete inertiaHandles[uid];
+            }
 
-                // 控件之前处于惯性状态必须停止
-                var uid = control.getUID();
-                if (inertiaHandles[uid]) {
-                    inertiaHandles[uid]();
-                    delete inertiaHandles[uid];
-                }
+            if (event && activedControl !== undefined && currEnv.type !== 'drag') {
+                dom.addClass(document.body, 'ui-drag');
 
                 // 判断鼠标没有mouseup
                 var parent = control.getOuter().offsetParent || document.documentElement,
