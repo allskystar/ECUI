@@ -280,6 +280,43 @@
         });
     }
 
+    function scrollIntoViewIfNeeded(fromHeight, toHeight) {
+        fromHeight = fromHeight || 0;
+        toHeight = toHeight || 0;
+
+        for (scroll = core.findControl(document.activeElement); scroll; scroll = scroll.getParent()) {
+            if (scroll.$MScroll) {
+                var main = scroll.getMain(),
+                    scrollY = scroll.getY(),
+                    scrollTop = dom.getPosition(main).top,
+                    scrollHeight = scroll.getHeight() + toHeight - fromHeight,
+                    activeTop = dom.getPosition(document.activeElement).top + main.scrollTop - window.scrollY + scrollY,
+                    activeHeight = document.activeElement.offsetHeight;
+
+                if (activeTop < scrollTop + activeHeight) {
+                    // 处理微信提示信息的问题
+                    scroll.setPosition(
+                        scroll.getX(),
+                        Math.min(
+                            (scroll.$MScrollData.bottom !== undefined ? scroll.$MScrollData.bottom : 0) + window.scrollY,
+                            scrollY + scrollHeight + activeHeight - activeHeight
+                        )
+                    );
+                } else if (activeTop + activeHeight > scrollTop + scrollHeight) {
+                    scroll.setPosition(
+                        scroll.getX(),
+                        Math.max(
+                            // ios下data.top已经提前计算好，android下window.scrollY与keyboardHeight恒为零
+                            (scroll.$MScrollData.top !== undefined ? scroll.$MScrollData.top : scrollHeight - main.scrollHeight + (util.hasIOSKeyboard() && tx.test(scroll.getBody().style.transform) ? +RegExp.$2 : 0)) + window.scrollY - keyboardHeight,
+                            scrollY - Math.ceil((activeTop + activeHeight - scrollTop - scrollHeight) / toHeight) * toHeight + activeHeight
+                        )
+                    );
+                }
+                break;
+            }
+        }
+    }
+
     if (isToucher) {
         var iosfixedList,
             keyboardHandle = util.blank,
@@ -288,25 +325,8 @@
         if (iosVersion) {
             dom.addEventListener(window, 'keyboardchange', function (event) {
                 keyboardHandle();
+                scrollIntoViewIfNeeded(keyboardHeight, event.data);
                 keyboardHeight = event.data - (safariVersion ? 45 : 0);
-
-                core.query(function (item) {
-                    return item.$MScroll;
-                }).forEach(function (item) {
-                    if (item.$MScrollData.top) {
-                        item.setPosition(
-                            item.getX(),
-                            Math.max(
-                                item.$MScrollData.top + window.scrollY - keyboardHeight,
-                                Math.min(
-                                    (item.$MScrollData.bottom !== undefined ? item.$MScrollData.bottom : 0) + window.scrollY,
-                                    item.getY()
-                                )
-                            )
-                        );
-                    }
-                });
-
                 fixed();
             });
 
@@ -346,32 +366,8 @@
                     }
 //{/if}//
                     keyboardHandle = scrollListener(function () {
-                        for (scroll = core.findControl(document.activeElement); scroll; scroll = scroll.getParent()) {
-                            if (scroll.$MScroll) {
-                                var main = scroll.getMain(),
-                                    scrollY = scroll.getY(),
-                                    scrollTop = dom.getPosition(main).top,
-                                    scrollHeight = scroll.getHeight() - keyboardHeight,
-                                    activeTop = dom.getPosition(target).top + main.scrollTop - window.scrollY + scrollY,
-                                    activeHeight = target.offsetHeight;
+                        scrollIntoViewIfNeeded(keyboardHeight);
 
-                                if (activeTop < scrollTop || activeTop + activeHeight > scrollTop + scrollHeight) {
-                                    scroll.setPosition(
-                                        scroll.getX(),
-                                        Math.max(
-                                            scroll.$MScrollData.top + window.scrollY - keyboardHeight,
-                                            Math.min(
-                                                (scroll.$MScrollData.bottom !== undefined ? scroll.$MScrollData.bottom : 0) + window.scrollY,
-                                                scrollY - activeTop + Math.round((scrollHeight - activeHeight) / 2)
-                                            )
-                                        )
-                                    );
-                                }
-                                break;
-                            }
-                        }
-
-                        // 反向动画抵消ios的滚屏动画效果，如果webview关闭了滚屏动画，需要执行fixed()消除抖动
                         if (lastScrollY !== window.scrollY) {
                             iosfixedList.forEach(function (item) {
                                 item.control.getMain().style.visibility = 'hidden';
@@ -383,6 +379,7 @@
                             }, 200);
                         }
                         fixed();
+                        // 反向动画抵消ios的滚屏动画效果，如果webview关闭了滚屏动画，需要执行fixed()消除抖动
                         // fixed(lastScrollY);
                         // effect.grade(function (precent, options) {
                         //     fixed(lastScrollY + Math.round((options.to - lastScrollY) * precent));
@@ -436,6 +433,9 @@
                             document.body.style.visibility = '';
                             // 复位
                             window.scrollTo(0, lastScrollY);
+
+                            scrollIntoViewIfNeeded(keyboardHeight);
+
                             fixed();
                             // 计算成功解除框架事件锁定
                             core.enable();
@@ -492,9 +492,8 @@
                     if (window.scrollY) {
                         for (scroll = core.findControl(document.activeElement); scroll; scroll = scroll.getParent()) {
                             if (scroll.$MScroll) {
-                                var main = scroll.getMain(),
-                                    scrollHeight = scroll.getHeight() + height - currHeight;
-                                scroll.setPosition(scroll.getX(), Math.max(scrollHeight - main.scrollHeight, scroll.getY()) - window.scrollY);
+                                var main = scroll.getMain();
+                                scroll.setPosition(scroll.getX(), Math.max(scroll.getHeight() + height - currHeight - main.scrollHeight, scroll.getY()) - window.scrollY);
                                 window.scrollTo(0, 0);
                                 break;
                             }
@@ -502,37 +501,7 @@
                     }
 
                     keyboardHandle();
-
-                    keyboardHandle = util.timer(function () {
-                        for (scroll = core.findControl(document.activeElement); scroll; scroll = scroll.getParent()) {
-                            if (scroll.$MScroll) {
-                                var scrollY = scroll.getY(),
-                                    scrollTop = dom.getPosition(main).top,
-                                    activeTop = dom.getPosition(target).top + main.scrollTop + scrollY,
-                                    activeHeight = target.offsetHeight;
-
-                                if (activeTop < scrollTop + activeHeight) {
-                                    // 处理微信提示信息的问题
-                                    scroll.setPosition(
-                                        scroll.getX(),
-                                        Math.min(
-                                            scroll.$MScrollData.bottom !== undefined ? scroll.$MScrollData.bottom : 0,
-                                            scrollY + scrollHeight + activeHeight - activeHeight
-                                        )
-                                    );
-                                } else if (activeTop + activeHeight > scrollTop + scrollHeight) {
-                                    scroll.setPosition(
-                                        scroll.getX(),
-                                        Math.max(
-                                            (scroll.$MScrollData.top !== undefined ? scroll.$MScrollData.top : scrollHeight - main.scrollHeight + (tx.test(scroll.getBody().style.transform) ? +RegExp.$2 : 0)),
-                                            scrollY - Math.ceil((activeTop + activeHeight - scrollTop - scrollHeight) / height) * height + activeHeight
-                                        )
-                                    );
-                                }
-                                break;
-                            }
-                        }
-                    }, 100);
+                    keyboardHandle = util.timer(scrollIntoViewIfNeeded, 100, this, currHeight, height);
                 } else if (scroll) {
                     util.timer(function () {
                         scroll = null;
