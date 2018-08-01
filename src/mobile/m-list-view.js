@@ -415,8 +415,8 @@ _nBottomIndex  - 下部隐藏的选项序号
                     }
                     this._nBottomIndex--;
                     this.$$bodyHeight -= height;
-                    this.setPosition(this.getX(), this.getY());
                     ui.Items.Methods.remove.call(this, item);
+                    this.setPosition(this.getX(), this.getY());
                 }
             },
 
