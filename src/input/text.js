@@ -181,12 +181,21 @@ _ePlaceHolder - 为空时的提示信息标签
             $focus: function () {
                 ui.InputControl.prototype.$focus.call(this);
 
+                var el = this.getInput(),
+                    textAlign = dom.getStyle(el, 'textAlign');
+
                 if (this._sErrValue !== undefined) {
                     setPlaceHolder(this, this._sPlaceHolder);
-
-                    var el = this.getInput();
                     el.value = this._sErrValue;
                     delete this._sErrValue;
+                }
+
+                if (textAlign === 'end' || textAlign === 'right') {
+                    util.timer(function () {
+                        if (!this.getSelectionStart()) {
+                            this.setCaret(el.value.length);
+                        }
+                    }, 400, this);
                 }
             },
 
@@ -303,7 +312,17 @@ _ePlaceHolder - 为空时的提示信息标签
                 range.moveStart('character', -this.getInput().value.length);
                 return range.text.length;
             } : function () {
-                return this.getInput().selectionEnd;
+                var input = this.getInput(),
+                    type = input.type,
+                    ret;
+
+                if ('number' === typeof input.selectionEnd) {
+                    return input.selectionEnd;
+                }
+                input.type = 'text';
+                ret = input.selectionEnd;
+                input.type = type;
+                return ret;
             },
 
             /**
@@ -319,7 +338,17 @@ _ePlaceHolder - 为空时的提示信息标签
                 range.moveEnd('character', length);
                 return length - range.text.length;
             } : function () {
-                return this.getInput().selectionStart;
+                var input = this.getInput(),
+                    type = input.type,
+                    ret;
+
+                if ('number' === typeof input.selectionStart) {
+                    return input.selectionStart;
+                }
+                input.type = 'text';
+                ret = input.selectionStart;
+                input.type = type;
+                return ret;
             },
 
             /**
@@ -347,7 +376,16 @@ _ePlaceHolder - 为空时的提示信息标签
                 range.collapse();
                 range.select();
             } : function (pos) {
-                this.getInput().setSelectionRange(pos, pos);
+                var input = this.getInput(),
+                    type = input.type;
+
+                if ('number' === typeof input.selectionStart) {
+                    input.setSelectionRange(pos, pos);
+                } else {
+                    input.type = 'text';
+                    input.setSelectionRange(pos, pos);
+                    input.type = type;
+                }
             }
         }
     );
