@@ -370,7 +370,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                         trackId = undefined;
                         onpressure(event, false);
                         ongesture(event.getNative().changedTouches, event);
-                        if (!util.hasIOSKeyboard(event.getNative().target)) {
+                        if (event.getNative().target.value === undefined) {
                             // 未点击到需要弹出软键盘的区域，阻止事件穿透
                             event.preventDefault();
                         }
