@@ -231,6 +231,7 @@ _ePlaceHolder - 为空时的提示信息标签
              */
             $input: function () {
                 ui.InputControl.prototype.$input.call(this);
+                this.getInput().placeholder = this.getValue() ? '' : this._sPlaceHolder;
                 if (this._ePlaceHolder) {
                     this.alterStatus(this.getValue() ? '-empty' : '+empty');
                 }
@@ -244,6 +245,14 @@ _ePlaceHolder - 为空时的提示信息标签
                 if (this._ePlaceHolder) {
                     this.alterStatus(this.getValue() ? '-empty' : '+empty');
                 }
+            },
+
+            /**
+             * @override
+             */
+            $setValue: function (value) {
+                ui.InputControl.prototype.$setValue.call(this, value);
+                this.getInput().placeholder = value ? '' : this._sPlaceHolder;
             },
 
             /**
