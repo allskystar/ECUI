@@ -286,14 +286,16 @@
 
         for (scroll = core.findControl(document.activeElement); scroll; scroll = scroll.getParent()) {
             if (scroll.$MScroll) {
-                var main = scroll.getMain(),
+                var height = util.hasIOSKeyboard() && tx.test(scroll.getBody().style.transform) ? +RegExp.$2 : 0,
+                    main = scroll.getMain(),
                     scrollY = scroll.getY(),
                     scrollTop = dom.getPosition(main).top,
                     scrollHeight = scroll.getHeight() + toHeight - fromHeight,
-                    activeTop = dom.getPosition(document.activeElement).top + main.scrollTop - window.scrollY + scrollY,
+                    activeTop = dom.getPosition(document.activeElement).top + main.scrollTop + height - window.scrollY + scrollY,
                     activeHeight = document.activeElement.offsetHeight;
 
-                if (activeTop < scrollTop + activeHeight) {
+console.log(document.activeElement, activeTop, activeHeight, scrollTop + scrollHeight, height);
+                if (activeTop - activeHeight < scrollTop) {
                     // 处理微信提示信息的问题
                     scroll.setPosition(
                         scroll.getX(),
@@ -307,8 +309,8 @@
                         scroll.getX(),
                         Math.max(
                             // ios下data.top已经提前计算好，android下window.scrollY与keyboardHeight恒为零
-                            (scroll.$MScrollData.top !== undefined ? scroll.$MScrollData.top : scrollHeight - main.scrollHeight + (util.hasIOSKeyboard() && tx.test(scroll.getBody().style.transform) ? +RegExp.$2 : 0)) + window.scrollY - keyboardHeight,
-                            scrollY - Math.ceil((activeTop + activeHeight - scrollTop - scrollHeight) / toHeight) * toHeight + activeHeight
+                            (scroll.$MScrollData.top !== undefined ? scroll.$MScrollData.top : scrollHeight - main.scrollHeight + height) + window.scrollY - keyboardHeight,
+                            scrollY - Math.ceil((activeTop + activeHeight - scrollTop - scrollHeight) / scrollHeight) * scrollHeight + activeHeight
                         )
                     );
                 }
