@@ -33,7 +33,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
         initRecursion = 0,        // init 操作的递归次数
         readyList = [],
         inputClickTime = 0,
-        inputClickHandle = util.blank,
+        blurHandle = util.blank,
         orientationHandle,
 
         maskElements = [],        // 遮罩层组
@@ -174,7 +174,6 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                     }
 
                     event.track = track;
-                    event.target = getElementFromEvent(event);
                     currEnv.mousemove(event);
                     if (pointerId === trackId) {
                         if (hoveredControl !== event.getControl()) {
@@ -271,16 +270,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                 if (iosVersion) {
                     if (Date.now() - inputClickTime < 400) {
                         // 400ms内产生两次点击，避免input得到焦点但是无法弹出软键盘
-                        inputClickHandle();
-                        inputClickHandle = util.timer(function () {
-                            if (util.hasIOSKeyboard(document.activeElement)) {
-                                var e = document.createEvent('HTMLEvents');
-                                e.initEvent('focusout', true, true);
-                                e.target = document.activeElement;
-                                document.dispatchEvent(e);
-                                document.activeElement.blur();
-                            }
-                        }, 1000);
+                        blurActiveElement();
                     }
                     if (util.hasIOSKeyboard(event.target)) {
                         inputClickTime = Date.now();
@@ -320,13 +310,14 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
                 event = core.wrapEvent(event);
 
+                var noPrimaryMove = true;
+
                 Array.prototype.slice.call(event.getNative().changedTouches).forEach(function (item) {
                     var track = tracks[item.identifier];
                     event.pageX = item.pageX;
                     event.pageY = item.pageY;
                     event.clientX = item.clientX;
                     event.clientY = item.clientY;
-                    event.target = getElementFromEvent(item);
 
                     calcSpeed(track, event);
 
@@ -342,8 +333,14 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                         }
                         onpressure(event, item.force === 1);
                         ongesture(event.getNative().touches, event);
+
+                        noPrimaryMove = false;
                     }
                 });
+
+                if (noPrimaryMove) {
+                    event.preventDefault();
+                }
             },
 
             touchend: function (event) {
@@ -370,7 +367,8 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                         event.pageY = item.pageY;
                         event.clientX = item.clientX;
                         event.clientY = item.clientY;
-                        event.target = getElementFromEvent(item);
+
+                        var target = getElementFromEvent(item);
 
                         currEnv.mouseup(event);
                         bubble(hoveredControl, 'mouseout', event, hoveredControl = null);
@@ -378,7 +376,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                         onpressure(event, false);
                         ongesture(event.getNative().changedTouches, event);
                         if (!util.hasIOSKeyboard(event.getNative().target)) {
-                            if (ghostClick || !event.target || event.target !== getElementFromEvent(item)) {
+                            if (ghostClick || !event.target || target !== getElementFromEvent(item)) {
                                 // 同一个位置事件元素发生了变化，阻止事件穿透
                                 event.preventDefault();
                             }
@@ -674,14 +672,19 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
             mousemove: function (event) {
                 dragmove(event.track, currEnv, event.clientX, event.clientY);
-                if (!util.hasIOSKeyboard(event.getNative().target) || Date.now() - currEnv.startTime > 400) {
-                    event.preventDefault();
+                event.preventDefault();
+                if (!currEnv.startTime) {
+                    currEnv.startTime = util.hasIOSKeyboard(event.getNative().target) && document.activeElement !== event.getNative().target ? Date.now() : 0;
                 }
             },
 
             mouseover: util.blank,
 
             mouseup: function (event) {
+                if (util.hasIOSKeyboard(event.getNative().target) && Date.now() - currEnv.startTime <= 400) {
+                    blurActiveElement();
+                }
+
                 var track = event.track,
                     target = currEnv.target,
                     uid = target.getUID(),
@@ -729,16 +732,21 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
         disableEnv = {
             type: 'disable',
             mousedown: function () {
-                currEnv.startTime = Date.now();
+                currEnv.startTime = 0;
             },
             mousemove: function (event) {
-                if (!util.hasIOSKeyboard(event.getNative().target) || Date.now() - currEnv.startTime > 400) {
-                    event.preventDefault();
+                event.preventDefault();
+                if (!currEnv.startTime) {
+                    currEnv.startTime = util.hasIOSKeyboard(event.getNative().target) && document.activeElement !== event.getNative().target ? Date.now() : 0;
                 }
             },
             mouseout: util.blank,
             mouseover: util.blank,
-            mouseup: util.blank
+            mouseup: function (event) {
+                if (util.hasIOSKeyboard(event.getNative().target) && Date.now() - currEnv.startTime <= 400) {
+                    blurActiveElement();
+                }
+            }
         };
 
     if (ieVersion < 9) {
@@ -898,6 +906,23 @@ outer:          for (var caches = [], target = event.target, el; target; target 
             }
         }
     });
+
+    /**
+     * 激活元素失去焦点。
+     * @private
+     */
+    function blurActiveElement() {
+        blurHandle();
+        blurHandle = util.timer(function () {
+            if (util.hasIOSKeyboard(document.activeElement)) {
+                var e = document.createEvent('HTMLEvents');
+                e.initEvent('focusout', true, true);
+                e.target = document.activeElement;
+                document.dispatchEvent(e);
+                document.activeElement.blur();
+            }
+        }, 1000);
+    }
 
     /**
      * 冒泡处理控件事件。
@@ -2119,7 +2144,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                     dragEnv.bottom += (dragEnv.bottom - dragEnv.limitBottom) * (dragEnv.limitRatio - 1);
                 }
 
-                dragEnv.startTime = Date.now();
+                dragEnv.startTime = 0;
 
                 dragEnv.target = control;
                 setEnv(dragEnv);
