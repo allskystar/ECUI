@@ -45,7 +45,7 @@
                 var main = this.getMain(),
                     body = this.getBody(),
                     data = this.$MScrollData,
-                    flag = tx.test(this.getBody().style.transform);
+                    flag = util.hasIOSKeyboard() && tx.test(this.getBody().style.transform);
 
                 core.drag(
                     this,
@@ -492,8 +492,9 @@
                     if (window.scrollY) {
                         for (scroll = core.findControl(document.activeElement); scroll; scroll = scroll.getParent()) {
                             if (scroll.$MScroll) {
-                                var main = scroll.getMain();
-                                scroll.setPosition(scroll.getX(), Math.max(main.clientHeight - main.scrollHeight, scroll.getY() - window.scrollY));
+                                var main = scroll.getMain(),
+                                    scrollHeight = scroll.getHeight() + height - currHeight;
+                                scroll.setPosition(scroll.getX(), Math.max(scrollHeight - main.scrollHeight, scroll.getY()) - window.scrollY);
                                 window.scrollTo(0, 0);
                                 break;
                             }
@@ -507,7 +508,6 @@
                             if (scroll.$MScroll) {
                                 var scrollY = scroll.getY(),
                                     scrollTop = dom.getPosition(main).top,
-                                    scrollHeight = scroll.getHeight() + height - currHeight,
                                     activeTop = dom.getPosition(target).top + main.scrollTop + scrollY,
                                     activeHeight = target.offsetHeight;
 
