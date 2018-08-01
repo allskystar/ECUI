@@ -299,7 +299,7 @@
                 if (activeTop < scrollTop + infoHeight) {
                     y = Math.floor((activeHeight > 50 ? scrollHeight - activeHeight : activeHeight) / 2) - activeTop + scrollTop + infoHeight;
                 } else if (activeTop + activeHeight > scrollTop + scrollHeight) {
-                    y = activeTop - scrollTop - scrollHeight + Math.floor((activeHeight > 50 ? scrollHeight - activeHeight : activeHeight) / 2);
+                    y = scrollTop + scrollHeight - activeTop - activeHeight - Math.floor((activeHeight > 50 ? activeHeight - scrollHeight : activeHeight) / 2);
                 }
 
                 scroll.setPosition(
@@ -321,8 +321,7 @@
 
     if (isToucher) {
         var iosfixedList,
-            keyboardHandle = util.blank,
-            scroll;
+            keyboardHandle = util.blank;
 
         if (iosVersion) {
             dom.addEventListener(window, 'keyboardchange', function (event) {
@@ -471,6 +470,21 @@
                     item.control.getMain().style.transform = '';
                 });
 
+                if (scroll) {
+                    var main = scroll.getMain();
+                    scroll.setPosition(
+                        scroll.getX(),
+                        Math.min(
+                            (scroll.$MScrollData.bottom !== undefined ? scroll.$MScrollData.bottom : 0) + window.scrollY,
+                            Math.max(
+                                // ios下data.top已经提前计算好，android下window.scrollY与keyboardHeight恒为零
+                                (scroll.$MScrollData.top !== undefined ? scroll.$MScrollData.top : main.clientHeight - main.scrollHeight + (util.hasIOSKeyboard() && tx.test(scroll.getBody().style.transform) ? +RegExp.$2 : 0)) + window.scrollY,
+                                scroll.getY()
+                            )
+                        )
+                    );
+                }
+
                 core.disable();
                 keyboardHandle = util.timer(function () {
                     core.query(function (item) {
@@ -491,7 +505,7 @@
                                 (scroll.$MScrollData.bottom !== undefined ? scroll.$MScrollData.bottom : 0) + window.scrollY,
                                 Math.max(
                                     // ios下data.top已经提前计算好，android下window.scrollY与keyboardHeight恒为零
-                                    (scroll.$MScrollData.top !== undefined ? scroll.$MScrollData.top : main.clientHeight - main.scrollHeight + (util.hasIOSKeyboard() && tx.test(scroll.getBody().style.transform) ? +RegExp.$2 : 0)) + window.scrollY - keyboardHeight,
+                                    (scroll.$MScrollData.top !== undefined ? scroll.$MScrollData.top : main.clientHeight - main.scrollHeight + (util.hasIOSKeyboard() && tx.test(scroll.getBody().style.transform) ? +RegExp.$2 : 0)) + window.scrollY,
                                     scroll.getY()
                                 )
                             )
@@ -501,7 +515,7 @@
                     keyboardHeight = 0;
                     iosfixedList = null;
                     core.enable();
-                }, 300);
+                }, 500);
             });
         } else {
             // android，处理软键盘问题
@@ -515,7 +529,7 @@
                     target.scrollIntoViewIfNeeded();
 
                     if (window.scrollY) {
-                        for (scroll = core.findControl(document.activeElement); scroll; scroll = scroll.getParent()) {
+                        for (var scroll = core.findControl(document.activeElement); scroll; scroll = scroll.getParent()) {
                             if (scroll.$MScroll) {
                                 var main = scroll.getMain();
                                 scroll.setPosition(scroll.getX(), Math.max(scroll.getHeight() + height - currHeight - main.scrollHeight, scroll.getY()) - window.scrollY);
@@ -527,10 +541,6 @@
 
                     keyboardHandle();
                     keyboardHandle = util.timer(scrollIntoViewIfNeeded, 100, this, currHeight, height);
-                } else if (scroll) {
-                    util.timer(function () {
-                        scroll = null;
-                    }, 1000);
                 }
             });
 
@@ -539,10 +549,33 @@
                 document.activeElement.scrollIntoViewIfNeeded();
             });
 
-            dom.addEventListener(document, 'focusout', function () {
-                if (scroll) {
-                    scroll.getBody().style.transform = '';
+            dom.addEventListener(document, 'focusout', function (event) {
+                for (var scroll = core.findControl(event.target); scroll; scroll = scroll.getParent()) {
+                    if (scroll.$MScroll) {
+                        // 终止之前可能存在的惯性状态，并设置滚动层的位置
+                        scroll.getBody().style.transform = '';
+
+                        core.drag(scroll);
+                        break;
+                    }
                 }
+
+                keyboardHandle = util.timer(function () {
+                    if (scroll) {
+                        var main = scroll.getMain();
+                        scroll.setPosition(
+                            scroll.getX(),
+                            Math.min(
+                                (scroll.$MScrollData.bottom !== undefined ? scroll.$MScrollData.bottom : 0) + window.scrollY,
+                                Math.max(
+                                    // ios下data.top已经提前计算好，android下window.scrollY与keyboardHeight恒为零
+                                    (scroll.$MScrollData.top !== undefined ? scroll.$MScrollData.top : main.clientHeight - main.scrollHeight + (util.hasIOSKeyboard() && tx.test(scroll.getBody().style.transform) ? +RegExp.$2 : 0)) + window.scrollY - keyboardHeight,
+                                    scroll.getY()
+                                )
+                            )
+                        );
+                    }
+                }, 300);
             });
         }
     }
