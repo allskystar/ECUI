@@ -286,34 +286,39 @@
 
         for (scroll = core.findControl(document.activeElement); scroll; scroll = scroll.getParent()) {
             if (scroll.$MScroll) {
-                var height = util.hasIOSKeyboard() && tx.test(scroll.getBody().style.transform) ? +RegExp.$2 : 0,
-                    main = scroll.getMain(),
+                var main = scroll.getMain(),
                     scrollY = scroll.getY(),
                     scrollTop = dom.getPosition(main).top,
                     scrollHeight = scroll.getHeight() + toHeight - fromHeight,
-                    activeTop = dom.getPosition(document.activeElement).top + main.scrollTop + height - window.scrollY + scrollY,
-                    activeHeight = document.activeElement.offsetHeight;
+                    activeTop = dom.getPosition(document.activeElement).top + main.scrollTop - window.scrollY + scrollY,
+                    activeHeight = document.activeElement.offsetHeight,
+                    // 处理微信提示信息的高度
+                    infoHeight = /MicroMessanger/.test(navigator.userAgent) ? 30 : 0,
+                    y;
 
-console.log(document.activeElement, activeTop, activeHeight, scrollTop + scrollHeight, height);
-                if (activeTop - activeHeight < scrollTop) {
-                    // 处理微信提示信息的问题
+                if (activeHeight > 50) {
+                    // textarea简单居中
+                    y = scrollTop - activeTop + Math.round((scrollHeight - activeHeight) / 2);
+                } else if (activeTop < scrollTop + infoHeight) {
+                    y = scrollHeight;
+                } else if (activeTop + activeHeight > scrollTop + scrollHeight) {
+                    y = activeHeight - Math.ceil((activeTop + activeHeight - scrollTop - scrollHeight) / toHeight) * toHeight;
+                }
+
+                if (!y) {
                     scroll.setPosition(
                         scroll.getX(),
                         Math.min(
                             (scroll.$MScrollData.bottom !== undefined ? scroll.$MScrollData.bottom : 0) + window.scrollY,
-                            scrollY + scrollHeight + activeHeight - activeHeight
-                        )
-                    );
-                } else if (activeTop + activeHeight > scrollTop + scrollHeight) {
-                    scroll.setPosition(
-                        scroll.getX(),
-                        Math.max(
-                            // ios下data.top已经提前计算好，android下window.scrollY与keyboardHeight恒为零
-                            (scroll.$MScrollData.top !== undefined ? scroll.$MScrollData.top : scrollHeight - main.scrollHeight + height) + window.scrollY - keyboardHeight,
-                            scrollY - Math.ceil((activeTop + activeHeight - scrollTop - scrollHeight) / scrollHeight) * scrollHeight + activeHeight
+                            Math.max(
+                                // ios下data.top已经提前计算好，android下window.scrollY与keyboardHeight恒为零
+                                (scroll.$MScrollData.top !== undefined ? scroll.$MScrollData.top : scrollHeight - main.scrollHeight + (util.hasIOSKeyboard() && tx.test(scroll.getBody().style.transform) ? +RegExp.$2 : 0)) + window.scrollY - keyboardHeight,
+                                scrollY + y                            
+                            )
                         )
                     );
                 }
+
                 break;
             }
         }
