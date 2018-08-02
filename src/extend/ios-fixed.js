@@ -31,10 +31,6 @@ ios-fixed - ios下的fixed定位插件，修复软键盘不能正确定位的问
             dispose: function () {
                 util.remove(topList, this);
                 util.remove(bottomList, this);
-            },
-
-            mousemove: function (event) {
-                event.preventDefault();
             }
         },
 
