@@ -148,16 +148,13 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
      */
     function autoChildRoute(route) {
         if (route.children) {
-            var children = route.children instanceof Array ? route.children : [route.children];
-            if (route.NAME) {
-                children.forEach(function (item) {
+            (route.children instanceof Array ? route.children : [route.children]).forEach(function (item) {
+                if ('string' === typeof item) {
                     esr.callRoute(replace(item), true);
-                });
-            } else {
-                children.forEach(function (item) {
+                } else {
                     callRoute(item, true);
-                });
-            }
+                }
+            });
         }
 
         routeRequestCount--;
@@ -574,7 +571,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
 
         if (el.route) {
             var elRoute = routes[el.route];
-            dom.removeClass(el, (elRoute.alias ? calcUrl(elRoute.alias) : elRoute.NAME).slice(1).replace(/[._]/g, '-').replace(/\//g, '_'));
+            dom.removeClass(el, elRoute.NAME.slice(1).replace(/[._]/g, '-').replace(/\//g, '_'));
             el.route = null;
 
             if (elRoute.ondispose) {
@@ -591,7 +588,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
         el.innerHTML = engine.render(name || route.view, context);
         if (route.NAME) {
             el.route = route.NAME;
-            dom.addClass(el, (route.alias ? calcUrl(route.alias) : route.NAME).slice(1).replace(/[._]/g, '-').replace(/\//g, '_'));
+            dom.addClass(el, route.NAME.slice(1).replace(/[._]/g, '-').replace(/\//g, '_'));
         }
         core.init(el);
 
@@ -673,9 +670,9 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
      * @param {object} route 路由对象，新的路由
      */
     function transition(route) {
-        if (route.NAME !== currRouteName && core.getStatus() !== 'disable') {
+        if (route.NAME !== currRouteName) {
             var layer = getLayer(route);
-            if (layer && currLayer !== layer) {
+            if (layer) {
                 var layerEl = layer.getMain();
                 // 路由权重在该项目中暂不考虑相等情况
                 if (currLayer) {
@@ -808,12 +805,17 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
             }
 //{/if}//
             route.view = route.view || name;
-            name = route.NAME = '/' + getModuleName(esr.getLocation()) + name;
+            name = '/' + getModuleName(esr.getLocation()) + name;
 //{if 1}//            if (!route.main) {//{/if}//
 //{if 1}//                var main = name.slice(1).replace(/[._]/g, '-').replace(/\//g, '_');//{/if}//
 //{if 1}//                route.main = core.$(main) ? main : esr.DEFAULT_MAIN;//{/if}//
 //{if 1}//            }//{/if}//
-            routes[name] = route;
+            if (route.alias) {
+                route.NAME = calcUrl(route.alias);
+                route.alias = name;
+            } else {
+                route.NAME = name;
+            }
 
             if (esrOptions.app && route.weight === undefined) {
                 route.weight = name.split(/[\/.]/).length - 2;
@@ -824,6 +826,18 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                     route[item.name] = item.value;
                 });
                 delete delegateRoutes[name];
+            }
+
+            if (route.frame) {
+                routes[name] = {
+                    NAME: route.NAME,
+                    weight: route.weight,
+                    main: route.main,
+                    view: route.view,
+                    children: route
+                };
+            } else {
+                routes[name] = route;
             }
         },
 
