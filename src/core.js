@@ -26,6 +26,8 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
         ecuiName = 'ui',          // Element 中用于自动渲染的 ecui 属性名称
         isGlobalId,               // 是否自动将 ecui 的标识符全局化
 
+        viewWidth,                // 浏览器宽高属性
+        viewHeight,               // 浏览器宽高属性
         flgFixedSize,             // 在计算盒子模型时，是否需要修正宽高
         scrollNarrow,             // 浏览器滚动条相对窄的一边的长度
 
@@ -72,40 +74,42 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
                 orientationHandle = util.timer(function () {
                     var width = document.documentElement.clientWidth,
-                        height = document.documentElement.clientHeight,
-                        style = document.body.style;
+                        height = document.documentElement.clientHeight;
 
-                    if (style.width !== width + 'px') {
-                        var currWidth = style.width,
-                            fontSize = util.toNumber(dom.getStyle(dom.parent(document.body), 'font-size'));
+                    if (viewWidth !== width) {
+                        var fontSize = util.toNumber(dom.getStyle(dom.parent(document.body), 'font-size'));
                         fontSizeCache.forEach(function (item) {
                             item[0]['font-size'] = Math.round(fontSize * item[1]) + 'px';
                         });
 
-                        style.width = width + 'px';
+                        viewWidth = width;
+                        viewHeight = height;
 
+                        repaint();
+                    } else if (viewHeight !== height) {
                         if (isToucher) {
-                            style.height = height + 'px';
-                            if (currWidth) {
-                                // 第一次进入不需要repaint
-                                repaint();
-                            }
-                        }
-                    } else if (style.height !== height + 'px') {
-                        if (isToucher) {
-                            var currHeight = util.toNumber(style.height);
-                            style.height = height + 'px';
-
                             // android 软键盘弹出和收起
-                            if (height >= currHeight) {
+                            var event = document.createEvent('HTMLEvents');
+                            event.initEvent('keyboardchange', true, true);
+
+                            if (height > viewHeight) {
                                 // 软键盘收起，失去焦点
                                 if (document.activeElement && document.activeElement.blur) {
                                     document.activeElement.blur();
                                 }
+                                event.height = 0;
+                            } else {
+                                event.height = viewHeight - height;
                             }
+
+                            document.dispatchEvent(event);
+
+                            viewHeight = height;
                         }
+                    } else if (isToucher) {
+                        orientationHandle = util.timer(events.orientationchange, 100);
                     }
-                }, 300);
+                }, 100);
             },
 
             // pad pro/surface pro等设备上的事件处理
@@ -1206,15 +1210,14 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                     util.getView = function () {
                         // 解决软键盘弹起时的高度计算问题，这个值已经被 orientationchange 写入了body的style中
                         var view = getView();
-                        view.height = util.toNumber(document.body.style.height);
+                        view.height = viewHeight;
                         return view;
                     };
                 }());
             }
 
-            document.body.style.width = document.documentElement.clientWidth + 'px';
-            document.body.style.height = document.documentElement.clientHeight + 'px';
-
+            viewWidth = document.documentElement.clientWidth;
+            viewHeight = document.documentElement.clientHeight;
             util.adjustFontSize(Array.prototype.slice.call(document.styleSheets));
 
             // 设置全局事件处理
@@ -1450,7 +1453,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                         event.toY = track.clientY;
                         callback('panmove');
                     } else {
-                        if (isTouchClick(track) && Math.sqrt(track.speedX * track.speedX + track.speedY * track.speedY) < HIGH_SPEED) {
+                        if (track && isTouchClick(track) && Math.sqrt(track.speedX * track.speedX + track.speedY * track.speedY) < HIGH_SPEED) {
                             callback('tap');
                         }
                     }
@@ -2491,9 +2494,9 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                     }
 
                     dom.addEventListener(window, 'resize', events.orientationchange);
-
-                    initRecursion--;
                 }
+
+                initRecursion--;
 
                 // 防止循环引用
                 el = null;

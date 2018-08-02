@@ -231,16 +231,13 @@
         });
     }
 
-    function scrollIntoViewIfNeeded(fromHeight, toHeight) {
-        fromHeight = fromHeight || 0;
-        toHeight = toHeight || 0;
-
+    function scrollIntoViewIfNeeded(height) {
         for (var scroll = core.findControl(document.activeElement); scroll; scroll = scroll.getParent()) {
             if (scroll.$MScroll) {
                 var main = scroll.getMain(),
                     scrollY = scroll.getY(),
                     scrollTop = dom.getPosition(main).top,
-                    scrollHeight = scroll.getHeight() + toHeight - fromHeight,
+                    scrollHeight = scroll.getHeight() - height,
                     activeTop = dom.getPosition(document.activeElement).top + main.scrollTop - window.scrollY + scrollY,
                     activeHeight = document.activeElement.offsetHeight,
                     // 处理微信提示信息的高度
@@ -339,12 +336,12 @@
                 if (keyboardHeight) {
                     dom.removeEventListener(document, 'touchmove', util.preventEvent);
                 }
-                keyboardHeight = Math.max(0, event.data - (safariVersion ? 45 : 0));
+                keyboardHeight = Math.max(0, event.height - (safariVersion ? 45 : 0));
                 if (keyboardHeight) {
                     dom.addEventListener(document, 'touchmove', util.preventEvent);
                 }
                 fixed();
-                scrollIntoViewIfNeeded(keyboardHeight, event.data);
+                scrollIntoViewIfNeeded(keyboardHeight);
             });
 
             dom.addEventListener(document, 'focusin', function (event) {
@@ -498,12 +495,11 @@
             });
         } else {
             // android，处理软键盘问题
-            dom.addEventListener(window, 'resize', function () {
-                var height = document.documentElement.clientHeight,
-                    currHeight = util.toNumber(document.body.style.height),
+            dom.addEventListener(window, 'keyboardchange', function (event) {
+                var height = event.height,
                     target = document.activeElement;
 
-                if (height < currHeight) {
+                if (height) {
                     // 打开软键盘
                     target.scrollIntoViewIfNeeded();
 
@@ -511,7 +507,7 @@
                         for (var scroll = core.findControl(document.activeElement); scroll; scroll = scroll.getParent()) {
                             if (scroll.$MScroll) {
                                 var main = scroll.getMain();
-                                scroll.setPosition(scroll.getX(), Math.max(scroll.getHeight() + height - currHeight - main.scrollHeight, scroll.getY()) - window.scrollY);
+                                scroll.setPosition(scroll.getX(), Math.max(scroll.getHeight() - height - main.scrollHeight, scroll.getY()) - window.scrollY);
                                 window.scrollTo(0, 0);
                                 break;
                             }
@@ -519,22 +515,25 @@
                     }
 
                     keyboardHandle();
-                    keyboardHandle = util.timer(scrollIntoViewIfNeeded, 100, this, currHeight, height);
+                    keyboardHandle = util.timer(scrollIntoViewIfNeeded, 100, this, height);
                 }
             });
 
             dom.addEventListener(window, 'focusin', function () {
                 // 解决软键盘状态下切换的情况
-                document.activeElement.scrollIntoViewIfNeeded();
+                dom.addEventListener(document, 'touchmove', util.preventEvent);
             });
 
             dom.addEventListener(document, 'focusout', function (event) {
+                dom.removeEventListener(document, 'touchmove', util.preventEvent);
                 for (var scroll = core.findControl(event.target); scroll; scroll = scroll.getParent()) {
                     if (scroll.$MScroll) {
                         // 终止之前可能存在的惯性状态，并设置滚动层的位置
                         scroll.getBody().style.transform = '';
                         core.drag(scroll);
-                        keyboardHandle = util.timer(setSafePosition, 300, this, scroll, scroll.getY(), scroll.getMain().clientHeight, 0);
+                        keyboardHandle = scrollListener(function () {
+                            setSafePosition(scroll, scroll.getY(), scroll.getMain().clientHeight, 0);
+                        });
                         break;
                     }
                 }
