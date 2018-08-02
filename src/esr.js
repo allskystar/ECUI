@@ -708,6 +708,9 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                         pauseStatus = true;
 
                         core.disable();
+                        if (!route.CACHE) {
+                            dom.addClass(layerEl, 'ui-transition');
+                        }
 
                         effect.grade(
                             fn,
@@ -716,6 +719,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                                 $: {from: currLayerEl, to: layerEl},
                                 onfinish: function () {
                                     // 在执行结束后，如果不同时common layer则隐藏from layer，并且去掉目标路由中的动画执行函数
+                                    dom.removeClass(layerEl, 'ui-transition');
                                     core.enable();
 
                                     currLayer.hide();

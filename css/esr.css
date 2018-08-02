@@ -3,3 +3,9 @@
     position: absolute !important;
     visibility: hidden !important;
 }
+
+.ui-transition {
+    img {
+        display: none;
+    }
+}
