@@ -1074,6 +1074,16 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
             },
 
             /**
+             * 阻止系统默认事件的单例函数，用于阻止事件调用。
+             * @public
+             *
+             * @param {Event} event 事件对象
+             */
+            preventEvent: function (event) {
+                event.preventDefault();
+            },
+
+            /**
              * 从数组中移除对象。
              * @public
              *
@@ -1386,9 +1396,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
     };
 //{if 0}//
     if (isToucher) {
-        dom.addEventListener(document, 'contextmenu', function (event) {
-            event.preventDefault();
-        });
+        dom.addEventListener(document, 'contextmenu', util.preventEvent);
     }
 //{/if}//
     (function () {
