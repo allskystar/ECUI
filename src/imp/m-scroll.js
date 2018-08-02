@@ -336,7 +336,13 @@
         if (iosVersion) {
             dom.addEventListener(window, 'keyboardchange', function (event) {
                 keyboardHandle();
-                keyboardHeight = event.data - (safariVersion ? 45 : 0);
+                if (keyboardHeight) {
+                    dom.removeEventListener(document, 'touchmove', util.preventEvent);
+                }
+                keyboardHeight = Math.max(0, event.data - (safariVersion ? 45 : 0));
+                if (keyboardHeight) {
+                    dom.addEventListener(document, 'touchmove', util.preventEvent);
+                }
                 fixed();
                 scrollIntoViewIfNeeded(keyboardHeight, event.data);
             });
@@ -395,12 +401,8 @@
                         // effect.grade(function (precent, options) {
                         //     fixed(lastScrollY + Math.round((options.to - lastScrollY) * precent));
                         // }, 200, {to: window.scrollY});
-
-                        core.enable();
                     });
                 } else {
-                    core.disable();
-
                     keyboardHandle = scrollListener(function () {
 //{if 0}//
                         if (isSimulator) {
@@ -423,10 +425,10 @@
                                 keyboardHeight = 294;
                                 break;
                             default:
-                                window.alert('不能识别的型号');
+                                throw new Error('不能识别的 iPhone 型号');
                             }
                             fixed();
-                            core.enable();
+                            dom.addEventListener(document, 'touchmove', util.preventEvent);
                             return;
                         }
 //{/if}//
@@ -441,24 +443,17 @@
                         keyboardHandle = scrollListener(function () {
                             // 第二次触发，计算软键盘高度
                             keyboardHeight = window.scrollY + document.body.clientHeight - document.body.scrollHeight - (safariVersion ? 45 : 0);
+                            dom.addEventListener(document, 'touchmove', util.preventEvent);
                             document.body.style.visibility = '';
                             // 复位
                             window.scrollTo(0, lastScrollY);
 
                             fixed();
                             scrollIntoViewIfNeeded(keyboardHeight);
-
-                            // 计算成功解除框架事件锁定
-                            core.enable();
                         });
                         window.scrollTo(0, 100000);
                     });
                 }
-
-                util.timer(function () {
-                    // 一秒后强制解除框架事件锁定
-                    core.enable();
-                }, 1000);
             });
 
             dom.addEventListener(document, 'focusout', function (event) {
@@ -472,6 +467,7 @@
                     if (scroll.$MScroll) {
                         // 终止之前可能存在的惯性状态，并设置滚动层的位置
                         core.drag(scroll);
+                        setSafePosition(scroll, scroll.getY(), scroll.getMain().clientHeight, 0);
                         break;
                     }
                 }
@@ -480,12 +476,7 @@
                     item.control.getMain().style.transform = '';
                 });
 
-                if (scroll) {
-                    setSafePosition(scroll, scroll.getY(), scroll.getMain().clientHeight, 0);
-                }
-
-                core.disable();
-                keyboardHandle = util.timer(function () {
+                keyboardHandle = scrollListener(function () {
                     core.query(function (item) {
                         return item.$MScroll;
                     }).forEach(function (item) {
@@ -500,10 +491,10 @@
                         setSafePosition(scroll, scroll.getY(), scroll.getMain().clientHeight, 0);
                     }
 
+                    dom.removeEventListener(document, 'touchmove', util.preventEvent);
                     keyboardHeight = 0;
                     iosfixedList = null;
-                    core.enable();
-                }, 500);
+                });
             });
         } else {
             // android，处理软键盘问题
