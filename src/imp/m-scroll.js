@@ -297,9 +297,15 @@
                     y = 0;
 
                 if (activeTop < scrollTop + infoHeight) {
-                    y = Math.floor((activeHeight > 50 ? scrollHeight - activeHeight : activeHeight) / 2) - activeTop + scrollTop + infoHeight;
+                    y = scrollTop + infoHeight - activeTop + (activeHeight < 50 ? Math.floor(activeHeight / 2) : 0);
                 } else if (activeTop + activeHeight > scrollTop + scrollHeight) {
-                    y = scrollTop + scrollHeight - activeTop - activeHeight - Math.floor((activeHeight > 50 ? activeHeight - scrollHeight : activeHeight) / 2);
+                    if (activeHeight < 50) {
+                        y = scrollTop + scrollHeight - activeTop - activeHeight - Math.floor(activeHeight / 2);
+                    } else if (activeHeight > scrollHeight - infoHeight) {
+                        y = scrollTop + infoHeight - activeTop;
+                    } else {
+                        y = scrollTop + scrollHeight - activeTop - activeHeight;
+                    }
                 }
 
                 scroll.setPosition(
