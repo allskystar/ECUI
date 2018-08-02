@@ -641,7 +641,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                     // 将 activedControl 的设置复位，此时表示没有鼠标左键点击
                     activedControl = undefined;
 
-                    if (isTouchMoved === false && click) {
+                    if (click) {
                         for (control = event.target; control; control = dom.parent(control)) {
                             if (control.tagName === 'A' && control.href) {
                                 location.href = control.href;
@@ -2107,7 +2107,6 @@ outer:          for (var caches = [], target = event.target, el; target; target 
 
                 dragEnv.target = control;
                 setEnv(dragEnv);
-                disableEnv.mousedown(event);
 
                 event.track.logicX = event.clientX;
                 event.track.logicY = event.clientY;
@@ -2300,6 +2299,16 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                 }
             }
             return core.$fastCreate(UIClass, 'function' === typeof el ? el() : el, parent, options);
+        },
+
+        /**
+         * 获取框架的状态。
+         * @public
+         *
+         * @return {string} 框架的状态
+         */
+        getStatus: function () {
+            return currEnv.type;
         },
 
         /**
