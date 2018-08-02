@@ -50,6 +50,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
         currRouteWeight,
 
         unloadNames = [],
+        waitRender,
 
         FormatInput = core.inherits(
             ui.Control,
@@ -160,6 +161,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
         routeRequestCount--;
         if (!routeRequestCount) {
             dom.removeClass(document.body, 'ui-loading');
+            delete context.DENY_CACHE;
         }
     }
 
@@ -256,7 +258,6 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
             } else {
                 // 解决A标签下反复修改的问题
                 currLocation = esr.getLocation().replace('~DENY_CACHE', '');
-                delete context.DENY_CACHE;
                 util.timer(function () {
                     history.replaceState('', '', '#' + currLocation);
                 }, 100);
@@ -564,6 +565,10 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
      * @param {string} name 模板名
      */
     function render(route, name) {
+        if (waitRender) {
+            waitRender.push([route, name]);
+            return;
+        }
         beforerender(route);
 
         var el = core.$(route.main);
@@ -720,6 +725,13 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                                 onfinish: function () {
                                     // 在执行结束后，如果不同时common layer则隐藏from layer，并且去掉目标路由中的动画执行函数
                                     dom.removeClass(layerEl, 'ui-transition');
+
+                                    var renders = waitRender;
+                                    waitRender = null;
+                                    renders.forEach(function (item) {
+                                        render.apply(null, item);
+                                    });
+
                                     core.enable();
 
                                     currLayer.hide();
@@ -731,6 +743,9 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                                 }
                             }
                         );
+
+                        // 动画过程中不进行渲染
+                        waitRender = [];
                     } else {
                         // weight相等不触发动画
                         currLayer.hide();
@@ -838,7 +853,8 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                     weight: route.weight,
                     main: route.main,
                     view: route.view,
-                    children: route
+                    children: route,
+                    CACHE: false
                 };
             } else {
                 routes[name] = route;
