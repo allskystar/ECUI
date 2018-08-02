@@ -209,55 +209,6 @@
             }
         }
     };
-
-    /**
-     * 滚动监听。
-     * @private
-     */
-    function scrollListener(fn) {
-
-        function onscroll() {
-            checkHandle();
-            waitHandle();
-
-            if (lastScrollY === window.scrollY) {
-                window.cancelAnimationFrame(handle);
-                handle = window.requestAnimationFrame(function () {
-                    if (fn) {
-                        fn();
-                    }
-                    dom.removeEventListener(window, 'scroll', onscroll);
-                });
-            } else {
-                lastScrollY = window.scrollY;
-                window.cancelAnimationFrame(handle);
-                handle = window.requestAnimationFrame(onscroll);
-            }
-        }
-
-        keyboardHandle();
-
-        var lastScrollY = window.scrollY,
-            // 保证1s后至少能触发一次执行
-            waitHandle = util.timer(onscroll, 1000),
-            checkHandle = util.timer(function () {
-                if (window.scrollY !== lastScrollY) {
-                    waitHandle();
-                    onscroll();
-                }
-            }, -20),
-            handle;
-
-        dom.addEventListener(window, 'scroll', onscroll);
-
-        return function () {
-            waitHandle();
-            checkHandle();
-            window.cancelAnimationFrame(handle);
-            dom.removeEventListener(window, 'scroll', onscroll);
-            fn = null;
-        };
-    }
 //{if 0}//
     var isSimulator = true;
     try {
@@ -308,21 +259,74 @@
                     }
                 }
 
-                scroll.setPosition(
-                    scroll.getX(),
-                    Math.min(
-                        (scroll.$MScrollData.bottom !== undefined ? scroll.$MScrollData.bottom : 0) + window.scrollY,
-                        Math.max(
-                            // ios下data.top已经提前计算好，android下window.scrollY与keyboardHeight恒为零
-                            (scroll.$MScrollData.top !== undefined ? scroll.$MScrollData.top : scrollHeight - main.scrollHeight + (util.hasIOSKeyboard() && tx.test(scroll.getBody().style.transform) ? +RegExp.$2 : 0)) + window.scrollY - keyboardHeight,
-                            scrollY + y
-                        )
-                    )
-                );
+                setSafePosition(scroll, scrollY + y, scrollHeight, keyboardHeight);
 
                 break;
             }
         }
+    }
+
+    /**
+     * 滚动监听。
+     * @private
+     */
+    function scrollListener(fn) {
+
+        function onscroll() {
+            checkHandle();
+            waitHandle();
+
+            if (lastScrollY === window.scrollY) {
+                window.cancelAnimationFrame(handle);
+                handle = window.requestAnimationFrame(function () {
+                    if (fn) {
+                        fn();
+                    }
+                    dom.removeEventListener(window, 'scroll', onscroll);
+                });
+            } else {
+                lastScrollY = window.scrollY;
+                window.cancelAnimationFrame(handle);
+                handle = window.requestAnimationFrame(onscroll);
+            }
+        }
+
+        keyboardHandle();
+
+        var lastScrollY = window.scrollY,
+            // 保证1s后至少能触发一次执行
+            waitHandle = util.timer(onscroll, 1000),
+            checkHandle = util.timer(function () {
+                if (window.scrollY !== lastScrollY) {
+                    waitHandle();
+                    onscroll();
+                }
+            }, -20),
+            handle;
+
+        dom.addEventListener(window, 'scroll', onscroll);
+
+        return function () {
+            waitHandle();
+            checkHandle();
+            window.cancelAnimationFrame(handle);
+            dom.removeEventListener(window, 'scroll', onscroll);
+            fn = null;
+        };
+    }
+
+    function setSafePosition(scroll, y, scrollHeight, keyboardHeight) {
+        scroll.setPosition(
+            scroll.getX(),
+            Math.min(
+                (scroll.$MScrollData.bottom !== undefined ? scroll.$MScrollData.bottom : 0) + window.scrollY,
+                Math.max(
+                    // ios下data.top已经提前计算好，android下window.scrollY与keyboardHeight恒为零
+                    (scroll.$MScrollData.top !== undefined ? scroll.$MScrollData.top : scrollHeight - scroll.getMain().scrollHeight + (util.hasIOSKeyboard() && tx.test(scroll.getBody().style.transform) ? +RegExp.$2 : 0)) + window.scrollY - keyboardHeight,
+                    y
+                )
+            )
+        );
     }
 
     if (isToucher) {
@@ -477,18 +481,7 @@
                 });
 
                 if (scroll) {
-                    var main = scroll.getMain();
-                    scroll.setPosition(
-                        scroll.getX(),
-                        Math.min(
-                            (scroll.$MScrollData.bottom !== undefined ? scroll.$MScrollData.bottom : 0) + window.scrollY,
-                            Math.max(
-                                // ios下data.top已经提前计算好，android下window.scrollY与keyboardHeight恒为零
-                                (scroll.$MScrollData.top !== undefined ? scroll.$MScrollData.top : main.clientHeight - main.scrollHeight + (util.hasIOSKeyboard() && tx.test(scroll.getBody().style.transform) ? +RegExp.$2 : 0)) + window.scrollY,
-                                scroll.getY()
-                            )
-                        )
-                    );
+                    setSafePosition(scroll, scroll.getY(), scroll.getMain().clientHeight, 0);
                 }
 
                 core.disable();
@@ -504,18 +497,7 @@
                     });
 
                     if (scroll) {
-                        var main = scroll.getMain();
-                        scroll.setPosition(
-                            scroll.getX(),
-                            Math.min(
-                                (scroll.$MScrollData.bottom !== undefined ? scroll.$MScrollData.bottom : 0) + window.scrollY,
-                                Math.max(
-                                    // ios下data.top已经提前计算好，android下window.scrollY与keyboardHeight恒为零
-                                    (scroll.$MScrollData.top !== undefined ? scroll.$MScrollData.top : main.clientHeight - main.scrollHeight + (util.hasIOSKeyboard() && tx.test(scroll.getBody().style.transform) ? +RegExp.$2 : 0)) + window.scrollY,
-                                    scroll.getY()
-                                )
-                            )
-                        );
+                        setSafePosition(scroll, scroll.getY(), scroll.getMain().clientHeight, 0);
                     }
 
                     keyboardHeight = 0;
@@ -560,28 +542,11 @@
                     if (scroll.$MScroll) {
                         // 终止之前可能存在的惯性状态，并设置滚动层的位置
                         scroll.getBody().style.transform = '';
-
                         core.drag(scroll);
+                        keyboardHandle = util.timer(setSafePosition, 300, this, scroll, scroll.getY(), scroll.getMain().clientHeight, 0);
                         break;
                     }
                 }
-
-                keyboardHandle = util.timer(function () {
-                    if (scroll) {
-                        var main = scroll.getMain();
-                        scroll.setPosition(
-                            scroll.getX(),
-                            Math.min(
-                                (scroll.$MScrollData.bottom !== undefined ? scroll.$MScrollData.bottom : 0) + window.scrollY,
-                                Math.max(
-                                    // ios下data.top已经提前计算好，android下window.scrollY与keyboardHeight恒为零
-                                    (scroll.$MScrollData.top !== undefined ? scroll.$MScrollData.top : main.clientHeight - main.scrollHeight + (util.hasIOSKeyboard() && tx.test(scroll.getBody().style.transform) ? +RegExp.$2 : 0)) + window.scrollY - keyboardHeight,
-                                    scroll.getY()
-                                )
-                            )
-                        );
-                    }
-                }, 300);
             });
         }
     }
