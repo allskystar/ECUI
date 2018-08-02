@@ -97,11 +97,6 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
      * @param {object} route 路由对象
      */
     function afterrender(route) {
-        routeRequestCount--;
-        if (!routeRequestCount) {
-            dom.removeClass(document.body, 'ui-loading');
-        }
-
         if (esrOptions.app) {
             transition(route);
             var layer = getLayer(route);
@@ -164,6 +159,11 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                 });
             }
         }
+
+        routeRequestCount--;
+        if (!routeRequestCount) {
+            dom.removeClass(document.body, 'ui-loading');
+        }
     }
 
     /**
@@ -212,11 +212,6 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
      * @param {object} options 参数
      */
     function callRoute(name, options) {
-        if (!routeRequestCount) {
-            dom.addClass(document.body, 'ui-loading');
-        }
-        routeRequestCount++;
-
         // 供onready时使用，此时name为route
         if ('string' === typeof name) {
             name = calcUrl(name);
@@ -259,10 +254,6 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                         route.oncached(context);
                     }
 
-                    routeRequestCount--;
-                    if (!routeRequestCount) {
-                        dom.removeClass(document.body, 'ui-loading');
-                    }
                     return;
                 }
             } else {
@@ -273,6 +264,11 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                     history.replaceState('', '', '#' + currLocation);
                 }, 100);
             }
+
+            if (!routeRequestCount) {
+                dom.addClass(document.body, 'ui-loading');
+            }
+            routeRequestCount++;
 
             if (!route.onrender || route.onrender() !== false) {
                 if (!route.model) {
@@ -443,6 +439,8 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
 
             // 与当前location相同时不进行route
             if (currLocation !== loc) {
+                document.activeElement.blur();
+
                 if (currLocation) {
                     if (core.hasMessageBox() || leaveUrl) {
                         history.go(/~HISTORY=(\d+)/.test(loc) ? historyIndex - +RegExp.$1 : -1);
@@ -675,9 +673,9 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
      * @param {object} route 路由对象，新的路由
      */
     function transition(route) {
-        if (route.NAME !== currRouteName) {
+        if (route.NAME !== currRouteName && core.getStatus() !== 'disable') {
             var layer = getLayer(route);
-            if (layer) {
+            if (layer && currLayer !== layer) {
                 var layerEl = layer.getMain();
                 // 路由权重在该项目中暂不考虑相等情况
                 if (currLayer) {
