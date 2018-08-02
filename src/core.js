@@ -663,6 +663,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                 event.preventDefault();
             },
 
+            mouseout: util.blank,
             mouseover: util.blank,
 
             mouseup: function (event) {
@@ -714,10 +715,9 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
         disableEnv = {
             type: 'disable',
-            mousedown: util.blank,
-            mousemove: function (event) {
-                event.preventDefault();
-            },
+            // 禁止input得到焦点
+            mousedown: util.preventEvent,
+            mousemove: util.preventEvent,
             mouseout: util.blank,
             mouseover: util.blank,
             mouseup: util.blank
