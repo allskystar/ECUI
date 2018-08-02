@@ -39,6 +39,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
         tracks = {},              // 鼠标/触摸事件对象跟踪
         trackId,                  // 当前正在跟踪的id
         pointers = [],            // 当前所有正在监听的pointer对象
+        lastClick = {},           // 最后一次点击的信息
         gestureListeners = [],    // 手势监听
         gestureStack = [],        // 手势堆栈，受mask影响进行分层监听
         forcedControl = null,     // 当前被重压的控件
@@ -122,8 +123,6 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                             pageY: event.pageY,
                             clientX: event.clientX,
                             clientY: event.clientY,
-                            originalX: event.clientX,
-                            originalY: event.clientY,
                             target: event.target,
                             lastMoveTime: Date.now(),
                             speedX: 0,
@@ -269,8 +268,6 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                     isTouchMoved = false;
 
                     var track = tracks[trackId = event.touches[0].identifier];
-                    track.originalX = track.startX = track.clientX;
-                    track.originalY = track.startY = track.clientY;
 
                     event = core.wrapEvent(event);
 
@@ -363,7 +360,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                             // 未点击到需要弹出软键盘的区域，阻止事件穿透
                             event.preventDefault();
                             // 点击到非INPUT区域需要失去焦点
-                            if (isTouchMoved === false && track.lastClick && Date.now() - track.lastClick.time < 300) {
+                            if (isTouchClick(track)) {
                                 document.activeElement.blur();
                             }
                         }
@@ -505,9 +502,9 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                     control = event.getControl(),
                     target = control;
 
-                if (!(track.lastClick && isDblClick(track))) {
-                    track.lastClick = {time: Date.now()};
-                }
+                track.startX = track.clientX;
+                track.startY = track.clientY;
+                track.startTime = Date.now();
 
                 if (control) {
                     // IE8以下的版本，如果为控件添加激活样式，原生滚动条的操作会失效
@@ -583,11 +580,12 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
                 var track = event.track,
                     control = event.getControl(),
-                    delay = track.lastClick && Date.now() - track.lastClick.time,
+                    click = isTouchClick(track),
+                    dblclick = Date.now() - lastClick.time < 500,
                     commonParent;
 
                 if (activedControl !== undefined) {
-                    if (isTouchMoved !== undefined && delay < 300) { // TouchEvent
+                    if (click) { // TouchEvent
                         core.setFocused(activedControl);
                     }
 
@@ -609,37 +607,41 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                     }
 
                     if (activedControl) {
-                        commonParent = getCommonParent(control, activedControl);
-                        if (isTouchMoved === undefined || (isTouchMoved === false && delay < 300)) { // MouseEvent
-                            bubble(commonParent, 'click', event);
-
-                            if (event.cancelBubble) {
-                                // 取消冒泡要阻止A标签提交
-                                for (el = control.getMain(); el; el = dom.parent(el)) {
-                                    if (el.tagName === 'A') {
-                                        blockAhref(el);
-                                        break;
+                        // 点击事件在同时响应鼠标按下与弹起周期的控件上触发(如果之间未产生鼠标移动事件)
+                        // 模拟点击事件是为了解决控件的 Element 进行了 remove/append 操作后 click 事件不触发的问题，以及移动端click延迟的问题
+                        if (dblclick) {
+                            commonParent = getCommonParent(control, lastClick.target);
+                            bubble(commonParent, 'dblclick', event);
+                        } else {
+                            commonParent = getCommonParent(control, activedControl);
+                            if (isTouchMoved === undefined || click) { // MouseEvent
+                                bubble(commonParent, 'click', event);
+                                if (event.cancelBubble) {
+                                    // 取消冒泡要阻止A标签提交
+                                    for (el = control.getMain(); el; el = dom.parent(el)) {
+                                        if (el.tagName === 'A') {
+                                            blockAhref(el);
+                                            break;
+                                        }
                                     }
                                 }
                             }
                         }
-                        // 点击事件在同时响应鼠标按下与弹起周期的控件上触发(如果之间未产生鼠标移动事件)
-                        // 模拟点击事件是为了解决控件的 Element 进行了 remove/append 操作后 click 事件不触发的问题
-                        if (track.lastClick) {
-                            if (isDblClick(track) && track.lastClick.target === control) {
-                                bubble(commonParent, 'dblclick', event);
-                                track.lastClick = undefined;
-                            } else {
-                                track.lastClick.target = control;
-                            }
-                        }
+
                         bubble(activedControl, 'deactivate', event);
+                    }
+
+                    if (dblclick) {
+                        lastClick.time = 0;
+                    } else {
+                        lastClick.time = track.startTime;
+                        lastClick.target = control;
                     }
 
                     // 将 activedControl 的设置复位，此时表示没有鼠标左键点击
                     activedControl = undefined;
 
-                    if (isTouchMoved !== undefined && delay < 300) {
+                    if (isTouchMoved === false && click) {
                         for (control = event.target; control; control = dom.parent(control)) {
                             if (control.tagName === 'A' && control.href) {
                                 location.href = control.href;
@@ -1308,17 +1310,6 @@ outer:          for (var caches = [], target = event.target, el; target; target 
     }
 
     /**
-     * 判断是否为允许的双击时间间隔。
-     * @private
-     *
-     * @param {object} track 事件跟踪对象
-     * @return {boolean} 是否为允许的双击时间间隔
-     */
-    function isDblClick(track) {
-        return Date.now() - track.lastClick.time > 500;
-    }
-
-    /**
      * 判断点击是否发生在滚动条区域。
      * @private
      *
@@ -1326,6 +1317,10 @@ outer:          for (var caches = [], target = event.target, el; target; target 
      * @return {boolean} 点击是否发生在滚动条区域
      */
     function isScrollClick(event) {
+        if (isToucher) {
+            return false;
+        }
+
         var target = event.target,
             pos = dom.getPosition(target),
             style = dom.getStyle(target),
@@ -1335,6 +1330,17 @@ outer:          for (var caches = [], target = event.target, el; target; target 
         event.deltaX = target.clientWidth && target.clientWidth !== target.scrollWidth && y >= 0 && y < scrollNarrow ? 1 : 0;
         event.deltaY = target.clientHeight && target.clientHeight !== target.scrollHeight && x >= 0 && x < scrollNarrow ? 1 : 0;
         return event.deltaX !== event.deltaY;
+    }
+
+    /**
+     * 判断是否为移动端单击时间间隔。
+     * @private
+     *
+     * @param {object} track 事件跟踪对象
+     * @return {boolean} 是否为移动端单击时间间隔
+     */
+    function isTouchClick(track) {
+        return isTouchMoved === false && Date.now() - track.startTime < 300;
     }
 
     /**
@@ -1419,11 +1425,11 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                 var track = tracks[pointers[0].identifier];
                 if (track.type !== 'mouse') {
                     if (event.getNative().type.slice(-4) === 'move') {
-                        if (!track.swipe && track.lastClick && Date.now() - track.lastClick.time < 500 && Math.sqrt(track.speedX * track.speedX + track.speedY * track.speedY) > HIGH_SPEED) {
+                        if (!track.swipe && Date.now() - track.startTime < 500 && Math.sqrt(track.speedX * track.speedX + track.speedY * track.speedY) > HIGH_SPEED) {
                             track.swipe = true;
                             util.timer(function () {
-                                if (tracks[track.identifier] !== track && Math.sqrt(Math.pow(track.lastX - track.originalX, 2) + Math.pow(track.lastY - track.originalY, 2)) > 100) {
-                                    event.angle = calcAngle(track.lastX - track.originalX, track.lastY - track.originalY);
+                                if (tracks[track.identifier] !== track && Math.sqrt(Math.pow(track.lastX - track.startX, 2) + Math.pow(track.lastY - track.startY, 2)) > 100) {
+                                    event.angle = calcAngle(track.lastX - track.startX, track.lastY - track.startY);
                                     if (event.angle > 150 && event.angle < 210) {
                                         callback('swipeleft');
                                     } else if (event.angle > 330 || event.angle < 30) {
@@ -1444,7 +1450,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                         event.toY = track.clientY;
                         callback('panmove');
                     } else {
-                        if (isTouchMoved === false && track.lastClick && Date.now() - track.lastClick.time < 300 && Math.sqrt(track.speedX * track.speedX + track.speedY * track.speedY) < HIGH_SPEED) {
+                        if (isTouchClick(track) && Math.sqrt(track.speedX * track.speedX + track.speedY * track.speedY) < HIGH_SPEED) {
                             callback('tap');
                         }
                     }
