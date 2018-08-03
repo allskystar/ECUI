@@ -241,7 +241,11 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
             var layer = getLayer(route);
 
             if (context.DENY_CACHE !== true) {
-                if (route.CACHE && layer && layer.location === currLocation) {
+                if (route.TYPE === 'frame' && route.CACHE !== null) {
+                    route.children.CACHE = route.CACHE;
+                    route.CACHE = null;
+                }
+                if ((route.CACHE || (route.TYPE && route.children.CACHE)) && layer && layer.location === currLocation) {
                     // 数据必须还在才触发缓存
                     // 模块发生变化，缓存状态下同样更换引擎
                     engine = loadStatus[getModuleName(route.NAME)] || etpl;
@@ -849,11 +853,12 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
             if (route.frame) {
                 routes[name] = {
                     NAME: route.NAME,
+                    TYPE: 'frame',
                     weight: route.weight,
                     main: route.main,
                     view: route.view,
                     children: route,
-                    CACHE: false
+                    CACHE: null
                 };
             } else {
                 routes[name] = route;
