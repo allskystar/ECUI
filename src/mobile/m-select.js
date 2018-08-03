@@ -39,8 +39,7 @@ _bRequired    - 是否必须选择
 
             ui.$select.call(this, el, options);
 
-            var unit = this.$getSection('Options');
-            unit.setOptionSize(options.optionSize || 3);
+            this.$getSection('Options').setOptionSize(options.optionSize || 3);
         },
         {
             /**
