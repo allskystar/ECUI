@@ -292,7 +292,21 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                     }
                     esr.request(route.model, function () {
                         esr.render(route);
-                    }, route.onerror || esr.onerror || util.blank);
+                    }, function (err) {
+                        err = (route.onerror || esr.onrequesterror || util.blank)(err);
+
+                        // 出错需要清除缓存
+                        if (route.CACHE !== false) {
+                            route.CACHE = undefined;
+                        }
+                        routeRequestCount--;
+                        if (!routeRequestCount) {
+                            dom.removeClass(document.body, 'ui-loading');
+                            delete context.DENY_CACHE;
+                        }
+
+                        return err;
+                    });
                 }
             }
         } else {
