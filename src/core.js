@@ -1816,11 +1816,9 @@ outer:          for (var caches = [], target = event.target, el; target; target 
          * @return {Array} 样式数组
          */
         $getClasses: function (UIClass, current) {
-            var classes = UIClass.TYPES.slice();
-            if (current && current !== UIClass.TYPES[0]) {
-                classes.push(current);
-            }
-            return classes;
+            return current && current !== UIClass.TYPES[0] ?
+                    UIClass.TYPES.concat([current]) :
+                    UIClass.TYPES.slice();
         },
 
         /**

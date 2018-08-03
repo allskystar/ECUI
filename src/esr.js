@@ -572,7 +572,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
         beforerender(route);
 
         var el = core.$(route.main);
-        el.style.visibility = 'hidden';
+        dom.addClass(el, 'ui-hide');
 
         if (el.route) {
             var elRoute = routes[el.route];
@@ -598,8 +598,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
         core.init(el);
 
         afterrender(route);
-
-        el.style.visibility = '';
+        dom.removeClass(el, 'ui-hide');
     }
 
     /**
