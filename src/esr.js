@@ -570,7 +570,9 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
      */
     function render(route, name) {
         if (waitRender) {
-            waitRender.push([route, name]);
+            waitRender.push(function () {
+                render(route, name);
+            });
             return;
         }
         beforerender(route);
@@ -726,23 +728,24 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                             {
                                 $: {from: currLayerEl, to: layerEl},
                                 onfinish: function () {
+                                    currLayer.hide();
+                                    currLayerEl.style.left = '';
+                                    currLayer = layer;
+                                    pauseStatus = false;
+                                    if (esrOptions.transition === 'cover') {
+                                        core.mask();
+                                    }
+
                                     // 在执行结束后，如果不同时common layer则隐藏from layer，并且去掉目标路由中的动画执行函数
                                     dom.removeClass(layerEl, 'ui-transition');
 
                                     var renders = waitRender;
                                     waitRender = null;
                                     renders.forEach(function (item) {
-                                        render.apply(null, item);
+                                        item();
                                     });
 
                                     core.enable();
-
-                                    currLayer.hide();
-                                    currLayer = layer;
-                                    pauseStatus = false;
-                                    if (esrOptions.transition === 'cover') {
-                                        core.mask();
-                                    }
                                 }
                             }
                         );
@@ -1404,10 +1407,18 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
          *
          * @param {ecui.ui.Control|string} content 选择框对应的控件或HTML片断
          * @param {ecui.ui.Control} onconfirm 操作成功后执行回调的函数
-         * @param {string} title 选择框标题
+         * @param {object|string} options 选择框参数，如果是字符串表示选择框标题
          */
-        showSelect: function (content, onconfirm, title) {
+        showSelect: function (content, onconfirm, options) {
             if (esrOptions.app) {
+                if ('string' === typeof options) {
+                    options = {
+                        title: options
+                    };
+                } else if (!options) {
+                    options = {};
+                }
+
                 var container = core.$('AppSelectContainer'),
                     layer = core.findControl(container),
                     lastLocation = esr.getLocation(),
@@ -1437,7 +1448,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                     core.removeControlListeners(core.findControl(container));
                 });
 
-                esr.setData('AppSelectTitle', title || '');
+                esr.setData('AppSelectTitle', options.title || '');
 
                 if (content) {
                     if (content instanceof ui.Control) {
@@ -1452,13 +1463,25 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                     }
                 }
 
-                esr.setLocation(lastLocation.split('~')[0] + '~ALLOW_LEAVE');
-
-                transition({
+                var route = {
                     NAME: 'AppSelect',
-                    main: 'AppSelectContainer',
-                    weight: 1000
-                });
+                    main: 'AppSelectContainer'
+                };
+                if (options.route !== false) {
+                    esr.setLocation(lastLocation.split('~')[0] + '~ALLOW_LEAVE');
+                    route.weight = 10000;
+                    transition(route);
+                } else {
+                    // 关闭路由模式需要禁止动画直接切换
+                    route.weight = currRouteWeight;
+                    if (waitRender) {
+                        waitRender.push(function () {
+                            transition(route);
+                        });
+                    } else {
+                        transition(route);
+                    }
+                }
             }
         },
 
