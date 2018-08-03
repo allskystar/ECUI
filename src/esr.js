@@ -1407,7 +1407,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                     layer = core.findControl(container),
                     lastLocation = esr.getLocation(),
                     parentElement,
-                    nextElement;
+                    nextSibling;
 
                 core.addEventListener(layer, 'confirm', function (event) {
                     if (onconfirm) {
@@ -1424,7 +1424,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                             container.innerHTML = '';
                         } else {
                             if (parentElement) {
-                                parentElement.insertBefore(content, nextElement);
+                                parentElement.insertBefore(content, nextSibling);
                             }
                         }
                         content = null;
@@ -1442,7 +1442,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                         core.init(container);
                     } else {
                         parentElement = dom.parent(content);
-                        nextElement = dom.next(content);
+                        nextSibling = content.nextSibling;
                         container.appendChild(content);
                     }
                 }
