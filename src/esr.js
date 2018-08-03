@@ -1083,7 +1083,17 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                     if (item.getControl) {
                         var control = item.getControl();
                         if (control.getFormName && control.getFormValue && !control.isDisabled() && (!control.isFormChecked || control.isFormChecked())) {
-                            setCacheData(data, control.getFormName(), control.getFormValue());
+                            var formName = control.getFormName(),
+                                formValue = control.getFormValue();
+                            if (formName) {
+                                setCacheData(data, formName, formValue);
+                            } else {
+                                for (var key in formValue) {
+                                    if (formValue.hasOwnProperty(key)) {
+                                        setCacheData(data, key, formValue[key]);
+                                    }
+                                }
+                            }
                         }
                     } else if (!item.disabled && ((item.type !== 'radio' && item.type !== 'checkbox') || item.checked)) {
                         setCacheData(data, item.name, item.value);
