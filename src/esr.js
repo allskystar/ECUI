@@ -158,11 +158,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
             });
         }
 
-        routeRequestCount--;
-        if (!routeRequestCount) {
-            dom.removeClass(document.body, 'ui-loading');
-            delete context.DENY_CACHE;
-        }
+        callRouteComplete();
     }
 
     /**
@@ -299,11 +295,8 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                         if (route.CACHE !== false) {
                             route.CACHE = undefined;
                         }
-                        routeRequestCount--;
-                        if (!routeRequestCount) {
-                            dom.removeClass(document.body, 'ui-loading');
-                            delete context.DENY_CACHE;
-                        }
+
+                        callRouteComplete();
 
                         return err;
                     });
@@ -336,6 +329,18 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                     }
                 }
             );
+        }
+    }
+
+    /**
+     * 路由请求完成。
+     * @private
+     */
+    function callRouteComplete() {
+        routeRequestCount--;
+        if (!routeRequestCount) {
+            dom.removeClass(document.body, 'ui-loading');
+            delete context.DENY_CACHE;
         }
     }
 
