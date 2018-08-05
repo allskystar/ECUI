@@ -62,6 +62,14 @@
         },
         {
             /**
+             * @override
+             */
+            $blur: function (event) {
+                ui.Text.prototype.$blur.call(this, event);
+                this.getPopup().hide();
+            },
+
+            /**
              * 获取日期对象。
              * @public
              *
