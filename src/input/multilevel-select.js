@@ -27,7 +27,7 @@ _aSelect - 全部的下拉框控件列表
             this._aSelect = [];
             Array.prototype.slice.call(el.getElementsByTagName('SELECT')).forEach(function (item) {
                 item.className += this.Select.CLASS;
-                this._aSelect.push(core.$fastCreate(this.Select, item, this));
+                this._aSelect.push(core.$fastCreate(this.Select, item, this, core.getOptions(item)));
             }, this);
         },
         {
