@@ -50,7 +50,9 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
         unloadNames = [],
         waitRender,
 
-        dataCache = {},
+        historyOffset = 0,
+        historyCache = [],
+        historyCacheSize,
 
         FormatInput = core.inherits(
             ui.Control,
@@ -102,7 +104,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
             transition(route);
             var layer = getLayer(route);
 
-            if (route.CACHE === undefined && layer && route.main !== 'AppCommonContainer') {
+            if (route.CACHE === undefined) {
                 // 位于层内且不在公共层，缓存数据
                 route.CACHE = true;
             }
@@ -218,11 +220,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
             var layer = getLayer(route);
 
             if (context.DENY_CACHE !== true) {
-                if (route.TYPE === 'frame' && route.CACHE !== null) {
-                    route.children.CACHE = route.CACHE;
-                    route.CACHE = null;
-                }
-                if ((route.CACHE || (route.TYPE && route.children.CACHE)) && layer && layer.location === currLocation) {
+                if (isCached(route) && layer && layer.location === currLocation) {
                     // 数据必须还在才触发缓存
                     // 模块发生变化，缓存状态下同样更换引擎
                     engine = loadStatus[getModuleName(route.NAME)] || etpl;
@@ -233,7 +231,9 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                     if (route.oncached) {
                         route.oncached(context);
                     }
-
+                    if (route.TYPE === 'frame' && route.children.oncached) {
+                        route.children.oncached(context);
+                    }
                     return;
                 }
             } else {
@@ -242,6 +242,8 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                 util.timer(function () {
                     history.replaceState('', '', '#' + currLocation);
                 }, 100);
+
+                route.CACHE = undefined;
             }
 
             if (!routeRequestCount) {
@@ -478,6 +480,25 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
     }
 
     /**
+     * 判断路由是否被缓存。
+     * @private
+     *
+     * @param {object} route 路由对象
+     */
+    function isCached(route) {
+        if (route.TYPE === 'frame') {
+            if (route.CACHE !== null) {
+                route.children.CACHE = route.CACHE;
+                route.CACHE = null;
+            }
+
+            return route.children.CACHE;
+        }
+
+        return route.CACHE;
+    }
+
+    /**
      * 事件监听处理函数。
      * @private
      */
@@ -606,6 +627,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                         esr.callRoute(loc);
                     }
                 } else {
+                    historyCache = historyCache.slice(0, historyIndex - historyOffset - 1);
                     loc += '~HISTORY=' + historyIndex;
                     if (ieVersion < 9) {
                         pauseStatus = true;
@@ -659,12 +681,25 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
             var elRoute = routes[el.route];
             dom.removeClass(el, elRoute.NAME.slice(1).replace(/[._]/g, '-').replace(/\//g, '_'));
 
-            dataCache[elRoute.NAME] = {};
-            if (elRoute.form) {
-                (elRoute.form instanceof Array ? elRoute.form : [elRoute.form]).forEach(function (item) {
-                    var name = 'string' === typeof item ? item : item.name;
-                    esr.parseObject(document.forms[name], dataCache[elRoute.NAME][name] = {});
-                });
+            if (isCached(elRoute)) {
+                var index = el.history - historyOffset - 1;
+                if (index >= historyCacheSize) {
+                    historyCache = historyCache.slice(index + 1 - historyCacheSize);
+                    historyOffset += index + 1 - historyCacheSize;
+                } else if (index < 0) {
+                    var list = [];
+                    list[-index - 1] = undefined;
+                    historyCache = list.concat(historyCache.slice(0, historyCacheSize + index));
+                    historyOffset += index;
+                }
+                var data = historyCache[el.history - historyOffset - 1] = {NAME: elRoute.NAME};
+                if (elRoute.form) {
+                    (elRoute.form instanceof Array ? elRoute.form : [elRoute.form]).forEach(function (item) {
+                        esr.parseObject(document.forms[item], data[item] = {});
+                    });
+                }
+            } else {
+                delete historyCache[el.history - historyOffset - 1];
             }
 
             if (elRoute.ondispose) {
@@ -682,13 +717,26 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
         el.innerHTML = engine.render(name || route.view, context);
         if (route.NAME) {
             el.route = route.NAME;
+            el.history = historyIndex;
             dom.addClass(el, route.NAME.slice(1).replace(/[._]/g, '-').replace(/\//g, '_'));
 
             if (route.form) {
-                (route.form instanceof Array ? route.form : [route.form]).forEach(function (item) {
-                    var name = 'string' === typeof item ? item : item.name;
-                    fillForm(document.forms[name], (dataCache[route.NAME] || {})[name] || {}, '');
-                });
+                index = historyIndex - historyOffset - 1;
+                if (index >= 0) {
+                    data = historyCache[index];
+                    if (!data) {
+                        historyCache.forEach(function (item) {
+                            if (item.NAME === route.NAME) {
+                                data = item;
+                            }
+                        });
+                    }
+                    if (data) {
+                        (route.form instanceof Array ? route.form : [route.form]).forEach(function (item) {
+                            fillForm(document.forms[item], data[item] || {}, '');
+                        });
+                    }
+                }
             }
         }
         core.init(el);
@@ -1668,6 +1716,8 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
             }
 
             esrOptions = JSON.parse('{' + decodeURIComponent(value.replace(/(\w+)\s*=\s*([A-Za-z0-9_]+)\s*($|,)/g, '"$1":"$2"$3')) + '}');
+
+            historyCacheSize = esrOptions.cache || 1000;
 
             if (esrOptions.meta) {
                 if (window.localStorage) {
