@@ -360,7 +360,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                         ongesture(event.getNative().changedTouches, event);
 
                         var target = event.target;
-                        if (target.readOnly || ((target.tagName !== 'INPUT' || target.type === 'radio' || target.type === 'checkbox') && target.tagName !== 'TEXTAREA')) {
+                        if (target.tagName !== 'INPUT' && target.tagName !== 'TEXTAREA') {
                             // 未点击到需要弹出软键盘的区域，阻止事件穿透
                             event.preventDefault();
                             // 点击到非INPUT区域需要失去焦点
