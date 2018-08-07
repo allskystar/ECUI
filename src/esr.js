@@ -104,14 +104,14 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
             transition(route);
             var layer = getLayer(route);
 
-            if (route.CACHE === undefined) {
-                // 位于层内且不在公共层，缓存数据
-                route.CACHE = true;
-            }
-
             if (layer) {
                 layer.location = currLocation;
             }
+        }
+
+        if (route.CACHE === undefined) {
+            // 位于层内且不在公共层，缓存数据
+            route.CACHE = true;
         }
 
         if (route.onafterrender) {
@@ -717,6 +717,8 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
 
         core.dispose(el, true);
         el.innerHTML = engine.render(name || route.view, context);
+        core.init(el);
+
         if (route.NAME) {
             el.route = route.NAME;
             el.history = historyIndex;
@@ -741,7 +743,6 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                 }
             }
         }
-        core.init(el);
 
         afterrender(route);
         dom.removeClass(el, 'ui-hide');
