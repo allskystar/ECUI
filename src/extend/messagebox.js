@@ -43,6 +43,12 @@
      * @param {Function} ... 按钮的点击事件处理函数，顺序与参数中按钮文本定义的顺序一致
      */
     core.$messagebox = function (className, text, buttonTexts) {
+        if (!instance) {
+            dom.addEventListener(window, 'resize', function () {
+                instance.center();
+            });
+        }
+
         var instance = core.getSingleton(
                 MessageBox,
                 function () {
@@ -73,7 +79,7 @@
 
             buttonInstances.forEach(function (item, index) {
                 if (index < buttonTexts.length) {
-                    item.setContent(buttonTexts[index]);
+                    item.getBody().innerHTML = buttonTexts[index];
                     item.show();
                 } else {
                     item.hide();
