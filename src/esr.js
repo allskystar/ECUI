@@ -976,7 +976,8 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
             }
             for (; el; el = dom.parent(el)) {
                 if (el.route) {
-                    return routes[el.route];
+                    var route = routes[el.route];
+                    return route.TYPE === 'frame' ? route.children : route;
                 }
             }
             return null;
@@ -1062,7 +1063,8 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
          * @return {object} 路由信息
          */
         getRoute: function (name) {
-            return routes[calcUrl(name)];
+            var route = routes[calcUrl(name)];
+            return route.TYPE === 'frame' ? route.children : route;
         },
 
         /**
