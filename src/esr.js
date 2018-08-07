@@ -23,11 +23,9 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
         firefoxVersion = /firefox\/(\d+\.\d)/i.test(navigator.userAgent) ? +RegExp.$1 : undefined;
 //{/if}//
     var historyIndex = 0,
-        historyData = [],
         leaveUrl,
         delegateRoutes = {},    // 路由赋值的委托，如果路由不存在，会保存在此处
         routeRequestCount = 0,  // 记录路由正在加载的数量，用于解决第一次加载时要全部加载完毕才允许init操作
-        cacheList = [],
         esrOptions = {},
         routes = {},
         autoRender = {},        // 模拟MVVM双向绑定
@@ -51,6 +49,8 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
 
         unloadNames = [],
         waitRender,
+
+        dataCache = {},
 
         FormatInput = core.inherits(
             ui.Control,
@@ -114,23 +114,6 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
 
         if (route.onafterrender) {
             route.onafterrender(context);
-        }
-
-        if (esrOptions.cache) {
-            // 除了这里有刷新，在控件初始化时也可以刷新回填
-            var data = historyData[historyIndex] = historyData[historyIndex] || {};
-            cacheList.forEach(function (item) {
-                if (item.target.getMain()) {
-                    var values = data[item.name];
-                    if (values) {
-                        item.values.forEach(function (value) {
-                            if (values.hasOwnProperty(value)) {
-                                item.target['set' + value](values[value]);
-                            }
-                        });
-                    }
-                }
-            });
         }
 
         if (route.NAME) {
@@ -228,10 +211,8 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
         }
 
         if (route) {
-            for (var key in options) {
-                if (options.hasOwnProperty(key)) {
-                    context[key] = options[key];
-                }
+            if (options !== true) {
+                Object.assign(context, options);
             }
 
             var layer = getLayer(route);
@@ -341,6 +322,99 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
         if (!routeRequestCount) {
             dom.removeClass(document.body, 'ui-loading');
             delete context.DENY_CACHE;
+        }
+    }
+
+    /**
+     * 使用指定的数据回填form表单。
+     * @private
+     *
+     * @param {HTMLForm} form 表单元素
+     * @param {object} data 用于回填的数据
+     * @param {string} prefix 数据项前缀
+     */
+    function fillForm(form, data, prefix) {
+        for (var key in data) {
+            if (data.hasOwnProperty(key)) {
+                var value = data[key],
+                    elements = form[prefix + key],
+                    el,
+                    control;
+
+                if (elements) {
+                    if (elements.length) {
+                        elements = Array.prototype.slice.call(elements);
+                        el = elements[0];
+                    } else {
+                        el = elements;
+                        elements = [el];
+                    }
+
+                    if (el.getControl) {
+                        control = el.getControl();
+                    }
+                }
+
+                if (value instanceof Array) {
+                    if (control) {
+                        if (control.isFormChecked) {
+                            elements.forEach(function (item) {
+                                item = item.getControl();
+                                if (value.indexOf(item.getFormValue()) >= 0) {
+                                    item.setChecked(true);
+                                    item.saveToDefault();
+                                }
+                            });
+                        } else {
+                            elements.forEach(function (item, index) {
+                                item.getControl().setValue(value[index] || '');
+                            });
+                        }
+                    } else {
+                        if (el.type === 'radio' || el.type === 'checkbox') {
+                            elements.forEach(function (item) {
+                                if (value.indexOf(item.value) >= 0) {
+                                    item.defaultChecked = item.checked = true;
+                                }
+                            });
+                        } else {
+                            elements.forEach(function (item, index) {
+                                item.defaultValue = item.value = value[index] || '';
+                            });
+                        }
+                    }
+                } else if (value instanceof Object) {
+                    if (control) {
+                        control.setValue(value);
+                    } else {
+                        fillForm(form, value, key + '.');
+                    }
+                } else {
+                    if (control) {
+                        if (control.isFormChecked) {
+                            elements.forEach(function (item) {
+                                item = item.getControl();
+                                if (item.getFormValue() === value) {
+                                    item.setChecked(true);
+                                    item.saveToDefault();
+                                }
+                            });
+                        } else {
+                            control.setValue(value);
+                        }
+                    } else {
+                        if (el.type === 'radio' || el.type === 'checkbox') {
+                            elements.forEach(function (item) {
+                                if (item.value === value) {
+                                    item.defaultChecked = item.checked = true;
+                                }
+                            });
+                        } else {
+                            el.defaultValue = el.value = value;
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -520,21 +594,6 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                 unloadNames = [];
 
                 requestVersion++;
-
-                if (esrOptions.cache) {
-                    cacheList = cacheList.filter(function (item) {
-                        return item.target.getMain();
-                    });
-                    historyData[historyIndex] = historyData[historyIndex] || {};
-                    cacheList.forEach(function (item) {
-                        var data = {};
-                        item.values.forEach(function (value) {
-                            data[value] = item.target['get' + value]();
-                        });
-                        historyData[historyIndex][item.name] = data;
-                    });
-                }
-
                 historyIndex++;
 
                 if (/~HISTORY=(\d+)/.test(loc)) {
@@ -547,9 +606,6 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                         esr.callRoute(loc);
                     }
                 } else {
-                    if (esrOptions.cache) {
-                        historyData.splice(historyIndex, historyData.length - historyIndex);
-                    }
                     loc += '~HISTORY=' + historyIndex;
                     if (ieVersion < 9) {
                         pauseStatus = true;
@@ -602,11 +658,19 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
         if (el.route) {
             var elRoute = routes[el.route];
             dom.removeClass(el, elRoute.NAME.slice(1).replace(/[._]/g, '-').replace(/\//g, '_'));
-            el.route = null;
+
+            dataCache[elRoute.NAME] = {};
+            if (elRoute.form) {
+                (elRoute.form instanceof Array ? elRoute.form : [elRoute.form]).forEach(function (item) {
+                    var name = 'string' === typeof item ? item : item.name;
+                    esr.parseObject(document.forms[name], dataCache[elRoute.NAME][name] = {});
+                });
+            }
 
             if (elRoute.ondispose) {
                 elRoute.ondispose();
             }
+            el.route = null;
         }
         Array.prototype.slice.call(el.all || el.getElementsByTagName('*')).forEach(function (item) {
             if (item.route && routes[item.route].ondispose) {
@@ -619,6 +683,13 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
         if (route.NAME) {
             el.route = route.NAME;
             dom.addClass(el, route.NAME.slice(1).replace(/[._]/g, '-').replace(/\//g, '_'));
+
+            if (route.form) {
+                (route.form instanceof Array ? route.form : [route.form]).forEach(function (item) {
+                    var name = 'string' === typeof item ? item : item.name;
+                    fillForm(document.forms[name], (dataCache[route.NAME] || {})[name] || {}, '');
+                });
+            }
         }
         core.init(el);
 
@@ -961,6 +1032,17 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
             } else {
                 (delegateRoutes[routeName] = delegateRoutes[routeName] || []).push({name: name, value: value});
             }
+        },
+
+        /**
+         * 使用指定的数据回填form表单。
+         * @public
+         *
+         * @param {HTMLForm} form 表单元素
+         * @param {object} data 用于回填的数据
+         */
+        fillForm: function (form, data) {
+            fillForm(form, data, '');
         },
 
         /**
@@ -1665,31 +1747,6 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
             for (var i = 0, links = document.getElementsByTagName('A'), el; el = links[i++]; i++) {
                 if (el.href.slice(-1) === '#') {
                     el.href = JAVASCRIPT + ':void(0)';
-                }
-            }
-        }
-    };
-
-    ext.cache = {
-        /**
-         * esr数据缓存插件初始化。
-         * @public
-         *
-         * @param {string} value 插件的参数，格式为 缓存名[属性名1,属性名2,...]
-         */
-        constructor: function (value) {
-            if (esrOptions.cache) {
-                if (value = /^(\w+)\[([\w,]+)\]$/.exec(value)) {
-                    var name = value[1],
-                        values = value[2].split(',').map(function (item) {
-                            return item.charAt(0).toUpperCase() + util.toCamelCase(item.slice(1));
-                        });
-
-                    cacheList.push({
-                        target: this,
-                        name: name,
-                        values: values
-                    });
                 }
             }
         }
