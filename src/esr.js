@@ -681,8 +681,8 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
             var elRoute = routes[el.route];
             dom.removeClass(el, elRoute.NAME.slice(1).replace(/[._]/g, '-').replace(/\//g, '_'));
 
+            var index = el.history - historyOffset - 1;
             if (isCached(elRoute)) {
-                var index = el.history - historyOffset - 1;
                 if (index >= historyCacheSize) {
                     historyCache = historyCache.slice(index + 1 - historyCacheSize);
                     historyOffset += index + 1 - historyCacheSize;
@@ -699,7 +699,9 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                     });
                 }
             } else {
-                delete historyCache[el.history - historyOffset - 1];
+                if (index >= 0 && index < historyCache.length) {
+                    historyCache[index] = {};
+                }
             }
 
             if (elRoute.ondispose) {
