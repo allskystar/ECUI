@@ -336,6 +336,44 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
      * @param {string} prefix 数据项前缀
      */
     function fillForm(form, data, prefix) {
+        function fillCheckedByArray(item) {
+            item = item.getControl();
+            if (value.indexOf(item.getFormValue()) >= 0) {
+                item.setChecked(true);
+                item.saveToDefault();
+            }
+        }
+
+        function fillValueByArray(item, index) {
+            var control = item.getControl();
+            control.setValue(value[index] || '');
+            control.saveToDefault();
+        }
+
+        function fillCheckedElByArray(item) {
+            if (value.indexOf(item.value) >= 0) {
+                item.defaultChecked = item.checked = true;
+            }
+        }
+
+        function fillValueElByArray(item, index) {
+            item.defaultValue = item.value = value[index] || '';
+        }
+
+        function fillCheckedByValue(item) {
+            item = item.getControl();
+            if (item.getFormValue() === value) {
+                item.setChecked(true);
+                item.saveToDefault();
+            }
+        }
+
+        function fillCheckedElByValue(item) {
+            if (item.value === value) {
+                item.defaultChecked = item.checked = true;
+            }
+        }
+
         for (var key in data) {
             if (data.hasOwnProperty(key)) {
                 var value = data[key],
@@ -360,29 +398,15 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                 if (value instanceof Array) {
                     if (control) {
                         if (control.isFormChecked) {
-                            elements.forEach(function (item) {
-                                item = item.getControl();
-                                if (value.indexOf(item.getFormValue()) >= 0) {
-                                    item.setChecked(true);
-                                    item.saveToDefault();
-                                }
-                            });
+                            elements.forEach(fillCheckedByArray);
                         } else {
-                            elements.forEach(function (item, index) {
-                                item.getControl().setValue(value[index] || '');
-                            });
+                            elements.forEach(fillValueByArray);
                         }
                     } else {
                         if (el.type === 'radio' || el.type === 'checkbox') {
-                            elements.forEach(function (item) {
-                                if (value.indexOf(item.value) >= 0) {
-                                    item.defaultChecked = item.checked = true;
-                                }
-                            });
+                            elements.forEach(fillCheckedElByArray);
                         } else {
-                            elements.forEach(function (item, index) {
-                                item.defaultValue = item.value = value[index] || '';
-                            });
+                            elements.forEach(fillValueElByArray);
                         }
                     }
                 } else if (value instanceof Object) {
@@ -394,23 +418,13 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                 } else {
                     if (control) {
                         if (control.isFormChecked) {
-                            elements.forEach(function (item) {
-                                item = item.getControl();
-                                if (item.getFormValue() === value) {
-                                    item.setChecked(true);
-                                    item.saveToDefault();
-                                }
-                            });
+                            elements.forEach(fillCheckedByValue);
                         } else {
                             control.setValue(value);
                         }
                     } else {
                         if (el.type === 'radio' || el.type === 'checkbox') {
-                            elements.forEach(function (item) {
-                                if (item.value === value) {
-                                    item.defaultChecked = item.checked = true;
-                                }
-                            });
+                            elements.forEach(fillCheckedElByValue);
                         } else {
                             el.defaultValue = el.value = value;
                         }
