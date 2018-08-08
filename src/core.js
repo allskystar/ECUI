@@ -1264,6 +1264,10 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                         disposeControl(item);
                     });
 
+                    singletons.forEach(function (item) {
+                        disposeControl(item);
+                    });
+
                     // 清除闭包中引用的 Element 对象
                     unmasks.forEach(function (item) {
                         item(true);
@@ -1759,8 +1763,10 @@ outer:          for (var caches = [], target = event.target, el; target; target 
             }
 
             oncreate(control, options);
-            allControls.push(control);
-            independentControls.push(control);
+            if (!control.constructor.singleton) {
+                allControls.push(control);
+                independentControls.push(control);
+            }
 
             // 处理所有的委托操作，参见delegate
             if (el = delegateControls[options.id]) {
@@ -2299,7 +2305,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                     return item;
                 }
             }
-            return core.$fastCreate(UIClass, 'function' === typeof el ? el() : el, parent, options);
+            return core.create(UIClass, 'function' === typeof el ? el() : el, parent, options);
         },
 
         /**
@@ -2330,7 +2336,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                 realType = type,
                 realConstructor = constructor,
                 subClass = function (el, options) {
-                    if (realSingleton) {
+                    if (subClass.singleton) {
                         for (var i = 0, item; item = singletons[i++]; ) {
                             if (item.constructor === subClass) {
                                 return item;
@@ -2352,7 +2358,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                         subClass.afterinterfaces.call(this, el, options);
                     }
 
-                    if (realSingleton) {
+                    if (subClass.singleton) {
                         singletons.push(this);
                     }
                 };
@@ -2363,6 +2369,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                 realType = realSingleton;
                 realSingleton = false;
             }
+            subClass.singleton = realSingleton;
 
             if ('string' !== typeof realType) {
                 index--;

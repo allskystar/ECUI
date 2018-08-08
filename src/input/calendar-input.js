@@ -11,6 +11,10 @@
     var Calendar = core.inherits(
             ui.Calendar,
             true,
+            function (el, options) {
+                dom.addClass(el, 'ui-popup ui-hide');
+                ui.Calendar.call(this, el, options);
+            },
             {
                 /**
                  * @override
@@ -53,12 +57,7 @@
         function (el, options) {
             ui.Text.call(this, el, options);
             this.getInput().readOnly = true;
-            this.setPopup(core.getSingleton(
-                Calendar,
-                function () {
-                    return dom.create({className: Calendar.CLASS + 'ui-popup ui-hide'});
-                }
-            ));
+            this.setPopup(core.getSingleton(Calendar));
         },
         {
             /**

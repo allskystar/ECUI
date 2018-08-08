@@ -5,14 +5,21 @@
 //{if 0}//
     var core = ecui,
         dom = core.dom,
-        ui = core.ui;
+        ui = core.ui,
+        util = core.util;
 //{/if}//
     var buttonInstances = [],
         instanceClass,
+        hideHandle = util.blank,
+        tipClass = { 'success': 'tip-success', 'error': 'tip-error', 'warn': 'tip-warn' },
         MessageBox = core.inherits(
             ui.Dialog,
             true,
             'ui-messagebox',
+            function (el, options) {
+                el.innerHTML = '<div class="ui-messagebox-content"></div><div class="ui-messagebox-buttons"></div>';
+                ui.Dialog.call(this, el, options);
+            },
             {
                 $hide: function (event) {
                     ui.Dialog.prototype.$hide.call(this, event);
@@ -49,65 +56,54 @@
             });
         }
 
-        var instance = core.getSingleton(
-                MessageBox,
-                function () {
-                    return dom.create({
-                        className: MessageBox.CLASS + 'ui-hide',
-                        innerHTML: '<div class="ui-messagebox-content"></div><div class="ui-messagebox-buttons"></div>'
-                    });
-                }
-            ),
+        var instance = core.getSingleton(MessageBox),
             outer = instance.getOuter(),
             body = instance.getBody(),
             elContent = body.firstChild,
-            elButton = body.lastChild,
-            args = arguments;
+            elButton = body.lastChild;
 
         if (!dom.parent(outer)) {
             document.body.appendChild(outer);
         }
 
-        if (!instance.isShow()) {
-            for (; buttonTexts.length > buttonInstances.length; ) {
-                buttonInstances.push(core.create(Button, {element: dom.create(), parent: elButton}));
-            }
-
-            core.dispose(elContent);
-            elContent.innerHTML = text;
-            core.init(elContent);
-
-            buttonInstances.forEach(function (item, index) {
-                if (index < buttonTexts.length) {
-                    item.getBody().innerHTML = buttonTexts[index];
-                    item.show();
-                } else {
-                    item.hide();
-                }
-                item.onclick = args[index + 3];
-            });
-
-            dom.addClass(outer, className + ' ui-messagebox-origin');
-            dom.removeClass(outer, 'ui-messagebox-text');
-            outer.style.width = '';
-            outer.style.height = '';
-            instance.showModal(0.5);
-            for (var width = 0, child = elContent.firstChild; child; child = child.nextSibling) {
-                if (child.nodeType === 1 && dom.getStyle(child, 'display') !== 'inline') {
-                    width = Math.max(width, child.offsetWidth);
-                }
-            }
-            dom.children(elContent).forEach(function (item) {
-                dom.addClass(item, 'ui-messagebox-block');
-            });
-            dom.removeClass(outer, 'ui-messagebox-origin');
-            if (!width) {
-                dom.addClass(outer, 'ui-messagebox-text');
-                width = body.scrollWidth;
-            }
-            instance.setClientSize(width, body.scrollHeight);
-            instance.center();
+        for (; buttonTexts.length > buttonInstances.length; ) {
+            buttonInstances.push(core.create(Button, {element: dom.create(), parent: elButton}));
         }
+
+        core.dispose(elContent);
+        elContent.innerHTML = text;
+        core.init(elContent);
+
+        buttonInstances.forEach(function (item, index) {
+            if (index < buttonTexts.length) {
+                item.getBody().innerHTML = buttonTexts[index];
+                item.show();
+            } else {
+                item.hide();
+            }
+            item.onclick = arguments[index + 3];
+        });
+
+        dom.addClass(outer, className + ' ui-messagebox-origin');
+        dom.removeClass(outer, 'ui-messagebox-text');
+        outer.style.width = '';
+        outer.style.height = '';
+        instance.showModal(0.5);
+        for (var width = 0, child = elContent.firstChild; child; child = child.nextSibling) {
+            if (child.nodeType === 1 && dom.getStyle(child, 'display') !== 'inline') {
+                width = Math.max(width, child.offsetWidth);
+            }
+        }
+        dom.children(elContent).forEach(function (item) {
+            dom.addClass(item, 'ui-messagebox-block');
+        });
+        dom.removeClass(outer, 'ui-messagebox-origin');
+        if (!width) {
+            dom.addClass(outer, 'ui-messagebox-text');
+            width = body.scrollWidth;
+        }
+        instance.setClientSize(width, body.scrollHeight);
+        instance.center();
 
         instanceClass = className;
     };
