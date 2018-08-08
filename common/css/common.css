@@ -313,7 +313,7 @@ a {
 .ui-input {
     input,
     textarea {
-        color: #495362;
+        color: #242527;
         outline: none;
         resize: none;
         word-wrap: break-word;
@@ -602,7 +602,7 @@ a {
     border: 1px solid #acbaca;
     border-radius: 2px;
     font-size: 14px;
-    color: #495362;
+    color: #242527;
     line-height: 30px;
 
     input {
@@ -612,7 +612,7 @@ a {
     input,
     textarea {
         font-size: 14px;
-        color: #495362;
+        color: #242527;
     }
 
     .ui-placeholder,
@@ -832,11 +832,10 @@ a {
     .ui-couple-slider-slider {
         top: 0px;
         left: 0px;
-        width: 14px;
-        height: 14px;
-        border-radius: 50%;
-        background-color: #ffffff;
-        box-shadow: 0.5px 0.5px 2px 1px rgba(0, 0, 0, 0.32);
+        width: px2rem(28px);
+        height: px2rem(28px);
+        background: url(images/ecui/icon_slide-mobile.png);
+        background-size: 100%;
         cursor: pointer;
         transform: translate(-7px, -1px);
         transition: left 0.3s linear;
@@ -859,4 +858,33 @@ a {
             transition-duration: 0s;
         }
     }
+}
+
+.ui-tip {
+    position: absolute;
+    z-index: 65555;
+}
+
+.ui-tip >div {
+    min-width: px2rem(310px);
+    max-width: px2rem(422px);
+    padding: px2rem(25px);
+    background: rgba(43, 43, 59, 0.95);
+    border-radius: px2rem(8px);
+    line-height: px2rem(60px);
+    color: #FFFFFF;
+    font-size: px2rem(36px);
+    text-align: center;
+}
+
+.ui-tip .tip-success {
+    background: rgba(58, 183, 106, 0.70);
+}
+
+.ui-tip .tip-error {
+    background: rgba(213, 18, 0, 0.70);
+}
+
+.ui-tip .tip-warn {
+    background: rgba(43, 43, 59, 0.95);
 }
