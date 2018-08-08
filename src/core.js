@@ -313,9 +313,13 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
                         event.track = track;
                         currEnv.mousemove(event);
+
+                        var target = event.target;
+                        event.target = getElementFromEvent(event);
                         if (hoveredControl !== event.getControl()) {
                             currEnv.mouseover(event);
                         }
+                        event.target = target;
                         onpressure(event, item.force === 1);
                         ongesture(event.getNative().touches, event);
 
