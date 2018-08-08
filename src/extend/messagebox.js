@@ -27,6 +27,15 @@
                 }
             }
         ),
+        Tip = core.inherits(
+            ui.Control,
+            true,
+            'ui-tip',
+            function (el, options) {
+                el.innerHTML = '<div></div>';
+                ui.Control.call(this, el, options);
+            }
+        ),
         Button = core.inherits(
             ui.Button,
             {
@@ -139,5 +148,33 @@
      */
     core.hasMessageBox = function () {
         return instanceClass !== undefined && core.getSingleton(MessageBox).isShow();
+    };
+
+    /**
+     * 非标准消息提示框框。
+     * @public
+     *
+     * @param {string} type 提示框类型 success、error、warn
+     * @param {string} text 提示信息文本、支持html文本
+     * @param {Array} delay 提示框延迟消失时间，默认2000ms
+     */
+    core.tip = function (type, text, delay) {
+        var className = tipClass[type],
+            instance = core.getSingleton(Tip),
+            elContent = instance.getBody().firstChild,
+            outer = instance.getOuter();
+
+        if (!dom.parent(outer)) {
+            document.body.appendChild(outer);
+        }
+
+        elContent.className = className;
+        elContent.innerHTML = text;
+
+        hideHandle();
+        hideHandle = util.timer(instance.hide, delay || 2000, instance);
+
+        instance.show();
+        instance.center();
     };
 }());
