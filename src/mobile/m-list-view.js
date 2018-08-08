@@ -51,7 +51,16 @@ _nBottomIndex  - 下部隐藏的选项序号
                 var body = this.getBody();
                 this._eHeader = dom.insertBefore(dom.create({className: options.classes.join('-header ')}), body);
                 this._eFooter = dom.insertAfter(dom.create({className: options.classes.join('-footer ')}), body);
+                dom.insertAfter(this._eEmpty, body);
                 this._oHandle = util.blank;
+            },
+            function (el, options) {
+                if (options.customEmpty) {
+                    dom.addClass(this._eEmpty = dom.remove(dom.last(el)), options.classes.join('-empty-body '));
+                } else {
+                    this._eEmpty = dom.create({className: options.classes.join('-empty-body ')});
+                }
+                ui.Control.call(this, el, options);
             }
         ],
         {
@@ -148,7 +157,7 @@ _nBottomIndex  - 下部隐藏的选项序号
              */
             $dispose: function () {
                 this._oHandle();
-                this._eHeader = this._eFooter = null;
+                this._eHeader = this._eFooter = this._eEmpty = null;
                 ui.Control.prototype.$dispose.call(this);
             },
 
