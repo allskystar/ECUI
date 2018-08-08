@@ -9,6 +9,7 @@ anchor - 锚点插件，使用ext-anchor的方式引用，指定的锚点名称�
     var core = ecui,
         dom = core.dom,
         ext = core.ext,
+        util = core.util,
 
         ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined,
         operaVersion = /opera\/(\d+\.\d)/i.test(navigator.userAgent) ? +RegExp.$1 : undefined;
@@ -16,6 +17,7 @@ anchor - 锚点插件，使用ext-anchor的方式引用，指定的锚点名称�
     var anchors = {};
 
     ext.anchor = {
+
         /**
          * 锚点插件初始化。
          * @public
@@ -23,14 +25,18 @@ anchor - 锚点插件，使用ext-anchor的方式引用，指定的锚点名称�
          * @param {string} value 插件的参数，表示锚点的名称
          */
         constructor: function (value) {
-            anchors[value] = this;
+            if (!anchors[value]) {
+                anchors[value] = [];
+            }
+            anchors[value].push(this);
         },
 
         Events: {
             dispose: function () {
                 for (var key in anchors) {
                     if (anchors.hasOwnProperty(key)) {
-                        if (anchors[key] === this) {
+                        util.remove(anchors[key], this);
+                        if (!anchors[key].length) {
                             delete anchors[key];
                         }
                     }
@@ -45,13 +51,17 @@ anchor - 锚点插件，使用ext-anchor的方式引用，指定的锚点名称�
          * @param {string} name 锚点的名称
          */
         go: function (name) {
-            var control = anchors[name];
-            if (control && control.isShow()) {
-                if (ieVersion < 8 || operaVersion) {
-                    document.body.scrollTop = dom.getPosition(control.getOuter()).top;
-                } else {
-                    control.getOuter().scrollIntoView();
-                }
+            var controls = anchors[name];
+            if (controls) {
+                controls.forEach(function (item) {
+                    if (item.isShow()) {
+                        if (ieVersion < 8 || operaVersion) {
+                            document.body.scrollTop = dom.getPosition(item.getOuter()).top;
+                        } else {
+                            item.getOuter().scrollIntoView();
+                        }
+                    }
+                });
             }
         },
 
@@ -65,8 +75,11 @@ anchor - 锚点插件，使用ext-anchor的方式引用，指定的锚点名称�
             var ret = [];
             for (var key in anchors) {
                 if (anchors.hasOwnProperty(key)) {
-                    if (!owner || owner.contain(anchors[key])) {
-                        ret.push(key);
+                    for (var i = 0, item; item = anchors[key][i++]; ) {
+                        if (!owner || owner.contain(item)) {
+                            ret.push(key);
+                            break;
+                        }
                     }
                 }
             }
