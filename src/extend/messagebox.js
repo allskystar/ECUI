@@ -69,7 +69,8 @@
             outer = instance.getOuter(),
             body = instance.getBody(),
             elContent = body.firstChild,
-            elButton = body.lastChild;
+            elButton = body.lastChild,
+            args = arguments;
 
         if (!dom.parent(outer)) {
             document.body.appendChild(outer);
@@ -90,7 +91,7 @@
             } else {
                 item.hide();
             }
-            item.onclick = arguments[index + 3];
+            item.onclick = args[index + 3];
         });
 
         dom.addClass(outer, className + ' ui-messagebox-origin');
