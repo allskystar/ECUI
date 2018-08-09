@@ -255,6 +255,16 @@ _nBottomIndex  - 下部隐藏的选项序号
             },
 
             /**
+             * 获取空listview元素。
+             * @public
+             *
+             * @return {Element} 空listview的 DOM 元素
+             */
+            getEmptyBody: function () {
+                return this._eEmpty;
+            },
+
+            /**
              * 获取底部元素。
              * @public
              *
@@ -487,7 +497,7 @@ _nBottomIndex  - 下部隐藏的选项序号
                 } else if (y === 0) {
                     // 解决items不够填充整个listview区域，导致footercomplete的触发
                     status = '';
-                } else if (y < top) {
+                } else if (y < top && top < 0) {
                     var status = y > top + this.$$footerHeight ? 'footerenter' : 'footercomplete';
                 } else {
                     status = '';
