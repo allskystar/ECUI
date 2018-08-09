@@ -207,6 +207,9 @@
                             loadRouteCss();
                             return;
                         }
+                        if (!/^\s*<header(>|\s).*?<\/header>\s*<container(>|\s).*?<\/container>\s*$/.test(text.replace(/\n/g, ''))) {
+                            throw new Error(url + ' 中只允许存在<header>与<container>标签');
+                        }
                         text = text.replace('<header', '<div style="display:none"');
                         text = text.replace('<container', '<div ui="type:ecui.esr.AppLayer" style="display:none" id="' + moduleName.replace(/[._]/g, '-').replace(/\//g, '_') + filename.replace(/[._]/g, '-') + '"');
                         text = text.replace('</header>', '</div>');
