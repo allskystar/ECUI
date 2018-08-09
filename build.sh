@@ -13,7 +13,7 @@ fi
 
 js_write_repl="sed -e \"s/document.write('<script type=\\\"text\/javascript\\\" src=\([^>]*\)><\/script>');/\/\/{include file=\1}\/\//g\""
 js_merge=$assign_js' java -jar $libpath/smarty4j.jar --left //{ --right }// --charset utf-8'
-js_compress='java -jar $libpath/webpacker.jar --mode 1 --charset utf-8'
+js_compress='uglifyjs -c -m'
 css_merge=$assign_css' java -jar $libpath/smarty4j.jar --left /\*{ --right }\*/ --charset utf-8'
 css_compile='lessc - --plugin=less-plugin-clean-css | python $libpath/less-funcs.py "$3"'
 html_compress="sed -e \"s/stylesheet\/less[^\\\"]*/stylesheet/g\" -e \"s/[[:space:]]/ /g\" -e \"s/^ *//g\" -e \"s/ *$//g\" -e \"/^ *$/d\" -e \"/<script>window.onload=/d\""
@@ -95,7 +95,7 @@ do
     name="_"${name//\//_}
     if [ ! "$name" = "$last" ]
     then
-        echo -e "    NS = ecui.ns['$name'] = ecui.ns['$name'] || {};\n    NS.data = NS.data || {};" >> .layers.js
+        echo -e "    NS = ecui.ns['$name'] = ecui.ns['$name'] || {};\n    NS.data = NS.data || {};\n    NS.ui = NS.ui || {};\n" >> .layers.js
     fi
     last=name
     cat $file >> .layers.js
@@ -126,9 +126,9 @@ do
     ns=${module//./-}
     ns=${ns//_/-}
     ns=${ns//\//_}
-    echo "(function(NS){$text}(ecui.ns['_$ns']));" | sed -e "s/ecui\.esr\.loadRoute(\"\([^.\"]*\)\")\(;\)*/\/\/{include file='route.\1.js'}\/\//g" -e "s/ecui\.esr\.loadRoute(\"\([^.\"]*\.\)*[^.\"]*\")\(;\)*/\\
+    echo "(function(NS){$text}(ecui.ns['_$ns']));" | sed -e "s/ecui\.esr\.loadRoute(\"\([^.\"]*\)\")\([,;]\)*/\/\/{include file='route.\1.js'}\/\//g" -e "s/ecui\.esr\.loadRoute(\"\([^.\"]*\.\)*[^.\"]*\")\([,;]\)*/\\
 &\\
-/g" -e "s/ecui\.esr\.loadClass(\"\([^\"]*\)\")\(;\)*/\/\/{include file='class.\1.js'}\/\//g" | awk '{if(gsub(/(^ecui\.esr\.loadRoute\("|"\)(;)*$)/,"")){match($1,/.*\./);value=substr($1,1,RLENGTH);tmp=value;gsub(/\./,"/",tmp);print "//{include file=\""tmp"route."substr($1,RLENGTH+1)".js\" assign=\"tpl\"}////{\$tpl|regex_replace:\"ecui\.esr\.addRoute\\\((.)\":\"ecui.esr.addRoute(\$1"value"\"}//"}else{print}}' | eval $js_merge | eval $js_compress > $outpath/${module}_define_.js
+/g" -e "s/ecui\.esr\.loadClass(\"\([^\"]*\)\")\([,;]\)*/\/\/{include file='class.\1.js'}\/\//g" | awk '{if(gsub(/(^ecui\.esr\.loadRoute\("|"\)([,;])*$)/,"")){match($1,/.*\./);value=substr($1,1,RLENGTH);tmp=value;gsub(/\./,"/",tmp);print "//{include file=\""tmp"route."substr($1,RLENGTH+1)".js\" assign=\"tpl\"}////{\$tpl|regex_replace:\"ecui\.esr\.addRoute\\\((.)\":\"ecui.esr.addRoute(\$1"value"\"}//"}else{print}}' | eval $js_merge | eval $js_compress > $outpath/${module}_define_.js
 
     reg=${module//\//\\/}
     if [ -f "_define_.css" ]
@@ -138,9 +138,9 @@ do
         file=""
     fi
 
-    text=`echo "$text" | awk '{gsub(/ecui\.esr\.loadRoute\("([^"]*)"\)(;)?/,"&\n");print}' | grep "ecui.esr.loadRoute("`
+    text=`echo "$text" | awk '{gsub(/ecui\.esr\.loadRoute\("([^"]*)"\)([,;])?/,"&\n");print}' | grep "ecui.esr.loadRoute("`
     echo -e "$file\n$text" | sed -e "s/.*ecui\.esr\.loadRoute(\"\([^\"]*\)\").*/$reg\1 \1/" | awk '{if(substr($1,1,2)!="//" && $2){gsub(/[\._]/,"-",$1);gsub(/\//,"_",$1);printf "."$1"{//{include file=\"";if(match($2,/.*\./)){gsub(/\./,"/",$2);printf substr($2,1,RLENGTH)"route."substr($2,RLENGTH+1)}else{printf "route."$2}print ".css\"}//}"}else{print}}' | eval $js_merge | eval $css_compile > "$outpath/${module}_define_.css"
-    echo "$text" | awk '{if(gsub(/(.*ecui\.esr\.loadRoute\("|"\)(;)*$)/,"")){match($1,/.*\./);value=$1;gsub(/\./,"/");print "//{include file=\""substr($1,1,RLENGTH)"route."substr($1,RLENGTH+1)".html\" assign=\"tpl\"}////{\$tpl|regex_replace:\"<!--\\s*target:\\s*([^>]+)\\s*-->\":\"<!-- target: "substr(value,1,RLENGTH)"\$1 -->\"}//"}else{print "//{include file=\""$1".html\"}//"}}' | sed -e "s/.*ecui.esr.loadRoute(\"\([^\"]*\)\").*/\/\/{include file='route.\1.html'}\/\//g" | eval $js_merge | eval "sed -e \"s/ui=\\\"type:NS\./ui=\\\"type:ecui.ns._$ns.ui./g\"" | eval $html_compress > "$outpath/${module}_define_.html"
+    echo "$text" | awk '{if(gsub(/(.*ecui\.esr\.loadRoute\("|"\)([,;])*$)/,"")){match($1,/.*\./);value=$1;gsub(/\./,"/");print "//{include file=\""substr($1,1,RLENGTH)"route."substr($1,RLENGTH+1)".html\" assign=\"tpl\"}////{\$tpl|regex_replace:\"<!--\\s*target:\\s*([^>]+)\\s*-->\":\"<!-- target: "substr(value,1,RLENGTH)"\$1 -->\"}//"}else{print "//{include file=\""$1".html\"}//"}}' | sed -e "s/.*ecui.esr.loadRoute(\"\([^\"]*\)\").*/\/\/{include file='route.\1.html'}\/\//g" | eval $js_merge | eval "sed -e \"s/ui=\\\"type:NS\./ui=\\\"type:ecui.ns._$ns.ui./g\"" | eval $html_compress > "$outpath/${module}_define_.html"
 
     if [ $module ]
     then
