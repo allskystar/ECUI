@@ -19,7 +19,7 @@
 
     //统一对请求成功返回参数做分类
     ecui.esr.onparsedata = function (url, data) {
-        if (url.indexOf('v1/base/series') >= 0) {
+        if (url.indexOf('v1/base/series') >= 0 || url.indexOf('/v1/base/c2b/series') >= 0) {
             data = data.data;
             var options = [];
             for (var i = 0; i < data.length; i++) {
