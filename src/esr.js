@@ -52,23 +52,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
 
         historyOffset = 0,
         historyCache = [],
-        historyCacheSize,
-
-        FormatInput = core.inherits(
-            ui.Control,
-            'ui-hide',
-            function (el, options) {
-                ui.Control.call(this, el, options);
-                this._sName = options.name;
-            },
-            {
-                getFormName: function () {
-                    return this._sName || this.getMain().name;
-                },
-
-                saveToDefault: util.blank
-            }
-        );
+        historyCacheSize;
 
     /**
      * 增加IE的history信息。
@@ -931,7 +915,8 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
 
         // 用于创建空对象，参见request方法
         CreateObject: core.inherits(
-            FormatInput,
+            ui.FormInput,
+            'ui-hide',
             {
                 getFormValue: function () {
                     return {};
@@ -941,7 +926,8 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
 
         // 用于创建空数组，参见request方法
         CreateArray: core.inherits(
-            FormatInput,
+            ui.FormInput,
+            'ui-hide',
             {
                 getFormValue: function () {
                     return [];
