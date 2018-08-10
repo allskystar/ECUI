@@ -40,8 +40,7 @@
         container.appendChild(popupEl);
     }
 
-    var namedMap = {},
-        owner;
+    var owner;
 
     ui.Popup = {
         NAME: '$Popup',
@@ -56,7 +55,7 @@
              */
             $click: function (event) {
                 this.$Popup.$click.call(this, event);
-                var popup = namedMap[this.getUID()];
+                var popup = this.$PopupData.popup;
                 if (dom.contain(this.getOuter(), event.target)) {
                     if (popup.isShow()) {
                         owner = null;
@@ -85,7 +84,7 @@
              * @override
              */
             $dispose: function () {
-                var el = namedMap[this.getUID()].getMain();
+                var el = this.$PopupData.popup.getMain();
                 if (el) {
                     dom.remove(el);
                 }
@@ -99,9 +98,8 @@
             $repaint: function (event) {
                 this.$Popup.$repaint.call(this, event);
 
-                var popup = namedMap[this.getUID()];
-                if (popup.isShow()) {
-                    setPopupPosition.call(popup);
+                if (this.$PopupData.popup.isShow()) {
+                    setPopupPosition.call(this.$PopupData.popup);
                 }
             },
 
@@ -111,10 +109,9 @@
             $scroll: function (event) {
                 this.$Popup.$scroll.call(this, event);
 
-                var popup = namedMap[this.getUID()];
-                if (event.type === 'mousedown' && !dom.contain(popup.getOuter(), event.target)) {
+                if (event.type === 'mousedown' && !dom.contain(this.$PopupData.popup.getOuter(), event.target)) {
                     // ie6/7/8下有可能scroll事件是由mousedown点击滚动条触发的
-                    popup.hide();
+                    this.$PopupData.popup.hide();
                 }
             },
 
@@ -125,7 +122,7 @@
              * @return {ecui.ui.Control} 弹出层控件
              */
             getPopup: function () {
-                return namedMap[this.getUID()];
+                return this.$PopupData.popup;
             },
 
             /**
@@ -135,14 +132,13 @@
              * @param {ecui.ui.Control} control 弹出层控件
              */
             setPopup: function (control) {
-                var popup = namedMap[this.getUID()];
-                if (popup) {
-                    core.removeEventListener(popup, 'show', setPopupPosition);
-                    delete namedMap[this.getUID()];
+                if (this.$PopupData.popup) {
+                    core.removeEventListener(this.$PopupData.popup, 'show', setPopupPosition);
+                    delete this.$PopupData.popup;
                 }
                 if (control) {
                     core.addEventListener(control, 'show', setPopupPosition);
-                    namedMap[this.getUID()] = control;
+                    this.$PopupData.popup = control;
                 }
             }
         }
