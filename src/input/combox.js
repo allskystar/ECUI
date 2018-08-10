@@ -44,6 +44,15 @@
             /**
              * @override
              */
+            $click: function (event) {
+                if (!this.$getSection('Options').isShow()) {
+                    ui.Select.prototype.$click.call(this, event);
+                }
+            },
+
+            /**
+             * @override
+             */
             $disable: function () {
                 ui.Select.prototype.$disable.call(this);
                 this.getInput().style.display = 'none';
@@ -60,19 +69,9 @@
             /**
              * @override
              */
-            $initStructure: function (width, height) {
-                ui.Select.prototype.$initStructure.call(this, width, height);
-
-                var style = this.getInput().style;
-                style.width = width + 'px';
-                style.height = height + 'px';
-            },
-
-            /**
-             * @override
-             */
-            $input: function () {
-                ui.Select.prototype.$input.call(this);
+            $input: function (event) {
+                ui.Select.prototype.$input.call(this, event);
+                this.$click(event);
                 this.setValue(this.getValue());
             },
 
@@ -81,6 +80,18 @@
              */
             setValue: function (value) {
                 ui.Select.prototype.setValue.call(this, value);
+
+                this.preventAlterItems();
+                this.getItems().forEach(function (item) {
+                    if (item.getContent().indexOf(value) < 0) {
+                        item.hide();
+                    } else {
+                        item.show();
+                    }
+                });
+                this.premitAlterItems();
+                this.alterItems();
+
                 this.$setValue(value);
             }
         }
