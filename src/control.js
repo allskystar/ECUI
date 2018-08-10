@@ -950,7 +950,7 @@ _aStatus            - 控件当前的状态集合
              * @return {boolean} 显示状态是否改变
              */
             hide: function () {
-                if (this.isShow()) {
+                if (!dom.hasClass(this.getOuter(), 'ui-hide')) {
                     core.dispatchEvent(this, 'hide');
                     return true;
                 }
@@ -1244,7 +1244,7 @@ _aStatus            - 控件当前的状态集合
              * @return {boolean} 显示状态是否改变
              */
             show: function () {
-                if (!this.isShow()) {
+                if (dom.hasClass(this.getOuter(), 'ui-hide')) {
                     core.dispatchEvent(this, 'show');
                     core.query(function (item) {
                         return this.contain(item);
