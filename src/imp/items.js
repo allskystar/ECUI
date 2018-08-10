@@ -22,6 +22,17 @@
             /**
              * @override
              */
+            $hide: function (event) {
+                ui.Control.prototype.$hide.call(this, event);
+                var parent = this.getParent();
+                if (parent) {
+                    parent.alterItems();
+                }
+            },
+
+            /**
+             * @override
+             */
             $setParent: function (parent) {
                 var oldParent = this.getParent();
                 if (oldParent) {
@@ -37,6 +48,17 @@
                 }
 
                 ui.Control.prototype.$setParent.call(this, parent);
+            },
+
+            /**
+             * @override
+             */
+            $show: function (event) {
+                ui.Control.prototype.$show.call(this, event);
+                var parent = this.getParent();
+                if (parent) {
+                    parent.alterItems();
+                }
             },
 
             /**

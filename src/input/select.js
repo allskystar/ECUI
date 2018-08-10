@@ -68,10 +68,18 @@ _bAlterItems  - 是否延迟到显示时执行alterItems
                      * @protected
                      */
                     $alterItems: function () {
-                        var select = this.getParent();
+                        var select = this.getParent(),
+                            size = 0;
+
+                        select.getItems().forEach(function (item) {
+                            // 只有处于显示状态的选项才计入高度
+                            if (item.isShow()) {
+                                size++;
+                            }
+                        });
 
                         // 设置options框的大小，如果没有元素，至少有一个单位的高度
-                        this.$setSize(select.getWidth(), (Math.min(select.getLength(), select._nOptionSize) || 1) * select.getClientHeight() + this.getMinimumHeight());
+                        this.$setSize(select.getWidth(), (Math.min(size, select._nOptionSize) || 1) * select.getClientHeight() + this.getMinimumHeight());
                     },
 
                     /**
