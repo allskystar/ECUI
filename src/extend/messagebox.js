@@ -72,6 +72,8 @@
             elButton = body.lastChild,
             args = arguments;
 
+        delete instance.onkeyup;
+
         if (!dom.parent(outer)) {
             document.body.appendChild(outer);
         }
@@ -127,6 +129,11 @@
      */
     core.alert = function (text, onok) {
         core.$messagebox('ui-messagebox-alert', text, ['确定'], onok);
+        core.getSingleton(MessageBox).onkeyup = function (event) {
+            if (event.which === 13) {
+                core.dispatchEvent(buttonInstances[0], 'click');
+            }
+        };
     };
 
     /**
@@ -139,6 +146,13 @@
      */
     core.confirm = function (text, onok, oncancel) {
         core.$messagebox('ui-messagebox-confirm', text, ['确定', '取消'], onok, oncancel);
+        core.getSingleton(MessageBox).onkeyup = function (event) {
+            if (event.which === 13) {
+                core.dispatchEvent(buttonInstances[0], 'click');
+            } else if (event.which === 27) {
+                core.dispatchEvent(buttonInstances[1], 'click');
+            }
+        };
     };
 
     /**

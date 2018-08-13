@@ -113,7 +113,11 @@ _eContainer      - 容器 DOM 元素
 
                     if (containerEl) {
                         if (options.parent) {
-                            options.parent.getBody().insertBefore(el, containerEl);
+                            if (dom.parent(containerEl)) {
+                                options.parent.getBody().insertBefore(el, containerEl);
+                            } else {
+                                options.parent.getBody().appendChild(el);
+                            }
                         } else {
                             containerEl.removeChild(el);
                         }
