@@ -122,6 +122,8 @@ _eContainer      - 容器 DOM 元素
                             containerEl.removeChild(el);
                         }
                         this._eContainer = containerEl;
+
+                        core.$bind(containerEl, this);
                     }
 
                     if (options.container) {
@@ -142,6 +144,7 @@ _eContainer      - 容器 DOM 元素
                      * @override
                      */
                     $dispose: function () {
+                        this._eContainer.getControl = null;
                         this._eContainer = null;
                         ui.Item.prototype.$dispose.call(this);
                     },
