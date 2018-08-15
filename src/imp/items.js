@@ -147,7 +147,8 @@
                 var list = this.$ItemsData.items,
                     items = [],
                     UIClass = this.Item || ui.Item,
-                    el = list[index] ? list[index].getOuter() : null;
+                    el = list[index] ? list[index].getOuter() : null,
+                    body = this.getBody();
 
                 this.preventAlterItems();
 
@@ -189,7 +190,7 @@
 
                     // 选项控件，直接添加
                     if (core.dispatchEvent(this, 'append', {child: item})) {
-                        this.getBody().appendChild(item.getOuter());
+                        body.appendChild(item.getOuter());
                         item.$setParent(this);
                         items.push(item);
                     }
@@ -208,6 +209,7 @@
                 this.alterItems();
 
                 if (this.isReady()) {
+                    core.init(body);
                     core.init(this.getMain());
                 }
                 return items;
