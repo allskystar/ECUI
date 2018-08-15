@@ -134,13 +134,16 @@ _aSelect - 全部的下拉框控件列表
                                             args.push(item.getValue());
                                         });
 
-                                        select.removeAll();
+                                        var selected = this.getSelected();
                                         core.request(util.stringFormat.apply(null, args), function (data) {
-                                            core.dispatchEvent(parent, 'request', {data: data, owner: select});
-                                            select.add(data);
-                                            item._aChildren = select.getItems();
-                                            select.show();
-                                            effect.grade('this.style.left=#100->' + (25 * index) + '%#', 400, { $: select.getOuter() });
+                                            if (selected === this.getSelected() && !select.getLength()) {
+                                                select.removeAll();
+                                                core.dispatchEvent(parent, 'request', {data: data, owner: select});
+                                                select.add(data);
+                                                item._aChildren = select.getItems();
+                                                select.show();
+                                                effect.grade('this.style.left=#100->' + (25 * index) + '%#', 400, { $: select.getOuter() });
+                                            }
                                         });
                                     }
                                 }
