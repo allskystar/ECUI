@@ -1225,9 +1225,10 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                         if (control.getFormName && control.getFormValue && !control.isDisabled() && (!control.isFormChecked || control.isFormChecked())) {
                             var formName = control.getFormName(),
                                 formValue = control.getFormValue();
+
                             if (formName) {
                                 setCacheData(data, formName, formValue);
-                            } else {
+                            } else if (formName !== undefined) {
                                 for (var key in formValue) {
                                     if (formValue.hasOwnProperty(key)) {
                                         setCacheData(data, key, formValue[key]);
