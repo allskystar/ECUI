@@ -144,8 +144,10 @@ _eContainer      - 容器 DOM 元素
                      * @override
                      */
                     $dispose: function () {
-                        this._eContainer.getControl = null;
-                        this._eContainer = null;
+                        if (this._eContainer) {
+                            this._eContainer.getControl = null;
+                            this._eContainer = null;
+                        }
                         ui.Item.prototype.$dispose.call(this);
                     },
 
@@ -213,9 +215,15 @@ _eContainer      - 容器 DOM 元素
              * @override
              */
             $itemclick: function (event) {
-                if (event.item !== this._cSelected) {
-                    this.setSelected(event.item);
-                    core.dispatchEvent(this, 'change');
+                if (dom.contain(event.item.getBody(), event.target)) {
+                    if (core.dispatchEvent(this, 'titleclick', event)) {
+                        if (event.item !== this._cSelected) {
+                            this.setSelected(event.item);
+                            core.dispatchEvent(this, 'change');
+                        }
+                    }
+                } else {
+                    core.dispatchEvent(this, 'containerclick', event);
                 }
             },
 
