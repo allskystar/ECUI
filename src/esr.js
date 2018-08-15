@@ -1214,7 +1214,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                 elements = Array.prototype.slice.call(form.elements);
 
             elements.forEach(function (item) {
-                if (validate !== false && item.getControl && !item.getControl().isDisabled()) {
+                if (validate !== false && item.name && item.getControl && !item.getControl().isDisabled()) {
                     if (!core.dispatchEvent(item.getControl(), 'validate')) {
                         valid = false;
                     }
@@ -1813,7 +1813,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
          * @param {string} value 插件的参数，格式为 变量名@#模板名 或 变量名@js函数名 ，表示指定的变量变化时，需要刷新控件内部HTML
          */
         constructor: function (value) {
-            if (value = /^([\w,]+)(\*?@)(#\w*|[\w\.]*\(\))$/.exec(value)) {
+            if (value = /^([\w,]+)(\*?@)(#[\w\.]*|[\w\.]*\(\))$/.exec(value)) {
                 if (value[3].charAt(0) !== '#') {
                     if (value[3].length === 2) {
                         var setData = util.decodeHTML(this.getContent().trim()),
