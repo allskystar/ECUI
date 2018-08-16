@@ -21,7 +21,9 @@ _eContainer      - 容器 DOM 元素
     var core = ecui,
         dom = core.dom,
         ui = core.ui,
-        util = core.util;
+        util = core.util,
+
+        eventNames = ['mousedown', 'mouseover', 'mousemove', 'mouseout', 'mouseup', 'click', 'dblclick', 'focus', 'blur', 'activate', 'deactivate'];
 //{/if}//
     /**
      * 移除容器 DOM 元素。
@@ -327,4 +329,16 @@ _eContainer      - 容器 DOM 元素
         },
         ui.Items
     );
+
+    // 初始化事件转发信息
+    eventNames.slice(0, 7).forEach(function (item) {
+        item = item.replace('mouse', '');
+        ui.Tab.prototype['$item' + item] = ui.Tab.prototype['$item' + item] || function (event) {
+            core.dispatchEvent(
+                this,
+                (dom.contain(event.item.getBody(), event.target) ? 'title' : 'container') + item,
+                event
+            );
+        };
+    });
 }());
