@@ -1674,7 +1674,6 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                 for (var el = document.body.firstChild; el; el = el.nextSibling) {
                     if (el.nodeType === 8) {
                         etpl.compile(el.textContent || el.nodeValue);
-                        dom.remove(el);
                     }
                 }
 
@@ -1764,6 +1763,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                                 item[0]
                             );
                             dom.remove(item[0]);
+                            console.log(document.body.innerHTML);
                             loadTpl();
                         },
                         onerror: function () {
