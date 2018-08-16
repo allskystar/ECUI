@@ -1,0 +1,45 @@
+/*<script>window.onload=function(){value=document.getElementsByTagName('TEXTAREA')[0].value;parent.postMessage({url:location.href.slice(7),text:value.slice(value.indexOf('\n')+1).replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&')},'*');}</script><textarea>*/
+.ui-switch {
+	width: 50px;
+	position:relative;   
+    display: block;   
+    padding: 1px;   
+    border-radius: 24px;   
+    height: 22px;   
+    margin-bottom: 15px;   
+    background-color: #eee;   
+    cursor: pointer;   
+    vertical-align: top;   
+    -webkit-user-select: none;
+    background-image: none;
+}
+.ui-switch:before{   
+    content: '';   
+    display: block;   
+    border-radius: 24px;   
+    height: 22px;   
+    background-color: white;   
+    -webkit-transform: scale(1, 1);   
+    -webkit-transition: all 0.3s ease;   
+}
+.ui-switch:after{   
+    content: '';   
+    position: absolute;   
+    top: 50%;     
+    left: 50%;     
+    margin-top: -11px;     
+    margin-left: -11px;   
+    width: 22px;   
+    height: 22px;   
+    border-radius: 22px;   
+    background-color: white;   
+    box-shadow: 1px 1px 1px 1px rgba(0,0,0,0.08);   
+    -webkit-transform: translateX(-9px);   
+    -webkit-transition: all 0.3s ease;   
+}
+.ui-switch-checked:after{   
+    -webkit-transform: translateX(9px);   
+}   
+.ui-switch-checked:before{   
+    background-color:green;   
+}  

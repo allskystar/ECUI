@@ -116,15 +116,14 @@ cities - 地区联动下拉框控件。
             }
             var pClass = options.primary ? options.primary + '-province' : 'province',
                 cClass = options.primary ? options.primary + '-city' : 'city',
-                aClass = options.primary ? options.primary + '-area' : 'area';
-            el.innerHTML = '<select class="' + pClass + '"></select><select class="' + cClass + '"></select>' + (options.multi === '3' ? '<select class="' + aClass + '"></select>' : '')  + '<input name="' + (options.name || '') + '" class="ui-hide">';
-            var _this = this;
+                aClass = options.primary ? options.primary + '-area' : 'area',
+                optionSize = options.optionSize || 10;
+            el.innerHTML = '<select class="' + pClass + '" ui="optionSize:' + optionSize + '"></select><select class="' + cClass + '"   ui="optionSize:' + optionSize + '"></select>' + (options.multi === '3' ? '<select class="' + aClass + '" ui="optionSize:' + optionSize + '"></select>' : '')  + '<input name="' + (options.name || '') + '" class="ui-hide">';
+
             this._eInput = ecui.dom.last(el);
-            this._eInput.getControl = function () {
-                return _this;
-            };
             this._eInput.value = options.value;
             ui.MultilevelSelect.call(this, el, options);
+
         },
         {
             init: function (options) {
@@ -138,9 +137,6 @@ cities - 地区联动下拉框控件。
                 this.getSelect(0).setValue(value.slice(0, 2) + '0000');
                 core.triggerEvent(this.getSelect(0), 'change');
 
-                if (value.slice(2) === '0000') {
-                    return;
-                }
                 this.getSelect(1).setValue(value.slice(0, 4) + '00');
 
                 if (options.multi === '3') {
@@ -156,8 +152,11 @@ cities - 地区联动下拉框控件。
                 this._eInput.value = select.getValue();
                 if (select === this.getSelect(0)) {
                     this.getSelect(1).setValue('000000');
-                } else if (select === this.getSelect(1)) {
-                    this.getSelect(2) && this.getSelect(2).setValue('000000');
+                    if (this.getSelect(2)) {
+                        this.getSelect(2).setValue('000000');
+                    }
+                } else if (select === this.getSelect(1) && this.getSelect(2)) {
+                    this.getSelect(2).setValue('000000');
                 }
             },
             getValue: function () {
@@ -174,10 +173,9 @@ cities - 地区联动下拉框控件。
                 this._eInput.value = val;
                 this.getSelect(0).setValue(val.slice(0, 2) + '0000');
                 core.triggerEvent(this.getSelect(0), 'change');
-                if (val.slice(2) === '0000') {
-                    return;
-                }
+
                 this.getSelect(1).setValue(val.slice(0, 4) + '00');
+
                 if (this.getSelect(2)) {
                     core.triggerEvent(this.getSelect(1), 'change');
                     this.getSelect(2).setValue(val.slice(4) !== '00' ? val : '000000');

@@ -14,3 +14,4 @@ document.write('<script type="text/javascript" src="common/js/ui/cityselect/citi
 document.write('<script type="text/javascript" src="common/js/ui/drag/drag.js"></script>');
 document.write('<script type="text/javascript" src="common/js/ui/queryButton/queryButton.js"></script>');
 document.write('<script type="text/javascript" src="common/js/ui/multi-select/multi-select.js"></script>');
+document.write('<script type="text/javascript" src="common/js/ui/switch-checkbox/switch.js"></script>');
