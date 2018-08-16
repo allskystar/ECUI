@@ -52,27 +52,52 @@ _oTest      匹配合法性的正则表达式
             /**
              * @override
              */
-            $input: function (event) {
-                ui.Text.prototype.$input.call(this, event);
+            $keydown: function (event) {
+                ui.Text.prototype.$keydown.call(this, event);
 
-                var value = this.getValue(),
-                    pos = this.getSelectionStart();
-                if (this._oTest.test(value)) {
-                    this._sLastValue = value;
-                    setSelection(this, pos);
-                } else {
-                    this.setValue(this._sLastValue);
-                    setSelection(this, pos - 1);
+                switch (event.which) {
+                case 8:
+                    var value = this.getValue(),
+                        pos = this.getSelectionStart();
+
+                    this.setValue(value.slice(0, pos) + '0' + value.slice(this.getSelectionEnd()));
+                    setSelection(this, pos - 1, -1);
+                    event.preventDefault();
+                    break;
+                case 37:
+                    setSelection(this, this.getSelectionStart() - 1, -1);
+                    event.preventDefault();
+                    break;
+                case 38:
+                    setSelection(this, 0);
+                    event.preventDefault();
+                    break;
+                case 39:
+                    setSelection(this, this.getSelectionStart() + 1);
+                    event.preventDefault();
+                    break;
+                case 40:
+                    setSelection(this, 8);
+                    event.preventDefault();
+                    break;
+                default:
+                    if (event.which >= 48 && event.which <= 57) {
+                        value = this.getValue();
+                        pos = this.getSelectionEnd();
+
+                        value = value.slice(0, this.getSelectionStart()) + String.fromCharCode(event.which) + value.slice(pos);
+                        if (this._oTest.test(value)) {
+                            this.setValue(value);
+                            setSelection(this, pos);
+                        }
+                        event.preventDefault();
+                    }
                 }
-            },
 
-            /**
-             * @override
-             */
-            $keyup: function (event) {
-                ui.Text.prototype.$keyup.call(this, event);
-                var fix = event.which === 37 ? -1 : 0;
-                setSelection(this, this.getSelectionStart() + fix, fix);
+                var native = event.getNative();
+                if (!native.metaKey && !native.ctrlKey && !native.altKey) {
+                    event.preventDefault();
+                }
             },
 
             /**
