@@ -6,6 +6,7 @@
         position: absolute !important;
         overflow: hidden !important;
         .width100rate();
+        .height100rate();
     }
 
     input {
@@ -17,8 +18,9 @@
 }
 
 .ui-combox-placeholder {
-    input {
-        display: none !important;
+    .ui-combox-text {
+        *z-index: 1;
+        *background: white;
     }
 }
 

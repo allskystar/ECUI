@@ -92,6 +92,7 @@
                 this.premitAlterItems();
                 this.alterItems();
 
+                this.alterStatus(value ? '-placeholder' : '+placeholder');
                 this.$setValue(value);
             }
         }

@@ -21,8 +21,9 @@ _bRequired    - 是否必须选择
     var core = ecui,
         dom = core.dom,
         ui = core.ui,
-        util = core.util;
+        util = core.util,
 
+        ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined;
 //{/if}//
     /**
      * 下拉框控件。
@@ -73,6 +74,10 @@ _bRequired    - 是否必须选择
             dom.remove(oldEl);
 
             el.innerHTML = '<div class="' + options.classes.join('-text ') + '"></div>';
+            var input = optionsEl.getElementsByTagName('INPUT')[0];
+            if (input) {
+                el.appendChild(input);
+            }
 
             ui.InputControl.call(this, el, options);
 
@@ -282,7 +287,9 @@ _bRequired    - 是否必须选择
                     if (this.getValue()) {
                         this.alterStatus('-placeholder');
                     } else {
-                        this._uText.getBody().innerHTML = this._uOptions.getMain().getAttribute('placeholder') || '';
+                        if (ieVersion < 10) {
+                            this._uText.getBody().innerHTML = this.getInput().getAttribute('placeholder') || '';
+                        }
                         this.alterStatus('+placeholder');
                     }
                     this._cSelected = item;
