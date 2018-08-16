@@ -19,8 +19,8 @@
 
 .ui-combox-placeholder {
     .ui-combox-text {
-        *z-index: 1;
-        *background: white;
+        z-index: 1;
+        background: white;
     }
 }
 
