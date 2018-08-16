@@ -193,7 +193,7 @@ _ePlaceHolder - 为空时的提示信息标签
                 if (textAlign === 'end' || textAlign === 'right') {
                     util.timer(function () {
                         if (!this.getSelectionStart()) {
-                            this.setCaret(el.value.length);
+                            this.setSelection(el.value.length);
                         }
                     }, 400, this);
                 }
@@ -363,28 +363,34 @@ _ePlaceHolder - 为空时的提示信息标签
             },
 
             /**
-             * 设置输入框光标的位置。
+             * 设置输入框选中的区域，如果不指定结束的位置，将直接设置光标的位置。
              * @public
              *
-             * @param {number} pos 位置索引
+             * @param {number} startPos 选中区域开始位置索引
+             * @param {number} endPos 选中区域结束位置索引，如果省略，等于开始的位置
              */
-            setCaret: ieVersion ? function (pos) {
-                var range = this.getInput().createTextRange();
-                range.collapse();
-                range.select();
-                range.moveStart('character', pos);
-                range.collapse();
-                range.select();
-            } : function (pos) {
-                var input = this.getInput(),
-                    type = input.type;
+            setSelection: function (startPos, endPos) {
+                endPos = endPos === undefined ? startPos : Math.max(startPos, endPos);
 
-                if ('number' === typeof input.selectionStart) {
-                    input.setSelectionRange(pos, pos);
+                var input = this.getInput();
+
+                if (ieVersion) {
+                    var range = input.createTextRange();
+                    range.collapse();
+                    range.select();
+                    range.moveStart('character', startPos);
+                    range.moveEnd('character', endPos);
+                    range.select();
                 } else {
-                    input.type = 'text';
-                    input.setSelectionRange(pos, pos);
-                    input.type = type;
+                    var type = input.type;
+
+                    if ('number' === typeof input.selectionStart) {
+                        input.setSelectionRange(startPos, endPos);
+                    } else {
+                        input.type = 'text';
+                        input.setSelectionRange(startPos, endPos);
+                        input.type = type;
+                    }
                 }
             }
         }

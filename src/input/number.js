@@ -12,8 +12,8 @@ _nDecimal   小数位数
 _sLastValue 最后一次的合法输入
 _oTest      匹配合法性的正则表达式
 */
-(function () {
 //{if 0}//
+(function () {
     var core = ecui,
         ui = core.ui;
 //{/if}//
@@ -96,4 +96,6 @@ _oTest      匹配合法性的正则表达式
             }
         }
     );
+//{if 0}//
 }());
+//{/if}//
