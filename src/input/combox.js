@@ -72,25 +72,51 @@
             $input: function (event) {
                 ui.Select.prototype.$input.call(this, event);
                 this.$click(event);
-                this.setValue(this.getValue());
+                this.setValue(ui.Select.prototype.getValue.call(this));
+            },
+
+            /**
+             * @override
+             */
+            getValue: function () {
+                var item = this.getSelected();
+                return item ? item.getValue() : '';
+            },
+
+            /**
+             * @override
+             */
+            setSelected: function (item) {
+                ui.Select.prototype.setSelected.call(this, item);
+
+                item = this.getSelected();
+                if (item) {
+                    this.$setValue(item.getContent());
+                }
             },
 
             /**
              * @override
              */
             setValue: function (value) {
-                ui.Select.prototype.setValue.call(this, value);
+                var selected;
 
                 this.preventAlterItems();
                 this.getItems().forEach(function (item) {
-                    if (item.getContent().indexOf(value) < 0) {
+                    var text = item.getContent();
+                    if (text.indexOf(value) < 0) {
                         item.hide();
                     } else {
+                        if (text === value) {
+                            selected = item;
+                        }
                         item.show();
                     }
                 });
                 this.premitAlterItems();
                 this.alterItems();
+
+                this.setSelected(selected);
 
                 this.alterStatus(value ? '-placeholder' : '+placeholder');
                 this.$setValue(value);

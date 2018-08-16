@@ -275,7 +275,7 @@ _bRequired    - 是否必须选择
                     }
                     if (item) {
                         item.alterStatus('+selected');
-                        this._uText.getBody().innerHTML = item.getBody().innerHTML;
+                        this._uText.getBody().innerHTML = item.getContent();
                         ui.InputControl.prototype.setValue.call(this, item._sValue);
                         if (this._uOptions.isShow()) {
                             core.setFocused(item);
