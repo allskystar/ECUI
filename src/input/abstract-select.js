@@ -24,7 +24,6 @@ _bRequired    - 是否必须选择
         util = core.util;
 
 //{/if}//
-
     /**
      * 下拉框控件。
      * 扩展了原生 SelectElement 的功能，允许指定下拉选项框的最大选项数量，在屏幕显示不下的时候，会自动显示在下拉框的上方。在没有选项时，下拉选项框有一个选项的高度。下拉框控件允许使用键盘与滚轮操作，在下拉选项框打开时，可以通过回车键或鼠标点击选择，上下键选择选项的当前条目，在关闭下拉选项框后，只要拥有焦点，就可以通过滚轮上下选择选项。
@@ -81,7 +80,6 @@ _bRequired    - 是否必须选择
             this._uOptions = core.$fastCreate(this.Options, optionsEl, this, {focusable: false});
 
             this._bRequired = !!options.required;
-            this._cSelected = null;
 
             this.setPopup(this._uOptions);
             this.$setBody(this._uOptions.getBody());
@@ -277,11 +275,15 @@ _bRequired    - 是否必须选择
                         if (this._uOptions.isShow()) {
                             core.setFocused(item);
                         }
-                        this.alterStatus(item._sValue === '' ? '+placeholder' : '-placeholder');
                     } else {
-                        this._uText.getBody().innerHTML = '';
                         ui.InputControl.prototype.setValue.call(this, '');
                         core.setFocused(this);
+                    }
+                    if (this.getValue()) {
+                        this.alterStatus('-placeholder');
+                    } else {
+                        this._uText.getBody().innerHTML = this._uOptions.getMain().getAttribute('placeholder') || '';
+                        this.alterStatus('+placeholder');
                     }
                     this._cSelected = item;
                 }
