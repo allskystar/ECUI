@@ -728,6 +728,22 @@ _aStatus            - 控件当前的状态集合
             },
 
             /**
+             * 找到指定类型的祖先控件。
+             * @public
+             *
+             * @param {Function} UIClass 控件的构造函数
+             * @return {ecui.ui.Control} 指定类型的控件，如果不存在返回 null
+             */
+            findControl: function (UIClass) {
+                for (var parent = this.getParent(); parent; parent = parent.getParent()) {
+                    if (parent instanceof UIClass) {
+                        return parent;
+                    }
+                }
+                return null;
+            },
+
+            /**
              * 控件获得焦点状态。
              * 如果控件没有处于焦点状态，focus 方法将设置控件获取焦点状态，参见 isFocused 与 setFocused 方法。
              * @public
