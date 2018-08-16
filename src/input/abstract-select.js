@@ -287,9 +287,7 @@ _bRequired    - 是否必须选择
                     if (this.getValue()) {
                         this.alterStatus('-placeholder');
                     } else {
-                        if (ieVersion < 10) {
-                            this._uText.getBody().innerHTML = this.getInput().getAttribute('placeholder') || '';
-                        }
+                        this._uText.getBody().innerHTML = this.getInput().getAttribute('placeholder') || '';
                         this.alterStatus('+placeholder');
                     }
                     this._cSelected = item;
