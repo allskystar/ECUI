@@ -1763,7 +1763,6 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                                 item[0]
                             );
                             dom.remove(item[0]);
-                            console.log(document.body.innerHTML);
                             loadTpl();
                         },
                         onerror: function () {
