@@ -232,7 +232,11 @@ a {
     /*background: url(images/ecui/arrow.png) no-repeat 120px center;*/
     font-size: 14px;
     color: #8492a6;
-
+    .ui-combox-text {
+        line-height:28px;
+        text-indent: 5px;
+        font-size:12px;
+    }
     input {
         width: 100%;
         height: 100%;
