@@ -21,9 +21,7 @@ _bRequired    - 是否必须选择
     var core = ecui,
         dom = core.dom,
         ui = core.ui,
-        util = core.util,
-
-        ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined;
+        util = core.util;
 //{/if}//
     /**
      * 下拉框控件。
@@ -287,7 +285,10 @@ _bRequired    - 是否必须选择
                     if (this.getValue()) {
                         this.alterStatus('-placeholder');
                     } else {
-                        this._uText.getBody().innerHTML = this.getInput().getAttribute('placeholder') || '';
+                        var placeholder = this.getInput().getAttribute('placeholder');
+                        if (placeholder) {
+                            this._uText.getBody().innerHTML = placeholder;
+                        }
                         this.alterStatus('+placeholder');
                     }
                     this._cSelected = item;
