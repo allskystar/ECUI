@@ -81,7 +81,7 @@ _oTest      匹配合法性的正则表达式
                     event.preventDefault();
                     break;
                 default:
-                    if ((event.which >= 48 && event.which <= 57) || (event.which >= 96 && event.which <= 107)) {
+                    if ((event.which >= 48 && event.which <= 57) || (event.which >= 96 && event.which <= 105)) {
                         value = this.getValue();
                         pos = this.getSelectionEnd();
 
