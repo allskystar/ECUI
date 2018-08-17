@@ -11,10 +11,11 @@
 </div>
 
 @fields
+_bRequired    - 是否必须选择
+_sPlaceHolder - 为空时的提示信息内容
 _cSelected    - 当前选中的选项
 _uText        - 下拉框的文本框
 _uOptions     - 下拉选择框
-_bRequired    - 是否必须选择
 */
 (function () {
 //{if 0}//
@@ -83,6 +84,8 @@ _bRequired    - 是否必须选择
             this._uOptions = core.$fastCreate(this.Options, optionsEl, this, {focusable: false});
 
             this._bRequired = !!options.required;
+            this._sPlaceHolder = dom.getAttribute(this.getInput(), 'placeholder') || '';
+            this.getInput().setAttribute('placeholder', '');
 
             this.setPopup(this._uOptions);
             this.$setBody(this._uOptions.getBody());
@@ -213,7 +216,7 @@ _bRequired    - 是否必须选择
              */
             $ready: function (options) {
                 ui.InputControl.prototype.$ready.call(this, options);
-                this.setValue(this.getValue());
+                this.setValue(this.getInput().value);
                 this._bAlterItems = true;
             },
 
@@ -280,18 +283,22 @@ _bRequired    - 是否必须选择
                         }
                     } else {
                         ui.InputControl.prototype.setValue.call(this, '');
-                        core.setFocused(this);
-                    }
-                    if (this.getValue()) {
-                        this.alterStatus('-placeholder');
-                    } else {
-                        var placeholder = this.getInput().getAttribute('placeholder');
-                        if (placeholder) {
-                            this._uText.getBody().innerHTML = placeholder;
+                        if (this.contain(core.getFocused())) {
+                            core.setFocused(this);
                         }
-                        this.alterStatus('+placeholder');
                     }
                     this._cSelected = item;
+                }
+
+                if (this.getInput().value) {
+                    this.alterStatus('-placeholder');
+                } else {
+                    if (this._sPlaceHolder) {
+                        this._uText.getBody().innerHTML = this._sPlaceHolder;
+                    } else if (!item) {
+                        this._uText.getBody().innerHTML = '';
+                    }
+                    this.alterStatus('+placeholder');
                 }
             },
 

@@ -13,12 +13,27 @@
     <div ui="value:22">22</div>
 </div>
 */
-//{if 0}//
 (function () {
+//{if 0}//
     var core = ecui,
         ui = core.ui,
         util = core.util;
 //{/if}//
+    function refresh(combox) {
+        var text = ui.Select.prototype.getValue.call(combox);
+
+        combox.preventAlterItems();
+        combox.getItems().forEach(function (item) {
+            if (item.getContent().indexOf(text) < 0) {
+                item.hide();
+            } else {
+                item.show();
+            }
+        });
+        combox.premitAlterItems();
+        combox.alterItems();
+    }
+
     /**
      * 组合框控件。
      * 组合框可以在下拉选项中选择，也可以输入内容。
@@ -72,7 +87,28 @@
             $input: function (event) {
                 ui.Select.prototype.$input.call(this, event);
                 this.$click(event);
-                this.setValue(ui.Select.prototype.getValue.call(this));
+                this.$selectText(ui.Select.prototype.getValue.call(this));
+            },
+
+            /**
+             * 根据文本值选择选项，如果有重复文本选择最后一项
+             * @public
+             *
+             * @param {string} text 文本
+             */
+            $selectText: function (text) {
+                var selected;
+                this.getItems().forEach(function (item) {
+                    if (item.getContent() === text) {
+                        selected = item;
+                    }
+                });
+                this.setSelected(selected);
+                if (!selected) {
+                    this.$setValue(text);
+                }
+                refresh(this);
+                this.alterStatus(text ? '-placeholder' : '+placeholder');
             },
 
             /**
@@ -93,36 +129,9 @@
                 if (item) {
                     this.$setValue(item.getContent());
                 }
-            },
 
-            /**
-             * @override
-             */
-            setValue: function (value) {
-                var selected;
-
-                this.preventAlterItems();
-                this.getItems().forEach(function (item) {
-                    var text = item.getContent();
-                    if (text.indexOf(value) < 0) {
-                        item.hide();
-                    } else {
-                        if (text === value) {
-                            selected = item;
-                        }
-                        item.show();
-                    }
-                });
-                this.premitAlterItems();
-                this.alterItems();
-
-                this.setSelected(selected);
-
-                this.alterStatus(value ? '-placeholder' : '+placeholder');
-                this.$setValue(value);
+                refresh(this);
             }
         }
     );
-//{if 0}//
 }());
-//{/if}//
