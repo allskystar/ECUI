@@ -81,11 +81,11 @@ _oTest      匹配合法性的正则表达式
                     event.preventDefault();
                     break;
                 default:
-                    if (event.which >= 48 && event.which <= 57) {
+                    if ((event.which >= 48 && event.which <= 57) || (event.which >= 96 && event.which <= 107)) {
                         value = this.getValue();
                         pos = this.getSelectionEnd();
 
-                        value = value.slice(0, this.getSelectionStart()) + String.fromCharCode(event.which) + value.slice(pos);
+                        value = value.slice(0, this.getSelectionStart()) + (event.which % 48) + value.slice(pos);
                         if (this._oTest.test(value)) {
                             this.setValue(value);
                             setSelection(this, pos);
