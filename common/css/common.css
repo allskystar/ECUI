@@ -666,6 +666,15 @@ a {
     }
 }
 
+.ui-time{
+    width:70px;
+    height:20px;
+    line-height:20px;
+    input{
+        text-align: center;
+    }
+}
+
 .ui-upload {
     display: block;
     width: 300px;
