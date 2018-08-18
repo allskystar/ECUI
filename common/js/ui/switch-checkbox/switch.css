@@ -1,12 +1,11 @@
 /*<script>window.onload=function(){value=document.getElementsByTagName('TEXTAREA')[0].value;parent.postMessage({url:location.href.slice(7),text:value.slice(value.indexOf('\n')+1).replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&')},'*');}</script><textarea>*/
 .ui-switch {
-	width: 50px;
-	position:relative;   
+    width: 70px;
+    height:22px;
+    position:relative;   
     display: block;   
     padding: 1px;   
     border-radius: 24px;   
-    height: 22px;   
-    margin-bottom: 15px;   
     background-color: #eee;   
     cursor: pointer;   
     vertical-align: top;   
@@ -26,20 +25,20 @@
     content: '';   
     position: absolute;   
     top: 50%;     
-    left: 50%;     
+    left: 0;     
     margin-top: -11px;     
-    margin-left: -11px;   
+    margin-left: 11px;   
     width: 22px;   
     height: 22px;   
     border-radius: 22px;   
     background-color: white;   
-    box-shadow: 1px 1px 1px 1px rgba(0,0,0,0.08);   
+    box-shadow: 0 0 1px black;  
     -webkit-transform: translateX(-9px);   
     -webkit-transition: all 0.3s ease;   
 }
 .ui-switch-checked:after{   
-    -webkit-transform: translateX(9px);   
+    -webkit-transform: translateX(39px);   
 }   
 .ui-switch-checked:before{   
-    background-color:green;   
+    background-color:#64bd63;   
 }  
