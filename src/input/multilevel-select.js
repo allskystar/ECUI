@@ -90,6 +90,7 @@ _aSelect - 全部的下拉框控件列表
                                             core.dispatchEvent(parent, 'request', {data: data, owner: currSelect});
                                             currSelect.add(data);
                                             item._aChildren = currSelect.getItems();
+                                            this.setValue(this.getValue());
                                         }
                                     }.bind(this));
                                 }
