@@ -52,10 +52,12 @@ _bAlterItems  - 是否延迟到显示时执行alterItems
         'ui-select',
         function (el, options) {
             // 初始化下拉区域最多显示的选项数量
-            this._nOptionSize = options.optionSize || 10;
+            this._nOptionSize = options.optionSize || this.DEFAULT_OPTION_SIZE;
             ui.$select.call(this, el, options);
         },
         {
+            DEFAULT_OPTION_SIZE: 10,
+
             /**
              * 选项框部件。
              * @unit

@@ -37,43 +37,44 @@ _uOptions     - 下拉选择框
         function (el, options) {
             util.setDefault(options, 'readOnly', true);
 
-            var oldEl = el;
-            el = dom.insertBefore(
-                dom.create(
-                    {
-                        className: el.className,
-                        style: {
-                            cssText: el.style.cssText
-                        }
-                    }
-                ),
-                el
-            );
-
-            if (oldEl.tagName === 'SELECT') {
-                options.name = oldEl.name;
-                options.value = oldEl.value;
+            if (el.tagName === 'SELECT') {
+                options.name = el.name;
+                options.value = el.value;
 
                 var optionsEl = dom.create(
-                    {
-                        innerHTML: Array.prototype.slice.call(oldEl.options).map(
-                            function (item) {
-                                var optionText = dom.getAttribute(item, core.getAttributeName());
-                                return '<div ' + core.getAttributeName() + '="value:' + util.encodeHTML(item.value) + (optionText ? ';' + util.encodeHTML(optionText) : '') + '">' + util.encodeHTML(item.text) + '</div>';
+                        {
+                            innerHTML: Array.prototype.slice.call(el.options).map(
+                                function (item) {
+                                    var optionText = dom.getAttribute(item, core.getAttributeName());
+                                    return '<div ' + core.getAttributeName() + '="value:' + util.encodeHTML(item.value) + (optionText ? ';' + util.encodeHTML(optionText) : '') + '">' + util.encodeHTML(item.text) + '</div>';
+                                }
+                            ).join('')
+                        }
+                    );
+
+                el = dom.insertBefore(
+                    dom.create(
+                        {
+                            className: el.className,
+                            style: {
+                                cssText: el.style.cssText
                             }
-                        ).join('')
-                    }
+                        }
+                    ),
+                    el
                 );
+
+                dom.remove(el.nextSibling);
             } else {
-                optionsEl = oldEl;
-                oldEl.style.cssText = '';
+                optionsEl = dom.create('DIV');
+                var input = el.getElementsByTagName('INPUT')[0];
+                for (; el.firstChild; ) {
+                    optionsEl.appendChild(el.firstChild);
+                }
             }
+
             optionsEl.className = options.classes.join('-options ') + 'ui-popup ui-hide';
-
-            dom.remove(oldEl);
-
             el.innerHTML = '<div class="' + options.classes.join('-text ') + '"></div>';
-            var input = optionsEl.getElementsByTagName('INPUT')[0];
             if (input) {
                 el.appendChild(input);
             }

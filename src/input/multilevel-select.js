@@ -21,15 +21,6 @@ _aSelect - 全部的下拉框控件列表
      */
     ui.MultilevelSelect = core.inherits(
         ui.InputControl,
-        function (el, options) {
-            ui.InputControl.call(this, el, options);
-
-            this._aSelect = [];
-            Array.prototype.slice.call(el.getElementsByTagName('SELECT')).forEach(function (item) {
-                item.className += this.Select.CLASS;
-                this._aSelect.push(core.$fastCreate(this.Select, item, this, core.getOptions(item)));
-            }, this);
-        },
         {
             /**
              * 下拉框部件。
@@ -37,10 +28,6 @@ _aSelect - 全部的下拉框控件列表
              */
             Select: core.inherits(
                 ui.Select,
-                function (el, options) {
-                    this._sUrl = dom.getAttribute(el, 'href');
-                    ui.Select.call(this, el, options);
-                },
                 {
                     /**
                      * 选项部件。
@@ -87,21 +74,24 @@ _aSelect - 全部的下拉框控件列表
                                     }
                                 }
                             } else if (select) {
-                                var args = [select._sUrl];
+                                var args = [dom.getAttribute(select.getMain(), 'href')];
                                 if (args[0]) {
                                     parent._aSelect.forEach(function (item) {
                                         args.push(item.getValue());
                                     });
 
-                                    var selected = this.getSelected();
+                                    select.removeAll();
+
+                                    var selected = this.getSelected(),
+                                        currSelect = select;
                                     core.request(util.stringFormat.apply(null, args), function (data) {
-                                        if (selected === this.getSelected() && !select.getLength()) {
-                                            select.removeAll();
-                                            core.dispatchEvent(parent, 'request', {data: data, owner: select});
-                                            select.add(data);
-                                            item._aChildren = select.getItems();
+                                        if (selected === this.getSelected()) {
+                                            currSelect.removeAll();
+                                            core.dispatchEvent(parent, 'request', {data: data, owner: currSelect});
+                                            currSelect.add(data);
+                                            item._aChildren = currSelect.getItems();
                                         }
-                                    });
+                                    }.bind(this));
                                 }
                             }
                         }
@@ -119,6 +109,30 @@ _aSelect - 全部的下拉框控件列表
              * @event
              */
             $change: util.blank,
+
+            /**
+             * @override
+             */
+            $ready: function (event) {
+                ui.InputControl.prototype.$ready.call(this, event);
+
+                var el = this.getMain();
+                this._aSelect = [];
+                Array.prototype.slice.call(el.all || el.getElementsByTagName('*')).forEach(function (item) {
+                    if (item.getControl) {
+                        item = item.getControl();
+                        if (item instanceof ui.Select && this._aSelect.indexOf(item) < 0) {
+                            this._aSelect.push(item);
+                        }
+                    } else if (item.tagName === 'SELECT') {
+                        var href = dom.getAttribute(item, 'href');
+                        item.className += this.Select.CLASS;
+                        item = core.$fastCreate(this.Select, item, this, core.getOptions(item));
+                        item.getMain().setAttribute('href', href);
+                        this._aSelect.push(item);
+                    }
+                }, this);
+            },
 
             /**
              * 请求返回事件，如果数据需要进行处理，请在此实现。
