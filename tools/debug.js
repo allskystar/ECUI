@@ -137,7 +137,7 @@
             ecui.io.ajax(moduleName + '_define_.css', {
                 cache: true,
                 onsuccess: function (cssText) {
-                    createStyle(cssText);
+                    createStyle('.module-' + moduleName.slice(0, -1).replace(/[._]/g, '-').replace(/\//g, '_') + '{' + cssText + '}');
                     oldLoadScriptFn.call(this, url, null, options);
                 },
                 onerror: function () {

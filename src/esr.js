@@ -222,7 +222,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                 }
             } else {
                 // 解决A标签下反复修改的问题
-                currLocation = esr.getLocation().replace('~DENY_CACHE', '');
+                setLocation(esr.getLocation().replace('~DENY_CACHE', ''));
                 util.timer(function () {
                     history.replaceState('', '', '#' + currLocation);
                 }, 100);
@@ -621,7 +621,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                     // ie下使用中间iframe作为中转控制
                     // 其他浏览器直接调用控制器方法
                     if (!addIEHistory(loc)) {
-                        currLocation = loc;
+                        setLocation(loc);
                         esr.callRoute(loc);
                     }
                 } else {
@@ -647,7 +647,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                         // ie下使用中间iframe作为中转控制
                         // 其他浏览器直接调用控制器方法
                         if (!addIEHistory(loc)) {
-                            currLocation = loc;
+                            setLocation(loc);
                             esr.callRoute(loc);
                         }
                     }, 100);
@@ -809,6 +809,24 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
             scope[list[i]].push(value);
         } else {
             scope[list[i]] = value;
+        }
+    }
+
+    /**
+     * 设置当前的 location。
+     * @private
+     *
+     * @param {string} loc 当前的loc
+     */
+    function setLocation(loc) {
+        var oldModule = getModuleName(currLocation),
+            newModule = getModuleName(loc);
+
+        currLocation = loc;
+
+        if (oldModule !== newModule) {
+            dom.removeClass(document.body, 'module-' + oldModule.slice(0, -1).replace(/[._]/g, '-').replace(/\//g, '_'));
+            dom.addClass(document.body, 'module-' + newModule.slice(0, -1).replace(/[._]/g, '-').replace(/\//g, '_'));
         }
     }
 
@@ -1563,7 +1581,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
             if (esr.getLocation() !== loc) {
                 location.hash = loc;
             }
-            currLocation = loc;
+            setLocation(loc);
         },
 
         /**

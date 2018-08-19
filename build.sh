@@ -133,7 +133,7 @@ do
     reg=${module//\//\\/}
     if [ -f "_define_.css" ]
     then
-        file="//{include file=\"_define_.css\"}//"
+        file=".module-${ns%_*}{\n//{include file=\"_define_.css\"}//\n}"
     else
         file=""
     fi
