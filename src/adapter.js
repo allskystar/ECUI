@@ -943,7 +943,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
 
             /**
              * 对目标字符串进行 html 编码。
-             * encodeHTML 方法对四个字符进行编码，分别是 &<>"
+             * encodeHTML 方法对五个字符进行编码，分别是 &<>"'
              * @public
              *
              * @param {string} source 目标字符串
@@ -954,6 +954,23 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                     /[&<>"']/g,
                     function (match) {
                         return '&#' + match.charCodeAt(0) + ';';
+                    }
+                );
+            },
+
+            /**
+             * 对目标字符串进行 js 编码。
+             * encodeJS 方法对单双引号进行编码
+             * @public
+             *
+             * @param {string} source 目标字符串
+             * @return {string} 结果字符串
+             */
+            encodeJS: function (source) {
+                return source.replace(
+                    /["']/g,
+                    function (match) {
+                        return match === '"' ? '\\x22' : '\\x27';
                     }
                 );
             },
