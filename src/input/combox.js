@@ -87,17 +87,10 @@
             $input: function (event) {
                 ui.Select.prototype.$input.call(this, event);
                 this.$click(event);
-                this.$selectText(ui.Select.prototype.getValue.call(this));
-            },
 
-            /**
-             * 根据文本值选择选项，如果有重复文本选择最后一项
-             * @public
-             *
-             * @param {string} text 文本
-             */
-            $selectText: function (text) {
-                var selected;
+                var text = ui.Select.prototype.getValue.call(this),
+                    selected;
+
                 this.getItems().forEach(function (item) {
                     if (item.getContent() === text) {
                         selected = item;
