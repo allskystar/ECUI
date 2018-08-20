@@ -54,7 +54,7 @@
      * @protected
      *
      * @param {string} className 弹出框样式
-     * @param {string} text 提示信息文本
+     * @param {string|object} text 提示信息文本或信息文件的对象{title: 标题, content: 内容}
      * @param {Array} buttonTexts 按钮的文本数组
      * @param {Function} ... 按钮的点击事件处理函数，顺序与参数中按钮文本定义的顺序一致
      */
@@ -82,6 +82,12 @@
             buttonInstances.push(core.create(Button, {element: dom.create(), parent: elButton}));
         }
 
+        if ('string' === typeof text) {
+            instance.setTitle(location.host);
+        } else {
+            instance.setTitle(text.title);
+            text = text.content;
+        }
         core.dispose(elContent);
         elContent.innerHTML = text;
         core.init(elContent);
