@@ -293,7 +293,9 @@ daikuan.setFormValue = function (context, form, searchParm) {
             }
             var _control = item.getControl && item.getControl();
             if (_control) {
-                if (_control instanceof ecui.ui.Radio) {
+                if (_control instanceof ecui.esr.CreateArray || _control instanceof ecui.esr.CreateObject) {
+                    return;
+                } else if (_control instanceof ecui.ui.Radio) {
                     _control.setChecked(searchParm[name] === _control.getValue());
                 } else if (_control instanceof ecui.ui.Checkbox) {
                     _control.setChecked(searchParm[name].indexOf(_control.getValue()) !== -1);
@@ -340,7 +342,9 @@ daikuan.setSearchParam = function(searchParm, form) {
         if (item.name) {
             var _control = ecui.findControl(item);
             if (_control) {
-                if (_control instanceof ecui.ui.Radio) {
+                if (_control instanceof ecui.esr.CreateArray || _control instanceof ecui.esr.CreateObject) {
+                    // 如果是ecui.esr.CreateArray 和 ecui.esr.CreateObject元素，不做任何处理
+                } else if (_control instanceof ecui.ui.Radio) {
                     if (Array.prototype.indexOf.call(form.elements[item.name], _control.getInput()) === 0) {
                         searchParm[item.name] = '';
                     }
