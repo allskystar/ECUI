@@ -129,6 +129,7 @@ _cItem    - 当前处于激活的选项
                      * @override
                      */
                     setPosition: function (x) {
+                        this.cache();
                         var sum = this.$$sumWidth,
                             offset = 0,
                             limit = x < -sum * 3 / 4 ? -sum : 0;
