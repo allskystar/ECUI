@@ -714,7 +714,10 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
         });
 
         core.dispose(el, true);
+//{if 1}//        el.innerHTML = engine.render(name || route.view, context).replace(/([^A-Za-z0-9_])NS\./g, '$1ecui.ns[\'_' + getModuleName(currLocation).replace(/[._]/g, '-').replace(/\//g, '_') + '\'].');
+//{else}//
         el.innerHTML = engine.render(name || route.view, context);
+//{/if}//
         core.init(el);
 
         if (route.NAME) {
@@ -1708,7 +1711,8 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                         content.appendChild(item);
                         var first = item.firstChild;
                         if (first && first === item.lastChild && first.nodeType === 8) {
-                            item.innerHTML = etpl.compile(first.textContent || first.nodeValue)({NS: (core.ns['_' + item.id.slice(0, item.id.lastIndexOf('_') + 1)] || {}).data});
+                            var moduleName = '_' + item.id.slice(0, item.id.lastIndexOf('_') + 1);
+                            item.innerHTML = etpl.compile(first.textContent || first.nodeValue)({NS: (core.ns[moduleName] || {}).data}).replace(/([^A-Za-z0-9_])NS\./g, '$1ecui.ns[\'' + moduleName + '\'].');
                         }
                     }
 
