@@ -443,6 +443,8 @@ _nBottomIndex  - 下部隐藏的选项序号
              * @override
              */
             setPosition: function (x, y) {
+                this.preventAlterItems();
+
                 var top = ui.MScroll.Methods.getY.call(this);
 
                 if (top < -screen.availHeight * 1.5) {
@@ -511,6 +513,8 @@ _nBottomIndex  - 下部隐藏的选项序号
                     }
                     this._sStatus = status;
                 }
+
+                this.premitAlterItems();
             }
         }
     );
