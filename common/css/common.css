@@ -342,6 +342,14 @@ a {
         background-color: #ffead6;
     }
 
+    .ui-combox {
+        border-color: #d0021b;
+
+        .ui-combox-text {
+            background-color: #ffead6;
+        }
+    }
+
     .ui-select-text {
         background-color: #ffead6;
     }

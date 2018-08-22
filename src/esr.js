@@ -1315,35 +1315,32 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                     }) !== false) {
                     afterrender(route);
                 }
-            } else if (engine.getRenderer(route.view)) {
-                render(route);
             } else {
-                // 如果在当前引擎找不到模板，有可能是主路由切换，也可能是主路由不存在
-                var moduleName = getModuleName(route.NAME);
-                engine = loadStatus[moduleName];
-
-                if (engine instanceof etpl.Engine) {
-                    if (engine.getRenderer(route.view)) {
-                        render(route);
-                        return;
-                    }
+                if (route.NAME) {
+                    var moduleName = getModuleName(route.NAME);
+                    engine = loadStatus[moduleName];
                 }
 
-                if (engine === true) {
-                    loadTPL();
-                } else if (!engine) {
-                    pauseStatus = true;
-                    io.ajax(moduleName + '_define_.css', {
-                        cache: true,
-                        onsuccess: function (data) {
-                            dom.createStyleSheet(data).setAttribute('module', '/' + moduleName);
-                            loadStatus[moduleName] = true;
-                            loadTPL();
-                        },
-                        onerror: function () {
-                            pauseStatus = false;
-                        }
-                    });
+                if (engine instanceof etpl.Engine && engine.getRenderer(route.view)) {
+                    // 如果在当前引擎找不到模板，有可能是主路由切换，也可能是主路由不存在
+                    render(route);
+                } else {
+                    if (engine === true) {
+                        loadTPL();
+                    } else if (!engine) {
+                        pauseStatus = true;
+                        io.ajax(moduleName + '_define_.css', {
+                            cache: true,
+                            onsuccess: function (data) {
+                                dom.createStyleSheet(data).setAttribute('module', '/' + moduleName);
+                                loadStatus[moduleName] = true;
+                                loadTPL();
+                            },
+                            onerror: function () {
+                                pauseStatus = false;
+                            }
+                        });
+                    }
                 }
             }
         },
