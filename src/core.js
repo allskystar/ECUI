@@ -15,6 +15,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
         isToucher = document.ontouchstart !== undefined,
         isPointer = !!window.PointerEvent, // 使用pointer事件序列，请一定在需要滚动的元素上加上touch-action:none
         isStrict = document.compatMode === 'CSS1Compat',
+        iosVersion = /(iPhone|iPad).+OS (\d+)/i.test(navigator.userAgent) ?  +(RegExp.$2) : undefined,
         ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined,
         chromeVersion = /Chrome\/(\d+\.\d)/i.test(navigator.userAgent) ? +RegExp.$1 : undefined,
         firefoxVersion = /firefox\/(\d+\.\d)/i.test(navigator.userAgent) ? +RegExp.$1 : undefined,
@@ -22,6 +23,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 //{/if}//
     var HIGH_SPEED = 100,         // 对高速的定义
         scrollHandler,            // DOM滚动事件
+        dragStopHandler = util.blank, // ios设备上移出webview区域停止事件
         isTouchMoved,
         ecuiName = 'ui',          // Element 中用于自动渲染的 ecui 属性名称
         isGlobalId,               // 是否自动将 ecui 的标识符全局化
@@ -667,7 +669,16 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             mousedown: util.blank,
 
             mousemove: function (event) {
-                dragmove(event.track, currEnv, event.clientX, event.clientY);
+                var view = util.getView();
+                dragStopHandler();
+                if (iosVersion && (event.clientX < 0 || event.clientX >= view.width || event.clientY < 0 || event.clientY >= view.height)) {
+                    // 延后500ms执行，无意中的滑出不会受到影响
+                    dragStopHandler = util.timer(function () {
+                        dragEnv.mouseup(event);
+                    }, 500);
+                } else {
+                    dragmove(event.track, currEnv, event.clientX, event.clientY);
+                }
                 event.preventDefault();
             },
 
@@ -2309,7 +2320,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                     return item;
                 }
             }
-            return core.create(UIClass, 'function' === typeof el ? el() : el, parent, options);
+            return core.create(UIClass, Object.assign({}, options, { main: 'function' === typeof el ? el() : el, parent: parent}));
         },
 
         /**
