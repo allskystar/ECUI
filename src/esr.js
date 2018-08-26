@@ -1315,11 +1315,11 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                     }) !== false) {
                     afterrender(route);
                 }
+            } else if (etpl.getRenderer(route.view)) {
+                render(route);
             } else {
-                if (route.NAME) {
-                    var moduleName = getModuleName(route.NAME);
-                    engine = loadStatus[moduleName];
-                }
+                var moduleName = getModuleName(route.NAME);
+                engine = loadStatus[moduleName];
 
                 if (engine instanceof etpl.Engine && engine.getRenderer(route.view)) {
                     // 如果在当前引擎找不到模板，有可能是主路由切换，也可能是主路由不存在
