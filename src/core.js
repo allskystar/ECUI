@@ -686,6 +686,8 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             mouseover: util.blank,
 
             mouseup: function (event) {
+                dragStopHandler();
+
                 disableEnv.mouseup(event);
 
                 var track = event.track,
