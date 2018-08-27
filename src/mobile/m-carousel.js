@@ -67,10 +67,10 @@ _nDelay   - 延迟时间，如果不自动轮播这个值为0
             count = imgs.length - 2;
 
         if (currImage) {
-            currImage.style.display = 'none';
+            dom.addClass(currImage, 'ui-hide');
         }
         currImage = imgs[index + 1];
-        currImage.style.display = '';
+        dom.removeClass(currImage, 'ui-hide');
         imgs[0].index = (index + count - 1) % count;
         imgs[0].src = imgs[imgs[0].index + 1].src;
         imgs[count + 1].index = (index + 1) % count;
@@ -119,9 +119,11 @@ _nDelay   - 延迟时间，如果不自动轮播这个值为0
              * @override
              */
             $activate: function (event) {
-                ui.MPanel.prototype.$activate.call(this, event);
-                if (this._nDelay) {
-                    this.stop();
+                if (dom.children(this.getBody()).length > 3) {
+                    ui.MPanel.prototype.$activate.call(this, event);
+                    if (this._nDelay) {
+                        this.stop();
+                    }
                 }
             },
 
@@ -148,9 +150,7 @@ _nDelay   - 延迟时间，如果不自动轮播这个值为0
              */
             $dragend: function (event) {
                 ui.MPanel.prototype.$dragend.call(this, event);
-                if (this._nDelay) {
-                    this.start();
-                }
+                this.start();
                 var el = this.getBody();
                 if (el.firstChild !== el.lastChild) {
                     refresh(this);
@@ -166,7 +166,7 @@ _nDelay   - 延迟时间，如果不自动轮播这个值为0
                 var el = this.getBody();
                 if (el.firstChild !== el.lastChild) {
                     dom.children(el).forEach(function (item) {
-                        item.style.display = 'none';
+                        dom.addClass(item, 'ui-hide');
                     });
                     dom.insertBefore(dom.create('IMG'), el.firstChild);
                     dom.insertAfter(dom.create('IMG'), el.lastChild);
@@ -192,7 +192,9 @@ _nDelay   - 延迟时间，如果不自动轮播这个值为0
              * @public
              */
             start: function () {
-                this.stop = util.timer(next, this._nDelay, this);
+                if (this._nDelay) {
+                    this.stop = util.timer(next, this._nDelay, this);
+                }
             },
 
             /**
