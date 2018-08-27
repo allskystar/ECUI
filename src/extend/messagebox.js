@@ -143,6 +143,16 @@
     };
 
     /**
+     * 关闭消息框。
+     * @public
+     *
+     * @return {boolean} 消息框是否正在工作
+     */
+    core.closeMessageBox = function () {
+        core.getSingleton(MessageBox).hide();
+    };
+
+    /**
      * 消息框显示提示信息，包含确认/取消按钮。
      * @public
      *

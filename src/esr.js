@@ -557,33 +557,36 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                 document.activeElement.blur();
 
                 if (currLocation) {
-                    if (core.hasMessageBox() || leaveUrl) {
-                        history.go(/~HISTORY=(\d+)/.test(loc) ? historyIndex - +RegExp.$1 : -1);
-                        return;
-                    }
+                    if (!/~ALLOW_LEAVE(~|$)/.test(loc)) {
+                        if (leaveUrl) {
+                            history.go(/~HISTORY=(\d+)/.test(loc) ? historyIndex - +RegExp.$1 : -1);
+                            return;
+                        }
 
-                    if (leaveUrl === undefined) {
-                        var currRoute = esr.getRoute(currLocation.split('~')[0]);
-                        if (!/~ALLOW_LEAVE(~|$)/.test(currLocation) && currRoute && currRoute.onleave) {
-                            if (currRoute.onleave(
-                                    context,
-                                    function (forward) {
-                                        if (forward) {
-                                            history.go(/~HISTORY=(\d+)/.test(leaveUrl) ? +RegExp.$1 - historyIndex : 1);
-                                            leaveUrl = '';
-                                        } else {
-                                            leaveUrl = undefined;
+                        if (leaveUrl === undefined) {
+                            var currRoute = esr.getRoute(currLocation.split('~')[0]);
+                            // 需要判断是不是showSelect中返回的
+                            if (!/~ALLOW_LEAVE(~|$)/.test(currLocation) && currRoute && currRoute.onleave) {
+                                if (currRoute.onleave(
+                                        context,
+                                        function (forward) {
+                                            if (forward) {
+                                                history.go(/~HISTORY=(\d+)/.test(leaveUrl) ? +RegExp.$1 - historyIndex : 1);
+                                                leaveUrl = '';
+                                            } else {
+                                                leaveUrl = undefined;
+                                            }
                                         }
-                                    }
-                                ) === false) {
-                                leaveUrl = loc;
+                                    ) === false) {
+                                    leaveUrl = loc;
+                                }
                             }
                         }
-                    }
 
-                    if (core.hasMessageBox() || leaveUrl) {
-                        history.go(/~HISTORY=(\d+)/.test(loc) ? historyIndex - +RegExp.$1 : -1);
-                        return;
+                        if (leaveUrl) {
+                            history.go(/~HISTORY=(\d+)/.test(loc) ? historyIndex - +RegExp.$1 : -1);
+                            return;
+                        }
                     }
                 }
 
@@ -592,6 +595,10 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                         history.back();
                         return;
                     }
+                }
+
+                if (core.hasMessageBox()) {
+                    core.closeMessageBox();
                 }
 
                 leaveUrl = undefined;
@@ -1029,6 +1036,14 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
             } else {
                 routes[name] = route;
             }
+        },
+
+        /**
+         * 允许在 messagebox 处理的时候前进后退。
+         * @public
+         */
+        allowLeave: function () {
+            leaveUrl = undefined;
         },
 
         /**
