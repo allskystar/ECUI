@@ -1257,13 +1257,15 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
          * @return {boolean} 校验是否通过
          */
         parseObject: function (form, data, validate) {
-            var valid = true,
+            var errControl,
                 elements = Array.prototype.slice.call(form.elements);
 
             elements.forEach(function (item) {
                 if (validate !== false && item.name && item.getControl && !item.getControl().isDisabled()) {
                     if (!core.dispatchEvent(item.getControl(), 'validate')) {
-                        valid = false;
+                        if (!errControl) {
+                            errControl = item;
+                        }
                     }
                 }
                 if (item.name) {
@@ -1289,10 +1291,12 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                 }
             });
 
-            if (valid) {
+            if (errControl) {
+                errControl.scrollIntoViewIfNeeded();
+            } else {
                 ui.InputControl.saveToDefault(elements);
             }
-            return valid;
+            return !errControl;
         },
 
         /**
