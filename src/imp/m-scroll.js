@@ -40,6 +40,8 @@
              * @override
              */
             $activate: function (event) {
+                this.cache();
+
                 this.$MScroll.$activate.call(this, event);
 
                 var main = this.getMain(),
