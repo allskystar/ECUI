@@ -727,12 +727,12 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
 //{else}//
         el.innerHTML = engine.render(name || route.view, context);
 //{/if}//
-        core.init(el);
-
         if (route.NAME) {
             el.route = route.NAME;
             el.history = historyIndex;
             dom.addClass(el, route.NAME.slice(1).replace(/[._]/g, '-').replace(/\//g, '_'));
+
+            core.init(el);
 
             if (route.form && context.DENY_CACHE !== true) {
                 index = historyIndex - historyOffset - 1;
@@ -752,6 +752,8 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                     }
                 }
             }
+        } else {
+            core.init(el);
         }
 
         dom.removeClass(el, 'ui-hide');
