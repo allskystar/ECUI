@@ -1298,6 +1298,14 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
         },
 
         /**
+         * 重新加载当前链接，逻辑上等价于location.reload()，但不会重新加载整个框架资源。
+         * @public
+         */
+        reload: function () {
+            esr.callRoute(currLocation);
+        },
+
+        /**
          * 渲染。
          * @public
          *
