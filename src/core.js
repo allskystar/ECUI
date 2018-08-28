@@ -201,13 +201,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             },
 
             pointerup: function (event) {
-                function onmousedown(event) {
-                    event.preventDefault();
-                    dom.removeEventListener(document, 'mousedown', onmousedown);
-                }
-
-                var type = event.type,
-                    pointerId = event.pointerId,
+                var pointerId = event.pointerId,
                     track = tracks[event.pointerType] || tracks[pointerId];
 
                 if (track) {
@@ -237,13 +231,9 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                             delete tracks.mouse;
                         }
                     } else {
-                        if (type === 'pointerup') {
+                        if (event.getNative().type === 'pointerup') {
                             onpressure(event, false);
                             ongesture(pointers, event);
-                            if (event.target !== getElementFromEvent(event)) {
-                                // 同一个位置事件元素发生了变化，阻止事件穿透
-                                dom.addEventListener(document, 'mousedown', onmousedown);
-                            }
                         }
                         trackId = undefined;
                         delete tracks[pointerId];
