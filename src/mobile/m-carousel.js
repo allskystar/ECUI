@@ -23,6 +23,8 @@ _nDelay   - 延迟时间，如果不自动轮播这个值为0
      * @private
      */
     function next() {
+        this.cache();
+
         var x = this.getX();
         this.stop = effect.grade(
             'this.setPosition(#round:' + x + '->' + (x - this.getClientWidth()) + '#,0)',
