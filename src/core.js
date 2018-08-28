@@ -24,6 +24,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
     var HIGH_SPEED = 100,         // 对高速的定义
         scrollHandler,            // DOM滚动事件
         dragStopHandler = util.blank, // ios设备上移出webview区域停止事件
+        touchTarget,              // touch点击的目标，用于防止ios下的点击穿透处理
         isTouchMoved,
         ecuiName = 'ui',          // Element 中用于自动渲染的 ecui 属性名称
         isGlobalId,               // 是否自动将 ecui 的标识符全局化
@@ -367,14 +368,14 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
                         var target = event.target;
                         if (target.tagName !== 'INPUT' && target.tagName !== 'TEXTAREA') {
-                            // 未点击到需要弹出软键盘的区域，阻止事件穿透
-                            event.preventDefault();
                             // 点击到非INPUT区域需要失去焦点
                             if (isTouchClick(track)) {
                                 document.activeElement.blur();
                             }
                         }
 
+                        // 记录touchend时的dom元素，阻止事件穿透
+                        touchTarget = target;
                         noPrimaryEnd = false;
                     }
                 });
@@ -458,7 +459,12 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             },
 
             // 鼠标点击时控件如果被屏弊需要取消点击事件的默认处理，此时链接将不能提交
-            click: function () {
+            click: function (event) {
+                if (touchTarget && event.target !== touchTarget) {
+                    // 如果touch的元素不是当前click的元素，就是点击穿透，直接阻止事件
+                    document.activeElement.blur();
+                    event.preventDefault();
+                }
                 if (activedControl !== undefined) {
                     // 如果undefined表示移动端长按导致触发了touchstart但没有触发touchend
                     activedControl = undefined;
