@@ -52,6 +52,14 @@ _oTimer         - 定时器
             /**
              * @override
              */
+            $dispose: function () {
+                this.stop();
+                ui.Control.prototype.$dispose.call(this);
+            },
+
+            /**
+             * @override
+             */
             $ready: function (event) {
                 ui.Control.prototype.$ready.call(this, event);
                 if (this._bImmediate) {
