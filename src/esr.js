@@ -1727,9 +1727,11 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                     commandClose: '>>>'
                 });
 
-                for (var el = document.body.firstChild; el; el = el.nextSibling) {
+                for (var el = document.body.firstChild; el; el = nextSibling) {
+                    var nextSibling = el.nextSibling;
                     if (el.nodeType === 8) {
                         etpl.compile(el.textContent || el.nodeValue);
+                        dom.remove(el);
                     }
                 }
 
