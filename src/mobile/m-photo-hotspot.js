@@ -152,8 +152,8 @@
         if (width === currHotspot.$$calcWidth) {
             fillImage(currImg, currHotspot, 0);
         } else {
-            currImg.style.top = (util.toNumber(currImg.style.top) - distance / currHotspot.$$calcWidth * currHotspot.$$calcHeight * (event.pageY - (body.parentNode.scrollTop || body.scrollTop)) / viewHeight) + 'px';
-            currImg.style.left = (util.toNumber(currImg.style.left) - distance * (event.pageX - (body.parentNode.scrollLeft || body.scrollLeft)) / viewWidth) + 'px';
+            currImg.style.top = (util.toNumber(currImg.style.top) - distance / currHotspot.$$calcWidth * currHotspot.$$calcHeight * (event.pageY - (document.body.parentNode.scrollTop || document.body.scrollTop)) / viewHeight) + 'px';
+            currImg.style.left = (util.toNumber(currImg.style.left) - distance * (event.pageX - (document.body.parentNode.scrollLeft || document.body.scrollLeft)) / viewWidth) + 'px';
         }
     }
 
