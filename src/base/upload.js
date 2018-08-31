@@ -73,15 +73,6 @@
 
             /**
              * @override
-             *
-             */
-            $click: function (event) {
-                ui.Control.prototype.$click.call(this, event);
-                this._eFile.click();
-            },
-
-            /**
-             * @override
              */
             $ready: function (event) {
                 ui.Control.prototype.$ready.call(this, event);
