@@ -452,14 +452,23 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
             // 鼠标点击时控件如果被屏弊需要取消点击事件的默认处理，此时链接将不能提交
             click: function (event) {
-                if (touchTarget && event.target !== touchTarget) {
-                    // 如果touch的元素不是当前click的元素，就是点击穿透，直接阻止事件
-                    document.activeElement.blur();
-                    event.preventDefault();
-                }
                 if (activedControl !== undefined) {
                     // 如果undefined表示移动端长按导致触发了touchstart但没有触发touchend
                     activedControl = undefined;
+                }
+
+                if (touchTarget && event.target !== touchTarget) {
+                    // 要处理label产生的转发情况
+                    for (var el = touchTarget; el; el = dom.parent(el)) {
+                        if (el.tagName === 'LABEL') {
+                            if (dom.contain(el, event.target)) {
+                                return;
+                            }
+                        }
+                    }
+                    // 如果touch的元素不是当前click的元素，就是点击穿透，直接阻止事件
+                    document.activeElement.blur();
+                    event.preventDefault();
                 }
             },
 
