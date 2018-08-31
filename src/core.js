@@ -461,7 +461,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                     // 要处理label产生的转发情况
                     for (var el = touchTarget; el; el = dom.parent(el)) {
                         if (el.tagName === 'LABEL') {
-                            if (dom.contain(el, event.target)) {
+                            if (dom.contain(el, event.target) || dom.getAttribute(el, 'for') === event.target.id) {
                                 return;
                             }
                         }
