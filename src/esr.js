@@ -405,7 +405,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                         if (control.isFormChecked) {
                             elements.forEach(fillCheckedByValue);
                         } else {
-                            control.setValue(value);
+                            control.setValue(String(value));
                         }
                     } else {
                         if (el.type === 'radio' || el.type === 'checkbox') {
@@ -1292,7 +1292,9 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
             });
 
             if (errControl) {
-                errControl.scrollIntoViewIfNeeded();
+                if (errControl.scrollIntoViewIfNeeded) {
+                    errControl.scrollIntoViewIfNeeded();
+                }
             } else {
                 ui.InputControl.saveToDefault(elements);
             }
