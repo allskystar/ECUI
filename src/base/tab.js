@@ -63,6 +63,7 @@ _eContainer      - 容器 DOM 元素
             }
         }
         if (items[index] !== this._cSelected) {
+            event.target = items[index].getBody();
             core.dispatchEvent(items[index], 'click', event);
         }
     }
