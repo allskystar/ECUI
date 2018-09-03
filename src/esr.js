@@ -85,7 +85,9 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
      */
     function afterrender(route) {
         if (esrOptions.app) {
-            transition(route);
+            if (!context.CHILD) {
+                transition(route);
+            }
             var layer = getLayer(route);
 
             if (layer) {
@@ -1071,6 +1073,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                         context[key] = loc[key];
                     }
                 }
+                context.CHILD = true;
             }
             callRoute(loc[''], childRoute || loc);
         },
