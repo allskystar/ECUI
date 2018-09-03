@@ -23,7 +23,6 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 //{/if}//
     var HIGH_SPEED = 100,         // 对高速的定义
         scrollHandler,            // DOM滚动事件
-        dragStopHandler = util.blank, // ios设备上移出webview区域停止事件
         touchTarget,              // touch点击的目标，用于防止ios下的点击穿透处理
         isTouchMoved,
         ecuiName = 'ui',          // Element 中用于自动渲染的 ecui 属性名称
@@ -679,12 +678,8 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
             mousemove: function (event) {
                 var view = util.getView();
-                dragStopHandler();
                 if (iosVersion && (event.clientX < 0 || event.clientX >= view.width || event.clientY < 0 || event.clientY >= view.height)) {
-                    // 延后500ms执行，无意中的滑出不会受到影响
-                    dragStopHandler = util.timer(function () {
-                        dragEnv.mouseup(event);
-                    }, 500);
+                    dragEnv.mouseup(event);
                 } else {
                     dragmove(event.track, currEnv, event.clientX, event.clientY);
                 }
@@ -695,8 +690,6 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             mouseover: util.blank,
 
             mouseup: function (event) {
-                dragStopHandler();
-
                 disableEnv.mouseup(event);
 
                 var track = event.track,
