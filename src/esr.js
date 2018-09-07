@@ -407,7 +407,9 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                 } else {
                     if (control) {
                         if (control.isFormChecked) {
-                            elements.forEach(fillCheckedByValue);
+                            if (elements && elements.length > 0) {
+                                elements.forEach(fillCheckedByValue);
+                            }
                         } else {
                             control.setValue(String(value));
                         }
