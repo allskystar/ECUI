@@ -213,7 +213,9 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                     engine = loadStatus[getModuleName(route.NAME)] || etpl;
                     // 添加oncached事件，在路由已经cache的时候依旧执行
                     if (esrOptions.app) {
-                        transition(route);
+                        if (!context.CHILD) {
+                            transition(route);
+                        }
                     }
                     if (route.oncached) {
                         route.oncached(context);
