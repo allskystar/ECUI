@@ -570,28 +570,30 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                         }
 
                         if (leaveUrl === undefined) {
-                            var currRoute = esr.getRoute(currLocation.split('~')[0]);
+                            var currRoute = esr.getRoute(currLocation.split('~')[0]),
+                                ret;
                             // 需要判断是不是showSelect中返回的
                             if (!/~ALLOW_LEAVE(~|$)/.test(currLocation) && currRoute && currRoute.onleave) {
-                                if (currRoute.onleave(
-                                        context,
-                                        function (forward) {
-                                            if (forward) {
-                                                history.go(/~HISTORY=(\d+)/.test(leaveUrl) ? +RegExp.$1 - historyIndex : 1);
-                                                leaveUrl = '';
-                                            } else {
-                                                leaveUrl = undefined;
-                                            }
+                                ret = currRoute.onleave(
+                                    context,
+                                    function (forward) {
+                                        if (forward) {
+                                            history.go(/~HISTORY=(\d+)/.test(leaveUrl) ? +RegExp.$1 - historyIndex : 1);
+                                            leaveUrl = '';
+                                        } else {
+                                            leaveUrl = undefined;
                                         }
-                                    ) === false) {
-                                    leaveUrl = loc;
+                                    }
+                                );
+
+                                if ('boolean' === typeof ret) {
+                                    if (!ret) {
+                                        leaveUrl = loc;
+                                    }
+                                    history.go(/~HISTORY=(\d+)/.test(loc) ? historyIndex - +RegExp.$1 : -1);
+                                    return;
                                 }
                             }
-                        }
-
-                        if (leaveUrl) {
-                            history.go(/~HISTORY=(\d+)/.test(loc) ? historyIndex - +RegExp.$1 : -1);
-                            return;
                         }
                     }
                 }
