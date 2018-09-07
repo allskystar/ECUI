@@ -260,70 +260,70 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                 }
 
                 dragStopHandler();
-                initTouchTracks(event);
+                initTouchTracks(event, function () {
+                    if (event.touches.length === 1) {
+                        isTouchMoved = false;
 
-                if (event.touches.length === 1) {
-                    isTouchMoved = false;
+                        var track = tracks[trackId = event.touches[0].identifier];
 
-                    var track = tracks[trackId = event.touches[0].identifier];
+                        event = core.wrapEvent(event);
 
-                    event = core.wrapEvent(event);
+                        event.pageX = track.pageX;
+                        event.pageY = track.pageY;
+                        event.clientX = track.clientX;
+                        event.clientY = track.clientY;
+                        event.target = track.target;
+                        event.track = track;
 
-                    event.pageX = track.pageX;
-                    event.pageY = track.pageY;
-                    event.clientX = track.clientX;
-                    event.clientY = track.clientY;
-                    event.target = track.target;
-                    event.track = track;
-
-                    track.lastMoveTime = Date.now();
-                    checkActived(event);
-                    currEnv.mouseover(event);
-                    currEnv.mousedown(event);
-                    onpressure(event, event.getNative().touches[0].force === 1);
-                }
+                        track.lastMoveTime = Date.now();
+                        checkActived(event);
+                        currEnv.mouseover(event);
+                        currEnv.mousedown(event);
+                        onpressure(event, event.getNative().touches[0].force === 1);
+                    }
+                });
             },
 
             touchmove: function (event) {
-                initTouchTracks(event);
+                initTouchTracks(event, function () {
+                    event = core.wrapEvent(event);
 
-                event = core.wrapEvent(event);
+                    var noPrimaryMove = true;
 
-                var noPrimaryMove = true;
+                    Array.prototype.slice.call(event.getNative().changedTouches).forEach(function (item) {
+                        var track = tracks[item.identifier];
+                        event.pageX = item.pageX;
+                        event.pageY = item.pageY;
+                        event.clientX = item.clientX;
+                        event.clientY = item.clientY;
 
-                Array.prototype.slice.call(event.getNative().changedTouches).forEach(function (item) {
-                    var track = tracks[item.identifier];
-                    event.pageX = item.pageX;
-                    event.pageY = item.pageY;
-                    event.clientX = item.clientX;
-                    event.clientY = item.clientY;
+                        calcSpeed(track, event);
 
-                    calcSpeed(track, event);
+                        if (item.identifier === trackId) {
+                            if ((Math.sqrt(track.speedX * track.speedX + track.speedY * track.speedY) > HIGH_SPEED) && isTouchMoved === false) {
+                                isTouchMoved = true;
+                            }
 
-                    if (item.identifier === trackId) {
-                        if ((Math.sqrt(track.speedX * track.speedX + track.speedY * track.speedY) > HIGH_SPEED) && isTouchMoved === false) {
-                            isTouchMoved = true;
+                            event.track = track;
+                            currEnv.mousemove(event);
+
+                            var target = event.target;
+                            event.target = getElementFromEvent(event);
+                            if (hoveredControl !== event.getControl()) {
+                                currEnv.mouseover(event);
+                            }
+                            event.target = target;
+                            onpressure(event, item.force === 1);
+                            ongesture(event.getNative().touches, event);
+
+                            noPrimaryMove = false;
                         }
+                    });
 
-                        event.track = track;
-                        currEnv.mousemove(event);
-
-                        var target = event.target;
-                        event.target = getElementFromEvent(event);
-                        if (hoveredControl !== event.getControl()) {
-                            currEnv.mouseover(event);
-                        }
-                        event.target = target;
-                        onpressure(event, item.force === 1);
-                        ongesture(event.getNative().touches, event);
-
-                        noPrimaryMove = false;
+                    if (noPrimaryMove) {
+                        event.preventDefault();
                     }
                 });
-
-                if (noPrimaryMove) {
-                    event.preventDefault();
-                }
             },
 
             touchend: function (event) {
@@ -333,53 +333,53 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                 var track = tracks[trackId],
                     noPrimaryEnd = true;
 
-                initTouchTracks(event);
-
-                Array.prototype.slice.call(event.changedTouches).forEach(function (item) {
-                    if (item.identifier === trackId) {
-                        if (isTouchMoved) {
-                            // 产生了滚屏操作，不响应ECUI事件
-                            bubble(activedControl, 'deactivate');
-                            activedControl = undefined;
-                        }
-
-                        event = core.wrapEvent(event);
-
-                        event.track = track;
-                        event.pageX = item.pageX;
-                        event.pageY = item.pageY;
-                        event.clientX = item.clientX;
-                        event.clientY = item.clientY;
-
-                        currEnv.mouseup(event);
-                        bubble(hoveredControl, 'mouseout', event, hoveredControl = null);
-                        trackId = undefined;
-                        if (event.getNative().type === 'touchend') {
-                            onpressure(event, false);
-                            ongesture(event.getNative().changedTouches, event);
-                        }
-
-                        var target = event.target;
-                        if (target.tagName !== 'INPUT' && target.tagName !== 'TEXTAREA') {
-                            // 点击到非INPUT区域需要失去焦点
-                            if (isTouchClick(track)) {
-                                document.activeElement.blur();
+                initTouchTracks(event, function () {
+                    Array.prototype.slice.call(event.changedTouches).forEach(function (item) {
+                        if (item.identifier === trackId) {
+                            if (isTouchMoved) {
+                                // 产生了滚屏操作，不响应ECUI事件
+                                bubble(activedControl, 'deactivate');
+                                activedControl = undefined;
                             }
-                        }
 
-                        // 记录touchend时的dom元素，阻止事件穿透
-                        touchTarget = target;
-                        noPrimaryEnd = false;
+                            event = core.wrapEvent(event);
+
+                            event.track = track;
+                            event.pageX = item.pageX;
+                            event.pageY = item.pageY;
+                            event.clientX = item.clientX;
+                            event.clientY = item.clientY;
+
+                            currEnv.mouseup(event);
+                            bubble(hoveredControl, 'mouseout', event, hoveredControl = null);
+                            trackId = undefined;
+                            if (event.getNative().type === 'touchend') {
+                                onpressure(event, false);
+                                ongesture(event.getNative().changedTouches, event);
+                            }
+
+                            var target = event.target;
+                            if (target.tagName !== 'INPUT' && target.tagName !== 'TEXTAREA') {
+                                // 点击到非INPUT区域需要失去焦点
+                                if (isTouchClick(track)) {
+                                    document.activeElement.blur();
+                                }
+                            }
+
+                            // 记录touchend时的dom元素，阻止事件穿透
+                            touchTarget = target;
+                            noPrimaryEnd = false;
+                        }
+                    });
+
+                    if (noPrimaryEnd) {
+                        event.preventDefault();
+                    }
+
+                    if (trackId && !tracks[trackId]) {
+                        tracks[trackId] = track;
                     }
                 });
-
-                if (noPrimaryEnd) {
-                    event.preventDefault();
-                }
-
-                if (trackId && !tracks[trackId]) {
-                    tracks[trackId] = track;
-                }
             },
 
             touchcancel: function (event) {
@@ -1316,7 +1316,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
      *
      * @return {Event} event 系统事件对象
      */
-    function initTouchTracks(event) {
+    function initTouchTracks(event, callback) {
         var caches = {};
         Array.prototype.slice.call(event.touches).forEach(function (item) {
             tracks[item.identifier] = tracks[item.identifier] || {
@@ -1332,15 +1332,15 @@ outer:          for (var caches = [], target = event.target, el; target; target 
             caches[item.identifier] = true;
         });
 
-        util.timer(function () {
-            for (var key in tracks) {
-                if (tracks.hasOwnProperty(key)) {
-                    if (!caches[key]) {
-                        delete tracks[key];
-                    }
+        callback();
+
+        for (var key in tracks) {
+            if (tracks.hasOwnProperty(key)) {
+                if (!caches[key]) {
+                    delete tracks[key];
                 }
             }
-        });
+        }
     }
 
     /**
