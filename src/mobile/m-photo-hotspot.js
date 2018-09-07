@@ -216,14 +216,7 @@
                                 event.to = util.toNumber(currImg.style.width) === currHotspot.$$calcWidth ? currHotspot.$$calcWidth * 2 : -util.toNumber(currImg.style.width);
                                 zoom(event);
                             } else {
-                                tapHandle = util.timer(function () {
-                                    dom.remove(currImg);
-                                    dom.remove(backupImg);
-                                    dom.remove(title);
-                                    core.removeGestureListeners(null);
-                                    core.mask();
-                                    tapHandle = null;
-                                }, 300);
+                                tapHandle = util.timer(ui.MPhotoHotspot.close, 300);
                             }
                         }
                     });
@@ -241,6 +234,30 @@
             }
         }
     );
+
+    /**
+     * 判断当前焦点图控件有没有激活。
+     * @public
+     *
+     * @return {boolean} 焦点图控件是否激活
+     */
+    ui.MPhotoHotspot.isUsing = function () {
+        return !!currHotspot;
+    };
+
+    /**
+     * 关闭焦点图控件激活状态。
+     * @public
+     */
+    ui.MPhotoHotspot.close = function () {
+        dom.remove(currImg);
+        dom.remove(backupImg);
+        dom.remove(title);
+        core.removeGestureListeners(null);
+        core.mask();
+        currHotspot = null;
+        tapHandle = null;
+    };
 
     ui.MPhotoHotspot.DEFAULT = {
         width: 750,
