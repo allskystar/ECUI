@@ -15,7 +15,8 @@
     var core = ecui,
         dom = core.dom,
         io = core.io,
-        ui = core.ui;
+        ui = core.ui,
+        util = core.util;
 //{/if}//
     /**
      * 文件上传回调事件。
@@ -41,7 +42,7 @@
                     progress.setValue(event.loaded);
                 } : undefined,
                 onsuccess: this.onupload.bind(this),
-                onerror: this.onerror.bind(this)
+                onerror: this.onerror ? this.onerror.bind(this) : util.blank
             });
         }.bind(this);
     }
