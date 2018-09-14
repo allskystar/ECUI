@@ -87,7 +87,7 @@
                     value = new Date(value);
                 }
                 if (value instanceof Date) {
-                    value = value.getFullYear() + '-' + (value.getMonth() + 1) + '-' + value.getDate();
+                    value = value.getFullYear() + '-' + ('0' + (value.getMonth() + 1)).slice(-2) + '-' + ('0' + value.getDate()).slice(-2);
                 }
                 ui.Text.prototype.setValue.call(this, value);
             }
