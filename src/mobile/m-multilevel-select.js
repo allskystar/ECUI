@@ -82,6 +82,18 @@ _aSelect - 全部的下拉框控件列表
                             },
 
                             /**
+                             * @override
+                             */
+                            $dispose: function () {
+                                if (this._aChildren && this._aChildren[0] instanceof ui.Item && !this._aChildren[0].getParent()) {
+                                    this._aChildren.forEach(function (item) {
+                                        item.dispose();
+                                    });
+                                }
+                                ui.Item.prototype.$dispose.call(this);
+                            },
+
+                            /**
                              * 获取选项的值。
                              * @public
                              *

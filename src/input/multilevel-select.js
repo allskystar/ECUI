@@ -38,6 +38,19 @@ _aSelect - 全部的下拉框控件列表
                         function (el, options) {
                             ui.Select.prototype.Item.call(this, el, options);
                             this._aChildren = options.children;
+                        },
+                        {
+                            /**
+                             * @override
+                             */
+                            $dispose: function () {
+                                if (this._aChildren && this._aChildren[0] instanceof ui.Item && !this._aChildren[0].getParent()) {
+                                    this._aChildren.forEach(function (item) {
+                                        item.dispose();
+                                    });
+                                }
+                                ui.Select.prototype.Item.prototype.$dispose.call(this);
+                            }
                         }
                     ),
 
