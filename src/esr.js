@@ -1080,6 +1080,8 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                     }
                 }
                 context.CHILD = true;
+            } else {
+                routeRequestCount = 0;
             }
             callRoute(loc[''], childRoute || loc);
         },
