@@ -95,7 +95,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                             var event = document.createEvent('HTMLEvents');
                             event.initEvent('keyboardchange', true, true);
 
-                            if (height > viewHeight) {
+                            if (height > viewHeight + 100) {
                                 // 软键盘收起，失去焦点
                                 if (document.activeElement && document.activeElement.blur) {
                                     document.activeElement.blur();
