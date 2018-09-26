@@ -1416,6 +1416,30 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
         dom.addEventListener(document, 'contextmenu', util.preventEvent);
     }
 //{/if}//
+    if (window.localStorage) {
+        util.getLocalStorage = function (key) {
+            return window.localStorage.getItem(location.pathname + '#' + key);
+        };
+        util.setLocalStorage = function (key, value) {
+            window.localStorage.getItem(location.pathname + '#' + key, value);
+        };
+    } else {
+        (function () {
+            var localStorage = dom.setInput(null, null, 'hidden');
+            localStorage.addBehavior('#default#userData');
+            document.body.appendChild(localStorage);
+
+            util.getLocalStorage = function (key) {
+                localStorage.load('ECUI');
+                return localStorage.getAttribute(key);
+            };
+            util.setLocalStorage = function (key, value) {
+                localStorage.setAttribute(key, value);
+                localStorage.save('ECUI');
+            };
+        }());
+    }
+
     (function () {
         if (patch) {
             Object.assign(core.dom, patch.dom);

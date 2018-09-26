@@ -39,7 +39,6 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
         engine = etpl,
         requestVersion = 0,     // 请求的版本号，主路由切换时会更新，在多次提交时保证只有最后一次提交会触发渲染
 
-        localStorage,
         metaVersion,
         meta,
 
@@ -1582,8 +1581,8 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                                 if (data.meta.version) {
                                     metaVersion = data.meta.version;
                                 }
-                                localStorage.setItem('esr_meta', JSON.stringify(meta));
-                                localStorage.setItem('esr_meta_version', metaVersion);
+                                util.setLocalStorage('esr_meta', JSON.stringify(meta));
+                                util.setLocalStorage('esr_meta_version', metaVersion);
                                 handle();
                             },
                             onerror: function () {
@@ -1831,24 +1830,8 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
             historyCacheSize = esrOptions.cache || 1000;
 
             if (esrOptions.meta) {
-                if (window.localStorage) {
-                    localStorage = window.localStorage;
-                } else {
-                    localStorage = dom.setInput(null, null, 'hidden');
-                    localStorage.addBehavior('#default#userData');
-                    document.body.appendChild(localStorage);
-                    localStorage.getItem = function (key) {
-                        localStorage.load('ecui');
-                        return localStorage.getAttribute(key);
-                    };
-                    localStorage.setItem = function (key, value) {
-                        localStorage.setAttribute(key, value);
-                        localStorage.save('ecui');
-                    };
-                }
-
-                metaVersion = localStorage.getItem('esr_meta_version') || '0';
-                meta = JSON.parse(localStorage.getItem('esr_meta')) || {};
+                metaVersion = util.getLocalStorage('esr_meta_version') || '0';
+                meta = JSON.parse(util.getLocalStorage('esr_meta')) || {};
             }
 //{if 0}//
             var tplList = [];
