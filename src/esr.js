@@ -1237,7 +1237,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
          * @param {string} moduleName 模块名称，如果不指定模块名称使用当前模块
          */
         getEngine: function (moduleName) {
-            if (!moduleName) {
+            if (moduleName === undefined) {
                 return engine;
             }
             if (!loadStatus[moduleName]) {
