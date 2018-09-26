@@ -17,5 +17,7 @@
     .ui-mobile-confirm-layout {
         position: relative;
         .m-width100rate();
+        /*解决数据多的时候确定会跟着拖动的workaround*/
+        overflow: hidden; 
     }
 }

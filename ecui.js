@@ -30,11 +30,11 @@ var ecui;
     document.write('<script type="text/javascript" src="src/base/progress.js"></script>');
     document.write('<script type="text/javascript" src="src/base/progress-bar.js"></script>');
     document.write('<script type="text/javascript" src="src/base/progress-circle.js"></script>');
-    document.write('<script type="text/javascript" src="src/base/upload.js"></script>');
     document.write('<script type="text/javascript" src="src/base/locked-table.js"></script>');
     document.write('<script type="text/javascript" src="src/base/checkbox-tree.js"></script>');
     document.write('<script type="text/javascript" src="src/base/count-down.js"></script>');
 
+    document.write('<script type="text/javascript" src="src/input/upload.js"></script>');
     document.write('<script type="text/javascript" src="src/input/input-control.js"></script>');
     document.write('<script type="text/javascript" src="src/input/input-group.js"></script>');
     document.write('<script type="text/javascript" src="src/input/label.js"></script>');
