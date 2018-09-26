@@ -258,7 +258,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                 route.CACHE = undefined;
             }
 
-            if (!routeRequestCount) {
+            if (!routeRequestCount && context.DENY_LOADING !== true) {
                 dom.addClass(document.body, 'ui-loading');
             }
             routeRequestCount++;
