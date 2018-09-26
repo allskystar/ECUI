@@ -45,6 +45,7 @@
                 $click: function (event) {
                     ui.Button.prototype.$click.call(this, event);
                     core.getSingleton(MessageBox).hide();
+                    event.preventDefault();
                 }
             }
         );
