@@ -101,7 +101,13 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
         }
 
         if (route.onafterrender) {
-            route.onafterrender(context);
+            try {
+                route.onafterrender(context);
+            } catch (e) {
+                if (esr.onexception) {
+                    esr.onexception(e);
+                }
+            }
         }
 
         if (route.NAME) {
@@ -150,7 +156,13 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
             }
         }
         if (route.onbeforerender) {
-            route.onbeforerender(context);
+            try {
+                route.onbeforerender(context);
+            } catch (e) {
+                if (esr.onexception) {
+                    esr.onexception(e);
+                }
+            }
         }
     }
 
@@ -218,10 +230,22 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                         }
                     }
                     if (route.oncached) {
-                        route.oncached(context);
+                        try {
+                            route.oncached(context);
+                        } catch (e) {
+                            if (esr.onexception) {
+                                esr.onexception(e);
+                            }
+                        }
                     }
                     if (route.TYPE === 'frame' && route.children.oncached) {
-                        route.children.oncached(context);
+                        try {
+                            route.children.oncached(context);
+                        } catch (e) {
+                            if (esr.onexception) {
+                                esr.onexception(e);
+                            }
+                        }
                     }
                     return;
                 }
@@ -245,7 +269,13 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                     esr.render(route);
                 } else if ('function' === typeof route.model) {
                     if (route.onbeforerequest) {
-                        route.onbeforerequest(context);
+                        try {
+                            route.onbeforerequest(context);
+                        } catch (e) {
+                            if (esr.onexception) {
+                                esr.onexception(e);
+                            }
+                        }
                     }
                     if (route.model(context, function () {
                             esr.render(route);
@@ -256,7 +286,13 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                     esr.render(route);
                 } else {
                     if (route.onbeforerequest) {
-                        route.onbeforerequest(context);
+                        try {
+                            route.onbeforerequest(context);
+                        } catch (e) {
+                            if (esr.onexception) {
+                                esr.onexception(e);
+                            }
+                        }
                     }
                     esr.request(route.model, function () {
                         esr.render(route);
