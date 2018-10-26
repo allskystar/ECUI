@@ -828,6 +828,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                 this.target = event.target;
             }
             this._oNative = event;
+            this.active = activedControl;
         } else {
             this.which = keyCode;
         }
