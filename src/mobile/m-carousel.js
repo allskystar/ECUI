@@ -16,8 +16,6 @@ _nDelay   - 延迟时间，如果不自动轮播这个值为0
         ui = core.ui,
         util = core.util;
 //{/if}//
-    var currImage;
-
     /**
      * 自动轮播下一张图片。
      * @private
@@ -68,11 +66,11 @@ _nDelay   - 延迟时间，如果不自动轮播这个值为0
         var imgs = dom.children(carousel.getBody()),
             count = imgs.length - 2;
 
-        if (currImage) {
-            dom.addClass(currImage, 'ui-hide');
+        if (carousel._eCurrImage) {
+            dom.addClass(carousel._eCurrImage, 'ui-hide');
         }
-        currImage = imgs[index + 1];
-        dom.removeClass(currImage, 'ui-hide');
+        carousel._eCurrImage = imgs[index + 1];
+        dom.removeClass(carousel._eCurrImage, 'ui-hide');
         imgs[0].index = (index + count - 1) % count;
         imgs[0].src = imgs[imgs[0].index + 1].src;
         imgs[count + 1].index = (index + 1) % count;
@@ -80,7 +78,7 @@ _nDelay   - 延迟时间，如果不自动轮播这个值为0
 
         carousel.setPosition(-carousel.getClientWidth(), 0);
 
-        core.dispatchEvent(carousel, 'change', {index: index, image: currImage});
+        core.dispatchEvent(carousel, 'change', {index: index, image: carousel._eCurrImage});
     }
 
     /**
@@ -144,6 +142,7 @@ _nDelay   - 延迟时间，如果不自动轮播这个值为0
              */
             $dispose: function () {
                 this.stop();
+                this._eCurrImage = null;
                 ui.MPanel.prototype.$dispose.call(this);
             },
 

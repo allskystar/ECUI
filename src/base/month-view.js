@@ -85,7 +85,7 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
             ui.Control.call(this, el, options);
 
             this._aCells = Array.prototype.slice.call(el.getElementsByTagName('TD')).map(function (item, index) {
-                return core.$fastCreate(index < 7 ? ui.Control : this.Date, item, this);
+                return core.$fastCreate(index < 7 ? ui.Control : this.Cell, item, this);
             }, this);
 
             this.WEEKNAMES.forEach(function (item, index) {
@@ -104,7 +104,7 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
              * 日期部件。
              * @unit
              */
-            Date: core.inherits(
+            Cell: core.inherits(
                 ui.Control,
                 {
                     /**
@@ -183,6 +183,16 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
              */
             getMonth: function () {
                 return this._nMonth + 1;
+            },
+
+            /**
+             * 获取日历控件当前选中的项。
+             * @public
+             *
+             * @return {ecui.ui.MonthView.Cell} 选中的控件
+             */
+            getSelected: function () {
+                return this._cSelected;
             },
 
             /**

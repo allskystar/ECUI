@@ -96,11 +96,11 @@
                         selected = item;
                     }
                 });
-                this.setSelected(selected);
-                if (!selected) {
-                    this.$setValue(text);
+                if (selected) {
+                    this.setSelected(selected);
+                } else {
+                    refresh(this);
                 }
-                refresh(this);
                 this.alterStatus(text ? '-placeholder' : '+placeholder');
             },
 
