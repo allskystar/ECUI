@@ -989,13 +989,6 @@ _aStatus            - 控件当前的状态集合
 
                     var el = this.getOuter();
 
-                    if (el.style.display === 'none') {
-                        this.$hide();
-                        el.style.display = '';
-                    } else if (this._bCached) {
-                        this.initStructure();
-                    }
-
                     if (waitReadyList === null) {
                         // 页面已经加载完毕，直接运行 $ready 方法
                         core.dispatchEvent(this, 'ready', {options: options});
@@ -1015,6 +1008,13 @@ _aStatus            - 控件当前的状态集合
                             );
                         }
                         waitReadyList.push({control: this, options: options});
+                    }
+
+                    if (el.style.display === 'none') {
+                        this.$hide();
+                        el.style.display = '';
+                    } else if (this._bCached) {
+                        this.initStructure();
                     }
                 }
             },
