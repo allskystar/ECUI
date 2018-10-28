@@ -112,13 +112,8 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
                      * @override
                      */
                     $click: function (event) {
-                        var parent = this.getParent();
-
-                        event.date = new Date(parent._nYear, parent._nMonth, this._nDay);
-                        if (core.dispatchEvent(parent, 'dateclick', event)) {
-                            parent._oDate = event.date;
-                            setSelected(parent, this);
-                        }
+                        event.item = this;
+                        core.dispatchEvent(this.getParent(), 'dateclick', event);
                     },
 
                     /**
@@ -145,7 +140,10 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
              * date  点击的日期
              * @event
              */
-            $dateclick: util.blank,
+            $dateclick: function (event) {
+                this._oDate = new Date(this._nYear, this._nMonth, event.item._nDay);
+                setSelected(this, event.item);
+            },
 
             /**
              * @override
