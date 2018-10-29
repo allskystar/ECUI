@@ -343,6 +343,19 @@ _aChildren     - 子控件集合
             },
 
             /**
+             * 遍历所有的树控件节点。
+             * @public
+             *
+             * @param {Function} fn 遍历时用于节点处理的函数
+             */
+            forEach: function (fn) {
+                for (var i = 0, nodes = [this.getRoot()], node; node = nodes[i++]; ) {
+                    fn(node);
+                    nodes = nodes.concat(node._aChildren);
+                }
+            },
+
+            /**
              * 获取当前树视图控件的所有子树视图控件。
              * @public
              *
