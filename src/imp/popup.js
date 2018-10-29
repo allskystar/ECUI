@@ -33,9 +33,11 @@
         }
 
         var popupTop = top + owner.getHeight(),
-            height = this.getHeight();
+            popupLeft = left,
+            height = this.getHeight(),
+            width = this.getWidth();
 
-        popupEl.style.left = left + 'px';
+        popupEl.style.left = (popupLeft + width <= container.scrollWidth ? popupLeft : Math.max(left - width + owner.getWidth(), 0)) + 'px';
         popupEl.style.top = (popupTop + height <= container.scrollHeight ? popupTop : Math.max(top - height, 0)) + 'px';
         container.appendChild(popupEl);
     }
