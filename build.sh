@@ -79,7 +79,7 @@ done
 
 find . -type f -name "layer.*.css" | awk '{input=$1;sub(/\/layer\./,"/");gsub(/(^\.\/|\.css$)/,"");gsub(/[\._]/,"-");gsub(/\//,"_");print "#"$1" {\n    @import (less) \""input"\";\n}"}' > .layers.css
 
-echo -e "(function (NS) {" > .layers.js
+echo "(function (NS) {" > .layers.js
 for file in `find . -type f -name "layer.*.js"`
 do
     name=${file%/*}"/"
@@ -89,12 +89,15 @@ do
     name="_"${name//\//_}
     if [ ! "$name" = "$last" ]
     then
-        echo -e "    NS = ecui.ns['$name'] = ecui.ns['$name'] || {};\n    NS.data = NS.data || {};\n    NS.ui = NS.ui || {};\n" >> .layers.js
+        echo "    NS = ecui.ns['$name'] = ecui.ns['$name'] || {};
+    NS.data = NS.data || {};
+    NS.ui = NS.ui || {};
+" >> .layers.js
     fi
     last=name
     cat $file >> .layers.js
 done
-echo -e "}());" >> .layers.js
+echo "}());" >> .layers.js
 
 for module in `find . -type f -name "_define_.js"`
 do
@@ -127,7 +130,9 @@ do
     reg=${module//\//\\/}
     if [ -f "_define_.css" ]
     then
-        file=".module-${ns%_*}{\n//{include file=\"_define_.css\"}//\n}"
+        file=".module-${ns%_*}{
+//{include file=\"_define_.css\"}//}
+"
     else
         file=""
     fi
