@@ -6,10 +6,39 @@
 - 通过src/adapter.js 来兼容第三方库；
 - 通过src/control 来扩展原生 DOM 节点的标准事件；
 - 并提供了 pc 和 移动端 开发 常用的控件(自带默认样式)；
-- 支持 单页应用 开发，暂不支持 ES6和ES7 语法。
+- 支持 单页应用 开发，支持 ES6+ 语法。（打包工具已采用 uglify-es ）
 
 ## 快速开始
 这里 只介绍 在公司内部 在mac环境下 如何快速 从0搭建一个 ecui 项目，并着手进行日常的开发，这里只接受 最常用 使用nginx进行开发的过程：
+
+### 构建依赖
+
+注意：构建服务器上采用的 node/v9.3.0  npm/6.1.0  如希望尽量减少和构建服务器的差异，可尽量安装同样的版本 以消除不确定性
+
+``` bash
+>>> ## 打包工具 build.sh 不再使用 webpack.jar ；现在用 uglify-es 打包压缩；构建服务器上版本是 uglify-es@3.3.9
+>>> uglifyjs --version
+uglify-es 3.3.9  ## 请注意这里是输出的是 uglify-es 表明是 UglifyJS2 （ harmony 分支）
+
+```
+
+如果输出的是 uglify-js 3.3.x 表示`安装不正确`； uglify-js 和 uglify-es 不一样， uglify-es 支持ES6+， 目前应采用的是 uglify-es
+
+build.sh 里使用了几项常见的linux 程序（还依赖于jdk - 像 smarty4j.jar ），包括 awk、sed、python （构建服务器上 Python 2.6.6 一般 Python 2.7.x 也可以）
+另外 需要一些node js里常用的工具。参见 内网说明文件 开发环境安装node、jslint
+
+前置假定 node 已安装好，从环境中可以找到node (无论是位于 /usr/local/bin/node 还是PATH中能找到)
+
+``` bash
+ >>> ## npm/6.1.0 node/v9.3.0 
+ >>> npm install jslint@0.12.0 -g     ### js 代码检测器 node-jslint version: 0.12.0  JSLint edition 2013-08-26; 稍后需用欧阳改造后的 lib/jslint.js
+ >>> npm install lesshint@5.1.0 -g    ### css 检测器
+ >>> npm install lessc@2.7.3 -g       ### css 语法高亮 
+ >>> npm install uglify-es@3.3.9 -g   ### 高效率压缩 js 文件 参见 https://github.com/mishoo/UglifyJS2/tree/harmony
+```
+
+安装完jslint后，找到安装路径（mac下默认安装路径：/usr/local/lib/node_modules），使用lib-fe项目下的lib-fe/tools/jslint.js替换掉安装的jslint中lib目录下的jslint.js文件（ /usr/local/lib/node_modules/jslint/lib/jslint.js） 
+
 
 ### 获取 框架源码
 建议先创建一个工作目录，把框架源码和项目代码 都放在该目录下：
@@ -77,16 +106,33 @@ http://localhost:9006/demo/index.html
 
     <link rel="stylesheet/less" type="text/css" href="ecui.css" />
     <link rel="stylesheet/less" type="text/css" href="common.css">
-	  <link rel="stylesheet/less" type="text/css" href="index.css">
+	<link rel="stylesheet/less" type="text/css" href="index.css">
     <script type="text/javascript" src="options.js"></script>
     <script type="text/javascript" src="ecui.js"></script>
     <script type="text/javascript" src="common.js"></script>
     <script type="text/javascript" src="index.js"></script>
 ```
 ### nginx配置示例
+
+请注意，不要把 filepath 、root 之类的目录位置原封不动的照抄！ 根据你实际情况来填写 
+
 该配置示例要求 框架和业务项目的目录 在同一目录下，主要更改以下 两方面 的地方：
 - 一是将 root 后面的路径 改为 您电脑上 ecui 框架或业务项目 的对应目录；
 - 二是 添加类似 市场ERP 的匹配规则，将market 替换成您 项目所在的目录名；
+
+### nginx 配置时小技巧
+
+请各位同事在研发态 给本机 nginx 静态资源的 location 段加一下 Cache-Control 控制，研发时，一些 css html jpg 废不了太多流量
+
+``` nginx
+location ~ /你的路径规则   {
+  add_header Cache-Control 'no-store,no-cache,must-revalidate';
+  add_header xx-via   'developer-你的名' ;   ## 这样可以明确的从http响应头 感知到 静态资源来自你机器
+  ……
+}
+``` 
+
+下方是一个简易的配置文件（貌似已落后实际很多，并不完全这样配的）
 
 ``` nginx
 #控制工作进程数
@@ -125,8 +171,8 @@ http {
     #本地开发时用于请求项目的静态文件，需要在hosts中配置 127.0.0.1 为localhost(Mac一般默认配置)
     #否则通过127.0.0.1加 文件路径进行访问
     server {
-        listen       9006;
-        server_name  localhost;
+        listen       9006;      # 一般习惯设置80，但很多开发者 本机80端口常被占
+        server_name  localhost; # 请确认是本机，最好解析为127 以免走入 ipv6型回路 
 
         #配置 demo 后台管理系统的静态资源请求规则
         location ~ ^/demo/[/\w-]+$ {

@@ -235,8 +235,10 @@ then
     rm "common"
 
     cd $output
+    cp index.html home.html
     tar -zcvf "../$1.tar.gz" *
 else
     cd $output
+    cp index.html home.html
     tar -zcvf "../output.tar.gz" *
 fi
