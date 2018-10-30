@@ -58,13 +58,6 @@
             /**
              * @override
              */
-            $blur: function (event) {
-                ui.Select.prototype.$blur.call(this, event);
-            },
-
-            /**
-             * @override
-             */
             $click: function (event) {
                 if (!this.$getSection('Options').isShow()) {
                     ui.Select.prototype.$click.call(this, event);
