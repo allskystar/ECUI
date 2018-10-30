@@ -1040,13 +1040,11 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                 route = name;
                 name = route.NAME;
             }
-//{if 0}//
-            if (name.indexOf('/') >= 0) {
-                throw new Error('The route\'s name can\'t contain \'/\'');
-            }
-//{/if}//
+
             route.view = route.view || name;
-            name = '/' + getModuleName(esr.getLocation()) + name;
+            if (name.indexOf('/') !== 0) {
+                name = '/' + getModuleName(esr.getLocation()) + name;
+            }
 //{if 1}//            if (!route.main) {//{/if}//
 //{if 1}//                var main = name.slice(1).replace(/[._]/g, '-').replace(/\//g, '_');//{/if}//
 //{if 1}//                route.main = core.$(main) ? main : esr.DEFAULT_MAIN;//{/if}//
