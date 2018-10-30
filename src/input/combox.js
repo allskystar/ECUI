@@ -16,21 +16,20 @@
 (function () {
 //{if 0}//
     var core = ecui,
+        dom = core.dom,
         ui = core.ui,
         util = core.util;
 //{/if}//
     function refresh(combox) {
         var text = ui.Select.prototype.getValue.call(combox);
 
-        combox.preventAlterItems();
         combox.getItems().forEach(function (item) {
             if (item.getContent().indexOf(text) < 0) {
-                item.hide();
+                dom.addClass(item.getMain(), 'ui-hide');
             } else {
-                item.show();
+                dom.removeClass(item.getMain(), 'ui-hide');
             }
         });
-        combox.premitAlterItems();
         combox.alterItems();
     }
 
@@ -59,9 +58,20 @@
             /**
              * @override
              */
+            $blur: function (event) {
+                ui.Select.prototype.$blur.call(this, event);
+            },
+
+            /**
+             * @override
+             */
             $click: function (event) {
                 if (!this.$getSection('Options').isShow()) {
                     ui.Select.prototype.$click.call(this, event);
+                    this.getItems().forEach(function (item) {
+                        dom.removeClass(item.getMain(), 'ui-hide');
+                    });
+                    this.alterItems();
                 }
             },
 
@@ -99,6 +109,7 @@
                 if (selected) {
                     this.setSelected(selected);
                 } else {
+                    this.$setSelected();
                     refresh(this);
                 }
                 this.alterStatus(text ? '-placeholder' : '+placeholder');

@@ -14,7 +14,6 @@
 _cSelected    - 当前选中的选项
 _uText        - 下拉框的文本框
 _uOptions     - 下拉选择框
-_bRequired    - 是否必须选择
 */
 (function () {
 //{if 0}//

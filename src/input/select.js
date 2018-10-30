@@ -15,7 +15,6 @@ _nOptionSize  - 下接选择框可以用于选择的条目数量
 _cSelected    - 当前选中的选项
 _uText        - 下拉框的文本框
 _uOptions     - 下拉选择框
-_bRequired    - 是否必须选择
 _bAlterItems  - 是否延迟到显示时执行alterItems
 */
 (function () {

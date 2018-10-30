@@ -234,11 +234,20 @@ _uOptions     - 下拉选择框
             },
 
             /**
+             * 设置底层的选中项。
+             * @protected
+             *
+             * @param {ecui.ui.Item} item 选项控件
+             */
+            $setSelected: function (item) {
+                this._cSelected = item || null;
+            },
+
+            /**
              * @override
              */
             $validate: function () {
                 ui.InputControl.prototype.$validate.call(this);
-
                 if (this.getValue() === '' &&  this._bRequired) {
                     core.dispatchEvent(this, 'error');
                     return false;
