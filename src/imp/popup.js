@@ -55,13 +55,21 @@
             /**
              * @override
              */
+            $blur: function (event) {
+                this.$Popup.$blur.call(this, event);
+                owner = null;
+                this.$PopupData.popup.hide();
+            },
+
+            /**
+             * @override
+             */
             $click: function (event) {
                 this.$Popup.$click.call(this, event);
                 var popup = this.$PopupData.popup;
                 if (dom.contain(this.getOuter(), event.target)) {
                     if (popup.isShow()) {
                         owner = null;
-
                         popup.hide();
                     } else {
                         owner = this;
@@ -113,6 +121,7 @@
 
                 if (event.type === 'mousedown' && !dom.contain(this.$PopupData.popup.getOuter(), event.target)) {
                     // ie6/7/8下有可能scroll事件是由mousedown点击滚动条触发的
+                    owner = null;
                     this.$PopupData.popup.hide();
                 }
             },
