@@ -693,7 +693,9 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                         }, -10);
                         return;
                     }
+                    pauseStatus = true;
                     util.timer(function () {
+                        pauseStatus = false;
                         history.replaceState('', '', '#' + loc);
                         // ie下使用中间iframe作为中转控制
                         // 其他浏览器直接调用控制器方法
