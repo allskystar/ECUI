@@ -290,7 +290,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
                     var noPrimaryMove = true;
 
-                    Array.apply(null, event.getNative().changedTouches).forEach(function (item) {
+                    Array.prototype.slice.call(event.getNative().changedTouches).forEach(function (item) {
                         var track = tracks[item.identifier];
                         event.pageX = item.pageX;
                         event.pageY = item.pageY;
@@ -2481,7 +2481,6 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                     dom.removeEventListener(window, 'resize', events.orientationchange);
                 }
                 initRecursion++;
-
 
                 Array.apply(null, el.all || el.getElementsByTagName('*')).forEach(function (item) {
                     if (dom.getAttribute(item, ecuiName)) {
