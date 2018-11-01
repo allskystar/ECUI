@@ -19,7 +19,7 @@
 
     //统一对请求成功返回参数做分类
     ecui.esr.onparsedata = function (url, data) {
-        if (url.indexOf('v1/base/series') >= 0 || url.indexOf('/v1/base/c2b/series') >= 0) {
+        if (url.indexOf('v1/base/series') >= 0 || url.indexOf('/v1/base/c2b/series') >= 0 || url.indexOf('/admin-auction/dealer/series') >= 0) {
             data = data.data;
             var options = [];
             for (var i = 0; i < data.length; i++) {
@@ -81,13 +81,21 @@
             return data;
         }
         if (code === 12011) {
-            // 分支3.4：登录相关的错误
-            window.location = './login.html';
+            if (ecui.inapp) {
+                ecui.esr.headers['x-access-token'] = '';
+                window.callBridge('login');
+            } else {
+                // 分支3.4：登录相关的错误
+                window.location = './login.html';
+            }
         } else {
             if (code === 300000) {
                 throw data.msg;
             }
-            daikuan.showHint('error', data.msg);
+            if (code !== 500016) {
+                // 淘车拍同步接口，该code表示，需要弹dialog去编辑，不弹提示
+                daikuan.showHint('error', data.msg);
+            }
         }
         return code;
     };
@@ -123,7 +131,7 @@ daikuan.cookie = {
     del: function(key) {
         var d = new Date();
         d.setTime(d.getTime() - 1000000);
-        var cookie = key + '="" ; expires=' + d.toGMTString();
+        var cookie = key + '="" ; expires=' + d.toGMTString() + ';path=/';
         document.cookie = cookie;
     }
 };
@@ -225,8 +233,8 @@ daikuan.setEditFormValue = function (data, form, isDefault) {
         // 使用ecui.util.parseValue解析数据，处理ecui.esr.CreateObject创建的对象数据的参数回填
         var value = ecui.util.parseValue(name, data);
         if (name && value !== undefined) {
-            // 将value转换成字符串
-            value = value + '';
+            // 将value转换成字符串，value 为 Array 和 Object 时不转换成字符串
+            value = typeof value === 'object' ? value : value + '';
             if (ignore.indexOf(name.split('.')[0]) === -1) {
                 var _control = item.getControl && item.getControl();
                 if (_control) {
@@ -235,7 +243,7 @@ daikuan.setEditFormValue = function (data, form, isDefault) {
                         _control.setChecked(value === _control.getValue());
                     } else if (_control instanceof ecui.ui.Checkbox) {
                         if (value instanceof Array) {
-                            _control.setChecked(value.indexOf(_control.getValue()) !== -1);
+                            _control.setChecked(value.indexOf(+_control.getValue()) !== -1);
                         } else {
                             // 当不是复选的时候 返回的不是数组,是string 
                             _control.setChecked(value === _control.getValue());
@@ -264,7 +272,7 @@ daikuan.setEditFormValue = function (data, form, isDefault) {
             } else {
                 // ecui.esr.CreateArray数组回填时index减去ecui.esr.CreateArray本身input表单元素
                 value = ecui.util.parseValue(name, data);
-                value = value && value.length ? value[Array.prototype.slice.call(elements[name]).indexOf(item) - 1] : '';
+                value = value && value.length ? value[Array.apply(null, elements[name]).indexOf(item) - 1] : '';
                 if (item.getControl) {
                     var control = item.getControl();
                     if (!(control instanceof ecui.esr.CreateObject)) {
@@ -338,9 +346,9 @@ daikuan.resetFormValue = function (form) {
 
 // 获取表单数据设置searchParam数据
 daikuan.setSearchParam = function(searchParm, form) {
-    Array.prototype.slice.call(form.elements).forEach(function(item) {
+    for (var i = 0, item; item = form.elements[i++]; ) {
         if (item.name) {
-            var _control = ecui.findControl(item);
+            var _control = item.getControl && item.getControl();
             if (_control) {
                 if (_control instanceof ecui.esr.CreateArray || _control instanceof ecui.esr.CreateObject) {
                     // 如果是ecui.esr.CreateArray 和 ecui.esr.CreateObject元素，不做任何处理
@@ -365,7 +373,7 @@ daikuan.setSearchParam = function(searchParm, form) {
                 searchParm[item.name] = item.value;
             }
         }
-    });
+    };
 };
 
 // 初始化dialog控件
@@ -420,9 +428,28 @@ daikuan.TableListRoute = function (route) {
 daikuan.TableListRoute.prototype.onbeforerequest = function (context) {
     context.pageNo = context.pageNo || +this.searchParm.pageNo;
     context.pageSize = +this.searchParm.pageSize;
-    daikuan.setFormValue(context, document.forms[this.model[0].split('?')[1]], this.searchParm);
+    daikuan.setFormValue(context, document.forms[this.model[0].split('?')[1].split('&')[0]], this.searchParm);
 };
 daikuan.TableListRoute.prototype.onbeforerender = function (context) {
+    var data = ecui.util.parseValue(this.model[0].split('@')[0], context);
+    context.offset = data.offset;
+    context.total = data.total;
+    context.totalPage = data.totalPage;
+};
+
+
+/**
+ * 列表路由对象。
+ * @public
+ *
+ * @param {object} route 路由对象
+ */
+daikuan.TableListRoute2 = function (route) {
+    this.model = [route.NAME.slice(0, -5) + '@FORM ' + route.url];
+    this.main = route.NAME.slice(0, -9) + '_table';
+    Object.assign(this, route);
+}
+daikuan.TableListRoute2.prototype.onbeforerender = function (context) {
     var data = ecui.util.parseValue(this.model[0].split('@')[0], context);
     context.offset = data.offset;
     context.total = data.total;

@@ -344,10 +344,10 @@ a {
 
     .ui-combox {
         border-color: #d0021b;
-
-        .ui-combox-text {
-            background-color: #ffead6;
-        }
+        background-color: #ffead6;
+    }
+    .ui-input input {
+        background-color: #ffead6;
     }
 
     .ui-select-text {
@@ -356,10 +356,7 @@ a {
 
     .ui-text {
         border-color: #d0021b;
-
-        input {
-            background-color: #ffead6;
-        }
+        background-color: #ffead6;
     }
 
     .ui-tip {
@@ -389,6 +386,7 @@ a {
 .ui-messagebox {
     overflow: hidden;
     border-radius: 5px;
+    max-width: 80%;
 
     .ui-dialog-title {
         display: none;

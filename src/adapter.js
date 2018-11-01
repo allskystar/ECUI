@@ -910,7 +910,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              */
             checkUpdate: function (form) {
                 var update = false;
-                Array.prototype.slice.call(form.elements).forEach(function (item) {
+                Array.apply(null, form.elements).forEach(function (item) {
                     if (item.type !== 'radio' && item.type !== 'checkbox') {
                         if (item.defaultValue !== item.value) {
                             update = true;

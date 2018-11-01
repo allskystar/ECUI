@@ -201,7 +201,7 @@ _aStatus            - 控件当前的状态集合
                 core.$clearState(this);
 
                 var el = this.getMain();
-                Array.prototype.slice.call(el.all || el.getElementsByTagName('*')).forEach(function (item) {
+                Array.apply(null, el.all || el.getElementsByTagName('*')).forEach(function (item) {
                     if (item.disabled === false) {
                         var tabIndex = dom.getAttribute(item, 'tabIndex') || '';
                         if (tabIndex !== '-1') {
@@ -255,7 +255,7 @@ _aStatus            - 控件当前的状态集合
                 this.alterStatus('-disabled');
 
                 var el = this.getMain();
-                Array.prototype.slice.call(el.all || el.getElementsByTagName('*')).forEach(function (item) {
+                Array.apply(null, el.all || el.getElementsByTagName('*')).forEach(function (item) {
                     if (item.disabled !== undefined) {
                         var tabIndex = dom.getAttribute(item, '_tabIndex');
                         if (tabIndex !== null) {

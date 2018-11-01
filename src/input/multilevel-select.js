@@ -132,7 +132,7 @@ _aSelect - 全部的下拉框控件列表
 
                 var el = this.getMain();
                 this._aSelect = [];
-                Array.prototype.slice.call(el.all || el.getElementsByTagName('*')).forEach(function (item) {
+                Array.apply(null, el.all || el.getElementsByTagName('*')).forEach(function (item) {
                     if (item.getControl) {
                         item = item.getControl();
                         if (item instanceof ui.Select && this._aSelect.indexOf(item) < 0) {

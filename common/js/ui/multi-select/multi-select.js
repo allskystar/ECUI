@@ -21,7 +21,7 @@ cities - 地区联动下拉框控件。
      *
      * @param {object} options 初始化选项
      */
-    ui.MultiSelect = core.inherits(
+    ui.CMultilevelSelect = core.inherits(
         ui.Text,
         'ui-multi-select',
         function (el, options) {
@@ -47,7 +47,7 @@ cities - 地区联动下拉框控件。
 
                 var optionsEl = dom.create(
                     {
-                        innerHTML: Array.prototype.slice.call(oldEl.options).map(
+                        innerHTML: Array.apply(null, oldEl.options).map(
                             function (item) {
                                 var optionText = dom.getAttribute(item, core.getAttributeName());
                                 return '<div ' + core.getAttributeName() + '="value:' + util.encodeHTML(item.value) + (optionText ? ';' + util.encodeHTML(optionText) : '') + '">' + util.encodeHTML(item.text) + '</div>';

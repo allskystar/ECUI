@@ -43,7 +43,7 @@ _uOptions     - 下拉选择框
 
                 var optionsEl = dom.create(
                         {
-                            innerHTML: Array.prototype.slice.call(el.options).map(
+                            innerHTML: Array.apply(null, el.options).map(
                                 function (item) {
                                     var optionText = dom.getAttribute(item, core.getAttributeName());
                                     return '<div ' + core.getAttributeName() + '="value:' + util.encodeHTML(item.value) + (optionText ? ';' + util.encodeHTML(optionText) : '') + '">' + util.encodeHTML(item.text) + '</div>';

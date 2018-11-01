@@ -42,7 +42,7 @@ _nTotalPage       - 总页数
         'ui-pagination',
         function (el, options) {
             ui.Control.call(this, el, options);
-            if (FeatureFlags.PAGEON_1 && options.route) {
+            if (FeatureFlags.PAGEON_1) {
                 // page值的形式: offset,total,pageSize,totalPage
                 var page = options.page.split(',');
                 // 定义当前页数
@@ -50,21 +50,20 @@ _nTotalPage       - 总页数
                 // 定义总页数
                 this._nTotalPage = +page[3];
 
-                if (options.route) {
-                    el.innerHTML = '<div class="pagination"></div>'
-                                    + '<div class="pagination-msgBox clearfix">'
-                                    + (options.skipInput ? '<div class="pagination-msg">第<input class="ui-text ui-input" />页</div>' : '')
-                                    + '<div class="pagination-msg">共' + this._nTotalPage + '页</div>'
-                                    + '<div class="pagination-msg">共' + (+page[1]) + '条</div>'
-                                    + '</div>';
-                    this.$setBody(el.firstChild);
-                    if (options.skipInput) {
-                        this._uSkipInput = core.$fastCreate(ui.Text, el.children[1].firstChild.children[0], this);
-                        this._uSkipInput.setValue(this._nCurrentPage);
-                        this._uSkipInput.oninput = validate;
-                        this._uSkipInput.onkeydown = skipTo;
-                    }
+                el.innerHTML = '<div class="pagination"></div>'
+                                + '<div class="pagination-msgBox clearfix">'
+                                + (options.skipInput ? '<div class="pagination-msg">第<input class="ui-text ui-input" />页</div>' : '')
+                                + '<div class="pagination-msg">共' + this._nTotalPage + '页</div>'
+                                + '<div class="pagination-msg">共' + (+page[1]) + '条</div>'
+                                + '</div>';
+                this.$setBody(el.firstChild);
+                if (options.skipInput) {
+                    this._uSkipInput = core.$fastCreate(ui.Text, el.children[1].firstChild.children[0], this);
+                    this._uSkipInput.setValue(this._nCurrentPage);
+                    this._uSkipInput.oninput = validate;
+                    this._uSkipInput.onkeydown = skipTo;
                 }
+
             } else {
                 var offset = options.page.split('-');
                 var pageSize = +offset[1] - offset[0] + 1;
