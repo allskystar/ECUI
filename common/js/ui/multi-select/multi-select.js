@@ -47,7 +47,7 @@ cities - 地区联动下拉框控件。
 
                 var optionsEl = dom.create(
                     {
-                        innerHTML: Array.apply(null, oldEl.options).map(
+                        innerHTML: dom.toArray(oldEl.options).map(
                             function (item) {
                                 var optionText = dom.getAttribute(item, core.getAttributeName());
                                 return '<div ' + core.getAttributeName() + '="value:' + util.encodeHTML(item.value) + (optionText ? ';' + util.encodeHTML(optionText) : '') + '">' + util.encodeHTML(item.text) + '</div>';

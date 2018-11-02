@@ -407,7 +407,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
 
                 if (elements) {
                     if (elements.length) {
-                        elements = Array.apply(null, elements);
+                        elements = dom.toArray(elements);
                         el = elements[0];
                     } else {
                         el = elements;
@@ -648,7 +648,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                 unloadNames.forEach(function (name) {
                     delete loadStatus[name];
                     name = '/' + name;
-                    Array.apply(null, document.getElementsByTagName('STYLE')).forEach(function (item) {
+                    dom.toArray(document.getElementsByTagName('STYLE')).forEach(function (item) {
                         if (dom.getAttribute(item, 'module') === name) {
                             dom.remove(item);
                         }
@@ -761,7 +761,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
             }
             el.route = null;
         }
-        Array.apply(null, el.all || el.getElementsByTagName('*')).forEach(function (item) {
+        dom.toArray(el.all || el.getElementsByTagName('*')).forEach(function (item) {
             if (item.route && routes[item.route].ondispose) {
                 routes[item.route].ondispose();
             }
@@ -1297,7 +1297,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
          */
         parseObject: function (form, data, validate) {
             var errControl,
-                elements = Array.apply(null, form.elements);
+                elements = dom.toArray(form.elements);
 
             elements.forEach(function (item) {
                 if (validate !== false && item.name && item.getControl && !item.getControl().isDisabled()) {

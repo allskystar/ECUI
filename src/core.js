@@ -2482,7 +2482,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                 }
                 initRecursion++;
 
-                Array.apply(null, el.all || el.getElementsByTagName('*')).forEach(function (item) {
+                dom.toArray(el.all || el.getElementsByTagName('*')).forEach(function (item) {
                     if (dom.getAttribute(item, ecuiName)) {
                         list.push(item);
                     }

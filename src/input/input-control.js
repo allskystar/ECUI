@@ -173,7 +173,7 @@ _eInput        - INPUT对象
     function submitHandler(event) {
         event = core.wrapEvent(event);
 
-        var elements = Array.apply(null, this.elements);
+        var elements = dom.toArray(this.elements);
 
         elements.forEach(function (item) {
             if (item.getControl) {
@@ -191,7 +191,7 @@ _eInput        - INPUT对象
      * @private
      */
     function resetHandler() {
-        Array.apply(null, this.elements).forEach(function (item) {
+        dom.toArray(this.elements).forEach(function (item) {
             if (item.getControl) {
                 core.dispatchEvent(item.getControl(), 'reset');
             }
