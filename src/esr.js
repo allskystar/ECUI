@@ -683,14 +683,16 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                         if (historyIndex > 1) {
                             // IE第一次进入，不能back，否则会退出框架
                             history.back();
+                            var handle = util.timer(function () {
+                                if (/~HISTORY=(\d+)/.test(location.href)) {
+                                    esr.setLocation(loc);
+                                    pauseStatus = false;
+                                    handle();
+                                }
+                            }, -10);
+                        } else {
+                            esr.setLocation(loc);
                         }
-                        var handle = util.timer(function () {
-                            if (/~HISTORY=(\d+)/.test(location.href)) {
-                                esr.setLocation(loc);
-                                pauseStatus = false;
-                                handle();
-                            }
-                        }, -10);
                         return;
                     }
                     pauseStatus = true;
