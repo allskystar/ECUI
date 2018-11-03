@@ -686,12 +686,14 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                             var handle = util.timer(function () {
                                 if (/~HISTORY=(\d+)/.test(location.href)) {
                                     esr.setLocation(loc);
+                                    esr.callRoute(loc);
                                     pauseStatus = false;
                                     handle();
                                 }
                             }, -10);
                         } else {
                             esr.setLocation(loc);
+                            esr.callRoute(loc);
                         }
                         return;
                     }
