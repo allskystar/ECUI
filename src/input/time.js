@@ -94,8 +94,8 @@ _oTest      匹配合法性的正则表达式
                     }
                 }
 
-                var native = event.getNative();
-                if (!native.metaKey && !native.ctrlKey && !native.altKey) {
+                var natived = event.getNative();
+                if (!natived.metaKey && !natived.ctrlKey && !natived.altKey) {
                     event.preventDefault();
                 }
             },
