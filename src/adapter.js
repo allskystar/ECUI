@@ -557,6 +557,13 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                 } else {
                     el.style[fixer || name] = value;
                 }
+            },
+
+            toArray: function (elements) {
+                for (var i = 0, ret = [], el; el = elements[i++]; ) {
+                    ret.push(el);
+                }
+                return ret;
             }
         },
         effect: {},
@@ -910,7 +917,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              */
             checkUpdate: function (form) {
                 var update = false;
-                Array.apply(null, form.elements).forEach(function (item) {
+                dom.toArray(form.elements).forEach(function (item) {
                     if (item.type !== 'radio' && item.type !== 'checkbox') {
                         if (item.defaultValue !== item.value) {
                             update = true;

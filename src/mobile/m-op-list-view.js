@@ -35,7 +35,7 @@ _cItem    - 当前处于激活的选项
                 ui.MListView.prototype.Item,
                 function (el, options) {
                     ui.MListView.prototype.Item.call(this, el, options);
-                    Array.apply(null, this.getBody().childNodes).forEach(function (item) {
+                    dom.toArray(this.getBody().childNodes).forEach(function (item) {
                         if (item.nodeType !== 1) {
                             dom.remove(item);
                         }

@@ -96,7 +96,7 @@ _nDelay   - 延迟时间，如果不自动轮播这个值为0
 
             el = this.getBody();
 
-            Array.apply(null, el.childNodes).forEach(function (item) {
+            dom.toArray(el.childNodes).forEach(function (item) {
                 if (item.nodeType !== 1) {
                     el.removeChild(item);
                 }

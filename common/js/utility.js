@@ -272,7 +272,7 @@ daikuan.setEditFormValue = function (data, form, isDefault) {
             } else {
                 // ecui.esr.CreateArray数组回填时index减去ecui.esr.CreateArray本身input表单元素
                 value = ecui.util.parseValue(name, data);
-                value = value && value.length ? value[Array.apply(null, elements[name]).indexOf(item) - 1] : '';
+                value = value && value.length ? value[dom.toArray(elements[name]).indexOf(item) - 1] : '';
                 if (item.getControl) {
                     var control = item.getControl();
                     if (!(control instanceof ecui.esr.CreateObject)) {
