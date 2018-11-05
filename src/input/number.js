@@ -20,7 +20,7 @@ _oTest      匹配合法性的正则表达式
     /**
      * 数字输入框控件。
      * options 属性：
-     * decimal  小数位数，会自动补齐，如果为负数或者不设置表示不限制
+     * decimal  小数位数，为正数会自动补齐，为负数有限制但是不自动补齐，为undefined表示不限制
      * @control
      */
     ui.Number = core.inherits(
@@ -28,8 +28,8 @@ _oTest      匹配合法性的正则表达式
         'ui-number',
         function (el, options) {
             ui.Text.call(this, el, options);
-            this._nDecimal = options.decimal === undefined ? -1 : +options.decimal;
-            this._oTest = new RegExp('^-?\\d*' + (!this._nDecimal ? '' : '(\\.\\d' + (this._nDecimal > 0 ? '{0,' + options.decimal + '}' : '*') + ')?') + '$');
+            this._nDecimal = options.decimal && +options.decimal;
+            this._oTest = new RegExp('^-?\\d*' + (this._nDecimal === 0 ? '' : '(\\.\\d' + (this._nDecimal ? '{0,' + Math.abs(this._nDecimal) + '}' : '*') + ')?') + '$');
         },
         {
             /**
