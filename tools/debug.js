@@ -119,7 +119,7 @@
                     return match.slice(-1) === '}' ? '}' : '';
                 });
             }
-            el.styleSheet.cssText = cssText;
+            el.setAttribute('lessText', cssText);
         } else {
             el.innerHTML = cssText;
         }
