@@ -2583,7 +2583,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
 
                 // 仅简单的显示或隐藏当前的屏蔽层，用于resize时的重绘
                 maskElements.forEach(function (item) {
-                    item.style.display = text;
+                    item.style.cssText += text;
                 });
             } else if (opacity === undefined) {
                 unmasks.pop()();
