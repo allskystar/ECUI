@@ -559,6 +559,13 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                 }
             },
 
+            /**
+             * 将 Element 集合转换成数组。
+             * @public
+             *
+             * @param {HTMLCollection} elements Element 集合
+             * @return {Array} Element 数组
+             */
             toArray: function (elements) {
                 for (var i = 0, ret = [], el; el = elements[i++]; ) {
                     ret.push(el);
