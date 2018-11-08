@@ -18,7 +18,7 @@ _uDate   - 日部件
         ui = core.ui;
 //{/if}//
     /**
-     * 移动端日历输入控件控件。
+     * 移动端日历输入控件。
      * @control
      */
     ui.MCalendar = core.inherits(
