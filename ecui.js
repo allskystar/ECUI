@@ -61,6 +61,7 @@ var ecui;
     document.write('<script type="text/javascript" src="src/mobile/m-photo-hotspot.js"></script>');
     document.write('<script type="text/javascript" src="src/mobile/m-multilevel-select.js"></script>');
     document.write('<script type="text/javascript" src="src/mobile/m-carousel.js"></script>');
+    document.write('<script type="text/javascript" src="src/mobile/m-book.js"></script>');
 
     document.write('<script type="text/javascript" src="src/extend/anchor.js"></script>');
     document.write('<script type="text/javascript" src="src/extend/link.js"></script>');
