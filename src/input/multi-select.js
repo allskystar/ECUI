@@ -22,18 +22,23 @@ _eInput - 选项对应的input，form提交时使用
      * @control
      */
     ui.MultiSelect = core.inherits(
-        ui.Control,
+        ui.InputControl,
         'ui-multi-select',
         function (el, options) {
             var optionsEl = dom.create({className: this.Options.CLASS + options.classes.join('-options ') + 'ui-popup ui-hide'});
             for (; el.firstChild; ) {
                 optionsEl.appendChild(el.firstChild);
             }
-            ui.Control.call(this, el, options);
+            ui.InputControl.call(this, el, options);
+            dom.insertBefore(
+                this._eText = dom.create('DIV', { className: options.classes.join('-text ') }),
+                dom.last(el)
+            );
             this.setPopup(core.$fastCreate(this.Options, optionsEl, this, {name: options.name}));
             this._sName = options.name || '';
         },
         {
+            TEXT: '已选{0}个',
             /**
              * 选项框部件。
              * @unit
@@ -65,10 +70,13 @@ _eInput - 选项对应的input，form提交时使用
              * @event
              */
             $change: function () {
-                var items = this.getSelected().map(function (item) {
-                    return item.getValue();
+                var text = [], value = [];
+                this.getSelected().map(function (item) {
+                    text.push(item.getBody().innerText.trim());
+                    value.push(item.getValue());
                 });
-                this.getBody().innerHTML = items.length ? items.join(',') : '';
+                this._eText.innerHTML = text.join(',');
+                this._eInput.value = value.join(',');
             },
 
             /**
@@ -90,6 +98,10 @@ _eInput - 选项对应的input，form提交时使用
              */
             getSelected: function () {
                 return this.getPopup().getSelected();
+            },
+            getValue: function () {
+                var value = this._eInput.value.split(',');
+                return value.map(function (item) { return item; });
             },
 
             /**

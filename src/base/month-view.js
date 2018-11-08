@@ -141,7 +141,8 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
              * @event
              */
             $dateclick: function (event) {
-                event.date = this._oDate = new Date(this._nYear, this._nMonth, event.item._nDay);
+                this._oDate = new Date(this._nYear, this._nMonth, event.item._nDay);
+                event.date = this._oDate;
                 setSelected(this, event.item);
             },
 

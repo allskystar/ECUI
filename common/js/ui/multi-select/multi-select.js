@@ -1,12 +1,17 @@
 /*
-cities - 地区联动下拉框控件。
-地区联动下拉框控件，继承自multilevel-select控件。
-
-多级联动下拉框控件直接HTML初始化的例子:
-省市二级联动：
-<div ui="type:cities;mutli:2"></div>
-省市区三级联动：
-<div ui="type:cities;multi:3"></div>
+多选下拉控件初始化的例子:
+<div class="search-input" ui="type:CustomeCheckBox;">
+    <label><div ui="type:checkbox;value:2;"></div>行政部</label>
+    <label><div ui="type:checkbox;value:3;"></div>人事部</label>
+    <label><div ui="type:checkbox;value:4;"></div>财务部</label>
+    <label><div ui="type:checkbox;value:5;"></div>市场部</label>
+    <label><div ui="type:checkbox;value:6;"></div>销售部</label>
+    <label><div ui="type:checkbox;value:7;"></div>技术部</label>
+    <div class="ui-operate">
+        <button type="button" class="ui-button cancel">取消</button>
+        <button type="button"  class="ui-button sure">确定</button>
+    </div>
+</div>
 
 */
 (function () {
@@ -16,23 +21,22 @@ cities - 地区联动下拉框控件。
         util = ecui.util;
 
     /**
-     * 初始化多项选择控件。
-     * @public
-     *
-     * @param {object} options 初始化选项
+     * 多选下拉控件。
+     * options 属性：
+     * @control
      */
-    ui.CMultilevelSelect = core.inherits(
-        ui.Text,
-        'ui-multi-select',
+    ui.CustomeCheckBox = core.inherits(
+        ui.InputControl,
+        'ui-custome-check-box',
         function (el, options) {
             util.setDefault(options, 'readOnly', true);
             util.setDefault(options, 'inputType', 'text');
-
             var oldEl = el;
             el = dom.insertBefore(
                 dom.create(
                     {
-                        className: el.className,
+                        className: el.className + ' ui-custome-check-box-input',
+                        innerHTML: '<div class="ui-custome-check-box-text"></div>',
                         style: {
                             cssText: el.style.cssText
                         }
@@ -40,181 +44,66 @@ cities - 地区联动下拉框控件。
                 ),
                 el
             );
-
-            if (oldEl.tagName === 'SELECT') {
-                options.name = oldEl.name;
-                options.value = oldEl.value;
-
-                var optionsEl = dom.create(
-                    {
-                        innerHTML: dom.toArray(oldEl.options).map(
-                            function (item) {
-                                var optionText = dom.getAttribute(item, core.getAttributeName());
-                                return '<div ' + core.getAttributeName() + '="value:' + util.encodeHTML(item.value) + (optionText ? ';' + util.encodeHTML(optionText) : '') + '">' + util.encodeHTML(item.text) + '</div>';
-                            }
-                        ).join('')
-                    }
-                );
-            } else {
-                optionsEl = oldEl;
-                oldEl.style.cssText = '';
-            }
-            optionsEl.className = options.classes.join('-options ') + 'ui-popup ui-hide';
-
-            dom.remove(oldEl);
-
-            el.innerHTML = '<div class="' + options.classes.join('-text ') + '"></div>';
-            this._uText = el.firstChild;
             ui.InputControl.call(this, el, options);
-            this.getInput().readOnly = true;
-            this._uOptions = core.$fastCreate(this.Options, optionsEl, this);
-            this._uOptions._cSelected = [];
-            this.$setBody(optionsEl);
-            // 初始化下拉区域最多显示的选项数量
-            this.setPopup(this._uOptions);
 
-            this._cSelected = [];
+            oldEl.className += ' ui-custome-check-box-popup ui-popup ui-hide';
+            this._uPopup = core.$fastCreate(ui.Control, oldEl, this);
+
+            this.$setBody(oldEl);
+            // 初始化下拉区域最多显示的选项数量
+            this.setPopup(this._uPopup);
+            this._cValue = [];
         },
         {
-            $change: function () {
-                var text = [], value = [];
-                this._cSelected.forEach(function (item) {
-                    text.push(item.getContent());
-                    value.push(item.getValue());
-                });
-                this._uText.innerHTML = text.join('，');
-                this.getInput().value = JSON.stringify(value);
-            },
-            getValue: function () {
-                return JSON.parse(this.getInput().value);
-            },
-            /**
-             * 选项部件。
-             * @unit
-             */
-            Item: core.inherits(
-                ui.Item,
-                function (el, options) {
-                    ui.Item.call(this, el, options);
-                    this._sValue = options.value === undefined ? dom.getText(el) : String(options.value);
-                },
-                {
-                    /**
-                     * @override
-                     */
-                    $click: function (event) {
-                        ui.Item.prototype.$click.call(this, event);
-                        var parent = this.getParent(),
-                            index = parent._uOptions._cSelected.indexOf(this);
-                        if (index === -1) {
-                            parent._uOptions._cSelected.push(this);
-                        } else {
-                            parent._uOptions._cSelected.splice(index, 1);
-                        }
-                        this.alterStatus((index === -1) ? '+selected' : '-selected');
-                        // core.triggerEvent(parent, 'change', event);
-                    },
+            VALUEHTML: '已选 {0} 个',
+            $click: function (event) {
+                var target = event.target;
+                var _this = this, value = [];
+                if (target.tagName === 'BUTTON') {
+                    this._uPopup.hide();
+                    if (ecui.dom.hasClass(target, 'sure')) {
+                        var checkBox = ecui.query(function (item) {
+                            return item instanceof ecui.ui.Checkbox && item.getParent() === this.getPopup();
+                        }, this);
+                        // this._cValue = [];
+                        var content = [];
+                        checkBox.forEach(function (item) {
+                            if (item.isChecked()) {
+                                if (!_this._cValue.includes(item.getValue())) {
+                                    value.push(item.getValue());
+                                    content.push(ecui.dom.getParent(item.getMain()).innerText);
+                                }
+                            }
+                        }, this);
 
-                    /**
-                     * 获取选项的值。
-                     * getValue 方法返回选项控件的值，即选项选中时整个下拉框控件的值。
-                     * @public
-                     *
-                     * @return {string} 选项的值
-                     */
-                    getValue: function () {
-                        return this._sValue;
-                    },
-
-                    /**
-                     * 设置选项的值。
-                     * setValue 方法设置选项控件的值，即选项选中时整个下拉框控件的值。
-                     * @public
-                     *
-                     * @param {string} value 选项的值
-                     */
-                    setValue: function (value) {
-                        var parent = this.getParent();
-                        this._sValue = value;
-                        if (parent && this === parent._cSelected) {
-                            // 当前被选中项的值发生变更需要同步更新控件的值
-                            ui.InputControl.prototype.setValue.call(parent, value);
-                        }
+                        // 添加选项的value
+                        this._cValue = this._cValue.concat(value);
+                        // 添加选项的text
+                        this.getMain().firstChild.innerHTML = util.stringFormat(this.VALUEHTML, this._cValue.length || 0);
+                        // 将改变的值通过event.value传给回调函数
+                        event.changeValue = value;
+                        core.triggerEvent(this, 'change', event);
                     }
                 }
-            ),
-
-            /**
-             * 选项框部件。
-             * @unit
-             */
-            Options: core.inherits(
-                ui.Control,
-                function (el, options) {
-                    ui.Control.call(this, el, options);
-                    el = this.getMain();
-
-                    // 生成操作按钮
-                    dom.insertHTML(
-                        el,
-                        'BEFOREEND',
-                        '<div class="' + options.classes.join('-operate ') + '"><div class="' +
-                            options.classes.join('-cancel ') + ui.Button.CLASS + '">取消</div><div class="' +
-                            options.classes.join('-sure ') + ui.Button.CLASS + '">确定</div></div>'
-                    );
-                    var buttons = dom.children(el.lastChild);
-                    this._uCancel = core.$fastCreate(this.Button, buttons[0], this);
-                    this._uSure = core.$fastCreate(this.Button, buttons[1], this);
-                },
-                {
-                    /**
-                     * 多项选择操作按钮控件。
-                     * options 属性：
-                     * move    前进后退月份的偏移值，需要改变一年设置为12
-                     * @unit
-                     */
-                    Button: core.inherits(
-                        ui.Button,
-                        function (el, options) {
-                            ui.Button.call(this, el, options);
-                        },
-                        {
-                            /**
-                             * @override
-                             */
-                            $click: function (event) {
-                                ui.Button.prototype.$click.call(this, event);
-                                var parent = this.getParent();
-                                if (this === parent._uCancel) {
-                                    parent._cSelected = [].concat(parent.getParent()._cSelected);
-                                } else {
-                                    parent.getParent()._cSelected = [].concat(parent._cSelected);
-                                    core.triggerEvent(parent.getParent(), 'change', event);
-                                }
-                                parent.hide();
-                            }
-                        }
-                    )
-                }
-            ),
-
-            /**
-             * 选项控件发生变化的处理。
-             * 在 选项组接口 中，选项控件发生添加/移除操作时调用此方法。虚方法，子控件必须实现。
-             * @protected
-             */
-            $alterItems: function () {
-                if (dom.parent(this._uOptions.getOuter())) {
-                    var step = this.getClientHeight(),
-                        width = this.getWidth(),
-                        itemLength = this.getLength();
-
-                    // 设置options框的大小，如果没有元素，至少有一个单位的高度
-                    this._uOptions.$setSize(width, (Math.min(itemLength, this._nOptionSize) || 1) * step + this._uOptions.getMinimumHeight());
+            },
+            getValue: function () {
+                return this._cValue;
+            },
+            deleteValue: function (value) {
+                if (value !== undefined) {
+                    var index = this._cValue.indexOf(value),
+                        str;
+                    if (index !== -1) {
+                        this._cValue.splice(index, 1);
+                        str = this.getMain().firstChild.innerHTML.split('，');
+                        str.splice(index, 1);
+                        this.getMain().firstChild.innerHTML = str.join('，');
+                    }
+                } else {
+                    this._cValue = [];
                 }
             }
         },
-        ui.Popup,
-        ui.Items
+        ui.Popup
     );
 }());
