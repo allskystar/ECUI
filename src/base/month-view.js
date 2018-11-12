@@ -93,8 +93,12 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
             }, this);
 
             this._bExtra = options.extra === 'disable';
-            this._oBegin = new Date(options.begin);
-            this._oEnd = new Date(options.end);
+            if (options.begin) {
+                this._oBegin = new Date(options.begin);
+            }
+            if (options.end) {
+                this._oEnd = new Date(options.end);
+            }
             this._oDate = options.date ? new Date(options.date) : new Date();
         },
         {
@@ -155,6 +159,16 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
             },
 
             /**
+             * 获取有效日期区间的开始。
+             * @public
+             *
+             * @return {Date} 有效日期区间的开始
+             */
+            getBegin: function () {
+                return this._oBegin;
+            },
+
+            /**
              * 获取全部的日期对象。
              * @public
              *
@@ -172,6 +186,16 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
              */
             getDate: function () {
                 return this._oDate;
+            },
+
+            /**
+             * 获取有效日期区间的结束。
+             * @public
+             *
+             * @return {Date} 有效日期区间的结束
+             */
+            getEnd: function () {
+                return this._oEnd;
             },
 
             /**
@@ -254,29 +278,37 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
                     dateYear = year || today.getFullYear(),
                     dateMonth = month !== undefined ? month - 1 : today.getMonth(),
                     // 得到上个月的最后几天的信息，用于补齐当前月日历的上月信息位置
-                    date = new Date(dateYear, dateMonth, 0),
-                    day = 1 - date.getDay(),
-                    lastDayOfLastMonth = date.getDate();
+                    lastDayOfLastMonthDate = new Date(dateYear, dateMonth, 0),
+                    day = 1 - lastDayOfLastMonthDate.getDay(),
+                    lastDayOfLastMonth = lastDayOfLastMonthDate.getDate(),
 
-                // 得到当前月的天数
-                date = new Date(dateYear, dateMonth + 1, 0);
-                var lastDayOfCurrMonth = date.getDate(),
-                    begin = getDay(this._oBegin, dateYear, dateMonth, 1),
-                    end = getDay(this._oEnd, dateYear, dateMonth, lastDayOfCurrMonth),
+                    // 得到当前月的天数
+                    firstDayOfCurrMonthDate = new Date(dateYear, dateMonth, 1),
+                    lastDayOfCurrMonthDate = new Date(dateYear, dateMonth + 1, 0),
+                    lastDayOfCurrMonth = lastDayOfCurrMonthDate.getDate(),
+                    begin = 1,
+                    end = lastDayOfCurrMonth,
                     selected = getDay(this._oDate, dateYear, dateMonth, 0),
                     now = getDay(today, dateYear, dateMonth, 0),
                     oldYear = this._nYear,
                     oldMonth = this._nMonth;
 
-                this._nYear = date.getFullYear();
-                this._nMonth = date.getMonth();
+                if (this._oBegin) {
+                    begin = this._oBegin >= new Date(dateYear, dateMonth + 1, 1) ? 100 : this._oBegin > firstDayOfCurrMonthDate ? this._oBegin.getDate() : firstDayOfCurrMonthDate.getDate();
+                }
+                if (this._oEnd) {
+                    end = this._oEnd < firstDayOfCurrMonthDate ? 0 : this._oEnd < lastDayOfCurrMonthDate ? this._oEnd.getDate() : lastDayOfCurrMonthDate.getDate();
+                }
+
+                this._nYear = firstDayOfCurrMonthDate.getFullYear();
+                this._nMonth = firstDayOfCurrMonthDate.getMonth();
 
                 setSelected(this);
 
                 this._aCells.forEach(function (item, index) {
                     if (index > 6) {
                         var el = item.getOuter();
-                        if (month = day >= begin && day <= end) {
+                        if (day >= begin && day <= end) {
                             if (index === 35 || index === 42) {
                                 dom.removeClass(dom.parent(el), 'ui-extra');
                             }
@@ -302,7 +334,7 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
                             dom.removeClass(el, 'ui-today');
                         }
 
-                        item.getBody().innerHTML = month ? day : day > lastDayOfCurrMonth ? day - lastDayOfCurrMonth : lastDayOfLastMonth + day;
+                        item.getBody().innerHTML = day >= 1 && day <= lastDayOfCurrMonth ? day : day > lastDayOfCurrMonth ? day - lastDayOfCurrMonth : lastDayOfLastMonth + day;
                         item._nDay = day++;
                     }
                 }, this);
