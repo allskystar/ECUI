@@ -48,6 +48,8 @@ var ecui;
     document.write('<script type="text/javascript" src="src/input/combox.js"></script>');
     document.write('<script type="text/javascript" src="src/input/listbox.js"></script>');
     document.write('<script type="text/javascript" src="src/input/calendar-input.js"></script>');
+    document.write('<script type="text/javascript" src="src/input/month-input.js"></script>');
+    document.write('<script type="text/javascript" src="src/input/quarter-input.js"></script>');
     document.write('<script type="text/javascript" src="src/input/multilevel-select.js"></script>');
     document.write('<script type="text/javascript" src="src/input/multi-select.js"></script>');
     document.write('<script type="text/javascript" src="src/input/couple-slider.js"></script>');

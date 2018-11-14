@@ -99,6 +99,12 @@ _eInput - 选项对应的input，form提交时使用
             getSelected: function () {
                 return this.getPopup().getSelected();
             },
+            /**
+             * 获取所有选中项的value。
+             * @public
+             *
+             * @return {Array} 选项数组
+             */
             getValue: function () {
                 var value = this._eInput.value.split(',');
                 return value.map(function (item) { return item; });

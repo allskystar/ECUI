@@ -77,6 +77,7 @@ _ePlaceHolder - 为空时的提示信息标签
                 this._nMinValue = +el[0];
                 this._nMaxValue = +el[1];
             }
+            
             if (options.regexp) {
                 this._oRegExp = new RegExp('^' + options.regexp + '$');
             }
