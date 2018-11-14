@@ -16,36 +16,63 @@
         dom = core.dom,
         io = core.io,
         ui = core.ui,
-        util = core.util;
+        util = core.util,
+
+        ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined;
 //{/if}//
     /**
      * 文件上传回调事件。
      * @private
      */
-    function fileChangeHandler() {
-        var reader = new FileReader(),
-            file = this._eFile.files[0],
-            progress = core.query(function (item) {
-                return item instanceof ui.Progress && item.getParent() === this;
-            }, this)[0];
+    var fileChangeHandler = ieVersion < 9 ? function () {
+            var name = this.getUID(),
+                iframe = dom.create('IFRAME', {
+                    name: name,
+                    className: 'ui-hide'
+                }),
+                form = dom.create('FORM', {
+                    action: this._sUrl,
+                    method: 'POST',
+                    enctype: 'multipart/form-data',
+                    target: name
+                });
+            document.appendChild(iframe);
+            document.appendChild(form);
+            form.appendChild(this._eFile.cloneNode(false));
+            form.submit();
+            var handle = util.timer(function () {
+                var text = iframe.contentDocument.body.innerHTML;
+                if (text) {
+                    handle();
+                    document.removeChild(form);
+                    document.removeChild(iframe);
+                    this.onupload(text);
+                }
+            }, -1, this);
+        } : function () {
+            var reader = new FileReader(),
+                file = this._eFile.files[0],
+                progress = core.query(function (item) {
+                    return item instanceof ui.Progress && item.getParent() === this;
+                }, this)[0];
 
-        reader.readAsDataURL(file);
-        reader.onload = function () {
-            var data = new FormData();
-            data.append(this._eFile.name, file);
+            reader.readAsDataURL(file);
+            reader.onload = function () {
+                var data = new FormData();
+                data.append(this._eFile.name, file);
 
-            io.ajax(this._sUrl, {
-                method: 'POST',
-                data: data,
-                onupload: progress ? function (event) {
-                    progress.setMax(event.total);
-                    progress.setValue(event.loaded);
-                } : undefined,
-                onsuccess: this.onupload.bind(this),
-                onerror: this.onerror ? this.onerror.bind(this) : util.blank
-            });
-        }.bind(this);
-    }
+                io.ajax(this._sUrl, {
+                    method: 'POST',
+                    data: data,
+                    onupload: progress ? function (event) {
+                        progress.setMax(event.total);
+                        progress.setValue(event.loaded);
+                    } : undefined,
+                    onsuccess: this.onupload.bind(this),
+                    onerror: this.onerror ? this.onerror.bind(this) : util.blank
+                });
+            }.bind(this);
+        };
 
     /**
      * 文件上传控件。
