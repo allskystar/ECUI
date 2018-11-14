@@ -37,7 +37,7 @@ build.sh 里使用了几项常见的linux 程序（还依赖于jdk - 像 smarty4
  >>> npm install uglify-es@3.3.9 -g   ### 高效率压缩 js 文件 参见 https://github.com/mishoo/UglifyJS2/tree/harmony
 ```
 
-安装完jslint后，找到安装路径（mac下默认安装路径：/usr/local/lib/node_modules），使用lib-fe项目下的lib-fe/tools/jslint.js替换掉安装的jslint中lib目录下的jslint.js文件（ /usr/local/lib/node_modules/jslint/lib/jslint.js） 
+安装完jslint后，找到安装路径（mac下默认安装路径：/usr/local/lib/node_modules），使用ECUI项目下的ECUI/tools/jslint.js替换掉安装的jslint中lib目录下的jslint.js文件（ /usr/local/lib/node_modules/jslint/lib/jslint.js） 
 
 
 ### 获取 框架源码
@@ -46,15 +46,18 @@ build.sh 里使用了几项常见的linux 程序（还依赖于jdk - 像 smarty4
 // 创建并进入该目录
 mkdir work && cd work
 // 下载源码
-git clone http://devops.biz.taoche.com/gitlab/lib/lib-fe.git
+git clone https://github.com/allskystar/ECUI.git
 ```
+### 本地生成文档
+cd ECUI
+在ECUI项目目录下执行 java -jar ecui-doc.jar
 ### 创建 项目目录
-可以使用 lib-fe下的 generator-ecui 脚本创建项目，也可以自己手动按照框架对目录和文件命名的要求一一创建：
+可以使用 ECUI下的 generator-ecui 脚本创建项目，也可以自己手动按照框架对目录和文件命名的要求一一创建：
 #### 使用脚本
 打开终端，在 work目录下执行以下命令：
 ```
 // 初始化项目并且创建路由 demo.list 和 demo.detail，并且在index中添加路由的链接
-./lib-fe/generator-ecui.sh  -i -r demo.list,demo.detail
+./ECUI/generator-ecui.sh  -i -r demo.list,demo.detail
 
 ```
 #### 手动搭建
@@ -183,7 +186,7 @@ http {
                 #意思是当请求 ecui 框架相关的文件时，当下目录下不存在；
                 #所以去掉 demo 目录名，去匹配后面的规则，$1取得是demo后面的所有内容
                 #比如ecui.js，匹配到后面的规则后转到http://127.0.0.1:8000，nignx启的另一个server
-                #来获取lib-fe,也就是ecui相关的文件，所以这个示例 要求框架和项目在同一层级目录
+                #来获取ECUI,也就是ecui相关的文件，所以这个示例 要求框架和项目在同一层级目录
                 rewrite '^/demo(.*)' $1;
             }
             root   /Users/kongwu/yxwork/;
@@ -219,7 +222,7 @@ http {
         listen       8000;
         location / {
             # 引入文件所在的路径
-            root   /Users/kongwu/yxwork/lib-fe;
+            root   /Users/kongwu/yxwork/ECUI;
         }
     }
 }
