@@ -36,16 +36,16 @@
                     enctype: 'multipart/form-data',
                     target: name
                 });
-            document.appendChild(iframe);
-            document.appendChild(form);
+            document.body.appendChild(iframe);
+            document.body.appendChild(form);
             form.appendChild(this._eFile.cloneNode(false));
             form.submit();
             var handle = util.timer(function () {
-                var text = iframe.contentDocument.body.innerHTML;
+                var text = iframe.contentDocument.body && iframe.contentDocument.body.innerHTML;
                 if (text) {
                     handle();
-                    document.removeChild(form);
-                    document.removeChild(iframe);
+                    document.body.removeChild(form);
+                    document.body.removeChild(iframe);
                     this.onupload(text);
                 }
             }, -1, this);
