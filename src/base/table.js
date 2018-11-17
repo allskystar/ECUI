@@ -620,8 +620,12 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
                     this._eLayout.style.height = height + 'px';
                 }
 
-                if (el.scrollHeight !== el.clientHeight) {
-                    cell.getMain().style.paddingRight = (cell.$$padding[1] + narrow) + 'px';
+                if (narrow && el.scrollHeight !== el.clientHeight) {
+                    el = cell.getMain();
+                    if (this.$$lastPaddingRight === undefined) {
+                        this.$$lastPaddingRight = el.style.paddingRight;
+                    }
+                    el.style.paddingRight = (cell.$$padding[1] + narrow) + 'px';
                 }
 
                 this.$$scrollFixed = [
@@ -654,7 +658,8 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
                 el.style.height = '';
                 this._eLayout.style.height = '';
 
-                this._aHCells[this._aHCells.length - 1].getMain().style.paddingRight = '';
+                this._aHCells[this._aHCells.length - 1].getMain().style.paddingRight = this.$$lastPaddingRight;
+                delete this.$$lastPaddingRight;
             },
 
             /**
