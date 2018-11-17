@@ -250,7 +250,7 @@ _uOptions     - 下拉选择框
              * @override
              */
             cache: function (force) {
-                this._uText.cache(true);
+                this._uText.cache(force);
                 ui.InputControl.prototype.cache.call(this, force);
             },
 

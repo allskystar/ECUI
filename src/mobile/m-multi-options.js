@@ -56,7 +56,7 @@ _aOptions    - 选项框数组
                      */
                     cache: function (force) {
                         this.getParent()._aOptions.forEach(function (item) {
-                            item.cache();
+                            item.cache(force);
                         });
                         ui.Control.prototype.cache.call(this, force);
                     }
