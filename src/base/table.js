@@ -612,7 +612,7 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
                 }, this);
 
                 dom.insertBefore(this._uHead.getBody(), this._uHead.getMain().lastChild.lastChild);
-                dom.parent(this.getBody()).style.marginTop = this.$$paddingTop + 'px';
+                dom.parent(dom.parent(this.getBody())).style.marginTop = this.$$paddingTop + 'px';
                 if (this.getMain().style.height) {
                     this._eLayout.style.height = height + 'px';
                 }
@@ -643,7 +643,7 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
                 });
 
                 dom.insertBefore(this._uHead.getBody(), this.getBody());
-                dom.parent(this.getBody()).style.marginTop = '';
+                dom.parent(dom.parent(this.getBody())).style.marginTop = '';
                 this._eLayout.style.height = '';
             },
 
