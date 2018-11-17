@@ -654,7 +654,7 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
                 el.style.height = '';
                 this._eLayout.style.height = '';
 
-                this._aHCells[this._aHCells.length - 1].style.paddingRight = '';
+                this._aHCells[this._aHCells.length - 1].getMain().style.paddingRight = '';
             },
 
             /**
