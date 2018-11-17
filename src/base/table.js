@@ -558,10 +558,6 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
                 var table = dom.parent(this.getBody());
                 this.$$tableWidth = table.offsetWidth;
                 this.$$tableHeight = table.offsetHeight;
-
-                this._aHCells.forEach(function (item) {
-                    item.cache(true);
-                });
             },
 
             /**
@@ -806,6 +802,16 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
 
                 row._aElements = rowCols;
                 return row;
+            },
+
+            /**
+             * @override
+             */
+            cache: function (force) {
+                this._aHCells.forEach(function (item) {
+                    item.cache(force);
+                });
+                ui.Control.prototype.cache.call(this, force);
             },
 
             /**

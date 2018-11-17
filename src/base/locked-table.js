@@ -373,6 +373,15 @@ _eRight      - 右侧乐定行的Element元素
             /**
              * @override
              */
+            cache: function (force) {
+                this._uLeftHead.cache(force);
+                this._uRightHead.cache(force);
+                ui.Table.prototype.cache.call(this, force);
+            },
+
+            /**
+             * @override
+             */
             removeColumn: function (index) {
                 ui.Table.prototype.removeColumn.call(this, index);
                 if (index >= 0) {
