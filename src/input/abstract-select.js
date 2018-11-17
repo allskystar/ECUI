@@ -180,14 +180,6 @@ _uOptions     - 下拉选择框
             },
 
             /**
-             * @override
-             */
-            $cache: function (style) {
-                ui.InputControl.prototype.$cache.call(this, style);
-                this._uText.cache(true);
-            },
-
-            /**
              * 选项改变事件。
              * @event
              */
@@ -252,6 +244,14 @@ _uOptions     - 下拉选择框
                     core.dispatchEvent(this, 'error');
                     return false;
                 }
+            },
+
+            /**
+             * @override
+             */
+            cache: function (force) {
+                this._uText.cache(true);
+                ui.InputControl.prototype.cache.call(this, force);
             },
 
             /**

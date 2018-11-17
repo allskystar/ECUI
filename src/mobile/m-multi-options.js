@@ -54,11 +54,11 @@ _aOptions    - 选项框数组
                     /**
                      * @override
                      */
-                    $cache: function (style) {
-                        ui.Control.prototype.$cache.call(this, style);
+                    cache: function (force) {
                         this.getParent()._aOptions.forEach(function (item) {
                             item.cache();
                         });
+                        ui.Control.prototype.cache.call(this, force);
                     }
                 },
                 ui.MConfirm
