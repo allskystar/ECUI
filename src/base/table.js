@@ -607,13 +607,23 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
                     initRow(this, item);
                 }, this);
 
+                var narrow = core.getScrollNarrow(),
+                    cell = this._aHCells[this._aHCells.length - 1],
+                    el = dom.parent(dom.parent(this.getBody()));
+
                 dom.insertBefore(this._uHead.getBody(), this._uHead.getMain().lastChild.lastChild);
-                dom.parent(dom.parent(this.getBody())).style.marginTop = this.$$paddingTop + 'px';
+                el.style.marginTop = this.$$paddingTop + 'px';
+                if (this.$$tableHeight > height) {
+                    el.style.height = (height - this.$$paddingTop) + 'px';
+                }
                 if (this.getMain().style.height) {
                     this._eLayout.style.height = height + 'px';
                 }
 
-                var narrow = core.getScrollNarrow();
+                if (el.scrollHeight !== el.clientHeight) {
+                    cell.getMain().style.paddingRight = (cell.$$padding[1] + narrow) + 'px';
+                }
+
                 this.$$scrollFixed = [
                     this.$$tableHeight - (this.$$tableWidth > width ? narrow : 0) > height ? narrow : 0,
                     this.$$tableWidth - (this.$$tableHeight > height ? narrow : 0) > width ? narrow : 0
@@ -638,9 +648,13 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
                     item.$resize();
                 });
 
+                var el = dom.parent(dom.parent(this.getBody()));
                 dom.insertBefore(this._uHead.getBody(), this.getBody());
-                dom.parent(dom.parent(this.getBody())).style.marginTop = '';
+                el.style.marginTop = '';
+                el.style.height = '';
                 this._eLayout.style.height = '';
+
+                this._aHCells[this._aHCells.length - 1].style.paddingRight = '';
             },
 
             /**
