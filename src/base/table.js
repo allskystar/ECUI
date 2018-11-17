@@ -153,12 +153,11 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
                 this._eLayout = dom.create(
                     {
                         className: options.classes.join('-layout '),
-                        innerHTML: '<div class="ui-table-head"><table cellspacing="0" class="' + table.className + '" style="' + table.style.cssText + '"><tbody></tbody></table></div>'
+                        innerHTML: '<div class="ui-table-body"></div><div class="ui-table-head"><table cellspacing="0" class="' + table.className + '" style="' + table.style.cssText + '"><tbody></tbody></table></div>'
                     }
                 )
             );
-            dom.insertBefore(table, this._eLayout.lastChild);
-            dom.addClass(table, 'ui-table-body');
+            this._eLayout.firstChild.appendChild(table);
 
             var i = 0,
                 list = dom.children(table),
