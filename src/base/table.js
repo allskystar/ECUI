@@ -613,7 +613,6 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
 
                 dom.insertBefore(this._uHead.getBody(), this._uHead.getMain().lastChild.lastChild);
                 el.style.marginTop = this.$$paddingTop + 'px';
-                el.style.width = this.$$tableWidth + 'px';
                 if (this.$$tableHeight > height) {
                     el.style.height = (height - this.$$paddingTop) + 'px';
                 }
@@ -622,11 +621,15 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
                 }
 
                 if (narrow && el.scrollHeight !== el.clientHeight) {
+                    el.style.width = (this.$$tableWidth + narrow) + 'px';
                     el = cell.getMain();
                     if (this.$$lastPaddingRight === undefined) {
                         this.$$lastPaddingRight = el.style.paddingRight;
                     }
                     el.style.paddingRight = (cell.$$padding[1] + narrow) + 'px';
+                    dom.parent(dom.parent(el)).style.width = (this.$$tableWidth + narrow) + 'px';
+                } else {
+                    el.style.width = this.$$tableWidth + 'px';
                 }
 
                 this.$$scrollFixed = [
@@ -661,7 +664,9 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
                 this._eLayout.style.height = '';
 
                 if (this.$$lastPaddingRight !== undefined) {
-                    this._aHCells[this._aHCells.length - 1].getMain().style.paddingRight = this.$$lastPaddingRight;
+                    el = this._aHCells[this._aHCells.length - 1].getMain();
+                    el.style.paddingRight = this.$$lastPaddingRight;
+                    dom.parent(dom.parent(el)).style.width = dom.parent(this.getBody()).style.width;
                     delete this.$$lastPaddingRight;
                 }
             },
