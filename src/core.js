@@ -140,6 +140,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
                     if (pointers.length === 1) {
                         if (pointerType === 'mouse') {
+                            startSimulationScroll(event);
                             isTouchMoved = undefined;
                             tracks.mouse = track;
                         } else {
@@ -228,6 +229,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                     if (track === tracks.mouse) {
                         // 只监听鼠标左键事件
                         if (event.which === 1) {
+                            stopSimulationScroll(event);
                             delete tracks.mouse;
                         }
                     } else {
@@ -390,21 +392,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                 event = core.wrapEvent(event);
                 // 仅监听鼠标左键
                 if (event.which === 1) {
-                    // 为了兼容beforescroll事件，同时考虑到scroll执行效率问题，自己手动触发滚动条事件
-                    if (isScrollClick(event)) {
-                        onbeforescroll(event);
-                        scrollHandler = util.timer(
-                            function () {
-                                var handler = scrollHandler;
-                                scrollHandler = null;
-                                onscroll(event);
-                                scrollHandler = handler;
-                                onbeforescroll(event);
-                            },
-                            -50
-                        );
-                    }
-
+                    startSimulationScroll(event);
                     event.track = tracks;
                     tracks.lastMoveTime = Date.now();
                     checkActived(event);
@@ -414,12 +402,6 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
             mousemove: function (event) {
                 event = core.wrapEvent(event);
-
-                if (scrollHandler) {
-                    scrollHandler();
-                    scrollHandler = null;
-                    util.timer(onscroll, 300, this, event);
-                }
 
                 calcSpeed(tracks, event);
 
@@ -439,12 +421,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                 event = core.wrapEvent(event);
 
                 if (event.which === 1) {
-                    if (scrollHandler) {
-                        scrollHandler();
-                        scrollHandler = null;
-                        util.timer(onscroll, 300, this, event);
-                    }
-
+                    stopSimulationScroll(event);
                     event.track = tracks;
                     currEnv.mouseup(event);
                     tracks = {};
@@ -1696,6 +1673,39 @@ outer:          for (var caches = [], target = event.target, el; target; target 
     function setEnv(env) {
         envStack.push(currEnv);
         currEnv = Object.assign({}, currEnv, env);
+    }
+
+    /**
+     * 开始仿真滚动行为。
+     * @private
+     */
+    function startSimulationScroll(event) {
+        // 为了兼容beforescroll事件，同时考虑到scroll执行效率问题，自己手动触发滚动条事件
+        if (isScrollClick(event)) {
+            onbeforescroll(event);
+            scrollHandler = util.timer(
+                function () {
+                    var handler = scrollHandler;
+                    scrollHandler = null;
+                    onscroll(event);
+                    scrollHandler = handler;
+                    onbeforescroll(event);
+                },
+                -50
+            );
+        }
+    }
+
+    /**
+     * 结束仿真滚动行为。
+     * @private
+     */
+    function stopSimulationScroll(event) {
+        if (scrollHandler) {
+            scrollHandler();
+            scrollHandler = null;
+            util.timer(onscroll, 300, this, event);
+        }
     }
 
     Object.assign(core, {

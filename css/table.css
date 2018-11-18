@@ -4,11 +4,29 @@
      * 表格样式，th、td 的 boder、pading的值需要严格规范
      * 左右的border、padding值相加必须相等，不然表格宽度计算会错乱
      */
+    position: relative;
     overflow: hidden !important;
 
     .ui-table-layout {
-        position: relative;
+        position: relative !important;
         overflow: auto !important;
+        padding: 0px !important;
+        border: 0px !important;
+
+        .ui-table-layout-body {
+            padding: 0px !important;
+            border: 0px !important;
+        }
+
+        .ui-table-head {
+            pointer-events: auto !important;
+        }
+
+        .ui-table-body {
+            position: static !important;
+            overflow: auto !important;
+            pointer-events: auto !important;
+        }
     }
 
     table {
@@ -16,12 +34,15 @@
     }
 
     .ui-table-head {
-        position: absolute;
-        overflow: hidden !important;
+        position: absolute !important;
         top: 0px;
+        overflow: hidden !important;
+        pointer-events: none !important;
     }
 
     .ui-table-body {
-        overflow: auto !important;
+        position: absolute !important;
+        overflow: hidden !important;
+        pointer-events: none !important;
     }
 }

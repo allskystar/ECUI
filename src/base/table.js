@@ -119,7 +119,7 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
 
     /**
      * 表格控件。
-     * 对基本的 TableElement 功能进行了扩展，表头固定，不会随表格的垂直滚动条滚动而滚动，在行列滚动时，支持整行整列移动，允许直接对表格的数据进行增加/删除/修改操作。
+     * 对基本的 TableElement 功能进行了扩展，表头固定，不会随表格的垂直滚动条滚动而滚动，在行列滚动时，支持整行整列移动，允许直接对表格的数据进行增加/删除/修改操作。表格控件针对有滚动条的鼠标设备和无滚动条的触控设备进行了不同的处理。
      * options 属性：
      * head-float     表头允许飘浮，默认不允许
      * @control
@@ -153,11 +153,11 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
                 this._eLayout = dom.create(
                     {
                         className: options.classes.join('-layout '),
-                        innerHTML: '<div class="ui-table-body"></div><div class="ui-table-head"><table cellspacing="0" class="' + table.className + '" style="' + table.style.cssText + '"><tbody></tbody></table></div>'
+                        innerHTML: '<div class="ui-table-layout-body"></div><div class="ui-table-body"></div><div class="ui-table-head"><table cellspacing="0" class="' + table.className + '" style="' + table.style.cssText + '"><tbody></tbody></table></div>'
                     }
                 )
             );
-            this._eLayout.firstChild.appendChild(table);
+            this._eLayout.lastChild.previousSibling.appendChild(table);
 
             var i = 0,
                 list = dom.children(table),
@@ -195,7 +195,14 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
 
             // 初始化表格区域
             this.$setBody(body);
-            (this._uHead = core.$fastCreate(ui.Control, el.lastChild.lastChild, this)).$setBody(head);
+            (this._uHead = core.$fastCreate(ui.Control, this._eLayout.lastChild, this)).$setBody(head);
+
+            if (core.getScrollNarrow()) {
+                el.appendChild(this._eLayout.lastChild);
+                el.appendChild(this._eLayout.lastChild);
+            } else {
+                dom.remove(this._eLayout.firstChild);
+            }
 
             // 以下初始化所有的行控件
             for (i = 0; o = list[i]; i++) {
@@ -608,12 +615,30 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
                 }, this);
 
                 dom.insertBefore(this._uHead.getBody(), this._uHead.getMain().lastChild.lastChild);
-                dom.parent(dom.parent(this.getBody())).style.marginTop = this.$$paddingTop + 'px';
-                if (this.getMain().style.height) {
-                    this._eLayout.style.height = height + 'px';
-                }
 
                 var narrow = core.getScrollNarrow();
+                if (narrow) {
+                    this._eLayout.style.width = width + 'px';
+                    this._eLayout.style.height = height + 'px';
+                    this._eLayout.lastChild.style.width = this.$$tableWidth + 'px';
+                    this._eLayout.lastChild.style.height = this.$$tableHeight + 'px';
+
+                    if (this.$$tableHeight > height || (this.$$tableHeight + narrow > height && this.$$tableWidth > width)) {
+                        this._uHead.getMain().style.width = (width - narrow) + 'px';
+                        dom.parent(dom.parent(this.getBody())).style.width = (width - narrow) + 'px';
+                    }
+                } else {
+                    var el = dom.parent(dom.parent(this.getBody()));
+                    el.style.marginTop = this.$$paddingTop + 'px';
+                    el.style.width = this.$$tableWidth + 'px';
+                    if (this.$$tableHeight > height) {
+                        el.style.height = (height - this.$$paddingTop) + 'px';
+                    }
+                    if (this.getMain().style.height) {
+                        this._eLayout.style.height = height + 'px';
+                    }
+                }
+
                 this.$$scrollFixed = [
                     this.$$tableHeight - (this.$$tableWidth > width ? narrow : 0) > height ? narrow : 0,
                     this.$$tableWidth - (this.$$tableHeight > height ? narrow : 0) > width ? narrow : 0
@@ -639,8 +664,14 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
                 });
 
                 dom.insertBefore(this._uHead.getBody(), this.getBody());
-                dom.parent(dom.parent(this.getBody())).style.marginTop = '';
-                this._eLayout.style.height = '';
+
+                if (core.getScrollNarrow()) {
+                    var el = dom.parent(dom.parent(this.getBody()));
+                    el.style.marginTop = '';
+                    el.style.width = '';
+                    el.style.height = '';
+                    this._eLayout.style.height = '';
+                }
             },
 
             /**
@@ -648,10 +679,16 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
              */
             $scroll: function (event) {
                 ui.Control.prototype.$scroll.call(this, event);
-                this._uHead.getOuter().style.top = dom.first(this.getMain()).scrollTop + 'px';
+
+                if (core.getScrollNarrow()) {
+                    var style = dom.parent(dom.parent(this.getBody())).style;
+                    this._uHead.getOuter().style.left = -this._eLayout.scrollLeft + 'px';
+                    style.top = -(this._eLayout.scrollTop - this.$$paddingTop) + 'px';
+                    style.left = -this._eLayout.scrollLeft + 'px';
+                }
 
                 if (this._bHeadFloat !== undefined) {
-                    var style = this._uHead.getOuter().style;
+                    style = this._uHead.getOuter().style;
                     style.position = '';
                     style.top = (Math.min(this.getClientHeight() - this.$$paddingTop, Math.max(0, util.getView().top - dom.getPosition(this.getOuter()).top)) + this._eLayout.scrollTop) + 'px';
                     style.left = '0px';
