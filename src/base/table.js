@@ -607,31 +607,13 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
                     initRow(this, item);
                 }, this);
 
-                var narrow = core.getScrollNarrow(),
-                    cell = this._aHCells[this._aHCells.length - 1],
-                    el = dom.parent(dom.parent(this.getBody()));
-
                 dom.insertBefore(this._uHead.getBody(), this._uHead.getMain().lastChild.lastChild);
-                el.style.marginTop = this.$$paddingTop + 'px';
-                if (this.$$tableHeight > height) {
-                    el.style.height = (height - this.$$paddingTop) + 'px';
-                }
+                dom.parent(dom.parent(this.getBody())).style.marginTop = this.$$paddingTop + 'px';
                 if (this.getMain().style.height) {
                     this._eLayout.style.height = height + 'px';
                 }
 
-                if (narrow && el.scrollHeight !== el.clientHeight) {
-                    el.style.width = (this.$$tableWidth + narrow) + 'px';
-                    el = cell.getMain();
-                    if (this.$$lastPaddingRight === undefined) {
-                        this.$$lastPaddingRight = el.style.paddingRight;
-                    }
-                    el.style.paddingRight = (cell.$$padding[1] + narrow) + 'px';
-                    dom.parent(dom.parent(el)).style.width = (this.$$tableWidth + narrow) + 'px';
-                } else {
-                    el.style.width = this.$$tableWidth + 'px';
-                }
-
+                var narrow = core.getScrollNarrow();
                 this.$$scrollFixed = [
                     this.$$tableHeight - (this.$$tableWidth > width ? narrow : 0) > height ? narrow : 0,
                     this.$$tableWidth - (this.$$tableHeight > height ? narrow : 0) > width ? narrow : 0
@@ -656,19 +638,9 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
                     item.$resize();
                 });
 
-                var el = dom.parent(dom.parent(this.getBody()));
                 dom.insertBefore(this._uHead.getBody(), this.getBody());
-                el.style.marginTop = '';
-                el.style.width = '';
-                el.style.height = '';
+                dom.parent(dom.parent(this.getBody())).style.marginTop = '';
                 this._eLayout.style.height = '';
-
-                if (this.$$lastPaddingRight !== undefined) {
-                    el = this._aHCells[this._aHCells.length - 1].getMain();
-                    el.style.paddingRight = this.$$lastPaddingRight;
-                    dom.parent(dom.parent(el)).style.width = dom.parent(this.getBody()).style.width;
-                    delete this.$$lastPaddingRight;
-                }
             },
 
             /**
@@ -676,6 +648,7 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
              */
             $scroll: function (event) {
                 ui.Control.prototype.$scroll.call(this, event);
+                this._uHead.getOuter().style.top = dom.first(this.getMain()).scrollTop + 'px';
 
                 if (this._bHeadFloat !== undefined) {
                     var style = this._uHead.getOuter().style;
