@@ -36,12 +36,14 @@
     .ui-table-head {
         position: absolute !important;
         top: 0px;
+        left: 0px;
         overflow: hidden !important;
         pointer-events: none !important;
     }
 
     .ui-table-body {
         position: absolute !important;
+        left: 0px;
         overflow: hidden !important;
         pointer-events: none !important;
     }

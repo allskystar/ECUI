@@ -739,7 +739,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
          * @param {Event} event 事件对象
          */
         events.mousewheel = function (event) {
-            onmousewheel(event, 0, 1);
+            onmousewheel(event, 0, event.wheelDelta / 3);
         };
     } else if (firefoxVersion < 17) {
         /**

@@ -616,23 +616,27 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
 
                 dom.insertBefore(this._uHead.getBody(), this._uHead.getMain().lastChild.lastChild);
 
-                var narrow = core.getScrollNarrow();
+                var narrow = core.getScrollNarrow(),
+                    style = dom.parent(dom.parent(this.getBody())).style;
                 if (narrow) {
                     this._eLayout.style.width = width + 'px';
                     this._eLayout.style.height = height + 'px';
                     this._eLayout.lastChild.style.width = this.$$tableWidth + 'px';
                     this._eLayout.lastChild.style.height = this.$$tableHeight + 'px';
 
+                    style.top = this.$$paddingTop + 'px';
                     if (this.$$tableHeight > height || (this.$$tableHeight + narrow > height && this.$$tableWidth > width)) {
                         this._uHead.getMain().style.width = (width - narrow) + 'px';
-                        dom.parent(dom.parent(this.getBody())).style.width = (width - narrow) + 'px';
+                        style.width = (width - narrow) + 'px';
+                    }
+                    if (this.$$tableWidth > width || (this.$$tableWidth + narrow > width && this.$$tableHeight > height)) {
+                        style.height = (height - this.$$paddingTop - narrow) + 'px';
                     }
                 } else {
-                    var el = dom.parent(dom.parent(this.getBody()));
-                    el.style.marginTop = this.$$paddingTop + 'px';
-                    el.style.width = this.$$tableWidth + 'px';
+                    style.marginTop = this.$$paddingTop + 'px';
+                    style.width = this.$$tableWidth + 'px';
                     if (this.$$tableHeight > height) {
-                        el.style.height = (height - this.$$paddingTop) + 'px';
+                        style.height = (height - this.$$paddingTop) + 'px';
                     }
                     if (this.getMain().style.height) {
                         this._eLayout.style.height = height + 'px';
@@ -646,6 +650,16 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
 
                 util.timer(this.$scroll, 0, this);
             },
+
+            /**
+             * @override
+             */
+            $mousewheel: ieVersion <= 10 ? function (event) {
+                this._eLayout.scrollTop -= event.deltaY;
+                if ((event.deltaY < 0 && this._eLayout.scrollTop !== this._eLayout.scrollHeight - this._eLayout.clientHeight) || (event.deltaY > 0 && this._eLayout.scrollTop)) {
+                    event.preventDefault();
+                }
+            } : ui.Control.prototype.$mousewheel,
 
             /**
              * @override
@@ -681,14 +695,14 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
                 ui.Control.prototype.$scroll.call(this, event);
 
                 if (core.getScrollNarrow()) {
-                    var style = dom.parent(dom.parent(this.getBody())).style;
-                    this._uHead.getOuter().style.left = -this._eLayout.scrollLeft + 'px';
-                    style.top = -(this._eLayout.scrollTop - this.$$paddingTop) + 'px';
-                    style.left = -this._eLayout.scrollLeft + 'px';
+                    var el = dom.parent(dom.parent(this.getBody()));
+                    this._uHead.getMain().scrollLeft = this._eLayout.scrollLeft;
+                    el.scrollLeft = this._eLayout.scrollLeft;
+                    el.scrollTop = this._eLayout.scrollTop;
                 }
 
                 if (this._bHeadFloat !== undefined) {
-                    style = this._uHead.getOuter().style;
+                    var style = this._uHead.getOuter().style;
                     style.position = '';
                     style.top = (Math.min(this.getClientHeight() - this.$$paddingTop, Math.max(0, util.getView().top - dom.getPosition(this.getOuter()).top)) + this._eLayout.scrollTop) + 'px';
                     style.left = '0px';
