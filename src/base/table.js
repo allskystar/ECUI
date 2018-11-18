@@ -147,7 +147,7 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
                 table = el.getElementsByTagName('TABLE')[0];
             }
 
-            this._bHeadFloat = !!options.headFloat;
+            this._bHeadFloat = options.headFloat;
 
             el.appendChild(
                 this._eLayout = dom.create(
@@ -530,7 +530,7 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
                 if (firefoxVersion || ieVersion < 7) {
                     return;
                 }
-                if (this._bHeadFloat && Math.abs(event.deltaX) <= Math.abs(event.deltaY)) {
+                if (this._bHeadFloat !== undefined && Math.abs(event.deltaX) <= Math.abs(event.deltaY)) {
                     var style = this._uHead.getOuter().style,
                         pos = dom.getPosition(this._eLayout),
                         view = util.getView(),
@@ -613,6 +613,7 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
 
                 dom.insertBefore(this._uHead.getBody(), this._uHead.getMain().lastChild.lastChild);
                 el.style.marginTop = this.$$paddingTop + 'px';
+                el.style.width = this.$$tableWidth + 'px';
                 if (this.$$tableHeight > height) {
                     el.style.height = (height - this.$$paddingTop) + 'px';
                 }
@@ -655,6 +656,7 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
                 var el = dom.parent(dom.parent(this.getBody()));
                 dom.insertBefore(this._uHead.getBody(), this.getBody());
                 el.style.marginTop = '';
+                el.style.width = '';
                 el.style.height = '';
                 this._eLayout.style.height = '';
 
@@ -670,7 +672,7 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
             $scroll: function (event) {
                 ui.Control.prototype.$scroll.call(this, event);
 
-                if (this._bHeadFloat) {
+                if (this._bHeadFloat !== undefined) {
                     var style = this._uHead.getOuter().style;
                     style.position = '';
                     style.top = (Math.min(this.getClientHeight() - this.$$paddingTop, Math.max(0, util.getView().top - dom.getPosition(this.getOuter()).top)) + this._eLayout.scrollTop) + 'px';
