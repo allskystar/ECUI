@@ -403,6 +403,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             mousemove: function (event) {
                 event = core.wrapEvent(event);
 
+                // 点击在滚动条上，不会触发mouseup事件，但会触发mousemove事件
                 stopSimulationScroll(event);
                 calcSpeed(tracks, event);
 
