@@ -147,7 +147,7 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
                 table = el.getElementsByTagName('TABLE')[0];
             }
 
-            this._nHeadFloat = options.headFloat === true ? 0 : +options.headFloat;
+            this._nHeadFloat = options.headFloat === undefined ? undefined : options.headFloat === true ? 0 : +options.headFloat;
 
             el.appendChild(
                 this._eLayout = dom.create(
