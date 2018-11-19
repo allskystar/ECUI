@@ -625,13 +625,8 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
                     this._eLayout.lastChild.style.height = this.$$tableHeight + 'px';
 
                     style.top = this.$$paddingTop + 'px';
-                    if (this.$$tableHeight > height || (this.$$tableHeight + narrow > height && this.$$tableWidth > width)) {
-                        this._uHead.getMain().style.width = (width - narrow) + 'px';
-                        style.width = (width - narrow) + 'px';
-                    }
-                    if (this.$$tableWidth > width || (this.$$tableWidth + narrow > width && this.$$tableHeight > height)) {
-                        style.height = (height - this.$$paddingTop - narrow) + 'px';
-                    }
+                    style.width = this._uHead.getMain().style.width = (width - (this.$$tableHeight > height || (this.$$tableHeight + narrow > height && this.$$tableWidth > width) ? narrow : 0)) + 'px';
+                    style.height = (height - this.$$paddingTop - (this.$$tableWidth > width || (this.$$tableWidth + narrow > width && this.$$tableHeight > height) ? narrow : 0)) + 'px';
                 } else {
                     style.marginTop = this.$$paddingTop + 'px';
                     style.width = this.$$tableWidth + 'px';
