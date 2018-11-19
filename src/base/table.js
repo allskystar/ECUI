@@ -651,15 +651,15 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
              */
             $mousewheel: function (event) {
                 ui.Control.prototype.$mousewheel.call(this, event);
-                if (navigator.userAgent.indexOf(' Mac OS X ') > 0) {
-                    event.deltaX = -event.deltaX;
-                    event.deltaY = -event.deltaY;
+
+                var left = Math.min(this._eLayout.scrollWidth - this._eLayout.clientWidth, Math.max(0, this._eLayout.scrollLeft + event.deltaX)),
+                    top = Math.min(this._eLayout.scrollHeight - this._eLayout.clientHeight, Math.max(0, this._eLayout.scrollTop + event.deltaY));
+
+                if (this._eLayout.scrollLeft !== left || this._eLayout.scrollTop !== top) {
+                    this._eLayout.scrollLeft = left;
+                    this._eLayout.scrollTop = top;
+                    event.preventDefault();
                 }
-                var left = this._eLayout.scrollLeft - event.deltaX,
-                    top = this._eLayout.scrollTop - event.deltaY;
-                this._eLayout.scrollLeft = Math.min(this._eLayout.scrollWidth - this._eLayout.clientWidth, Math.max(0, left));
-                this._eLayout.scrollTop = Math.min(this._eLayout.scrollHeight - this._eLayout.clientHeight, Math.max(0, top));
-                event.preventDefault();
             },
 
             /**
