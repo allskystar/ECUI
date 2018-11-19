@@ -35,11 +35,13 @@
         top: 0px;
         left: 0px;
         overflow: hidden !important;
+        margin: 0px !important;
     }
 
     .ui-table-body {
         position: absolute;
         left: 0px;
         overflow: hidden !important;
+        margin: 0px !important;
     }
 }
