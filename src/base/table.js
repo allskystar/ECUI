@@ -654,6 +654,18 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
             /**
              * @override
              */
+            $mousewheel: function (event) {
+                ui.Control.prototype.$mousewheel.call(this, event);
+                this._eLayout.scrollLeft -= event.deltaX;
+                this._eLayout.scrollTop -= event.deltaY;
+                if ((event.deltaX < 0 && this._eLayout.scrollLeft !== this._eLayout.scrollWidth - this._eLayout.clientWidth) || (event.deltaX > 0 && this._eLayout.scrollLeft) || (event.deltaY < 0 && this._eLayout.scrollTop !== this._eLayout.scrollHeight - this._eLayout.clientHeight) || (event.deltaY > 0 && this._eLayout.scrollTop)) {
+                    event.preventDefault();
+                }
+            },
+
+            /**
+             * @override
+             */
             $resize: function (event) {
                 ui.Control.prototype.$resize.call(this, event);
 
@@ -1038,19 +1050,6 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
             }
         }
     );
-
-    if (ieVersion <= 10) {
-        /**
-         * @override
-         */
-        ui.Table.prototype.$mousewheel = function (event) {
-            ui.Control.prototype.$mousewheel.call(this, event);
-            this._eLayout.scrollTop -= event.deltaY;
-            if ((event.deltaY < 0 && this._eLayout.scrollTop !== this._eLayout.scrollHeight - this._eLayout.clientHeight) || (event.deltaY > 0 && this._eLayout.scrollTop)) {
-                event.preventDefault();
-            }
-        };
-    }
 
     // 初始化事件转发信息
     eventNames.slice(0, 7).forEach(function (item) {
