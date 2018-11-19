@@ -23,7 +23,7 @@
         }
 
         .ui-table-body {
-            position: static !important;
+            position: static;
             overflow: auto !important;
             pointer-events: auto !important;
         }
@@ -34,7 +34,7 @@
     }
 
     .ui-table-head {
-        position: absolute !important;
+        position: absolute;
         top: 0px;
         left: 0px;
         overflow: hidden !important;
@@ -42,7 +42,7 @@
     }
 
     .ui-table-body {
-        position: absolute !important;
+        position: absolute;
         left: 0px;
         overflow: hidden !important;
         pointer-events: none !important;

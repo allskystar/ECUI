@@ -1,6 +1,6 @@
 /*
 @example
-<!-- 如果需要滚动条，请设置div的width样式到合适的值，并且在div外部再包一个div显示滚动条 -->
+<!-- 如果需要滚动条，请设置div的width/height以及table的width样式，其中table的width如果大于div的width将出现横向滚动条，如果table的高度大于div的height将出现纵向滚动条 -->
 <div ui="type:table">
   <table>
     <!-- 表头区域 -->
@@ -25,7 +25,7 @@
 </div>
 
 @fields
-_bHeadFloat  - 表头飘浮
+_nHeadFloat  - 表头飘浮的位置
 _aHCells     - 表格头单元格控件对象
 _aRows       - 表格数据行对象
 _uHead       - 表头区域
@@ -147,7 +147,7 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
                 table = el.getElementsByTagName('TABLE')[0];
             }
 
-            this._bHeadFloat = options.headFloat;
+            this._nHeadFloat = options.headFloat === true ? 0 : +options.headFloat;
 
             el.appendChild(
                 this._eLayout = dom.create(
@@ -537,15 +537,15 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
                 if (firefoxVersion || ieVersion < 7) {
                     return;
                 }
-                if (this._bHeadFloat !== undefined && Math.abs(event.deltaX) <= Math.abs(event.deltaY)) {
+                if (this._nHeadFloat !== undefined && Math.abs(event.deltaX) <= Math.abs(event.deltaY)) {
                     var style = this._uHead.getOuter().style,
                         pos = dom.getPosition(this._eLayout),
                         view = util.getView(),
                         top = pos.top - view.top,
                         left = pos.left - view.left - this._eLayout.scrollLeft;
 
-                    top = Math.min(this.getClientHeight() - this.$$paddingTop + top, Math.max(0, top));
-                    if (!top || dom.contain(this.getMain(), event.target)) {
+                    top = Math.min(this.getClientHeight() - this.$$paddingTop + top, Math.max(this._nHeadFloat, top));
+                    if (top <= this._nHeadFloat || dom.contain(this.getMain(), event.target)) {
                         style.position = 'fixed';
                         style.top = top + 'px';
                         style.left = left + 'px';
@@ -654,16 +654,6 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
             /**
              * @override
              */
-            $mousewheel: ieVersion <= 10 ? function (event) {
-                this._eLayout.scrollTop -= event.deltaY;
-                if ((event.deltaY < 0 && this._eLayout.scrollTop !== this._eLayout.scrollHeight - this._eLayout.clientHeight) || (event.deltaY > 0 && this._eLayout.scrollTop)) {
-                    event.preventDefault();
-                }
-            } : ui.Control.prototype.$mousewheel,
-
-            /**
-             * @override
-             */
             $resize: function (event) {
                 ui.Control.prototype.$resize.call(this, event);
 
@@ -701,10 +691,10 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
                     el.scrollTop = this._eLayout.scrollTop;
                 }
 
-                if (this._bHeadFloat !== undefined) {
+                if (this._nHeadFloat !== undefined) {
                     var style = this._uHead.getOuter().style;
                     style.position = '';
-                    style.top = (Math.min(this.getClientHeight() - this.$$paddingTop, Math.max(0, util.getView().top - dom.getPosition(this.getOuter()).top)) + this._eLayout.scrollTop) + 'px';
+                    style.top = (Math.min(this.getClientHeight() - this.$$paddingTop, this._nHeadFloat + Math.max(0, util.getView().top - dom.getPosition(this.getOuter()).top)) + this._eLayout.scrollTop) + 'px';
                     style.left = '0px';
                     style.clip = ieVersion < 8 ? 'rect(0,100%,100%,0)' : 'auto';
                 }
@@ -1048,6 +1038,19 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
             }
         }
     );
+
+    if (ieVersion <= 10) {
+        /**
+         * @override
+         */
+        ui.Table.prototype.$mousewheel = function (event) {
+            ui.Control.prototype.$mousewheel.call(this, event);
+            this._eLayout.scrollTop -= event.deltaY;
+            if ((event.deltaY < 0 && this._eLayout.scrollTop !== this._eLayout.scrollHeight - this._eLayout.clientHeight) || (event.deltaY > 0 && this._eLayout.scrollTop)) {
+                event.preventDefault();
+            }
+        };
+    }
 
     // 初始化事件转发信息
     eventNames.slice(0, 7).forEach(function (item) {
