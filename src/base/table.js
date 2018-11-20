@@ -652,12 +652,13 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
             $mousewheel: function (event) {
                 ui.Control.prototype.$mousewheel.call(this, event);
 
-                var left = Math.min(this._eLayout.scrollWidth - this._eLayout.clientWidth, Math.max(0, this._eLayout.scrollLeft + event.deltaX)),
-                    top = Math.min(this._eLayout.scrollHeight - this._eLayout.clientHeight, Math.max(0, this._eLayout.scrollTop + event.deltaY));
+                var el = this._eLayout,
+                    left = Math.min(el.scrollWidth - el.clientWidth, Math.max(0, el.scrollLeft + event.deltaX)),
+                    top = Math.min(el.scrollHeight - el.clientHeight, Math.max(0, el.scrollTop + event.deltaY));
 
-                if (this._eLayout.scrollLeft !== left || this._eLayout.scrollTop !== top) {
-                    this._eLayout.scrollLeft = left;
-                    this._eLayout.scrollTop = top;
+                if (el.scrollLeft !== left || el.scrollTop !== top) {
+                    el.scrollLeft = left;
+                    el.scrollTop = top;
                     event.preventDefault();
                 }
             },
