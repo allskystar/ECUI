@@ -1460,7 +1460,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                         if (item.length > 1) {
                             setCacheData(data, item[0], replace(decodeURIComponent(item[1])));
                         } else if (method[0] === 'FORM') {
-                            valid = esr.parseObject(document.forms[item[0]], data);
+                            valid = valid && esr.parseObject(document.forms[item[0]], data);
                         } else {
                             Object.assign(data, replace(item[0]));
                         }
