@@ -21,10 +21,10 @@
         util = core.util;
 //{/if}//
     function refresh(combox) {
-        var text = ui.Select.prototype.getValue.call(combox);
+        var text = ui.Select.prototype.getValue.call(combox).toUpperCase();
 
         combox.getItems().forEach(function (item) {
-            if (item.getContent().indexOf(text) < 0) {
+            if (item.getContent().toUpperCase().indexOf(text) < 0) {
                 dom.addClass(item.getMain(), 'ui-hide');
             } else {
                 dom.removeClass(item.getMain(), 'ui-hide');
