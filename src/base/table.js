@@ -565,6 +565,10 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
                 var table = dom.parent(this.getBody());
                 this.$$tableWidth = table.offsetWidth;
                 this.$$tableHeight = table.offsetHeight;
+
+                if (!this.getClientHeight()) {
+                    this.$$height = this.$$tableHeight + (this.$$tableWidth > this.getClientWidth() ? core.getScrollNarrow() : 0);
+                }
             },
 
             /**
@@ -602,11 +606,6 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
              * @override
              */
             $initStructure: function (width, height) {
-                var narrow = core.getScrollNarrow(),
-                    style = dom.parent(dom.parent(this.getBody())).style;
-
-                height = height || (this.$$tableHeight + (this.$$tableWidth > width ? narrow : 0));
-
                 ui.Control.prototype.$initStructure.call(this, width, height);
 
                 this._aHCells.forEach(function (item) {
@@ -620,6 +619,9 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
                 }, this);
 
                 dom.insertBefore(this._uHead.getBody(), this._uHead.getMain().lastChild.lastChild);
+
+                var narrow = core.getScrollNarrow(),
+                    style = dom.parent(dom.parent(this.getBody())).style;
 
                 if (narrow) {
                     this._eLayout.style.width = width + 'px';
