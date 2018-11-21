@@ -602,6 +602,8 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
              * @override
              */
             $initStructure: function (width, height) {
+                height = height || (this.$$tableHeight + (this.$$tableWidth > width ? narrow : 0));
+
                 ui.Control.prototype.$initStructure.call(this, width, height);
 
                 this._aHCells.forEach(function (item) {
