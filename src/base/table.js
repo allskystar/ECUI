@@ -602,6 +602,9 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
              * @override
              */
             $initStructure: function (width, height) {
+                var narrow = core.getScrollNarrow(),
+                    style = dom.parent(dom.parent(this.getBody())).style;
+
                 height = height || (this.$$tableHeight + (this.$$tableWidth > width ? narrow : 0));
 
                 ui.Control.prototype.$initStructure.call(this, width, height);
@@ -618,8 +621,6 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
 
                 dom.insertBefore(this._uHead.getBody(), this._uHead.getMain().lastChild.lastChild);
 
-                var narrow = core.getScrollNarrow(),
-                    style = dom.parent(dom.parent(this.getBody())).style;
                 if (narrow) {
                     this._eLayout.style.width = width + 'px';
                     this._eLayout.style.height = height + 'px';
