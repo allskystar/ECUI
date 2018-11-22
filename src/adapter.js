@@ -1145,9 +1145,9 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
             },
 
             /**
-             * 字符串格式化
+             * 字符串格式化。
+             * @public
              *
-             * @inner
              * @param {string} source 目标模版字符串
              * @param {string} ... 字符串替换项集合
              * @return {string} 格式化结果
@@ -1160,6 +1160,21 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                         return args[+index + 1];
                     }
                 );
+            },
+
+            /**
+             * 数组求和。
+             * @public
+             *
+             * @param {Array} array 数组对象
+             * @return {number} 数组的和
+             */
+            sum: function (array) {
+                var ret = 0;
+                array.forEach(function (n) {
+                    ret += n;
+                });
+                return ret;
             },
 
             /**

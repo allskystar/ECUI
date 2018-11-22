@@ -1,9 +1,26 @@
+/*
+@example
+<!-- 以下***表示具体的展现类型 -->
+<div ui="type:***"></div>
+或
+<!-- 以下***表示具体的展现类型 -->
+<div ui="type:***">
+    <svg>
+        <defs>
+            <linearGradient id="orange_red" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" style="stop-color:rgb(255,255,0);stop-opacity:1"/>
+                <stop offset="100%" style="stop-color:rgb(255,0,0);stop-opacity:1"/>
+            </linearGradient>
+        </defs>
+    </svg>
+</div>
+*/
 //{if 0}//
 (function () {
-//{/if}//
     var core = ecui,
+        dom = core.dom,
         ui = core.ui;
-
+//{/if}//
     /**
      * SVG基类，请不要直接使用。
      * @control
@@ -12,8 +29,13 @@
         ui.Control,
         function (el, options) {
             ui.Control.call(this, el, options);
-            el.innerHTML = '<svg></svg>';
-            this._eSVG = el.lastChild;
+            this._eSVG = dom.first(el);
+            if (this._eSVG) {
+                this._eDefs = dom.first(this._eSVG);
+            } else {
+                el.innerHTML = '<svg></svg>';
+                this._eSVG = el.lastChild;
+            }
             this._aDrawer = [];
         },
         {
@@ -39,9 +61,17 @@
             },
 
             render: function () {
+                if (this._eDefs) {
+                    this._eSVG.removeChild(this._eDefs);
+                }
                 this._eSVG.innerHTML = this._aDrawer.join('');
+                if (this._eDefs) {
+                    this._eSVG.insertBefore(this._eDefs, this._eSVG.firstChild);
+                }
                 this._aDrawer = [];
             }
         }
     );
+//{if 0}//
 }());
+//{/if}//

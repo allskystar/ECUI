@@ -1,24 +1,30 @@
 /*
 @example
 <!-- 以下***表示具体的展现类型 -->
-<div ui="type:YV***Axis"></div>
+<div ui="type:YV***AxisChart">
+    <!-- 参见svg.js -->
+</div>
 <script>
 var options = {
     xAxis: {
-        grid: [1, 1, 2, 2, 1], // 左间隔，[各个分类]，右间隔的宽度比例
-        line: false, // 不显示轴线
+        grid: [1, 1, 2, 2, 1],
+        line: false,
         data: ['', '二手车', '新车']
     },
     yAxis: {
-        grid: [1, 4, 1], // 左间隔，主区域，右间隔的高度比例
-        line: false, // 不显示轴线
-        max: 100, // 坐标轴最大值
-        min: 0, // 坐标轴最小值
-        format: '{0}%' // 值显示的格式
+        grid: [1, 4, 1],
+        line: false,
+        max: 50, // 坐标轴最大值
+        min: -50, // 坐标轴最小值
+        formatter: '{0}%' // 值显示的格式
     },
     series: {
-        ratio: [1 / 2, 1, 1 / 3], // 依次是宽度，文本相对位置，椭圆的长宽比
-        data: [0, 5, 95] // 分类
+        ratio: {
+            width: 1 / 2, // 宽度相对分类的总宽度比例
+            text: 1, // 文本相对于当前选项高度的比例
+            ellipse: 1 / 3 // 椭圆的高宽比例，仅对YVCylinderAxis有效
+        },
+        data: [0, -20, 50] // 取值
     }
 };
 YVCylinderAxisControl.render(options);
@@ -85,25 +91,17 @@ YVBarAxisControl.render(options);
 }
 </style>
 */
-(function () {
 //{if 0}//
+(function () {
     var core = ecui,
         ui = core.ui,
         util = core.util;
 //{/if}//
-    function sum(array) {
-        var ret = 0;
-        array.forEach(function (n) {
-            ret += n;
-        });
-        return ret;
-    }
-
     /**
      * Y轴为值，X轴为分类的分类图基类。
      * @control
      */
-    ui.YVAxis = core.inherits(
+    ui.YVAxisChart = core.inherits(
         ui.SVG,
         {
             /**
@@ -113,8 +111,8 @@ YVBarAxisControl.render(options);
             render: function (options) {
                 var width = this.getWidth(),
                     height = this.getHeight(),
-                    xUnit = width / sum(options.xAxis.grid),
-                    yUnit = height / sum(options.yAxis.grid),
+                    xUnit = width / util.sum(options.xAxis.grid),
+                    yUnit = height / util.sum(options.yAxis.grid),
                     yGrid = options.yAxis.grid[1],
                     min = options.yAxis.min,
                     max = options.yAxis.max,
@@ -126,7 +124,7 @@ YVBarAxisControl.render(options);
 
                 for (var i = 0, y = y1, value = min, step = (max - value) / yGrid; i < yGrid + 1; i++) {
                     this.drawLine(x1, height - y, x2, height - y, value || options.yAxis.line === false ? 'align-line' : 'axis-line');
-                    this.drawText(0, height - y, options.yAxis.format ? util.stringFormat(options.yAxis.format, value) : value, 'axis-text');
+                    this.drawText(0, height - y, options.yAxis.formatter ? util.stringFormat(options.yAxis.formatter, value) : value, 'axis-text');
                     y += yUnit;
                     value += step;
                 }
@@ -147,8 +145,8 @@ YVBarAxisControl.render(options);
                             cy = height - y1 - h / 2 - h0;
 
                         this.drawText(cx, height - y1, item, 'category-text');
-                        this.$drawItem(index, cx, cy, w * options.series.ratio[0], Math.abs(h), options.series);
-                        this.drawText(cx, height - y1 - Math.max(0, h * options.series.ratio[1]) - h0, options.yAxis.format ? util.stringFormat(options.yAxis.format, value) : value, 'item-text');
+                        this.$drawItem(index, cx, cy, w * options.series.ratio.width, Math.abs(h), options.series);
+                        this.drawText(cx, height - y1 - Math.max(0, h * options.series.ratio.text) - h0, options.yAxis.formatter ? util.stringFormat(options.yAxis.formatter, value) : value, 'item-text');
                     }
                     x += w;
                 }, this);
@@ -162,8 +160,8 @@ YVBarAxisControl.render(options);
      * 方块分类图。
      * @control
      */
-    ui.YVBarAxis = core.inherits(
-        ui.YVAxis,
+    ui.YVBarAxisChart = core.inherits(
+        ui.YVAxisChart,
         {
             /**
              * @override
@@ -178,18 +176,20 @@ YVBarAxisControl.render(options);
      * 圆柱分类图。
      * @control
      */
-    ui.YVCylinderAxis = core.inherits(
-        ui.YVAxis,
+    ui.YVCylinderAxisChart = core.inherits(
+        ui.YVAxisChart,
         {
             /**
              * @override
              */
             $drawItem: function (index, x, y, w, h, series) {
-                var ellipseHeight = w * series.ratio[2] / 2;
+                var ellipseHeight = w * series.ratio.ellipse / 2;
                 this.drawRect(x - w / 2, y - h / 2, w, h, 'item-body item' + index + '-body');
                 this.drawEllipse(x, y + h / 2, w / 2, ellipseHeight, 'item-foot item' + index + '-foot');
                 this.drawEllipse(x, y - h / 2, w / 2, ellipseHeight, 'item-head item' + index + '-head');
             }
         }
     );
+//{if 0}//
 }());
+//{/if}//
