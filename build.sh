@@ -33,6 +33,19 @@ then
         exit 0
     fi
 
+    if [ $1 = 'ecui-svg-min' ]
+    then
+        if [ ! -d release ]
+        then
+            mkdir release
+        fi
+        echo "build ecui-svg-min"
+        libpath="."
+        cat svg.css | eval $css_compile > release/ecui-svg-min.css
+        cat svg.js | eval $js_write_repl | eval $js_merge | eval $js_compress > release/ecui-svg-min.js
+        exit 0
+    fi
+
     if [ -f smarty4j.jar ]
     then
         cd ..
