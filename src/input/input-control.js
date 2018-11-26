@@ -138,7 +138,8 @@ _eInput        - INPUT对象
         if (control.contain(core.getFocused())) {
             util.timer(function () {
                 // 键盘操作焦点移向了另一个输入框
-                if (document.activeElement.tagName !== 'BODY') {
+                var tagName = document.activeElement.tagName;
+                if (tagName === 'INPUT' || tagName === 'SELECT' || tagName === 'TEXTAREA' || tagName === 'BUTTON') {
                     control.blur();
                 }
             }, 10);
