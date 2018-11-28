@@ -567,7 +567,7 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
                 this.$$tableHeight = table.offsetHeight;
 
                 if (!this.getClientHeight()) {
-                    this.$$height = this.$$tableHeight + (this.$$tableWidth > this.getClientWidth() ? core.getScrollNarrow() : 0);
+                    this.$$height = this.getMinimumHeight() + this.$$tableHeight + (this.$$tableWidth > this.getClientWidth() ? core.getScrollNarrow() : 0);
                 }
             },
 
