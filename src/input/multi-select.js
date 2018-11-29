@@ -71,12 +71,20 @@ _eInput - 选项对应的input，form提交时使用
              */
             $change: function () {
                 var text = [], value = [];
-                this.getSelected().map(function (item) {
+                this.getSelected().forEach(function (item) {
                     text.push(item.getBody().innerText.trim());
                     value.push(item.getValue());
                 });
                 this._eText.innerHTML = text.join(',');
-                this._eInput.value = value.join(',');
+                this.$setValue(value.join(','));
+            },
+
+            /**
+             * @override
+             */
+            $dispose: function () {
+                this._eText = null;
+                ui.InputControl.prototype.$dispose.call(this);
             },
 
             /**
@@ -99,6 +107,7 @@ _eInput - 选项对应的input，form提交时使用
             getSelected: function () {
                 return this.getPopup().getSelected();
             },
+
             /**
              * 获取所有选中项的value。
              * @public
@@ -106,8 +115,7 @@ _eInput - 选项对应的input，form提交时使用
              * @return {Array} 选项数组
              */
             getValue: function () {
-                var value = this._eInput.value.split(',');
-                return value.map(function (item) { return item; });
+                return ui.InputControl.prototype.getValue.call(this).split(',');
             },
 
             /**
