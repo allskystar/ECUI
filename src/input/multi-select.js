@@ -115,7 +115,8 @@ _eInput - 选项对应的input，form提交时使用
              * @return {Array} 选项数组
              */
             getValue: function () {
-                return ui.InputControl.prototype.getValue.call(this).split(',');
+                var value = ui.InputControl.prototype.getValue.call(this).trim();
+                return value !== '' ? value.split(',') : [];
             },
 
             /**
