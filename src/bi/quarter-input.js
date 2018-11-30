@@ -1,8 +1,8 @@
 /*
 @example
-<input ui="type:month-input" value="2018-10" name="time" />
+<input ui="type:BIQuarter-input" value="2018-10" name="time" />
 或
-<div ui="type:month-input;value:2018-10;name:time"></div>
+<div ui="type:BIQuarter-input;value:2018-10;name:time"></div>
 */
 (function () {
 //{if 0}//
@@ -12,22 +12,22 @@
         ui = core.ui;
 //{/if}//
     /**
-     * 年月视图控件。
+     * 年季度视图控件。
      * @control
      */
-    ui.Month = core.inherits(
+    ui.BIQuarter = core.inherits(
         ui.Control,
-        'ui-month-view',
+        'ui-quarter-view',
         function (el, options) {
             dom.addClass(el, 'ui-popup ui-calendar ui-hide');
             el.innerHTML = util.stringFormat(
-                '<table><thead>{1}</thead><tbody>{0}{0}{0}</tbody></table>',
+                '<table><thead>{1}</thead><tbody>{0}{0}</tbody></table>',
                 util.stringFormat(
-                    '<tr>{0}{0}{0}{0}</tr>',
+                    '<tr>{0}{0}</tr>',
                     '<td class="' + options.classes.join('-date ') + '"></td>'
                 ),
                 util.stringFormat(
-                    '<tr>{0}{0}{0}{0}</tr>',
+                    '<tr>{0}{0}</tr>',
                     '<td class="' + options.classes.join('-title ') + '"></td>'
                 )
             );
@@ -35,11 +35,11 @@
             ui.Control.call(this, el, options);
 
             this._aCells = Array.apply(null, el.getElementsByTagName('TD')).map(function (item, index) {
-                return core.$fastCreate(index < 4 ? ui.Control : this.Month, item, this, { value: index - 4 });
+                return core.$fastCreate(index < 2 ? ui.Control : this.Quarter, item, this, { value: (index - 1) * 3 - 1 });
             }, this);
 
-            this.MONTHS.forEach(function (item, index) {
-                this._aCells[index + 4].getBody().innerHTML = item;
+            this.QUARTER.forEach(function (item, index) {
+                this._aCells[index + 2].getBody().innerHTML = item;
             }, this);
 
             // 生成日历控件结构
@@ -66,13 +66,13 @@
              * 控件头部展示格式。
              */
             TITLEFORMAT: '{0}年',
-            MONTHS: ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月'],
+            QUARTER: ['一季度', '二季度', '三季度', '四季度'],
 
             /**
              * 日期部件。
              * @unit
              */
-            Month: core.inherits(
+            Quarter: core.inherits(
                 ui.Control,
                 function (el, options) {
                     ui.Control.call(this, el, options);
@@ -229,17 +229,17 @@
         }
     );
     /**
-     * 月输入框控件。
-     * 提供月的选择输入功能，所有的月输入框控件共享一个月选择弹层。
+     * 季度输入框控件。
+     * 提供季度的选择输入功能，所有的季度输入框控件共享一个季度选择弹层。
      * @control
      */
-    ui.MonthInput = core.inherits(
+    ui.BIQuarterInput = core.inherits(
         ui.Text,
         'ui-calendar-input',
         function (el, options) {
             ui.Text.call(this, el, options);
             this.getInput().readOnly = true;
-            this.setPopup(core.getSingleton(ui.Month));
+            this.setPopup(core.getSingleton(ui.BIQuarter));
         },
         {
             /**
