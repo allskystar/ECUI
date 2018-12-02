@@ -943,3 +943,57 @@ a {
 .ui-tip .tip-warn {
     background: rgba(43, 43, 59, 0.95);
 }
+.ui-calendar-input-options {
+
+    .ui-time-calendar {
+        width: 234px;
+        font-size: 0;
+        padding: 0 12px;
+        background: #ffffff;
+
+        .ui-time-calendar-header {
+            position: relative;
+            width: 256px;
+            height: 45px;
+            line-height: 45px;
+            font-size: 0px;
+            border: 1px solid #cccccc;
+            text-align: center;
+            background: #ffffff;
+            margin-left: -12px;
+
+            div {
+                display: inline-block;
+                vertical-align: middle;
+                width: 50%;
+                font-size: 14px;
+            }
+        }
+        .ui-listbox {
+            display: inline-block;
+            vertical-align: middle;
+            font-size: 14px;
+            width: 25%;
+            height: 240px;
+            overflow-y: auto;
+
+            .ui-item {
+                text-align: center;
+                height: 30px;
+                line-height: 30px;
+                cursor: pointer;
+            }
+            .ui-item-hover {
+                color: #ffffff;
+                background-color: #368cda;
+            }
+
+            .ui-item-focus,
+            .ui-item-selected {
+                color: #368cda;
+                background-color: #ffffff;
+            }
+        }
+    }   
+}
+
