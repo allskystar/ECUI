@@ -25,6 +25,217 @@
     };
     </script>
     <style>
+
+.ui-calendar-input-options {
+    display: inline-block;
+    
+
+    .ui-calendar-header {
+        position: relative;
+        width: auto;
+        height: 45px;
+        line-height: 45px;
+        font-size: 0px;
+        border: 1px solid #cccccc;
+        text-align: center;
+        background: #ffffff;
+        margin-left: -12px;
+
+        .ui-button {
+            width: 60px;
+        }
+        .ui-button.ui-calendar-title {
+            width: 80px;
+        }
+    }
+    .ui-calendar {
+        width: auto;
+        font-size: 0;
+        padding: 0 12px;
+        background: #ffffff;
+        padding: 0;
+        .ui-monthview {
+            width: 234px;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        .ui-listbox {
+            display: inline-block;
+            vertical-align: middle;
+            font-size: 14px;
+            width: 25%;
+            height: 240px;
+            overflow-y: auto;
+
+            .ui-item {
+                text-align: center;
+                height: 30px;
+                line-height: 30px;
+                cursor: pointer;
+            }
+            .ui-item-hover {
+                color: #ffffff;
+                background-color: #368cda;
+            }
+
+            .ui-item-focus,
+            .ui-item-selected {
+                color: #368cda;
+                background-color: #ffffff;
+            }
+        }
+    }   
+
+    .options-content{
+        position: relative;
+        height:50px;
+        line-height:50px;
+        background:#fff;
+        border: 1px solid #cccccc;
+        border-top:none;
+
+        .time-title{
+            display: inline-block;
+            vertical-align: middle;
+            width:100px;
+            height:22px;
+            line-height:22px;
+            text-align: center;
+            border: 1px solid #acbaca;
+            border-right:none;
+            font-size:14px;
+        }
+        .clear{
+            position: absolute;
+            right: 100px;
+            display: inline-block;
+            vertical-align: middle;
+            font-size:14px;
+            color:rgba(81, 163, 81, 1);
+            cursor: pointer;
+            &:hover{
+                color:rgba(81,189, 81, 1);
+            }
+        }
+        .submit{
+            position: absolute;
+            right: 50px;
+            position: absolute;
+            display: inline-block;
+            vertical-align: middle;
+            padding-left:15px;
+            font-size:14px;
+            cursor: pointer;
+            color:rgba(81, 163, 81, 1);
+            &:hover{
+                color:rgba(81,189, 81, 1);
+            }
+        }
+    }
+}
+
+
+.ui-calendar-input-options {
+  display: inline-block;
+}
+.ui-calendar-input-options .ui-calendar-header {
+  position: relative;
+  width: auto;
+  height: 45px;
+  line-height: 45px;
+  font-size: 0px;
+  border: 1px solid #cccccc;
+  text-align: center;
+  background: #ffffff;
+  margin-left: -12px;
+}
+.ui-calendar-input-options .ui-calendar-header .ui-button {
+  width: 60px;
+}
+.ui-calendar-input-options .ui-calendar-header .ui-button.ui-calendar-title {
+  width: 80px;
+}
+.ui-calendar-input-options .ui-calendar {
+  width: auto;
+  font-size: 0;
+  padding: 0 12px;
+  background: #ffffff;
+  padding: 0;
+}
+.ui-calendar-input-options .ui-calendar .ui-monthview {
+  width: 234px;
+  display: inline-block;
+  vertical-align: middle;
+}
+.ui-calendar-input-options .ui-calendar .ui-listbox {
+  display: inline-block;
+  vertical-align: middle;
+  font-size: 14px;
+  width: 25%;
+  height: 240px;
+  overflow-y: auto;
+}
+.ui-calendar-input-options .ui-calendar .ui-listbox .ui-item {
+  text-align: center;
+  height: 30px;
+  line-height: 30px;
+  cursor: pointer;
+}
+.ui-calendar-input-options .ui-calendar .ui-listbox .ui-item-hover {
+  color: #ffffff;
+  background-color: #368cda;
+}
+.ui-calendar-input-options .ui-calendar .ui-listbox .ui-item-focus,
+.ui-calendar-input-options .ui-calendar .ui-listbox .ui-item-selected {
+  color: #368cda;
+  background-color: #ffffff;
+}
+.ui-calendar-input-options .options-content {
+  position: relative;
+  height: 50px;
+  line-height: 50px;
+  background: #fff;
+  border: 1px solid #cccccc;
+  border-top: none;
+}
+.ui-calendar-input-options .options-content .time-title {
+  display: inline-block;
+  vertical-align: middle;
+  width: 100px;
+  height: 22px;
+  line-height: 22px;
+  text-align: center;
+  border: 1px solid #acbaca;
+  border-right: none;
+  font-size: 14px;
+}
+.ui-calendar-input-options .options-content .clear {
+  position: absolute;
+  right: 100px;
+  display: inline-block;
+  vertical-align: middle;
+  font-size: 14px;
+  color: #51a351;
+  cursor: pointer;
+}
+.ui-calendar-input-options .options-content .clear:hover {
+  color: #51bd51;
+}
+.ui-calendar-input-options .options-content .submit {
+  right: 50px;
+  position: absolute;
+  display: inline-block;
+  vertical-align: middle;
+  padding-left: 15px;
+  font-size: 14px;
+  cursor: pointer;
+  color: #51a351;
+}
+.ui-calendar-input-options .options-content .submit:hover {
+  color: #51bd51;
+}
+
+
     </style>
 </head>
 <body>
@@ -214,6 +425,29 @@
     <br>
     <br>
     </div>
+
+
+
+<div class="ui-calendar-input-options">
+    <div class="ui-calendar-header">
+        <span class="ui-button ui-monthview-prev-year">&lt;&lt;</span>
+        <span class="ui-button ui-monthview-prev-month">&lt;</span>
+        <span class="ui-button ui-calendar-title">2018年12月</span>
+        <span class="ui-button ui-calendar-title">2019年1月</span>
+        <span class="ui-button ui-monthview-next-year">&gt;</span>
+        <span class="ui-button ui-monthview-next-year">&gt;&gt;</span>
+    </div>
+    <div class="ui-calendar">
+        <div ui="type:month-view"></div>
+        <div ui="type:month-view"></div>
+    </div>
+    <div class="options-content">
+        <span class="time-title">选择时间</span>
+        <span class="clear">清除</span>
+        <span class="submit">确定</span>
+    </div>
+</div>
+
     <script>
 //        alert(document.body.ontouchmove);
     </script>
