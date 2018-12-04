@@ -334,8 +334,8 @@
                                     minute = uTimeCalendar._uStartMinute.getSelected().getValue(),
                                     ehour = uTimeCalendar._uEndHouer.getSelected().getValue(),
                                     eminute = uTimeCalendar._uEndMinute.getSelected().getValue();
-                                date.setHours(hour, minute, 0);
-                                endDate.setHours(ehour, eminute, 0);
+                                date = new Date(date.setHours(hour, minute, 0));
+                                endDate = new Date(endDate.setHours(ehour, eminute, 0));
                                 uTimePicker.setValue(toDateString(date) + ' - ' + toDateString(endDate));
                                 ecui.dispatchEvent(uTimePicker, 'input', event);
                                 this.getParent().hide();
