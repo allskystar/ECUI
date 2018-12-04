@@ -82,7 +82,7 @@ _eTitle        - 日历头部信息提示区
              */
             $change: function (event) {
                 ui.MonthView.prototype.$change.call(this, event);
-                this._eTitle.innerHTML = util.stringFormat(this.TITLEFORMAT, this.getYear(), this.getMonth());
+                this.setTitle(this.getYear(), this.getMonth());
             },
 
             /**
@@ -101,6 +101,17 @@ _eTitle        - 日历头部信息提示区
              */
             getTitle: function () {
                 return this._eTitle;
+            },
+
+            /**
+             * 设置 title。
+             * @public
+             *
+             * @param {number} year 年
+             * @param {number} month 月(1-12)
+             */
+            setTitle: function (year, month) {
+                this._eTitle.innerHTML = util.stringFormat(this.TITLEFORMAT, year, month);
             }
         }
     );
