@@ -91,6 +91,16 @@ _eTitle        - 日历头部信息提示区
             $dispose: function () {
                 this._eTitle = null;
                 ui.MonthView.prototype.$dispose.call(this);
+            },
+
+            /**
+             * 获取 title 元素。
+             * @public
+             *
+             * @return {HTMLElement} title 元素
+             */
+            getTitle: function () {
+                return this._eTitle;
             }
         }
     );

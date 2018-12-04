@@ -70,27 +70,9 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
         ui.Control,
         'ui-monthview',
         function (el, options) {
-            el.innerHTML = util.stringFormat(
-                '<table><thead>{1}</thead><tbody>{0}{0}{0}{0}{0}{0}</tbody></table>',
-                util.stringFormat(
-                    '<tr>{0}{0}{0}{0}{0}{0}{0}</tr>',
-                    '<td class="' + options.classes.join('-date ') + '"></td>'
-                ),
-                util.stringFormat(
-                    '<tr>{0}{0}{0}{0}{0}{0}{0}</tr>',
-                    '<td class="' + options.classes.join('-title ') + '"></td>'
-                )
-            );
-
             ui.Control.call(this, el, options);
 
-            this._aCells = dom.toArray(el.getElementsByTagName('TD')).map(function (item, index) {
-                return core.$fastCreate(index < 7 ? ui.Control : this.Cell, item, this);
-            }, this);
-
-            this.WEEKNAMES.forEach(function (item, index) {
-                this._aCells[index].getBody().innerHTML = item;
-            }, this);
+            this._aCells = this.$initView(options);
 
             this._bExtra = options.extra === 'disable';
             if (options.begin) {
@@ -116,9 +98,8 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
                      * @override
                      */
                     $click: function (event) {
-                        var parent = this.getParent();
                         event.item = this;
-                        event.date = new Date(parent._nYear, parent._nMonth, this._nDay);
+                        event.date = new Date(this._nYear, this._nMonth, this._nDay);
                         core.dispatchEvent(this.getParent(), 'dateclick', event);
                     },
 
@@ -149,6 +130,38 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
             $dateclick: function (event) {
                 this._oDate = event.date;
                 setSelected(this, event.item);
+            },
+
+            /**
+             * 初始化视图区域(子类可以多次初始化)。
+             * @protected
+             *
+             * @param {Object} options 参数化参数
+             * @return {Array} 视图区域数组，可以在 setView 中使用
+             */
+            $initView: function (options) {
+                var el = this.getBody();
+                dom.insertHTML(el, 'beforeEnd', util.stringFormat(
+                    '<table><thead>{1}</thead><tbody>{0}{0}{0}{0}{0}{0}</tbody></table>',
+                    util.stringFormat(
+                        '<tr>{0}{0}{0}{0}{0}{0}{0}</tr>',
+                        '<td class="' + options.classes.join('-date ') + '"></td>'
+                    ),
+                    util.stringFormat(
+                        '<tr>{0}{0}{0}{0}{0}{0}{0}</tr>',
+                        '<td class="' + options.classes.join('-title ') + '"></td>'
+                    )
+                ));
+
+                var cells = dom.toArray(el.lastChild.getElementsByTagName('TD')).map(function (item, index) {
+                    return core.$fastCreate(index < 7 ? ui.Control : this.Cell, item, this);
+                }, this);
+
+                this.WEEKNAMES.forEach(function (item, index) {
+                    cells[index].getBody().innerHTML = item;
+                }, this);
+
+                return cells;
             },
 
             /**
@@ -273,8 +286,9 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
              *
              * @param {number} year 年份(19xx-20xx)，如果省略使用浏览器的当前年份
              * @param {number} month 月份(1-12)，如果省略使用浏览器的当前月份
+             * @param {Array} cells 填充的区域，默认是主区域
              */
-            setView: function (year, month) {
+            setView: function (year, month, cells) {
                 var today = new Date(),
                     dateYear = year || today.getFullYear(),
                     dateMonth = month !== undefined ? month - 1 : today.getMonth(),
@@ -306,7 +320,9 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
 
                 setSelected(this);
 
-                this._aCells.forEach(function (item, index) {
+                (cells || this._aCells).forEach(function (item, index) {
+                    item._nYear = this._nYear;
+                    item._nMonth = this._nMonth;
                     if (index > 6) {
                         var el = item.getOuter();
                         if (day >= begin && day <= end) {
