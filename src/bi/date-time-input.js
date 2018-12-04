@@ -57,7 +57,7 @@
                 ui.Control,
                 function (el, options) {
                     ui.Control.call(this, el, options);
-                    this._uCalendar = ecui.$fastCreate(this.DoubleCalendar, el.appendChild(dom.create('DIV', {className: ui.Calendar.CLASS})), this);
+                    this._uCalendar = ecui.$fastCreate(this.DoubleCalendar, el.appendChild(dom.create('DIV', {className: ui.Calendar.CLASS})), this, { extra: 'disable' });
                     this._uTimeCalendar = ecui.$fastCreate(this.TimeCalendar, el.appendChild(dom.create('DIV', {className: ' ui-time-calendar ui-hide'})), this, {value: '00:00'});
 
                     var calendarHandle = dom.create('DIV', {className: 'options-content'});
