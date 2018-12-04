@@ -943,13 +943,46 @@ a {
 .ui-tip .tip-warn {
     background: rgba(43, 43, 59, 0.95);
 }
-.ui-calendar-input-options {
 
-    .ui-time-calendar {
-        width: 234px;
+.ui-double-calendar-input-options {
+    display: inline-block;
+
+    .ui-calendar-header {
+        position: relative;
+        width: auto;
+        height: 45px;
+        line-height: 45px;
+        font-size: 0px;
+        border: 1px solid #cccccc;
+        text-align: center;
+        background: #ffffff;
+
+        .ui-button {
+            width: 60px;
+            height: 24px;
+            line-height: 24px;
+        }
+        .ui-calendar-title {
+            width: auto;
+            font-size: 14px;
+        }
+    }
+    .ui-calendar {
+        width: auto;
         font-size: 0;
         padding: 0 12px;
         background: #ffffff;
+        padding: 0;
+
+        table {
+            display: inline-table;
+        }
+    }
+    .ui-time-calendar {
+        width: 256px;
+        font-size: 0;
+        background: #ffffff;
+        border: 1px solid #cccccc;
 
         .ui-time-calendar-header {
             position: relative;
@@ -957,10 +990,9 @@ a {
             height: 45px;
             line-height: 45px;
             font-size: 0px;
-            border: 1px solid #cccccc;
+            border-bottom: 1px solid #cccccc;
             text-align: center;
             background: #ffffff;
-            margin-left: -12px;
 
             div {
                 display: inline-block;
@@ -994,6 +1026,60 @@ a {
                 background-color: #ffffff;
             }
         }
-    }   
-}
+    } 
+    .options-content{
+        position: relative;
+        height:50px;
+        line-height:50px;
+        background:#fff;
+        border: 1px solid #cccccc;
+        border-top:none;
 
+        .toggle-btn{
+            display: inline-block;
+            vertical-align: middle;
+            width: 80px;
+            height: 22px;
+            line-height: 22px;
+            text-align: center;
+            border-width: 0;
+            border-right: none;
+            font-size: 14px;
+            cursor: pointer;
+            color:rgba(81, 163, 81, 1);
+            &:hover{
+                color:rgba(81,189, 81, 1);
+            }
+        }
+        .handle-box {
+            position: absolute;
+            right: 0px;
+            top: 0;
+
+            .clear{
+                display: inline-block;
+                vertical-align: middle;
+                font-size:14px;
+                color:rgba(81, 163, 81, 1);
+                cursor: pointer;
+                &:hover{
+                    color:rgba(81,189, 81, 1);
+                }
+            }
+            .submit{
+                display: inline-block;
+                vertical-align: middle;
+                margin-right: 10px;
+                margin-left:15px;
+                font-size:14px;
+                cursor: pointer;
+                color:rgba(81, 163, 81, 1);
+                &:hover{
+                    color:rgba(81,189, 81, 1);
+                }
+            }
+        }
+    }
+     
+
+}
