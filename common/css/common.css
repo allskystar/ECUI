@@ -1010,10 +1010,10 @@ a {
         .ui-listbox {
             display: inline-block;
             vertical-align: middle;
+            overflow-y: hidden;
             font-size: 14px;
             width: 25%;
             height: 240px;
-            overflow-y: auto;
             box-sizing: border-box;
             border-right: 1px solid #cccccc;
 
@@ -1037,6 +1037,9 @@ a {
                 color: #368cda;
                 background-color: #ffffff;
             }
+        }
+        .ui-listbox:hover {
+            overflow-y: auto;
         }
     } 
     .options-content{
