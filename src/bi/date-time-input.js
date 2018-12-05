@@ -10,7 +10,7 @@
     var core = ecui,
         dom = core.dom,
         util = core.util,
-        FORMAT = 'yyyy-MM-dd HH:mm',
+        FORMAT = 'yyyy-MM-dd HH:mm:ss',
         ui = core.ui;
 //{/if}//
 
@@ -46,13 +46,13 @@
             this._eStartInput = dom.insertAfter(dom.create('input', { name: names[0], readOnly: true, className: ' ui-hide' }), this.getInput());
             this._eEndInput = dom.insertAfter(dom.create('input', { name: names[1], readOnly: true, className: ' ui-hide' }), this.getInput());
             this._bRequired = !!options.required;
-            this._sValue = options.value;
+            this._sValue = options.value || this.getInput().value;
             var optionsEl = dom.create('DIV', {className: options.classes.join('-options ') + 'ui-popup ui-hide'});
             this._uOptions = ecui.$fastCreate(this.Options, optionsEl, this, {focusable: false});
             this.setPopup(this._uOptions);
         },
         {
-            FORMAT: 'yyyy-MM-dd HH:mm',
+            FORMAT: 'yyyy-MM-dd HH:mm:ss',
             Options: ecui.inherits(
                 ui.Control,
                 function (el, options) {
@@ -155,7 +155,8 @@
                             $show: function (event) {
                                 ui.Calendar.prototype.$show.call(this, event);
                                 this.$setParent(ui.Popup.getOwner());
-                                this.setDate(this.getParent().getDate());
+                                var start = this.getParent()._eStartInput.value;
+                                this.setDate(start ? new Date(start.replace(' ', 'T')) : new Date());
 
                             },
                             setTitle: function (year, month) {

@@ -957,8 +957,14 @@ a {
         text-align: center;
         background: #ffffff;
 
+        span {
+            width: 50%;
+            display: inline-block;
+            vertical-align: middle;
+            text-align: center;
+        }
         .ui-button {
-            width: 60px;
+            width: auto;
             height: 24px;
             line-height: 24px;
         }
@@ -1008,6 +1014,12 @@ a {
             width: 25%;
             height: 240px;
             overflow-y: auto;
+            box-sizing: border-box;
+            border-right: 1px solid #cccccc;
+
+            &:last-child {
+                border-right: 0;
+            }
 
             .ui-item {
                 text-align: center;
