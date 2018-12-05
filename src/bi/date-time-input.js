@@ -308,8 +308,12 @@
                             onclick: function () {
                                 var parent = this.getParent();
                                 parent.getParent().setValue('');
-                                parent._uCalendar._cSelected.alterStatus('-selected');
-                                parent._uCalendar._eSelected.alterStatus('-selected');
+                                if (parent._uCalendar._cSelected) {
+                                    parent._uCalendar._cSelected.alterStatus('-selected');
+                                }
+                                if (parent._uCalendar._eSelected) {
+                                    parent._uCalendar._eSelected.alterStatus('-selected');
+                                }
                                 parent._uCalendar._oDate = null;
                                 parent._uCalendar._eDate = null;
                                 parent._uCalendar._cSelected = null;
