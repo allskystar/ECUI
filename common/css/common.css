@@ -1042,15 +1042,15 @@ a {
             overflow-y: auto;
         }
     } 
-    .options-content{
+    .options-content {
         position: relative;
-        height:50px;
-        line-height:50px;
-        background:#fff;
+        height: 46px;
+        line-height: 46px;
+        background: #fff;
         border: 1px solid #cccccc;
-        border-top:none;
+        border-top: none;
 
-        .toggle-btn{
+        .toggle-btn {
             display: inline-block;
             vertical-align: middle;
             width: 80px;
@@ -1061,9 +1061,9 @@ a {
             border-right: none;
             font-size: 14px;
             cursor: pointer;
-            color:rgba(81, 163, 81, 1);
-            &:hover{
-                color:rgba(81,189, 81, 1);
+            color: #4197ee;
+            &:hover {
+                color: #1672d8;
             }
         }
         .handle-box {
@@ -1071,26 +1071,36 @@ a {
             right: 0px;
             top: 0;
 
-            .clear{
+            .clear {
                 display: inline-block;
                 vertical-align: middle;
                 font-size:14px;
-                color:rgba(81, 163, 81, 1);
+                color: #4197ee;
                 cursor: pointer;
-                &:hover{
-                    color:rgba(81,189, 81, 1);
+                width: 50px;
+                height: 26px;
+                line-height: 26px;
+                text-align: center;
+                &:hover {
+                    color: #1672d8;
                 }
             }
-            .submit{
+            .submit {
                 display: inline-block;
                 vertical-align: middle;
+                width: 50px;
+                height: 26px;
+                line-height: 26px;
                 margin-right: 10px;
                 margin-left:15px;
                 font-size:14px;
                 cursor: pointer;
-                color:rgba(81, 163, 81, 1);
+                background-color: #0070ff;
+                color: #fff;
+                text-align: center;
+                border-radius: 3px;
                 &:hover{
-                    color:rgba(81,189, 81, 1);
+                    background-color: #0032a1;
                 }
             }
         }

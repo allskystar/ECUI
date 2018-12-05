@@ -90,7 +90,9 @@
                                 if (this._cSelected !== event.item && this._eSelected !== event.item) {
                                     if (this._cSelected && this._eSelected) {
                                         if (event.date < this._oDate) {
-                                            this._eSelected.alterStatus('-selected');
+                                            if (this._cSelected !== this._eSelected) {
+                                                this._eSelected.alterStatus('-selected');
+                                            }
                                             // 设置结束时间 = 起始时间
                                             this._eDate = this._oDate;
                                             this._eSelected = this._cSelected;
@@ -99,7 +101,9 @@
                                             this._cSelected = event.item;
 
                                         } else if (event.date > this._eDate) {
-                                            this._cSelected.alterStatus('-selected');
+                                            if (this._cSelected !== this._eSelected) {
+                                                this._cSelected.alterStatus('-selected');
+                                            }
                                             // 设置起始时间 = 结束时间
                                             this._oDate = this._eDate;
                                             this._cSelected = this._eSelected;
@@ -110,22 +114,24 @@
                                         } else {
                                             if (this._eDate - event.date > event.date - this._oDate) { // 当前时间 离开始时间近
                                                 // 去掉结束时间
-                                                this._eSelected.alterStatus('-selected');
+                                                if (this._cSelected !== this._eSelected) {
+                                                    this._eSelected.alterStatus('-selected');
+                                                }
                                                 // 设置起始时间 = 当前选中时间
                                                 this._eDate = event.date;
                                                 this._eSelected = event.item;
 
                                             } else { // 当前时间 离结束时间近
                                                 // 去掉开始时间
-                                                this._cSelected.alterStatus('-selected');
+                                                if (this._cSelected !== this._eSelected) {
+                                                    this._cSelected.alterStatus('-selected');
+                                                }
                                                 // 设置起始时间 = 当前选中时间
                                                 this._oDate = event.date;
                                                 this._cSelected = event.item;
 
                                             }
                                         }
-
-
                                     } else if (this._cSelected) { // 起始时间存在，结束时间为null
                                         this._eSelected = event.item;
                                         this._eDate =  event.date;
@@ -135,6 +141,14 @@
                                     }
                                     // 添加当前时间的选中效果
                                     event.item.alterStatus('+selected');
+                                } else {
+                                    this._eSelected.alterStatus('-selected');
+                                    this._cSelected.alterStatus('-selected');
+                                    event.item.alterStatus('+selected');
+                                    this._oDate = event.date;
+                                    this._eDate = event.date;
+                                    this._cSelected = event.item;
+                                    this._eSelected = event.item;
                                 }
                             },
                             getEndDate: function () {
