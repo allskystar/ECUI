@@ -798,7 +798,8 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              */
             openSocket: function (url, callback, onerror) {
                 var recvbuf = '',
-                    sendbuf = '';
+                    sendbuf = '',
+                    heartInterval = util.blank;
 
                 function onrecieve(event) {
                     recvbuf += event.data;
@@ -836,12 +837,16 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                 function websocketErrorHandler() {
                     socket.close();
                     websocket();
+                    heartInterval();
                 }
 
                 function websocket() {
                     socket = new WebSocket((location.protocol.startsWith('https') ? 'wss://' : 'ws://') + url[0]);
                     socket.onmessage = onrecieve;
                     socket.onerror = onerror || websocketErrorHandler;
+                    heartInterval = util.timer(function () {
+                        socket.send({ type: 0, message: 'keep heart!!!' });
+                    }, -15000);
                 }
 
                 url = url.split('|');
@@ -851,6 +856,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                     return {
                         close: function () {
                             url[1] = null;
+                            heartInterval();
                         },
 
                         send: function (data) {
@@ -863,6 +869,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                 return {
                     close: function () {
                         socket.close();
+                        heartInterval();
                     },
 
                     send: function (data) {
