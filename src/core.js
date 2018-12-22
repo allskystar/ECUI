@@ -2239,7 +2239,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
          * @return {string} 自定义样式值
          */
         getCustomStyle: function (style, name) {
-            var text = ieVersion < 9 ? style.filter : style.content.trim().slice(1, -1);
+            var text = ieVersion < 9 ? style.filter : style.content ? style.content.trim().slice(1, -1) : '';
             new RegExp('(^|\\s*)' + name + '\\s*:([^;]+)(;|$)').test(text);
             return (RegExp.$2 || '').trim();
         },
