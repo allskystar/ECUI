@@ -14,7 +14,33 @@
         safariVersion = !/(chrome|crios|ucbrowser)/i.test(navigator.userAgent) && /(\d+\.\d)(\.\d)?\s+.*safari/i.test(navigator.userAgent) ? +RegExp.$1 : undefined;
 //{/if}//
     var tx = /(\-?\d+)px\s*,\s*(\-?\d+)/,
-        keyboardHeight = 0;
+        keyboardHeight = 0,
+        statueHeight = 0;
+
+    if (iosVersion && safariVersion) {
+        switch (screen.height) {
+        case 568:
+            // iphone 5S/SE
+            statueHeight = 44;
+            break;
+        case 667:
+            // iphone 6/7/8/6S/7S
+            statueHeight = 44;
+            break;
+        case 736:
+            // iphone 6/7/8 Plus
+            statueHeight = 44;
+            break;
+        case 812:
+            // iphone X/XS
+            statueHeight = 83;
+            break;
+        case 896:
+            // iphone XR/XS max
+            statueHeight = 83;
+            break;
+        }
+    }
 
     ui.MScroll = {
         NAME: '$MScroll',
@@ -338,7 +364,7 @@
                 if (keyboardHeight) {
                     dom.removeEventListener(document, 'touchmove', util.preventEvent);
                 }
-                keyboardHeight = Math.max(0, event.height - (safariVersion ? 45 : 0));
+                keyboardHeight = Math.max(0, event.height - statueHeight);
                 if (keyboardHeight) {
                     dom.addEventListener(document, 'touchmove', util.preventEvent);
                 }
@@ -420,7 +446,7 @@
                                 keyboardHeight = 271;
                                 break;
                             case 812:
-                                //iphoneX
+                                // iphoneX
                                 keyboardHeight = 294;
                                 break;
                             default:
@@ -441,7 +467,7 @@
 
                         keyboardHandle = scrollListener(function () {
                             // 第二次触发，计算软键盘高度
-                            keyboardHeight = window.scrollY + document.body.clientHeight - document.body.scrollHeight - (safariVersion ? 45 : 0);
+                            keyboardHeight = window.scrollY + document.body.clientHeight - document.body.scrollHeight - statueHeight;
                             dom.addEventListener(document, 'touchmove', util.preventEvent);
                             document.body.style.visibility = '';
                             // 复位
@@ -466,7 +492,7 @@
                     if (scroll.$MScroll) {
                         // 终止之前可能存在的惯性状态，并设置滚动层的位置
                         core.drag(scroll);
-                        setSafePosition(scroll, scroll.getY(), scroll.getMain().clientHeight, 0);
+                        setSafePosition(scroll, scroll.getY(), scroll.getMain().clientHeight, keyboardHeight);
                         break;
                     }
                 }
