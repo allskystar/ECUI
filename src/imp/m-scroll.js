@@ -307,7 +307,6 @@
                     if (fn) {
                         fn();
                     }
-                    dom.removeEventListener(window, 'scroll', onscroll);
                 });
             } else {
                 lastScrollY = window.scrollY;
@@ -329,13 +328,10 @@
             }, -20),
             handle;
 
-        dom.addEventListener(window, 'scroll', onscroll);
-
         return function () {
             waitHandle();
             checkHandle();
             window.cancelAnimationFrame(handle);
-            dom.removeEventListener(window, 'scroll', onscroll);
             fn = null;
         };
     }
@@ -457,34 +453,6 @@
                             return;
                         }
 //{/if}//
-                        function calcKeyboardHeight() {
-                            keyboardHandle = scrollListener(function () {
-                                // 第二次触发，计算软键盘高度
-                                keyboardHeight = window.scrollY + document.body.clientHeight - document.body.scrollHeight - statueHeight;
-                                dom.addEventListener(document, 'touchmove', util.preventEvent);
-                                document.body.style.visibility = '';
-                                // 复位
-                                window.scrollTo(0, lastScrollY);
-
-                                fixed();
-                                scrollIntoViewIfNeeded(keyboardHeight);
-                            });
-                        }
-
-                        if (target.getControl) {
-                            var control = target.getControl();
-                            // 输入框在最下方，直接滚动到最下方
-                            if (dom.getPosition(control.getMain()).top + control.getHeight() === document.body.scrollHeight) {
-                                calcKeyboardHeight();
-                                window.scrollTo(0, 100000);
-                                return;
-                            }
-                        } else if (dom.getPosition(target).top + target.offsetHeight === document.body.scrollHeight) {
-                            calcKeyboardHeight();
-                            window.scrollTo(0, 100000);
-                            return;
-                        }
-
                         // 第一次触发，开始测试软键盘高度
                         lastScrollY = window.scrollY;
                         document.body.style.visibility = 'hidden';
@@ -493,9 +461,20 @@
                             document.body.style.visibility = '';
                         }, 500);
 
-                        calcKeyboardHeight();
-
                         window.scrollTo(0, 100000);
+                        keyboardHandle = scrollListener(function () {
+                            // 第二次触发，计算软键盘高度
+                            keyboardHeight = window.scrollY + document.body.clientHeight - document.body.scrollHeight - statueHeight;
+                            dom.addEventListener(document, 'touchmove', util.preventEvent);
+                            // 复位
+                            if (lastScrollY !== undefined) {
+                                document.body.style.visibility = '';
+                                window.scrollTo(0, lastScrollY);
+                            }
+
+                            fixed();
+                            scrollIntoViewIfNeeded(keyboardHeight);
+                        });
                     });
                 }
             });
