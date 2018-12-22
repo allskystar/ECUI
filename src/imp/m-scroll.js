@@ -84,7 +84,7 @@
                         absolute: true,
                         left: data.left !== undefined ? data.left : main.clientWidth - main.scrollWidth + (flag ? +RegExp.$1 : 0),
                         right: data.right !== undefined ? data.right : 0,
-                        top: (data.top !== undefined ? data.top : main.clientHeight - main.scrollHeight + (flag ? +RegExp.$2 : 0)) + window.scrollY - keyboardHeight,
+                        top: (data.top !== undefined ? data.top : main.clientHeight - main.scrollHeight + (flag ? +RegExp.$2 : 0)) + Math.min(0, window.scrollY - keyboardHeight),
                         bottom: (data.bottom !== undefined ? data.bottom : 0) + window.scrollY,
                         limit: data.range
                     }
@@ -238,7 +238,8 @@
         }
     };
 //{if 0}//
-    var isSimulator = true;
+    var isSimulator = true,
+        bodyScrollTop = 0;
     try {
         isSimulator = !window.localStorage;
     } catch (ignore) {
@@ -249,7 +250,7 @@
         if (!isSimulator) {
 //{/if}//
             // 解除滚动下方的白条与半像素问题
-            window.scrollTo(0, Math.min(keyboardHeight, window.scrollY));
+            window.scrollTo(0, Math.min(keyboardHeight + bodyScrollTop, window.scrollY));
 //{if 0}//
         }
 //{/if}//
@@ -424,6 +425,7 @@
                         // }, 200, {to: window.scrollY});
                     });
                 } else {
+                    bodyScrollTop = document.body.scrollTop;
                     keyboardHandle = scrollListener(function () {
 //{if 0}//
                         if (isSimulator) {
