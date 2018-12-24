@@ -362,7 +362,8 @@
 
     if (isToucher) {
         var iosfixedList,
-            keyboardHandle = util.blank;
+            keyboardHandle = util.blank,
+            changeHandle = util.blank;
 
         if (iosVersion) {
             dom.addEventListener(window, 'keyboardchange', function (event) {
@@ -372,13 +373,16 @@
                 keyboardHeight = Math.max(0, event.height - statueHeight);
 
                 if (oldHeight !== keyboardHeight) {
+                    changeHandle();
                     if (!keyboardHeight) {
                         dom.removeEventListener(document, 'touchmove', util.preventEvent);
                     } else if (!oldHeight) {
                         dom.addEventListener(document, 'touchmove', util.preventEvent);
                     }
-                    fixed();
-                    scrollIntoViewIfNeeded(keyboardHeight);
+                    changeHandle = scrollListener(function () {
+                        fixed();
+                        scrollIntoViewIfNeeded(keyboardHeight);
+                    });
                 }
             });
 
