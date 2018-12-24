@@ -845,7 +845,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                     socket.onmessage = onrecieve;
                     socket.onerror = onerror || websocketErrorHandler;
                     heartInterval = util.timer(function () {
-                        socket.send({ type: 0, message: 'keep heart!!!' });
+                        socket.send(JSON.stringify({ type: 0, message: 'keep heart!!!' }));
                     }, -15000);
                 }
 

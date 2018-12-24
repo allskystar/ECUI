@@ -273,7 +273,7 @@
         }
 
         if (!scroll) {
-            scrollTop = 0;
+            scrollTop = bodyScrollTop;
             scrollHeight = document.body.clientHeight - height;
             activeTop = dom.getPosition(document.activeElement).top - window.scrollY;
         }
@@ -297,7 +297,7 @@
         if (scroll) {
             setSafePosition(scroll, scrollY + y, scrollHeight, keyboardHeight);
         } else {
-            window.scrollTo(0, window.scrollY + y);
+            window.scrollTo(0, window.scrollY - y);
         }
     }
 
@@ -379,10 +379,15 @@
                     } else if (!oldHeight) {
                         dom.addEventListener(document, 'touchmove', util.preventEvent);
                     }
-                    changeHandle = scrollListener(function () {
+                    if (oldHeight && keyboardHeight) {
                         fixed();
                         scrollIntoViewIfNeeded(keyboardHeight);
-                    });
+                    } else {
+                        changeHandle = scrollListener(function () {
+                            fixed();
+                            scrollIntoViewIfNeeded(keyboardHeight);
+                        });
+                    }
                 }
             });
 
