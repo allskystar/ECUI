@@ -267,30 +267,38 @@
                     scrollY = scroll.getY(),
                     scrollTop = dom.getPosition(main).top,
                     scrollHeight = scroll.getHeight() - height,
-                    activeTop = dom.getPosition(document.activeElement).top + main.scrollTop - window.scrollY + scrollY,
-                    activeHeight = document.activeElement.offsetHeight,
-                    // 处理微信提示信息的高度
-                    infoHeight = /MicroMessanger/.test(navigator.userAgent) ? 30 : 0,
-                    y = 0;
-
-                if (activeTop < scrollTop + infoHeight) {
-                    y = scrollTop + infoHeight - activeTop + (activeHeight < 50 ? Math.floor(activeHeight / 2) : 0);
-                } else if (activeTop + activeHeight > scrollTop + scrollHeight) {
-                    if (activeHeight < 50) {
-                        y = scrollTop + scrollHeight - activeTop - activeHeight - Math.floor(activeHeight / 2);
-                    } else if (activeHeight > scrollHeight - infoHeight) {
-                        y = scrollTop + infoHeight - activeTop;
-                    } else {
-                        y = scrollTop + scrollHeight - activeTop - activeHeight;
-                    }
-                }
-
-                setSafePosition(scroll, scrollY + y, scrollHeight, keyboardHeight);
-
-                return;
+                    activeTop = dom.getPosition(document.activeElement).top + main.scrollTop - window.scrollY + scrollY;
+                break;
             }
         }
-        document.activeElement.scrollIntoViewIfNeeded();
+
+        if (!scroll) {
+            scrollTop = 0;
+            scrollHeight = document.body.clientHeight - height;
+            activeTop = dom.getPosition(document.activeElement).top - window.scrollY;
+        }
+
+        var activeHeight = document.activeElement.offsetHeight,
+            infoHeight = /MicroMessanger/.test(navigator.userAgent) ? 30 : 0, // 处理微信提示信息的高度
+            y = 0;
+
+        if (activeTop < scrollTop + infoHeight) {
+            y = scrollTop + infoHeight - activeTop + (activeHeight < 50 ? Math.floor(activeHeight / 2) : 0);
+        } else if (activeTop + activeHeight > scrollTop + scrollHeight) {
+            if (activeHeight < 50) {
+                y = scrollTop + scrollHeight - activeTop - activeHeight - Math.floor(activeHeight / 2);
+            } else if (activeHeight > scrollHeight - infoHeight) {
+                y = scrollTop + infoHeight - activeTop;
+            } else {
+                y = scrollTop + scrollHeight - activeTop - activeHeight;
+            }
+        }
+
+        if (scroll) {
+            setSafePosition(scroll, scrollY + y, scrollHeight, keyboardHeight);
+        } else {
+            window.scrollTo(0, window.scrollY + y);
+        }
     }
 
     /**
@@ -359,15 +367,19 @@
         if (iosVersion) {
             dom.addEventListener(window, 'keyboardchange', function (event) {
                 keyboardHandle();
-                if (keyboardHeight) {
-                    dom.removeEventListener(document, 'touchmove', util.preventEvent);
-                }
+
+                var oldHeight = keyboardHeight;
                 keyboardHeight = Math.max(0, event.height - statueHeight);
-                if (keyboardHeight) {
-                    dom.addEventListener(document, 'touchmove', util.preventEvent);
+
+                if (oldHeight !== keyboardHeight) {
+                    if (!keyboardHeight) {
+                        dom.removeEventListener(document, 'touchmove', util.preventEvent);
+                    } else if (!oldHeight) {
+                        dom.addEventListener(document, 'touchmove', util.preventEvent);
+                    }
+                    fixed();
+                    scrollIntoViewIfNeeded(keyboardHeight);
                 }
-                fixed();
-                scrollIntoViewIfNeeded(keyboardHeight);
             });
 
             dom.addEventListener(document, 'focusin', function (event) {
