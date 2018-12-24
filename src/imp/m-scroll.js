@@ -287,9 +287,10 @@
 
                 setSafePosition(scroll, scrollY + y, scrollHeight, keyboardHeight);
 
-                break;
+                return;
             }
         }
+        document.activeElement.scrollIntoViewIfNeeded();
     }
 
     /**
