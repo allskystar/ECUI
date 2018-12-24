@@ -69,7 +69,7 @@ _nRatio    原始的宽高比例
             $mousewheel: function (event) {
                 ui.Control.prototype.$mousewheel.call(this, event);
                 var delta = event.deltaY,
-                    width = Math.max(this._nMinWidth, this.getWidth() + delta * 2);
+                    width = Math.max(this._nMinWidth, this.getWidth() - delta * 2);
 
                 this.setSize(width, Math.round(width * this._nRatio));
                 this.setPosition(this.getX(), this.getY());
