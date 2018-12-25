@@ -15,7 +15,8 @@
 //{/if}//
     var tx = /(\-?\d+)px\s*,\s*(\-?\d+)/,
         keyboardHeight = 0,
-        statueHeight = 0;
+        statueHeight = 0,
+        bodyScrollTop = 0;
 
     if (iosVersion && safariVersion) {
         switch (screen.height) {
@@ -238,8 +239,7 @@
         }
     };
 //{if 0}//
-    var isSimulator = true,
-        bodyScrollTop = 0;
+    var isSimulator = true;
     try {
         isSimulator = !window.localStorage;
     } catch (ignore) {
@@ -541,17 +541,17 @@
                     item.control.getMain().style.transform = '';
                 });
 
-                keyboardHandle = scrollListener(function () {
-                    core.query(function (item) {
-                        return item.$MScroll;
-                    }).forEach(function (item) {
-                        item.setPosition(item.getX(), Math.max(item.$MScrollData.top, Math.min(0, item.getY())));
-                        if (item.$MScrollData.cacheTop) {
-                            item.$MScrollData.cacheTop = false;
-                            delete item.$MScrollData.top;
-                        }
-                    });
+                core.query(function (item) {
+                    return item.$MScroll;
+                }).forEach(function (item) {
+                    item.setPosition(item.getX(), Math.max(item.$MScrollData.top, Math.min(0, item.getY())));
+                    if (item.$MScrollData.cacheTop) {
+                        item.$MScrollData.cacheTop = false;
+                        delete item.$MScrollData.top;
+                    }
+                });
 
+                keyboardHandle = scrollListener(function () {
                     if (scroll) {
                         setSafePosition(scroll, scroll.getY(), scroll.getMain().clientHeight, 0);
                     }
