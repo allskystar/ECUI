@@ -10,7 +10,7 @@
         util = core.util,
 
         isToucher = document.ontouchstart !== undefined,
-        iosVersion = /(iPhone|iPad).+OS (\d+(\.\d+)?)/i.test(navigator.userAgent) ?  +(RegExp.$2) : undefined,
+        iosVersion = /(iPhone|iPad).*?OS (\d+(_\d+)?)/i.test(navigator.userAgent) ?  +(RegExp.$2.replace('_', '.')) : undefined,
         safariVersion = !/(chrome|crios|ucbrowser)/i.test(navigator.userAgent) && /(\d+\.\d)(\.\d)?\s+.*safari/i.test(navigator.userAgent) ? +RegExp.$1 : undefined;
 //{/if}//
     var tx = /(\-?\d+)px\s*,\s*(\-?\d+)/,
@@ -435,6 +435,9 @@
 //{if 0}//
                     }
 //{/if}//
+                    // 焦点控件切换
+                    core.setFocused(core.findControl(target));
+
                     keyboardHandle = scrollListener(function () {
                         if (lastScrollY !== window.scrollY) {
                             iosfixedList.forEach(function (item) {
@@ -481,7 +484,7 @@
                                     document.body.style.visibility = '';
                                     window.scrollTo(0, lastScrollY);
                                 }
-console.log(keyboardHeight);
+
                                 fixed();
                                 scrollIntoViewIfNeeded(keyboardHeight);
                             });
