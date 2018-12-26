@@ -12,7 +12,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
         //{if 1}//isPointer = !!window.PointerEvent, // 使用pointer事件序列，请一定在需要滚动的元素上加上touch-action:none//{/if}//
         isStrict = document.compatMode === 'CSS1Compat',
         isWebkit = /webkit/i.test(navigator.userAgent),
-        iosVersion = /(iPhone|iPad).+OS (\d+)/i.test(navigator.userAgent) ?  +(RegExp.$2) : undefined,
+        iosVersion = /(iPhone|iPad).+OS (\d+(\.\d+)?)/i.test(navigator.userAgent) ?  +(RegExp.$2) : undefined,
         isUCBrowser = /ucbrowser/i.test(navigator.userAgent),
         chromeVersion = /(Chrome|CriOS)\/(\d+\.\d)/i.test(navigator.userAgent) ? +RegExp.$2 : undefined,
         ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined,

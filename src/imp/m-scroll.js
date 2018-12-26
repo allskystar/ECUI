@@ -10,7 +10,7 @@
         util = core.util,
 
         isToucher = document.ontouchstart !== undefined,
-        iosVersion = /(iPhone|iPad).+OS (\d+)/i.test(navigator.userAgent) ?  +(RegExp.$2) : undefined,
+        iosVersion = /(iPhone|iPad).+OS (\d+(\.\d+)?)/i.test(navigator.userAgent) ?  +(RegExp.$2) : undefined,
         safariVersion = !/(chrome|crios|ucbrowser)/i.test(navigator.userAgent) && /(\d+\.\d)(\.\d)?\s+.*safari/i.test(navigator.userAgent) ? +RegExp.$1 : undefined;
 //{/if}//
     var tx = /(\-?\d+)px\s*,\s*(\-?\d+)/,
@@ -246,58 +246,62 @@
     }
 //{/if}//
     function fixed(scrollY) {
+        if (iosVersion < 11.1 || iosVersion > 11.2) {
 //{if 0}//
-        if (!isSimulator) {
+            if (!isSimulator) {
 //{/if}//
-            // 解除滚动下方的白条与半像素问题
-            window.scrollTo(0, Math.min(keyboardHeight + bodyScrollTop, window.scrollY));
+                // 解除滚动下方的白条与半像素问题
+                window.scrollTo(0, Math.min(keyboardHeight + bodyScrollTop, window.scrollY));
 //{if 0}//
+            }
+//{/if}//
+            scrollY = scrollY === undefined ? window.scrollY : scrollY;
+            iosfixedList.forEach(function (item) {
+                item.control.getMain().style.transform = 'translateY(' + (item.top ? scrollY : scrollY - keyboardHeight) + 'px)';
+            });
         }
-//{/if}//
-        scrollY = scrollY === undefined ? window.scrollY : scrollY;
-        iosfixedList.forEach(function (item) {
-            item.control.getMain().style.transform = 'translateY(' + (item.top ? scrollY : scrollY - keyboardHeight) + 'px)';
-        });
     }
 
     function scrollIntoViewIfNeeded(height) {
-        for (var scroll = core.findControl(document.activeElement); scroll; scroll = scroll.getParent()) {
-            if (scroll.$MScroll) {
-                var main = scroll.getMain(),
-                    scrollY = scroll.getY(),
-                    scrollTop = dom.getPosition(main).top,
-                    scrollHeight = scroll.getHeight() - height,
-                    activeTop = dom.getPosition(document.activeElement).top + main.scrollTop - window.scrollY + scrollY;
-                break;
+        if (iosVersion < 11.1 || iosVersion > 11.2) {
+            for (var scroll = core.findControl(document.activeElement); scroll; scroll = scroll.getParent()) {
+                if (scroll.$MScroll) {
+                    var main = scroll.getMain(),
+                        scrollY = scroll.getY(),
+                        scrollTop = dom.getPosition(main).top,
+                        scrollHeight = scroll.getHeight() - height,
+                        activeTop = dom.getPosition(document.activeElement).top + main.scrollTop - window.scrollY + scrollY;
+                    break;
+                }
             }
-        }
 
-        if (!scroll) {
-            scrollTop = bodyScrollTop;
-            scrollHeight = document.body.clientHeight - height;
-            activeTop = dom.getPosition(document.activeElement).top - window.scrollY;
-        }
+            if (!scroll) {
+                scrollTop = bodyScrollTop;
+                scrollHeight = document.body.clientHeight - height;
+                activeTop = dom.getPosition(document.activeElement).top - window.scrollY;
+            }
 
-        var activeHeight = document.activeElement.offsetHeight,
-            infoHeight = /MicroMessanger/.test(navigator.userAgent) ? 30 : 0, // 处理微信提示信息的高度
-            y = 0;
+            var activeHeight = document.activeElement.offsetHeight,
+                infoHeight = /MicroMessanger/.test(navigator.userAgent) ? 30 : 0, // 处理微信提示信息的高度
+                y = 0;
 
-        if (activeTop < scrollTop + infoHeight) {
-            y = scrollTop + infoHeight - activeTop + (activeHeight < 50 ? Math.floor(activeHeight / 2) : 0);
-        } else if (activeTop + activeHeight > scrollTop + scrollHeight) {
-            if (activeHeight < 50) {
-                y = scrollTop + scrollHeight - activeTop - activeHeight - Math.floor(activeHeight / 2);
-            } else if (activeHeight > scrollHeight - infoHeight) {
-                y = scrollTop + infoHeight - activeTop;
+            if (activeTop < scrollTop + infoHeight) {
+                y = scrollTop + infoHeight - activeTop + (activeHeight < 50 ? Math.floor(activeHeight / 2) : 0);
+            } else if (activeTop + activeHeight > scrollTop + scrollHeight) {
+                if (activeHeight < 50) {
+                    y = scrollTop + scrollHeight - activeTop - activeHeight - Math.floor(activeHeight / 2);
+                } else if (activeHeight > scrollHeight - infoHeight) {
+                    y = scrollTop + infoHeight - activeTop;
+                } else {
+                    y = scrollTop + scrollHeight - activeTop - activeHeight;
+                }
+            }
+
+            if (scroll) {
+                setSafePosition(scroll, scrollY + y, scrollHeight, keyboardHeight);
             } else {
-                y = scrollTop + scrollHeight - activeTop - activeHeight;
+                window.scrollTo(0, window.scrollY - y);
             }
-        }
-
-        if (scroll) {
-            setSafePosition(scroll, scrollY + y, scrollHeight, keyboardHeight);
-        } else {
-            window.scrollTo(0, window.scrollY - y);
         }
     }
 

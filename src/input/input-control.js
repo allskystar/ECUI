@@ -21,7 +21,7 @@ _eInput        - INPUT对象
         util = core.util,
 
         isToucher = document.ontouchstart !== undefined,
-        iosVersion = /(iPhone|iPad).+OS (\d+)/i.test(navigator.userAgent) ?  +(RegExp.$2) : undefined,
+        iosVersion = /(iPhone|iPad).+OS (\d+(\.\d+)?)/i.test(navigator.userAgent) ?  +(RegExp.$2) : undefined,
         ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined;
 //{/if}//
     var timer = util.blank,
