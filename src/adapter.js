@@ -874,6 +874,9 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
 
                     send: function (data) {
                         if (socket.readyState !== 1) {
+                            if (socket.readyState === 3) {
+                                websocket();
+                            }
                             util.timer(this.send, 100, this, data);
                         } else {
                             socket.send(data);
