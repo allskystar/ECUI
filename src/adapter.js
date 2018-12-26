@@ -12,7 +12,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
         //{if 1}//isPointer = !!window.PointerEvent, // 使用pointer事件序列，请一定在需要滚动的元素上加上touch-action:none//{/if}//
         isStrict = document.compatMode === 'CSS1Compat',
         isWebkit = /webkit/i.test(navigator.userAgent),
-        iosVersion = /(iPhone|iPad).+OS (\d+)/i.test(navigator.userAgent) ?  +(RegExp.$2) : undefined,
+        iosVersion = /(iPhone|iPad).+OS (\d+(\.\d+)?)/i.test(navigator.userAgent) ?  +(RegExp.$2) : undefined,
         isUCBrowser = /ucbrowser/i.test(navigator.userAgent),
         chromeVersion = /(Chrome|CriOS)\/(\d+\.\d)/i.test(navigator.userAgent) ? +RegExp.$2 : undefined,
         ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined,
@@ -796,10 +796,11 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              * @param {Function} onerror io失败时的处理
              * @return {object} 操作对象，使用close关闭长连接
              */
-            openSocket: function (url, callback, onerror) {
+            openSocket: function (url, callback, onerror, protocol) {
                 var recvbuf = '',
                     sendbuf = '',
-                    heartInterval = util.blank;
+                    heartInterval = util.blank,
+                    sendHandle = util.blank;
 
                 function onrecieve(event) {
                     recvbuf += event.data;
@@ -834,18 +835,31 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
 
                 var socket;
 
-                function websocketErrorHandler() {
+                function sendErrorHandler() {
                     socket.close();
-                    websocket();
                     heartInterval();
+                    if (onerror) {
+                        onerror();
+                    }
+                    websocket();
                 }
 
                 function websocket() {
-                    socket = new WebSocket((location.protocol.startsWith('https') ? 'wss://' : 'ws://') + url[0]);
+                    socket = new WebSocket((location.protocol.startsWith('https') ? 'wss://' : 'ws://') + url[0], protocol);
                     socket.onmessage = onrecieve;
-                    socket.onerror = onerror || websocketErrorHandler;
+                    socket.onerror = function () {
+                        socket.close();
+                        heartInterval();
+                        util.timer(websocket, 1000);
+                    };
+                    socket.onopen = function () {
+                        socket.onerror = sendErrorHandler;
+                    };
                     heartInterval = util.timer(function () {
-                        socket.send(JSON.stringify({ type: 0, message: 'keep heart!!!' }));
+                        if (socket.readyState !== 1) {
+                            heartInterval();
+                        }
+                        socket.send(JSON.stringify({type: 0}));
                     }, -15000);
                 }
 
@@ -856,7 +870,6 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                     return {
                         close: function () {
                             url[1] = null;
-                            heartInterval();
                         },
 
                         send: function (data) {
@@ -873,11 +886,10 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                     },
 
                     send: function (data) {
-                        if (socket.readyState !== 1) {
-                            if (socket.readyState === 3) {
-                                websocket();
+                        if (socket.readyState === 3) {
+                            if (socket.onerror === sendErrorHandler) {
+                                sendErrorHandler();
                             }
-                            util.timer(this.send, 100, this, data);
                         } else {
                             socket.send(data);
                         }

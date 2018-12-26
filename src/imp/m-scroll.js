@@ -10,12 +10,13 @@
         util = core.util,
 
         isToucher = document.ontouchstart !== undefined,
-        iosVersion = /(iPhone|iPad).+OS (\d+)/i.test(navigator.userAgent) ?  +(RegExp.$2) : undefined,
+        iosVersion = /(iPhone|iPad).+OS (\d+(\.\d+)?)/i.test(navigator.userAgent) ?  +(RegExp.$2) : undefined,
         safariVersion = !/(chrome|crios|ucbrowser)/i.test(navigator.userAgent) && /(\d+\.\d)(\.\d)?\s+.*safari/i.test(navigator.userAgent) ? +RegExp.$1 : undefined;
 //{/if}//
     var tx = /(\-?\d+)px\s*,\s*(\-?\d+)/,
         keyboardHeight = 0,
         statueHeight = 0,
+        innerKeyboardHeight,
         bodyScrollTop = 0;
 
     if (iosVersion && safariVersion) {
@@ -23,22 +24,27 @@
         case 568:
             // iphone 5S/SE
             statueHeight = 44;
+            innerKeyboardHeight = 253;
             break;
         case 667:
             // iphone 6/7/8/6S/7S
             statueHeight = 44;
+            innerKeyboardHeight = 260;
             break;
         case 736:
             // iphone 6/7/8 Plus
             statueHeight = 44;
+            innerKeyboardHeight = 271;
             break;
         case 812:
             // iphone X/XS
             statueHeight = 83;
+            innerKeyboardHeight = 296;
             break;
         case 896:
             // iphone XR/XS max
             statueHeight = 83;
+            innerKeyboardHeight = 307;
             break;
         }
     }
@@ -246,14 +252,17 @@
     }
 //{/if}//
     function fixed(scrollY) {
+        if (iosVersion < 11.1 || iosVersion > 11.2) {
 //{if 0}//
-        if (!isSimulator) {
+            if (!isSimulator) {
 //{/if}//
-            // 解除滚动下方的白条与半像素问题
-            window.scrollTo(0, Math.min(keyboardHeight + bodyScrollTop, window.scrollY));
+                // 解除滚动下方的白条与半像素问题
+                window.scrollTo(0, Math.min(keyboardHeight + bodyScrollTop, window.scrollY));
 //{if 0}//
+            }
+//{/if}//
         }
-//{/if}//
+
         scrollY = scrollY === undefined ? window.scrollY : scrollY;
         iosfixedList.forEach(function (item) {
             item.control.getMain().style.transform = 'translateY(' + (item.top ? scrollY : scrollY - keyboardHeight) + 'px)';
@@ -296,7 +305,7 @@
 
         if (scroll) {
             setSafePosition(scroll, scrollY + y, scrollHeight, keyboardHeight);
-        } else {
+        } else if (iosVersion < 11.1 || iosVersion > 11.2) {
             window.scrollTo(0, window.scrollY - y);
         }
     }
@@ -451,32 +460,17 @@
                     keyboardHandle = scrollListener(function () {
 //{if 0}//
                         if (isSimulator) {
-                            // 在模拟器内运行
-                            switch (screen.height) {
-                            case 568:
-                                // iphone 5s/se
-                                keyboardHeight = 253;
-                                break;
-                            case 667:
-                                // iphone 6/7/8
-                                keyboardHeight = 258;
-                                break;
-                            case 736:
-                                // iphone 6/7/8 plus
-                                keyboardHeight = 271;
-                                break;
-                            case 812:
-                                // iphoneX
-                                keyboardHeight = 294;
-                                break;
-                            default:
-                                throw new Error('不能识别的 iPhone 型号');
-                            }
+                            keyboardHeight = innerKeyboardHeight;
                             fixed();
                             dom.addEventListener(document, 'touchmove', util.preventEvent);
                             return;
                         }
 //{/if}//
+                        if (iosVersion === 11.1 || iosVersion === 11.2) {
+                            keyboardHeight = innerKeyboardHeight;
+                            return;
+                        }
+
                         function calcKeyboardHeight() {
                             keyboardHandle = scrollListener(function () {
                                 // 第二次触发，计算软键盘高度
@@ -487,7 +481,7 @@
                                     document.body.style.visibility = '';
                                     window.scrollTo(0, lastScrollY);
                                 }
-
+console.log(keyboardHeight);
                                 fixed();
                                 scrollIntoViewIfNeeded(keyboardHeight);
                             });
