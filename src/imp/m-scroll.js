@@ -435,6 +435,9 @@
 //{if 0}//
                     }
 //{/if}//
+                    // 焦点控件切换
+                    core.setFocused(core.findControl(target));
+
                     keyboardHandle = scrollListener(function () {
                         if (lastScrollY !== window.scrollY) {
                             iosfixedList.forEach(function (item) {
@@ -481,7 +484,7 @@
                                     document.body.style.visibility = '';
                                     window.scrollTo(0, lastScrollY);
                                 }
-console.log(keyboardHeight);
+
                                 fixed();
                                 scrollIntoViewIfNeeded(keyboardHeight);
                             });
