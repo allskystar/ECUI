@@ -21,6 +21,7 @@ _eInput        - INPUT对象
         util = core.util,
 
         isToucher = document.ontouchstart !== undefined,
+        iosVersion = /(iPhone|iPad).+OS (\d+)/i.test(navigator.userAgent) ?  +(RegExp.$2) : undefined,
         ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined;
 //{/if}//
     var timer = util.blank,
@@ -30,7 +31,7 @@ _eInput        - INPUT对象
              * 输入结束事件处理。
              * @private
              */
-            compositionend: function (event) {
+            compositionend: iosVersion ? util.blank : function (event) {
                 event = core.wrapEvent(event);
                 var control = event.target.getControl();
                 core.dispatchEvent(control, 'input', event);
@@ -45,7 +46,7 @@ _eInput        - INPUT对象
              * 输入开始事件处理。
              * @private
              */
-            compositionstart: function (event) {
+            compositionstart: iosVersion ? util.blank : function (event) {
                 timer();
                 core.wrapEvent(event).target.getControl()._bIME = true;
             },
