@@ -890,9 +890,9 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                     send: function (data) {
                         if (socket.readyState === 1) {
                             socket.send(data);
-                        } else {
-                            // 连接不可用，主动触发错误处理
-                            socket.onerror();
+                        } else if (onerror) {
+                            // 连接不可用，主动触发错误处理并重连
+                            onerror();
                         }
                     }
                 };
