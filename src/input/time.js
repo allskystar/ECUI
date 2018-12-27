@@ -36,7 +36,7 @@ _oTest      匹配合法性的正则表达式
         'ui-time',
         function (el, options) {
             ui.Text.call(this, el, options);
-            this._oTest = new RegExp('^([0-1]\\d|2[0-3]):[0-5]\\d' + (options.second !== false ? ':[0-5]\\d' : '') + '$');
+            this._oTest = new RegExp('^[0-2]\\d:[0-5]\\d' + (options.second !== false ? ':[0-5]\\d' : '') + '$');
         },
         {
             /**
@@ -87,6 +87,9 @@ _oTest      匹配合法性的正则表达式
 
                         value = value.slice(0, this.getSelectionStart()) + (event.which % 48) + value.slice(pos);
                         if (this._oTest.test(value)) {
+                            if (+value.slice(0, 2) > 23) {
+                                value = '23' + value.slice(2);
+                            }
                             this.setValue(value);
                             setSelection(this, pos);
                         }
