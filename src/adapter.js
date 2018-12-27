@@ -855,10 +855,10 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                                 socket.send(JSON.stringify({type: 0}));
                             }
                         }, -15000);
-                    };
-                    socket.onclose = function () {
-                        // 连接意外关闭，重新打开连接
-                        websocket();
+                        socket.onclose = function () {
+                            // 连接意外关闭，重新打开连接
+                            websocket();
+                        };
                     };
                 }
 
