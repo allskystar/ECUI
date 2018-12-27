@@ -794,13 +794,13 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              * @param {string} url 长连接的地址
              * @param {Function} callback 每接受一个正确的数据报文时产生的回调函数，数据报文是一个紧凑的json字符串，使用\n分隔不同的数据报文
              * @param {Function} onerror io失败时的处理
+             * @param {object} options 参数
              * @return {object} 操作对象，使用close关闭长连接
              */
-            openSocket: function (url, callback, onerror, protocol) {
+            openSocket: function (url, callback, onerror, options) {
                 var recvbuf = '',
                     sendbuf = '',
-                    heartInterval = util.blank,
-                    sendHandle = util.blank;
+                    heartInterval = util.blank;
 
                 function onrecieve(event) {
                     recvbuf += event.data;
@@ -835,32 +835,31 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
 
                 var socket;
 
-                function sendErrorHandler() {
-                    socket.close();
-                    heartInterval();
-                    if (onerror) {
-                        onerror();
-                    }
-                    websocket();
-                }
-
                 function websocket() {
-                    socket = new WebSocket((location.protocol.startsWith('https') ? 'wss://' : 'ws://') + url[0], protocol);
+                    if (socket && socket.readyState <= 1) {
+                        // socket正在连接或者已经连接，直接返回
+                        return;
+                    }
+                    socket = new WebSocket((location.protocol.startsWith('https') ? 'wss://' : 'ws://') + url[0], options.protocol);
                     socket.onmessage = onrecieve;
                     socket.onerror = function () {
-                        socket.close();
-                        heartInterval();
+                        // 连接服务器失败重试，此时还没有触发心跳
                         util.timer(websocket, 1000);
                     };
                     socket.onopen = function () {
-                        socket.onerror = sendErrorHandler;
+                        socket.onerror = onerror;
+                        // 关闭之前的心跳处理
+                        heartInterval();
+                        heartInterval = util.timer(function () {
+                            if (socket.readyState === 1) {
+                                socket.send(JSON.stringify({type: 0}));
+                            }
+                        }, -15000);
                     };
-                    heartInterval = util.timer(function () {
-                        if (socket.readyState !== 1) {
-                            heartInterval();
-                        }
-                        socket.send(JSON.stringify({type: 0}));
-                    }, -15000);
+                    socket.onclose = function () {
+                        // 连接意外关闭，重新打开连接
+                        websocket();
+                    };
                 }
 
                 url = url.split('|');
@@ -881,17 +880,19 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                 websocket();
                 return {
                     close: function () {
+                        // 先停止onclose方法避免重新连接
+                        socket.onclose = null;
                         socket.close();
+                        // 连接被彻底关闭停止心跳
                         heartInterval();
                     },
 
                     send: function (data) {
-                        if (socket.readyState === 3) {
-                            if (socket.onerror === sendErrorHandler) {
-                                sendErrorHandler();
-                            }
-                        } else {
+                        if (socket.readyState === 1) {
                             socket.send(data);
+                        } else {
+                            // 连接不可用，主动触发错误处理
+                            socket.onerror();
                         }
                     }
                 };
