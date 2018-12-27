@@ -841,6 +841,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                         return;
                     }
                     socket = new WebSocket((location.protocol.startsWith('https') ? 'wss://' : 'ws://') + url[0], options.protocol);
+                    recvbuf = '';
                     socket.onmessage = onrecieve;
                     socket.onerror = function () {
                         // 连接服务器失败重试，此时还没有触发心跳
