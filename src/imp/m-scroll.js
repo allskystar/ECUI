@@ -379,22 +379,20 @@
                 var oldHeight = keyboardHeight;
                 keyboardHeight = Math.max(0, event.height - statueHeight);
 
-                if (oldHeight !== keyboardHeight) {
-                    changeHandle();
-                    if (!keyboardHeight) {
-                        dom.removeEventListener(document, 'touchmove', util.preventEvent);
-                    } else if (!oldHeight) {
-                        dom.addEventListener(document, 'touchmove', util.preventEvent);
-                    }
-                    if (oldHeight && keyboardHeight) {
+                changeHandle();
+                if (!keyboardHeight) {
+                    dom.removeEventListener(document, 'touchmove', util.preventEvent);
+                } else if (!oldHeight) {
+                    dom.addEventListener(document, 'touchmove', util.preventEvent);
+                }
+                if (oldHeight && keyboardHeight) {
+                    fixed();
+                    scrollIntoViewIfNeeded(keyboardHeight);
+                } else {
+                    changeHandle = scrollListener(function () {
                         fixed();
                         scrollIntoViewIfNeeded(keyboardHeight);
-                    } else {
-                        changeHandle = scrollListener(function () {
-                            fixed();
-                            scrollIntoViewIfNeeded(keyboardHeight);
-                        });
-                    }
+                    });
                 }
             });
 
