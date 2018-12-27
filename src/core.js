@@ -1285,6 +1285,24 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                 }
             );
 
+            if (iosVersion === 11.1 || iosVersion === 11.2) {
+                el = dom.create({
+                    id: 'ECUI-FIXED-BODY'
+                });
+                for (; document.body.firstChild; ) {
+                    el.appendChild(document.body.firstChild);
+                }
+                document.body.appendChild(el);
+                window.scrollTo = function (left, top) {
+                    var el = core.$('ECUI-FIXED-BODY');
+                    el.scrollTop = top - window.scrollTop;
+                    el.style.transform = 'translate(0px,' + (window.scrollTop + el.scrollTop - top) + 'px)';
+                };
+
+                dom.addEventListener(window, 'focusout', function () {
+                    core.$('ECUI-FIXED-BODY').style.transform = '';
+                });
+            }
             core.init(document.body);
             el = null;
 

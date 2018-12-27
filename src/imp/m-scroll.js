@@ -252,16 +252,14 @@
     }
 //{/if}//
     function fixed(scrollY) {
-        if (iosVersion < 11.1 || iosVersion > 11.2) {
 //{if 0}//
-            if (!isSimulator) {
+        if (!isSimulator) {
 //{/if}//
-                // 解除滚动下方的白条与半像素问题
-                window.scrollTo(0, Math.min(keyboardHeight + bodyScrollTop, window.scrollY));
+            // 解除滚动下方的白条与半像素问题
+            window.scrollTo(0, Math.min(keyboardHeight + bodyScrollTop, window.scrollY));
 //{if 0}//
-            }
-//{/if}//
         }
+//{/if}//
 
         scrollY = scrollY === undefined ? window.scrollY : scrollY;
         iosfixedList.forEach(function (item) {
@@ -305,7 +303,7 @@
 
         if (scroll) {
             setSafePosition(scroll, scrollY + y, scrollHeight, keyboardHeight);
-        } else if (iosVersion < 11.1 || iosVersion > 11.2) {
+        } else {
             window.scrollTo(0, window.scrollY - y);
         }
     }
