@@ -582,9 +582,11 @@
                 }
             });
 
-            dom.addEventListener(window, 'focusin', function () {
+            dom.addEventListener(window, 'focusin', function (event) {
                 // 解决软键盘状态下切换的情况
                 dom.addEventListener(document, 'touchmove', util.preventEvent);
+                // 焦点控件切换
+                core.setFocused(core.findControl(event.target));
             });
 
             dom.addEventListener(document, 'focusout', function (event) {
