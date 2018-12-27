@@ -141,7 +141,10 @@ _eInput        - INPUT对象
                 // 键盘操作焦点移向了另一个输入框
                 var tagName = document.activeElement.tagName;
                 if (tagName === 'INPUT' || tagName === 'SELECT' || tagName === 'TEXTAREA' || tagName === 'BUTTON') {
-                    control.blur();
+                    // 如果另一个输入框仍然在当前控件的子控件内部，将不需要处理
+                    if (!control.contain(core.findControl(document.activeElement))) {
+                        control.blur();
+                    }
                 }
             }, 10);
         } else {
