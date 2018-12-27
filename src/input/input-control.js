@@ -138,10 +138,13 @@ _eInput        - INPUT对象
         // INPUT失去焦点，但控件未失去焦点，不需要触发blur，例如Select的Input失去焦点不需要触发
         if (control.contain(core.getFocused())) {
             util.timer(function () {
-                // 键盘操作焦点移向了另一个输入框
-                var tagName = document.activeElement.tagName;
-                if (tagName === 'INPUT' || tagName === 'SELECT' || tagName === 'TEXTAREA' || tagName === 'BUTTON') {
-                    control.blur();
+                // 如果焦点没有从当前控件移出，将不需要处理，用于弹出框中包含INPUT的情况的处理
+                if (!control.contain(core.getFocused())) {
+                    // 键盘操作焦点移向了另一个输入框
+                    var tagName = document.activeElement.tagName;
+                    if (tagName === 'INPUT' || tagName === 'SELECT' || tagName === 'TEXTAREA' || tagName === 'BUTTON') {
+                        control.blur();
+                    }
                 }
             }, 10);
         } else {
