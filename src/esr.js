@@ -99,6 +99,10 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
             route.CACHE = true;
         }
 
+        if (esr.onafterrender) {
+            esr.onafterrender(context);
+        }
+
         if (route.onafterrender) {
             try {
                 route.onafterrender(context);
@@ -154,6 +158,11 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                 el.id = 'AppBackupContainer';
             }
         }
+
+        if (esr.onbeforerender) {
+            esr.onbeforerender(context);
+        }
+
         if (route.onbeforerender) {
             try {
                 route.onbeforerender(context);
@@ -1523,7 +1532,8 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
 
                         if (!count) {
                             if (err.length > 0) {
-                                if (errorHandle(err) === false) {
+                                if (onerror(err) === false) {
+                                    onafterrequest();
                                     return;
                                 }
                             }
@@ -1531,7 +1541,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                                 onsuccess();
                             } else {
                                 // 数据无效，需要恢复环境
-                                errorHandle();
+                                onerror();
                             }
                         }
                     },
@@ -1539,7 +1549,8 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                         count--;
                         err.push({url: varUrl, name: varName, xhr: xhr});
                         if (!count) {
-                            if (errorHandle(err) === false) {
+                            if (onerror(err) === false) {
+                                onafterrequest();
                                 return;
                             }
                             onsuccess();
@@ -1552,66 +1563,66 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                 urls = [urls];
             }
 
-            var err = [],
-                count = urls.length,
-                metaUpdate,
-                onerror = onerror || esr.onrequesterror || util.blank,
-                handle_old = onsuccess || util.blank,
-                handle = function () {
-                    if (esr.afterRequest) {
-                        esr.afterRequest();
-                    }
-                    return handle_old();
-                },
-                errorHandle = function (err) {
-                    console.log('errorHandle');
-                    if (esr.afterRequest) {
-                        esr.afterRequest();
-                    }
-                    return onerror(err);
-                },
-                version = requestVersion;
+            var count = urls.length;
+            if (count) {
+                var err = [],
+                    metaUpdate,
+                    callback = onsuccess || util.blank,
+                    onafterrequest = function () {
+                        if (requestVersion === version && esr.onafterrequest) {
+                            esr.onafterrequest(context);
+                        }
+                    },
+                    handle = function () {
+                        callback();
+                        onafterrequest();
+                    },
+                    version = requestVersion;
 
-            onsuccess = function () {
-                if (metaUpdate) {
-                    // 枚举常量管理
-                    io.ajax(
-                        esrOptions.meta,
-                        {
-                            headers: {'x-enum-version': metaVersion},
-                            onsuccess: function (text) {
-                                var data = JSON.parse(text);
-                                for (var key in data.meta.record) {
-                                    if (data.meta.record.hasOwnProperty(key)) {
-                                        meta[key] = meta[key] || {};
-                                        for (var i = 0, items = data.meta.record[key], item; item = items[i++]; ) {
-                                            meta[key][item.id] = item;
+                onsuccess = function () {
+                    if (metaUpdate) {
+                        // 枚举常量管理
+                        io.ajax(
+                            esrOptions.meta,
+                            {
+                                headers: {'x-enum-version': metaVersion},
+                                onsuccess: function (text) {
+                                    var data = JSON.parse(text);
+                                    for (var key in data.meta.record) {
+                                        if (data.meta.record.hasOwnProperty(key)) {
+                                            meta[key] = meta[key] || {};
+                                            for (var i = 0, items = data.meta.record[key], item; item = items[i++]; ) {
+                                                meta[key][item.id] = item;
+                                            }
                                         }
                                     }
+                                    if (data.meta.version) {
+                                        metaVersion = data.meta.version;
+                                    }
+                                    util.setLocalStorage('esr_meta', JSON.stringify(meta));
+                                    util.setLocalStorage('esr_meta_version', metaVersion);
+                                    handle();
+                                },
+                                onerror: function () {
+                                    if (onerror(err) === false) {
+                                        onafterrequest();
+                                        return;
+                                    }
+                                    handle();
                                 }
-                                if (data.meta.version) {
-                                    metaVersion = data.meta.version;
-                                }
-                                util.setLocalStorage('esr_meta', JSON.stringify(meta));
-                                util.setLocalStorage('esr_meta_version', metaVersion);
-                                handle();
-                            },
-                            onerror: function () {
-                                if (onerror(err) === false) {
-                                    return;
-                                }
-                                handle();
                             }
-                        }
-                    );
-                } else {
-                    handle();
+                        );
+                    } else {
+                        handle();
+                    }
+                };
+
+                onerror = onerror || esr.onrequesterror || util.blank;
+
+                if (esr.onbeforerequest) {
+                    esr.onbeforerequest(context);
                 }
-            };
-            if (esr.beforeRequest) {
-                esr.beforeRequest();
-            }
-            if (count) {
+
                 urls.forEach(function (item) {
                     var url = item.split('@');
                     if (url[1]) {
