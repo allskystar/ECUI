@@ -1523,7 +1523,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
 
                         if (!count) {
                             if (err.length > 0) {
-                                if (onerror(err) === false) {
+                                if (errorHandle(err) === false) {
                                     return;
                                 }
                             }
@@ -1531,7 +1531,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                                 onsuccess();
                             } else {
                                 // 数据无效，需要恢复环境
-                                onerror();
+                                errorHandle();
                             }
                         }
                     },
@@ -1539,7 +1539,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                         count--;
                         err.push({url: varUrl, name: varName, xhr: xhr});
                         if (!count) {
-                            if (onerror(err) === false) {
+                            if (errorHandle(err) === false) {
                                 return;
                             }
                             onsuccess();
@@ -1555,7 +1555,21 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
             var err = [],
                 count = urls.length,
                 metaUpdate,
-                handle = onsuccess || util.blank,
+                onerror = onerror || esr.onrequesterror || util.blank,
+                handle_old = onsuccess || util.blank,
+                handle = function () {
+                    if (esr.afterRequest) {
+                        esr.afterRequest();
+                    }
+                    return handle_old();
+                },
+                errorHandle = function (err) {
+                    console.log('errorHandle');
+                    if (esr.afterRequest) {
+                        esr.afterRequest();
+                    }
+                    return onerror(err);
+                },
                 version = requestVersion;
 
             onsuccess = function () {
@@ -1594,8 +1608,9 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                     handle();
                 }
             };
-            onerror = onerror || esr.onrequesterror || util.blank;
-
+            if (esr.beforeRequest) {
+                esr.beforeRequest();
+            }
             if (count) {
                 urls.forEach(function (item) {
                     var url = item.split('@');
