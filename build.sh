@@ -109,7 +109,7 @@ do
     base=${base#*/}
     module=${base//./-}
     module=${module//_/-}
-    module=${module//\//_}"_"
+    module="_"${module//\//_}"_"
     while [ ! -f ${base}/_define_.js ]
     do
         if [ $base = ${base%/*} ]
@@ -118,7 +118,8 @@ do
             exit -1;
         fi
         base=${base%/*}
-        module=${module%_}"-"${module##*_}
+        module=${module%_}
+        module=${module%_}"_"
     done
     if [ ! "$module" = "$last" ]
     then
