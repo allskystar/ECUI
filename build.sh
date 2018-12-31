@@ -77,11 +77,21 @@ mkdir $output
 echo "" > .layers.html
 for file in `find . -type f -name "layer.*.html"`
 do
-    module=${file%/*}"/"
-    module=${module#*/}
-    module=${module//./-}
+    base=${file%/*}
+    base=${base#*/}
+    module=${base//./-}
     module=${module//_/-}
-    module=${module//\//_}
+    module=${module//\//_}"_"
+    while [ ! -f ${base}/_define_.js ]
+    do
+        if [ $base = ${base%/*} ]
+        then
+            echo "The _define_.js isn't found"
+            exit -1;
+        fi
+        base=${base%/*}
+        module=${module%_}"-"${module##*_}
+    done
     name=${file##*layer.}
     name=${name%.*}
     name=${name//./-}
@@ -95,19 +105,29 @@ find . -type f -name "layer.*.css" | awk '{input=$1;sub(/\/layer\./,"/");gsub(/(
 echo "(function (NS) {" > .layers.js
 for file in `find . -type f -name "layer.*.js"`
 do
-    name=${file%/*}"/"
-    name=${name#*/}
-    name=${name//./-}
-    name=${name//_/-}
-    name="_"${name//\//_}
-    if [ ! "$name" = "$last" ]
+    base=${file%/*}
+    base=${base#*/}
+    module=${base//./-}
+    module=${module//_/-}
+    module=${module//\//_}"_"
+    while [ ! -f ${base}/_define_.js ]
+    do
+        if [ $base = ${base%/*} ]
+        then
+            echo "The _define_.js isn't found"
+            exit -1;
+        fi
+        base=${base%/*}
+        module=${module%_}"-"${module##*_}
+    done
+    if [ ! "$module" = "$last" ]
     then
-        echo "    NS = ecui.ns['$name'] = ecui.ns['$name'] || {};
+        echo "    NS = ecui.ns['$module'] = ecui.ns['$module'] || {};
     NS.data = NS.data || {};
     NS.ui = NS.ui || {};
 " >> .layers.js
     fi
-    last=name
+    last=module
     cat $file >> .layers.js
 done
 echo "}());" >> .layers.js
