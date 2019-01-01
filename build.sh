@@ -159,7 +159,7 @@ do
     ns=${ns//\//_}
     echo "(function(NS){$text}(ecui.ns['_$ns']));" | sed -e "s/ecui\.esr\.loadRoute(\"\([^.\"]*\)\")\([,;]\)*/\/\/{include file='route.\1.js'}\/\//g" -e "s/ecui\.esr\.loadRoute(\"\([^.\"]*\.\)*[^.\"]*\")\([,;]\)*/\\
 &\\
-/g" -e "s/ecui\.esr\.loadClass(\"\([^\"]*\)\")\([,;]\)*/\/\/{include file='class.\1.js'}\/\//g" | awk '{if(gsub(/(^ecui\.esr\.loadRoute\("|"\)([,;])*$)/,"")){match($1,/.*\./);value=substr($1,1,RLENGTH);tmp=value;gsub(/\./,"/",tmp);print "//{include file=\""tmp"route."substr($1,RLENGTH+1)".js\" assign=\"tpl\"}////{\$tpl|regex_replace:\"ecui\.esr\.addRoute\\\((.)\":\"ecui.esr.addRoute(\$1"value"\"}//"}else{print}}' | eval $js_merge | eval $js_compress > $outpath/${module}_define_.js
+/g" -e "s/ecui\.esr\.loadClass(\"\([^\"]*\)\")\([,;]\)*/\/\/{include file='class.\1.js'}\/\//g" | awk '{if(gsub(/(^ecui\.esr\.loadRoute\("|"\)([,;])*$)/,"")){match($1,/.*\./);value=substr($1,1,RLENGTH);tmp=value;gsub(/\./,"/",tmp);print "//{include file=\""tmp"route."substr($1,RLENGTH+1)".js\" assign=\"tpl\"}////{\$tpl|regex_replace:\"\.esr\.addRoute\\\((.)\":\".esr.addRoute(\$1"value"\"}//"}else{print}}' | eval $js_merge | eval $js_compress > $outpath/${module}_define_.js
 
     reg=${module//\//\\/}
     if [ -f "_define_.css" ]
