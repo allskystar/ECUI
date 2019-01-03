@@ -93,7 +93,8 @@ _eInput        - INPUT对象
              */
             propertychange: function (event) {
                 if (ieVersion < 9) {
-                    if (event.propertyName === 'value' && core.wrapEvent(event).target.type !== 'hidden') {
+                    if (event.propertyName === 'value' && document.activeElement === event.srcElement) {
+                        // 尽量避免因为js调用而触发 input 事件
                         event = core.wrapEvent(event);
                         core.dispatchEvent(event.target.getControl(), 'input', event);
                     }
@@ -401,7 +402,7 @@ _eInput        - INPUT对象
 
             /**
              * 设置控件的值。
-             * setValue 方法设置提交时表单项的值，使用 getValue 方法获取设置的值。
+             * 如果需要绕过控件的逻辑处理设置基础表单项的值，请使用此方法，不要直接对表单项进行 value 属性的设置。
              * @protected
              *
              * @param {string} value 控件的值
