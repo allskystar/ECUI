@@ -128,6 +128,14 @@
                 }
 
                 refresh(this);
+            },
+
+            /**
+             * @override
+             */
+            setValue: function (value) {
+                this.$setValue(value);
+                ui.Select.prototype.setValue.call(this, value);
             }
         }
     );
