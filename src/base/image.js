@@ -21,6 +21,9 @@ _nRatio    原始的宽高比例
         control._nMinWidth = event.target.width;
         control._nRatio = event.target.height / event.target.width;
         dom.removeEventListener(this, 'load', load);
+        if (control.isReady()) {
+            control.cache();
+        }
     }
 
     /**
