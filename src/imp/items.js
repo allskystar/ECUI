@@ -327,8 +327,7 @@
             removeAll: function (dispose) {
                 this.preventAlterItems();
                 this.getItems().forEach(function (item) {
-                    this.remove(item);
-                    if (dispose) {
+                    if (this.remove(item) && dispose) {
                         item.dispose();
                     }
                 }, this);
