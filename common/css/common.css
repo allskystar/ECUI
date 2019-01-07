@@ -397,11 +397,14 @@ a {
     }
 
     .ui-messagebox-buttons {
+        display: -webkit-flex;
         display: flex;
+        -webkit-flex-direction: row-reverse;
         flex-direction: row-reverse;
         border-top: 1px solid #e0e6ed;
 
         .ui-button {
+            -webkit-flex-grow: 1;
             flex-grow: 1;
             height: 30px;
             border-radius: 0px;
@@ -577,6 +580,7 @@ a {
 }
 
 .ui-tab-title {
+    display: -webkit-flex;
     display: flex;
     border-bottom: 1px solid #acbaca;
 }
@@ -831,10 +835,12 @@ a {
 
 .ui-mobile-calendar-popup {
     .ui-mobile-confirm-layout {
+        display: -webkit-flex;
         display: flex;
     }
 
     .ui-mobile-options {
+        -webkit-flex: 1;
         flex: 1;
         height: 210px;
         content: 'item-height:30px';
@@ -1107,4 +1113,54 @@ a {
     }
      
 
+}
+
+.ui-m-send-text {
+    position: absolute;
+    left: px2rem(28px);
+    right: px2rem(28px);
+    bottom: px2rem(14px);
+    width: auto;
+    height: px2rem(54px);
+    line-height: px2rem(54px);
+    background: #fff;
+    border-radius: px2rem(54px);
+    box-sizing: border-box;
+    overflow: visible !important;
+    padding: 0 px2rem(124px) 0 px2rem(66px);
+
+    input {
+        overflow: hidden;
+        /*text-indent: px2rem(66px);*/
+    }
+    .send {
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: px2rem(124px);
+        height: px2rem(54px);
+        line-height: px2rem(54px);
+        border-radius: 0 px2rem(54px) px2rem(54px) 0;
+        text-align: center;
+        font-size: 0;
+        color: #fff;
+    }
+    &:before {
+        display: block;
+        content: ' ';
+        position: absolute;
+        top: px2rem(18px);
+        left: px2rem(20px);
+        width: px2rem(24px);
+        height: px2rem(22px);
+    }
+
+    input::-webkit-input-placeholder {
+        /* placeholder颜色  */
+        color: #4C4343;
+        /* placeholder字体大小  */
+        /*font-size: 12px;*/
+        /* placeholder位置  */
+        /*text-align: right;*/
+    }
 }

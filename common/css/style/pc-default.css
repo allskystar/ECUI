@@ -1,0 +1,322 @@
+/*搜索条件栏*/
+.search-items {
+    padding: 20px;
+    background-color: #FFF;
+    font-size: 0px;
+    /*搜索项*/
+    .search-item {
+        display: inline-block;
+        font-size: 14px;
+        margin-right: 10px;
+        margin-bottom: 10px;
+        vertical-align: middle;
+        .search-label {
+            margin-bottom: 8px;
+        }
+    }
+    .search-input {
+        width: 135px;
+        height: 30px;
+        line-height: 30px;
+    }
+    .ui-input {
+        display: inline-block;
+        vertical-align: middle;
+    }
+}
+
+/*搜索表格*/
+.list-table {
+    border: 1px solid #E6E6E6;
+    border-right-width: 0px;
+    border-top-width: 0px;
+    .ui-locked-table-right {
+        border-left: 1px solid #E6E6E6;
+    }
+    .ui-table-row:nth-child(2n) > td {
+        background: #FCFCFC!important;
+    }
+    table {
+        thead {
+            th {
+                background: #EEE none repeat scroll 0 0;
+                border-top: 1px solid #E6E6E6;
+                border-right: 1px solid #E6E6E6;
+                border-bottom: none;
+                height: 40px;
+                line-height: 40px;
+                text-align: center;
+                font-size: 14px;
+                color: #666;
+                padding: 0 10px;
+            }
+        }
+        tbody {
+            td {
+                background: #fff;
+                border-right: 1px solid #E6E6E6;
+                border-top: 1px solid #E6E6E6;
+                height: 40px;
+                text-align: center;
+                font-size: 14px;
+                padding: 10px;
+                color: #333;
+            }
+            a, strong {
+                color: #3076FC;
+                cursor: pointer;
+            }
+        }
+    }
+}
+
+/*信息录入块*/
+.edit-part {
+    margin-bottom: 20px;
+    .edit-title {
+        width: 96.6%;
+        height: 40px;
+        line-height: 40px;
+        padding: 0 20px;
+        font-size: 16px;
+        color: #333;
+        background-color: #EEEEEE;
+        .placeholder {
+            margin-left: 20px;
+            font-size: 12px;
+            color: #999999;
+        }
+        .placeholder.error {
+            color: #F5523B;
+        }
+    }
+}
+
+/*信息录入项（多项）*/
+.edit-items {
+    background-color: #FFF;
+    padding: 10px 20px 20px;
+    /*录入项（单项）*/
+    .edit-item {
+        position: relative;
+        font-size: 0px;
+        .must-icon {
+            position: absolute;
+            font-size: 14px;
+            color: #F5523B;
+            top: 10px;
+            left: -10px;
+        }
+        .edit-unit {
+            display: inline-block;
+            vertical-align: middle;
+            margin-left: 10px;
+            font-size: 14px;
+            color: #666666;
+        }
+        .ui-cities {
+            display: inline-block;
+            vertical-align: middle;
+        }
+        .edit-label {
+            vertical-align: middle;
+            width: 300px;
+            font-size: 14px;
+            padding: 10px 0 8px;
+        }
+        .ui-input {
+            vertical-align: middle;
+            font-size: 14px;
+            width: 300px;
+            height: 34px;
+            line-height: 34px;
+            border-radius: 4px;
+        }
+        .ui-inputs {
+            vertical-align: middle;
+            font-size: 14px;
+            width: 300px;
+            height: 68px;
+            line-height: 34px;
+            border-radius: 4px;
+        }
+        .ui-select,
+        .ui-combox {
+            width: 270px;
+            background-position: 280px;
+        }
+        .ui-combox input {
+            width: 270px !important;
+        }
+        .ui-label {
+            font-size: 14px;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        .ui-radio {
+            font-size: 14px;
+            width: 17px;
+            height: 17px;
+            vertical-align: middle;
+            line-height: normal;
+        }
+        .ui-checkbox {
+            font-size: 14px;
+            width: 17px;
+            height: 17px;
+            vertical-align: middle;
+            line-height: normal;
+        }
+        .edit-input {
+            height: 36px;
+            line-height: 36px;
+            vertical-align: middle;
+        }
+        .must-tip,
+        .error-tip {
+            display: none;
+            position: relative;
+            vertical-align: middle;
+            margin-left: 10px;
+            padding-left: 30px;
+            font-size: 14px;
+            color: #F5523B;
+            height: 34px;
+            line-height: 34px;
+            .icon {
+                top: 5px;
+                left: 0px;
+                position: absolute;
+                width: 24px;
+                display: inline-block;
+                height: 24px;
+                vertical-align: middle;
+                background-image: url('images/icon.png');
+                background-position: -26px -33px;
+            }
+        }
+        &.error .error-tip,
+        &.not-input .must-tip,
+        &.error.not-input .must-tip {
+            display: inline-block;
+        }
+        &.error.not-input .error-tip {
+            display: none;
+        }
+    }
+    .edit-item.img-edit {
+        width: 185px;
+        display: inline-block;
+        margin-right: 20px;
+        .img-cont {
+            position: relative;
+            .delete-btn {
+                position: absolute;
+                top: 0px;
+                right: 0px;
+                width: 30px;
+                height: 30px;
+                background-color: #000;
+                background-image: url('images/del_pic.png');
+                background-repeat: no-repeat;
+                background-position: 7px 7px;
+            }
+        }
+        .img-cont.empty .delete-btn {
+            display: none;
+        }
+        .img-cont,
+        img {
+            width: 185px;
+            height: 185px;
+            cursor: pointer;
+        }
+    }
+}
+
+/*详情信息展示块*/
+.info-part {
+    margin-bottom: 20px;
+    .info-title {
+        width: 96.6%;
+        height: 40px;
+        line-height: 40px;
+        padding: 0 20px;
+        font-size: 16px;
+        color: #333;
+        background-color: #EEEEEE;
+        .placeholder {
+            margin-left: 0px;
+            font-size: 12px;
+            color: #999999;
+        }
+    }
+}
+
+/*详情信息展示项（多项）*/
+.info-items {
+    background-color: #FFF;
+    padding: 10px 20px 20px;
+    /*信息展示项（单项）*/
+    .info-item {
+        position: relative;
+        font-size: 14px;
+        padding: 5px 0;
+
+        .ui-img-preview {
+            position: relative;
+        }
+        .info-label {
+            width: 130px;
+            position: absolute;
+            left: 0px;
+            top: 5px;
+        }
+        .info-line {
+            position: absolute;
+            left: 120px;
+            top: 5px;
+        }
+        .info-text {
+            margin-left: 121px;
+            padding-left: 10px;
+        }
+    }
+    .info-item.img-info {
+        width: 185px;
+        display: inline-block;
+        margin-right: 20px;
+        .info-label {
+            position: relative;
+            margin-bottom: 8px;
+        }
+        img {
+            width: 185px;
+            height: 185px;
+            cursor: pointer;
+        }
+    }
+}
+
+
+/*tip信息提示框*/
+.ui-tip {
+    position: fixed;
+    z-index: 65555;
+    top: 50% !important;
+    left: 50% !important;
+    -webkit-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
+}
+
+.ui-tip >div {
+    min-width: 210px;
+    max-width: 522px;
+    padding: 35px;
+    background: rgba(43, 43, 59, 0.95);
+    border-radius: 4px;
+    line-height: 30px;
+    color: #FFFFFF;
+    font-size: 18px;
+    text-align: center;
+}

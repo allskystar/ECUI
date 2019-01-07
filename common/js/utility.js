@@ -1,66 +1,6 @@
 (function () {
-    //数据规则
-    var urlRule = [
-        {
-            exp: /base\/series\/[\d]+/,
-            def: {
-                'value': 'id',
-                'code': 'text'
-            }
-        },
-        {
-            exp: /base\/motorcycletype\/[\d]+/,
-            def: {
-                'value': 'id',
-                'code': 'description'
-            }
-        }
-    ];
-
     //统一对请求成功返回参数做分类
     ecui.esr.onparsedata = function (url, data) {
-        if (url.indexOf('v1/base/series') >= 0 || url.indexOf('/v1/base/c2b/series') >= 0 || url.indexOf('/admin-auction/dealer/series') >= 0) {
-            data = data.data;
-            var options = [];
-            for (var i = 0; i < data.length; i++) {
-                options.push({
-                    value: '',
-                    code: data[i].subbrand,
-                    capturable: false,
-                    primary: 'title'
-                });
-                for (var j = 0, list = data[i].serials; j < list.length; j++) {
-                    options.push({
-                        value: list[j].serialid,
-                        code: list[j].serialname
-                    });
-                }
-            }
-            return options;
-        }
-        if (url.indexOf('v1/base/motorcycletype') >= 0) {
-            data = data.data;
-            options = [];
-            for (i = 0; i < data.length; i++) {
-                options.push({
-                    value: '',
-                    code: data[i].caryear,
-                    capturable: false,
-                    primary: 'title'
-                });
-                for (j = 0, list = data[i].carmodels; j < list.length; j++) {
-                    options.push({
-                        value: list[j].carid,
-                        code: list[j].carname
-                    });
-                }
-            }
-            return options;
-        }
-        if (data.data.pageNo !== undefined && data.data.total === undefined &&  data.data.offset === undefined) {
-            data.data.total = data.data.totalRecord;
-            data.data.offset = data.data.pageSize * (data.data.pageNo - 1);
-        }
         var code = data.code;
         if (0 === code) {
             data = data.data;
@@ -94,7 +34,7 @@
             }
             if (code !== 500016) {
                 // 淘车拍同步接口，该code表示，需要弹dialog去编辑，不弹提示
-                daikuan.showHint('error', data.msg);
+                yiche.showHint('error', data.msg);
             }
         }
         return code;
@@ -109,7 +49,7 @@ ecui.render.select = function (data) {
     this.add(data);
 }
 
-daikuan.cookie = {
+yiche.cookie = {
     set: function(key, val, exp) {
         var cookie = key + '=' + val;
         if (exp) {
@@ -136,14 +76,14 @@ daikuan.cookie = {
     }
 };
 
-daikuan.util = {
+yiche.util = {
     clone: function (obj) {
         var newobj = obj.constructor === Array ? [] : {};
         if (typeof obj !== 'object') {
             return;
         } else {
             for (var i in obj) {
-                newobj[i] = typeof obj[i] === 'object' ? daikuan.util.clone(obj[i]) : obj[i];
+                newobj[i] = typeof obj[i] === 'object' ? yiche.util.clone(obj[i]) : obj[i];
             }
         }
         return newobj;
@@ -162,7 +102,7 @@ daikuan.util = {
     }
 };
 
-daikuan.getCity = function(code, city_data) {
+yiche.getCity = function(code, city_data) {
     if (code == 0) {
         return [' '];
     }
@@ -204,7 +144,7 @@ Date.prototype.pattern = function(fmt) {
 };
 
 // 弹出提示框
-daikuan.showHint = function (type, msg) {
+yiche.showHint = function (type, msg) {
     var className = {
         success: 'successHint',
         error: 'errorHint',
@@ -225,7 +165,7 @@ daikuan.showHint = function (type, msg) {
  * @param {form}    form        要回填的表格元素
  * @param {Boolean} isDefault   是否要设置为默认值
  */
-daikuan.setEditFormValue = function (data, form, isDefault) {
+yiche.setEditFormValue = function (data, form, isDefault) {
     var elements = form.elements;
     var ignore = [], arr_obj_ignore = [];
     for (var i = 0, item; item = elements[i++]; ) {
@@ -291,7 +231,7 @@ daikuan.setEditFormValue = function (data, form, isDefault) {
 };
 
 // 搜索数据回填表单数据
-daikuan.setFormValue = function (context, form, searchParm) {
+yiche.setFormValue = function (context, form, searchParm) {
     var elements = form.elements;
     for (var i = 0, item; item = elements[i++]; ) {
         var name = item.name;
@@ -319,7 +259,7 @@ daikuan.setFormValue = function (context, form, searchParm) {
 };
 
 // 清空表单数据
-daikuan.resetFormValue = function (form) {
+yiche.resetFormValue = function (form) {
     var elements = form.elements;
     for (var i = 0, item; item = elements[i++]; ) {
         var name = item.name;
@@ -345,7 +285,7 @@ daikuan.resetFormValue = function (form) {
 };
 
 // 获取表单数据设置searchParam数据
-daikuan.setSearchParam = function(searchParm, form) {
+yiche.setSearchParam = function(searchParm, form) {
     for (var i = 0, item; item = form.elements[i++]; ) {
         if (item.name) {
             var _control = item.getControl && item.getControl();
@@ -377,7 +317,7 @@ daikuan.setSearchParam = function(searchParm, form) {
 };
 
 // 初始化dialog控件
-daikuan.initDialog = function (container, targetName, options) {
+yiche.initDialog = function (container, targetName, options) {
     ecui.dispose(container);
     container.innerHTML = ecui.esr.getEngine().render(targetName, options);
     ecui.init(container);
@@ -386,7 +326,7 @@ daikuan.initDialog = function (container, targetName, options) {
 
 // 复制text到剪切板中
 // 在异步ajax请求中使用document.execCommand('copy')无效，同步的ajax请求中正常使用
-daikuan.copy = function (text) {
+yiche.copy = function (text) {
     var textarea = document.createElement("textarea");
     textarea.style.position = 'fixed';
     textarea.style.top = -100;
@@ -406,7 +346,7 @@ daikuan.copy = function (text) {
 };
 
 // 设置分页数据
-daikuan.setPageData = function (context, listNmae) {
+yiche.setPageData = function (context, listNmae) {
     var data = ecui.util.parseValue(listNmae, context);
 
     context.offset = data.offset;
@@ -420,17 +360,17 @@ daikuan.setPageData = function (context, listNmae) {
  *
  * @param {object} route 路由对象
  */
-daikuan.TableListRoute = function (route) {
+yiche.TableListRoute = function (route) {
     this.model = [route.NAME.slice(0, -5) + '@FORM ' + route.url];
     this.main = route.NAME.slice(0, -9) + '_table';
     Object.assign(this, route);
 }
-daikuan.TableListRoute.prototype.onbeforerequest = function (context) {
+yiche.TableListRoute.prototype.onbeforerequest = function (context) {
     context.pageNo = context.pageNo || +this.searchParm.pageNo;
     context.pageSize = +this.searchParm.pageSize;
-    daikuan.setFormValue(context, document.forms[this.model[0].split('?')[1].split('&')[0]], this.searchParm);
+    yiche.setFormValue(context, document.forms[this.model[0].split('?')[1].split('&')[0]], this.searchParm);
 };
-daikuan.TableListRoute.prototype.onbeforerender = function (context) {
+yiche.TableListRoute.prototype.onbeforerender = function (context) {
     var data = ecui.util.parseValue(this.model[0].split('@')[0], context);
     context.offset = data.offset;
     context.total = data.total;
@@ -444,12 +384,12 @@ daikuan.TableListRoute.prototype.onbeforerender = function (context) {
  *
  * @param {object} route 路由对象
  */
-daikuan.TableListRoute2 = function (route) {
+yiche.TableListRoute2 = function (route) {
     this.model = [route.NAME.slice(0, -5) + '@FORM ' + route.url];
     this.main = route.NAME.slice(0, -9) + '_table';
     Object.assign(this, route);
 }
-daikuan.TableListRoute2.prototype.onbeforerender = function (context) {
+yiche.TableListRoute2.prototype.onbeforerender = function (context) {
     var data = ecui.util.parseValue(this.model[0].split('@')[0], context);
     context.offset = data.offset;
     context.total = data.total;
