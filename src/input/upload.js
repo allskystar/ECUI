@@ -61,6 +61,7 @@
 
                 io.ajax(this._sUrl, {
                     method: 'POST',
+                    headers: ecui.esr.headers,
                     data: data,
                     onupload: progress ? function (event) {
                         progress.setMax(event.total);
