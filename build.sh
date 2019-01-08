@@ -78,20 +78,25 @@ echo "" > .layers.html
 for file in `find . -type f -name "layer.*.html"`
 do
     base=${file%/*}
-    base=${base#*/}
-    module=${base//./-}
-    module=${module//_/-}
-    module=${module//\//_}"_"
-    while [ ! -f ${base}/_define_.js ]
-    do
-        if [ $base = ${base%/*} ]
-        then
-            echo "The _define_.js isn't found"
-            exit -1;
-        fi
-        base=${base%/*}
-        module=${module%_}"-"${module##*_}
-    done
+    if [ $base = "." ]
+    then
+        module=""
+    else
+        base=${base#*/}
+        module=${base//./-}
+        module=${module//_/-}
+        module=${module//\//_}"_"
+        while [ ! -f ${base}/_define_.js ]
+        do
+            if [ $base = ${base%/*} ]
+            then
+                echo "The _define_.js isn't found"
+                exit -1;
+            fi
+            base=${base%/*}
+            module=${module%_}"-"${module##*_}
+        done
+    fi
     name=${file##*layer.}
     name=${name%.*}
     name=${name//./-}
@@ -106,21 +111,26 @@ echo "(function (NS) {" > .layers.js
 for file in `find . -type f -name "layer.*.js"`
 do
     base=${file%/*}
-    base=${base#*/}
-    module=${base//./-}
-    module=${module//_/-}
-    module="_"${module//\//_}"_"
-    while [ ! -f ${base}/_define_.js ]
-    do
-        if [ $base = ${base%/*} ]
-        then
-            echo "The _define_.js isn't found"
-            exit -1;
-        fi
-        base=${base%/*}
-        module=${module%_}
-        module=${module%_}"_"
-    done
+    if [ $base = "." ]
+    then
+        module="_"
+    else
+        base=${base#*/}
+        module=${base//./-}
+        module=${module//_/-}
+        module="_"${module//\//_}"_"
+        while [ ! -f ${base}/_define_.js ]
+        do
+            if [ $base = ${base%/*} ]
+            then
+                echo "The _define_.js isn't found"
+                exit -1;
+            fi
+            base=${base%/*}
+            module=${module%_}
+            module=${module%_}"_"
+        done
+    fi
     if [ ! "$module" = "$last" ]
     then
         echo "    NS = ecui.ns['$module'] = ecui.ns['$module'] || {};
@@ -188,15 +198,15 @@ do
     if [ -d "$file" ]
     then
         cd $file
-    	if [ -f ".buildcopy" ]
+        if [ -f ".buildcopy" ]
         then
             if [ ! -d "../$output/$file/" ]
             then
                 mkdir "../$output/$file/"
             fi
             echo "copy $file/"
-    		cp -R * "../$output/$file/"
-    	fi
+            cp -R * "../$output/$file/"
+        fi
         cd ..
     else
         ext=${file##*.}
