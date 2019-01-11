@@ -268,7 +268,11 @@ _eInput        - INPUT对象
             $blur: function (event) {
                 ui.Control.prototype.$blur.call(this, event);
 
-                if (!isToucher) {
+                if (isToucher) {
+                    dom.removeEventListener(this._eInput, 'focusout', events.blur);
+                    this._eInput.blur();
+                    dom.addEventListener(this._eInput, 'focusout', events.blur);
+                } else {
                     if (events.blur) {
                         dom.removeEventListener(this._eInput, 'blur', events.blur);
                     }
@@ -348,7 +352,11 @@ _eInput        - INPUT对象
                     this._bError = false;
                 }
 
-                if (!isToucher) {
+                if (isToucher) {
+                    dom.removeEventListener(this._eInput, 'focusin', events.focus);
+                    this._eInput.focus();
+                    dom.addEventListener(this._eInput, 'focusin', events.focus);
+                } else {
                     util.timer(
                         function () {
                             dom.removeEventListener(this._eInput, 'focus', events.focus);

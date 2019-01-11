@@ -276,7 +276,9 @@ _aStatus            - 控件当前的状态集合
              * @event
              */
             $focus: function () {
-                this.alterStatus('+focus');
+                if (this.isFocused()) {
+                    this.alterStatus('+focus');
+                }
             },
 
             /**
