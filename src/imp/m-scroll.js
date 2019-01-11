@@ -436,9 +436,9 @@
                             item.disabled = true;
                             disabledInputs.push(item);
                         }
+                        observer.observe(item, {attributes: true, attributeFilter: ['disabled']});
                     }
                 });
-                observer.observe(document.body, {attributes: true, subtree: true, attributeFilter: ['disabled']});
 
                 keyboardHandle();
 
