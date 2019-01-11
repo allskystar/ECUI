@@ -2807,8 +2807,8 @@ outer:          for (var caches = [], target = event.target, el; target; target 
          * event 方法将浏览器产生的鼠标与键盘事件标准化并添加 ECUI 框架需要的信息到事件对象中。标准化的属性如下：
          * pageX           {number} 鼠标的X轴坐标
          * pageY           {number} 鼠标的Y轴坐标
-         * clientX           {number} 鼠标当前区域的X轴坐标
-         * clientY           {number} 鼠标当前区域的Y轴坐标
+         * clientX         {number} 鼠标当前区域的X轴坐标
+         * clientY         {number} 鼠标当前区域的Y轴坐标
          * which           {number} 触发事件的按键码
          * target          {HTMLElement} 触发事件的 Element 对象
          * returnValue     {boolean}  是否进行默认处理
