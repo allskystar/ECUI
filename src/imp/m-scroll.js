@@ -371,6 +371,17 @@
         var iosfixedList,
             keyboardHandle = util.blank,
             changeHandle = util.blank,
+            observer = new MutationObserver(function (mutations) {
+                mutations.forEach(function (item) {
+                    if (item.target.disabled) {
+                        util.remove(disabledInputs, item.target);
+                    } else {
+                        item.target.disabled = true;
+                        disabledInputs.push(item.target);
+                    }
+                });
+                observer.takeRecords();
+            }),
             disabledInputs = [];
 
         if (iosVersion) {
@@ -382,7 +393,9 @@
                         if (document.activeElement !== event.target) {
                             event.target.disabled = true;
                         }
+                        observer.takeRecords();
                     }, 500);
+                    observer.takeRecords();
                 }
             });
 
@@ -418,11 +431,14 @@
                 }
 
                 Array.prototype.slice.call(document.getElementsByTagName('INPUT')).concat(Array.prototype.slice(document.getElementsByTagName('TEXTAREA'))).forEach(function (item) {
-                    if (item !== target && !item.disabled) {
-                        item.disabled = true;
-                        disabledInputs.push(item);
+                    if (item !== target) {
+                        if (!item.disabled) {
+                            item.disabled = true;
+                            disabledInputs.push(item);
+                        }
                     }
                 });
+                observer.observe(document.body, {attributes: true, subtree: true, attributeFilter: ['disabled']});
 
                 keyboardHandle();
 
@@ -542,6 +558,7 @@
                     return;
                 }
 
+                observer.disconnect();
                 disabledInputs.forEach(function (item) {
                     item.disabled = false;
                 });
