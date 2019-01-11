@@ -370,9 +370,22 @@
     if (isToucher) {
         var iosfixedList,
             keyboardHandle = util.blank,
-            changeHandle = util.blank;
+            changeHandle = util.blank,
+            disabledInputs = [];
 
         if (iosVersion) {
+            // 在一个输入框获取焦点后使其它输入框都处于失效状态，手势触发的时候解除失效状态，如果不是点击行为，重新设置失效状态
+            dom.addEventListener(document, 'touchstart', function (event) {
+                if (disabledInputs.indexOf(event.target) >= 0) {
+                    event.target.disabled = false;
+                    util.timer(function () {
+                        if (document.activeElement !== event.target) {
+                            event.target.disabled = true;
+                        }
+                    }, 500);
+                }
+            });
+
             dom.addEventListener(window, 'keyboardchange', function (event) {
                 keyboardHandle();
 
@@ -404,6 +417,13 @@
                     return;
                 }
 
+                Array.prototype.slice.call(document.getElementsByTagName('INPUT')).concat(Array.prototype.slice(document.getElementsByTagName('TEXTAREA'))).forEach(function (item) {
+                    if (item !== target && !item.disabled) {
+                        item.disabled = true;
+                        disabledInputs.push(item);
+                    }
+                });
+
                 keyboardHandle();
 
                 if (!iosfixedList) {
@@ -421,7 +441,9 @@
                     }
                 });
 
-                if (keyboardHeight) {
+//由于不再会有软键盘实现的焦点切换，因此不再需要重新计算位置
+                if (!keyboardHeight) {
+/*
 //{if 0}//
                     if (isSimulator) {
                         lastScrollY = window.scrollY;
@@ -455,6 +477,7 @@
                         // }, 200, {to: window.scrollY});
                     });
                 } else {
+*/
                     bodyScrollTop = document.body.scrollTop;
                     keyboardHandle = scrollListener(function () {
 //{if 0}//
@@ -518,6 +541,11 @@
                 if (!util.hasIOSKeyboard(event.target)) {
                     return;
                 }
+
+                disabledInputs.forEach(function (item) {
+                    item.disabled = false;
+                });
+                disabledInputs = [];
 
                 keyboardHandle();
 
