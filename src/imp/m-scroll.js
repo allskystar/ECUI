@@ -389,13 +389,18 @@
             dom.addEventListener(document, 'touchstart', function (event) {
                 if (disabledInputs.indexOf(event.target) >= 0) {
                     event.target.disabled = false;
+                    observer.takeRecords();
+                }
+            });
+
+            dom.addEventListener(document, 'touchend', function (event) {
+                if (disabledInputs.indexOf(event.target) >= 0) {
                     util.timer(function () {
                         if (document.activeElement !== event.target) {
                             event.target.disabled = true;
+                            observer.takeRecords();
                         }
-                        observer.takeRecords();
-                    }, 500);
-                    observer.takeRecords();
+                    }, 20);
                 }
             });
 
@@ -457,9 +462,7 @@
                     }
                 });
 
-//由于不再会有软键盘实现的焦点切换，因此不再需要重新计算位置
-                if (!keyboardHeight) {
-/*
+                if (keyboardHeight) {
 //{if 0}//
                     if (isSimulator) {
                         lastScrollY = window.scrollY;
@@ -493,7 +496,6 @@
                         // }, 200, {to: window.scrollY});
                     });
                 } else {
-*/
                     bodyScrollTop = document.body.scrollTop;
                     keyboardHandle = scrollListener(function () {
 //{if 0}//
