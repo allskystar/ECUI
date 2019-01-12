@@ -10,7 +10,7 @@
         util = core.util,
 
         isToucher = document.ontouchstart !== undefined,
-        iosVersion = /(iPhone|iPad).*?OS (\d+(_\d+)?)/i.test(navigator.userAgent) ?  +(RegExp.$2.replace('_', '.')) : undefined,
+        iosVersion = /(iPhone|iPad).*?OS (\d+(_\d+)?)/i.test(navigator.userAgent) ? +(RegExp.$2.replace('_', '.')) : undefined,
         safariVersion = !/(chrome|crios|ucbrowser)/i.test(navigator.userAgent) && /(\d+\.\d)(\.\d)?\s+.*safari/i.test(navigator.userAgent) ? +RegExp.$1 : undefined;
 //{/if}//
     var tx = /(\-?\d+)px\s*,\s*(\-?\d+)/,
