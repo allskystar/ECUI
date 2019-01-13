@@ -277,10 +277,7 @@ _eInput        - INPUT对象
                         if (events.blur) {
                             dom.removeEventListener(this._eInput, 'blur', events.blur);
                         }
-                        try {
-                            this._eInput.blur();
-                        } catch (ignore) {
-                        }
+                        this._eInput.blur();
                         if (events.blur) {
                             dom.addEventListener(this._eInput, 'blur', events.blur);
                         }
@@ -354,9 +351,9 @@ _eInput        - INPUT对象
                     this._bError = false;
                 }
 
-                var active = document.activeElement;
-                if (active !== this._eInput) {
-                    if (isToucher) {
+                if (isToucher) {
+                    var active = document.activeElement;
+                    if (active !== this._eInput) {
                         if (active.tagName !== 'BODY') {
                             if (active.getControl) {
                                 dom.removeEventListener(active, 'focusout', events.focusout);
@@ -369,20 +366,33 @@ _eInput        - INPUT对象
                         dom.removeEventListener(this._eInput, 'focusin', events.focusin);
                         this._eInput.focus();
                         dom.addEventListener(this._eInput, 'focusin', events.focusin);
-                    } else {
-                        util.timer(
-                            function () {
-                                dom.removeEventListener(this._eInput, 'focus', events.focus);
-                                try {
-                                    this._eInput.focus();
-                                } catch (ignore) {
-                                }
-                                dom.addEventListener(this._eInput, 'focus', events.focus);
-                            },
-                            0,
-                            this
-                        );
                     }
+                } else {
+                    util.timer(
+                        function () {
+                            var active = document.activeElement;
+                            if (active !== this._eInput) {
+                                if (active.tagName !== 'BODY') {
+                                    if (active.getControl) {
+                                        dom.removeEventListener(active, 'blur', events.blur);
+                                        if (active.blur) {
+                                            active.blur();
+                                        }
+                                        dom.addEventListener(active, 'blur', events.blur);
+                                    } else {
+                                        if (active.blur) {
+                                            active.blur();
+                                        }
+                                    }
+                                }
+                                dom.removeEventListener(this._eInput, 'focus', events.focus);
+                                this._eInput.focus();
+                                dom.addEventListener(this._eInput, 'focus', events.focus);
+                            }
+                        },
+                        0,
+                        this
+                    );
                 }
             },
 
