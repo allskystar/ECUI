@@ -2,13 +2,15 @@
 @example
 <div ui="type:MSendText;len:1-20">
     <input maxlength="20" type="text" placeholder="请输入">
-    <input disabled />
+    <input />
 </div>
 */
 (function () {
 //{if 0}//
     var core = ecui,
-        ui = core.ui;
+        ui = core.ui,
+
+        iosVersion = /(iPhone|iPad).*?OS (\d+(_\d+)?)/i.test(navigator.userAgent) ? +(RegExp.$2.replace('_', '.')) : undefined;
 //{/if}//
     /**
      * 移动端文本操作控件，用于解决普通操作会导致软键盘收起的问题。
@@ -19,11 +21,13 @@
         'ui-m-op-text',
         function (el, options) {
             ui.Text.call(this, el, options);
+            var input = this.getInput();
             Array.prototype.slice.call(el.getElementsByTagName('INPUT')).forEach(function (item) {
-                if (item.disabled) {
+                if (item !== input) {
+                    item.disabled = !!iosVersion;
                     core.$fastCreate(this.Button, item, this, {focusable: false});
                 }
-            });
+            }, this);
         },
         {
             /**
@@ -40,6 +44,14 @@
                         ui.Control.prototype.$click.call(this, event);
                         core.dispatchEvent(this.getParent(), 'buttonclick', event);
                         event.exit();
+                    },
+
+                    /**
+                     * @override
+                     */
+                    $mousedown: function (event) {
+                        ui.Control.prototype.$mousedown.call(this, event);
+                        event.preventDefault();
                     }
                 }
             )
