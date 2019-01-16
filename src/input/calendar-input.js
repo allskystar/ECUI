@@ -58,8 +58,20 @@
             ui.Text.call(this, el, options);
             this.getInput().readOnly = true;
             this.setPopup(core.getSingleton(Calendar));
+            dom.insertHTML(el, 'BEFOREEND', '<span class="ui-calendar-input-clear"></span>');
+            this._uClear = core.$fastCreate(this.Clear, dom.last(el), this);
         },
         {
+            Clear: core.inherits(
+                ui.Control,
+                {
+                    onclick: function (event) {
+                        this.getParent().setValue('');
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                }
+            ),
             /**
              * 获取日期对象。
              * @public
