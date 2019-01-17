@@ -13,9 +13,6 @@
         ui = core.ui;
 //{/if}//
     var FORMAT = 'yyyy-MM-dd HH:mm:ss';
-    function addZero(number) {
-        return number < 10 ? '0' + number : number;
-    }
     /**
      * 转换成时间字符串。
      * @public
@@ -252,9 +249,6 @@
                                             }
                                         }
                                     ),
-                                    $change: function (event) {
-                                        // console.log(event);
-                                    },
                                     onready: function () {
                                         this.setSelected(this.getItem(0));
                                     },

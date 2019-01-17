@@ -238,7 +238,7 @@
 
     </style>
 </head>
-<body>
+<body style="overflow: auto">
     <div ui="type:m-panel" style="overflow:auto;height:100%">
     <form name="testForm">
         <input value="123" style="border:1px solid black;width:120px;height:20px;">
@@ -426,30 +426,101 @@
     <br>
     </div>
 
+<div ui="type:calendar-input"></div>
 
 
-<div class="ui-calendar-input-options">
-    <div class="ui-calendar-header">
-        <span class="ui-button ui-monthview-prev-year">&lt;&lt;</span>
-        <span class="ui-button ui-monthview-prev-month">&lt;</span>
-        <span class="ui-button ui-calendar-title">2018年12月</span>
-        <span class="ui-button ui-calendar-title">2019年1月</span>
-        <span class="ui-button ui-monthview-next-year">&gt;</span>
-        <span class="ui-button ui-monthview-next-year">&gt;&gt;</span>
+    <div ui="type:table">
+      <table>
+        <!-- 表头区域 -->
+        <thead ui="ext-floatTop">
+          <tr>
+            <th style="width:200px;">公司名</th>
+            <th style="width:200px;">url</th>
+            <th style="width:250px;">地址</th>
+            <th style="width:100px;">创办时间</th>
+          </tr>
+        </thead>
+        <!-- 内容行区域 -->
+        <tbody>
+          <tr>
+            <td>百度</td>
+            <td>www.baidu.com</td>
+            <td>中国北京中关村</td>
+            <td>1999</td>
+          </tr>
+          <tr>
+            <td>百度</td>
+            <td>www.baidu.com</td>
+            <td>中国北京中关村</td>
+            <td>1999</td>
+          </tr>
+          <tr>
+            <td>百度</td>
+            <td>www.baidu.com</td>
+            <td>中国北京中关村</td>
+            <td>1999</td>
+          </tr>
+          <tr>
+            <td>百度</td>
+            <td>www.baidu.com</td>
+            <td>中国北京中关村</td>
+            <td>1999</td>
+          </tr>
+          <tr>
+            <td>百度</td>
+            <td>www.baidu.com</td>
+            <td>中国北京中关村</td>
+            <td>1999</td>
+          </tr>
+          <tr>
+            <td>百度</td>
+            <td>www.baidu.com</td>
+            <td>中国北京中关村</td>
+            <td>1999</td>
+          </tr>
+          <tr>
+            <td>百度</td>
+            <td>www.baidu.com</td>
+            <td>中国北京中关村</td>
+            <td>1999</td>
+          </tr>
+          <tr>
+            <td>百度</td>
+            <td>www.baidu.com</td>
+            <td>中国北京中关村</td>
+            <td>1999</td>
+          </tr>
+          <tr>
+            <td>百度</td>
+            <td>www.baidu.com</td>
+            <td>中国北京中关村</td>
+            <td>1999</td>
+          </tr>
+          <tr>
+            <td>百度</td>
+            <td>www.baidu.com</td>
+            <td>中国北京中关村</td>
+            <td>1999</td>
+          </tr>
+          <tr>
+            <td>百度</td>
+            <td>www.baidu.com</td>
+            <td>中国北京中关村</td>
+            <td>1999</td>
+          </tr>
+          <tr>
+            <td>百度</td>
+            <td>www.baidu.com</td>
+            <td>中国北京中关村</td>
+            <td>1999</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
-    <div class="ui-calendar">
-        <div ui="type:month-view"></div>
-        <div ui="type:month-view"></div>
-    </div>
-    <div class="options-content">
-        <span class="time-title">选择时间</span>
-        <span class="clear">清除</span>
-        <span class="submit">确定</span>
-    </div>
-</div>
 
     <script>
-//        alert(document.body.ontouchmove);
+    ecui.esr.onready = function () {
+    };
     </script>
 </body>
 </html>

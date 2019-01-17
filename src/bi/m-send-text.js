@@ -1,11 +1,11 @@
 /*
 @example
-<form action="javascript: void(0);" ui="type:MSendText;len:1-20">
+<form action="javascript: void(0);" ui="type:b-m-send-text;len:1-20">
     <input maxlength="20" type="text" placeholder="请输入">
     <input type="text" class="send"/>
 </form>
 或
-<div ui="type:MSendText;len:1-20">
+<div ui="type:BMSendText;len:1-20">
     <input maxlength="20" type="text" placeholder="请输入">
     <input type="text" class="send"/>
 </div>
@@ -22,7 +22,7 @@
      * 移动端发送信息控件。
      * @control
      */
-    ui.MSendText = core.inherits(
+    ui.BMSendText = core.inherits(
         ecui.ui.Text,
         'ui-m-send-text',
         function (el, options) {
