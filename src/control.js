@@ -85,7 +85,6 @@ _aStatus            - 控件当前的状态集合
      * capturable  是否接收交互事件，如果设置不接收交互事件，交互事件由控件的父控件处理，缺省值为 true
      * userSelect  是否允许选中内容，缺省值为 true
      * focusable   是否允许获取焦点，如果设置不允许获取焦点，控件的交互事件不会改变当前拥有焦点的控件，用于自定义滚动条，缺省值为 true
-     * transparent 是否透明，如果设置透明，控件的交互事件将穿透控件由控件下方的控件处理，缺省值为 false
      * @control
      */
     ui.Control = core.inherits(
