@@ -152,7 +152,7 @@ _eInput        - INPUT对象
         var el = core.wrapEvent(event).target,
             control = el.getControl();
 
-        if (control.isDisabled()) {
+        if (control.isDisabled() || !control.isCapturable()) {
             dom.removeEventListener(el, 'blur', events.blur);
             try {
                 el.blur();
