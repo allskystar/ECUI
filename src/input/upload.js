@@ -61,7 +61,7 @@
 
                 io.ajax(this._sUrl, {
                     method: 'POST',
-                    headers: this._sHeaders || {},
+                    headers: this._oHeaders,
                     data: data,
                     onupload: progress ? function (event) {
                         progress.setMax(event.total);
@@ -104,6 +104,16 @@
             },
 
             /**
+             * 设置上传文件请求的 headers。
+             * @public
+             *
+             * @param {object} headers 文件上传请求的请求头信息
+             */
+            setHeaders: function (headers) {
+                this._oHeaders = headers;
+            },
+
+            /**
              * 设置控件上传文件路径。
              * @public
              *
@@ -111,16 +121,6 @@
              */
             setUrl: function (url) {
                 this._sUrl = url;
-            },
-
-            /**
-             * 设置上传文件请求的 headers。
-             * @public
-             *
-             * @param {Object} headers 文件上传请求的请求头信息
-             */
-            setHeaders: function (headers) {
-                this._sHeaders = headers;
             }
         }
     );

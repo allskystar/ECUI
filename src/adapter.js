@@ -902,81 +902,6 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
         ui: {},
         util: {
             /*
-             * 设置 cookie 值
-             * @public
-             *
-             * @param {String} key cookie 名
-             * @param {String} val cookie 值
-             * @param {String} exp cookie 的过期时间
-             */
-            setCookie: function (key, val, exp) {
-                var cookie = key + '=' + val;
-                if (exp) {
-                    cookie += ('; expires=' + exp.toGMTString());
-                }
-                document.cookie = cookie;
-            },
-
-            /**
-             * 获取 cookie 值
-             * @public
-             *
-             * @param {String} key cookie 名
-             * @return {string} cookie字符串
-             */
-            getCookie: function (key) {
-                var cookies = document.cookie.split('; ');
-                var val = null;
-                cookies.forEach(function (cookie) {
-                    cookie = cookie.split('=');
-                    if (cookie[0] === key) {
-                        val = cookie[1];
-                    }
-                });
-                return val;
-            },
-
-            /**
-             * 删除 cookie 值
-             * @public
-             *
-             * @param {String} key cookie 名
-             */
-            delCookie: function (key) {
-                var d = new Date();
-                d.setTime(d.getTime() - 1000000);
-                var cookie = key + '="" ; expires=' + d.toGMTString() + ';path=/';
-                document.cookie = cookie;
-            },
-
-            /**
-             * 复制text到剪切板中
-             * 在异步ajax请求中使用document.execCommand('copy')无效，同步的ajax请求中正常使用
-             * @public
-             *
-             * @param {String} text 被复制到剪切板的内容
-             * @return {bolean} 是否copy成功
-             */
-            clipboard: function (text) {
-                var textarea = document.createElement('textarea');
-                textarea.style.position = 'fixed';
-                textarea.style.top = -100;
-                textarea.style.left = 0;
-                textarea.style.border = 'none';
-                textarea.style.outline = 'none';
-                textarea.style.resize = 'none';
-                textarea.style.background = 'transparent';
-                textarea.style.color = 'transparent';
-
-                textarea.value = text;
-                document.body.appendChild(textarea);
-                textarea.select();
-                var flag = document.execCommand('copy');
-                document.body.removeChild(textarea);
-                return flag;
-            },
-
-            /*
              * 自适应调整字体大小。
              * @public
              *
@@ -1036,6 +961,24 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
             },
 
             /**
+             * 复制text到剪切板中。
+             * 在异步ajax请求中使用document.execCommand('copy')无效，同步的ajax请求中正常使用。
+             * @public
+             *
+             * @param {String} text 被复制到剪切板的内容
+             * @return {bolean} 是否copy成功
+             */
+            clipboard: function (text) {
+                var textarea = dom.create('TEXTAREA', {className: 'ui-clipboard'});
+                textarea.value = text;
+                document.body.appendChild(textarea);
+                textarea.select();
+                var flag = document.execCommand('copy');
+                document.body.removeChild(textarea);
+                return flag;
+            },
+
+            /**
              * 对目标字符串进行基于当前页面编码集的 base64 解码。
              * @public
              *
@@ -1044,11 +987,9 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              */
             decodeBase64: function (source) {
                 var output = '';
-                var chr1, chr2, chr3;
-                var enc1, enc2, enc3, enc4;
-                var i = 0;
+                var chr1, chr2, chr3, enc1, enc2, enc3, enc4;
                 source = source.replace(/[^A-Za-z0-9\+\/\=]/g, '');
-                while (i < source.length) {
+                for (var i = 0; i < source.length; ) {
                     enc1 = BASE64_TABLE.indexOf(source.charAt(i++));
                     enc2 = BASE64_TABLE.indexOf(source.charAt(i++));
                     enc3 = BASE64_TABLE.indexOf(source.charAt(i++));
@@ -1088,6 +1029,19 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
             }()),
 
             /**
+             * 删除 cookie 值。
+             * @public
+             *
+             * @param {String} key cookie 名
+             */
+            delCookie: function (key) {
+                var d = new Date();
+                d.setTime(d.getTime() - 1000000);
+                var cookie = key + '="" ; expires=' + d.toGMTString() + ';path=/';
+                document.cookie = cookie;
+            },
+
+            /**
              * 对目标字符串进行基于当前页面编码集的 base64 编码。
              * @public
              *
@@ -1097,20 +1051,22 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
             encodeBase64: function (source) {
                 var output = '';
                 var chr1, chr2, chr3, enc1, enc2, enc3, enc4;
-                var i = 0;
                 source = encodeURIComponent(source);
-                while (i < source.length) {
+                for (var i = 0; i < source.length; ) {
                     chr1 = source.charCodeAt(i++);
                     if (chr1 === 37) {
-                        chr1 = parseInt(source.charAt(i++) + source.charAt(i++), 16);
+                        chr1 = parseInt(source.slice(i, i + 2), 16);
+                        i += 2;
                     }
                     chr2 = source.charCodeAt(i++);
                     if (chr2 === 37) {
-                        chr2 = parseInt(source.charAt(i++) + source.charAt(i++), 16);
+                        chr2 = parseInt(source.slice(i, i + 2), 16);
+                        i += 2;
                     }
                     chr3 = source.charCodeAt(i++);
                     if (chr3 === 37) {
-                        chr3 = parseInt(source.charAt(i++) + source.charAt(i++), 16);
+                        chr3 = parseInt(source.slice(i, i + 2), 16);
+                        i += 2;
                     }
                     enc1 = chr1 >> 2;
                     enc2 = ((chr1 & 3) << 4) | (chr2 >> 4);
@@ -1198,6 +1154,25 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                     return format;
                 }
                 return '';
+            },
+
+            /**
+             * 获取 cookie 值。
+             * @public
+             *
+             * @param {String} key cookie 名
+             * @return {string} cookie字符串
+             */
+            getCookie: function (key) {
+                var cookies = document.cookie.split('; ');
+                var val = null;
+                cookies.forEach(function (cookie) {
+                    cookie = cookie.split('=');
+                    if (cookie[0] === key) {
+                        val = cookie[1];
+                    }
+                });
+                return val;
             },
 
             /**
@@ -1298,6 +1273,22 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                         array.splice(i, 1);
                     }
                 }
+            },
+
+            /*
+             * 设置 cookie 值。
+             * @public
+             *
+             * @param {String} key cookie 名
+             * @param {String} val cookie 值
+             * @param {String} exp cookie 的过期时间
+             */
+            setCookie: function (key, val, exp) {
+                var cookie = key + '=' + val;
+                if (exp) {
+                    cookie += ('; expires=' + exp.toGMTString());
+                }
+                document.cookie = cookie;
             },
 
             /**
