@@ -1605,9 +1605,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
     } catch (ignore) {
     }
 
-    try {
-        new Function('let a')();
-    } catch (e) {
+    if (!Object.assign) {
         // es6 部分函数兼容
         Object.assign = function (target) {
             Array.prototype.slice.call(arguments, 1).forEach(function (source) {
