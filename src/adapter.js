@@ -966,16 +966,24 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              * @public
              *
              * @param {String} text 被复制到剪切板的内容
-             * @return {bolean} 是否copy成功
              */
             clipboard: function (text) {
                 var textarea = dom.create('TEXTAREA', {className: 'ui-clipboard'});
                 textarea.value = text;
                 document.body.appendChild(textarea);
                 textarea.select();
-                var flag = document.execCommand('copy');
+                if (document.execCommand('copy')) {
+                    __ECUI__ClipboardText = undefined;
+                    clipboardListener();
+                } else {
+                    if (__ECUI__ClipboardText === undefined) {
+                        dom.addEventListener(document, 'mousedown', clipboardListener);
+                        dom.addEventListener(document, 'touchstart', clipboardListener);
+                        dom.addEventListener(document, 'keydown', clipboardListener);
+                    }
+                    __ECUI__ClipboardText = text;
+                }
                 document.body.removeChild(textarea);
-                return flag;
             },
 
             /**
@@ -990,10 +998,10 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                 var chr1, chr2, chr3, enc1, enc2, enc3, enc4;
                 source = source.replace(/[^A-Za-z0-9\+\/\=]/g, '');
                 for (var i = 0; i < source.length; ) {
-                    enc1 = BASE64_TABLE.indexOf(source.charAt(i++));
-                    enc2 = BASE64_TABLE.indexOf(source.charAt(i++));
-                    enc3 = BASE64_TABLE.indexOf(source.charAt(i++));
-                    enc4 = BASE64_TABLE.indexOf(source.charAt(i++));
+                    enc1 = __ECUI__Base64Table.indexOf(source.charAt(i++));
+                    enc2 = __ECUI__Base64Table.indexOf(source.charAt(i++));
+                    enc3 = __ECUI__Base64Table.indexOf(source.charAt(i++));
+                    enc4 = __ECUI__Base64Table.indexOf(source.charAt(i++));
                     chr1 = (enc1 << 2) | (enc2 >> 4);
                     chr2 = ((enc2 & 15) << 4) | (enc3 >> 2);
                     chr3 = ((enc3 & 3) << 6) | enc4;
@@ -1077,7 +1085,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                     } else if (isNaN(chr3)) {
                         enc4 = 64;
                     }
-                    output += BASE64_TABLE.charAt(enc1) + BASE64_TABLE.charAt(enc2) + BASE64_TABLE.charAt(enc3) + BASE64_TABLE.charAt(enc4);
+                    output += __ECUI__Base64Table.charAt(enc1) + __ECUI__Base64Table.charAt(enc2) + __ECUI__Base64Table.charAt(enc3) + __ECUI__Base64Table.charAt(enc4);
                 }
                 return output;
             },
@@ -1209,6 +1217,20 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                     pageWidth: Math.max(html.scrollWidth, body.scrollWidth, clientWidth),
                     pageHeight: Math.max(html.scrollHeight, body.scrollHeight, clientHeight)
                 };
+            },
+
+            /**
+             * 当前是否需要处理IOS软键盘。
+             * @public
+             *
+             * @param {HTMLElement} target 用于判断的元素对象，如果为空使用 document.activeElement
+             * @return {boolean} 是否需要处理IOS软键盘
+             */
+            hasIOSKeyboard: iosVersion ? function (target) {
+                target = target || document.activeElement;
+                return !target.readOnly && ((target.tagName === 'INPUT' && target.type !== 'radio' && target.type !== 'checkbox') || target.tagName === 'TEXTAREA');
+            } : function () {
+                return false;
             },
 
             /**
@@ -1451,7 +1473,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
 
     //{if 1}//var eventNames = ['mousedown', 'mouseover', 'mousemove', 'mouseout', 'mouseup', 'click', 'dblclick', 'focus', 'blur', 'activate', 'deactivate'];//{/if}//
 
-    var BASE64_TABLE = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
+    var __ECUI__Base64Table = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
 
     // 读写特殊的 css 属性操作
     var __ECUI__StyleFixer = {
@@ -1506,7 +1528,21 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
             lt: '<',
             gt: '>',
             amp: '&'
-        };
+        },
+
+        __ECUI__ClipboardText;
+
+    function clipboardListener() {
+        dom.removeEventListener(document, 'mousedown', clipboardListener);
+        dom.removeEventListener(document, 'touchstart', clipboardListener);
+        dom.removeEventListener(document, 'keydown', clipboardListener);
+
+        if (__ECUI__ClipboardText !== undefined) {
+            var text = __ECUI__ClipboardText;
+            __ECUI__ClipboardText = undefined;
+            util.clipboard(text);
+        }
+    }
 
     /**
      * 设置页面加载完毕后自动执行的方法。
@@ -1590,20 +1626,6 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
             return this.lastIndexOf(s) === this.length - s.length;
         };
     }
-
-    /**
-     * 当前是否需要处理IOS软键盘。
-     * @public
-     *
-     * @param {HTMLElement} target 用于判断的元素对象，如果为空使用 document.activeElement
-     * @return {boolean} 是否需要处理IOS软键盘
-     */
-    util.hasIOSKeyboard = iosVersion ? function (target) {
-        target = target || document.activeElement;
-        return !target.readOnly && ((target.tagName === 'INPUT' && target.type !== 'radio' && target.type !== 'checkbox') || target.tagName === 'TEXTAREA');
-    } : function () {
-        return false;
-    };
 //{if 0}//
     if (isToucher) {
         dom.addEventListener(document, 'contextmenu', util.preventEvent);
