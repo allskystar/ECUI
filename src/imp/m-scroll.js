@@ -63,7 +63,7 @@
                 bodyEl.appendChild(el.firstChild);
             }
 
-            dom.addClass(el, 'ui-mobile-scroll ui-mobile-scroll-init');
+            dom.addClass(el, 'ui-mobile-scroll');
             el.appendChild(bodyEl);
             this.$setBody(bodyEl);
         },
@@ -121,23 +121,6 @@
             $dragstart: function (event) {
                 this.$MScroll.$dragstart.call(this, event);
                 this.$MScrollData.scrolling = true;
-            },
-
-            /**
-             * @override
-             */
-            $initStructure: function (width, height) {
-                this.$MScroll.$initStructure.call(this, width, height);
-                this.$setSize(width, height);
-                dom.removeClass(this.getMain(), 'ui-mobile-scroll-init');
-            },
-
-            /**
-             * @override
-             */
-            $resize: function (event) {
-                this.$MScroll.$initStructure.call(this, event);
-                dom.addClass(this.getMain(), 'ui-mobile-scroll-init');
             },
 
             /**

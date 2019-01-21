@@ -2,3 +2,8 @@
 .ui-mobile-panel {
     overflow: hidden !important;
 }
+
+.ui-mobile-panel-location .ui-mobile-panel-body {
+    overflow: hidden !important;
+    height: 100%;
+}
