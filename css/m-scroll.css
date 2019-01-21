@@ -8,3 +8,8 @@
     overflow: visible !important;
     .m-width100rate();
 }
+
+.ui-mobile-scroll-init .ui-mobile-scroll-body {
+    overflow: hidden !important;
+    height: 100%;
+}

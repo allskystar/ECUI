@@ -63,7 +63,7 @@
                 bodyEl.appendChild(el.firstChild);
             }
 
-            dom.addClass(el, 'ui-mobile-scroll');
+            dom.addClass(el, 'ui-mobile-scroll ui-mobile-scroll-init');
             el.appendChild(bodyEl);
             this.$setBody(bodyEl);
         },
@@ -80,7 +80,7 @@
                 var main = this.getMain(),
                     body = this.getBody(),
                     data = this.$MScrollData,
-                    flag = util.hasIOSKeyboard() && tx.test(this.getBody().style.transform);
+                    flag = util.hasIOSKeyboard() && tx.test(body.style.transform);
 
                 core.drag(
                     this,
@@ -121,6 +121,23 @@
             $dragstart: function (event) {
                 this.$MScroll.$dragstart.call(this, event);
                 this.$MScrollData.scrolling = true;
+            },
+
+            /**
+             * @override
+             */
+            $initStructure: function (width, height) {
+                this.$MScroll.$initStructure.call(this, width, height);
+                this.$setSize(width, height);
+                dom.removeClass(this.getMain(), 'ui-mobile-scroll-init');
+            },
+
+            /**
+             * @override
+             */
+            $resize: function (event) {
+                this.$MScroll.$initStructure.call(this, event);
+                dom.addClass(this.getMain(), 'ui-mobile-scroll-init');
             },
 
             /**

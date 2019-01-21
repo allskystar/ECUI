@@ -39,3 +39,8 @@ body {
     position: absolute !important;
     background-color: #000000 !important;
 }
+
+.ui-clipboard {
+    position: absolute !important;
+    visibility: hidden !important;
+}
