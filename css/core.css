@@ -43,4 +43,5 @@ body {
 .ui-clipboard {
     position: absolute !important;
     visibility: hidden !important;
+    top: -100px;
 }
