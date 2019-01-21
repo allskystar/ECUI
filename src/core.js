@@ -902,7 +902,12 @@ outer:          for (var caches = [], target = event.target, el; target; target 
      * @param {ecui.ui.Control} end 终止冒泡的控件，如果不设置将一直冒泡至顶层
      */
     function bubble(start, type, event, end) {
-        event = event || new ECUIEvent(type);
+        if (!event) {
+            event = new ECUIEvent(type);
+            if (start) {
+                event.target = start.getMain();
+            }
+        }
         start = start || null;
         end = end || null;
         for (; start !== end; start = start.getParent()) {
