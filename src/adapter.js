@@ -965,25 +965,29 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              * 在异步ajax请求中使用document.execCommand('copy')无效，同步的ajax请求中正常使用。
              * @public
              *
-             * @param {String} text 被复制到剪切板的内容
+             * @param {string} text 被复制到剪切板的内容
              */
             clipboard: function (text) {
-                var textarea = dom.create('TEXTAREA', {className: 'ui-clipboard'});
-                textarea.value = text;
-                document.body.appendChild(textarea);
-                textarea.select();
-                if (document.execCommand('copy')) {
-                    __ECUI__ClipboardText = undefined;
-                    clipboardListener();
+                if (ieVersion < 9) {
+                    window.clipboardData.setData('Text', text);
                 } else {
-                    if (__ECUI__ClipboardText === undefined) {
-                        dom.addEventListener(document, 'mousedown', clipboardListener);
-                        dom.addEventListener(document, 'touchstart', clipboardListener);
-                        dom.addEventListener(document, 'keydown', clipboardListener);
+                    var textarea = dom.create('TEXTAREA', {className: 'ui-clipboard'});
+                    textarea.value = text;
+                    document.body.appendChild(textarea);
+                    textarea.select();
+                    if (document.execCommand('copy')) {
+                        __ECUI__ClipboardText = undefined;
+                        clipboardListener();
+                    } else {
+                        if (__ECUI__ClipboardText === undefined) {
+                            dom.addEventListener(document, 'mousedown', clipboardListener);
+                            dom.addEventListener(document, 'touchstart', clipboardListener);
+                            dom.addEventListener(document, 'keydown', clipboardListener);
+                        }
+                        __ECUI__ClipboardText = text;
                     }
-                    __ECUI__ClipboardText = text;
+                    document.body.removeChild(textarea);
                 }
-                document.body.removeChild(textarea);
             },
 
             /**
