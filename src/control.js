@@ -137,6 +137,12 @@ _aStatus            - 控件当前的状态集合
              * @event
              */
             $blur: function () {
+                if (dom.contain(this.getBody(), document.activeElement)) {
+                    try {
+                        document.activeElement.blur();
+                    } catch (ignore) {
+                    }
+                }
                 this.alterStatus('-focus');
             },
 

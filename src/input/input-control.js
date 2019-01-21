@@ -266,8 +266,6 @@ _eInput        - INPUT对象
              * @override
              */
             $blur: function (event) {
-                ui.Control.prototype.$blur.call(this, event);
-
                 if (document.activeElement === this._eInput) {
                     if (isToucher) {
                         dom.removeEventListener(this._eInput, 'focusout', events.focusout);
@@ -287,6 +285,8 @@ _eInput        - INPUT对象
                 if (this._bBlur) {
                     core.dispatchEvent(this, 'validate');
                 }
+
+                ui.Control.prototype.$blur.call(this, event);
             },
 
             /**
