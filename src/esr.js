@@ -1346,6 +1346,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
             if (errControl) {
                 if (errControl.scrollIntoViewIfNeeded) {
                     errControl.scrollIntoViewIfNeeded();
+                    errControl.focus();
                 }
             } else {
                 ui.InputControl.saveToDefault(elements);
