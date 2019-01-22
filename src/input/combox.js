@@ -109,6 +109,29 @@
              */
             $input: function (event) {
                 ui.Select.prototype.$input.call(this, event);
+
+                this._sHref = dom.getAttribute(this.getMain(), 'href');
+                if (this._sHref) {
+                    if (!this._oHandle) {
+                        this.removeAll(true);
+                        this._oHandle = util.timer(
+                            function () {
+                                var args = [this._sHref, this.getInput().value];
+                                delete this._sHref;
+                                core.request(util.stringFormat.apply(null, args), function (data) {
+                                    delete this._oHandle;
+                                    this.add(data);
+                                    if (this._sHref !== undefined) {
+                                        core.dispatchEvent(this, 'input');
+                                    }
+                                }.bind(this));
+                            },
+                            1000,
+                            this
+                        );
+                    }
+                }
+
                 this.$click(event);
 
                 var text = ui.Select.prototype.getValue.call(this),
