@@ -81,7 +81,12 @@ _eInput        - INPUT对象
                 event = core.wrapEvent(event);
                 var control = event.target.getControl();
                 if (!control._bIME) {
+                    // 防止ie11修改placeholder引起的input重入
+                    control._bIME = true;
                     core.dispatchEvent(control, 'input', event);
+                    util.timer(function () {
+                        control._bIME = false;
+                    });
                 }
             },
 
