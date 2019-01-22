@@ -8,11 +8,24 @@
         ui = core.ui;
 //{/if}//
     /**
-     * 设置控件的弹出层显示的位置。
-     * @public
+     * 隐藏弹出层控件。
+     * @private
      */
-    function setPopupPosition() {
-        var popupEl = this.getOuter(),
+    function hidePopup() {
+        owners.pop();
+        core.removeEventListener(this, 'hide', hidePopup);
+    }
+
+    /**
+     * 显示弹出层控件，设置控件的弹出层显示的位置。
+     * @private
+     *
+     * @param {ecui.ui.Control} popup 弹出层控件
+     */
+    function showPopup(popup) {
+        popup.show();
+
+        var popupEl = popup.getOuter(),
             owner = ui.Popup.getOwner();
         dom.remove(popupEl);
 
@@ -35,12 +48,14 @@
 
         var popupTop = top + owner.getHeight(),
             popupLeft = left,
-            height = this.getHeight(),
-            width = this.getWidth();
+            height = popup.getHeight(),
+            width = popup.getWidth();
 
         popupEl.style.left = (popupLeft + width <= container.scrollWidth ? popupLeft : Math.max(left - width + owner.getWidth(), 0)) + 'px';
         popupEl.style.top = (popupTop + height <= container.scrollHeight ? popupTop : Math.max(top - height, 0)) + 'px';
         container.appendChild(popupEl);
+
+        core.addEventListener(popup, 'hide', hidePopup);
     }
 
     var owners = [];
@@ -58,7 +73,6 @@
              */
             $blur: function (event) {
                 this.$Popup.$blur.call(this, event);
-                owners.pop();
                 this.$PopupData.popup.hide();
             },
 
@@ -70,7 +84,6 @@
                 var popup = this.$PopupData.popup;
                 if (dom.contain(this.getOuter(), event.target)) {
                     if (popup.isShow()) {
-                        owners.pop();
                         popup.hide();
                     } else {
                         owners.push(this);
@@ -80,12 +93,12 @@
                         if (!dom.parent(el)) {
                             // 第一次显示时需要进行下拉选项部分的初始化，将其挂载到 DOM 树中
                             document.body.appendChild(el);
-                            popup.show();
+                            showPopup(popup);
                             if (this.$initPopup) {
                                 this.$initPopup();
                             }
                         } else {
-                            popup.show();
+                            showPopup(popup);
                         }
                     }
                 }
@@ -122,7 +135,6 @@
 
                 if (event.type === 'mousedown' && !dom.contain(this.$PopupData.popup.getOuter(), event.target)) {
                     // ie6/7/8下有可能scroll事件是由mousedown点击滚动条触发的
-                    owners.pop();
                     this.$PopupData.popup.hide();
                 }
             },
@@ -144,14 +156,7 @@
              * @param {ecui.ui.Control} control 弹出层控件
              */
             setPopup: function (control) {
-                if (this.$PopupData.popup) {
-                    core.removeEventListener(this.$PopupData.popup, 'show', setPopupPosition);
-                    delete this.$PopupData.popup;
-                }
-                if (control) {
-                    core.addEventListener(control, 'show', setPopupPosition);
-                    this.$PopupData.popup = control;
-                }
+                this.$PopupData.popup = control;
             }
         }
     };

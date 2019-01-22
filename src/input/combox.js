@@ -44,6 +44,7 @@
         function (el, options) {
             util.setDefault(options, 'readOnly', false);
             ui.Select.call(this, el, options);
+            this._bFilter = options.filter === true;
         },
         {
             /**
@@ -58,8 +59,27 @@
             /**
              * @override
              */
+            $blur: function (event) {
+                ui.Select.prototype.$blur.call(this, event);
+                if (this._bFilter && !this.getSelected()) {
+                    this.$setValue('');
+                }
+            },
+
+            /**
+             * @override
+             */
             $click: function (event) {
-                if (!this.$getSection('Options').isShow()) {
+                if (this._bFilter) {
+                    var options = this.$getSection('Options');
+                    if (this.getInput().value) {
+                        if (!options.isShow()) {
+                            ui.Select.prototype.$click.call(this, event);
+                        }
+                    } else {
+                        options.hide();
+                    }
+                } else if (!this.$getSection('Options').isShow()) {
                     ui.Select.prototype.$click.call(this, event);
                     this.getItems().forEach(function (item) {
                         dom.removeClass(item.getMain(), 'ui-hide');
