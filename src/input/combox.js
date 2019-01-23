@@ -105,7 +105,7 @@
                     this.setSelected(selected);
                 } else {
                     this.$setSelected();
-                    this.alterStatus(text ? '-placeholder' : '+placeholder');
+                    this.$setPlaceholder();
                     refresh(this);
                 }
             },

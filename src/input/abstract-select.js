@@ -226,6 +226,19 @@ _uOptions     - 下拉选择框
             },
 
             /**
+             * 设置placeholder信息。
+             * @protected
+             */
+            $setPlaceholder: function () {
+                if (this.getInput().value) {
+                    this.alterStatus('-placeholder');
+                } else {
+                    this.alterStatus('+placeholder');
+                    this._uText.getBody().innerHTML = this._sPlaceHolder;
+                }
+            },
+
+            /**
              * 设置底层的选中项。
              * @protected
              *
@@ -240,12 +253,7 @@ _uOptions     - 下拉选择框
              */
             $setValue: function (value) {
                 ui.InputControl.prototype.$setValue.call(this, value);
-                if (value) {
-                    this.alterStatus('-placeholder');
-                } else {
-                    this.alterStatus('+placeholder');
-                    this._uText.getBody().innerHTML = this._sPlaceHolder;
-                }
+                this.$setPlaceholder();
             },
 
             /**
