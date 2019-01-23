@@ -46,7 +46,7 @@ link - 链接插件，使用ext-link使用，具体的跳转地址写在DOM元�
 
         Events: {
             scroll: function () {
-                var el = dom.parent(dom.parent(this.getMain())),
+                var el = this.getMain(),
                     offset = getOffset(el),
                     top = window.scrollY + this._sFloatTop - offset.top;
                 // 设置偏移量

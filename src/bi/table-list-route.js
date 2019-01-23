@@ -191,7 +191,13 @@
     ui.BTableListRoute.prototype.onbeforerequest = function (context) {
         context.pageNo = context.pageNo || +this.searchParm.pageNo;
         context.pageSize = +this.searchParm.pageSize;
-        setFormValue(context, document.forms[this.model[0].split('?')[1].split('&')[0]], this.searchParm);
+        var forms = this.model[0].split('?')[1].split('&');
+        for (var i = 0, form, item; item = forms[i++]; ) {
+            form = document.forms[item.split('=')[0]];
+            if (item.split('=').length === 1 && form) {
+                setFormValue(context, form, this.searchParm);
+            }
+        }
     };
     ui.BTableListRoute.prototype.onbeforerender = function (context) {
         var data = ecui.util.parseValue(this.model[0].split('@')[0], context);
