@@ -47,6 +47,7 @@ var ecui;
     document.write('<script type="text/javascript" src="src/input/abstract-select.js"></script>');
     document.write('<script type="text/javascript" src="src/input/select.js"></script>');
     document.write('<script type="text/javascript" src="src/input/combox.js"></script>');
+    document.write('<script type="text/javascript" src="src/input/filter.js"></script>');
     document.write('<script type="text/javascript" src="src/input/listbox.js"></script>');
     document.write('<script type="text/javascript" src="src/input/calendar-input.js"></script>');
     document.write('<script type="text/javascript" src="src/input/multilevel-select.js"></script>');

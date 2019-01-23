@@ -11,20 +11,18 @@
      * 隐藏弹出层控件。
      * @private
      */
-    function hidePopup() {
+    function hidePopupHandler() {
         owners.pop();
-        core.removeEventListener(this, 'hide', hidePopup);
+        core.removeEventListener(this, 'hide', hidePopupHandler);
     }
 
     /**
-     * 显示弹出层控件，设置控件的弹出层显示的位置。
+     * 设置控件的弹出层显示的位置。
      * @private
      *
      * @param {ecui.ui.Control} popup 弹出层控件
      */
-    function showPopup(popup) {
-        popup.show();
-
+    function setPopupPosition(popup) {
         var popupEl = popup.getOuter(),
             owner = ui.Popup.getOwner();
         dom.remove(popupEl);
@@ -54,8 +52,18 @@
         popupEl.style.left = (popupLeft + width <= container.scrollWidth ? popupLeft : Math.max(left - width + owner.getWidth(), 0)) + 'px';
         popupEl.style.top = (popupTop + height <= container.scrollHeight ? popupTop : Math.max(top - height, 0)) + 'px';
         container.appendChild(popupEl);
+    }
 
-        core.addEventListener(popup, 'hide', hidePopup);
+    /**
+     * 显示弹出层控件，设置控件的弹出层显示的位置。
+     * @private
+     *
+     * @param {ecui.ui.Control} popup 弹出层控件
+     */
+    function showPopup(popup) {
+        popup.show();
+        setPopupPosition(popup);
+        core.addEventListener(popup, 'hide', hidePopupHandler);
     }
 
     var owners = [];
@@ -81,25 +89,11 @@
              */
             $click: function (event) {
                 this.$Popup.$click.call(this, event);
-                var popup = this.$PopupData.popup;
                 if (dom.contain(this.getOuter(), event.target)) {
-                    if (popup.isShow()) {
-                        popup.hide();
+                    if (this.$PopupData.popup.isShow()) {
+                        this.$PopupData.popup.hide();
                     } else {
-                        owners.push(this);
-
-                        var el = popup.getOuter();
-
-                        if (!dom.parent(el)) {
-                            // 第一次显示时需要进行下拉选项部分的初始化，将其挂载到 DOM 树中
-                            document.body.appendChild(el);
-                            showPopup(popup);
-                            if (this.$initPopup) {
-                                this.$initPopup();
-                            }
-                        } else {
-                            showPopup(popup);
-                        }
+                        this.popup();
                     }
                 }
             },
@@ -123,7 +117,7 @@
                 this.$Popup.$repaint.call(this, event);
 
                 if (this.$PopupData.popup.isShow()) {
-                    setPopupPosition.call(this.$PopupData.popup);
+                    setPopupPosition(this.$PopupData.popup);
                 }
             },
 
@@ -147,6 +141,29 @@
              */
             getPopup: function () {
                 return this.$PopupData.popup;
+            },
+
+            /**
+             * 显示弹出层。
+             * @public
+             */
+            popup: function () {
+                if (!this.$PopupData.popup.isShow()) {
+                    owners.push(this);
+
+                    var el = this.$PopupData.popup.getOuter();
+
+                    if (!dom.parent(el)) {
+                        // 第一次显示时需要进行下拉选项部分的初始化，将其挂载到 DOM 树中
+                        document.body.appendChild(el);
+                        showPopup(this.$PopupData.popup);
+                        if (this.$initPopup) {
+                            this.$initPopup();
+                        }
+                    } else {
+                        showPopup(this.$PopupData.popup);
+                    }
+                }
             },
 
             /**

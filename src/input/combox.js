@@ -44,7 +44,6 @@
         function (el, options) {
             util.setDefault(options, 'readOnly', false);
             ui.Select.call(this, el, options);
-            this._bFilter = options.filter === true;
         },
         {
             /**
@@ -59,27 +58,10 @@
             /**
              * @override
              */
-            $blur: function (event) {
-                ui.Select.prototype.$blur.call(this, event);
-                if (this._bFilter && !this.getSelected()) {
-                    this.$setValue('');
-                }
-            },
-
-            /**
-             * @override
-             */
             $click: function (event) {
-                if (this._bFilter) {
-                    var options = this.$getSection('Options');
-                    if (this.getInput().value) {
-                        if (!options.isShow()) {
-                            ui.Select.prototype.$click.call(this, event);
-                        }
-                    } else {
-                        options.hide();
-                    }
-                } else if (!this.$getSection('Options').isShow()) {
+                if (this.$getSection('Options').isShow()) {
+                    this.$Popup.$click.call(this, event);
+                } else {
                     ui.Select.prototype.$click.call(this, event);
                     this.getItems().forEach(function (item) {
                         dom.removeClass(item.getMain(), 'ui-hide');
@@ -109,30 +91,7 @@
              */
             $input: function (event) {
                 ui.Select.prototype.$input.call(this, event);
-
-                this._sHref = dom.getAttribute(this.getMain(), 'href');
-                if (this._sHref) {
-                    if (!this._oHandle) {
-                        this.removeAll(true);
-                        this._oHandle = util.timer(
-                            function () {
-                                var args = [this._sHref, this.getInput().value];
-                                delete this._sHref;
-                                core.request(util.stringFormat.apply(null, args), function (data) {
-                                    delete this._oHandle;
-                                    this.add(data);
-                                    if (this._sHref !== undefined) {
-                                        core.dispatchEvent(this, 'input');
-                                    }
-                                }.bind(this));
-                            },
-                            1000,
-                            this
-                        );
-                    }
-                }
-
-                this.$click(event);
+                this.popup();
 
                 var text = ui.Select.prototype.getValue.call(this),
                     selected;
@@ -146,6 +105,7 @@
                     this.setSelected(selected);
                 } else {
                     this.$setSelected();
+                    this.$getSection('Text').getBody().innerHTML = '';
                     refresh(this);
                 }
                 this.alterStatus(text ? '-placeholder' : '+placeholder');
