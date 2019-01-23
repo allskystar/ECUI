@@ -9,6 +9,7 @@
 </div>
 
 @fields
+_bIME          - 是否正在使用输入法
 _bBlur         - 失去焦点时是否需要校验
 _bError        - 是否出错
 _eInput        - INPUT对象

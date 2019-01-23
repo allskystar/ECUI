@@ -113,6 +113,16 @@
             /**
              * @override
              */
+            $keydown: function (event) {
+                ui.Select.prototype.$keydown.call(this, event);
+                util.timer(function () {
+                    this.$setPlaceholder();
+                }, 0, this);
+            },
+
+            /**
+             * @override
+             */
             getValue: function () {
                 var item = this.getSelected();
                 return item ? item.getValue() : '';
