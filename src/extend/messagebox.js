@@ -8,7 +8,8 @@
         ui = core.ui,
         util = core.util;
 //{/if}//
-    var buttonInstances = [],
+    var defaultTitle,
+        buttonInstances = [],
         instanceClass,
         hideHandle = util.blank,
         tipClass = { 'success': 'tip-success', 'error': 'tip-error', 'warn': 'tip-warn' },
@@ -84,7 +85,7 @@
         }
 
         if ('string' === typeof text) {
-            instance.setTitle(location.host);
+            instance.setTitle(defaultTitle || location.host);
         } else {
             instance.setTitle(text.title);
             text = text.content;
@@ -180,6 +181,16 @@
      */
     core.hasMessageBox = function () {
         return instanceClass !== undefined && core.getSingleton(MessageBox).isShow();
+    };
+
+    /**
+     * 设置消息框缺省的标题。
+     * @public
+     *
+     * @param {string} title 消息框标题
+     */
+    core.setMessageBoxTitle = function (title) {
+        defaultTitle = title;
     };
 
     /**
