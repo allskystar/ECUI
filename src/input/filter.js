@@ -64,10 +64,10 @@ _oHandler   - 定时器句柄
              */
             $input: function (event) {
                 function request() {
-                    this._sRequest = ui.Select.prototype.getValue.call(this);
+                    this._sRequest = this.getInput().value;
                     var args = [this._sUrl, this._sRequest];
                     core.request(util.stringFormat.apply(null, args), function (data) {
-                        var text = ui.Select.prototype.getValue.call(this);
+                        var text = this.getInput().value;
                         if (this._sRequest !== text) {
                             // 数据请求过程中输入框又产生了变化，重新请求
                             if (text) {
@@ -89,7 +89,7 @@ _oHandler   - 定时器句柄
 
                 ui.Combox.prototype.$input.call(this, event);
 
-                if (ui.Select.prototype.getValue.call(this)) {
+                if (this.getInput().value) {
                     this.popup();
                 } else {
                     this.$getSection('Options').hide();

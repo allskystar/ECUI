@@ -21,7 +21,7 @@
         util = core.util;
 //{/if}//
     function refresh(combox) {
-        var text = ui.Select.prototype.getValue.call(combox).toUpperCase();
+        var text = combox.getInput().value.toUpperCase();
 
         combox.getItems().forEach(function (item) {
             if (item.getContent().toUpperCase().indexOf(text) < 0) {
@@ -93,7 +93,7 @@
                 ui.Select.prototype.$input.call(this, event);
                 this.popup();
 
-                var text = ui.Select.prototype.getValue.call(this),
+                var text = this.getInput().value,
                     selected;
 
                 this.getItems().forEach(function (item) {
