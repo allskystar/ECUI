@@ -105,10 +105,9 @@
                     this.setSelected(selected);
                 } else {
                     this.$setSelected();
-                    this.$getSection('Text').getBody().innerHTML = '';
+                    this.alterStatus(text ? '-placeholder' : '+placeholder');
                     refresh(this);
                 }
-                this.alterStatus(text ? '-placeholder' : '+placeholder');
             },
 
             /**

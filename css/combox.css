@@ -18,8 +18,8 @@
 }
 
 .ui-combox-placeholder {
-    .ui-combox-text {
-        z-index: 1;
+    input {
+        background-color: transparent;
     }
 }
 

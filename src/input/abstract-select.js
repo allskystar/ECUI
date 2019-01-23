@@ -238,6 +238,19 @@ _uOptions     - 下拉选择框
             /**
              * @override
              */
+            $setValue: function (value) {
+                ui.InputControl.prototype.$setValue.call(this, value);
+                if (value) {
+                    this.alterStatus('-placeholder');
+                } else {
+                    this.alterStatus('+placeholder');
+                    this._uText.getBody().innerHTML = this._sPlaceHolder;
+                }
+            },
+
+            /**
+             * @override
+             */
             $validate: function () {
                 ui.InputControl.prototype.$validate.call(this);
                 if (this.getValue() === '' &&  this._bRequired) {
@@ -276,6 +289,7 @@ _uOptions     - 下拉选择框
                     if (this._cSelected) {
                         this._cSelected.alterStatus('-selected');
                     }
+                    this._cSelected = item;
                     if (item) {
                         item.alterStatus('+selected');
                         this._uText.getBody().innerHTML = item.getContent();
@@ -289,18 +303,6 @@ _uOptions     - 下拉选择框
                             core.setFocused(this);
                         }
                     }
-                    this._cSelected = item;
-                }
-
-                if (this.getInput().value) {
-                    this.alterStatus('-placeholder');
-                } else {
-                    if (this._sPlaceHolder) {
-                        this._uText.getBody().innerHTML = this._sPlaceHolder;
-                    } else if (!item) {
-                        this._uText.getBody().innerHTML = '';
-                    }
-                    this.alterStatus('+placeholder');
                 }
             },
 
