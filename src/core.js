@@ -581,8 +581,15 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                     dblclick = Date.now() - lastClick.time < 500,
                     commonParent;
 
+                if (click) { // TouchEvent
+                    if ((event.target.tagName === 'INPUT' && event.target.type !== 'radio' && event.target.type !== 'checkbox') || event.target.tagName === 'TEXTAREA') {
+                        event.target.focus();
+                        commonParent = true;
+                    }
+                }
+
                 if (activedControl !== undefined) {
-                    if (click) { // TouchEvent
+                    if (click && !commonParent) { // TouchEvent
                         core.setFocused(activedControl);
                     }
 

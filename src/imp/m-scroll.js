@@ -522,21 +522,26 @@
                                     window.scrollTo(0, lastScrollY);
                                 }
 
+                                document.body.removeChild(el);
+
                                 fixed();
                                 scrollIntoViewIfNeeded(keyboardHeight);
                             });
                         }
 
+                        var el = dom.create('INPUT', {style: {cssText: 'position:absolute;bottom:0px'}});
+                        document.body.appendChild(el);
+
                         if (target.getControl) {
                             var control = target.getControl();
                             // 输入框在最下方，直接滚动到最下方
                             if (dom.getPosition(control.getMain()).top + control.getHeight() === document.body.scrollHeight) {
-                                window.scrollTo(0, 100000);
+                                el.scrollIntoView();
                                 calcKeyboardHeight();
                                 return;
                             }
                         } else if (dom.getPosition(target).top + target.offsetHeight === document.body.scrollHeight) {
-                            window.scrollTo(0, 100000);
+                            el.scrollIntoView();
                             calcKeyboardHeight();
                             return;
                         }
@@ -549,7 +554,7 @@
                             document.body.style.visibility = '';
                         }, 500);
 
-                        window.scrollTo(0, 100000);
+                        el.scrollIntoView();
                         calcKeyboardHeight();
                     });
                 }
