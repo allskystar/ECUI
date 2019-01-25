@@ -61,6 +61,7 @@ _bRequired       - 是否必须选择
      */
     function setStatus(checkbox, status) {
         if (status !== checkbox._nStatus) {
+            checkbox.$clearErrorStyle();
             // 状态发生改变时进行处理
             checkbox.alterSubType(['checked', '', 'part'][status]);
 

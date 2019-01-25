@@ -49,6 +49,7 @@ _bRequired - 是否必须选择
      * @param {boolean} checked 新的状态，如果忽略表示不改变当前状态
      */
     function setChecked(radio, checked) {
+        radio.$clearErrorStyle();
         if (checked) {
             radio.getItems().forEach(function (item) {
                 refresh(item, item === radio);
