@@ -346,17 +346,6 @@ _eInput        - INPUT对象
             $focus: function (event) {
                 ui.Control.prototype.$focus.call(this, event);
 
-                for (var control = this; control = control.getParent(); ) {
-                    if (control instanceof ui.InputGroup) {
-                        control.alterSubType('');
-                        break;
-                    }
-                }
-                if (this._bError) {
-                    this.alterSubType('');
-                    this._bError = false;
-                }
-
                 if (isToucher) {
                     var active = document.activeElement;
                     if (active !== this._eInput) {
@@ -406,7 +395,18 @@ _eInput        - INPUT对象
              * 内容改变事件。
              * @event
              */
-            $input: util.blank,
+            $input: function () {
+                for (var control = this; control = control.getParent(); ) {
+                    if (control instanceof ui.InputGroup) {
+                        control.alterSubType('');
+                        break;
+                    }
+                }
+                if (this._bError) {
+                    this.alterSubType('');
+                    this._bError = false;
+                }
+            },
 
             /**
              * @override

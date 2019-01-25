@@ -13,8 +13,6 @@ _nMinLength   - 允许提将近最小长度
 _nMaxLength   - 允许提交的最大长度
 _nMinValue    - 允许提交的最小值
 _nMaxValue    - 允许提交的最大值
-_sErrValue    - 检验错误的文本值
-_sPlaceHolder - 为空时的提示信息内容
 _oRegExp      - 允许提交的格式正则表达式
 _ePlaceHolder - 为空时的提示信息标签
 */
@@ -27,21 +25,6 @@ _ePlaceHolder - 为空时的提示信息标签
 
         ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined;
 //{/if}//
-    /**
-     * 设置控件提示信息。
-     * @private
-     *
-     * @param {ecui.ui.Control} text 文本控件对象
-     * @param {string} prompt 提示信息的内容
-     */
-    function setPlaceHolder(text, prompt) {
-        if (text._ePlaceHolder) {
-            text._ePlaceHolder.innerHTML = prompt;
-        } else {
-            text.getInput().setAttribute('placeholder', prompt);
-        }
-    }
-
     /**
      * 文本输入框控件。
      * 扩展 InputELement 标签的功能，提供对低版本 IE 的 placeholder 的兼容。
@@ -83,13 +66,12 @@ _ePlaceHolder - 为空时的提示信息标签
             }
 
             el = this.getInput();
-            this._sPlaceHolder = dom.getAttribute(el, 'placeholder') || '';
             if (ieVersion < 10) {
                 this._ePlaceHolder = dom.insertBefore(
                     dom.create(
                         {
                             className: 'ui-placeholder',
-                            innerHTML: this._sPlaceHolder
+                            innerHTML: dom.getAttribute(el, 'placeholder') || ''
                         }
                     ),
                     el
@@ -162,34 +144,11 @@ _ePlaceHolder - 为空时的提示信息标签
             /**
              * @override
              */
-            $error: function (event) {
-                if (this._sErrValue === undefined) {
-                    if (ui.InputControl.prototype.$error.call(this, event) !== false) {
-                        if (event.text) {
-                            setPlaceHolder(this, event.text);
-                        }
-
-                        var el = this.getInput();
-                        this._sErrValue = el.value;
-                        el.value = '';
-                    }
-                }
-            },
-
-            /**
-             * @override
-             */
             $focus: function () {
                 ui.InputControl.prototype.$focus.call(this);
 
                 var el = this.getInput(),
                     textAlign = dom.getStyle(el, 'textAlign');
-
-                if (this._sErrValue !== undefined) {
-                    setPlaceHolder(this, this._sPlaceHolder);
-                    el.value = this._sErrValue;
-                    delete this._sErrValue;
-                }
 
                 if (textAlign === 'end' || textAlign === 'right') {
                     util.timer(function () {
@@ -241,7 +200,6 @@ _ePlaceHolder - 为空时的提示信息标签
              */
             $input: function () {
                 ui.InputControl.prototype.$input.call(this);
-                this.getInput().placeholder = this.getValue() ? '' : this._sPlaceHolder;
                 if (this._ePlaceHolder) {
                     this.alterStatus(this.getValue() ? '-empty' : '+empty');
                 }
@@ -255,14 +213,6 @@ _ePlaceHolder - 为空时的提示信息标签
                 if (this._ePlaceHolder) {
                     this.alterStatus(this.getValue() ? '-empty' : '+empty');
                 }
-            },
-
-            /**
-             * @override
-             */
-            $setValue: function (value) {
-                ui.InputControl.prototype.$setValue.call(this, value);
-                this.getInput().placeholder = value ? '' : this._sPlaceHolder;
             },
 
             /**
@@ -356,7 +306,7 @@ _ePlaceHolder - 为空时的提示信息标签
              * @override
              */
             getValue: function () {
-                var value = this._sErrValue !== undefined ? this._sErrValue : ui.InputControl.prototype.getValue.call(this);
+                var value = ui.InputControl.prototype.getValue.call(this);
                 if (this._bTrim) {
                     value = value.trim();
                 }
