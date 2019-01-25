@@ -183,7 +183,9 @@ _uOptions     - 下拉选择框
              * 选项改变事件。
              * @event
              */
-            $change: util.blank,
+            $change: function () {
+                this.$clearErrorStyle();
+            },
 
             /**
              * @override

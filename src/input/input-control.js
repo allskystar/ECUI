@@ -296,6 +296,24 @@ _eInput        - INPUT对象
             },
 
             /**
+             * 清除错误样式。
+             * @protected
+             *
+             */
+            $clearErrorStyle: function () {
+                for (var control = this; control = control.getParent(); ) {
+                    if (control instanceof ui.InputGroup) {
+                        control.alterSubType('');
+                        break;
+                    }
+                }
+                if (this._bError) {
+                    this.alterSubType('');
+                    this._bError = false;
+                }
+            },
+
+            /**
              * 控件失效，阻止输入框提交。
              * @override
              */
@@ -396,16 +414,7 @@ _eInput        - INPUT对象
              * @event
              */
             $input: function () {
-                for (var control = this; control = control.getParent(); ) {
-                    if (control instanceof ui.InputGroup) {
-                        control.alterSubType('');
-                        break;
-                    }
-                }
-                if (this._bError) {
-                    this.alterSubType('');
-                    this._bError = false;
-                }
+                this.$clearErrorStyle();
             },
 
             /**
