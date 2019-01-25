@@ -6,6 +6,7 @@
 </div>
 
 @fields
+_sUrl    - 动态请求url的地址
 _aSelect - 全部的下拉框控件列表
 */
 //{if 0}//
@@ -28,6 +29,10 @@ _aSelect - 全部的下拉框控件列表
              */
             Select: core.inherits(
                 ui.Select,
+                function (el, options) {
+                    ui.Select.call(this, el, options);
+                    this._sUrl = options.url;
+                },
                 {
                     /**
                      * 选项部件。
@@ -87,8 +92,8 @@ _aSelect - 全部的下拉框控件列表
                                     }
                                 }
                             } else if (select) {
-                                var args = [dom.getAttribute(select.getMain(), 'href')];
-                                if (args[0]) {
+                                if (select._sUrl) {
+                                    var args = [select._sUrl];
                                     parent._aSelect.forEach(function (item) {
                                         args.push(item.getValue());
                                     });
@@ -139,10 +144,8 @@ _aSelect - 全部的下拉框控件列表
                             this._aSelect.push(item);
                         }
                     } else if (item.tagName === 'SELECT') {
-                        var href = dom.getAttribute(item, 'href');
                         item.className += this.Select.CLASS;
                         item = core.$fastCreate(this.Select, item, this, core.getOptions(item));
-                        item.getMain().setAttribute('href', href);
                         this._aSelect.push(item);
                     }
                 }, this);

@@ -85,7 +85,7 @@ _uOptions     - 下拉选择框
             this._uOptions = core.$fastCreate(this.Options, optionsEl, this, {focusable: false});
 
             this._bRequired = !!options.required;
-            this._sPlaceHolder = dom.getAttribute(this.getInput(), 'placeholder') || '';
+            this._sPlaceHolder = options.placeholder || dom.getAttribute(this.getInput(), 'placeholder') || '';
             this.getInput().setAttribute('placeholder', '');
 
             this.setPopup(this._uOptions);

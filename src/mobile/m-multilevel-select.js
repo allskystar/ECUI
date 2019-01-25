@@ -40,7 +40,7 @@ _aSelect - 全部的下拉框控件列表
                 ui.MPanel,
                 function (el, options) {
                     ui.MPanel.call(this, el, options);
-                    this._sUrl =  dom.getAttribute(el, 'href');
+                    this._sUrl =  options.url;
                     this._cSelected = null;
                 },
                 {
