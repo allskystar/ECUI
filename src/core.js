@@ -1901,8 +1901,9 @@ outer:          for (var caches = [], target = event.target, el; target; target 
          * @param {Function} func 监听函数
          */
         addEventListener: function (control, name, func) {
-            name = control.getUID() + '#' + name;
-            (eventListeners[name] = eventListeners[name] || []).push(func);
+            control = control.getUID();
+            eventListeners[control] = eventListeners[control] || {};
+            (eventListeners[control][name] = eventListeners[control][name] || []).push(func);
         },
 
         /**
@@ -2033,12 +2034,14 @@ outer:          for (var caches = [], target = event.target, el; target; target 
             }
 
             // 检查事件是否被监听
-            if (listeners = eventListeners[uid + '#' + name]) {
-                listeners.forEach(function (item) {
-                    if (item) {
-                        item.call(control, event);
-                    }
-                });
+            if (eventListeners[uid]) {
+                if (listeners = eventListeners[uid][name]) {
+                    listeners.forEach(function (item) {
+                        if (item) {
+                            item.call(control, event);
+                        }
+                    });
+                }
             }
 
             delete eventStack[uid][name];
@@ -2096,17 +2099,19 @@ outer:          for (var caches = [], target = event.target, el; target; target 
             });
 
             // 需要删除的控件先放入一个集合中等待遍历结束后再删除，否则控件链将产生变化
+            var index = 0;
             allControls.slice().filter(function (item) {
                 if (isControl ? control.contain(item) : !!item.getOuter() && contain(control, item)) {
                     if (!onlyChild || (isControl ? control !== item : control !== item.getOuter())) {
                         util.remove(independentControls, item);
-                        util.remove(allControls, item);
+                        allControls.splice(index, 1);
                         if (item = namedMap[item.getUID()]) {
                             delete namedControls[item];
                         }
                         return true;
                     }
                 }
+                index++;
             }).forEach(function (item) {
                 disposeControl(item);
                 core.removeControlListeners(item);
@@ -2711,15 +2716,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
          * @param {ecui.ui.Control} control ECUI 控件
          */
         removeControlListeners: function (control) {
-            var name = control.getUID() + '#',
-                len = name.length;
-            for (var key in eventListeners) {
-                if (eventListeners.hasOwnProperty(key)) {
-                    if (key.slice(0, len) === name) {
-                        delete eventListeners[key];
-                    }
-                }
-            }
+            delete eventListeners[control.getUID()];
             core.removeGestureListeners(control);
         },
 
@@ -2732,8 +2729,9 @@ outer:          for (var caches = [], target = event.target, el; target; target 
          * @param {Function} func 监听函数
          */
         removeEventListener: function (control, name, func) {
-            if (name = eventListeners[control.getUID() + '#' + name]) {
-                util.remove(name, func);
+            control = control.getUID();
+            if (eventListeners[control] && eventListeners[control][name]) {
+                util.remove(eventListeners[control][name], func);
             }
         },
 
