@@ -62,6 +62,16 @@ _oHandler   - 定时器句柄
             /**
              * @override
              */
+            $focus: function (event) {
+                ui.Combox.prototype.$focus.call(this, event);
+                if (this.getInput().value) {
+                    this.popup();
+                }
+            },
+
+            /**
+             * @override
+             */
             $input: function (event) {
                 function request() {
                     this._sRequest = this.getInput().value;

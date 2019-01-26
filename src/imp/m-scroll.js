@@ -511,6 +511,9 @@
 //{/if}//
                         if (iosVersion === 11.1 || iosVersion === 11.2) {
                             keyboardHeight = innerKeyboardHeight;
+                            if (window.scrollY > keyboardHeight) {
+                                window.scrollTo(0, keyboardHeight);
+                            }
                             return;
                         }
 
