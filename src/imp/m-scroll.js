@@ -11,7 +11,10 @@
 
         isToucher = document.ontouchstart !== undefined,
         iosVersion = /(iPhone|iPad).*?OS (\d+(_\d+)?)/i.test(navigator.userAgent) ? +(RegExp.$2.replace('_', '.')) : undefined,
-        safariVersion = !/(chrome|crios|ucbrowser)/i.test(navigator.userAgent) && /(\d+\.\d)(\.\d)?\s+.*safari/i.test(navigator.userAgent) ? +RegExp.$1 : undefined;
+        isUCBrowser = /ucbrowser/i.test(navigator.userAgent),
+        chromeVersion = /(Chrome|CriOS)\/(\d+\.\d)/i.test(navigator.userAgent) ? +RegExp.$2 : undefined,
+        safariVersion = !/(chrome|crios|ucbrowser)/i.test(navigator.userAgent) && /(\d+\.\d)(\.\d)?\s+.*safari/i.test(navigator.userAgent) ? +RegExp.$1 : undefined,
+        isWebview = iosVersion && !chromeVersion && !isUCBrowser ? !/\)\s*Version\//.test(navigator.userAgent) : !safariVersion && /\)\s*Version\//.test(navigator.userAgent);
 //{/if}//
     var tx = /(\-?\d+)px\s*,\s*(\-?\d+)/,
         keyboardHeight = 0,
@@ -23,17 +26,17 @@
         switch (screen.height) {
         case 568:
             // iphone 5S/SE
-            statueHeight = 44;
+            statueHeight = iosVersion <= 10 ? 38 : 44;
             innerKeyboardHeight = 253;
             break;
         case 667:
             // iphone 6/7/8/6S/7S
-            statueHeight = 44;
+            statueHeight = iosVersion <= 10 ? 38 : 44;
             innerKeyboardHeight = 260;
             break;
         case 736:
             // iphone 6/7/8 Plus
-            statueHeight = 44;
+            statueHeight = iosVersion <= 10 ? 38 : 44;
             innerKeyboardHeight = 271;
             break;
         case 812:
@@ -428,6 +431,7 @@
             });
 
             dom.addEventListener(document, 'focusin', function (event) {
+                event.preventDefault();
                 var target = event.target,
                     lastScrollY;
 
@@ -474,7 +478,6 @@
 //{/if}//
                     // 焦点控件切换
                     core.setFocused(core.findControl(target));
-
                     keyboardHandle = scrollListener(function () {
                         if (lastScrollY !== window.scrollY) {
                             iosfixedList.forEach(function (item) {
@@ -517,10 +520,8 @@
                                 keyboardHeight = window.scrollY + document.body.clientHeight - document.body.scrollHeight - statueHeight;
                                 dom.addEventListener(document, 'touchmove', util.preventEvent);
                                 // 复位
-                                if (lastScrollY !== undefined) {
-                                    document.body.style.visibility = '';
-                                    window.scrollTo(0, lastScrollY);
-                                }
+                                document.body.style.visibility = '';
+                                window.scrollTo(0, Math.min(lastScrollY, keyboardHeight));
 
                                 document.body.removeChild(el);
 
@@ -529,22 +530,8 @@
                             });
                         }
 
-                        var el = dom.create('INPUT', {style: {cssText: 'position:absolute;bottom:0px'}});
+                        var el = dom.create('INPUT', {id: 'ECUI-KEYBOARD'});
                         document.body.appendChild(el);
-
-                        if (target.getControl) {
-                            var control = target.getControl();
-                            // 输入框在最下方，直接滚动到最下方
-                            if (dom.getPosition(control.getMain()).top + control.getHeight() === document.body.scrollHeight) {
-                                el.scrollIntoView();
-                                calcKeyboardHeight();
-                                return;
-                            }
-                        } else if (dom.getPosition(target).top + target.offsetHeight === document.body.scrollHeight) {
-                            el.scrollIntoView();
-                            calcKeyboardHeight();
-                            return;
-                        }
 
                         // 第一次触发，开始测试软键盘高度
                         lastScrollY = window.scrollY;
