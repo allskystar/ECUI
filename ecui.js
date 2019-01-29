@@ -84,6 +84,7 @@ var ecui;
     document.write('<script type="text/javascript" src="src/bi/switch.js"></script>');
     document.write('<script type="text/javascript" src="src/bi/table-list-route.js"></script>');
     document.write('<script type="text/javascript" src="src/bi/ext-float.js"></script>');
+    document.write('<script type="text/javascript" src="src/bi/img-fill.js"></script>');
 
 
     document.write('<script type="text/javascript" src="src/svg/svg.js"></script>');
