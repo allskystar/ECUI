@@ -11,10 +11,7 @@
 
         isToucher = document.ontouchstart !== undefined,
         iosVersion = /(iPhone|iPad).*?OS (\d+(_\d+)?)/i.test(navigator.userAgent) ? +(RegExp.$2.replace('_', '.')) : undefined,
-        isUCBrowser = /ucbrowser/i.test(navigator.userAgent),
-        chromeVersion = /(Chrome|CriOS)\/(\d+\.\d)/i.test(navigator.userAgent) ? +RegExp.$2 : undefined,
-        safariVersion = !/(chrome|crios|ucbrowser)/i.test(navigator.userAgent) && /(\d+\.\d)(\.\d)?\s+.*safari/i.test(navigator.userAgent) ? +RegExp.$1 : undefined,
-        isWebview = iosVersion && !chromeVersion && !isUCBrowser ? !/\)\s*Version\//.test(navigator.userAgent) : !safariVersion && /\)\s*Version\//.test(navigator.userAgent);
+        safariVersion = !/(chrome|crios|ucbrowser)/i.test(navigator.userAgent) && /(\d+\.\d)(\.\d)?\s+.*safari/i.test(navigator.userAgent) ? +RegExp.$1 : undefined;
 //{/if}//
     var tx = /(\-?\d+)px\s*,\s*(\-?\d+)/,
         keyboardHeight = 0,
@@ -26,23 +23,23 @@
         switch (screen.height) {
         case 568:
             // iphone 5S/SE
-            statueHeight = iosVersion <= 10 ? 38 : 44;
+            statueHeight = iosVersion < 12 ? 38 : 44;
             innerKeyboardHeight = 253;
             break;
         case 667:
             // iphone 6/7/8/6S/7S
-            statueHeight = iosVersion <= 10 ? 38 : 44;
+            statueHeight = iosVersion < 12 ? 38 : 44;
             innerKeyboardHeight = 260;
             break;
         case 736:
             // iphone 6/7/8 Plus
-            statueHeight = iosVersion <= 10 ? 38 : 44;
+            statueHeight = iosVersion < 12 ? 38 : 44;
             innerKeyboardHeight = 271;
             break;
         case 812:
             // iphone X/XS
             statueHeight = 83;
-            innerKeyboardHeight = 296;
+            innerKeyboardHeight = iosVersion < 12 ? 294 : 296;
             break;
         case 896:
             // iphone XR/XS max
@@ -431,7 +428,6 @@
             });
 
             dom.addEventListener(document, 'focusin', function (event) {
-                event.preventDefault();
                 var target = event.target,
                     lastScrollY;
 
@@ -478,6 +474,7 @@
 //{/if}//
                     // 焦点控件切换
                     core.setFocused(core.findControl(target));
+
                     keyboardHandle = scrollListener(function () {
                         if (lastScrollY !== window.scrollY) {
                             iosfixedList.forEach(function (item) {
@@ -510,7 +507,7 @@
                         }
 //{/if}//
                         if (iosVersion === 11.1 || iosVersion === 11.2) {
-                            keyboardHeight = innerKeyboardHeight;
+                            keyboardHeight = safariVersion ? innerKeyboardHeight : innerKeyboardHeight + statueHeight;
                             if (window.scrollY > keyboardHeight) {
                                 window.scrollTo(0, keyboardHeight);
                             }

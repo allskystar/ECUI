@@ -1347,6 +1347,9 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                 if (errControl.scrollIntoViewIfNeeded) {
                     errControl.scrollIntoViewIfNeeded();
                     errControl.focus();
+                } else if (errControl.scrollIntoView) {
+                    errControl.scrollIntoView();
+                    errControl.focus();
                 }
             } else {
                 ui.InputControl.saveToDefault(elements);
@@ -1519,10 +1522,6 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                             data = esr.onparsedata ? esr.onparsedata(url, data) : data.data;
 
                             if (varName) {
-                                if (varName.charAt(0) === '#') {
-                                    varName = varName.slice(1);
-                                    esr.fillForm(document.forms[varName], data);
-                                }
                                 esr.setData(varName, data);
                             } else {
                                 for (key in data) {
