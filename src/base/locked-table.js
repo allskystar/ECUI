@@ -96,7 +96,8 @@ _eRight      - 右侧乐定行的Element元素
      * @param {ecui.ui.LockedTable.Row} row 锁定表头控件或者锁定行控件
      */
     function splitRow(table, row) {
-        var elements = row.$getElements();
+        var elements = row.$getElements(),
+            body = row.getBody();
 
         table.getHCells().forEach(function (item, index) {
             if (item = elements[index]) {
@@ -108,9 +109,9 @@ _eRight      - 右侧乐定行的Element元素
             }
         });
 
-        if (!row.getBody().innerHTML.trim()) {
+        if (!body.innerHTML.trim()) {
             row._bEmpty = true;
-            row.getBody().innerHTML = '<td class="ui-locked-table-hcell ui-table-hcell"></td>';
+            body.innerHTML = '<td class="ui-locked-table-hcell ui-table-hcell"></td>';
         }
 
         row._eLeft.lastChild.style.height = row._eRight.firstChild.style.height = row.getHeight() + 'px';

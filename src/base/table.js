@@ -96,7 +96,9 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
      */
     function resizeRow(row) {
         row._aElements.forEach(function (item) {
-            item.style.width = '';
+            if (item) {
+                item.style.width = '';
+            }
         });
     }
 
