@@ -933,6 +933,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
      * @param {number} y y坐标
      */
     function calcAngle(x, y) {
+        y = -y;
         if (x > 0) {
             var angle = Math.atan(y / x) / Math.PI * 180;
             if (angle < 0) {
@@ -941,9 +942,9 @@ outer:          for (var caches = [], target = event.target, el; target; target 
         } else if (x < 0) {
             angle = 180 + Math.atan(y / x) / Math.PI * 180;
         } else if (y < 0) {
-            angle = 90;
-        } else if (y > 0) {
             angle = 270;
+        } else if (y > 0) {
+            angle = 90;
         }
         return angle;
     }
