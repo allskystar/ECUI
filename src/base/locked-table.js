@@ -69,6 +69,11 @@ _eRight      - 右侧乐定行的Element元素
 
         row._eLeft.firstChild.style.height = row._eRight.firstChild.style.height = '';
 
+        if (row._bEmpty) {
+            delete row._bEmpty;
+            row.getBody().innerHTML = '';
+        }
+
         row = row.getMain();
         first = row.firstChild;
 
@@ -102,6 +107,11 @@ _eRight      - 右侧乐定行的Element元素
                 }
             }
         });
+
+        if (!row.getBody().innerHTML.trim()) {
+            row._bEmpty = true;
+            row.getBody().innerHTML = '<td class="ui-locked-table-hcell ui-table-hcell"></td>';
+        }
 
         row._eLeft.lastChild.style.height = row._eRight.firstChild.style.height = row.getHeight() + 'px';
     }
@@ -376,6 +386,12 @@ _eRight      - 右侧乐定行的Element元素
             cache: function (force) {
                 this._uLeftHead.cache(force);
                 this._uRightHead.cache(force);
+                this._aHeadRows.forEach(function (item) {
+                    item.cache(force);
+                });
+                this._aRows.forEach(function (item) {
+                    item.cache(force);
+                });
                 ui.Table.prototype.cache.call(this, force);
             },
 
