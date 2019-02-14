@@ -32,6 +32,7 @@ var ecui;
     document.write('<script type="text/javascript" src="src/base/progress-bar.js"></script>');
     document.write('<script type="text/javascript" src="src/base/progress-circle.js"></script>');
     document.write('<script type="text/javascript" src="src/base/locked-table.js"></script>');
+    document.write('<script type="text/javascript" src="src/base/inline-table.js"></script>');
     document.write('<script type="text/javascript" src="src/base/checkbox-tree.js"></script>');
     document.write('<script type="text/javascript" src="src/base/count-down.js"></script>');
 
