@@ -176,12 +176,14 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              * @param {HTMLElement} el Element 对象
              * @return {HTMLElement} 子 Element 对象
              */
-            first: function (el) {
+            first: ieVersion < 9 ? function (el) {
                 for (el = el.firstChild; el; el = el.nextSibling) {
                     if (el.nodeType === 1) {
                         return el;
                     }
                 }
+            } : function (el) {
+                return el.firstElementChild;
             },
 
             /**
@@ -389,12 +391,14 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              * @param {HTMLElement} el Element 对象
              * @return {HTMLElement} 子 Element 对象
              */
-            last: function (el) {
+            last: ieVersion < 9 ? function (el) {
                 for (el = el.lastChild; el; el = el.previousSibling) {
                     if (el.nodeType === 1) {
                         return el;
                     }
                 }
+            } : function (el) {
+                return el.lastElementChild;
             },
 
             /**
@@ -404,12 +408,14 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              * @param {HTMLElement} el Element 对象
              * @return {HTMLElement} 下一个兄弟 Element 对象
              */
-            next: function (el) {
+            next: ieVersion < 9 ? function (el) {
                 for (el = el.nextSibling; el; el = el.nextSibling) {
                     if (el.nodeType === 1) {
                         return el;
                     }
                 }
+            } : function (el) {
+                return el.nextElementSibling;
             },
 
             /**
@@ -433,12 +439,14 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              * @param {HTMLElement} el Element 对象
              * @return {HTMLElement} 上一个兄弟 Element 对象
              */
-            previous: function (el) {
+            previous: ieVersion < 9 ? function (el) {
                 for (el = el.previousSibling; el; el = el.previousSibling) {
                     if (el.nodeType === 1) {
                         return el;
                     }
                 }
+            } : function (el) {
+                return el.previousElementSibling;
             },
 
             /**
