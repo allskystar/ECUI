@@ -211,7 +211,7 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
                 // list[i] 保存每一行的当前需要处理的列元素
                 list[i] = dom.first(o);
                 colspans[i] = 0;
-                (rows[i] = core.$fastCreate(this.Row, o, this))._aElements = [];
+                (rows[i] = core.$fastCreate(this.Row, o, this, core.getOptions(o)))._aElements = [];
             }
 
             for (j = 0;; j++) {
@@ -402,6 +402,10 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
              */
             Row: core.inherits(
                 ui.Control,
+                function (el, options) {
+                    ui.Control.call(this, el, options);
+                    this._bMerge = !!options.merge;
+                },
                 {
                     /**
                      * @override
@@ -519,6 +523,16 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
                     },
 
                     /**
+                     * 设置单元格尾部合并属性。
+                     * @public
+                     *
+                     * @param {boolean} flag 单元格尾部是否需要合并(针对新增的列)
+                     */
+                    setMerge: function (flag) {
+                        this._bMerge = flag;
+                    },
+
+                    /**
                      * @override
                      */
                     setSize: function (width, height) {
@@ -591,13 +605,17 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
              * @return {HTMLElement} 单元格主元素对象
              */
             $getElement: function (rowIndex, colIndex) {
-                var rows = this._aRows,
-                    cols = rows[rowIndex] && rows[rowIndex]._aElements,
+                if (rowIndex < 0) {
+                    var rows = this._aHeadRows;
+                    rowIndex += this._aHeadRows.length;
+                } else {
+                    rows = this._aRows;
+                }
+
+                var cols = rows[rowIndex] && rows[rowIndex]._aElements,
                     col = cols && cols[colIndex];
 
-                if (col === undefined) {
-                    col = null;
-                } else if (!col) {
+                if (!col) {
                     for (; col === false; col = (cols = rows[--rowIndex]._aElements)[colIndex]) {}
                     for (; !col; col = cols[--colIndex]) {}
                 }
@@ -745,10 +763,25 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
                     col = core.$fastCreate(this.HCell, el, this),
                     row;
 
+                if (!this._aHCells[index]) {
+                    index = this._aHCells.length;
+                }
+
                 primary += this._sCellClass;
                 for (var i = 0, o; row = rows[i]; i++) {
                     o = row._aElements[index];
-                    if (o !== null) {
+                    if ((o === undefined && row._bMerge) || o === null) {
+                        o = null;
+                        // 出现跨列的插入列操作，需要修正colspan的属性值
+                        var cell = this.$getElement(i - headRowCount, index),
+                            j = +dom.getAttribute(cell, 'rowSpan') || 1;
+
+                        cell.setAttribute('colSpan', +dom.getAttribute(cell, 'colSpan') + 1);
+                        row._aElements.splice(index, 0, o);
+                        for (; --j; ) {
+                            rows[++i]._aElements.splice(index, 0, false);
+                        }
+                    } else {
                         // 没有出现跨列的插入列操作
                         for (j = index; !o; ) {
                             o = row._aElements[++j];
@@ -776,16 +809,6 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
                                     o
                                 )
                             );
-                        }
-                    } else {
-                        // 出现跨列的插入列操作，需要修正colspan的属性值
-                        var cell = this.$getElement(i - headRowCount, index),
-                            j = +dom.getAttribute(cell, 'rowSpan') || 1;
-
-                        cell.setAttribute('colSpan', +dom.getAttribute(cell, 'colSpan') + 1);
-                        row._aElements.splice(index, 0, o);
-                        for (; --j; ) {
-                            rows[++i]._aElements.splice(index, 0, false);
                         }
                     }
                 }
@@ -823,7 +846,7 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
                         // 如果部分列被隐藏，colspan/width 需要动态计算
                         rowCols[i] = true;
                         html[j++] = '<td class="' + this._sCellClass + '" style="';
-                        for (var o = i, colspan = col.isShow() ? 1 : 0, width = col.getWidth() - col.getMinimumWidth(); (col = this._aHCells[++i]) && data[i] === null; ) {
+                        for (var o = i, colspan = col.isShow() ? 1 : 0, width = col.getWidth() - col.getMinimumWidth(); (col = this._aHCells[++i]) && (data[i] === null || data[i] === undefined); ) {
                             rowCols[i] = null;
                             if (col.isShow()) {
                                 colspan++;
@@ -1069,11 +1092,13 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
             event.row = this;
             core.dispatchEvent(this.getParent(), 'row' + type, event);
         };
+        ui.Table.prototype['$row' + type] = ui.Table.prototype['$row' + type] || util.blank;
 
         ui.Table.prototype.Cell.prototype[item] = function (event) {
             ui.Control.prototype[item].call(this, event);
             event.cell = this;
             core.dispatchEvent(this.getParent().getParent(), 'cell' + type, event);
         };
+        ui.Table.prototype['$cell' + type] = ui.Table.prototype['$cell' + type] || util.blank;
     });
 }());
