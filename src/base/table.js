@@ -30,6 +30,7 @@ _aHCells     - 表格头单元格控件对象
 _aRows       - 表格数据行对象
 _uHead       - 表头区域
 _aElements   - 行控件属性，行的列Element对象，如果当前列需要向左合并为null，需要向上合并为false
+_bMerge      - 行控件属性，是否在表格最后一列添加新列时自动合并
 */
 (function () {
 //{if 0}//
