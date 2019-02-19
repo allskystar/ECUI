@@ -412,7 +412,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                 var value = data[key],
                     elements = form[prefix + key],
                     el,
-                    control;
+                    control = null;
 
                 if (elements) {
                     if (elements.length) {
