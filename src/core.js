@@ -1645,10 +1645,6 @@ outer:          for (var caches = [], target = event.target, el; target; target 
         // 隐藏所有遮罩层
         core.mask(false);
 
-        independentControls.forEach(function (item) {
-            core.dispatchEvent(item, 'repaint');
-        });
-
         // 按广度优先查找所有正在显示的控件，保证子控件一定在父控件之后
         for (var i = 0, list = [], resizeList = null, widthList; resizeList !== undefined; resizeList = list[i++]) {
             Array.prototype.push.apply(list, core.query(filter));

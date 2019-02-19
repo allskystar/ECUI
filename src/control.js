@@ -1032,6 +1032,7 @@ _aStatus            - 控件当前的状态集合
              */
             initStructure: function () {
                 this.$initStructure(this.getClientWidth(), this.getClientHeight());
+                core.dispatchEvent(this, 'repaint');
             },
 
             /**
