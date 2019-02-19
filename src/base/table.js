@@ -707,13 +707,21 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
 
                 dom.insertBefore(this._uHead.getBody(), this.getBody());
 
+                var style = dom.parent(dom.parent(this.getBody())).style;
+
                 if (core.getScrollNarrow()) {
-                    var el = dom.parent(dom.parent(this.getBody()));
-                    el.style.marginTop = '';
-                    el.style.width = '';
-                    el.style.height = '';
-                    this._eLayout.style.height = '';
+                    this._eLayout.style.width = '';
+                    this._eLayout.lastChild.style.width = '';
+                    this._eLayout.lastChild.style.height = '';
+
+                    style.top = '';
+                } else {
+                    style.marginTop = '';
                 }
+
+                style.width = '';
+                style.height = '';
+                this._eLayout.style.height = '';
             },
 
             /**

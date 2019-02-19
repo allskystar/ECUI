@@ -426,6 +426,9 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                     if (el.getControl) {
                         control = el.getControl();
                     }
+                } else {
+                    elements = [];
+                    el = {};
                 }
 
                 if (value instanceof Array) {

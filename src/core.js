@@ -70,7 +70,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
         envStack = [],            // 高优先级事件调用时，保存上一个事件环境的栈
         events = {
             // 屏幕旋转
-            orientationchange: function () {
+            orientationchange: function (event) {
                 if (orientationHandle) {
                     orientationHandle();
                 }
@@ -109,7 +109,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
                             viewHeight = height;
                         }
-                    } else if (isToucher) {
+                    } else if (event && event.type === 'orientationchange') {
                         orientationHandle = util.timer(events.orientationchange, 100);
                     }
                 }, 100);
