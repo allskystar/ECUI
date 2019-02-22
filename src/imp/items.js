@@ -124,12 +124,6 @@
             },
 
             /**
-             * 选项点击事件。
-             * @event
-             */
-            $itemclick: util.blank,
-
-            /**
              * @override
              */
             $ready: function (event) {
