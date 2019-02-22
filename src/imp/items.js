@@ -6,9 +6,7 @@
     var core = ecui,
         dom = core.dom,
         ui = core.ui,
-        util = core.util,
-
-        eventNames = ['mousedown', 'mouseover', 'mousemove', 'mouseout', 'mouseup', 'click', 'dblclick', 'focus', 'blur', 'activate', 'deactivate'];
+        util = core.util;
 //{/if}//
     /**
      * 选项控件。
@@ -19,6 +17,19 @@
         ui.Control,
         'ui-item',
         {
+            /**
+             * @override
+             */
+            $click: function (event) {
+                ui.Control.prototype.$click.call(this, event);
+                var parent = this.getParent();
+                if (parent) {
+                    event.item = this;
+                    event.index = parent.$ItemsData.items.indexOf(this);
+                    core.dispatchEvent(parent, 'itemclick', event);
+                }
+            },
+
             /**
              * @override
              */
@@ -111,6 +122,12 @@
                     }
                 }
             },
+
+            /**
+             * 选项点击事件。
+             * @event
+             */
+            $itemclick: util.blank,
 
             /**
              * @override
@@ -336,17 +353,4 @@
             }
         }
     };
-
-    // 初始化事件转发信息
-    eventNames.slice(0, 7).forEach(function (item) {
-        ui.Item.prototype['$' + item] = function (event) {
-            ui.Control.prototype['$' + item].call(this, event);
-            var parent = this.getParent();
-            if (parent) {
-                event.item = this;
-                event.index = parent.$ItemsData.items.indexOf(this);
-                core.dispatchEvent(parent, 'item' + item.replace('mouse', ''), event);
-            }
-        };
-    });
 }());

@@ -48,6 +48,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
         gestureListeners = [],    // 手势监听
         gestureStack = [],        // 手势堆栈，受mask影响进行分层监听
         forcedControl = null,     // 当前被重压的控件
+        enableGesture = true,     // 手势识别是否有效，在touchend/pointer后会恢复
 
         pauseCount = 0,           // 暂停的次数
         keyCode = 0,              // 当前键盘按下的键值，解决keypress与keyup中得不到特殊按键的keyCode的问题
@@ -70,7 +71,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
         envStack = [],            // 高优先级事件调用时，保存上一个事件环境的栈
         events = {
             // 屏幕旋转
-            orientationchange: function (event) {
+            orientationchange: function () {
                 if (orientationHandle) {
                     orientationHandle();
                 }
@@ -224,6 +225,8 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
                         event.track = track;
                         currEnv.mouseup(event);
+
+                        enableGesture = true;
                     }
 
                     if (track === tracks.mouse) {
@@ -353,6 +356,8 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                             event.clientY = item.clientY;
 
                             currEnv.mouseup(event);
+                            enableGesture = true;
+
                             bubble(hoveredControl, 'mouseout', event, hoveredControl = null);
                             trackId = undefined;
                             if (event.getNative().type === 'touchend') {
@@ -821,6 +826,14 @@ outer:          for (var caches = [], target = event.target, el; target; target 
     }
 
     Object.assign(ECUIEvent.prototype, {
+        /**
+         * 取消手势，如果要准确的取消，请在mousedown事件中执行。
+         * @public
+         */
+        cancelGesture: function () {
+            enableGesture = false;
+        },
+
         /**
          * 终止全部事件操作。
          * @public

@@ -37,9 +37,7 @@ _eRight      - 右侧乐定行的Element元素
 
         firefoxVersion = /firefox\/(\d+\.\d)/i.test(navigator.userAgent) ? +RegExp.$1 : undefined,
         ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined,
-        safariVersion = !/(chrome|crios|ucbrowser)/i.test(navigator.userAgent) && /(\d+\.\d)(\.\d)?\s+.*safari/i.test(navigator.userAgent) ? +RegExp.$1 : undefined,
-
-        eventNames = ['mousedown', 'mouseover', 'mousemove', 'mouseout', 'mouseup', 'click', 'dblclick', 'focus', 'blur', 'activate', 'deactivate'];
+        safariVersion = !/(chrome|crios|ucbrowser)/i.test(navigator.userAgent) && /(\d+\.\d)(\.\d)?\s+.*safari/i.test(navigator.userAgent) ? +RegExp.$1 : undefined;
 //{/if}//
     /**
      * 建立锁定行控件。
@@ -189,6 +187,14 @@ _eRight      - 右侧乐定行的Element元素
             Row: core.inherits(
                 ui.Table.prototype.Row,
                 {
+                    /**
+                     * @override
+                     */
+                    $click: function (event) {
+                        ui.Table.prototype.Row.prototype.$click.call(this, event);
+                        dom.parent(this._eLeft).className = dom.parent(this._eRight).className = this.getMain().className;
+                    },
+
                     /**
                      * @override
                      */
@@ -430,15 +436,4 @@ _eRight      - 右侧乐定行的Element元素
             }
         }
     );
-
-    /**
-     * 初始化需要执行关联控制的行控件鼠标事件的默认处理。
-     * 行控件鼠标事件发生时，需要通知关联的行控件也同步产生默认的处理。
-     */
-    eventNames.forEach(function (item) {
-        ui.LockedTable.prototype.Row.prototype['$' + item] = function (event) {
-            ui.Table.prototype.Row.prototype['$' + item].call(this, event);
-            dom.parent(this._eLeft).className = dom.parent(this._eRight).className = this.getMain().className;
-        };
-    });
 }());

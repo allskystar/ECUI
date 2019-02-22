@@ -12,9 +12,7 @@ _cFor - 被转发的控件对象
 //{if 0}//
 (function () {
     var core = ecui,
-        ui = core.ui,
-
-        eventNames = ['mousedown', 'mouseover', 'mousemove', 'mouseout', 'mouseup', 'click', 'dblclick', 'focus', 'blur', 'activate', 'deactivate'];
+        ui = core.ui;
 //{/if}//
     /**
      * 标签控件。
@@ -44,6 +42,7 @@ _cFor - 被转发的控件对象
                     }, this)[0];
 
                 if (target && !target.isDisabled() && !target.contain(event.getControl())) {
+                    core.setFocused(target);
                     core.dispatchEvent(target, 'click', event);
                 }
             },
@@ -60,25 +59,6 @@ _cFor - 被转发的控件对象
             }
         }
     );
-
-    // 初始化事件转发信息
-    eventNames.slice(0, 7).forEach(function (item) {
-        ui.Label.prototype['$' + item] = function (event) {
-            ui.Control.prototype['$' + item].call(this, event);
-
-            var target = this._cFor || core.query(function (item) {
-                    return item instanceof ui.InputControl && this.contain(item);
-                }, this)[0];
-
-            if (target && !target.isDisabled() && !target.contain(event.getControl())) {
-                if (item === 'click') {
-                    core.setFocused(target);
-                }
-
-                core.dispatchEvent(target, item, event);
-            }
-        };
-    });
 //{if 0}//
 }());
 //{/if}//

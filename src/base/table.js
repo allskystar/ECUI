@@ -40,9 +40,7 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
         util = core.util,
 
         firefoxVersion = /firefox\/(\d+\.\d)/i.test(navigator.userAgent) ? +RegExp.$1 : undefined,
-        ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined,
-
-        eventNames = ['mousedown', 'mouseover', 'mousemove', 'mouseout', 'mouseup', 'click', 'dblclick', 'focus', 'blur', 'activate', 'deactivate'];
+        ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined;
 //{/if}//
     /**
      * 初始化单元格。
@@ -278,6 +276,15 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
                     /**
                      * @override
                      */
+                    $click: function (event) {
+                        ui.Control.prototype.$click.call(this, event);
+                        event.cell = this;
+                        core.dispatchEvent(this.getParent().getParent(), 'cellclick', event);
+                    },
+
+                    /**
+                     * @override
+                     */
                     getHeight: function () {
                         return this.getOuter().offsetHeight;
                     },
@@ -408,6 +415,15 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
                     this._bMerge = !!options.merge;
                 },
                 {
+                    /**
+                     * @override
+                     */
+                    $click: function (event) {
+                        ui.Control.prototype.$click.call(this, event);
+                        event.row = this;
+                        core.dispatchEvent(this.getParent(), 'rowclick', event);
+                    },
+
                     /**
                      * @override
                      */
@@ -589,6 +605,12 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
             },
 
             /**
+             * 单元格点击事件。
+             * @event
+             */
+            $cellclick: util.blank,
+
+            /**
              * @override
              */
             $dispose: function () {
@@ -723,6 +745,12 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
                 style.height = '';
                 this._eLayout.style.height = '';
             },
+
+            /**
+             * 行点击事件。
+             * @event
+             */
+            $rowclick: util.blank,
 
             /**
              * @override
@@ -1089,25 +1117,4 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
             }
         }
     );
-
-    // 初始化事件转发信息
-    eventNames.slice(0, 7).forEach(function (item) {
-        var type = item.replace('mouse', '');
-
-        item = '$' + item;
-
-        ui.Table.prototype.Row.prototype[item] = function (event) {
-            ui.Control.prototype[item].call(this, event);
-            event.row = this;
-            core.dispatchEvent(this.getParent(), 'row' + type, event);
-        };
-        ui.Table.prototype['$row' + type] = ui.Table.prototype['$row' + type] || util.blank;
-
-        ui.Table.prototype.Cell.prototype[item] = function (event) {
-            ui.Control.prototype[item].call(this, event);
-            event.cell = this;
-            core.dispatchEvent(this.getParent().getParent(), 'cell' + type, event);
-        };
-        ui.Table.prototype['$cell' + type] = ui.Table.prototype['$cell' + type] || util.blank;
-    });
 }());

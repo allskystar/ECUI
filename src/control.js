@@ -30,9 +30,7 @@ _aStatus            - 控件当前的状态集合
         ui = core.ui,
         util = core.util,
 
-        ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined,
-
-        eventNames = ['mousedown', 'mouseover', 'mousemove', 'mouseout', 'mouseup', 'click', 'dblclick', 'focus', 'blur', 'activate', 'deactivate'];
+        ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined;
 //{/if}//
     var waitReadyList;
 
@@ -173,7 +171,7 @@ _aStatus            - 控件当前的状态集合
                 this.$$width = this._eMain.offsetWidth;
                 this.$$height = this._eMain.offsetHeight;
             },
-//{if 0}//
+
             /**
              * 点击事件。
              * @event
@@ -185,7 +183,7 @@ _aStatus            - 控件当前的状态集合
              * @event
              */
             $dblclick: util.blank,
-//{/if}//
+
             /**
              * 失去激活事件。
              * 控件失去激活时，移除状态样式 active。
@@ -375,7 +373,7 @@ _aStatus            - 控件当前的状态集合
              * @event
              */
             $keyup: util.blank,
-//{if 0}//
+
             /**
              * 鼠标键按下事件。
              * @event
@@ -387,7 +385,7 @@ _aStatus            - 控件当前的状态集合
              * @event
              */
             $mousemove: util.blank,
-//{/if}//
+
             /**
              * 鼠标移出事件。
              * 鼠标移出控件区域时，控件失去悬停状态，移除状态样式 hover。
@@ -405,13 +403,13 @@ _aStatus            - 控件当前的状态集合
             $mouseover: function () {
                 this.alterStatus('+hover');
             },
-//{if 0}//
+
             /**
              * 鼠标键弹起事件。
              * @event
              */
             $mouseup: util.blank,
-//{/if}//
+
             /**
              * 鼠标滚轮事件。
              * @event
@@ -1293,9 +1291,4 @@ _aStatus            - 控件当前的状态集合
             }
         }
     );
-
-    // 初始化事件处理函数，以事件名命名，这些函数行为均是判断控件是否可操作/是否需要调用事件/是否需要执行缺省的事件处理，对应的缺省事件处理函数名以$开头后接事件名，处理函数以及缺省事件处理函数参数均为事件对象，仅执行一次。
-    eventNames.forEach(function (item) {
-        ui.Control.prototype['$' + item] = ui.Control.prototype['$' + item] || util.blank;
-    });
 }());
