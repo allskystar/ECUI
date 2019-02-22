@@ -1479,7 +1479,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
             });
         }
 
-        if (gestureListeners.length) {
+        if (enableGesture && gestureListeners.length) {
             switch (pointers.length) {
             case 1:
                 var track = tracks[pointers[0].identifier];
