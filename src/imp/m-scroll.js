@@ -508,11 +508,12 @@
                         window.scrollTo(0, document.body.scrollHeight + screen.availHeight);
                         keyboardHandle = scrollListener(function () {
                             // 第二次触发，计算软键盘高度
-                            keyboardHeight = window.scrollY + document.body.clientHeight - document.body.scrollHeight - statusHeight;
+                            var height = document.body.scrollHeight - document.body.clientHeight;
+                            keyboardHeight = window.scrollY - height - statusHeight;
                             dom.addEventListener(document, 'touchmove', util.preventEvent);
                             // 复位
                             document.body.style.visibility = '';
-                            window.scrollTo(0, lastScrollY);
+                            window.scrollTo(0, Math.min(lastScrollY, height + keyboardHeight));
 
                             fixed();
                             scrollIntoViewIfNeeded(keyboardHeight);
