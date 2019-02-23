@@ -15,35 +15,34 @@
 //{/if}//
     var tx = /(\-?\d+)px\s*,\s*(\-?\d+)/,
         keyboardHeight = 0,
-        statueHeight = 0,
-        innerKeyboardHeight,
-        bodyScrollTop = 0;
+        statusHeight = 0,
+        innerKeyboardHeight;
 
     if (iosVersion && safariVersion) {
         switch (screen.height) {
         case 568:
             // iphone 5S/SE
-            statueHeight = iosVersion < 12 ? 38 : 44;
+            statusHeight = 44;
             innerKeyboardHeight = 253;
             break;
         case 667:
-            // iphone 6/7/8/6S/7S
-            statueHeight = iosVersion < 12 ? 38 : 44;
-            innerKeyboardHeight = 260;
+            // iphone 6/7/8/6S
+            statusHeight = 44;
+            innerKeyboardHeight = iosVersion < 12 ? 258 : 260;
             break;
         case 736:
             // iphone 6/7/8 Plus
-            statueHeight = iosVersion < 12 ? 38 : 44;
+            statusHeight = 44;
             innerKeyboardHeight = 271;
             break;
         case 812:
             // iphone X/XS
-            statueHeight = 83;
-            innerKeyboardHeight = iosVersion < 12 ? 294 : 296;
+            statusHeight = 83;
+            innerKeyboardHeight = iosVersion < 12 ? 296 : 294;
             break;
         case 896:
             // iphone XR/XS max
-            statueHeight = 83;
+            statusHeight = 83;
             innerKeyboardHeight = 307;
             break;
         }
@@ -252,15 +251,6 @@
     }
 //{/if}//
     function fixed(scrollY) {
-//{if 0}//
-//        if (!isSimulator) {
-//{/if}//
-            // 解除滚动下方的白条与半像素问题
-//            window.scrollTo(0, Math.min(keyboardHeight + bodyScrollTop, window.scrollY));
-//{if 0}//
-//        }
-//{/if}//
-
         scrollY = scrollY === undefined ? window.scrollY : scrollY;
         iosfixedList.forEach(function (item) {
             item.control.getMain().style.transform = 'translateY(' + (item.top ? scrollY : scrollY - keyboardHeight) + 'px)';
@@ -408,7 +398,7 @@
                 keyboardHandle();
 
                 var oldHeight = keyboardHeight;
-                keyboardHeight = Math.max(0, event.height - statueHeight);
+                keyboardHeight = Math.max(0, event.height - statusHeight);
 
                 changeHandle();
                 if (!keyboardHeight) {
@@ -490,7 +480,6 @@
                         scrollIntoViewIfNeeded(keyboardHeight);
                     });
                 } else {
-                    bodyScrollTop = document.body.scrollTop;
                     keyboardHandle = scrollListener(function () {
 //{if 0}//
                         if (isSimulator) {
@@ -501,7 +490,7 @@
                         }
 //{/if}//
                         if (iosVersion === 11.1 || iosVersion === 11.2) {
-                            keyboardHeight = safariVersion ? innerKeyboardHeight : innerKeyboardHeight + statueHeight;
+                            keyboardHeight = safariVersion ? innerKeyboardHeight : innerKeyboardHeight + statusHeight;
                             if (window.scrollY > keyboardHeight) {
                                 window.scrollTo(0, keyboardHeight);
                             }
@@ -516,15 +505,16 @@
                             document.body.style.visibility = '';
                         }, 500);
 
-                        window.scrollTo(0, 1000000);
+                        window.scrollTo(0, document.body.scrollHeight + screen.availHeight);
                         keyboardHandle = scrollListener(function () {
                             // 第二次触发，计算软键盘高度
-                            keyboardHeight = window.scrollY + document.body.clientHeight - document.body.scrollHeight - statueHeight;
+                            keyboardHeight = window.scrollY + document.body.clientHeight - document.body.scrollHeight - statusHeight;
                             dom.addEventListener(document, 'touchmove', util.preventEvent);
                             // 复位
                             document.body.style.visibility = '';
                             window.scrollTo(0, lastScrollY);
-
+target.value = keyboardHeight;
+window.scrollTo(0, document.body.scrollHeight - document.body.clientHeight + keyboardHeight);
                             fixed();
                             scrollIntoViewIfNeeded(keyboardHeight);
                         });
