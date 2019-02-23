@@ -511,9 +511,9 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              * @param {boolean} isMiddle true - 默认值，居中显示 / false - 离最近的可视区域显示
              */
             scrollIntoViewIfNeeded: function (el, isMiddle) {
-                // if (el.scrollIntoViewIfNeeded) {
-                //     el.scrollIntoViewIfNeeded(isMiddle);
-                // } else {
+                if (el.scrollIntoViewIfNeeded) {
+                    el.scrollIntoViewIfNeeded(isMiddle);
+                } else {
                     var top = dom.getPosition(el).top,
                         height = el.offsetHeight,
                         view = util.getView();
@@ -558,7 +558,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                             window.scroll(0, top + height - el.clientHeight);
                         }
                     }
-                // }
+                }
             },
 
             /**
