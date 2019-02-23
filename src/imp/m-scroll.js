@@ -38,7 +38,7 @@
         case 812:
             // iphone X/XS
             statusHeight = 83;
-            innerKeyboardHeight = iosVersion < 12 ? 296 : 294;
+            innerKeyboardHeight = iosVersion < 12 ? 294 : 296;
             break;
         case 896:
             // iphone XR/XS max
@@ -513,8 +513,7 @@
                             // 复位
                             document.body.style.visibility = '';
                             window.scrollTo(0, lastScrollY);
-target.value = keyboardHeight;
-window.scrollTo(0, document.body.scrollHeight - document.body.clientHeight + keyboardHeight);
+
                             fixed();
                             scrollIntoViewIfNeeded(keyboardHeight);
                         });
