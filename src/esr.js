@@ -1312,20 +1312,23 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
          * @return {boolean} 校验是否通过
          */
         parseObject: function (form, data, validate) {
-            var errControl,
-                elements = dom.toArray(form.elements);
+            var elements = dom.toArray(form.elements),
+                firstUnvalid;
 
             elements.forEach(function (item) {
-                if (validate !== false && item.name && item.getControl && !item.getControl().isDisabled()) {
-                    if (!core.dispatchEvent(item.getControl(), 'validate')) {
-                        if (!errControl) {
-                            errControl = item;
+                if (item.getControl) {
+                    var control = item.getControl();
+                }
+
+                if (validate !== false && item.name && control && !control.isDisabled()) {
+                    if (!core.dispatchEvent(control, 'validate')) {
+                        if (!firstUnvalid) {
+                            firstUnvalid = item;
                         }
                     }
                 }
                 if (item.name) {
-                    if (item.getControl) {
-                        var control = item.getControl();
+                    if (control) {
                         if (control.getFormName && control.getFormValue && !control.isDisabled() && (!control.isFormChecked || control.isFormChecked())) {
                             var formName = control.getFormName(),
                                 formValue = control.getFormValue();
@@ -1346,18 +1349,22 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                 }
             });
 
-            if (errControl) {
-                if (errControl.scrollIntoViewIfNeeded) {
-                    errControl.scrollIntoViewIfNeeded();
-                    errControl.focus();
-                } else if (errControl.scrollIntoView) {
-                    errControl.scrollIntoView();
-                    errControl.focus();
+            if (firstUnvalid) {
+                if (firstUnvalid.scrollIntoViewIfNeeded) {
+                    firstUnvalid.scrollIntoViewIfNeeded();
+                    firstUnvalid.focus();
+                } else {
+                    var view = util.getView(),
+                        pos = dom.getPosition(firstUnvalid);
+                    if (pos.top < view.top || pos.top + firstUnvalid.offsetHeight > view.bottom) {
+                        window.scrollTo(window.scrollX, pos.top);
+                    }
+                    firstUnvalid.focus();
                 }
-            } else {
-                ui.InputControl.saveToDefault(elements);
+                return false;
             }
-            return !errControl;
+            ui.InputControl.saveToDefault(elements);
+            return true;
         },
 
         /**
