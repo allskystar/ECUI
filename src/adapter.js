@@ -529,8 +529,12 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
 
                             if (isMiddle || height > clientHeight) {
                                 el.scrollTop += top - clientTop + (height - clientHeight) / 2;
-                                top = elTop;
-                                height = clientHeight;
+                                if (height > clientHeight) {
+                                    top = elTop;
+                                    height = clientHeight;
+                                } else {
+                                    top = dom.getPosition(el).top;
+                                }
                             } else {
                                 if (top < elTop) {
                                     el.scrollTop -= elTop - top;
