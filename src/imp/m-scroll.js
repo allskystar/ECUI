@@ -253,12 +253,12 @@
 //{/if}//
     function fixed(scrollY) {
 //{if 0}//
-        if (!isSimulator) {
+//        if (!isSimulator) {
 //{/if}//
             // 解除滚动下方的白条与半像素问题
-            window.scrollTo(0, Math.min(keyboardHeight + bodyScrollTop, window.scrollY));
+//            window.scrollTo(0, Math.min(keyboardHeight + bodyScrollTop, window.scrollY));
 //{if 0}//
-        }
+//        }
 //{/if}//
 
         scrollY = scrollY === undefined ? window.scrollY : scrollY;
@@ -280,7 +280,7 @@
         }
 
         if (!scroll) {
-            scrollTop = bodyScrollTop;
+            scrollTop = 0;
             scrollHeight = document.body.clientHeight - height;
             activeTop = dom.getPosition(document.activeElement).top - window.scrollY;
         }
@@ -303,8 +303,8 @@
 
         if (scroll) {
             setSafePosition(scroll, scrollY + y, scrollHeight, keyboardHeight);
-        } else {
-            window.scrollTo(0, window.scrollY - y);
+        } else if (y) {
+            window.scrollTo(0, window.scrollY + y);
         }
     }
 
@@ -488,12 +488,6 @@
                         }
                         fixed();
                         scrollIntoViewIfNeeded(keyboardHeight);
-
-                        // 反向动画抵消ios的滚屏动画效果，如果webview关闭了滚屏动画，需要执行fixed()消除抖动
-                        // fixed(lastScrollY);
-                        // effect.grade(function (precent, options) {
-                        //     fixed(lastScrollY + Math.round((options.to - lastScrollY) * precent));
-                        // }, 200, {to: window.scrollY});
                     });
                 } else {
                     bodyScrollTop = document.body.scrollTop;
@@ -514,25 +508,6 @@
                             return;
                         }
 
-                        function calcKeyboardHeight() {
-                            keyboardHandle = scrollListener(function () {
-                                // 第二次触发，计算软键盘高度
-                                keyboardHeight = window.scrollY + document.body.clientHeight - document.body.scrollHeight - statueHeight;
-                                dom.addEventListener(document, 'touchmove', util.preventEvent);
-                                // 复位
-                                document.body.style.visibility = '';
-                                window.scrollTo(0, Math.min(lastScrollY, keyboardHeight));
-
-                                document.body.removeChild(el);
-
-                                fixed();
-                                scrollIntoViewIfNeeded(keyboardHeight);
-                            });
-                        }
-
-                        var el = dom.create('INPUT', {id: 'ECUI-KEYBOARD'});
-                        document.body.appendChild(el);
-
                         // 第一次触发，开始测试软键盘高度
                         lastScrollY = window.scrollY;
                         document.body.style.visibility = 'hidden';
@@ -541,8 +516,18 @@
                             document.body.style.visibility = '';
                         }, 500);
 
-                        el.scrollIntoView();
-                        calcKeyboardHeight();
+                        window.scrollTo(0, 1000000);
+                        keyboardHandle = scrollListener(function () {
+                            // 第二次触发，计算软键盘高度
+                            keyboardHeight = window.scrollY + document.body.clientHeight - document.body.scrollHeight - statueHeight;
+                            dom.addEventListener(document, 'touchmove', util.preventEvent);
+                            // 复位
+                            document.body.style.visibility = '';
+                            window.scrollTo(0, lastScrollY);
+
+                            fixed();
+                            scrollIntoViewIfNeeded(keyboardHeight);
+                        });
                     });
                 }
             });
