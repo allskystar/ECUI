@@ -511,51 +511,54 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              * @param {boolean} isMiddle true - 默认值，居中显示 / false - 离最近的可视区域显示
              */
             scrollIntoViewIfNeeded: function (el, isMiddle) {
-                if (isMiddle === undefined) {
-                    isMiddle = true;
-                }
-
-                if (el.scrollIntoViewIfNeeded) {
-                    el.scrollIntoViewIfNeeded(isMiddle);
-                } else {
+                // if (el.scrollIntoViewIfNeeded) {
+                //     el.scrollIntoViewIfNeeded(isMiddle);
+                // } else {
                     var top = dom.getPosition(el).top,
-                        height = el.offsetHeight;
+                        height = el.offsetHeight,
+                        view = util.getView();
 
+                    if ((top >= view.top && top + height <= view.bottom) || (top < view.top && top + height > view.top) || (top + height > view.bottom && top < view.bottom)) {
+                        // 部分在屏幕外或者指定非居中，靠最近的可视区域显示
+                        isMiddle = false;
+                    } else if (isMiddle === undefined) {
+                        isMiddle = true;
+                    }
                     for (el = dom.parent(el); el !== document.body; el = dom.parent(el)) {
                         if (el.clientHeight !== el.scrollHeight) {
-                            var elTop = dom.getPosition(el).top,
-                                clientTop = elTop + util.toNumber(dom.getStyle(el, 'borderTopWidth')),
-                                clientHeight = el.clientHeight;
+                            var clientTop = dom.getPosition(el).top + util.toNumber(dom.getStyle(el, 'borderTopWidth')),
+                                clientHeight = el.clientHeight,
+                                distance;
 
                             if (isMiddle || height > clientHeight) {
-                                var distance = top + el.scrollTop - clientTop;
-                                el.scrollTop = distance + (height - clientHeight) / 2;
-                                if (height > clientHeight) {
-                                    top = elTop;
-                                    height = clientHeight;
-                                } else {
-                                    top = distance + clientTop - el.scrollTop;
-                                }
+                                // 高度不够居中显示
+                                distance = top + el.scrollTop;
+                                el.scrollTop = distance - clientTop + (height - clientHeight) / 2;
+                                top = distance - el.scrollTop;
                             } else {
-                                if (top < elTop) {
-                                    el.scrollTop -= elTop - top;
-                                    top = elTop;
-                                } else if (top + height > elTop + clientHeight) {
-                                    el.scrollTop += top + height - elTop - clientHeight;
-                                    top = elTop + clientHeight - height;
+                                // 高度足够靠最近的位置
+                                if (top < clientTop) {
+                                    el.scrollTop -= clientTop - top;
+                                    top = clientTop;
+                                } else if (top + height > clientTop + clientHeight) {
+                                    el.scrollTop += top + height - clientTop - clientHeight;
+                                    top = clientTop + clientHeight - height;
                                 }
                             }
                         }
                     }
 
-                    if (isMiddle) {
+                    if (isMiddle || height > el.clientHeight) {
+                        // 高度不够居中显示
                         window.scroll(0, top + (height - el.clientHeight) / 2);
-                    } else if (top < 0) {
-                        window.scroll(0, top);
-                    } else if (top + height > el.clientHeight) {
-                        window.scroll(0, top + height - el.clientHeight);
+                    } else {
+                        if (top < 0) {
+                            window.scroll(0, top);
+                        } else if (top + height > el.clientHeight) {
+                            window.scroll(0, top + height - el.clientHeight);
+                        }
                     }
-                }
+                // }
             },
 
             /**
