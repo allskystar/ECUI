@@ -1350,17 +1350,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
             });
 
             if (firstUnvalid) {
-                if (firstUnvalid.scrollIntoViewIfNeeded) {
-                    firstUnvalid.scrollIntoViewIfNeeded();
-                    firstUnvalid.focus();
-                } else {
-                    var view = util.getView(),
-                        pos = dom.getPosition(firstUnvalid);
-                    if (pos.top < view.top || pos.top + firstUnvalid.offsetHeight > view.bottom) {
-                        window.scrollTo(window.scrollX, pos.top);
-                    }
-                    firstUnvalid.focus();
-                }
+                dom.scrollIntoViewIfNeeded(firstUnvalid);
                 return false;
             }
             ui.InputControl.saveToDefault(elements);

@@ -504,6 +504,56 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
             },
 
             /**
+             * 如果元素不在可视区域，将元素滚动到可视区域。
+             * @public
+             *
+             * @param {HTMLElement} el InputElement 对象
+             * @param {boolean} isMiddle true - 默认值，居中显示 / false - 离最近的可视区域显示
+             */
+            scrollIntoViewIfNeeded: function (el, isMiddle) {
+                if (isMiddle === undefined) {
+                    isMiddle = true;
+                }
+
+                if (el.scrollIntoViewIfNeeded) {
+                    el.scrollIntoViewIfNeeded(isMiddle);
+                } else {
+                    var top = dom.getPosition(el).top,
+                        height = el.offsetHeight;
+
+                    for (el = dom.parent(el); el !== document.body; el = dom.parent(el)) {
+                        if (el.clientHeight !== el.scrollHeight) {
+                            var elTop = dom.getPosition(el).top,
+                                clientTop = elTop + util.toNumber(dom.getStyle(el, 'borderTopWidth')),
+                                clientHeight = el.clientHeight;
+
+                            if (isMiddle || height > clientHeight) {
+                                el.scrollTop += top - clientTop + (height - clientHeight) / 2;
+                                top = elTop;
+                                height = clientHeight;
+                            } else {
+                                if (top < elTop) {
+                                    el.scrollTop -= elTop - top;
+                                    top = elTop;
+                                } else if (top + height > elTop + clientHeight) {
+                                    el.scrollTop += top + height - elTop - clientHeight;
+                                    top = elTop + clientHeight - height;
+                                }
+                            }
+                        }
+                    }
+
+                    if (isMiddle) {
+                        window.scroll(0, top + (height - el.clientHeight) / 2);
+                    } else if (top < 0) {
+                        window.scroll(0, top);
+                    } else if (top + height > el.clientHeight) {
+                        window.scroll(0, top + height - el.clientHeight);
+                    }
+                }
+            },
+
+            /**
              * 设置输入框的表单项属性。
              * 如果没有指定一个表单项，setInput 方法将创建一个表单项。
              * @public
