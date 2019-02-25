@@ -188,27 +188,27 @@
              */
             setPosition: function (x, y) {
                 var main = this.getMain();
-                if (util.hasIOSKeyboard()) {
+//                if (util.hasIOSKeyboard()) {
                     // 解决光标问题
-                    if (this.getX() !== x || this.getY() !== y) {
-                        main.scrollLeft = this.$MScrollData.scrollLeft = 0;
-                        main.scrollTop = this.$MScrollData.scrollTop = 0;
-                        this.getBody().style.transform = 'translate(' + x + 'px,' + y + 'px)';
-                    }
-                } else {
-                    // 滚动结束使用scrollxxx解决删除时自动复位的问题
-                    var style = this.getBody().style;
-                    style.transform = '';
-                    main.scrollLeft = -x;
-                    main.scrollTop = -y;
-                    this.$MScrollData.scrollLeft = main.scrollLeft;
-                    this.$MScrollData.scrollTop = main.scrollTop;
-                    x += this.$MScrollData.scrollLeft;
-                    y += this.$MScrollData.scrollTop;
-                    if (x || y) {
-                        style.transform = 'translate(' + x + 'px,' + y + 'px)';
-                    }
+                if (this.getX() !== x || this.getY() !== y) {
+                    main.scrollLeft = this.$MScrollData.scrollLeft = 0;
+                    main.scrollTop = this.$MScrollData.scrollTop = 0;
+                    this.getBody().style.transform = 'translate3d(' + x + 'px,' + y + 'px,0px)';
                 }
+//                } else {
+                    // 滚动结束使用scrollxxx解决删除时自动复位的问题
+//                    var style = this.getBody().style;
+//                    style.transform = '';
+//                    main.scrollLeft = -x;
+//                    main.scrollTop = -y;
+//                    this.$MScrollData.scrollLeft = main.scrollLeft;
+//                    this.$MScrollData.scrollTop = main.scrollTop;
+//                    x += this.$MScrollData.scrollLeft;
+//                    y += this.$MScrollData.scrollTop;
+//                    if (x || y) {
+//                        style.transform = 'translate(' + x + 'px,' + y + 'px)';
+//                    }
+//                }
             },
 
             /**
