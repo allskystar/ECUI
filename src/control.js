@@ -899,6 +899,16 @@ _aStatus            - 控件当前的状态集合
             },
 
             /**
+             * 获取控件用于设置 Position 的 DOM 元素。
+             * @public
+             *
+             * @return {HTMLElement} 控件用于设置 Position 的元素
+             */
+            getPositionElement: function () {
+                return this.getOuter();
+            },
+
+            /**
              * 获取控件的基本样式。
              * getPrimary 方法返回控件生成时指定的 primary 参数(参见 create 方法)。基本样式与通过 getClass 方法返回的当前样式存在区别，在控件生成初期，当前样式等于基本样式，基本样式在初始化后无法改变，setClass 方法改变当前样式。
              * @public

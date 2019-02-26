@@ -135,6 +135,8 @@
                 if (event.type === 'mousedown' && !dom.contain(this.$PopupData.popup.getOuter(), event.target)) {
                     // ie6/7/8下有可能scroll事件是由mousedown点击滚动条触发的
                     this.$PopupData.popup.hide();
+                } else if (ui.Popup.getOwner()) {
+                    setPopupPosition(this.$PopupData.popup);
                 }
             },
 

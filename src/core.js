@@ -707,25 +707,52 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                 if (inertia) {
                     var ax = vx / inertia,
                         ay = vy / inertia,
-                        env = currEnv,
-                        startX = track.x,
+                        env = currEnv;
+
+                    if (isToucher) {
+                        inertiaHandles[uid] = function () {
+                            stopHandler();
+                            var el = target.getPositionElement(),
+                                pos = dom.getPosition(el);
+                            el.style.transition = '';
+                            target.setPosition(pos.left - startPos.left + startX, pos.top - startPos.top + startY);
+                        };
+                        // 计算期待移到的位置
+                        var el = target.getPositionElement(),
+                            expectX = Math.round(env.originalX + Math.round(mx + vx * inertia - ax * inertia * inertia / 2) - track.logicX),
+                            expectY = Math.round(env.originalY + Math.round(my + vy * inertia - ay * inertia * inertia / 2) - track.logicY),
+                            // 计算实际允许移到的位置
+                            realX = Math.min(Math.max(expectX, env.left), env.right),
+                            realY = Math.min(Math.max(expectY, env.top), env.bottom),
+                            stopHandler = util.timer(function () {
+                                inertiaHandles[uid]();
+                            }, inertia * 1000 + 100),
+                            startPos = dom.getPosition(el),
+                            startX = target.getX(),
+                            startY = target.getY();
+
+                        el.style.transition = 'transform ' + inertia + 's cubic-bezier(0.1,0.57,0.1,1)';
+                        delete currEnv.event;
+                        target.setPosition(realX, realY);
+                    } else {
+                        startX = track.x;
                         startY = track.y;
+                        inertiaHandles[uid] = util.timer(function () {
+                            var time = (Date.now() - start) / 1000,
+                                t = Math.min(time, inertia),
+                                x = track.x,
+                                y = track.y;
 
-                    inertiaHandles[uid] = util.timer(function () {
-                        var time = (Date.now() - start) / 1000,
-                            t = Math.min(time, inertia),
-                            x = track.x,
-                            y = track.y;
-
-                        dragmove(track, env, Math.round(mx + vx * t - ax * t * t / 2), Math.round(my + vy * t - ay * t * t / 2));
-                        if (t >= inertia || (x === track.x && y === track.y)) {
-                            inertiaHandles[uid]();
-                            if (env.event && startX === x && startY === y) {
-                                env.event.inertia = false;
+                            dragmove(track, env, Math.round(mx + vx * t - ax * t * t / 2), Math.round(my + vy * t - ay * t * t / 2));
+                            if (t >= inertia || (x === track.x && y === track.y)) {
+                                inertiaHandles[uid]();
+                                if (env.event && startX === x && startY === y) {
+                                    env.event.inertia = false;
+                                }
+                                dragend(dragEvent, env, target);
                             }
-                            dragend(dragEvent, env, target);
-                        }
-                    }, -20);
+                        }, -20);
+                    }
                 } else {
                     dragend(dragEvent, currEnv, target);
                 }
@@ -1156,15 +1183,14 @@ outer:          for (var caches = [], target = event.target, el; target; target 
             return;
         }
 
-        var target = env.target,
-            // 计算期待移到的位置
-            expectX = Math.round(env.originalX + x - track.logicX),
+        // 计算期待移到的位置
+        var expectX = Math.round(env.originalX + x - track.logicX),
             expectY = Math.round(env.originalY + y - track.logicY),
             // 计算实际允许移到的位置
             realX = Math.min(Math.max(expectX, env.left), env.right),
             realY = Math.min(Math.max(expectY, env.top), env.bottom);
 
-        dragAnimationFrame(env, target, {track: track, x: realX, y: realY, inertia: env !== currEnv});
+        dragAnimationFrame(env, env.target, {track: track, x: realX, y: realY, inertia: env !== currEnv});
 
         track.x = realX;
         track.y = realY;

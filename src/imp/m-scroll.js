@@ -124,6 +124,13 @@
             },
 
             /**
+             * @override
+             */
+            getPositionElement: function () {
+                return this.getBody();
+            },
+
+            /**
              * 获取正常显示范围，用于拖拽结束后归位设置。
              * @public
              *
