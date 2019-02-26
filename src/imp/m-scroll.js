@@ -79,7 +79,7 @@
                 var main = this.getMain(),
                     body = this.getBody(),
                     data = this.$MScrollData,
-                    flag = util.hasIOSKeyboard() && tx.test(body.style.transform);
+                    flag = /*util.hasIOSKeyboard() &&*/ tx.test(body.style.transform);
 
                 core.drag(
                     this,

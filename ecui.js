@@ -80,10 +80,10 @@ var ecui;
     document.write('<script type="text/javascript" src="src/bi/multi-select.js"></script>');
     document.write('<script type="text/javascript" src="src/bi/pagination.js"></script>');
     document.write('<script type="text/javascript" src="src/bi/quarter-input.js"></script>');
+    document.write('<script type="text/javascript" src="src/bi/table-list-route.js"></script>');
     document.write('<script type="text/javascript" src="src/bi/queryButton.js"></script>');
     document.write('<script type="text/javascript" src="src/bi/selectTree.js"></script>');
     document.write('<script type="text/javascript" src="src/bi/switch.js"></script>');
-    document.write('<script type="text/javascript" src="src/bi/table-list-route.js"></script>');
     document.write('<script type="text/javascript" src="src/bi/ext-float.js"></script>');
     document.write('<script type="text/javascript" src="src/bi/img-fill.js"></script>');
 
