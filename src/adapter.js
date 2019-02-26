@@ -217,8 +217,8 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                     body = document.body,
                     html = dom.parent(body);
 
-                if (ieVersion) {
-                    if (!isStrict) {
+                if (el.getBoundingClientRect) {
+                    if (ieVersion && !isStrict) {
                         // 在怪异模式下，IE 将 body 的边框也算在了偏移值中，需要先纠正
                         var style = dom.getStyle(body);
                         if (isNaN(top = util.toNumber(style.borderTopWidth))) {
@@ -251,19 +251,21 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                         top -= body.offsetTop;
                     }
 
-                    for (parent = dom.parent(el); parent !== body; parent = dom.parent(parent)) {
+                    for (parent = dom.parent(el); parent !== html; parent = dom.parent(parent)) {
                         left -= parent.scrollLeft;
                         if (!operaVersion) {
                             style = dom.getStyle(parent);
-                            // 以下解决firefox下特殊的布局引发的双倍border边距偏移的问题，使用 html 作为临时变量
-                            html = firefoxVersion && style.overflow !== 'visible' && childStyle.position === 'absolute' ? 2 : 1;
-                            top += util.toNumber(style.borderTopWidth) * html - parent.scrollTop;
-                            left += util.toNumber(style.borderLeftWidth) * html;
+                            // 以下解决firefox下特殊的布局引发的双倍border边距偏移的问题
+                            var ratio = firefoxVersion && style.overflow !== 'visible' && childStyle.position === 'absolute' ? 2 : 1;
+                            top += util.toNumber(style.borderTopWidth) * ratio - parent.scrollTop;
+                            left += util.toNumber(style.borderLeftWidth) * ratio;
                             childStyle = style;
                         } else if (parent.tagName !== 'TR') {
                             top -= parent.scrollTop;
                         }
                     }
+                    top -= html.scrollTop;
+                    left -= html.scrollLeft;
                 }
 
                 return {top: top, left: left};

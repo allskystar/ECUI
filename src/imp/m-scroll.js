@@ -209,6 +209,12 @@
 //                        style.transform = 'translate(' + x + 'px,' + y + 'px)';
 //                    }
 //                }
+                core.query(function (item) {
+                    return this.contain(item);
+                }.bind(this)).forEach(function (item) {
+                    core.dispatchEvent(item, 'beforescroll', {deltaX: x, deltaY: y});
+                    core.dispatchEvent(item, 'scroll', {deltaX: x, deltaY: y});
+                });
             },
 
             /**
