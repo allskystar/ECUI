@@ -53,6 +53,10 @@ _nBottomIndex  - 下部隐藏的选项序号
                 this._eFooter = dom.insertAfter(dom.create({className: options.classes.join('-footer ')}), body);
                 dom.insertAfter(this._eEmpty, body);
                 this._oHandle = util.blank;
+
+                this._nTopHidden = this._nBottomHidden = 0;
+                this._nTopIndex = 0;
+                this._nBottomIndex = this.getLength();
             },
             function (el, options) {
                 if (options.customEmpty) {
@@ -235,16 +239,6 @@ _nBottomIndex  - 下部隐藏的选项序号
              */
             $loaddata: function () {
                 return false;
-            },
-
-            /**
-             * @override
-             */
-            $ready: function () {
-                ui.Control.prototype.$ready.call(this);
-                this._nTopHidden = this._nBottomHidden = 0;
-                this._nTopIndex = 0;
-                this._nBottomIndex = this.getLength();
             },
 
             /**

@@ -712,8 +712,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                     if (isToucher) {
                         inertiaHandles[uid] = function () {
                             stopHandler();
-                            var el = target.getPositionElement(),
-                                pos = dom.getPosition(el);
+                            var pos = dom.getPosition(el);
                             el.style.transition = '';
                             target.setPosition(pos.left - startPos.left + startX, pos.top - startPos.top + startY);
                         };
@@ -726,10 +725,27 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                             realY = Math.min(Math.max(expectY, env.top), env.bottom),
                             stopHandler = util.timer(function () {
                                 inertiaHandles[uid]();
-                            }, inertia * 1000 + 100),
+                                dragend(dragEvent, env, target);
+                            }, inertia * 1000),
                             startPos = dom.getPosition(el),
                             startX = target.getX(),
                             startY = target.getY();
+
+                        if (env.limit) {
+                            var scale = 1 - 1 / (env.limitRatio || 3);
+
+                            if (realX < env.limitLeft) {
+                                realX -= Math.round((realX - env.limitLeft) * scale);
+                            } else if (realX > env.limitRight) {
+                                realX -= Math.round((realX - env.limitRight) * scale);
+                            }
+
+                            if (realY < env.limitTop) {
+                                realY -= Math.round((realY - env.limitTop) * scale);
+                            } else if (realY > env.limitBottom) {
+                                realY -= Math.round((realY - env.limitBottom) * scale);
+                            }
+                        }
 
                         el.style.transition = 'transform ' + inertia + 's cubic-bezier(0.1,0.57,0.1,1)';
                         delete currEnv.event;
@@ -1127,7 +1143,6 @@ outer:          for (var caches = [], target = event.target, el; target; target 
 
         if (env.limit) {
             var range = env.limit,
-                el = env.el || target.getOuter(),
                 x = target.getX(),
                 y = target.getY(),
                 expectX = Math.min(range.right === undefined ? x : range.right, Math.max(range.left === undefined ? x : range.left, x)),
@@ -1141,27 +1156,48 @@ outer:          for (var caches = [], target = event.target, el; target; target 
             }
 
             if (x !== expectX || y !== expectY) {
-                inertiaHandles[uid] = effect.grade(
-                    function (percent, options) {
-                        event.x = Math.round(options.x + percent * (expectX - options.x));
-                        event.y = Math.round(options.y + percent * (expectY - options.y));
-                        event.inertia = true;
-                        event.reset = true;
-
-                        dragAnimationFrame(env, target, event);
-
-                        if (percent >= 1) {
+                if (isToucher) {
+                    inertiaHandles[uid] = function () {
+                        stopHandler();
+                        var pos = dom.getPosition(el);
+                        el.style.transition = '';
+                        target.setPosition(pos.left - startPos.left + startX, pos.top - startPos.top + startY);
+                    };
+                    // 计算期待移到的位置
+                    var el = target.getPositionElement(),
+                        stopHandler = util.timer(function () {
                             inertiaHandles[uid]();
-                            finish();
+                        }, 500),
+                        startPos = dom.getPosition(el),
+                        startX = target.getX(),
+                        startY = target.getY();
+
+                    el.style.transition = 'transform 0.5s';
+                    delete env.event;
+                    target.setPosition(expectX, expectY);
+                } else {
+                    inertiaHandles[uid] = effect.grade(
+                        function (percent, options) {
+                            event.x = Math.round(options.x + percent * (expectX - options.x));
+                            event.y = Math.round(options.y + percent * (expectY - options.y));
+                            event.inertia = true;
+                            event.reset = true;
+
+                            dragAnimationFrame(env, target, event);
+
+                            if (percent >= 1) {
+                                inertiaHandles[uid]();
+                                finish();
+                            }
+                        },
+                        500,
+                        {
+                            $: env.el || target.getOuter(),
+                            x: x,
+                            y: y
                         }
-                    },
-                    500,
-                    {
-                        $: el,
-                        x: x,
-                        y: y
-                    }
-                );
+                    );
+                }
                 return;
             }
         }
@@ -2224,7 +2260,6 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                     dragEnv.limitBottom = dragEnv.limit.bottom === undefined ? dragEnv.bottom : dragEnv.limit.bottom;
                     dragEnv.bottom += (dragEnv.bottom - dragEnv.limitBottom) * (dragEnv.limitRatio - 1);
                 }
-
                 dragEnv.target = control;
                 setEnv(dragEnv);
 
