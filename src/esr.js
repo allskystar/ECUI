@@ -1062,7 +1062,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
             }
 
             route.view = route.view || name;
-            if (name.indexOf('/') !== 0) {
+            if (name.charCodeAt(0) !== 47) { // '/'字符
                 name = '/' + (hasReady ? getModuleName(esr.getLocation()) : '') + name;
             }
 //{if 1}//            if (!route.main) {//{/if}//
