@@ -16,7 +16,8 @@
     var tx = /(\-?\d+)px\s*,\s*(\-?\d+)/,
         keyboardHeight = 0,
         statusHeight = 0,
-        innerKeyboardHeight;
+        innerKeyboardHeight,
+        transformName = iosVersion < 9 ? 'webkitTransform' : 'transform';
 
     if (iosVersion && safariVersion) {
         switch (screen.height) {
@@ -79,7 +80,7 @@
                 var main = this.getMain(),
                     body = this.getBody(),
                     data = this.$MScrollData,
-                    flag = /*util.hasIOSKeyboard() &&*/ tx.test(body.style.transform);
+                    flag = /*util.hasIOSKeyboard()*/ !iosVersion && tx.test(body.style[transformName]);
 
                 core.drag(
                     this,
@@ -152,7 +153,7 @@
              */
             getX: function () {
                 var main = this.getMain();
-                return (tx.test(this.getBody().style.transform) ? +RegExp.$1 : 0) - (main.offsetWidth ? main.scrollLeft : this.$MScrollData.scrollLeft || 0);
+                return (tx.test(this.getBody().style[transformName]) ? +RegExp.$1 : 0) - (main.offsetWidth ? main.scrollLeft : this.$MScrollData.scrollLeft || 0);
             },
 
             /**
@@ -160,7 +161,7 @@
              */
             getY: function () {
                 var main = this.getMain();
-                return (tx.test(this.getBody().style.transform) ? +RegExp.$2 : 0) - (main.offsetWidth ? main.scrollTop : this.$MScrollData.scrollTop || 0);
+                return (tx.test(this.getBody().style[transformName]) ? +RegExp.$2 : 0) - (main.offsetWidth ? main.scrollTop : this.$MScrollData.scrollTop || 0);
             },
 
             /**
@@ -193,7 +194,7 @@
                 if (this.getX() !== x || this.getY() !== y) {
                     main.scrollLeft = this.$MScrollData.scrollLeft = 0;
                     main.scrollTop = this.$MScrollData.scrollTop = 0;
-                    this.getBody().style.transform = 'translate3d(' + x + 'px,' + y + 'px,0px)';
+                    this.getBody().style[transformName] = 'translate3d(' + x + 'px,' + y + 'px,0px)';
                 }
 //                } else {
                     // 滚动结束使用scrollxxx解决删除时自动复位的问题
@@ -259,7 +260,7 @@
     function fixed(scrollY) {
         scrollY = scrollY === undefined ? window.scrollY : scrollY;
         iosfixedList.forEach(function (item) {
-            item.control.getMain().style.transform = 'translateY(' + (item.top ? scrollY : scrollY - keyboardHeight) + 'px)';
+            item.control.getMain().style[transformName] = 'translateY(' + (item.top ? scrollY : scrollY - keyboardHeight) + 'px)';
         });
     }
 
@@ -356,7 +357,7 @@
                 (scroll.$MScrollData.bottom !== undefined ? scroll.$MScrollData.bottom : 0) + window.scrollY,
                 Math.max(
                     // ios下data.top已经提前计算好，android下window.scrollY与keyboardHeight恒为零
-                    (scroll.$MScrollData.top !== undefined ? scroll.$MScrollData.top : scrollHeight - scroll.getMain().scrollHeight + (util.hasIOSKeyboard() && tx.test(scroll.getBody().style.transform) ? +RegExp.$2 : 0)) + window.scrollY - keyboardHeight,
+                    (scroll.$MScrollData.top !== undefined ? scroll.$MScrollData.top : scrollHeight - scroll.getMain().scrollHeight + (util.hasIOSKeyboard() && tx.test(scroll.getBody().style[transformName]) ? +RegExp.$2 : 0)) + window.scrollY - keyboardHeight,
                     y
                 )
             )
@@ -454,7 +455,7 @@
                     if (item.$MScrollData.top === undefined) {
                         item.$MScrollData.cacheTop = true;
                         var main = item.getMain();
-                        item.$MScrollData.top = main.clientHeight - main.scrollHeight + (tx.test(item.getBody().style.transform) ? +RegExp.$2 : 0);
+                        item.$MScrollData.top = main.clientHeight - main.scrollHeight + (tx.test(item.getBody().style[transformName]) ? +RegExp.$2 : 0);
                     }
                 });
 
@@ -551,7 +552,7 @@
                 }
 
                 iosfixedList.forEach(function (item) {
-                    item.control.getMain().style.transform = '';
+                    item.control.getMain().style[transformName] = '';
                 });
 
                 core.query(function (item) {
@@ -612,7 +613,7 @@
                 for (var scroll = core.findControl(event.target); scroll; scroll = scroll.getParent()) {
                     if (scroll.$MScroll) {
                         // 终止之前可能存在的惯性状态，并设置滚动层的位置
-                        scroll.getBody().style.transform = '';
+                        scroll.getBody().style[transformName] = '';
                         core.drag(scroll);
                         keyboardHandle = scrollListener(function () {
                             setSafePosition(scroll, scroll.getY(), scroll.getMain().clientHeight, 0);
