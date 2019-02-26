@@ -22,7 +22,8 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
         ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined,
         firefoxVersion = /firefox\/(\d+\.\d)/i.test(navigator.userAgent) ? +RegExp.$1 : undefined;
 //{/if}//
-    var historyIndex = 0,
+    var hasReady = false,
+        historyIndex = 0,
         leaveUrl,
         delegateRoutes = {},    // 路由赋值的委托，如果路由不存在，会保存在此处
         routeRequestCount = 0,  // 记录路由正在加载的数量，用于解决第一次加载时要全部加载完毕才允许init操作
@@ -528,6 +529,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
             } else {
                 setInterval(listener, 100);
             }
+            hasReady = true;
         }
     }
 
@@ -1061,7 +1063,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
 
             route.view = route.view || name;
             if (name.indexOf('/') !== 0) {
-                name = '/' + getModuleName(esr.getLocation()) + name;
+                name = '/' + (hasReady ? getModuleName(esr.getLocation()) : '') + name;
             }
 //{if 1}//            if (!route.main) {//{/if}//
 //{if 1}//                var main = name.slice(1).replace(/[._]/g, '-').replace(/\//g, '_');//{/if}//
