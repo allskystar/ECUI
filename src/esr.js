@@ -1303,7 +1303,17 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
             var route = routes[calcUrl(name)];
             return route.TYPE === 'frame' ? route.children : route;
         },
-
+//{if 0}//
+        /**
+         * 获取全部的路由信息，仅在DEV阶段有效。
+         * @public
+         *
+         * @return {object} 全部路由信息
+         */
+        getRoutes: function () {
+            return routes;
+        },
+//{/if}//
         /**
          * 将一个 Form 表单转换成对象。
          * @public
