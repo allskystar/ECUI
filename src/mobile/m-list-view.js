@@ -61,6 +61,7 @@ _nBottomIndex  - 下部隐藏的选项序号
                     this._eEmpty = dom.create({className: options.classes.join('-empty-body ')});
                 }
                 ui.Control.call(this, el, options);
+                this._sStatus = '';
             }
         ],
         {

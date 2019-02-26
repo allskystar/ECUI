@@ -5,7 +5,10 @@
 //{if 0}//
     var core = ecui,
         dom = core.dom,
-        ui = core.ui;
+        ui = core.ui,
+        util = core.util,
+
+        ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined;
 //{/if}//
     /**
      * 隐藏弹出层控件。
@@ -36,15 +39,17 @@
             container.style.position = 'relative';
         }
 
-        var top = 0,
-            left = 0;
-        for (; el !== container; ) {
-            top += el.offsetTop;
-            left += el.offsetLeft;
-            el = el.offsetParent;
+        if (ieVersion < 8) {
+            var style = dom.getStyle(container, 'borderWidth').split(' ');
+            style = {borderTopWidth: style[0], borderLeftWidth: style[3] || style[1] || style[0]};
+        } else {
+            style = dom.getStyle(container);
         }
-
-        var popupTop = top + owner.getHeight(),
+        var elPos = dom.getPosition(el),
+            containerPos = dom.getPosition(container),
+            top = elPos.top - containerPos.top - util.toNumber(style.borderTopWidth),
+            left = elPos.left - containerPos.left - util.toNumber(style.borderLeftWidth),
+            popupTop = top + owner.getHeight(),
             popupLeft = left,
             height = popup.getHeight(),
             width = popup.getWidth();
