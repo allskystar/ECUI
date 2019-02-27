@@ -22,7 +22,6 @@ _nBottomIndex  - 下部隐藏的选项序号
         ui = core.ui,
         util = core.util,
 
-        isToucher = document.ontouchstart !== undefined,
         ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined;
 //{/if}//
     function setEnterAndLeave() {
@@ -450,7 +449,7 @@ _nBottomIndex  - 下部隐藏的选项序号
             setPosition: function (x, y) {
                 this.preventAlterItems();
 
-                if (!isToucher && (!this.$MScrollData.scrolling || this.$MScrollData.inertia)) {
+                if (ieVersion < 9 && (!this.$MScrollData.scrolling || this.$MScrollData.inertia)) {
                     var top = ui.MScroll.Methods.getY.call(this);
 
                     if (top < -screen.availHeight * 1.5) {

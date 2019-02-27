@@ -709,17 +709,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                         ay = vy / inertia,
                         env = currEnv;
 
-                    if (isToucher) {
-                        var result = calcPosition(track, env, Math.round(mx + vx * inertia - ax * inertia * inertia / 2), Math.round(my + vy * inertia - ay * inertia * inertia / 2));
-
-                        delete currEnv.event;
-                        core.dispatchEvent(target, 'dragmove', {x: result.x, y: result.y, inertia: true});
-                        createInertiaHandles(target, inertia * 1000, function () {
-                            dragend(dragEvent, env, target);
-                        });
-                        target.getPositionElement().style.transition = 'transform ' + inertia + 's cubic-bezier(0.1,0.57,0.1,1)';
-                        target.setPosition(result.x, result.y);
-                    } else {
+                    if (ieVersion < 9) {
                         var startX = track.x,
                             startY = track.y;
 
@@ -738,6 +728,16 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                                 dragend(dragEvent, env, target);
                             }
                         }, -20);
+                    } else {
+                        var result = calcPosition(track, env, Math.round(mx + vx * inertia - ax * inertia * inertia / 2), Math.round(my + vy * inertia - ay * inertia * inertia / 2));
+
+                        delete currEnv.event;
+                        core.dispatchEvent(target, 'dragmove', {x: result.x, y: result.y, inertia: true});
+                        createInertiaHandles(target, inertia * 1000, function () {
+                            dragend(dragEvent, env, target);
+                        });
+                        target.getPositionElement().style.transition = 'all ' + inertia + 's cubic-bezier(0.1,0.57,0.1,1)';
+                        target.setPosition(result.x, result.y);
                     }
                 } else {
                     dragend(dragEvent, currEnv, target);
@@ -1182,12 +1182,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
             }
 
             if (x !== expectX || y !== expectY) {
-                if (isToucher) {
-                    delete env.event;
-                    createInertiaHandles(target, 300, finish);
-                    target.getPositionElement().style.transition = 'transform 0.5s';
-                    target.setPosition(expectX, expectY);
-                } else {
+                if (ieVersion < 9) {
                     inertiaHandles[uid] = effect.grade(
                         function (percent, options) {
                             event.x = Math.round(options.x + percent * (expectX - options.x));
@@ -1208,6 +1203,11 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                             y: y
                         }
                     );
+                } else {
+                    delete env.event;
+                    createInertiaHandles(target, 300, finish);
+                    target.getPositionElement().style.transition = 'all 0.5s';
+                    target.setPosition(expectX, expectY);
                 }
                 return;
             }
