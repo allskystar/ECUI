@@ -95,8 +95,7 @@ _eRight      - 右侧乐定行的Element元素
      */
     function splitRow(table, row) {
         var elements = row.$getElements(),
-            body = row.getBody(),
-            height = row.getHeight();
+            body = row.getBody();
 
         table.getHCells().forEach(function (item, index) {
             if (item = elements[index]) {
@@ -117,7 +116,7 @@ _eRight      - 右侧乐定行的Element元素
             }
         }
 
-        row._eLeft.style.height = row._eRight.style.height = row.getMain().style.height = height + 'px';
+        row._eLeft.style.height = row._eRight.style.height = row.getMain().style.height = row.getHeight() + 'px';
     }
 
     /**
