@@ -69,7 +69,6 @@ _eRight      - 右侧乐定行的Element元素
 
         if (row._bEmpty) {
             delete row._bEmpty;
-
             if (ieVersion < 9) {
                 el.removeChild(el.firstChild);
             } else {

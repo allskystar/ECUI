@@ -733,11 +733,15 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
                         delete currEnv.event;
                         core.dispatchEvent(target, 'dragmove', {x: result.x, y: result.y, inertia: true});
-                        createInertiaHandles(target, inertia * 1000, function () {
-                            dragend(dragEvent, env, target);
-                        });
-                        target.getPositionElement().style.transition = 'all ' + inertia + 's cubic-bezier(0.1,0.57,0.1,1)';
-                        target.setPosition(result.x, result.y);
+                        if (result.x !== target.getX() || result.y !== target.getY()) {
+                            createInertiaHandles(target, inertia * 1000, function () {
+                                dragend(dragEvent, env, target);
+                            });
+                            target.getPositionElement().style.transition = 'all ' + inertia + 's cubic-bezier(0.1,0.57,0.1,1)';
+                            target.setPosition(result.x, result.y);
+                        } else {
+                            dragend(dragEvent, currEnv, target);
+                        }
                     }
                 } else {
                     dragend(dragEvent, currEnv, target);
@@ -1073,7 +1077,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
         var uid = target.getUID(),
             el = target.getPositionElement(),
             stopHandler = util.timer(function () {
-                inertiaHandles[uid]();
+                el.style.transition = '';
                 delete inertiaHandles[uid];
                 if (callback) {
                     callback();

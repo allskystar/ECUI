@@ -14,7 +14,7 @@
         ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined,
         safariVersion = !/(chrome|crios|ucbrowser)/i.test(navigator.userAgent) && /(\d+\.\d)(\.\d)?\s+.*safari/i.test(navigator.userAgent) ? +RegExp.$1 : undefined;
 //{/if}//
-    var tx = /(\-?\d+)px\s*,\s*(\-?\d+)/,
+    var tx = /(\-?\d+|\-?\d+\.\d+)px\s*,\s*(\-?\d+|\-?\d+\.\d+)px/,
         keyboardHeight = 0,
         statusHeight = 0,
         innerKeyboardHeight,
@@ -90,9 +90,9 @@
                         el: body,
                         decelerate: 400,
                         absolute: true,
-                        left: data.left !== undefined ? data.left : main.clientWidth - main.scrollWidth + (flag ? +RegExp.$1 : 0),
+                        left: data.left !== undefined ? data.left : main.clientWidth - (iosVersion ? body.offsetWidth : main.scrollWidth - (flag ? +RegExp.$1 : 0)),
                         right: data.right !== undefined ? data.right : 0,
-                        top: (data.top !== undefined ? data.top : main.clientHeight - main.scrollHeight + (flag ? +RegExp.$2 : 0)) + Math.min(0, window.scrollY - keyboardHeight),
+                        top: (data.top !== undefined ? data.top : main.clientHeight - (iosVersion ? body.offsetHeight : main.scrollHeight - (flag ? +RegExp.$2 : 0))) + Math.min(0, window.scrollY - keyboardHeight),
                         bottom: (data.bottom !== undefined ? data.bottom : 0) + window.scrollY,
                         limit: data.range
                     }
