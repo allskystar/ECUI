@@ -53,10 +53,6 @@ _nBottomIndex  - 下部隐藏的选项序号
                 this._eFooter = dom.insertAfter(dom.create({className: options.classes.join('-footer ')}), body);
                 dom.insertAfter(this._eEmpty, body);
                 this._oHandle = util.blank;
-
-                this._nTopHidden = this._nBottomHidden = 0;
-                this._nTopIndex = 0;
-                this._nBottomIndex = this.getLength();
             },
             function (el, options) {
                 if (options.customEmpty) {
@@ -230,7 +226,9 @@ _nBottomIndex  - 下部隐藏的选项序号
             $initStructure: function (width, height) {
                 ui.Control.prototype.$initStructure.call(this, width, height);
                 this.alterStatus(this.getLength() ? '-empty' : '+empty');
-                this.setPosition(0, 0);
+                if (this.isReady()) {
+                    this.setPosition(0, 0);
+                }
             },
 
             /**
@@ -239,6 +237,17 @@ _nBottomIndex  - 下部隐藏的选项序号
              */
             $loaddata: function () {
                 return false;
+            },
+
+            /**
+             * @override
+             */
+            $ready: function () {
+                ui.Control.prototype.$ready.call(this);
+                this._nTopHidden = this._nBottomHidden = 0;
+                this._nTopIndex = 0;
+                this._nBottomIndex = this.getLength();
+                this.setPosition(0, 0);
             },
 
             /**
@@ -440,47 +449,49 @@ _nBottomIndex  - 下部隐藏的选项序号
             setPosition: function (x, y) {
                 this.preventAlterItems();
 
-                var top = ui.MScroll.Methods.getY.call(this);
+                if (ieVersion < 9 && (!this.$MScrollData.scrolling || this.$MScrollData.inertia)) {
+                    var top = ui.MScroll.Methods.getY.call(this);
 
-                if (top < -screen.availHeight * 1.5) {
-                    for (; top < -screen.availHeight * 1.5; ) {
-                        var item = this.getItem(this._nTopIndex++),
+                    if (top < -screen.availHeight * 1.5) {
+                        for (; top < -screen.availHeight * 1.5; ) {
+                            var item = this.getItem(this._nTopIndex++),
+                                height = item.getHeight();
+
+                            item.hide();
+                            this._nTopHidden += height;
+                            top += height;
+                        }
+                    } else if (top > -screen.availHeight) {
+                        for (; top > -screen.availHeight && this._nTopIndex; ) {
+                            item = this.getItem(--this._nTopIndex);
                             height = item.getHeight();
 
-                        item.hide();
-                        this._nTopHidden += height;
-                        top += height;
+                            item.show();
+                            this._nTopHidden -= height;
+                            top -= height;
+                        }
                     }
-                } else if (top > -screen.availHeight) {
-                    for (; top > -screen.availHeight && this._nTopIndex; ) {
-                        item = this.getItem(--this._nTopIndex);
-                        height = item.getHeight();
 
-                        item.show();
-                        this._nTopHidden -= height;
-                        top -= height;
-                    }
-                }
+                    top = this.getHeight() - this.$$bodyHeight - y + this._nBottomHidden;
+                    if (top < -screen.availHeight * 1.5) {
+                        for (; top < -screen.availHeight * 1.5; ) {
+                            item = this.getItem(--this._nBottomIndex);
+                            height = item.getHeight();
 
-                top = this.getHeight() - this.$$bodyHeight - y + this._nBottomHidden;
-                if (top < -screen.availHeight * 1.5) {
-                    for (; top < -screen.availHeight * 1.5; ) {
-                        item = this.getItem(--this._nBottomIndex);
-                        height = item.getHeight();
+                            item.hide();
+                            this._nBottomHidden += height;
+                            top += height;
+                        }
+                    } else if (top > -screen.availHeight) {
+                        var length = this.getLength();
+                        for (; top > -screen.availHeight && this._nBottomIndex < length; ) {
+                            item = this.getItem(this._nBottomIndex++);
+                            height = item.getHeight();
 
-                        item.hide();
-                        this._nBottomHidden += height;
-                        top += height;
-                    }
-                } else if (top > -screen.availHeight) {
-                    var length = this.getLength();
-                    for (; top > -screen.availHeight && this._nBottomIndex < length; ) {
-                        item = this.getItem(this._nBottomIndex++);
-                        height = item.getHeight();
-
-                        item.show();
-                        this._nBottomHidden -= height;
-                        top -= height;
+                            item.show();
+                            this._nBottomHidden -= height;
+                            top -= height;
+                        }
                     }
                 }
 
