@@ -65,7 +65,7 @@ _eRight      - 右侧乐定行的Element元素
         var elements = row.$getElements(),
             first;
 
-        row._eLeft.firstChild.style.height = row._eRight.firstChild.style.height = '';
+        row._eLeft.style.height = row._eRight.style.height = row.getMain().style.height = '';
 
         if (row._bEmpty) {
             delete row._bEmpty;
@@ -95,7 +95,8 @@ _eRight      - 右侧乐定行的Element元素
      */
     function splitRow(table, row) {
         var elements = row.$getElements(),
-            body = row.getBody();
+            body = row.getBody(),
+            height = row.getHeight();
 
         table.getHCells().forEach(function (item, index) {
             if (item = elements[index]) {
@@ -109,10 +110,14 @@ _eRight      - 右侧乐定行的Element元素
 
         if (!body.innerHTML.trim()) {
             row._bEmpty = true;
-            body.innerHTML = '<td class="ui-locked-table-hcell ui-table-hcell"></td>';
+            if (ieVersion < 9) {
+                body.appendChild(dom.create('TD', {className: 'ui-locked-table-hcell ui-table-hcell'}));
+            } else {
+                body.innerHTML = '<td class="ui-locked-table-hcell ui-table-hcell"></td>';
+            }
         }
 
-        row._eLeft.lastChild.style.height = row._eRight.firstChild.style.height = row.getHeight() + 'px';
+        row._eLeft.style.height = row._eRight.style.height = row.getMain().style.height = height + 'px';
     }
 
     /**
