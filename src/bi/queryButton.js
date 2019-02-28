@@ -29,7 +29,9 @@ queryButton - 查询按钮控件。
                 ui.Button.prototype.$click.call(this, event);
                 var route = ecui.esr.findRoute(this);
                 var children = ecui.esr.getRoute(route.children);
-                yiche.setSearchParam(children.searchParm, this.getForm());
+                children.searchParm = {};
+                ecui.esr.parseObject(this.getForm(), children.searchParm);
+                // ecui.ui.BTableListRoute.prototype.setSearchParam(children.searchParm, this.getForm());
                 // children.searchParm.pageNo = 1;
                 ecui.esr.callRoute(route.children + '~pageNo=1', true);
             },

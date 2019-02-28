@@ -570,10 +570,11 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
                 if (firefoxVersion || ieVersion < 7) {
                     return;
                 }
-
-                for (var el = this._uHead.getOuter(); el !== document.body; el = dom.parent(el)) {
-                    if (dom.getStyle(el, 'transform') !== 'none') {
-                        return;
+                if (!(ieVersion < 9)) {
+                    for (var el = this._uHead.getOuter(); el !== document.body; el = dom.parent(el)) {
+                        if (dom.getStyle(el, 'transform') !== 'none') {
+                            return;
+                        }
                     }
                 }
 

@@ -90,7 +90,7 @@
         for (var i = 0, item; item = elements[i++]; ) {
             var name = item.name;
             if (name) {
-                if (context[name]) {
+                if (context[name] !== undefined) {
                     searchParm[name] = context[name];
                 }
                 var _control = item.getControl && item.getControl();
@@ -102,11 +102,11 @@
                     } else if (_control instanceof ecui.ui.Checkbox) {
                         _control.setChecked(searchParm[name].indexOf(_control.getValue()) !== -1);
                     } else {
-                        _control.setValue(searchParm[name] || '');
+                        _control.setValue(searchParm[name] !== undefined ? searchParm[name] : '');
                     }
 
                 } else {
-                    item.value = searchParm[name] || '';
+                    item.value = searchParm[name] !== undefined ? searchParm[name] : '';
                 }
             }
         }
@@ -161,7 +161,7 @@
                             searchParm[item.name] = _control.getValue();
                         }
                     } else if (_control instanceof ecui.ui.Checkbox) {
-                        if (Array.prototype.indexOf.call(form.elements[item.name], _control.getInput()) === 0) {
+                        if (!searchParm[item.name]) {
                             searchParm[item.name] = [];
                         }
                         if (_control.isChecked()) {
@@ -177,6 +177,19 @@
         }
     }
 
+    function replenishSearchCode(form, searchParm, context) {
+        var data = {};
+        ecui.esr.parseObject(form, data, false);
+        for (var key in data) {
+            if (data.hasOwnProperty(key)) {
+                if (context[key] !== undefined) {
+                    searchParm[key] = context[key];
+                } else if (searchParm[key] === undefined) {
+                    searchParm[key] = '';
+                }
+            }
+        }
+    }
     /**
      * 列表路由对象。
      * @public
@@ -184,8 +197,10 @@
      * @param {object} route 路由对象
      */
     ui.BTableListRoute = function (route) {
-        this.model = [route.NAME.slice(0, -5) + '@FORM ' + route.url];
-        this.main = route.NAME.slice(0, -9) + '_table';
+        var name = route.NAME.slice(route.NAME.indexOf('/') === 0 ? 1 : 0);
+        this.view = route.view || name;
+        this.model = [name.slice(0, -5) + '@FORM ' + route.url];
+        this.main = name.slice(0, -9) + '_table';
         Object.assign(this, route);
     };
     ui.BTableListRoute.prototype.onbeforerequest = function (context) {
@@ -195,7 +210,9 @@
         for (var i = 0, form, item; item = forms[i++]; ) {
             form = document.forms[item.split('=')[0]];
             if (item.split('=').length === 1 && form) {
-                setFormValue(context, form, this.searchParm);
+                replenishSearchCode(form, this.searchParm, context);
+                // setFormValue(context, form, this.searchParm);
+                ecui.esr.fillForm(form, Object.assign({}, this.searchParm, context));
             }
         }
     };

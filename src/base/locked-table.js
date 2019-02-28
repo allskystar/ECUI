@@ -63,22 +63,27 @@ _eRight      - 右侧乐定行的Element元素
      */
     function restoreRow(table, row) {
         var elements = row.$getElements(),
-            first;
+            el = row.getBody();
 
-        row._eLeft.firstChild.style.height = row._eRight.firstChild.style.height = '';
+        row._eLeft.style.height = row._eRight.style.height = row.getMain().style.height = '';
 
         if (row._bEmpty) {
             delete row._bEmpty;
-            row.getBody().innerHTML = '';
+
+            if (ieVersion < 9) {
+                el.removeChild(el.firstChild);
+            } else {
+                el.innerHTML = '';
+            }
         }
 
         row = row.getMain();
-        first = row.firstChild;
+        el = row.firstChild;
 
         table.getHCells().forEach(function (item, index) {
             if (item = elements[index]) {
                 if (index < table._nLeft) {
-                    row.insertBefore(item, first);
+                    row.insertBefore(item, el);
                 } else if (index >= table._nRight) {
                     row.appendChild(item);
                 }
@@ -109,10 +114,14 @@ _eRight      - 右侧乐定行的Element元素
 
         if (!body.innerHTML.trim()) {
             row._bEmpty = true;
-            body.innerHTML = '<td class="ui-locked-table-hcell ui-table-hcell"></td>';
+            if (ieVersion < 9) {
+                body.appendChild(dom.create('TD', {className: 'ui-locked-table-hcell ui-table-hcell'}));
+            } else {
+                body.innerHTML = '<td class="ui-locked-table-hcell ui-table-hcell"></td>';
+            }
         }
 
-        row._eLeft.lastChild.style.height = row._eRight.firstChild.style.height = row.getHeight() + 'px';
+        row._eLeft.style.height = row._eRight.style.height = row.getMain().style.height = row.getHeight() + 'px';
     }
 
     /**
@@ -148,12 +157,14 @@ _eRight      - 右侧乐定行的Element元素
             });
 
             o = '<table cellspacing="0" class="ui-locked-table-{0} ui-locked-table-body ' + dom.parent(this.getBody()).className + '"><tbody>' + list.splice(headRows.length, rows.length).join('') + '</tbody></table><table cellspacing="0" class="ui-locked-table-{0} ui-locked-table-head ' + this.$getSection('Head').getMain().className + '"><thead>' + list.join('') + '</thead></table>';
+            if (core.getScrollNarrow()) {
+                layout = el;
+            }
             dom.insertHTML(
                 layout,
                 'beforeEnd',
                 '<div class="ui-locked-table-fill"></div>' + util.stringFormat(o, 'right') + util.stringFormat(o, 'left')
             );
-
             el = layout.lastChild;
             for (i = 0; i < 4; i++) {
                 list[i] = el;
@@ -293,7 +304,7 @@ _eRight      - 右侧乐定行的Element元素
                 this._uRightHead.getMain().style.width = this._uRightMain.getMain().style.width = (this.$$rightTDWidth + this.$$paddingRight) + 'px';
                 table.style.marginLeft = head.style.marginLeft = this.$$paddingLeft + 'px';
                 table.style.width = head.style.width = (this.$$tableWidth - this.$$paddingLeft - this.$$paddingRight) + 'px';
-                dom.parent(head).style.width = this.$$tableWidth + 'px';
+                //dom.parent(head).style.width = this.$$tableWidth + 'px';
             },
 
             /**
@@ -338,13 +349,18 @@ _eRight      - 右侧乐定行的Element元素
                     rightMainStyle = this._uRightMain.getOuter().style;
 
                 leftHeadStyle.position = rightHeadStyle.position = leftMainStyle.position = rightMainStyle.position = '';
-
                 leftHeadStyle.top = rightHeadStyle.top = this.$getSection('Head').getOuter().style.top;
 
-                leftHeadStyle.left = leftMainStyle.left = this.getLayout().scrollLeft + 'px';
-                rightHeadStyle.left = rightMainStyle.left = (Math.min(this.getWidth(), this.$$tableWidth) - this.$$paddingRight + this.getLayout().scrollLeft - this.$$rightTDWidth - this.$$scrollFixed[0]) + 'px';
-                leftMainStyle.top = rightMainStyle.top = (this.$$paddingTop + this.getLayout().scrollTop - dom.parent(this.$getSection('Head').getOuter()).scrollTop) + 'px';
-                leftMainStyle.clip = rightMainStyle.clip = ieVersion < 8 ? 'rect(0,100%,100%,0)' : 'auto';
+                if (core.getScrollNarrow()) {
+                    leftHeadStyle.left = leftMainStyle.left = '0px';
+                    rightHeadStyle.left = rightMainStyle.left = (Math.min(this.getWidth(), this.$$tableWidth) - this.$$paddingRight - this.$$rightTDWidth - this.$$scrollFixed[0]) + 'px';
+                    leftMainStyle.top = rightMainStyle.top = this.$$paddingTop + 'px';
+                } else {
+                    leftHeadStyle.left = leftMainStyle.left = this.getLayout().scrollLeft + 'px';
+                    rightHeadStyle.left = rightMainStyle.left = (Math.min(this.getWidth(), this.$$tableWidth) - this.$$paddingRight + this.getLayout().scrollLeft - this.$$rightTDWidth - this.$$scrollFixed[0]) + 'px';
+                    leftMainStyle.top = rightMainStyle.top = (this.$$paddingTop + this.getLayout().scrollTop - dom.parent(this.$getSection('Head').getOuter()).scrollTop) + 'px';
+                    leftMainStyle.clip = rightMainStyle.clip = ieVersion < 8 ? 'rect(0,100%,100%,0)' : 'auto';
+                }
             },
 
             /**

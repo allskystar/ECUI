@@ -16,7 +16,7 @@
      */
     ui.BImgFill = core.inherits(
         ui.Control,
-        '',
+        'ui-img-fill',
         function (el, options) {
             ui.Control.call(this, el, options);
 
