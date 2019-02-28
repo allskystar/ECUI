@@ -80,8 +80,7 @@
 
                 var main = this.getMain(),
                     body = this.getBody(),
-                    data = this.$MScrollData,
-                    flag = /*util.hasIOSKeyboard()*/ !iosVersion && tx.test(body.style[transformName]);
+                    data = this.$MScrollData;
 
                 core.drag(
                     this,
@@ -90,9 +89,9 @@
                         el: body,
                         decelerate: 400,
                         absolute: true,
-                        left: data.left !== undefined ? data.left : main.clientWidth - (iosVersion ? body.offsetWidth : main.scrollWidth - (flag ? +RegExp.$1 : 0)),
+                        left: data.left !== undefined ? data.left : main.clientWidth - body.offsetWidth,
                         right: data.right !== undefined ? data.right : 0,
-                        top: (data.top !== undefined ? data.top : main.clientHeight - (iosVersion ? body.offsetHeight : main.scrollHeight - (flag ? +RegExp.$2 : 0))) + Math.min(0, window.scrollY - keyboardHeight),
+                        top: (data.top !== undefined ? data.top : main.clientHeight - body.offsetHeight) + Math.min(0, window.scrollY - keyboardHeight),
                         bottom: (data.bottom !== undefined ? data.bottom : 0) + window.scrollY,
                         limit: data.range
                     }
