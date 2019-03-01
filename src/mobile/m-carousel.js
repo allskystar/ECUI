@@ -1,6 +1,6 @@
 /*
 @example
-<div ui="type:carousel;delay:5">
+<div ui="type:m-carousel;delay:5">
     <img src="...">
     ...
 </div>
