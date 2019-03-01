@@ -89,9 +89,9 @@
                         el: body,
                         decelerate: 400,
                         absolute: true,
-                        left: data.left !== undefined ? data.left : main.clientWidth - body.scrollWidth,
+                        left: data.left !== undefined ? data.left : main.clientWidth - body.offsetWidth,
                         right: data.right !== undefined ? data.right : 0,
-                        top: (data.top !== undefined ? data.top : main.clientHeight - body.scrollHeight) + Math.min(0, window.scrollY - keyboardHeight),
+                        top: (data.top !== undefined ? data.top : main.clientHeight - body.offsetHeight) + Math.min(0, window.scrollY - keyboardHeight),
                         bottom: (data.bottom !== undefined ? data.bottom : 0) + window.scrollY,
                         limit: data.range
                     }
