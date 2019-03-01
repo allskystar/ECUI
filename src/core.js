@@ -729,11 +729,14 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                             }
                         }, -20);
                     } else {
-                        var result = calcPosition(track, env, Math.round(mx + vx * inertia - ax * inertia * inertia / 2), Math.round(my + vy * inertia - ay * inertia * inertia / 2));
+                        var result = calcPosition(track, env, Math.round(mx + vx * inertia - ax * inertia * inertia / 2), Math.round(my + vy * inertia - ay * inertia * inertia / 2)),
+                            x = target.getX(),
+                            y = target.getY();
 
+                        inertia = Math.min(Math.abs((result.x - x) / vx), Math.abs((result.y - y) / vx));
                         delete currEnv.event;
                         core.dispatchEvent(target, 'dragmove', {x: result.x, y: result.y, inertia: true});
-                        if (result.x !== target.getX() || result.y !== target.getY()) {
+                        if (result.x !== x || result.y !== y) {
                             createInertiaHandles(target, inertia * 1000, function () {
                                 dragend(dragEvent, env, target);
                             });
