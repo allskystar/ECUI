@@ -745,7 +745,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                             createInertiaHandles(target, inertia * 1000, function () {
                                 dragend(dragEvent, env, target);
                             });
-                            target.getPositionElement().style.transition = 'all ' + inertia + 's cubic-bezier(' + 1 / 3 + ',' + ((4 - (sx ? (ax / sx) : (ay / sy))) / 6) + ',' + 2 / 3 + ',' + (1 - (2 - (sx ? (ax / sx) : (ay / sy))) / 6) + ')';
+                            target.getPositionElement().style.transition = 'all ' + inertia + 's ease-out';
                             target.setPosition(result.x, result.y);
                         } else {
                             dragend(dragEvent, currEnv, target);
