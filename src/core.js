@@ -707,6 +707,8 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                 if (inertia) {
                     var ax = vx / inertia,
                         ay = vy / inertia,
+                        sx = vx * inertia - ax * inertia * inertia / 2,
+                        sy = vy * inertia - ay * inertia * inertia / 2,
                         env = currEnv;
 
                     if (ieVersion < 9) {
@@ -719,7 +721,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                                 x = track.x,
                                 y = track.y;
 
-                            dragmove(track, env, Math.round(mx + vx * t - ax * t * t / 2), Math.round(my + vy * t - ay * t * t / 2));
+                            dragmove(track, env, Math.round(mx + sx), Math.round(my + sy));
                             if (t >= inertia || (x === track.x && y === track.y)) {
                                 inertiaHandles[uid]();
                                 if (env.event && startX === x && startY === y) {
@@ -729,18 +731,21 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                             }
                         }, -20);
                     } else {
-                        var result = calcPosition(track, env, Math.round(mx + vx * inertia - ax * inertia * inertia / 2), Math.round(my + vy * inertia - ay * inertia * inertia / 2)),
-                            x = target.getX(),
-                            y = target.getY();
+                        var x = target.getX(),
+                            y = target.getY(),
+                            result = calcPosition(track, env, Math.round(x + sx), Math.round(y + sy));
 
-                        inertia = Math.min(Math.abs((result.x - x) / vx), Math.abs((result.y - y) / vx));
+                        sx = result.x - x;
+                        sy = result.y - y;
+                        inertia = Math.max(ax ? (Math.abs(vx) - Math.sqrt(vx * vx - 2 * ax * sx)) / Math.abs(ax) : 0, ay ? (Math.abs(vy) - Math.sqrt(vy * vy - 2 * ay * sy)) / Math.abs(ay) : 0) || inertia;
+
                         delete currEnv.event;
                         core.dispatchEvent(target, 'dragmove', {x: result.x, y: result.y, inertia: true});
                         if (result.x !== x || result.y !== y) {
                             createInertiaHandles(target, inertia * 1000, function () {
                                 dragend(dragEvent, env, target);
                             });
-                            target.getPositionElement().style.transition = 'all ' + inertia + 's cubic-bezier(0.1,0.57,0.1,1)';
+                            target.getPositionElement().style.transition = 'all ' + inertia + 's cubic-bezier(' + 1 / 3 + ',' + ((4 - (sx ? (ax / sx) : (ay / sy))) / 6) + ',' + 2 / 3 + ',' + (1 - (2 - (sx ? (ax / sx) : (ay / sy))) / 6) + ')';
                             target.setPosition(result.x, result.y);
                         } else {
                             dragend(dragEvent, currEnv, target);
@@ -993,13 +998,9 @@ outer:          for (var caches = [], target = event.target, el; target; target 
      * @return {Object} 计算结果
      */
     function calcPosition(track, env, x, y) {
-        // 计算期待移到的位置
-        var expectX = Math.round(env.originalX + x - track.logicX),
-            expectY = Math.round(env.originalY + y - track.logicY);
-
         // 计算实际允许移到的位置
-        x = Math.min(Math.max(expectX, env.left), env.right);
-        y = Math.min(Math.max(expectY, env.top), env.bottom);
+        x = Math.min(Math.max(x, env.left), env.right);
+        y = Math.min(Math.max(y, env.top), env.bottom);
 
         if (env.limit) {
             var scale = 1 - 1 / (env.limitRatio || 3);
@@ -1017,8 +1018,6 @@ outer:          for (var caches = [], target = event.target, el; target; target 
             }
         }
         return {
-            expectX: expectX,
-            expectY: expectY,
             x: x,
             y: y
         };
@@ -1237,13 +1236,17 @@ outer:          for (var caches = [], target = event.target, el; target; target 
             return;
         }
 
-        var result = calcPosition(track, env, x, y);
+        // 计算期待移到的位置
+        var expectX = Math.round(env.originalX + x - track.logicX),
+            expectY = Math.round(env.originalY + y - track.logicY);
+
+        var result = calcPosition(track, env, expectX, expectY);
         dragAnimationFrame(env, env.target, {track: track, x: result.x, y: result.y, inertia: env !== currEnv});
 
         track.x = result.x;
         track.y = result.y;
-        track.logicX = x + env.originalX - result.expectX;
-        track.logicY = y + env.originalY - result.expectY;
+        track.logicX = x + env.originalX - expectX;
+        track.logicY = y + env.originalY - expectY;
     }
 
     /**
