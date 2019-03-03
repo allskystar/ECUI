@@ -1031,8 +1031,27 @@ outer:          for (var caches = [], target = event.target, el; target; target 
      * @param {ECUIEvent} 事件对象
      */
     function calcSpeed(track, event) {
-        var time = Date.now(),
-            delay = time - track.lastMoveTime > 500,
+        if (!track.path) {
+            track.path = [];
+        }
+        track.path.push({
+            time: track.lastMoveTime,
+            x: track.clientX,
+            y: track.clientY
+        });
+        // 计算最近100ms的平均速度
+        for (var i = track.path.length, time = Date.now(); --i; ) {
+            if (time - track.path[i].time > 100) {
+                break;
+            }
+        }
+
+        track.lastMoveTime = track.path[i].time;
+        track.clientX = track.path[i].x;
+        track.clientY = track.path[i].y;
+        track.path.splice(0, i);
+
+        var delay = time - track.lastMoveTime > 500,
             offsetX = event.clientX - track.clientX,
             offsetY = event.clientY - track.clientY,
             speed = 1000 / (time - track.lastMoveTime);
