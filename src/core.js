@@ -2624,6 +2624,11 @@ outer:          for (var caches = [], target = event.target, el; target; target 
          */
         init: function (el) {
             if (!initEnvironment() && el) {
+//{if 0}//
+                if (!dom.contain(document.body, el)) {
+                    console.warn('The element is not in the Document');
+                }
+//{/if}//
                 var list = dom.getAttribute(el, ecuiName) ? [el] : [],
                     controls = [],
                     options;
