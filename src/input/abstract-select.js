@@ -232,7 +232,7 @@ _uOptions     - 下拉选择框
              * @protected
              */
             $setPlaceholder: function () {
-                if (this.getInput().value) {
+                if (this.getInput().value || this._uText.getContent()) {
                     this.alterStatus('-placeholder');
                 } else {
                     this.alterStatus('+placeholder');
