@@ -737,7 +737,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
                         sx = result.x - x;
                         sy = result.y - y;
-                        inertia = Math.max(ax ? (Math.abs(vx) - Math.sqrt(vx * vx - 2 * ax * sx)) / Math.abs(ax) : 0, ay ? (Math.abs(vy) - Math.sqrt(vy * vy - 2 * ay * sy)) / Math.abs(ay) : 0) || inertia;
+                        inertia = Math.max((Math.abs(vx) - Math.sqrt(vx * vx - 2 * ax * sx)) / Math.abs(ax) || 0, (Math.abs(vy) - Math.sqrt(vy * vy - 2 * ay * sy)) / Math.abs(ay) || 0) || inertia;
 
                         delete currEnv.event;
                         core.dispatchEvent(target, 'dragmove', {x: result.x, y: result.y, inertia: true});
