@@ -10,6 +10,7 @@ _bCapturable        - 控件是否响应浏览器事件状态
 _bUserSelect        - 控件是否允许选中内容
 _bFocusable         - 控件是否允许获取焦点
 _bDisabled          - 控件的状态，为true时控件不处理任何事件
+_bGesture           - 控件是否允许手势操作
 _bCached            - 控件是否已经读入缓存
 _bReady             - 控件是否已经完全生成
 _sUID               - 控件的内部ID
@@ -1107,6 +1108,16 @@ _aStatus            - 控件当前的状态集合
             },
 
             /**
+             * 判断控件是否允许手势操作。
+             * @public
+             *
+             * @return {boolean} 控件是否允许手势操作
+             */
+            isGestureStatus: function () {
+                return !this.isDisabled() && this._bGesture;
+            },
+
+            /**
              * 判断控件是否处于悬停状态。
              * @public
              *
@@ -1212,6 +1223,16 @@ _aStatus            - 控件当前的状态集合
                 core.dispose(this._eBody, true);
                 this._eBody.innerHTML = html;
                 core.init(this._eBody);
+            },
+
+            /**
+             * 设置当前控件是否允许手势操作。
+             * @public
+             *
+             * @param {boolean} status 当前控件是否允许手势操作
+             */
+            setGestureStatus: function (status) {
+                this._bGesture = status;
             },
 
             /**

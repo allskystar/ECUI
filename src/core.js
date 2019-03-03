@@ -1550,7 +1550,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
             event.type = type;
             // 防止事件中的写操作导致多次reflow
             gestureListeners.filter(function (item) {
-                return item[1][type] && (!item[0] || (item[0].isShow() && !item[0].isDisabled()));
+                return item[1][type] && (!item[0] || (item[0].isShow() && item[0].isGestureStatus()));
             }).forEach(function (item) {
                 item[1][type].call(item[0], event);
             });
