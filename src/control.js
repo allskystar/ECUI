@@ -101,6 +101,7 @@ _aStatus            - 控件当前的状态集合
             this._bCapturable = options.capturable !== false;
             this._bUserSelect = options.userSelect !== false;
             this._bFocusable = options.focusable !== false;
+            this._bGesture = true;
 
             this._aStatus = ['', ' '];
             this._sSubType = '';

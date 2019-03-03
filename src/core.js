@@ -1584,8 +1584,8 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                         if (!track.swipe && Date.now() - track.startTime < 500 && Math.sqrt(track.speedX * track.speedX + track.speedY * track.speedY) > HIGH_SPEED) {
                             track.swipe = true;
                             util.timer(function () {
-                                if (tracks[track.identifier] !== track && Math.sqrt(Math.pow(track.lastX - track.startX, 2) + Math.pow(track.lastY - track.startY, 2)) > 30) {
-                                    event.angle = calcAngle(track.lastX - track.startX, track.lastY - track.startY);
+                                if (tracks[track.identifier] !== track && Math.sqrt(Math.pow(track.clientX - track.startX, 2) + Math.pow(track.clientY - track.startY, 2)) > 30) {
+                                    event.angle = calcAngle(track.clientX - track.startX, track.clientY - track.startY);
                                     if (event.angle > 150 && event.angle < 210) {
                                         callback('swipeleft');
                                     } else if (event.angle > 330 || event.angle < 30) {

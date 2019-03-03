@@ -423,6 +423,16 @@ _nBottomIndex  - 下部隐藏的选项序号
             },
 
             /**
+             * 是否正在加载数据。
+             * @public
+             *
+             * @return {boolean} 是否在loading状态
+             */
+            isLoading: function () {
+                return this._bLoading;
+            },
+
+            /**
              * @override
              */
             remove: function (item) {
