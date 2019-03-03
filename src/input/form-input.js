@@ -29,7 +29,7 @@
              * @return {string} 控件的表单名称
              */
             getFormName: function () {
-                return this._sName || this.getMain().name;
+                return this.getName();
             },
 
             /**
@@ -39,6 +39,28 @@
              * @return {string} 控件的表单值
              */
             getFormValue: function () {
+                return this.getValue();
+            },
+
+            /**
+             * 获取控件的名称。
+             * 输入控件可以在表单中被提交，getName 方法返回提交时用的表单项名称，表单项名称可以使用 setName 方法改变。
+             * @public
+             *
+             * @return {string} INPUT 对象名称
+             */
+            getName: function () {
+                return this._sName || this.getMain().name;
+            },
+
+            /**
+             * 获取控件的值。
+             * getValue 方法返回提交时表单项的值，使用 setValue 方法设置。
+             * @public
+             *
+             * @return {string} 控件的值
+             */
+            getValue: function () {
                 return this.getMain().value;
             },
 
