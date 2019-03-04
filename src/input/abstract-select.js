@@ -86,7 +86,6 @@ _uOptions     - 下拉选择框
 
             this._bRequired = !!options.required;
             this._sPlaceHolder = options.placeholder || dom.getAttribute(this.getInput(), 'placeholder') || '';
-            this.getInput().setAttribute('placeholder', '');
 
             this.setPopup(this._uOptions);
             this.$setBody(this._uOptions.getBody());
@@ -232,11 +231,11 @@ _uOptions     - 下拉选择框
              * @protected
              */
             $setPlaceholder: function () {
-                if (this.getInput().value || this._uText.getContent()) {
+                if (this.getInput().value || this.getText()) {
                     this.alterStatus('-placeholder');
                 } else {
                     this.alterStatus('+placeholder');
-                    this._uText.getBody().innerHTML = this._sPlaceHolder;
+                    this.setText(this._sPlaceHolder);
                 }
             },
 
@@ -288,6 +287,16 @@ _uOptions     - 下拉选择框
             },
 
             /**
+             * 获取控件显示的文本。
+             * @public
+             *
+             * @return {string} 用于显示的文本
+             */
+            getText: function () {
+                return this._uText.getContent();
+            },
+
+            /**
              * 改变下拉框当前选中的项。
              * @private
              *
@@ -302,7 +311,7 @@ _uOptions     - 下拉选择框
                     this._cSelected = item;
                     if (item) {
                         item.alterStatus('+selected');
-                        this._uText.getBody().innerHTML = item.getContent();
+                        this.setText(item.getContent());
                         ui.InputControl.prototype.setValue.call(this, item._sValue);
                         if (this._uOptions.isShow()) {
                             core.setFocused(item);
@@ -324,6 +333,16 @@ _uOptions     - 下拉选择框
              */
             setSelectedIndex: function (index) {
                 this.setSelected(this.getItems()[index]);
+            },
+
+            /**
+             * 设置控件显示的文本。
+             * @public
+             *
+             * @param {string} text 用于显示的文本
+             */
+            setText: function (text) {
+                this._uText.getBody().innerHTML = text;
             },
 
             /**

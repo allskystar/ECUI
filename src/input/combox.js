@@ -18,7 +18,9 @@
     var core = ecui,
         dom = core.dom,
         ui = core.ui,
-        util = core.util;
+        util = core.util,
+
+        ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined;
 //{/if}//
     function refresh(combox) {
         var text = combox.getInput().value.toUpperCase();
@@ -42,8 +44,16 @@
         ui.Select,
         '*ui-combox',
         function (el, options) {
+            util.setDefault(options, 'inputType', 'hidden');
             util.setDefault(options, 'readOnly', false);
             ui.Select.call(this, el, options);
+
+            el = this.$getSection('Text').getBody();
+
+            var placeholder = options.placeholder || dom.getAttribute(this.getInput(), 'placeholder');
+            el.innerHTML = ieVersion < 10 ? '<div ui="ui-placeholder">' + placeholder + '</div><input>' : '<input placeholder="' + util.encodeHTML(placeholder) + '">';
+            this._eTextInput = el.lastChild;
+            this.$bindEvent(this._eTextInput);
         },
         {
             /**
@@ -75,7 +85,16 @@
              */
             $disable: function () {
                 ui.Select.prototype.$disable.call(this);
-                this.getInput().style.display = 'none';
+                this._eTextInput.disabled = true;
+            },
+
+            /**
+             * @override
+             */
+            $dispose: function () {
+                this._eTextInput.getControl = null;
+                this._eTextInput  = null;
+                ui.Select.prototype.$dispose.call(this);
             },
 
             /**
@@ -83,7 +102,7 @@
              */
             $enable: function () {
                 ui.Select.prototype.$enable.call(this);
-                this.getInput().style.display = '';
+                this._eTextInput.disabled = false;
             },
 
             /**
@@ -93,7 +112,7 @@
                 ui.Select.prototype.$input.call(this, event);
                 this.popup();
 
-                var text = this.getInput().value,
+                var text = this._eTextInput.value,
                     selected;
 
                 this.getItems().forEach(function (item) {
@@ -104,7 +123,7 @@
                 if (selected) {
                     this.setSelected(selected);
                 } else {
-                    this.$setSelected();
+                    this.setSelected();
                     this.$setPlaceholder();
                     refresh(this);
                 }
@@ -123,31 +142,24 @@
             /**
              * @override
              */
-            getValue: function () {
-                var item = this.getSelected();
-                return item ? item.getValue() : '';
-            },
-
-            /**
-             * @override
-             */
-            setSelected: function (item) {
-                ui.Select.prototype.setSelected.call(this, item);
-
-                item = this.getSelected();
-                if (item) {
-                    this.$setValue(item.getContent());
+            $setPlaceholder: function () {
+                if (ieVersion < 10) {
+                    this.alterStatus(this.getInput().value || this.getText() ? '-placeholder' : '+placeholder');
                 }
-
-                refresh(this);
             },
 
             /**
              * @override
              */
-            setValue: function (value) {
-                this.$setValue(value);
-                ui.Select.prototype.setValue.call(this, value);
+            getText: function () {
+                return this._eTextInput.value;
+            },
+
+            /**
+             * @override
+             */
+            setText: function (text) {
+                this._eTextInput.value = text;
             }
         }
     );

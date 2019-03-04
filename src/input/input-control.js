@@ -117,24 +117,6 @@ _eInput        - INPUT对象
     }
 
     /**
-     * 为控件的 INPUT 节点绑定事件。
-     * @private
-     *
-     * @param {ecui.ui.InputControl} input 基础输入控件
-     */
-    function bindEvent(input) {
-        core.$bind(input._eInput, input);
-        if (input._eInput.type !== 'hidden') {
-            // 对于IE或者textarea的变化，需要重新绑定相关的控件事件
-            for (var name in events) {
-                if (events.hasOwnProperty(name)) {
-                    dom.addEventListener(input._eInput, name, events[name]);
-                }
-            }
-        }
-    }
-
-    /**
      * INPUT 失去焦点的处理。
      * @private
      */
@@ -258,7 +240,7 @@ _eInput        - INPUT对象
             ui.Control.call(this, el, options);
 
             this._eInput = inputEl;
-            bindEvent(this);
+            this.$bindEvent(inputEl);
 
             if (options.valid) {
                 options = options.valid.split(',');
@@ -268,6 +250,24 @@ _eInput        - INPUT对象
             }
         },
         {
+            /**
+             * 为控件的 INPUT 节点绑定事件。
+             * @public
+             *
+             * @param {InputElement} input 输入元素
+             */
+            $bindEvent: function (input) {
+                core.$bind(input, this);
+                if (input.type !== 'hidden') {
+                    // 对于IE或者textarea的变化，需要重新绑定相关的控件事件
+                    for (var name in events) {
+                        if (events.hasOwnProperty(name)) {
+                            dom.addEventListener(input, name, events[name]);
+                        }
+                    }
+                }
+            },
+
             /**
              * @override
              */
@@ -366,7 +366,7 @@ _eInput        - INPUT对象
 
                 if (isToucher) {
                     var active = document.activeElement;
-                    if (active !== this._eInput) {
+                    if (!active.getControl || active.getControl() !== this) {
                         if (active.tagName !== 'BODY') {
                             if (active.getControl) {
                                 dom.removeEventListener(active, 'focusout', events.focusout);
@@ -384,7 +384,7 @@ _eInput        - INPUT对象
                     util.timer(
                         function () {
                             var active = document.activeElement;
-                            if (active !== this._eInput) {
+                            if (!active.getControl || active.getControl() !== this) {
                                 if (active.tagName !== 'BODY') {
                                     if (active.getControl) {
                                         dom.removeEventListener(active, 'blur', events.blur);
@@ -554,7 +554,7 @@ _eInput        - INPUT对象
                 var el = dom.setInput(this._eInput, name || '');
                 if (this._eInput !== el) {
                     this._eInput = el;
-                    bindEvent(this);
+                    this.$bindEvent(el);
                 }
             },
 
