@@ -52,6 +52,8 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
         pauseCount = 0,           // 暂停的次数
         keyCode = 0,              // 当前键盘按下的键值，解决keypress与keyup中得不到特殊按键的keyCode的问题
+        lastClientX,
+        lastClientY,
         inertiaHandles = {},      // 惯性处理句柄
 
         allControls = [],         // 全部生成的控件，供释放控件占用的内存使用
@@ -280,6 +282,9 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                         event.target = track.target;
                         event.track = track;
 
+                        lastClientX = event.clientX;
+                        lastClientY = event.clientY;
+
                         track.lastMoveTime = Date.now();
                         checkActived(event);
                         currEnv.mouseover(event);
@@ -305,6 +310,9 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                         calcSpeed(track, event);
 
                         if (item.identifier === trackId) {
+                            lastClientX = event.clientX;
+                            lastClientY = event.clientY;
+
                             if ((Math.sqrt(track.speedX * track.speedX + track.speedY * track.speedY) > HIGH_SPEED) && isTouchMoved === false) {
                                 isTouchMoved = true;
                             }
@@ -846,6 +854,8 @@ outer:          for (var caches = [], target = event.target, el; target; target 
             this._oNative = event;
             this.active = activedControl;
         } else {
+            this.clientX = lastClientX;
+            this.clientY = lastClientY;
             this.which = keyCode;
         }
     }
@@ -2958,6 +2968,11 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                 event.pageY = html.scrollTop + body.scrollTop - html.clientTop + event.clientY - body.clientTop;
                 event.target = event.srcElement;
                 event.which = event.keyCode || (event.button | 1);
+            }
+
+            if (event.clientX !== undefined) {
+                lastClientX = event.clientX;
+                lastClientY = event.clientY;
             }
 
             return new ECUIEvent(event.type, event);
