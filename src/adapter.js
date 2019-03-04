@@ -235,11 +235,11 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                     }
 
                     var bound = el.getBoundingClientRect();
-                    top += html.scrollTop + body.scrollTop - html.clientTop + Math.floor(bound.top);
-                    left += html.scrollLeft + body.scrollLeft - html.clientLeft + Math.floor(bound.left);
+                    top += html.scrollTop + body.scrollTop - html.clientTop + Math.round(bound.top);
+                    left += html.scrollLeft + body.scrollLeft - html.clientLeft + Math.round(bound.left);
                 } else if (el === body) {
-                    top = html.scrollTop + body.scrollTop;
-                    left = html.scrollLeft + body.scrollLeft;
+                    top = -html.scrollTop;
+                    left = -html.scrollLeft;
                 } else if (el !== html) {
                     for (var parent = el, childStyle = dom.getStyle(el); parent; parent = parent.offsetParent) {
                         top += parent.offsetTop;
@@ -269,8 +269,8 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                             top -= parent.scrollTop;
                         }
                     }
-                    top -= html.scrollTop;
-                    left -= html.scrollLeft;
+//                    top -= html.scrollTop;
+//                    left -= html.scrollLeft;
                 }
 
                 return {top: top, left: left};
