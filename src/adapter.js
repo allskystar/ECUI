@@ -988,6 +988,9 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                             item.push(value);
                         }
                     } else {
+                        if (item.href.startsWith('file:')) {
+                            return;
+                        }
                         item = Array.prototype.slice.call(item.rules || item.cssRules);
                     }
                     for (var i = 0, rule; rule = item[i++]; ) {
