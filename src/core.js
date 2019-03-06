@@ -1341,7 +1341,15 @@ outer:          for (var caches = [], target = event.target, el; target; target 
      */
     function initEnvironment() {
         if (scrollNarrow === undefined) {
-            var el;
+            var options = core.getOptions(document.body, 'data-ecui') || {},
+                el;
+
+            if ((options.device === 'mobile' && !isToucher) || (options.device === 'pc' && isToucher)) {
+                if (core.onerrordevice) {
+                    core.onerrordevice();
+                }
+                return;
+            }
 
             if (isToucher) {
                 (function () {
@@ -1377,8 +1385,6 @@ outer:          for (var caches = [], target = event.target, el; target; target 
             flgFixedSize = el.offsetWidth !== 80;
             scrollNarrow = el.offsetWidth - el.clientWidth - 2;
             dom.remove(el);
-
-            var options = core.getOptions(document.body, 'data-ecui') || {};
 
             ecuiName = options.name || ecuiName;
             isGlobalId = options.globalId;
