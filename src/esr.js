@@ -260,10 +260,29 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                 }
             } else {
                 // 解决A标签下反复修改的问题
-                setLocation(esr.getLocation().replace('~DENY_CACHE', ''));
-                util.timer(function () {
-                    history.replaceState('', '', '#' + currLocation);
-                }, 100);
+                var loc = esr.getLocation().replace('~DENY_CACHE', '');
+
+                if (ieVersion < 9) {
+                    if (historyIndex > 1) {
+                        // IE第一次进入，不能back，否则会退出框架
+                        pauseStatus = true;
+                        history.back();
+                        var handle = util.timer(function () {
+                            if (!/~DENY_CACHE/.test(location.href)) {
+                                esr.setLocation(loc);
+                                pauseStatus = false;
+                                handle();
+                            }
+                        }, -10);
+                    } else {
+                        esr.setLocation(loc);
+                    }
+                } else {
+                    setLocation(loc);
+                    util.timer(function () {
+                        history.replaceState('', '', '#' + loc);
+                    }, 100);
+                }
 
                 route.CACHE = undefined;
             }
@@ -1376,7 +1395,11 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
          * @param {string} loc location位置
          */
         redirect: function (loc) {
-            location.hash = calcUrl(loc);
+            if (ieVersion < 9 || esrOptions.history !== false) {
+                location.hash = calcUrl(loc);
+            } else {
+                history.replaceState('', '', '#' + calcUrl(loc));
+            }
         },
 
         /**
@@ -1704,7 +1727,11 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
             // opera下，相同的hash重复写入会在历史堆栈中重复记录
             // 所以需要ESR_GET_LOCATION来判断
             if (esr.getLocation() !== loc) {
-                location.hash = loc;
+                if (ieVersion < 9 || esrOptions.history !== false) {
+                    location.hash = loc;
+                } else {
+                    history.replaceState('', '', '#' + loc);
+                }
             }
             setLocation(loc);
         },
