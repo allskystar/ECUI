@@ -23,8 +23,8 @@
         ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined;
 //{/if}//
     function refresh(combox) {
-        var text = combox.getInput().value.toUpperCase();
-
+        var text = combox._eTextInput.value.toUpperCase();
+console.log(text);
         combox.getItems().forEach(function (item) {
             if (item.getContent().toUpperCase().indexOf(text) < 0) {
                 dom.addClass(item.getMain(), 'ui-hide');
