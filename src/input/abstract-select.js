@@ -318,6 +318,7 @@ _uOptions     - 下拉选择框
                         }
                     } else {
                         ui.InputControl.prototype.setValue.call(this, '');
+                        this.setText('');
                         if (this.contain(core.getFocused())) {
                             core.setFocused(this);
                         }
