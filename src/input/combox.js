@@ -24,7 +24,7 @@
 //{/if}//
     function refresh(combox) {
         var text = combox._eTextInput.value.toUpperCase();
-console.log(text);
+
         combox.getItems().forEach(function (item) {
             if (item.getContent().toUpperCase().indexOf(text) < 0) {
                 dom.addClass(item.getMain(), 'ui-hide');
