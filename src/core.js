@@ -627,23 +627,22 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                         // 点击事件在同时响应鼠标按下与弹起周期的控件上触发(如果之间未产生鼠标移动事件)
                         // 模拟点击事件是为了解决控件的 Element 进行了 remove/append 操作后 click 事件不触发的问题，以及移动端click延迟的问题
                         if (event.getNative().type.indexOf('cancel') < 0) {
-                            if (dblclick) {
-                                commonParent = getCommonParent(control, lastClick.target);
-                                bubble(commonParent, 'dblclick', event);
-                            } else {
-                                commonParent = getCommonParent(control, activedControl);
-                                if (isTouchMoved === undefined || click) { // MouseEvent
-                                    bubble(commonParent, 'click', event);
-                                    if (event.cancelBubble) {
-                                        // 取消冒泡要阻止A标签提交
-                                        for (el = control.getMain(); el; el = dom.parent(el)) {
-                                            if (el.tagName === 'A') {
-                                                blockAhref(el);
-                                                break;
-                                            }
+                            commonParent = getCommonParent(control, activedControl);
+                            if (isTouchMoved === undefined || click) { // MouseEvent
+                                bubble(commonParent, 'click', event);
+                                if (event.cancelBubble) {
+                                    // 取消冒泡要阻止A标签提交
+                                    for (el = control.getMain(); el; el = dom.parent(el)) {
+                                        if (el.tagName === 'A') {
+                                            blockAhref(el);
+                                            break;
                                         }
                                     }
                                 }
+                            }
+                            if (dblclick) {
+                                commonParent = getCommonParent(control, lastClick.target);
+                                bubble(commonParent, 'dblclick', event);
                             }
                         }
 
