@@ -44,14 +44,13 @@
         ui.Select,
         '*ui-combox',
         function (el, options) {
-            util.setDefault(options, 'inputType', 'hidden');
             util.setDefault(options, 'readOnly', false);
             ui.Select.call(this, el, options);
 
             el = this.$getSection('Text').getBody();
 
             var placeholder = options.placeholder || dom.getAttribute(this.getInput(), 'placeholder');
-            el.innerHTML = ieVersion < 10 ? '<div ui="ui-placeholder">' + placeholder + '</div><input>' : '<input placeholder="' + util.encodeHTML(placeholder) + '">';
+            el.innerHTML = ieVersion < 10 ? '<div class="ui-placeholder">' + placeholder + '</div><input>' : '<input placeholder="' + util.encodeHTML(placeholder) + '">';
             this._eTextInput = el.lastChild;
             this.$bindEvent(this._eTextInput);
         },
@@ -159,7 +158,7 @@
              * @override
              */
             setText: function (text) {
-                this._eTextInput.value = text;
+                this._eTextInput.value = util.decodeHTML(text);
             }
         }
     );

@@ -7,11 +7,15 @@
         overflow: hidden !important;
         .width100rate();
         .height100rate();
+
+        input {
+            display: block !important;
+        }
     }
 
     input {
         position: absolute !important;
-        display: block !important;
+        display: none !important;
         .width100rate();
         outline: none !important;
     }

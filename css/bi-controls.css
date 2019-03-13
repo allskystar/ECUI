@@ -1,0 +1,6 @@
+.ui-img-fill {
+    position: relative;
+    display: inline-block;
+    vertical-align: middle;
+    overflow: hidden;
+}

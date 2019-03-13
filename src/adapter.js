@@ -1025,12 +1025,14 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
             checkUpdate: function (form) {
                 var update = false;
                 dom.toArray(form.elements).forEach(function (item) {
-                    if (item.type !== 'radio' && item.type !== 'checkbox') {
-                        if (item.defaultValue !== item.value) {
+                    if (item.name) {
+                        if (item.type !== 'radio' && item.type !== 'checkbox') {
+                            if (item.defaultValue !== item.value) {
+                                update = true;
+                            }
+                        } else if (item.defaultChecked !== item.checked) {
                             update = true;
                         }
-                    } else if (item.defaultChecked !== item.checked) {
-                        update = true;
                     }
                 });
                 return update;
