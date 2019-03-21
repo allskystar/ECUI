@@ -139,8 +139,12 @@
                                     // 添加当前时间的选中效果
                                     event.item.alterStatus('+selected');
                                 } else {
-                                    this._eSelected.alterStatus('-selected');
-                                    this._cSelected.alterStatus('-selected');
+                                    if (this._eSelected) {
+                                        this._eSelected.alterStatus('-selected');
+                                    }
+                                    if (this._cSelected) {
+                                        this._cSelected.alterStatus('-selected');
+                                    }
                                     event.item.alterStatus('+selected');
                                     this._oDate = event.date;
                                     this._eDate = event.date;
