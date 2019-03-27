@@ -131,12 +131,12 @@ _eContainer      - 容器 DOM 元素
                         this._eContainer = core.$(options.container);
                     }
 
-                    if (this._eContainer && !options.selected) {
-                        dom.addClass(this._eContainer, 'ui-hide');
+                    if (this._eContainer) {
+                        dom.addClass(this._eContainer, this.getType().replace('-item', '-container'));
                         this.getMain().appendChild(this._eContainer);
                     }
 
-                    if (parent && options.selected) {
+                    if (options.parent && options.selected) {
                         options.parent.setSelected(this);
                     }
                 },
@@ -189,9 +189,9 @@ _eContainer      - 容器 DOM 元素
                             parent.getMain().appendChild(el);
                             // 如果当前节点被选中需要显示容器元素，否则隐藏
                             if (parent._cSelected === this) {
-                                dom.removeClass(el, 'ui-hide');
+                                dom.addClass(el, this.getType().replace('-item', '-container-selected'));
                             } else {
-                                dom.addClass(el, 'ui-hide');
+                                dom.removeClass(el, this.getType().replace('-item', '-container-selected'));
                             }
                         }
                     }
@@ -285,14 +285,14 @@ _eContainer      - 容器 DOM 元素
                     if (this._cSelected) {
                         this._cSelected.alterStatus('-selected');
                         if (this._cSelected._eContainer && (!item || this._cSelected._eContainer !== item._eContainer)) {
-                            dom.addClass(this._cSelected._eContainer, 'ui-hide');
+                            dom.removeClass(this._cSelected._eContainer, this._cSelected.getType().replace('-item', '-container-selected'));
                         }
                     }
 
                     if (item) {
                         item.alterStatus('+selected');
                         if (item._eContainer && (!this._cSelected || this._cSelected._eContainer !== item._eContainer)) {
-                            dom.removeClass(item._eContainer, 'ui-hide');
+                            dom.addClass(item._eContainer, item.getType().replace('-item', '-container-selected'));
                             core.cacheAtShow(item._eContainer);
                         }
                     }

@@ -8,6 +8,14 @@
         }
     }
 
+    .ui-tab-container {
+        display: none !important;
+    }
+
+    .ui-tab-container-selected {
+        display: block !important;
+    }
+
     .ui-tab-bar {
         position: absolute !important;
     }
