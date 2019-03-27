@@ -44,7 +44,7 @@
             this._bRequired = !!options.required;
             this._sValue = options.value || this.getInput().value;
             var optionsEl = dom.create('DIV', {className: options.classes.join('-options ') + 'ui-popup ui-hide'});
-            this._uOptions = ecui.$fastCreate(this.Options, optionsEl, this, {focusable: false});
+            this._uOptions = ecui.$fastCreate(this.Options, optionsEl, this, { focusable: false, value: this._sValue});
             this.setPopup(this._uOptions);
         },
         {
@@ -53,8 +53,8 @@
                 ui.Control,
                 function (el, options) {
                     ui.Control.call(this, el, options);
-                    this._uCalendar = ecui.$fastCreate(this.DoubleCalendar, el.appendChild(dom.create('DIV', {className: ui.Calendar.CLASS})), this, { extra: 'disable' });
-                    this._uTimeCalendar = ecui.$fastCreate(this.TimeCalendar, el.appendChild(dom.create('DIV', {className: ' ui-time-calendar ui-hide'})), this, {value: '00:00'});
+                    this._uCalendar = ecui.$fastCreate(this.DoubleCalendar, el.appendChild(dom.create('DIV', {className: ui.Calendar.CLASS})), this, { extra: 'disable', value: options.value });
+                    this._uTimeCalendar = ecui.$fastCreate(this.TimeCalendar, el.appendChild(dom.create('DIV', {className: ' ui-time-calendar ui-hide'})), this, { value: options.value });
 
                     var calendarHandle = dom.create('DIV', {className: 'options-content'});
                     calendarHandle.innerHTML = '<div class="time-box">' +
@@ -139,8 +139,12 @@
                                     // 添加当前时间的选中效果
                                     event.item.alterStatus('+selected');
                                 } else {
-                                    this._eSelected.alterStatus('-selected');
-                                    this._cSelected.alterStatus('-selected');
+                                    if (this._eSelected) {
+                                        this._eSelected.alterStatus('-selected');
+                                    }
+                                    if (this._cSelected) {
+                                        this._cSelected.alterStatus('-selected');
+                                    }
                                     event.item.alterStatus('+selected');
                                     this._oDate = event.date;
                                     this._eDate = event.date;
@@ -191,8 +195,17 @@
                                 houer.push({ code: item, value: item });
                                 if (i * this.RANGE <= 60) {
                                     item = ('0' + i * this.RANGE).slice(-2);
+                                    if (item === '60') {
+                                        item = '59';
+                                    }
                                     minute.push({ code: item, value: item });
                                 }
+                            }
+                            var values, start, end;
+                            if (options.value) {
+                                values = options.value.split(' - ');
+                                start = values[0].split(' ')[1];
+                                end = values[1].split(' ')[1];
                             }
                             // 生成日历控件结构
                             dom.insertHTML(
@@ -206,7 +219,10 @@
                                     className: 'ui-listbox',
                                     innerHTML: houer.map(function (item) { return '<div ui="value:' + item.value + '">' + item.code + '</div>'; }).join('')
                                 })),
-                                this
+                                this,
+                                {
+                                    value: start ? start.split(':')[0] : '00'
+                                }
                             );
                             this._uStartMinute = ecui.$fastCreate(
                                 this.Listbox,
@@ -214,7 +230,10 @@
                                     className: 'ui-listbox',
                                     innerHTML: minute.map(function (item) { return '<div ui="value:' + item.value + '">' + item.code + '</div>'; }).join('')
                                 })),
-                                this
+                                this,
+                                {
+                                    value: start ? start.split(':')[1] : '00'
+                                }
                             );
                             this._uEndHouer = ecui.$fastCreate(
                                 this.Listbox,
@@ -222,7 +241,10 @@
                                     className: 'ui-listbox',
                                     innerHTML: houer.map(function (item) { return '<div ui="value:' + item.value + '">' + item.code + '</div>'; }).join('')
                                 })),
-                                this
+                                this,
+                                {
+                                    value: end ? end.split(':')[0] : '23'
+                                }
                             );
                             this._uEndMinute = ecui.$fastCreate(
                                 this.Listbox,
@@ -230,13 +252,20 @@
                                     className: 'ui-listbox',
                                     innerHTML: minute.map(function (item) { return '<div ui="value:' + item.value + '">' + item.code + '</div>'; }).join('')
                                 })),
-                                this
+                                this,
+                                {
+                                    value: end ? end.split(':')[1] : '59'
+                                }
                             );
                         },
                         {
                             RANGE: 5,
                             Listbox: ecui.inherits(
                                 ui.Listbox,
+                                function (el, options) {
+                                    ui.Listbox.call(this, el, options);
+                                    this._sValue = options.value;
+                                },
                                 {
                                     Item: ecui.inherits(
                                         ecui.ui.Listbox.prototype.Item,
@@ -250,7 +279,15 @@
                                         }
                                     ),
                                     onready: function () {
-                                        this.setSelected(this.getItem(0));
+                                        if (this._sValue === '00') {
+                                            this.setSelected(this.getItem(0));
+                                        } else {
+                                            this.getItems().forEach(function (item) {
+                                                if (item.getValue() === this._sValue) {
+                                                    this.setSelected(item);
+                                                }
+                                            }.bind(this));
+                                        }
                                     },
 
                                     /**
