@@ -35,6 +35,7 @@ _nRatio    原始的宽高比例
         ui.Control,
         'ui-image',
         function (el, options) {
+            options.userSelect = false;
             ui.Control.call(this, el, options);
             if (el.width) {
                 load({target: el});
