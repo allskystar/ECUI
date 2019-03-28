@@ -13,7 +13,6 @@
 
 @fields
 _cSelected       - 当前选中的选项卡
-_eBar            - 下划线变量
 _eContainer      - 容器 DOM 元素
 */
 (function () {
@@ -43,50 +42,24 @@ _eContainer      - 容器 DOM 元素
     }
 
     /**
-     * 滑动事件处理。
-     * @private
-     *
-     * @param {ECUIEvent} event ECUI 事件对象
-     */
-    function swipe(event) {
-        var items = this.getItems(),
-            index = items.indexOf(this._cSelected);
-        if (event.type === 'swiperight') {
-            if (index) {
-                index--;
-            }
-        } else if (event.type === 'swipeleft') {
-            if (index < items.length - 1) {
-                index++;
-            }
-        }
-        if (items[index] !== this._cSelected) {
-            event.target = items[index].getBody();
-            core.dispatchEvent(items[index], 'click', event);
-        }
-    }
-
-    /**
      * 选项卡控件。
      * 每一个选项卡都包含一个头部区域与容器区域，选项卡控件存在互斥性，只有唯一的一个选项卡能被选中并显示容器区域。
      * options 属性：
      * selected    选中的选项序号，默认为0
-     * bar         是否需要下划线，默认为false
-     * gesture     是否支持手势切换，默认为true
      * @control
      */
     ui.Tab = core.inherits(
         ui.Control,
         'ui-tab',
         function (el, options) {
-            var titleEl = dom.create({className: options.classes.join('-title ')});
+            var titleEl = dom.create({className: options.classes.join('-title ')}),
+                containerEl = dom.create({className: options.classes.join('-container ')});
+
             for (; el.firstChild; ) {
                 titleEl.appendChild(el.firstChild);
             }
             el.appendChild(titleEl);
-            if (options.bar) {
-                this._eBar = dom.create({className: 'ui-tab-bar'});
-            }
+            this._eContainer = el.appendChild(containerEl);
 
             ui.Control.call(this, el, options);
 
@@ -132,8 +105,10 @@ _eContainer      - 容器 DOM 元素
                     }
 
                     if (this._eContainer) {
-                        dom.addClass(this._eContainer, this.getType() + '-container');
-                        this.getMain().appendChild(this._eContainer);
+                        dom.addClass(this._eContainer, this.getType());
+                        if (options.parent) {
+                            options.parent._eContainer.appendChild(this._eContainer);
+                        }
                     }
 
                     if (options.parent && options.selected) {
@@ -158,7 +133,7 @@ _eContainer      - 容器 DOM 元素
                     $setParent: function (parent) {
                         if (!parent) {
                             removeContainer(this);
-                        } else if (this._eContainer && dom.parent(this._eContainer) !== parent.getMain()) {
+                        } else if (this._eContainer && dom.parent(this._eContainer) !== parent._eContainer) {
                             parent.getMain().appendChild(this._eContainer);
                         }
 
@@ -189,9 +164,9 @@ _eContainer      - 容器 DOM 元素
                             parent.getMain().appendChild(el);
                             // 如果当前节点被选中需要显示容器元素，否则隐藏
                             if (parent._cSelected === this) {
-                                dom.addClass(el, this.getType() + '-container-selected');
+                                dom.addClass(el, this.getType() + '-selected');
                             } else {
-                                dom.removeClass(el, this.getType() + '-container-selected');
+                                dom.removeClass(el, this.getType() + '-selected');
                             }
                         }
                     }
@@ -207,8 +182,7 @@ _eContainer      - 容器 DOM 元素
              * @override
              */
             $dispose: function () {
-                this._eBar = null;
-                core.removeGestureListeners(this);
+                this._eContainer = null;
                 ui.Control.prototype.$dispose.call(this);
             },
 
@@ -234,13 +208,6 @@ _eContainer      - 容器 DOM 元素
             $ready: function (event) {
                 if (!this._cSelected) {
                     this.setSelected(+(event.options.selected) || 0);
-                }
-
-                if (event.options.gesture !== false) {
-                    core.addGestureListeners(this, {
-                        swipeleft: swipe,
-                        swiperight: swipe
-                    });
                 }
 
                 ui.Control.prototype.$ready.call(this, event.options);
@@ -285,44 +252,19 @@ _eContainer      - 容器 DOM 元素
                     if (this._cSelected) {
                         this._cSelected.alterStatus('-selected');
                         if (this._cSelected._eContainer && (!item || this._cSelected._eContainer !== item._eContainer)) {
-                            dom.removeClass(this._cSelected._eContainer, this._cSelected.getType() + '-container-selected');
+                            dom.removeClass(this._cSelected._eContainer, this._cSelected.getType() + '-selected');
                         }
                     }
 
                     if (item) {
                         item.alterStatus('+selected');
                         if (item._eContainer && (!this._cSelected || this._cSelected._eContainer !== item._eContainer)) {
-                            dom.addClass(item._eContainer, item.getType() + '-container-selected');
+                            dom.addClass(item._eContainer, item.getType() + '-selected');
                             core.cacheAtShow(item._eContainer);
                         }
                     }
 
                     this._cSelected = item;
-
-                    if (this._eBar) {
-                        if (this.isReady()) {
-                            var main = this.getMain(),
-                                parent = dom.parent(this._eBar),
-                                left = this._eBar.offsetLeft,
-                                top = this._eBar.offsetTop,
-                                width = this._eBar.offsetWidth;
-
-                            if (parent !== main) {
-                                this.$$barMargin = parent.getControl().getClientWidth() - width;
-                                this._eBar.style.top = top + 'px';
-                                this._eBar.style.left = left + 'px';
-                                this._eBar.style.width = width + 'px';
-                                main.appendChild(this._eBar);
-                            }
-
-                            util.timer(function () {
-                                this._eBar.style.left = (item.getX() + this.$$barMargin / 2) + 'px';
-                                this._eBar.style.width = (item.getWidth() - this.$$barMargin) + 'px';
-                            }, 0, this);
-                        } else {
-                            item.getBody().appendChild(this._eBar);
-                        }
-                    }
                 }
             }
         },

@@ -2,18 +2,14 @@
 .ui-tab {
     position: relative;
 
-    .ui-tab-item {
-        .ui-tab-bar {
-            position: static !important;
+    .ui-tab-container {
+        .ui-tab-item {
+            display: none !important;
         }
-    }
 
-    .ui-tab-item-container {
-        display: none !important;
-    }
-
-    .ui-tab-item-container-selected {
-        display: block !important;
+        .ui-tab-item-selected {
+            display: block !important;
+        }
     }
 
     .ui-tab-bar {
