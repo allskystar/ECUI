@@ -11,8 +11,4 @@
             display: block !important;
         }
     }
-
-    .ui-tab-bar {
-        position: absolute !important;
-    }
 }
