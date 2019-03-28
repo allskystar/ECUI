@@ -68,6 +68,10 @@
          */
         js: util.encodeJS,
 
+        json: function (source) {
+            return JSON.stringify(source);
+        },
+
         /**
          * 源串filter，用于在默认开启HTML转义时获取源串，不进行转义
          *
@@ -351,16 +355,18 @@
             }
 
             var engine = this.engine;
-            var open = engine.options.variableOpen;
             var code = [];
 
-            this.value.split(open.replace('$', '=')).forEach(function (text, i) {
+            this.value.replace(
+                new RegExp(engine.options.refRegExp, 'g'),
+                '&' + engine.options.variableOpen + '*$1|json|url' + engine.options.variableClose
+            ).split(engine.options.assignOpen).forEach(function (text, i) {
                 if (i) {
                     var firstOutput = true;
                     var leftText = '';
                     parseTextBlock(
                         text,
-                        open,
+                        engine.options.variableOpen,
                         engine.options.variableClose,
                         2,
                         function (text) {
@@ -1247,6 +1253,8 @@
      */
     Engine.prototype.config = function (options) {
         Object.assign(this.options, options);
+        this.options.assignOpen = this.options.variableOpen.replace(/\$/g, '=');
+        this.options.refRegExp = this.options.variableOpen.replace(/\$/g, '&').replace(/([\{\}\[\]\(\)\|\.])/g, '\\$1') + '([\\w|\\.]+)' + this.options.variableClose.replace(/([\{\}\[\]\(\)\|\.])/g, '\\$1');
     };
 
    /**
