@@ -1596,7 +1596,11 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                 var track = tracks[pointers[0].identifier];
                 if (track.type !== 'mouse') {
                     if (event.getNative().type.slice(-4) === 'move') {
-                        if (!track.swipe && Date.now() - track.startTime < 500 && Math.sqrt(track.speedX * track.speedX + track.speedY * track.speedY) > HIGH_SPEED) {
+                        if (track.swipe) {
+                            if (Date.now() - track.startTime >= 500) {
+                                delete track.swipe;
+                            }
+                        } else if (Date.now() - track.startTime < 500 && Math.sqrt(track.speedX * track.speedX + track.speedY * track.speedY) > HIGH_SPEED) {
                             track.swipe = true;
                             util.timer(function () {
                                 if (tracks[track.identifier] !== track && Math.sqrt(Math.pow(track.clientX - track.startX, 2) + Math.pow(track.clientY - track.startY, 2)) > 30) {
