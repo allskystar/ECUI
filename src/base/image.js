@@ -35,6 +35,7 @@ _nRatio    原始的宽高比例
         ui.Control,
         'ui-image',
         function (el, options) {
+            // firefox下点击图片会自动进入选中状态
             options.userSelect = false;
             ui.Control.call(this, el, options);
             if (el.width) {
