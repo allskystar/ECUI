@@ -8,11 +8,11 @@
         }
     }
 
-    .ui-tab-container {
+    .ui-tab-item-container {
         display: none !important;
     }
 
-    .ui-tab-container-selected {
+    .ui-tab-item-container-selected {
         display: block !important;
     }
 

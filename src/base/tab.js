@@ -132,7 +132,7 @@ _eContainer      - 容器 DOM 元素
                     }
 
                     if (this._eContainer) {
-                        dom.addClass(this._eContainer, this.getType().replace('-item', '-container'));
+                        dom.addClass(this._eContainer, this.getType() + '-container');
                         this.getMain().appendChild(this._eContainer);
                     }
 
@@ -189,9 +189,9 @@ _eContainer      - 容器 DOM 元素
                             parent.getMain().appendChild(el);
                             // 如果当前节点被选中需要显示容器元素，否则隐藏
                             if (parent._cSelected === this) {
-                                dom.addClass(el, this.getType().replace('-item', '-container-selected'));
+                                dom.addClass(el, this.getType() + '-container-selected');
                             } else {
-                                dom.removeClass(el, this.getType().replace('-item', '-container-selected'));
+                                dom.removeClass(el, this.getType() + '-container-selected');
                             }
                         }
                     }
@@ -285,14 +285,14 @@ _eContainer      - 容器 DOM 元素
                     if (this._cSelected) {
                         this._cSelected.alterStatus('-selected');
                         if (this._cSelected._eContainer && (!item || this._cSelected._eContainer !== item._eContainer)) {
-                            dom.removeClass(this._cSelected._eContainer, this._cSelected.getType().replace('-item', '-container-selected'));
+                            dom.removeClass(this._cSelected._eContainer, this._cSelected.getType() + '-container-selected');
                         }
                     }
 
                     if (item) {
                         item.alterStatus('+selected');
                         if (item._eContainer && (!this._cSelected || this._cSelected._eContainer !== item._eContainer)) {
-                            dom.addClass(item._eContainer, item.getType().replace('-item', '-container-selected'));
+                            dom.addClass(item._eContainer, item.getType() + '-container-selected');
                             core.cacheAtShow(item._eContainer);
                         }
                     }
