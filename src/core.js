@@ -1596,27 +1596,8 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                 var track = tracks[pointers[0].identifier];
                 if (track.type !== 'mouse') {
                     if (event.getNative().type.slice(-4) === 'move') {
-                        if (track.swipe) {
-                            if (Date.now() - track.startTime >= 500) {
-                                delete track.swipe;
-                            }
-                        } else if (Date.now() - track.startTime < 500 && Math.sqrt(track.speedX * track.speedX + track.speedY * track.speedY) > HIGH_SPEED) {
+                        if (!track.swipe && Math.sqrt(track.speedX * track.speedX + track.speedY * track.speedY) > HIGH_SPEED) {
                             track.swipe = true;
-                            util.timer(function () {
-                                if (tracks[track.identifier] !== track && Math.sqrt(Math.pow(track.clientX - track.startX, 2) + Math.pow(track.clientY - track.startY, 2)) > 30) {
-                                    event.angle = calcAngle(track.clientX - track.startX, track.clientY - track.startY);
-                                    if (event.angle > 150 && event.angle < 210) {
-                                        callback('swipeleft');
-                                    } else if (event.angle > 330 || event.angle < 30) {
-                                        callback('swiperight');
-                                    } else if (event.angle > 60 && event.angle < 120) {
-                                        callback('swipeup');
-                                    } else if (event.angle > 240 && event.angle < 300) {
-                                        callback('swipedown');
-                                    }
-                                    callback('swipe');
-                                }
-                            }, 300);
                         }
 
                         event.fromX = track.lastX;
@@ -1625,8 +1606,22 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                         event.toY = track.clientY;
                         callback('panmove');
                     } else {
-                        if (track && isTouchClick(track) && Math.sqrt(track.speedX * track.speedX + track.speedY * track.speedY) < HIGH_SPEED) {
-                            callback('tap');
+                        if (track) {
+                            if (track.swipe && Date.now() - track.startTime < 500 && Math.sqrt(Math.pow(track.clientX - track.startX, 2) + Math.pow(track.clientY - track.startY, 2)) > 30) {
+                                event.angle = calcAngle(track.clientX - track.startX, track.clientY - track.startY);
+                                if (event.angle > 150 && event.angle < 210) {
+                                    callback('swipeleft');
+                                } else if (event.angle > 330 || event.angle < 30) {
+                                    callback('swiperight');
+                                } else if (event.angle > 60 && event.angle < 120) {
+                                    callback('swipeup');
+                                } else if (event.angle > 240 && event.angle < 300) {
+                                    callback('swipedown');
+                                }
+                                callback('swipe');
+                            } else if (isTouchClick(track) && Math.sqrt(track.speedX * track.speedX + track.speedY * track.speedY) < HIGH_SPEED) {
+                                callback('tap');
+                            }
                         }
                     }
                 }
