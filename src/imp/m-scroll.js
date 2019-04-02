@@ -11,10 +11,9 @@
 
         isToucher = document.ontouchstart !== undefined,
         iosVersion = /(iPhone|iPad).*?OS (\d+(_\d+)?)/i.test(navigator.userAgent) ? +(RegExp.$2.replace('_', '.')) : undefined,
-        ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined,
         safariVersion = !/(chrome|crios|ucbrowser)/i.test(navigator.userAgent) && /(\d+\.\d)(\.\d)?\s+.*safari/i.test(navigator.userAgent) ? +RegExp.$1 : undefined;
 //{/if}//
-    var tx = /(\-?\d+|\-?\d+\.\d+)px\s*,\s*(\-?\d+|\-?\d+\.\d+)px/,
+    var tx = /(\-?\d+|\-?\d+\.\d+)px\s*/,
         keyboardHeight = 0,
         statusHeight = 0,
         innerKeyboardHeight,
@@ -196,26 +195,11 @@
              */
             setPosition: function (x, y) {
                 var main = this.getMain();
-                if (ieVersion < 9) {
-                    // 滚动结束使用scrollxxx解决删除时自动复位的问题
-                    var style = this.getBody().style;
-                    style.transform = '';
-                    main.scrollLeft = -x;
-                    main.scrollTop = -y;
-                    this.$MScrollData.scrollLeft = main.scrollLeft;
-                    this.$MScrollData.scrollTop = main.scrollTop;
-                    x += this.$MScrollData.scrollLeft;
-                    y += this.$MScrollData.scrollTop;
-                    if (x || y) {
-                        style.transform = 'translate(' + x + 'px,' + y + 'px)';
-                    }
-                } else {
-                    // 解决光标问题
-                    if (this.getX() !== x || this.getY() !== y) {
-                        main.scrollLeft = this.$MScrollData.scrollLeft = 0;
-                        main.scrollTop = this.$MScrollData.scrollTop = 0;
-                        this.getBody().style[transformName] = 'translate3d(' + x + 'px,' + y + 'px,0px)';
-                    }
+                // 解决光标问题
+                if (this.getX() !== x || this.getY() !== y) {
+                    main.scrollLeft = this.$MScrollData.scrollLeft = 0;
+                    main.scrollTop = this.$MScrollData.scrollTop = 0;
+                    this.getBody().style[transformName] = 'translate3d(' + x + 'px,' + y + 'px,0px)';
                 }
                 core.query(function (item) {
                     return this.contain(item);

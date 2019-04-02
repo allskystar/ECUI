@@ -112,7 +112,7 @@ _eContainer      - 容器 DOM 元素
                     }
 
                     if (options.parent && options.selected) {
-                        options.parent.setSelected(this);
+                        options.parent._cSelected = this;
                     }
                 },
                 {
@@ -206,10 +206,7 @@ _eContainer      - 容器 DOM 元素
              * @override
              */
             $ready: function (event) {
-                if (!this._cSelected) {
-                    this.setSelected(+(event.options.selected) || 0);
-                }
-
+                this.setSelected(this._cSelected || +(event.options.selected) || 0);
                 ui.Control.prototype.$ready.call(this, event.options);
             },
 
@@ -226,6 +223,16 @@ _eContainer      - 容器 DOM 元素
                 }
 
                 ui.Control.prototype.$remove.call(this, event);
+            },
+
+            /**
+             * 获取选项卡对应的容器元素。
+             * @public
+             *
+             * @return {HTMLElement} 选项卡对应的容器元素
+             */
+            getContainer: function () {
+                return this._eContainer;
             },
 
             /**

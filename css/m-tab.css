@@ -1,0 +1,45 @@
+.ui-m-tab {
+    overflow: hidden;
+
+    .ui-m-tab-title {
+        position: relative;
+        box-sizing: border-box;
+        width: 100%;
+        border-bottom: 0px;
+        white-space: nowrap;
+
+        .ui-tab-item {
+            display: inline-block !important;
+            box-sizing: border-box;
+            width: 100%;
+            vertical-align: top;
+            white-space: nowrap;
+
+            .ui-tab-bar {
+                position: relative !important;
+            }
+        }
+
+        .ui-tab-bar {
+            position: absolute !important;
+        }
+    }
+
+    .ui-m-tab-container {
+        position: relative;
+        box-sizing: border-box;
+        width: 100%;
+        white-space: nowrap;
+
+        .ui-tab-item {
+            display: inline-block !important;
+            box-sizing: border-box;
+            width: 100%;
+            vertical-align: top;
+        }
+    }
+}
+
+.ui-m-tab-active .ui-m-tab-title,
+.ui-m-tab-active .ui-m-tab-container {
+}

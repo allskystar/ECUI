@@ -1605,23 +1605,21 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                         event.toX = track.clientX;
                         event.toY = track.clientY;
                         callback('panmove');
-                    } else {
-                        if (track) {
-                            if (track.swipe && Date.now() - track.startTime < 500 && Math.sqrt(Math.pow(track.clientX - track.startX, 2) + Math.pow(track.clientY - track.startY, 2)) > 30) {
-                                event.angle = calcAngle(track.clientX - track.startX, track.clientY - track.startY);
-                                if (event.angle > 150 && event.angle < 210) {
-                                    callback('swipeleft');
-                                } else if (event.angle > 330 || event.angle < 30) {
-                                    callback('swiperight');
-                                } else if (event.angle > 60 && event.angle < 120) {
-                                    callback('swipeup');
-                                } else if (event.angle > 240 && event.angle < 300) {
-                                    callback('swipedown');
-                                }
-                                callback('swipe');
-                            } else if (isTouchClick(track) && Math.sqrt(track.speedX * track.speedX + track.speedY * track.speedY) < HIGH_SPEED) {
-                                callback('tap');
+                    } else if (track) {
+                        if (track.swipe && Date.now() - track.startTime < 500 && Math.sqrt(Math.pow(track.clientX - track.startX, 2) + Math.pow(track.clientY - track.startY, 2)) > 30) {
+                            event.angle = calcAngle(track.clientX - track.startX, track.clientY - track.startY);
+                            if (event.angle > 150 && event.angle < 210) {
+                                callback('swipeleft');
+                            } else if (event.angle > 330 || event.angle < 30) {
+                                callback('swiperight');
+                            } else if (event.angle > 60 && event.angle < 120) {
+                                callback('swipeup');
+                            } else if (event.angle > 240 && event.angle < 300) {
+                                callback('swipedown');
                             }
+                            callback('swipe');
+                        } else if (isTouchClick(track) && Math.sqrt(track.speedX * track.speedX + track.speedY * track.speedY) < HIGH_SPEED) {
+                            callback('tap');
                         }
                     }
                 }
@@ -2261,6 +2259,11 @@ outer:          for (var caches = [], target = event.target, el; target; target 
          * @param {object} options 控件拖拽的参数，省略参数时，控件默认只允许在 offsetParent 定义的区域内拖拽，如果 offsetParent 是 body，则只允许在当前浏览器可视范围内拖拽
          */
         drag: function (control, event, options) {
+            if (!control) {
+                // 不指定控件，取消drag
+                restore();
+                return;
+            }
             // 控件之前处于惯性状态必须停止
             var uid = control.getUID();
             if (inertiaHandles[uid]) {
@@ -2269,6 +2272,8 @@ outer:          for (var caches = [], target = event.target, el; target; target 
             }
 
             if (event && activedControl !== undefined && currEnv.type !== 'drag') {
+                setEnv(dragEnv);
+
                 dom.addClass(document.body, 'ui-drag');
 
                 // 判断鼠标没有mouseup
@@ -2277,7 +2282,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
 
                 // 拖拽范围默认不超出上级元素区域
                 Object.assign(
-                    dragEnv,
+                    currEnv,
                     parent.tagName === 'BODY' || parent.tagName === 'HTML' ? util.getView() : {
                         top: 0,
                         right: parent.offsetWidth - util.toNumber(style.borderLeftWidth) - util.toNumber(style.borderRightWidth),
@@ -2285,31 +2290,30 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                         left: 0
                     }
                 );
-                Object.assign(dragEnv, options);
+                Object.assign(currEnv, options);
 
-                var x = dragEnv.x !== undefined ? dragEnv.x : control.getX(),
-                    y = dragEnv.y !== undefined ? dragEnv.y : control.getY();
+                var x = currEnv.x !== undefined ? currEnv.x : control.getX(),
+                    y = currEnv.y !== undefined ? currEnv.y : control.getY();
 
-                if (!dragEnv.absolute) {
-                    dragEnv.right = Math.max(dragEnv.right - control.getWidth(), dragEnv.left);
-                    dragEnv.bottom = Math.max(dragEnv.bottom - control.getHeight(), dragEnv.top);
+                if (!currEnv.absolute) {
+                    currEnv.right = Math.max(currEnv.right - control.getWidth(), currEnv.left);
+                    currEnv.bottom = Math.max(currEnv.bottom - control.getHeight(), currEnv.top);
                 }
-                dragEnv.originalX = x;
-                dragEnv.originalY = y;
+                currEnv.originalX = x;
+                currEnv.originalY = y;
 
-                if (dragEnv.limit) {
-                    dragEnv.limitRatio = dragEnv.limit.ratio || 3;
-                    dragEnv.limitLeft = dragEnv.limit.left === undefined ? dragEnv.left : dragEnv.limit.left;
-                    dragEnv.left += (dragEnv.left - dragEnv.limitLeft) * (dragEnv.limitRatio - 1);
-                    dragEnv.limitRight = dragEnv.limit.right === undefined ? dragEnv.right : dragEnv.limit.right;
-                    dragEnv.right += (dragEnv.right - dragEnv.limitRight) * (dragEnv.limitRatio - 1);
-                    dragEnv.limitTop = dragEnv.limit.top === undefined ? dragEnv.top : dragEnv.limit.top;
-                    dragEnv.top += (dragEnv.top - dragEnv.limitTop) * (dragEnv.limitRatio - 1);
-                    dragEnv.limitBottom = dragEnv.limit.bottom === undefined ? dragEnv.bottom : dragEnv.limit.bottom;
-                    dragEnv.bottom += (dragEnv.bottom - dragEnv.limitBottom) * (dragEnv.limitRatio - 1);
+                if (currEnv.limit) {
+                    currEnv.limitRatio = currEnv.limit.ratio || 3;
+                    currEnv.limitLeft = currEnv.limit.left === undefined ? currEnv.left : currEnv.limit.left;
+                    currEnv.left += (currEnv.left - currEnv.limitLeft) * (currEnv.limitRatio - 1);
+                    currEnv.limitRight = currEnv.limit.right === undefined ? currEnv.right : currEnv.limit.right;
+                    currEnv.right += (currEnv.right - currEnv.limitRight) * (currEnv.limitRatio - 1);
+                    currEnv.limitTop = currEnv.limit.top === undefined ? currEnv.top : currEnv.limit.top;
+                    currEnv.top += (currEnv.top - currEnv.limitTop) * (currEnv.limitRatio - 1);
+                    currEnv.limitBottom = currEnv.limit.bottom === undefined ? currEnv.bottom : currEnv.limit.bottom;
+                    currEnv.bottom += (currEnv.bottom - currEnv.limitBottom) * (currEnv.limitRatio - 1);
                 }
-                dragEnv.target = control;
-                setEnv(dragEnv);
+                currEnv.target = control;
 
                 event.track.logicX = event.clientX;
                 event.track.logicY = event.clientY;

@@ -52,6 +52,7 @@
 @import (less) 'css/select.css';
 @import (less) 'css/combox.css';
 @import (less) 'css/couple-slider.css';
+@import (less) 'css/multi-select.css';
 
 @import (less) 'css/locked-table.css';
 
@@ -65,10 +66,10 @@
 @import (less) 'css/m-options.css';
 @import (less) 'css/m-photo-hotspot.css';
 @import (less) 'css/m-select.css';
-@import (less) 'css/multi-select.css';
 @import (less) 'css/m-list-view.css';
 @import (less) 'css/m-op-list-view.css';
 @import (less) 'css/m-carousel.css';
 @import (less) 'css/m-book.css';
+@import (less) 'css/m-tab.css';
 
 @import (less) 'css/svg.css';

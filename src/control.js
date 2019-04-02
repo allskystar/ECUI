@@ -613,13 +613,12 @@ _aStatus            - 控件当前的状态集合
              */
             cache: function (force) {
                 if ((force || !this._bCached) && this.getOuter().offsetWidth) {
-                    if (this._bCached !== undefined) {
-                        // 之前缓存过，因为clearCache方法标记为需要重新缓存，不需要再次主动执行initStructure方法
-                        force = true;
-                    }
+                    // 之前未进行过缓存相关操作，强制缓存，否则不执行initStructure
+                    force = this._bCached === undefined;
                     this._bCached = true;
                     this.$cache(dom.getStyle(this._eMain));
-                    if (!force && this._bReady) {
+                    if (force && this._bReady) {
+                        // 之前缓存过，因为clearCache方法标记为需要重新缓存，不需要再次主动执行initStructure方法
                         this.initStructure();
                     }
                     return true;
