@@ -211,7 +211,7 @@ do
     else
         ext=${file##*.}
         type=${file%%.*}
-        if [ $ext = "jar" ] || [ $ext = "sh" ] || [ $ext = "py" ] || [ $file = "README.md" ] || [ $type = "route" ] || [ $type = "layer" ] || [ $type = "_define_" ] || [ $type = "svg" ]
+        if [ $ext = "jar" ] || [ $ext = "sh" ] || [ $ext = "py" ] || [ $file = "README.md" ] || [ $type = "route" ] || [ $type = "layer" ] || [ $type = "_define_" ]
         then
             continue
         fi
@@ -260,7 +260,7 @@ then
     do
         if [ -f $file ]
         then
-            if [ ! $file = "ecui.js" ] && [ ! $file = "ecui.css" ] && [ ! $file = "common.js" ] && [ ! $file = "common.css" ] && [ ! $file = "ie-es5.js" ] && [ ! $file = "options.js" ]
+            if [ ! $file = "ecui.js" ] && [ ! $file = "ecui.css" ] && [ ! $file = "common.js" ] && [ ! $file = "common.css" ] && [ ! $file = "ie-es5.js" ] && [ ! $file = "options.js" ] && [ ! $file = "ios.js" ] && [ ! $file = "android.js" ]
             then
                 continue
             fi
