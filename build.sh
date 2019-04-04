@@ -211,7 +211,7 @@ do
     else
         ext=${file##*.}
         type=${file%%.*}
-        if [ $ext = "jar" ] || [ $ext = "sh" ] || [ $ext = "py" ] || [ $file = "README.md" ] || [ $type = "route" ] || [ $type = "layer" ] || [ $type = "_define_" ]
+        if [ $ext = "jar" ] || [ $ext = "sh" ] || [ $ext = "py" ] || [ $file = "README.md" ] || [ $type = "route" ] || [ $type = "layer" ] || [ $type = "_define_" ] || [ $type = "svg" ]
         then
             continue
         fi
