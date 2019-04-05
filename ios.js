@@ -4,7 +4,7 @@
         if (options.method && options.method.toUpperCase() === 'POST') {
             var data = options.data || '';
             delete options.data;
-            url += '&' + data;
+            url += '#' + data;
         }
         oldAjax(url, options);
     };
