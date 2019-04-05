@@ -3,7 +3,9 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
 使用示例：
 <body data-ecui="load:esr">
 支持的参数：
-esr(cache=true,meta=true,history=false)
+esr(cache=500,meta=true,history=false)
+cache参数可以用于页面数据缓存区的大小，默认为1000
+
 ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价于<a>标签，callRoute不会记录url信息，等价于传统的ajax调用，change用于参数的部分改变，一般用于翻页操作仅改变少量页码信息。
 btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要使用自动跳转，并带上HISTORY参数，如#/index~HISTORY=1
 */
