@@ -18,8 +18,12 @@ link - 链接插件，使用ext-link使用，具体的跳转地址写在DOM元�
                 if (!event.__ECUI_Link__) {
                     var href = dom.getAttribute(this.getMain(), 'href');
                     if (href) {
-                        linkElement.href = href;
-                        location.href = linkElement.href;
+                        if (href.charAt(0) === '#') {
+                            core.esr.redirect(href.slice(1));
+                        } else {
+                            linkElement.href = href;
+                            location.href = linkElement.href;
+                        }
                         event.__ECUI_Link__ = true;
                     }
                 }

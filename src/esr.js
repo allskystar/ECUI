@@ -699,7 +699,11 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                 requestVersion++;
                 historyIndex++;
 
-                if (/~HISTORY=(\d+)/.test(loc)) {
+                if (!(ieVersion < 9) && esrOptions.history === false) {
+                    history.replaceState('', '', '#' + loc);
+                    setLocation(loc);
+                    esr.callRoute(loc);
+                } else if (/~HISTORY=(\d+)/.test(loc)) {
                     historyIndex = +RegExp.$1;
 
                     // ie下使用中间iframe作为中转控制
@@ -1891,7 +1895,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                 });
             }
 
-            esrOptions = JSON.parse('{' + decodeURIComponent(value.replace(/(\w+)\s*=\s*([A-Za-z0-9_]+)\s*($|,)/g, '"$1":"$2"$3')) + '}');
+            esrOptions = JSON.parse('{' + decodeURIComponent(value.replace(/(\w+)\s*=\s*(["A-Za-z0-9_]+)\s*($|,)/g, '"$1":$2$3')) + '}');
 
             historyCacheSize = esrOptions.cache || 1000;
 
