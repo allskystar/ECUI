@@ -53,8 +53,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
         waitRender,
 
         historyOffset = 0,
-        historyCache = [],
-        historyCacheSize;
+        historyCache = [];
 
     /**
      * 增加IE的history信息。
@@ -264,7 +263,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                 // 解决A标签下反复修改的问题
                 var loc = esr.getLocation().replace('~DENY_CACHE', '');
 
-                if (ieVersion < 9) {
+                if (ieVersion < 7) {
                     if (historyIndex > 1) {
                         // IE第一次进入，不能back，否则会退出框架
                         pauseStatus = true;
@@ -282,7 +281,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                 } else {
                     setLocation(loc);
                     util.timer(function () {
-                        history.replaceState('', '', '#' + loc);
+                        location.replace('#' + loc);
                     }, 100);
                 }
 
@@ -701,8 +700,8 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                 requestVersion++;
                 historyIndex++;
 
-                if (!(ieVersion < 9) && esrOptions.history === false) {
-                    history.replaceState('', '', '#' + loc);
+                if (!esrOptions.history) {
+                    location.replace('#' + loc);
                     setLocation(loc);
                     esr.callRoute(loc);
                 } else if (/~HISTORY=(\d+)/.test(loc)) {
@@ -717,7 +716,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                 } else {
                     historyCache = historyCache.slice(0, historyIndex - historyOffset - 1);
                     loc += '~HISTORY=' + historyIndex;
-                    if (ieVersion < 9) {
+                    if (ieVersion < 7) {
                         if (historyIndex > 1) {
                             // IE第一次进入，不能back，否则会退出框架
                             pauseStatus = true;
@@ -739,7 +738,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                     pauseStatus = true;
                     util.timer(function () {
                         pauseStatus = false;
-                        history.replaceState('', '', '#' + loc);
+                        location.replace('#' + loc);
                         // ie下使用中间iframe作为中转控制
                         // 其他浏览器直接调用控制器方法
                         if (!addIEHistory(loc)) {
@@ -778,13 +777,13 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
 
             var index = el.history - historyOffset - 1;
             if (isCached(elRoute)) {
-                if (index >= historyCacheSize) {
-                    historyCache = historyCache.slice(index + 1 - historyCacheSize);
-                    historyOffset += index + 1 - historyCacheSize;
+                if (index >= esrOptions.cache) {
+                    historyCache = historyCache.slice(index + 1 - esrOptions.cache);
+                    historyOffset += index + 1 - esrOptions.cache;
                 } else if (index < 0) {
                     var list = [];
                     list[-index - 1] = undefined;
-                    historyCache = list.concat(historyCache.slice(0, historyCacheSize + index));
+                    historyCache = list.concat(historyCache.slice(0, esrOptions.cache + index));
                     historyOffset += index;
                 }
                 var data = historyCache[el.history - historyOffset - 1] = {NAME: elRoute.NAME};
@@ -1401,10 +1400,10 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
          * @param {string} loc location位置
          */
         redirect: function (loc) {
-            if (ieVersion < 9 || esrOptions.history !== false) {
+            if (esrOptions.history) {
                 location.hash = calcUrl(loc);
             } else {
-                history.replaceState('', '', '#' + calcUrl(loc));
+                location.replace('#' + calcUrl(loc));
             }
         },
 
@@ -1733,10 +1732,10 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
             // opera下，相同的hash重复写入会在历史堆栈中重复记录
             // 所以需要ESR_GET_LOCATION来判断
             if (esr.getLocation() !== loc) {
-                if (ieVersion < 9 || esrOptions.history !== false) {
+                if (esrOptions.history) {
                     location.hash = loc;
                 } else {
-                    history.replaceState('', '', '#' + loc);
+                    location.replace('#' + loc);
                 }
             }
             setLocation(loc);
@@ -1899,7 +1898,8 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
 
             esrOptions = JSON.parse('{' + decodeURIComponent(value.replace(/(\w+)\s*=\s*(["A-Za-z0-9_]+)\s*($|,)/g, '"$1":$2$3')) + '}');
 
-            historyCacheSize = esrOptions.cache || 1000;
+            esrOptions.history = esrOptions.history !== false || ieVersion < 7;
+            esrOptions.cache = esrOptions.cache || 1000;
 
             if (esrOptions.meta) {
                 metaVersion = util.getLocalStorage('esr_meta_version') || '0';
