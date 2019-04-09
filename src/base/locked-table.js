@@ -233,11 +233,11 @@ _eRight      - 右侧乐定行的Element元素
                     rightHeadStyle = this._uRightHead.getOuter().style,
                     leftMainStyle = this._uLeftMain.getOuter().style,
                     rightMainStyle = this._uRightMain.getOuter().style,
-                    fixed = dom.contain(this.getMain(), event.target) && Math.abs(event.deltaX) >= Math.abs(event.deltaY);
+                    fixed = dom.contain(this.getMain(), event.target) && event.deltaX;
 
                 if (this.$getSection('Head').getMain().style.position === 'fixed' || fixed) {
                     leftHeadStyle.position = rightHeadStyle.position = 'fixed';
-                    leftHeadStyle.top = rightHeadStyle.top = (Math.min(this.getClientHeight() - this.$$paddingTop + top, Math.max(0, top))) + 'px';
+                    leftHeadStyle.top = rightHeadStyle.top = this.$$fixedTop + 'px';
                     leftHeadStyle.left = left + 'px';
                     rightHeadStyle.left = (Math.min(this.getClientWidth(), this.$$tableWidth) - this.$$paddingRight + left - this.$$rightTDWidth - this.$$scrollFixed[0]) + 'px';
                 }

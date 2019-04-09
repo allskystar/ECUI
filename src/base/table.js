@@ -26,6 +26,7 @@
 
 @fields
 _nHeadFloat  - 表头飘浮的位置
+_nHeadMargin - 表头距离表底的高度
 _aHCells     - 表格头单元格控件对象
 _aRows       - 表格数据行对象
 _uHead       - 表头区域
@@ -149,6 +150,7 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
             }
 
             this._nHeadFloat = options.headFloat === undefined ? undefined : options.headFloat === true ? 0 : +options.headFloat;
+            this._nHeadMargin = options.headMargin || 0;
 
             el.appendChild(
                 this._eLayout = dom.create(
@@ -579,16 +581,16 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
                     }
                 }
 
-                if (this._nHeadFloat !== undefined && Math.abs(event.deltaX) <= Math.abs(event.deltaY)) {
+                if (this._nHeadFloat !== undefined && event.deltaY) {
                     var style = this._uHead.getOuter().style,
                         pos = dom.getPosition(this._eLayout),
                         view = util.getView(),
                         top = pos.top - view.top;
 
-                    top = Math.min(this.getClientHeight() - this.$$paddingTop + top, Math.max(this._nHeadFloat, top));
-                    if (top <= this._nHeadFloat || dom.contain(this.getMain(), event.target)) {
+                    this.$$fixedTop = Math.min(this.getClientHeight() - this.$$paddingTop - this._nHeadMargin + top, Math.max(this._nHeadFloat, top));
+                    if (this.$$fixedTop <= this._nHeadFloat || dom.contain(this.getMain(), event.target)) {
                         style.position = 'fixed';
-                        style.top = top + 'px';
+                        style.top = this.$$fixedTop + 'px';
                         if (core.getScrollNarrow()) {
                             style.left = pos.left + 'px';
                         } else {
@@ -780,10 +782,9 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
                 if (this._nHeadFloat !== undefined) {
                     var style = this._uHead.getOuter().style;
                     style.position = '';
-                    style.top = (Math.min(this.getClientHeight() - this.$$paddingTop, this._nHeadFloat + Math.max(0, util.getView().top - dom.getPosition(this.getOuter()).top)) + this._eLayout.scrollTop) + 'px';
+                    style.top = (Math.min(this.getClientHeight() - this.$$paddingTop - this._nHeadMargin, Math.max(0, this._nHeadFloat + util.getView().top - dom.getPosition(this.getOuter()).top)) + this._eLayout.scrollTop) + 'px';
                     style.left = '0px';
-                    if (core.getScrollNarrow()) {
-                    } else {
+                    if (!core.getScrollNarrow()) {
                         style.clip = ieVersion < 8 ? 'rect(0,100%,100%,0)' : 'auto';
                     }
                 }
