@@ -67,7 +67,7 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
             if (options.end) {
                 this._oEnd = new Date(options.end);
             }
-            this._nOffset = options.offset || 1;
+            this._nOffset = +options.offset || 1;
             this._oDate = options.date ? new Date(options.date) : new Date();
         },
         {
