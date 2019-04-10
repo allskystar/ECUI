@@ -310,19 +310,25 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
                     item.getBody().innerHTML = item._nDay = date.getDate();
 
                     if (date >= begin && date <= end) {
-                        if (!(index % 7)) {
+                        if (index && !(index % 7)) {
                             dom.removeClass(dom.parent(el), 'ui-extra');
+                            delete item._bRowExtra;
                         }
                         dom.removeClass(el, 'ui-extra');
+                        delete item._bExtra;
                         if (date === this._oDate) {
                             setSelected(this, item);
                         }
                         item.enable();
                     } else {
-                        if (!(index % 7)) {
+                        if (index && !(index % 7) && !item._bRowExtra) {
                             dom.addClass(dom.parent(el), 'ui-extra');
+                            item._bRowExtra = true;
                         }
-                        dom.addClass(el, 'ui-extra');
+                        if (!item._bExtra) {
+                            dom.addClass(el, 'ui-extra');
+                            item._bExtra = true;
+                        }
                         if (this._bExtra) {
                             item.disable();
                         }
