@@ -1,9 +1,10 @@
 /*
 @example
-<div ui="type:month-view;year:2009;month:11"></div>
+<div ui="type:month-view;date:2009/04/17"></div>
 
 @fields
 _bExtra     - 扩展的日期是否响应事件
+_bRowExtra  - 当前是否有行扩展
 _nYear      - 年份
 _nMonth     - 月份(0-11)
 _aCells     - 日历控件内的所有单元格，其中第0-6项是日历的头部星期名称
@@ -44,8 +45,6 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
      * 月视图控件。
      * 提供指定月份的日历信息。
      * options 属性：
-     * year    年份
-     * month   月份(1-12)
      * begin   开始日期，小于这个日期的日历单元格会被disabled
      * end     结束日期，大于这个日期的日历单元格会被disabled
      * date    初始选中的日期，默认是今日
@@ -287,7 +286,7 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
                     oldYear = this._nYear,
                     oldMonth = this._nMonth;
 
-                today = new Date(dateYear, dateMonth, today.getDate());
+                today = new Date(today.getFullYear(), today.getMonth(), today.getDate());
 
                 if (this._oBegin > begin) {
                     begin = this._oBegin;
