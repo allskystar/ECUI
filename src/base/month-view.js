@@ -5,8 +5,10 @@
 @fields
 _bExtra     - 扩展的日期是否响应事件
 _bRowExtra  - 当前是否有行扩展
+_nOffset    - 月份开始的偏移值，-26表示当前月的第一天是上个月的26号，默认是1
 _nYear      - 年份
 _nMonth     - 月份(0-11)
+_nWeekday   - 从周几开始显示，0表示周日
 _aCells     - 日历控件内的所有单元格，其中第0-6项是日历的头部星期名称
 _oBegin     - 开始日期
 _oEnd       - 结束日期
@@ -49,6 +51,8 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
      * end     结束日期，大于这个日期的日历单元格会被disabled
      * date    初始选中的日期，默认是今日
      * extra   扩展的日期是否响应事件，默认为enable，如果需要响应事件设置成disable
+     * weekday 从周几开始进行控制，默认是周日(0)
+     * offset  每月的开始时间，默认是1,如果从上个月延续，取负值，如-26表示这个月的开始是上个月的26号
      * @control
      */
     ui.MonthView = core.inherits(
@@ -56,8 +60,6 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
         'ui-monthview',
         function (el, options) {
             ui.Control.call(this, el, options);
-
-            this._aCells = this.$initView(options);
 
             this._bExtra = options.extra === 'disable';
             if (options.begin) {
@@ -68,9 +70,12 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
             }
             this._nOffset = +options.offset || 1;
             this._oDate = options.date ? new Date(options.date) : new Date();
+            this._nWeekday = +options.weekday || 0;
+
+            this._aCells = this.$initView(options);
         },
         {
-            WEEKNAMES: ['一', '二', '三', '四', '五', '六', '日'],
+            WEEKNAMES: ['日', '一', '二', '三', '四', '五', '六'],
 
             /**
              * 日期部件。
@@ -143,9 +148,10 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
                     return core.$fastCreate(index < 7 ? ui.Control : this.Cell, item, this);
                 }, this);
 
-                this.WEEKNAMES.forEach(function (item, index) {
-                    cells[index].getBody().innerHTML = item;
-                }, this);
+                for (var i = 0; i < 7; i++) {
+                    console.log(i, this._nWeekday);
+                    cells[i].getBody().innerHTML = this.WEEKNAMES[(i + this._nWeekday) % 7];
+                }
 
                 return cells;
             },
@@ -280,7 +286,7 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
                     dateMonth = month !== undefined ? month - 1 : today.getMonth(),
                     firstDay = new Date(dateYear, this._nOffset > 0 ? dateMonth : dateMonth - 1, this._nOffset > 0 ? this._nOffset : -this._nOffset),
                     lastDay = new Date(dateYear, this._nOffset > 0 ? dateMonth + 1 : dateMonth, this._nOffset > 0 ? this._nOffset - 1 : -this._nOffset - 1),
-                    day = -(firstDay.getDay() + 6) % 7,
+                    day = -(firstDay.getDay() + 7 - this._nWeekday) % 7,
                     begin = firstDay,
                     end = lastDay,
                     oldYear = this._nYear,
