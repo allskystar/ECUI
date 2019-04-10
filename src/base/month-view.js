@@ -21,20 +21,6 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
         util = core.util;
 //{/if}//
     /**
-     * 获取匹配的日期。
-     * @private
-     *
-     * @param {Date} date 原始日期对象
-     * @param {number} year 匹配的年份
-     * @param {number} month 匹配的月份
-     * @param {number} day 当年月无法匹配时的返回值
-     * @return {number} 年月可以匹配时返回日期
-     */
-    function getDay(date, year, month, day) {
-        return date && date.getFullYear() === year && date.getMonth() === month ? date.getDate() : day;
-    }
-
-    /**
      * 选中某个日期单元格。
      * @private
      *
@@ -81,6 +67,7 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
             if (options.end) {
                 this._oEnd = new Date(options.end);
             }
+            this._nOffset = options.offset || 1;
             this._oDate = options.date ? new Date(options.date) : new Date();
         },
         {
@@ -292,67 +279,59 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
                 var today = new Date(),
                     dateYear = year || today.getFullYear(),
                     dateMonth = month !== undefined ? month - 1 : today.getMonth(),
-                    // 得到上个月的最后几天的信息，用于补齐当前月日历的上月信息位置
-                    lastDayOfLastMonthDate = new Date(dateYear, dateMonth, 0),
-                    day = 1 - lastDayOfLastMonthDate.getDay(),
-                    lastDayOfLastMonth = lastDayOfLastMonthDate.getDate(),
-
-                    // 得到当前月的天数
-                    firstDayOfCurrMonthDate = new Date(dateYear, dateMonth, 1),
-                    lastDayOfCurrMonthDate = new Date(dateYear, dateMonth + 1, 0),
-                    lastDayOfCurrMonth = lastDayOfCurrMonthDate.getDate(),
-                    begin = 1,
-                    end = lastDayOfCurrMonth,
-                    selected = getDay(this._oDate, dateYear, dateMonth, 0),
-                    now = getDay(today, dateYear, dateMonth, 0),
+                    firstDay = new Date(dateYear, this._nOffset > 0 ? dateMonth : dateMonth - 1, this._nOffset > 0 ? this._nOffset : -this._nOffset),
+                    lastDay = new Date(dateYear, this._nOffset > 0 ? dateMonth + 1 : dateMonth, this._nOffset > 0 ? this._nOffset - 1 : -this._nOffset - 1),
+                    day = -(firstDay.getDay() + 6) % 7,
+                    begin = firstDay,
+                    end = lastDay,
                     oldYear = this._nYear,
                     oldMonth = this._nMonth;
 
-                if (this._oBegin) {
-                    begin = this._oBegin >= new Date(dateYear, dateMonth + 1, 1) ? 100 : this._oBegin > firstDayOfCurrMonthDate ? this._oBegin.getDate() : firstDayOfCurrMonthDate.getDate();
+                today = new Date(dateYear, dateMonth, today.getDate());
+
+                if (this._oBegin > begin) {
+                    begin = this._oBegin;
                 }
-                if (this._oEnd) {
-                    end = this._oEnd < firstDayOfCurrMonthDate ? 0 : this._oEnd < lastDayOfCurrMonthDate ? this._oEnd.getDate() : lastDayOfCurrMonthDate.getDate();
+                if (this._oEnd < end) {
+                    end = this._oEnd;
                 }
 
-                this._nYear = firstDayOfCurrMonthDate.getFullYear();
-                this._nMonth = firstDayOfCurrMonthDate.getMonth();
+                this._nYear = dateYear;
+                this._nMonth = dateMonth;
 
                 setSelected(this);
 
-                (cells || this._aCells).forEach(function (item, index) {
-                    item._nYear = this._nYear;
-                    item._nMonth = this._nMonth;
-                    if (index > 6) {
-                        var el = item.getOuter();
-                        if (day >= begin && day <= end) {
-                            if (index === 35 || index === 42) {
-                                dom.removeClass(dom.parent(el), 'ui-extra');
-                            }
-                            dom.removeClass(el, 'ui-extra');
-                            // 恢复选择的日期
-                            if (day === selected) {
-                                setSelected(this, item);
-                            }
-                            item.enable();
-                        } else {
-                            if (index === 35 || index === 42) {
-                                dom.addClass(dom.parent(el), 'ui-extra');
-                            }
-                            dom.addClass(el, 'ui-extra');
-                            if (this._bExtra) {
-                                item.disable();
-                            }
-                        }
+                (cells || this._aCells).slice(7).forEach(function (item, index) {
+                    var date = new Date(firstDay.getTime() + (day + index) * 3600000 * 24),
+                        el = item.getOuter();
 
-                        if (day === now && now > 0) {
-                            dom.addClass(el, 'ui-today');
-                        } else {
-                            dom.removeClass(el, 'ui-today');
-                        }
+                    item._nYear = date.getYear();
+                    item._nMonth = date.getMonth();
+                    item.getBody().innerHTML = item._nDay = date.getDate();
 
-                        item.getBody().innerHTML = day >= 1 && day <= lastDayOfCurrMonth ? day : day > lastDayOfCurrMonth ? day - lastDayOfCurrMonth : lastDayOfLastMonth + day;
-                        item._nDay = day++;
+                    if (date >= begin && date <= end) {
+                        if (!(index % 7)) {
+                            dom.removeClass(dom.parent(el), 'ui-extra');
+                        }
+                        dom.removeClass(el, 'ui-extra');
+                        if (date === this._oDate) {
+                            setSelected(this, item);
+                        }
+                        item.enable();
+                    } else {
+                        if (!(index % 7)) {
+                            dom.addClass(dom.parent(el), 'ui-extra');
+                        }
+                        dom.addClass(el, 'ui-extra');
+                        if (this._bExtra) {
+                            item.disable();
+                        }
+                    }
+
+                    if (date - today) {
+                        dom.removeClass(el, 'ui-today');
+                    } else {
+                        dom.addClass(el, 'ui-today');
                     }
                 }, this);
 
