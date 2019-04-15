@@ -1,5 +1,6 @@
 /*<script>window.onload=function(){value=document.getElementsByTagName('TEXTAREA')[0].value;parent.postMessage({url:location.href.slice(7),text:value.slice(value.indexOf('\n')+1).replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&')},'*');}</script><textarea>*/
 * {
+    font-family: Helvetica Neue,Helvetica,PingFang SC,Hiragino Sans GB,Microsoft YaHei,'微软雅黑',Arial,sans-serif;
     padding: 0px;
     margin: 0px;
 }
@@ -181,6 +182,7 @@ a {
             top: 12px;
             width: 24px;
             height: 24px;
+            line-height: 24px;
             cursor: pointer;
         }
 
@@ -577,7 +579,37 @@ a {
         background-color: #ffead6;
     }
 }
+.ui-m-tab {
 
+    .ui-m-tab-title {
+
+        .ui-tab-item {
+
+            .ui-tab-bar {
+                background-color: #2784E2;
+            } 
+        }
+        .ui-tab-bar {
+            position: absolute !important;
+        }
+    }
+
+    .ui-m-tab-container {
+        position: relative;
+        white-space: nowrap;
+        width: 100%;
+        box-sizing: border-box;
+
+        .ui-tab-item {
+            display: inline-block!important;
+            vertical-align: top;
+            width: 100%;
+            box-sizing: border-box;
+        }
+    }
+    .ui-m-tab-active .ui-m-tab-container {
+    }   
+}
 .ui-tab-title {
     display: -webkit-flex;
     display: flex;
@@ -754,15 +786,19 @@ a {
 
 #hintContainer .successHint {
     background: rgba(58, 183, 106, 0.70);
+    -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#B23AB76A,endColorstr=#B23AB76A)";
 }
 
 #hintContainer .errorHint {
     background: rgba(213, 18, 0, 0.70);
+    -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#B2D51200,endColorstr=#B2D51200)";
 }
 
 #hintContainer .warnHint {
     background: rgba(43, 43, 59, 0.95);
+    -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#E52B2B3B,endColorstr=#E52B2B3B)";
 }
+
 
 .ui-mobile-confirm {
     padding-top: 30px;
@@ -937,14 +973,17 @@ a {
 
 .ui-tip .tip-success {
     background: rgba(58, 183, 106, 0.70);
+    -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#B23AB76A,endColorstr=#B23AB76A)";
 }
 
 .ui-tip .tip-error {
     background: rgba(213, 18, 0, 0.70);
+    -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#B2D51200,endColorstr=#B2D51200)";
 }
 
 .ui-tip .tip-warn {
     background: rgba(43, 43, 59, 0.95);
+    -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#E52B2B3B,endColorstr=#E52B2B3B)";
 }
 
 .ui-double-calendar-input-options {
