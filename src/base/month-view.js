@@ -149,7 +149,6 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
                 }, this);
 
                 for (var i = 0; i < 7; i++) {
-                    console.log(i, this._nWeekday);
                     cells[i].getBody().innerHTML = this.WEEKNAMES[(i + this._nWeekday) % 7];
                 }
 
@@ -310,7 +309,7 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
                     var date = new Date(firstDay.getTime() + (day + index) * 3600000 * 24),
                         el = item.getOuter();
 
-                    item._nYear = date.getYear();
+                    item._nYear = date.getFullYear();
                     item._nMonth = date.getMonth();
                     item.getBody().innerHTML = item._nDay = date.getDate();
 
