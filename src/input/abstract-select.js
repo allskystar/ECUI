@@ -318,8 +318,8 @@ _uOptions     - 下拉选择框
                             core.setFocused(item);
                         }
                     } else {
-                        ui.InputControl.prototype.setValue.call(this, '');
                         this.setText('');
+                        ui.InputControl.prototype.setValue.call(this, '');
                         if (this.contain(core.getFocused())) {
                             core.setFocused(this);
                         }
