@@ -2050,7 +2050,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
          */
         cacheAtShow: function (el) {
             core.query(function (item) {
-                return dom.contain(el, item.getMain());
+                return dom.contain(el, item.getOuter());
             }).sort(function (a, b) {
                 var ia = 0,
                     ib = 0,

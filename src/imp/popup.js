@@ -112,7 +112,7 @@
              * @override
              */
             $dispose: function () {
-                var el = this.$PopupData.popup.getMain();
+                var el = this.$PopupData.popup.getOuter();
                 if (el) {
                     dom.remove(el);
                 }

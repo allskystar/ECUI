@@ -201,7 +201,7 @@ _aStatus            - 控件当前的状态集合
              * @event
              */
             $disable: function () {
-                dom.addClass(this.getMain(), 'ui-disabled');
+                dom.addClass(this.getOuter(), 'ui-disabled');
                 this.alterStatus('+disabled');
                 core.$clearState(this);
 
@@ -256,7 +256,7 @@ _aStatus            - 控件当前的状态集合
              * @event
              */
             $enable: function () {
-                dom.removeClass(this.getMain(), 'ui-disabled');
+                dom.removeClass(this.getOuter(), 'ui-disabled');
                 this.alterStatus('-disabled');
 
                 var el = this.getMain();
@@ -1000,7 +1000,7 @@ _aStatus            - 控件当前的状态集合
                 if (!this._bReady) {
                     if (this._bDisabled) {
                         this.alterStatus('+disabled');
-                        dom.addClass(this.getMain(), 'ui-disabled');
+                        dom.addClass(this.getOuter(), 'ui-disabled');
                     }
 
                     var el = this.getOuter();
