@@ -19,13 +19,8 @@ _eBar            - 下划线 DOM 元素
     var core = ecui,
         dom = core.dom,
         ui = core.ui,
-        util = core.util,
-
-        iosVersion = /(iPhone|iPad).*?OS (\d+(_\d+)?)/i.test(navigator.userAgent) ? +(RegExp.$2.replace('_', '.')) : undefined;
+        util = core.util;
 //{/if}//
-    var tx = /(\-?\d+|\-?\d+\.\d+)px\s*/,
-        transformName = iosVersion < 9 ? 'webkitTransform' : 'transform';
-
     /**
      * 滑动事件处理。
      * @private
@@ -134,7 +129,7 @@ _eBar            - 下划线 DOM 元素
              * @return {number} container延x轴方向移动的距离
              */
             $getXByContainer: function () {
-                return (tx.test(this.getContainer().style[transformName]) ? +RegExp.$1 : 0);
+                return util.toNumber(dom.getStyle(this.getContainer(), 'transform').split(',')[4]);
             },
 
             /**
@@ -144,7 +139,7 @@ _eBar            - 下划线 DOM 元素
              * @return {number} title延x轴方向移动的距离
              */
             $getXByTitle: function () {
-                return (tx.test(this.getBody().style[transformName]) ? +RegExp.$1 : 0);
+                return util.toNumber(dom.getStyle(this.getBody(), 'transform').split(',')[4]);
             },
 
             /**
@@ -166,7 +161,7 @@ _eBar            - 下划线 DOM 元素
              * @param {number} x container延x轴方向移动的距离
              */
             $setPositionByContainer: function (x) {
-                this.getContainer().style[transformName] = 'translate3d(' + x + 'px,0px,0px)';
+                dom.setStyle(this.getContainer(), 'transform', 'translate3d(' + x + 'px,0px,0px)');
             },
 
             /**
@@ -176,7 +171,7 @@ _eBar            - 下划线 DOM 元素
              * @param {number} x title延x轴方向移动的距离
              */
             $setPositionByTitle: function (x) {
-                this.getBody().style[transformName] = 'translate3d(' + x + 'px,0px,0px)';
+                dom.setStyle(this.getBody(), 'transform', 'translate3d(' + x + 'px,0px,0px)');
             },
 
             /**

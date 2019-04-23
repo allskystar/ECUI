@@ -287,7 +287,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              */
             getStyle: function (el, name) {
                 var fixer = __ECUI__StyleFixer[name],
-                    style = el.currentStyle || (ieVersion ? el.style : getComputedStyle(el, null));
+                    style = window.getComputedStyle ? getComputedStyle(el, null) : (el.currentStyle || el.style);
 
                 return name ? fixer && fixer.get ? fixer.get(el, style) : style[fixer || name] : style;
             },

@@ -12,9 +12,6 @@
     function hideHandler() {
         core.mask();
         core.removeEventListener(this, 'hide', hideHandler);
-        if (this.$MPopupData.parent) {
-            this.$MPopupData.parent.insertBefore(this.getOuter(), this.$MPopupData.next);
-        }
     }
 
     var position = {
@@ -45,13 +42,8 @@
                         el = popup.getOuter(),
                         style = el.style;
 
-                    this.$MPopupData.parent = dom.parent(el);
-                    if (this.$MPopupData.parent !== document.body) {
-                        this.$MPopupData.next = el.nextSibling;
-                        // 第一次显示时需要进行下拉选项部分的初始化，将其挂载到 DOM 树中
+                    if (!dom.parent(el)) {
                         document.body.appendChild(el);
-                    } else {
-                        delete this.$MPopupData.parent;
                     }
 
                     this.$MPopup.$click.call(this, event);
