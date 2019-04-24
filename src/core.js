@@ -714,50 +714,50 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                 if (inertia) {
                     var ax = vx / inertia,
                         ay = vy / inertia,
-                        sx = vx * inertia - ax * inertia * inertia / 2,
-                        sy = vy * inertia - ay * inertia * inertia / 2,
+//                        sx = vx * inertia - ax * inertia * inertia / 2,
+//                        sy = vy * inertia - ay * inertia * inertia / 2,
                         env = currEnv;
 
-                    if (ieVersion < 9) {
-                        var startX = track.x,
-                            startY = track.y;
+                    // if (ieVersion < 9) {
+                    var startX = track.x,
+                        startY = track.y;
 
-                        inertiaHandles[uid] = util.timer(function () {
-                            var time = (Date.now() - start) / 1000,
-                                t = Math.min(time, inertia),
-                                x = track.x,
-                                y = track.y;
+                    inertiaHandles[uid] = util.timer(function () {
+                        var time = (Date.now() - start) / 1000,
+                            t = Math.min(time, inertia),
+                            x = track.x,
+                            y = track.y;
 
-                            dragmove(track, env, Math.round(mx + sx), Math.round(my + sy));
-                            if (t >= inertia || (x === track.x && y === track.y)) {
-                                inertiaHandles[uid]();
-                                if (env.event && startX === x && startY === y) {
-                                    env.event.inertia = false;
-                                }
-                                dragend(dragEvent, env, target);
+                        dragmove(track, env, Math.round(mx + vx * t - ax * t * t / 2), Math.round(my + vy * t - ay * t * t / 2));
+                        if (t >= inertia || (x === track.x && y === track.y)) {
+                            inertiaHandles[uid]();
+                            if (env.event && startX === x && startY === y) {
+                                env.event.inertia = false;
                             }
-                        }, -20);
-                    } else {
-                        var x = target.getX(),
-                            y = target.getY(),
-                            result = calcPosition(track, env, Math.round(x + sx), Math.round(y + sy));
-
-                        sx = result.x - x;
-                        sy = result.y - y;
-                        inertia = Math.max((Math.abs(vx) - Math.sqrt(vx * vx - 2 * ax * sx)) / Math.abs(ax) || 0, (Math.abs(vy) - Math.sqrt(vy * vy - 2 * ay * sy)) / Math.abs(ay) || 0) || inertia;
-
-                        delete currEnv.event;
-                        core.dispatchEvent(target, 'dragmove', {x: result.x, y: result.y, inertia: true});
-                        if (result.x !== x || result.y !== y) {
-                            createInertiaHandles(target, inertia * 1000, function () {
-                                dragend(dragEvent, env, target);
-                            });
-                            target.getPositionElement().style.transition = 'all ' + inertia + 's ease-out';
-                            target.setPosition(result.x, result.y);
-                        } else {
-                            dragend(dragEvent, currEnv, target);
+                            dragend(dragEvent, env, target);
                         }
-                    }
+                    }, -1);
+                    // } else {
+                    //     var x = target.getX(),
+                    //         y = target.getY(),
+                    //         result = calcPosition(track, env, Math.round(x + sx), Math.round(y + sy));
+
+                    //     sx = result.x - x;
+                    //     sy = result.y - y;
+                    //     inertia = Math.max((Math.abs(vx) - Math.sqrt(vx * vx - 2 * ax * sx)) / Math.abs(ax) || 0, (Math.abs(vy) - Math.sqrt(vy * vy - 2 * ay * sy)) / Math.abs(ay) || 0) || inertia;
+
+                    //     delete currEnv.event;
+                    //     core.dispatchEvent(target, 'dragmove', {x: result.x, y: result.y, inertia: true});
+                    //     if (result.x !== x || result.y !== y) {
+                    //         createInertiaHandles(target, inertia * 1000, function () {
+                    //             dragend(dragEvent, env, target);
+                    //         });
+                    //         target.getPositionElement().style.transition = 'all ' + inertia + 's ease-out';
+                    //         target.setPosition(result.x, result.y);
+                    //     } else {
+                    //         dragend(dragEvent, currEnv, target);
+                    //     }
+                    // }
                 } else {
                     dragend(dragEvent, currEnv, target);
                 }
@@ -1103,27 +1103,27 @@ outer:          for (var caches = [], target = event.target, el; target; target 
      * @param {number} delay 滚动惯性的时间
      * @param {Function} callback 回调函数
      */
-    function createInertiaHandles(target, delay, callback) {
-        var uid = target.getUID(),
-            el = target.getPositionElement(),
-            stopHandler = util.timer(function () {
-                el.style.transition = '';
-                delete inertiaHandles[uid];
-                if (callback) {
-                    callback();
-                }
-            }, delay),
-            startPos = dom.getPosition(el),
-            startX = target.getX(),
-            startY = target.getY();
+    // function createInertiaHandles(target, delay, callback) {
+    //     var uid = target.getUID(),
+    //         el = target.getPositionElement(),
+    //         stopHandler = util.timer(function () {
+    //             el.style.transition = '';
+    //             delete inertiaHandles[uid];
+    //             if (callback) {
+    //                 callback();
+    //             }
+    //         }, delay),
+    //         startPos = dom.getPosition(el),
+    //         startX = target.getX(),
+    //         startY = target.getY();
 
-        inertiaHandles[uid] = function () {
-            stopHandler();
-            var endPos = dom.getPosition(el);
-            el.style.transition = '';
-            target.setPosition(endPos.left - startPos.left + startX, endPos.top - startPos.top + startY);
-        };
-    }
+    //     inertiaHandles[uid] = function () {
+    //         stopHandler();
+    //         var endPos = dom.getPosition(el);
+    //         el.style.transition = '';
+    //         target.setPosition(endPos.left - startPos.left + startX, endPos.top - startPos.top + startY);
+    //     };
+    // }
 
     /**
      * dispose一个控件，dispose情况特殊，ondispose不能阻止$dispose函数的执行。
@@ -1216,33 +1216,33 @@ outer:          for (var caches = [], target = event.target, el; target; target 
             }
 
             if (x !== expectX || y !== expectY) {
-                if (ieVersion < 9) {
-                    inertiaHandles[uid] = effect.grade(
-                        function (percent, options) {
-                            event.x = Math.round(options.x + percent * (expectX - options.x));
-                            event.y = Math.round(options.y + percent * (expectY - options.y));
-                            event.inertia = true;
+                // if (ieVersion < 9) {
+                inertiaHandles[uid] = effect.grade(
+                    function (percent, options) {
+                        event.x = Math.round(options.x + percent * (expectX - options.x));
+                        event.y = Math.round(options.y + percent * (expectY - options.y));
+                        event.inertia = true;
 
-                            dragAnimationFrame(env, target, event);
+                        dragAnimationFrame(env, target, event);
 
-                            if (percent >= 1) {
-                                inertiaHandles[uid]();
-                                finish();
-                            }
-                        },
-                        300,
-                        {
-                            $: env.el || target.getOuter(),
-                            x: x,
-                            y: y
+                        if (percent >= 1) {
+                            inertiaHandles[uid]();
+                            finish();
                         }
-                    );
-                } else {
-                    delete env.event;
-                    createInertiaHandles(target, 300, finish);
-                    target.getPositionElement().style.transition = 'all 0.5s';
-                    target.setPosition(expectX, expectY);
-                }
+                    },
+                    300,
+                    {
+                        $: env.el || target.getOuter(),
+                        x: x,
+                        y: y
+                    }
+                );
+                // } else {
+                //     delete env.event;
+                //     createInertiaHandles(target, 300, finish);
+                //     target.getPositionElement().style.transition = 'all 0.5s';
+                //     target.setPosition(expectX, expectY);
+                // }
                 return;
             }
         }
@@ -1669,6 +1669,10 @@ outer:          for (var caches = [], target = event.target, el; target; target 
      * @param {number} delta Y轴滚动距离
      */
     function onmousewheel(event, deltaX, deltaY) {
+        if (scrollHandler) {
+            scrollHandler();
+            scrollHandler = null;
+        }
         event = core.wrapEvent(event);
         event.deltaX = deltaX;
         event.deltaY = deltaY;
@@ -1682,13 +1686,25 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                 bubble(focusedControl, 'mousewheel', event);
             }
             onbeforescroll(event);
-            scrollHandler = util.timer(
-                function () {
-                    scrollHandler = null;
-                    onscroll(event);
-                },
-                50
-            );
+            if (core.getScrollNarrow()) {
+                var startTime = Date.now();
+                scrollHandler = util.timer(
+                    function () {
+                        var handler = scrollHandler;
+                        scrollHandler = null;
+                        onscroll(event);
+                        if (Date.now() - startTime > 500) {
+                            if (handler) {
+                                handler();
+                            }
+                        } else {
+                            scrollHandler = handler;
+                            onbeforescroll(event);
+                        }
+                    },
+                    -1
+                );
+            }
         }
     }
 
@@ -1841,7 +1857,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                     scrollHandler = handler;
                     onbeforescroll(event);
                 },
-                -50
+                -1
             );
         }
     }
@@ -2317,9 +2333,8 @@ outer:          for (var caches = [], target = event.target, el; target; target 
 
                 event.track.logicX = event.clientX;
                 event.track.logicY = event.clientY;
-                if (core.dispatchEvent(control, 'dragstart', {track: event.track})) {
-                    control.setPosition(x, y);
-                }
+                control.setPosition(x, y);
+                core.dispatchEvent(control, 'dragstart', {track: event.track});
 
                 //这里不能preventDefault事件，否则input的软键盘无法出现
             }

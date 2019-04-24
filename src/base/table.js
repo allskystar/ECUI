@@ -581,22 +581,29 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
                     }
                 }
 
-                if (this._nHeadFloat !== undefined && event.deltaY) {
-                    var style = this._uHead.getOuter().style,
-                        pos = dom.getPosition(this._eLayout),
-                        view = util.getView(),
-                        top = pos.top - view.top;
+                if (this._nHeadFloat !== undefined) {
+                    if (event.deltaY) {
+                        var style = this._uHead.getOuter().style,
+                            pos = dom.getPosition(this._eLayout),
+                            view = util.getView(),
+                            top = pos.top - view.top,
+                            main = this.getMain();
 
-                    this.$$fixedTop = Math.min(this.getClientHeight() - this.$$paddingTop - this._nHeadMargin + top, Math.max(this._nHeadFloat, top));
-                    if (this.$$fixedTop <= this._nHeadFloat || dom.contain(this.getMain(), event.target)) {
-                        style.position = 'fixed';
-                        style.top = this.$$fixedTop + 'px';
-                        if (core.getScrollNarrow()) {
-                            style.left = pos.left + 'px';
-                        } else {
-                            style.left = (pos.left - view.left - this._eLayout.scrollLeft) + 'px';
-                            style.clip = 'rect(0px ' + (this._eLayout.scrollLeft + this.getClientWidth() - this.$$scrollFixed[0]) + 'px ' + this.$$paddingTop + 'px ' + this._eLayout.scrollLeft + 'px)';
+                        this.$$fixedTop = Math.min(this.getClientHeight() - this.$$paddingTop - this._nHeadMargin + top, Math.max(this._nHeadFloat, top));
+                        if (this.isShow() && (this.$$fixedTop <= this._nHeadFloat || (dom.contain(main, event.target) && main.scrollHeight !== main.clientHeight))) {
+                            style.position = 'fixed';
+                            style.top = this.$$fixedTop + 'px';
+                            if (core.getScrollNarrow()) {
+                                style.left = pos.left + 'px';
+                            } else {
+                                style.left = (pos.left - view.left - this._eLayout.scrollLeft) + 'px';
+                                style.clip = 'rect(0px ' + (this._eLayout.scrollLeft + this.getClientWidth() - this.$$scrollFixed[0]) + 'px ' + this.$$paddingTop + 'px ' + this._eLayout.scrollLeft + 'px)';
+                            }
+                            return;
                         }
+                    }
+                    if (!this._oScrollHandler) {
+                        this._oScrollHandler = util.timer(this.$headscroll, -1, this);
                     }
                 }
             },
@@ -657,6 +664,29 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
                     for (; !col; col = cols[--colIndex]) {}
                 }
                 return col;
+            },
+
+            /**
+             * 头部滚动处理。
+             * @protected
+             */
+            $headscroll: function () {
+                if (core.getScrollNarrow()) {
+                    var el = dom.parent(dom.parent(this.getBody()));
+                    this._uHead.getMain().scrollLeft = this._eLayout.scrollLeft;
+                    el.scrollLeft = this._eLayout.scrollLeft;
+                    el.scrollTop = this._eLayout.scrollTop;
+                }
+
+                if (this._nHeadFloat !== undefined) {
+                    var style = this._uHead.getOuter().style;
+                    style.position = '';
+                    style.top = (Math.min(this.getClientHeight() - this.$$paddingTop - this._nHeadMargin, Math.max(0, this._nHeadFloat + util.getView().top - dom.getPosition(this.getOuter()).top)) + this._eLayout.scrollTop) + 'px';
+                    style.left = '0px';
+                    if (!core.getScrollNarrow()) {
+                        style.clip = ieVersion < 8 ? 'rect(0,100%,100%,0)' : 'auto';
+                    }
+                }
             },
 
             /**
@@ -771,23 +801,11 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
              */
             $scroll: function (event) {
                 ui.Control.prototype.$scroll.call(this, event);
-
-                if (core.getScrollNarrow()) {
-                    var el = dom.parent(dom.parent(this.getBody()));
-                    this._uHead.getMain().scrollLeft = this._eLayout.scrollLeft;
-                    el.scrollLeft = this._eLayout.scrollLeft;
-                    el.scrollTop = this._eLayout.scrollTop;
+                if (this._oScrollHandler) {
+                    this._oScrollHandler();
+                    this._oScrollHandler = null;
                 }
-
-                if (this._nHeadFloat !== undefined) {
-                    var style = this._uHead.getOuter().style;
-                    style.position = '';
-                    style.top = (Math.min(this.getClientHeight() - this.$$paddingTop - this._nHeadMargin, Math.max(0, this._nHeadFloat + util.getView().top - dom.getPosition(this.getOuter()).top)) + this._eLayout.scrollTop) + 'px';
-                    style.left = '0px';
-                    if (!core.getScrollNarrow()) {
-                        style.clip = ieVersion < 8 ? 'rect(0,100%,100%,0)' : 'auto';
-                    }
-                }
+                this.$headscroll();
             },
 
             /**
@@ -1130,6 +1148,16 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
 
                     return row;
                 }
+            },
+
+            /**
+             * 设置表头飘浮的位置。
+             * @public
+             *
+             * @param {number|undefine} value 表头漂浮的位置
+             */
+            setHeadFloat: function (value) {
+                this._nHeadFloat = value;
             }
         }
     );

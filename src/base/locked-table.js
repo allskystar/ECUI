@@ -285,6 +285,30 @@ _eRight      - 右侧乐定行的Element元素
             /**
              * @override
              */
+            $headscroll: function () {
+                var leftHeadStyle = this._uLeftHead.getOuter().style,
+                    rightHeadStyle = this._uRightHead.getOuter().style,
+                    leftMainStyle = this._uLeftMain.getOuter().style,
+                    rightMainStyle = this._uRightMain.getOuter().style;
+
+                leftHeadStyle.position = rightHeadStyle.position = leftMainStyle.position = rightMainStyle.position = '';
+                leftHeadStyle.top = rightHeadStyle.top = this.$getSection('Head').getOuter().style.top;
+
+                if (core.getScrollNarrow()) {
+                    leftHeadStyle.left = leftMainStyle.left = '0px';
+                    rightHeadStyle.left = rightMainStyle.left = (Math.min(this.getWidth(), this.$$tableWidth) - this.$$paddingRight - this.$$rightTDWidth - this.$$scrollFixed[0]) + 'px';
+                    leftMainStyle.top = rightMainStyle.top = this.$$paddingTop + 'px';
+                } else {
+                    leftHeadStyle.left = leftMainStyle.left = this.getLayout().scrollLeft + 'px';
+                    rightHeadStyle.left = rightMainStyle.left = (Math.min(this.getWidth(), this.$$tableWidth) - this.$$paddingRight + this.getLayout().scrollLeft - this.$$rightTDWidth - this.$$scrollFixed[0]) + 'px';
+                    leftMainStyle.top = rightMainStyle.top = (this.$$paddingTop + this.getLayout().scrollTop - dom.parent(this.$getSection('Head').getOuter()).scrollTop) + 'px';
+                    leftMainStyle.clip = rightMainStyle.clip = ieVersion < 8 ? 'rect(0,100%,100%,0)' : 'auto';
+                }
+            },
+
+            /**
+             * @override
+             */
             $initStructure: function (width, height) {
                 ui.Table.prototype.$initStructure.call(this, width, height);
 
@@ -334,32 +358,6 @@ _eRight      - 右侧乐定行的Element元素
                 leftHead.style.left = leftMain.style.left = '';
                 rightHead.style.left = rightMain.style.left = '';
                 leftMain.style.top = rightMain.style.top = '';
-            },
-
-            /**
-             * @override
-             */
-            $scroll: function (event) {
-                ui.Table.prototype.$scroll.call(this, event);
-
-                var leftHeadStyle = this._uLeftHead.getOuter().style,
-                    rightHeadStyle = this._uRightHead.getOuter().style,
-                    leftMainStyle = this._uLeftMain.getOuter().style,
-                    rightMainStyle = this._uRightMain.getOuter().style;
-
-                leftHeadStyle.position = rightHeadStyle.position = leftMainStyle.position = rightMainStyle.position = '';
-                leftHeadStyle.top = rightHeadStyle.top = this.$getSection('Head').getOuter().style.top;
-
-                if (core.getScrollNarrow()) {
-                    leftHeadStyle.left = leftMainStyle.left = '0px';
-                    rightHeadStyle.left = rightMainStyle.left = (Math.min(this.getWidth(), this.$$tableWidth) - this.$$paddingRight - this.$$rightTDWidth - this.$$scrollFixed[0]) + 'px';
-                    leftMainStyle.top = rightMainStyle.top = this.$$paddingTop + 'px';
-                } else {
-                    leftHeadStyle.left = leftMainStyle.left = this.getLayout().scrollLeft + 'px';
-                    rightHeadStyle.left = rightMainStyle.left = (Math.min(this.getWidth(), this.$$tableWidth) - this.$$paddingRight + this.getLayout().scrollLeft - this.$$rightTDWidth - this.$$scrollFixed[0]) + 'px';
-                    leftMainStyle.top = rightMainStyle.top = (this.$$paddingTop + this.getLayout().scrollTop - dom.parent(this.$getSection('Head').getOuter()).scrollTop) + 'px';
-                    leftMainStyle.clip = rightMainStyle.clip = ieVersion < 8 ? 'rect(0,100%,100%,0)' : 'auto';
-                }
             },
 
             /**
