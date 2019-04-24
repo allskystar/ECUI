@@ -1157,9 +1157,8 @@ outer:          for (var caches = [], target = event.target, el; target; target 
             if (!env.event) {
                 window.requestAnimationFrame(function () {
                     if (env.event) {
-                        if (core.dispatchEvent(target, 'dragmove', env.event)) {
-                            target.setPosition(env.event.x, env.event.y);
-                        }
+                        target.setPosition(env.event.x, env.event.y);
+                        core.dispatchEvent(target, 'dragmove', env.event);
                         if (env.event.dragend) {
                             core.dispatchEvent(target, 'dragend', env.event);
                             dom.removeClass(document.body, 'ui-drag');
@@ -1170,9 +1169,8 @@ outer:          for (var caches = [], target = event.target, el; target; target 
             }
             env.event = event;
         } else {
-            if (core.dispatchEvent(target, 'dragmove', event)) {
-                target.setPosition(event.x, event.y);
-            }
+            target.setPosition(event.x, event.y);
+            core.dispatchEvent(target, 'dragmove', event);
         }
     }
 
