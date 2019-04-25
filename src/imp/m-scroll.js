@@ -91,7 +91,7 @@
                         absolute: true
                     };
 
-                if (keyboardHeight) {
+                if (keyboardHeight && data.range) {
                     data = data.range;
                     options.limit = {};
                 } else {
@@ -103,11 +103,34 @@
                     {
                         left: data.left !== undefined ? data.left : main.clientWidth - body.scrollWidth,
                         right: data.right !== undefined ? data.right : 0,
-                        top: (data.top !== undefined ? data.top : main.clientHeight - body.scrollHeight) + Math.min(0, window.scrollY - keyboardHeight),
-                        bottom: (data.bottom !== undefined ? data.bottom : 0) + window.scrollY
+                        top: data.top !== undefined ? data.top : main.clientHeight - body.scrollHeight,
+                        bottom: data.bottom !== undefined ? data.bottom : 0
                     }
                 );
+                // 如果内容不够外部区域的宽度，不需要滚动
+                if (options.left > options.right) {
+                    options.left = options.right = this.getX();
+                    if (options.limit) {
+                        delete options.limit.left;
+                        delete options.limit.right;
+                    }
+                }
+                if (options.top > options.bottom) {
+                    options.top = options.bottom = this.getY();
+                    if (options.limit) {
+                        delete options.limit.top;
+                        delete options.limit.bottom;
+                    }
+                }
 
+                if (options.top === options.bottom) {
+                    options.top += Math.min(0, main.clientHeight - body.scrollHeight);
+                } else {
+                    options.top += Math.min(0, window.scrollY - keyboardHeight);
+                }
+                options.bottom += window.scrollY;
+
+                // 增加滚动边界的距离
                 if (!options.limit && data.overflow) {
                     options.limit = {
                         top: options.top,
@@ -230,7 +253,7 @@
                 if (this.getX() !== x || this.getY() !== y) {
                     main.scrollLeft = this.$MScrollData.scrollLeft = 0;
                     main.scrollTop = this.$MScrollData.scrollTop = 0;
-                    dom.setStyle(this.getBody(), 'transform', 'translate3d(' + x + 'px,' + y + 'px,0px)');
+                    dom.setStyle(this.getBody(), 'transform', keyboardHeight ? 'translate(' + x + 'px,' + y + 'px)' : 'translate3d(' + x + 'px,' + y + 'px,0px)');
                 }
                 core.query(function (item) {
                     return this.contain(item);
