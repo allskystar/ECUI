@@ -64,6 +64,14 @@
             dom.addClass(el, 'ui-mobile-scroll');
             el.appendChild(bodyEl);
             this.$setBody(bodyEl);
+
+            if (options.overflow) {
+                var list = options.overflow.split(',');
+                this.$MScrollData.overflow = [+list[0]];
+                this.$MScrollData.overflow[1] = list[1] ? +list[1] : this.$MScrollData.overflow[0];
+                this.$MScrollData.overflow[2] = list[2] ? +list[2] : this.$MScrollData.overflow[0];
+                this.$MScrollData.overflow[3] = list[3] ? +list[3] : this.$MScrollData.overflow[1];
+            }
         },
 
         Methods: {
@@ -77,21 +85,47 @@
 
                 var main = this.getMain(),
                     body = this.getBody(),
-                    data = this.$MScrollData;
+                    data = this.$MScrollData,
+                    options = {
+                        el: body,
+                        decelerate: 400,
+                        absolute: true
+                    };
+
+                if (keyboardHeight) {
+                    data = data.range;
+                    options.limit = {};
+                } else {
+                    options.limit = data.range;
+                }
+
+                Object.assign(
+                    options,
+                    {
+                        left: data.left !== undefined ? data.left : main.clientWidth - body.scrollWidth,
+                        right: data.right !== undefined ? data.right : 0,
+                        top: (data.top !== undefined ? data.top : main.clientHeight - body.scrollHeight) + Math.min(0, window.scrollY - keyboardHeight),
+                        bottom: (data.bottom !== undefined ? data.bottom : 0) + window.scrollY
+                    }
+                );
+
+                if (!options.limit && data.overflow) {
+                    options.limit = {
+                        top: options.top,
+                        right: options.right,
+                        bottom: options.bottom,
+                        left: options.left
+                    };
+                    options.top -= data.overflow[0];
+                    options.right += data.overflow[1];
+                    options.bottom += data.overflow[2];
+                    options.left -= data.overflow[3];
+                }
 
                 core.drag(
                     this,
                     event,
-                    {
-                        el: body,
-                        decelerate: 400,
-                        absolute: true,
-                        left: data.left !== undefined ? data.left : main.clientWidth - body.scrollWidth,
-                        right: data.right !== undefined ? data.right : 0,
-                        top: (data.top !== undefined ? data.top : main.clientHeight - body.scrollHeight) + Math.min(0, window.scrollY - keyboardHeight),
-                        bottom: (data.bottom !== undefined ? data.bottom : 0) + window.scrollY,
-                        limit: data.range
-                    }
+                    options
                 );
             },
 
