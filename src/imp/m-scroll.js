@@ -87,7 +87,6 @@
                     body = this.getBody(),
                     data = this.$MScrollData,
                     options = {
-                        el: body,
                         decelerate: 400,
                         absolute: true
                     };
