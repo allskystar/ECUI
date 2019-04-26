@@ -591,6 +591,10 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
 
                         this.$$fixedTop = Math.min(this.getClientHeight() - this.$$paddingTop - this._nHeadMargin + top, Math.max(this._nHeadFloat, top));
                         if (this.isShow() && (this.$$fixedTop <= this._nHeadFloat || (dom.contain(main, event.target) && main.scrollHeight !== main.clientHeight))) {
+                            if (this._oScrollHandler) {
+                                this._oScrollHandler();
+                                this._oScrollHandler = null;
+                            }
                             style.position = 'fixed';
                             style.top = this.$$fixedTop + 'px';
                             if (core.getScrollNarrow()) {
