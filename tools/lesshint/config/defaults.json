@@ -22,6 +22,11 @@
         "enabled": false
     },
 
+    "compatibility": {
+        "enabled": true,
+        "ios": true
+    },
+
     "decimalZero": {
         "enabled": true,
         "style": "leading"
