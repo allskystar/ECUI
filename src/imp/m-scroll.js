@@ -311,14 +311,14 @@
         });
     }
 
-/*    function scrollIntoViewIfNeeded(height) {
+    function scrollIntoViewIfNeeded(height) {
         for (var scroll = core.findControl(document.activeElement); scroll; scroll = scroll.getParent()) {
             if (scroll.$MScroll) {
                 var main = scroll.getMain(),
                     scrollY = scroll.getY(),
-                    scrollTop = dom.getPosition(main).top - window.scrollY,
+                    scrollTop = dom.getPosition(main).top,
                     scrollHeight = scroll.getHeight() - height,
-                    activeTop = dom.getPosition(document.activeElement).top - window.scrollY;
+                    activeTop = dom.getPosition(document.activeElement).top + main.scrollTop - window.scrollY + scrollY;
                 break;
             }
         }
@@ -350,7 +350,7 @@
         } else if (y) {
             window.scrollTo(0, window.scrollY + y);
         }
-    }*/
+    }
 
     /**
      * 滚动监听。
@@ -462,11 +462,9 @@
                 }
                 if (oldHeight && keyboardHeight) {
                     fixed();
-//                    scrollIntoViewIfNeeded(keyboardHeight);
                 } else {
                     changeHandle = scrollListener(function () {
                         fixed();
-//                        scrollIntoViewIfNeeded(keyboardHeight);
                     });
                 }
             });
@@ -531,7 +529,6 @@
                             }, 200);
                         }
                         fixed();
-//                        scrollIntoViewIfNeeded(keyboardHeight);
                     });
                 } else {
                     keyboardHandle = scrollListener(function () {
@@ -570,7 +567,6 @@
                             window.scrollTo(0, Math.min(lastScrollY, height + keyboardHeight));
 
                             fixed();
-//                            scrollIntoViewIfNeeded(keyboardHeight);
                         });
                     });
                 }
@@ -645,7 +641,7 @@
                     }
 
                     keyboardHandle();
-                    keyboardHandle = null;//util.timer(scrollIntoViewIfNeeded, 100, this, height);
+                    keyboardHandle = util.timer(scrollIntoViewIfNeeded, 100, this, height);
                 }
             });
 
