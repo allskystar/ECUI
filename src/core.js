@@ -1428,14 +1428,6 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                     el.appendChild(document.body.firstChild);
                 }
                 document.body.appendChild(el);
-                window.scrollTo = function (left, top) {
-                    var el = core.$('ECUI-FIXED-BODY');
-                    el.style.transform = 'translate(0px,' + (window.scrollY - top) + 'px)';
-                };
-
-                dom.addEventListener(window, 'focusout', function () {
-                    core.$('ECUI-FIXED-BODY').style.transform = '';
-                });
             }
             core.init(document.body);
             el = null;

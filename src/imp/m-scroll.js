@@ -543,7 +543,7 @@
                         if (iosVersion === 11.1 || iosVersion === 11.2) {
                             keyboardHeight = safariVersion ? innerKeyboardHeight : innerKeyboardHeight + statusHeight;
                             if (window.scrollY > keyboardHeight) {
-                                window.scrollTo(0, keyboardHeight);
+                                core.$('ECUI-FIXED-BODY').style.transform = 'translate(0px,' + (window.scrollY - keyboardHeight) + 'px)';
                             }
                             return;
                         }
@@ -556,7 +556,7 @@
                             document.body.style.visibility = '';
                         }, 500);
 
-                        window.scrollBy(0, screen.height);
+                        window.scrollTo(0, screen.height);
                         keyboardHandle = scrollListener(function () {
                             // 第二次触发，计算软键盘高度
                             var height = document.body.scrollHeight - document.body.clientHeight;
@@ -615,7 +615,8 @@
 
                     dom.removeEventListener(document, 'touchmove', util.preventEvent);
                     keyboardHeight = 0;
-                    window.scrollBy(0, -screen.height);
+                    window.scrollTo(0, 0);
+                    core.$('ECUI-FIXED-BODY').style.transform = '';
                     iosfixedList = null;
                 });
             });
