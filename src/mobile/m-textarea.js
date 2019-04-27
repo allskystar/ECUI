@@ -13,7 +13,7 @@
      * @control
      */
     ui.MTextarea = core.inherits(
-        ui.Control,
+        ui.FormInput,
         'ui-mobile-textarea',
         {
             /**

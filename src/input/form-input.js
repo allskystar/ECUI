@@ -23,6 +23,24 @@
         },
         {
             /**
+             * 控件失效，阻止输入框提交。
+             * @override
+             */
+            $disable: function () {
+                ui.Control.prototype.$disable.call(this);
+                this.getMain().disabled = true;
+            },
+
+            /**
+             * 控件解除失效，需要将输入框设置为可提交。
+             * @override
+             */
+            $enable: function () {
+                ui.Control.prototype.$enable.call(this);
+                this.getMain().disabled = false;
+            },
+
+            /**
              * 获取控件进行提交的名称。
              * @public
              *
