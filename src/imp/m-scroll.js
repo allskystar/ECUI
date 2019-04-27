@@ -15,7 +15,6 @@
 //{/if}//
     var keyboardHeight = 0,
         statusHeight = 0,
-        oldScrollY,
         innerKeyboardHeight;
 
     if (iosVersion && safariVersion) {
@@ -130,7 +129,7 @@
                     } else {
                         options.top += Math.min(0, window.scrollY - keyboardHeight);
                     }
-                    options.bottom += window.scrollY - oldScrollY;
+                    options.bottom += window.scrollY;
                 }
 
                 // 增加滚动边界的距离
@@ -312,14 +311,14 @@
         });
     }
 
-    function scrollIntoViewIfNeeded(height) {
+/*    function scrollIntoViewIfNeeded(height) {
         for (var scroll = core.findControl(document.activeElement); scroll; scroll = scroll.getParent()) {
             if (scroll.$MScroll) {
                 var main = scroll.getMain(),
                     scrollY = scroll.getY(),
-                    scrollTop = dom.getPosition(main).top,
+                    scrollTop = dom.getPosition(main).top - window.scrollY,
                     scrollHeight = scroll.getHeight() - height,
-                    activeTop = dom.getPosition(document.activeElement).top + main.scrollTop - window.scrollY + scrollY;
+                    activeTop = dom.getPosition(document.activeElement).top - window.scrollY;
                 break;
             }
         }
@@ -351,7 +350,7 @@
         } else if (y) {
             window.scrollTo(0, window.scrollY + y);
         }
-    }
+    }*/
 
     /**
      * 滚动监听。
@@ -463,11 +462,11 @@
                 }
                 if (oldHeight && keyboardHeight) {
                     fixed();
-                    scrollIntoViewIfNeeded(keyboardHeight);
+//                    scrollIntoViewIfNeeded(keyboardHeight);
                 } else {
                     changeHandle = scrollListener(function () {
                         fixed();
-                        scrollIntoViewIfNeeded(keyboardHeight);
+//                        scrollIntoViewIfNeeded(keyboardHeight);
                     });
                 }
             });
@@ -480,7 +479,7 @@
                     return;
                 }
 
-                Array.prototype.slice.call(document.getElementsByTagName('INPUT')).concat(Array.prototype.slice(document.getElementsByTagName('TEXTAREA'))).forEach(function (item) {
+                Array.prototype.slice.call(document.getElementsByTagName('INPUT')).concat(Array.prototype.slice.call(document.getElementsByTagName('TEXTAREA'))).forEach(function (item) {
                     if (item !== target) {
                         if (!item.disabled) {
                             item.disabled = true;
@@ -532,10 +531,9 @@
                             }, 200);
                         }
                         fixed();
-                        scrollIntoViewIfNeeded(keyboardHeight);
+//                        scrollIntoViewIfNeeded(keyboardHeight);
                     });
                 } else {
-                    oldScrollY = window.scrollY;
                     keyboardHandle = scrollListener(function () {
 //{if 0}//
                         if (isSimulator) {
@@ -561,7 +559,7 @@
                             document.body.style.visibility = '';
                         }, 500);
 
-                        window.scrollTo(0, document.body.scrollHeight + screen.availHeight);
+                        window.scrollBy(0, screen.height);
                         keyboardHandle = scrollListener(function () {
                             // 第二次触发，计算软键盘高度
                             var height = document.body.scrollHeight - document.body.clientHeight;
@@ -572,7 +570,7 @@
                             window.scrollTo(0, Math.min(lastScrollY, height + keyboardHeight));
 
                             fixed();
-                            scrollIntoViewIfNeeded(keyboardHeight);
+//                            scrollIntoViewIfNeeded(keyboardHeight);
                         });
                     });
                 }
@@ -621,7 +619,7 @@
 
                     dom.removeEventListener(document, 'touchmove', util.preventEvent);
                     keyboardHeight = 0;
-                    window.scrollTo(0, oldScrollY);
+                    window.scrollBy(0, -screen.height);
                     iosfixedList = null;
                 });
             });
@@ -647,7 +645,7 @@
                     }
 
                     keyboardHandle();
-                    keyboardHandle = util.timer(scrollIntoViewIfNeeded, 100, this, height);
+                    keyboardHandle = null;//util.timer(scrollIntoViewIfNeeded, 100, this, height);
                 }
             });
 

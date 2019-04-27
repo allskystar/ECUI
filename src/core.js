@@ -1420,7 +1420,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                 }
             );
 
-            if (iosVersion === 11.1 || iosVersion === 11.2) {
+            if (iosVersion) {
                 el = dom.create({
                     id: 'ECUI-FIXED-BODY'
                 });
@@ -1430,8 +1430,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                 document.body.appendChild(el);
                 window.scrollTo = function (left, top) {
                     var el = core.$('ECUI-FIXED-BODY');
-                    el.scrollTop = top - window.scrollY;
-                    el.style.transform = 'translate(0px,' + (window.scrollY + el.scrollTop - top) + 'px)';
+                    el.style.transform = 'translate(0px,' + (window.scrollY - top) + 'px)';
                 };
 
                 dom.addEventListener(window, 'focusout', function () {
