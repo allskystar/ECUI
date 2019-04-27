@@ -97,7 +97,7 @@
                 } else {
                     options.limit = data.range;
                 }
-console.log(data.top, main.clientHeight, body.scrollHeight);
+
                 Object.assign(
                     options,
                     {
