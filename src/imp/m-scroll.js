@@ -15,6 +15,7 @@
 //{/if}//
     var keyboardHeight = 0,
         statusHeight = 0,
+        oldScrollY,
         innerKeyboardHeight;
 
     if (iosVersion && safariVersion) {
@@ -123,12 +124,14 @@
                     }
                 }
 
-                if (options.top === options.bottom) {
-                    options.top += Math.min(0, main.clientHeight - body.scrollHeight);
-                } else {
-                    options.top += Math.min(0, window.scrollY - keyboardHeight);
+                if (keyboardHeight) {
+                    if (options.top === options.bottom) {
+                        options.top += Math.min(0, main.clientHeight - body.scrollHeight);
+                    } else {
+                        options.top += Math.min(0, window.scrollY - keyboardHeight);
+                    }
+                    options.bottom += window.scrollY - oldScrollY;
                 }
-                options.bottom += window.scrollY;
 
                 // 增加滚动边界的距离
                 if (!options.limit && data.overflow) {
@@ -532,6 +535,7 @@
                         scrollIntoViewIfNeeded(keyboardHeight);
                     });
                 } else {
+                    oldScrollY = window.scrollY;
                     keyboardHandle = scrollListener(function () {
 //{if 0}//
                         if (isSimulator) {
@@ -617,6 +621,7 @@
 
                     dom.removeEventListener(document, 'touchmove', util.preventEvent);
                     keyboardHeight = 0;
+                    window.scrollTo(0, oldScrollY);
                     iosfixedList = null;
                 });
             });
