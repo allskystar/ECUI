@@ -97,7 +97,7 @@
                 } else {
                     options.limit = data.range;
                 }
-
+console.log(data.top, main.clientHeight, body.scrollHeight);
                 Object.assign(
                     options,
                     {
@@ -493,16 +493,16 @@
                     iosfixedList = ext.iosFixed.getVisibles();
                 }
 
-                // 缓存panel的大小
-                core.query(function (item) {
-                    return item.$MScroll && item.isShow();
-                }).forEach(function (item) {
-                    if (item.$MScrollData.top === undefined) {
-                        item.$MScrollData.cacheTop = true;
-                        var main = item.getMain();
-                        item.$MScrollData.top = main.clientHeight - main.scrollHeight + util.toNumber(dom.getStyle(item.getBody(), 'transform').split(',')[5]);
-                    }
-                });
+                // core.query(function (item) {
+                //     return item.$MScroll && item.isShow();
+                // }).forEach(function (item) {
+                //     if (item.$MScrollData.top === undefined) {
+                //         // 缓存panel的位置
+                //         item.$MScrollData.cacheTop = true;
+                //         var main = item.getMain();
+                //         item.$MScrollData.top = main.clientHeight - main.scrollHeight + util.toNumber(dom.getStyle(item.getBody(), 'transform').split(',')[5]);
+                //     }
+                // });
 
                 if (keyboardHeight) {
 //{if 0}//
@@ -598,15 +598,15 @@
                     dom.setStyle(item.control.getMain(), 'transform', '');
                 });
 
-                core.query(function (item) {
-                    return item.$MScroll;
-                }).forEach(function (item) {
-                    item.setPosition(item.getX(), Math.max(item.$MScrollData.top, Math.min(0, item.getY())));
-                    if (item.$MScrollData.cacheTop) {
-                        item.$MScrollData.cacheTop = false;
-                        delete item.$MScrollData.top;
-                    }
-                });
+                // core.query(function (item) {
+                //     return item.$MScroll;
+                // }).forEach(function (item) {
+                //     item.setPosition(item.getX(), Math.max(item.$MScrollData.top, Math.min(0, item.getY())));
+                //     if (item.$MScrollData.cacheTop) {
+                //         item.$MScrollData.cacheTop = false;
+                //         delete item.$MScrollData.top;
+                //     }
+                // });
 
                 keyboardHandle = scrollListener(function () {
                     if (scroll) {
