@@ -123,13 +123,10 @@
                     }
                 }
 
-                if (keyboardHeight) {
-                    if (options.top === options.bottom) {
-                        options.top += Math.min(0, main.clientHeight - body.scrollHeight);
-                    } else {
-                        options.top += Math.min(0, window.scrollY - keyboardHeight);
-                    }
-                    options.bottom += window.scrollY;
+                if (iosVersion && keyboardHeight) {
+                    var mainTop = dom.getPosition(main).top + this.$$border[0];
+                    options.top += Math.min(0, keyboardHeight - window.scrollY + document.body.clientHeight - mainTop - main.clientHeight);
+                    options.bottom += Math.max(0, window.scrollY - mainTop);
                 }
 
                 // 增加滚动边界的距离
@@ -556,7 +553,7 @@
                             document.body.style.visibility = '';
                         }, 500);
 
-                        window.scrollTo(0, screen.height);
+                        window.scrollTo(0, document.body.clientHeight);
                         keyboardHandle = scrollListener(function () {
                             // 第二次触发，计算软键盘高度
                             var height = document.body.scrollHeight - document.body.clientHeight;
