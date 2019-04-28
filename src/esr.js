@@ -1846,7 +1846,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                     commandClose: '>>>'
                 });
 
-                for (var el = document.body.firstChild; el; el = nextSibling) {
+                for (var el = body.firstChild; el; el = nextSibling) {
                     var nextSibling = el.nextSibling;
                     if (el.nodeType === 8) {
                         etpl.compile(el.textContent || el.nodeValue);
@@ -1859,7 +1859,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                     el.id = 'AppBackupContainer';
                     dom.insertHTML(el, 'afterEnd', dom.previous(el).outerHTML + el.outerHTML);
                     el.id = 'AppCommonContainer';
-                    var content = dom.last(dom.first(document.body)),
+                    var content = dom.last(dom.first(body)),
                         header = dom.previous(content),
                         children = dom.children(el.parentNode).slice(0, -2);
                     for (var i = 1, item; item = children[i]; i += 2) {
@@ -1894,6 +1894,8 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                         init();
                     }
                 });
+
+                body = null;
             }
 
             esrOptions = JSON.parse('{' + decodeURIComponent(value.replace(/(\w+)\s*=\s*(["A-Za-z0-9_]+)\s*($|,)/g, '"$1":$2$3')) + '}');
@@ -1906,8 +1908,10 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                 meta = JSON.parse(util.getLocalStorage('esr_meta')) || {};
             }
 //{if 0}//
-            var tplList = [];
-            for (el = document.body.firstChild; el; el = el.nextSibling) {
+            var tplList = [],
+                body = core.$('ECUI-FIXED-BODY') || document.body;
+
+            for (el = body.firstChild; el; el = el.nextSibling) {
                 if (el.nodeType === 8) {
                     if (/^\s*import:\s*([A-Za-z0-9.-_]+)\s*$/.test(el.textContent || el.nodeValue)) {
                         tplList.push([el, RegExp.$1]);
@@ -1943,15 +1947,15 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                     io.ajax('.app-container.html', {
                         cache: true,
                         onsuccess: function (text) {
-                            dom.insertHTML(document.body, 'AFTERBEGIN', text);
+                            dom.insertHTML(body, 'AFTERBEGIN', text);
                             loadInit();
-                            core.init(document.body);
+                            core.init(body);
                         },
                         onerror: function () {
                             console.warn('找不到APP的布局文件，请确认.app-container.html文件是否存在');
                             esrOptions.app = false;
                             loadInit();
-                            core.init(document.body);
+                            core.init(body);
                         }
                     });
                 } else {
