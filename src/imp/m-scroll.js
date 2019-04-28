@@ -550,7 +550,7 @@
                             document.body.style.visibility = '';
                         }, 500);
 
-                        window.scrollTo(0, document.body.clientHeight);
+                        window.scrollTo(0, document.body.scrollHeight);
                         keyboardHandle = scrollListener(function () {
                             // 第二次触发，计算软键盘高度
                             var height = document.body.scrollHeight - document.body.clientHeight;
