@@ -35,7 +35,7 @@
              * @override
              */
             $resize: function (event) {
-                ui.Control.prototype.$initStructure.call(this, event);
+                ui.Control.prototype.$resize.call(this, event);
                 dom.addClass(this.getMain(), 'ui-mobile-panel-location');
             }
         },
