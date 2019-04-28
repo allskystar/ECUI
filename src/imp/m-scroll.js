@@ -650,7 +650,7 @@
                 for (var scroll = core.findControl(event.target); scroll; scroll = scroll.getParent()) {
                     if (scroll.$MScroll) {
                         // 终止之前可能存在的惯性状态，并设置滚动层的位置
-                        dom.setStyle(scroll.getBody(), 'transform', '');
+//                        dom.setStyle(scroll.getBody(), 'transform', '');
                         core.drag(scroll);
                         keyboardHandle = scrollListener(function () {
                             var oldKeyboardHeight = keyboardHeight;
