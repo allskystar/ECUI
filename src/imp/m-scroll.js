@@ -109,14 +109,14 @@
                 );
                 // 如果内容不够外部区域的宽度，不需要滚动
                 if (options.left > options.right) {
-                    options.left = options.right = this.getX();
+                    options.left = options.right;
                     if (options.limit) {
                         delete options.limit.left;
                         delete options.limit.right;
                     }
                 }
                 if (options.top > options.bottom) {
-                    options.top = options.bottom = this.getY();
+                    options.top = options.bottom;
                     if (options.limit) {
                         delete options.limit.top;
                         delete options.limit.bottom;
@@ -125,7 +125,7 @@
 
                 if (iosVersion && keyboardHeight) {
                     var mainTop = dom.getPosition(main).top + this.$$border[0];
-                    options.top += Math.min(0, keyboardHeight - window.scrollY + document.body.clientHeight - mainTop - main.clientHeight);
+                    options.top += Math.min(0, window.scrollY - keyboardHeight + document.body.clientHeight - mainTop - Math.min(body.scrollHeight, main.clientHeight));
                     options.bottom += Math.max(0, window.scrollY - mainTop);
                 }
 
