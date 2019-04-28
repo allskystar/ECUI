@@ -534,9 +534,8 @@
 //{/if}//
                         if (iosVersion === 11.1 || iosVersion === 11.2) {
                             keyboardHeight = safariVersion ? innerKeyboardHeight : innerKeyboardHeight + statusHeight;
-                            if (window.scrollY > keyboardHeight) {
-                                core.$('ECUI-FIXED-BODY').style.transform = 'translate(0px,' + (window.scrollY - keyboardHeight) + 'px)';
-                            }
+                            fixed();
+//                            core.$('ECUI-FIXED-BODY').style.transform = 'translate(0px,' + (window.scrollY - keyboardHeight) + 'px)';
                             return;
                         }
 
