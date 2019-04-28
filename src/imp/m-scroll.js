@@ -90,7 +90,7 @@
 
         if (keyboardHeight) {
             var mainTop = dom.getPosition(main).top + scroll.$$border[0];
-            options.top += Math.min(0, window.scrollY - keyboardHeight + (iosVersion ? document.body.clientHeight - mainTop - Math.min(body.scrollHeight, main.clientHeight) : mainTop + Math.min(body.scrollHeight, main.clientHeight) - document.body.scrollTop));
+            options.top += Math.min(0, window.scrollY - keyboardHeight + document.body.clientHeight - mainTop - Math.min(body.scrollHeight, main.clientHeight));
             options.bottom += Math.max(0, window.scrollY - mainTop);
         }
 
@@ -653,10 +653,7 @@
 //                        dom.setStyle(scroll.getBody(), 'transform', '');
                         core.drag(scroll);
                         keyboardHandle = scrollListener(function () {
-                            var oldKeyboardHeight = keyboardHeight;
-                            keyboardHeight = 0;
                             setSafePosition(scroll, scroll.getY());
-                            keyboardHeight = oldKeyboardHeight;
                         });
                         break;
                     }
