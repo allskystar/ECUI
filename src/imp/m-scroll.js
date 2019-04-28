@@ -427,6 +427,9 @@
                     event.target.disabled = false;
                     observer.takeRecords();
                 }
+                if (keyboardHeight) {
+                    event.preventDefault();
+                }
             });
 
             dom.addEventListener(document, 'touchend', function (event) {
@@ -527,13 +530,14 @@
 //{if 0}//
                         if (isSimulator) {
                             keyboardHeight = innerKeyboardHeight;
-                            fixed();
                             dom.addEventListener(document, 'touchmove', util.preventEvent);
+                            fixed();
                             return;
                         }
 //{/if}//
                         if (iosVersion === 11.1 || iosVersion === 11.2) {
                             keyboardHeight = safariVersion ? innerKeyboardHeight : innerKeyboardHeight + statusHeight;
+                            dom.addEventListener(document, 'touchmove', util.preventEvent);
                             fixed();
 //                            core.$('ECUI-FIXED-BODY').style.transform = 'translate(0px,' + (window.scrollY - keyboardHeight) + 'px)';
                             return;
