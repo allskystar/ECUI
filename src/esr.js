@@ -1840,13 +1840,13 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
          * @public
          */
         load: function (value) {
-            function loadInit() {
+            function loadInit(body) {
                 etpl.config({
                     commandOpen: '<<<',
                     commandClose: '>>>'
                 });
 
-                for (var body = core.$('ECUI-FIXED-BODY') || document.body, el = body.firstChild; el; el = nextSibling) {
+                for (var el = body.firstChild; el; el = nextSibling) {
                     var nextSibling = el.nextSibling;
                     if (el.nodeType === 8) {
                         etpl.compile(el.textContent || el.nodeValue);
@@ -1946,21 +1946,21 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                         cache: true,
                         onsuccess: function (text) {
                             dom.insertHTML(body, 'AFTERBEGIN', text);
-                            loadInit();
-                            core.init(body);
+                            loadInit(body);
+                            core.init(document.body);
                         },
                         onerror: function () {
                             console.warn('找不到APP的布局文件，请确认.app-container.html文件是否存在');
                             esrOptions.app = false;
-                            loadInit();
-                            core.init(body);
+                            loadInit(body);
+                            core.init(document.body);
                         }
                     });
                 } else {
-                    loadInit();
+                    loadInit(body);
                 }
             }
-//{else}//            loadInit();
+//{else}//            loadInit(document.body);
 //{/if}//
             for (var i = 0, links = document.getElementsByTagName('A'), el; el = links[i++]; i++) {
                 if (el.href.slice(-1) === '#') {
