@@ -79,6 +79,9 @@
              * @override
              */
             $activate: function (event) {
+                if (keyboardHeight && iosVersion < 9) {
+                    return;
+                }
                 this.cache();
 
                 this.$MScroll.$activate.call(this, event);
@@ -498,7 +501,6 @@
                 //         item.$MScrollData.top = main.clientHeight - main.scrollHeight + util.toNumber(dom.getStyle(item.getBody(), 'transform').split(',')[5]);
                 //     }
                 // });
-
                 if (keyboardHeight) {
 //{if 0}//
                     if (isSimulator) {
