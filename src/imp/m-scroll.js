@@ -211,16 +211,14 @@
              * @override
              */
             getX: function () {
-                var main = this.getMain();
-                return util.toNumber(dom.getStyle(this.getBody(), 'transform').split(',')[4]) - (main.offsetWidth ? main.scrollLeft : this.$MScrollData.scrollLeft || 0);
+                return util.toNumber(dom.getStyle(this.getBody(), 'transform').split(',')[4]);
             },
 
             /**
              * @override
              */
             getY: function () {
-                var main = this.getMain();
-                return util.toNumber(dom.getStyle(this.getBody(), 'transform').split(',')[5]) - (main.offsetWidth ? main.scrollTop : this.$MScrollData.scrollTop || 0);
+                return util.toNumber(dom.getStyle(this.getBody(), 'transform').split(',')[5]);
             },
 
             /**
@@ -247,11 +245,8 @@
              * @override
              */
             setPosition: function (x, y) {
-                var main = this.getMain();
                 // 解决光标问题
                 if (this.getX() !== x || this.getY() !== y) {
-                    main.scrollLeft = this.$MScrollData.scrollLeft = 0;
-                    main.scrollTop = this.$MScrollData.scrollTop = 0;
                     dom.setStyle(this.getBody(), 'transform', keyboardHeight ? 'translate(' + x + 'px,' + y + 'px)' : 'translate3d(' + x + 'px,' + y + 'px,0px)');
                 }
                 core.query(function (item) {
@@ -315,7 +310,7 @@
                     scrollY = scroll.getY(),
                     scrollTop = dom.getPosition(main).top,
                     scrollHeight = scroll.getHeight() - height,
-                    activeTop = dom.getPosition(document.activeElement).top + main.scrollTop - window.scrollY + scrollY;
+                    activeTop = dom.getPosition(document.activeElement).top - window.scrollY + scrollY;
                 break;
             }
         }
