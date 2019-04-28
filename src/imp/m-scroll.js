@@ -430,9 +430,6 @@
                     event.target.disabled = false;
                     observer.takeRecords();
                 }
-                if (keyboardHeight) {
-                    event.preventDefault();
-                }
             });
 
             dom.addEventListener(document, 'touchend', function (event) {
