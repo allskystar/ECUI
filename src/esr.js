@@ -1906,10 +1906,9 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                 meta = JSON.parse(util.getLocalStorage('esr_meta')) || {};
             }
 //{if 0}//
-            var tplList = [],
-                body = core.$('ECUI-FIXED-BODY') || document.body;
+            var tplList = [];
 
-            for (el = body.firstChild; el; el = el.nextSibling) {
+            for (el = document.body.firstChild; el; el = el.nextSibling) {
                 if (el.nodeType === 8) {
                     if (/^\s*import:\s*([A-Za-z0-9.-_]+)\s*$/.test(el.textContent || el.nodeValue)) {
                         tplList.push([el, RegExp.$1]);
@@ -1941,6 +1940,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
             }());
 
             function loadApp() {
+                var body = core.$('ECUI-FIXED-BODY') || document.body;
                 if (esrOptions.app) {
                     io.ajax('.app-container.html', {
                         cache: true,
