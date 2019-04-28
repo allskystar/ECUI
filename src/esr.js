@@ -1940,11 +1940,11 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
             }());
 
             function loadApp() {
-                var body = core.$('ECUI-FIXED-BODY') || document.body;
                 if (esrOptions.app) {
                     io.ajax('.app-container.html', {
                         cache: true,
                         onsuccess: function (text) {
+                            var body = core.$('ECUI-FIXED-BODY') || document.body;
                             dom.insertHTML(body, 'AFTERBEGIN', text);
                             loadInit(body);
                             core.init(document.body);
@@ -1952,12 +1952,12 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                         onerror: function () {
                             console.warn('找不到APP的布局文件，请确认.app-container.html文件是否存在');
                             esrOptions.app = false;
-                            loadInit(body);
+                            loadInit(core.$('ECUI-FIXED-BODY') || document.body);
                             core.init(document.body);
                         }
                     });
                 } else {
-                    loadInit(body);
+                    loadInit(core.$('ECUI-FIXED-BODY') || document.body);
                 }
             }
 //{else}//            loadInit(document.body);
