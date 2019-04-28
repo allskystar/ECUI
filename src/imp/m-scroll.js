@@ -89,9 +89,24 @@
         }
 
         if (keyboardHeight) {
-            var mainTop = dom.getPosition(main).top + scroll.$$border[0];
-            options.top += Math.min(0, window.scrollY - keyboardHeight + document.body.clientHeight - mainTop - Math.min(body.scrollHeight, main.clientHeight));
-            options.bottom += Math.max(0, window.scrollY - mainTop) + scroll.$MScrollData.fixed;
+            var mainTop = dom.getPosition(main).top + scroll.$$border[0],
+                mainBottom = mainTop + Math.min(body.scrollHeight, main.clientHeight),
+                top = 0,
+                bottom = 0;
+            options.top += Math.min(0, window.scrollY - keyboardHeight + document.body.clientHeight - mainBottom);
+            options.bottom += Math.max(0, window.scrollY - mainTop);
+
+            ext.iosFixed.getVisibles().forEach(function (item) {
+                if (!dom.contain(main.offsetParent, item.control.getMain())) {
+                    if (item.top) {
+                        bottom = Math.max(bottom, dom.getPosition(item.control.getMain()).top - window.scrollY + item.control.getHeight());
+                    } else {
+                        top = Math.min(top, dom.getPosition(item.control.getMain()).top - mainBottom);
+                    }
+                }
+            });
+            options.top += top;
+            options.bottom += bottom;
         }
 
         // 增加滚动边界的距离
@@ -136,7 +151,6 @@
                 this.$MScrollData.overflow[2] = list[2] ? +list[2] : this.$MScrollData.overflow[0];
                 this.$MScrollData.overflow[3] = list[3] ? +list[3] : this.$MScrollData.overflow[1];
             }
-            this.$MScrollData.fixed = +options.fixed || 0;
         },
 
         Methods: {
