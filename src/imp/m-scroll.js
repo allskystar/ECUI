@@ -91,7 +91,7 @@
         if (keyboardHeight) {
             var mainTop = dom.getPosition(main).top + scroll.$$border[0];
             options.top += Math.min(0, window.scrollY - keyboardHeight + document.body.clientHeight - mainTop - Math.min(body.scrollHeight, main.clientHeight));
-            options.bottom += Math.max(0, window.scrollY + mainTop);
+            options.bottom += Math.max(0, window.scrollY - core.$('ECUI-FIXED-BODY').scrollTop);
         }
 
         // 增加滚动边界的距离
