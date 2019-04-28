@@ -596,7 +596,11 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
                 if (click) { // TouchEvent
                     if ((event.target.tagName === 'INPUT' && event.target.type !== 'radio' && event.target.type !== 'checkbox') || event.target.tagName === 'TEXTAREA') {
-                        event.target.focus();
+                        util.timer(function () {
+                            if (document.activeElement !== event.target) {
+                                event.target.focus();
+                            }
+                        }, 500);
                         commonParent = true;
                     }
                 }
