@@ -47,6 +47,70 @@
         }
     }
 
+    function getOptions(scroll) {
+        var main = scroll.getMain(),
+            body = scroll.getBody(),
+            data = scroll.$MScrollData,
+            options = {
+                decelerate: 400,
+                absolute: true
+            };
+
+        if (keyboardHeight && data.range) {
+            data = data.range;
+            options.limit = {};
+        } else {
+            options.limit = data.range;
+        }
+
+        Object.assign(
+            options,
+            {
+                left: data.left !== undefined ? data.left : main.clientWidth - body.scrollWidth,
+                right: data.right !== undefined ? data.right : 0,
+                top: data.top !== undefined ? data.top : main.clientHeight - body.scrollHeight,
+                bottom: data.bottom !== undefined ? data.bottom : 0
+            }
+        );
+        // 如果内容不够外部区域的宽度，不需要滚动
+        if (options.left > options.right) {
+            options.left = options.right;
+            if (options.limit) {
+                delete options.limit.left;
+                delete options.limit.right;
+            }
+        }
+        if (options.top > options.bottom) {
+            options.top = options.bottom;
+            if (options.limit) {
+                delete options.limit.top;
+                delete options.limit.bottom;
+            }
+        }
+
+        if (iosVersion && keyboardHeight) {
+            var mainTop = dom.getPosition(main).top + scroll.$$border[0];
+            options.top += Math.min(0, window.scrollY - keyboardHeight + document.body.clientHeight - mainTop - Math.min(body.scrollHeight, main.clientHeight));
+            options.bottom += Math.max(0, window.scrollY - mainTop);
+        }
+
+        // 增加滚动边界的距离
+        if (!options.limit && data.overflow) {
+            options.limit = {
+                top: options.top,
+                right: options.right,
+                bottom: options.bottom,
+                left: options.left
+            };
+            options.top -= data.overflow[0];
+            options.right += data.overflow[1];
+            options.bottom += data.overflow[2];
+            options.left -= data.overflow[3];
+        }
+
+        return options;
+    }
+
     ui.MScroll = {
         NAME: '$MScroll',
 
@@ -86,70 +150,10 @@
 
                 this.$MScroll.$activate.call(this, event);
 
-                var main = this.getMain(),
-                    body = this.getBody(),
-                    data = this.$MScrollData,
-                    options = {
-                        decelerate: 400,
-                        absolute: true
-                    };
-
-                if (keyboardHeight && data.range) {
-                    data = data.range;
-                    options.limit = {};
-                } else {
-                    options.limit = data.range;
-                }
-
-                Object.assign(
-                    options,
-                    {
-                        left: data.left !== undefined ? data.left : main.clientWidth - body.scrollWidth,
-                        right: data.right !== undefined ? data.right : 0,
-                        top: data.top !== undefined ? data.top : main.clientHeight - body.scrollHeight,
-                        bottom: data.bottom !== undefined ? data.bottom : 0
-                    }
-                );
-                // 如果内容不够外部区域的宽度，不需要滚动
-                if (options.left > options.right) {
-                    options.left = options.right;
-                    if (options.limit) {
-                        delete options.limit.left;
-                        delete options.limit.right;
-                    }
-                }
-                if (options.top > options.bottom) {
-                    options.top = options.bottom;
-                    if (options.limit) {
-                        delete options.limit.top;
-                        delete options.limit.bottom;
-                    }
-                }
-
-                if (iosVersion && keyboardHeight) {
-                    var mainTop = dom.getPosition(main).top + this.$$border[0];
-                    options.top += Math.min(0, window.scrollY - keyboardHeight + document.body.clientHeight - mainTop - Math.min(body.scrollHeight, main.clientHeight));
-                    options.bottom += Math.max(0, window.scrollY - mainTop);
-                }
-
-                // 增加滚动边界的距离
-                if (!options.limit && data.overflow) {
-                    options.limit = {
-                        top: options.top,
-                        right: options.right,
-                        bottom: options.bottom,
-                        left: options.left
-                    };
-                    options.top -= data.overflow[0];
-                    options.right += data.overflow[1];
-                    options.bottom += data.overflow[2];
-                    options.left -= data.overflow[3];
-                }
-
                 core.drag(
                     this,
                     event,
-                    options
+                    getOptions(this)
                 );
             },
 
@@ -341,7 +345,7 @@
         }
 
         if (scroll) {
-            setSafePosition(scroll, scrollY + y, scrollHeight, keyboardHeight);
+            setSafePosition(scroll, scrollY + y);
         } else if (y) {
             window.scrollTo(0, window.scrollY + y);
         }
@@ -392,18 +396,12 @@
         };
     }
 
-    function setSafePosition(scroll, y, scrollHeight, keyboardHeight) {
-        scroll.setPosition(
-            scroll.getX(),
-            Math.min(
-                (scroll.$MScrollData.bottom !== undefined ? scroll.$MScrollData.bottom : 0) + window.scrollY,
-                Math.max(
-                    // ios下data.top已经提前计算好，android下window.scrollY与keyboardHeight恒为零
-                    (scroll.$MScrollData.top !== undefined ? scroll.$MScrollData.top : scrollHeight - scroll.getMain().scrollHeight + (util.hasIOSKeyboard() ? util.toNumber(dom.getStyle(scroll.getBody(), 'transform').split(',')[5]) : 0)) + window.scrollY - keyboardHeight,
-                    y
-                )
-            )
-        );
+    function setSafePosition(scroll, y) {
+        var options = getOptions(scroll),
+            top = options.limit && options.limit.top !== undefined ? options.limit.top : options.top,
+            bottom = options.limit && options.limit.bottom !== undefined ? options.limit.bottom : options.bottom;
+
+        scroll.setPosition(scroll.getX(), Math.min(bottom, Math.max(top, y)));
     }
 
     if (isToucher) {
@@ -583,7 +581,7 @@
                     if (scroll.$MScroll) {
                         // 终止之前可能存在的惯性状态，并设置滚动层的位置
                         core.drag(scroll);
-                        setSafePosition(scroll, scroll.getY(), scroll.getMain().clientHeight, keyboardHeight);
+                        setSafePosition(scroll, scroll.getY());
                         break;
                     }
                 }
@@ -603,12 +601,12 @@
                 // });
 
                 keyboardHandle = scrollListener(function () {
+                    keyboardHeight = 0;
                     if (scroll) {
-                        setSafePosition(scroll, scroll.getY(), scroll.getMain().clientHeight, 0);
+                        setSafePosition(scroll, scroll.getY());
                     }
 
                     dom.removeEventListener(document, 'touchmove', util.preventEvent);
-                    keyboardHeight = 0;
                     // window.scrollTo(0, 0);
                     // core.$('ECUI-FIXED-BODY').style.transform = '';
                     iosfixedList = null;
@@ -655,7 +653,10 @@
                         dom.setStyle(scroll.getBody(), 'transform', '');
                         core.drag(scroll);
                         keyboardHandle = scrollListener(function () {
-                            setSafePosition(scroll, scroll.getY(), scroll.getMain().clientHeight, 0);
+                            var oldKeyboardHeight = keyboardHeight;
+                            keyboardHeight = 0;
+                            setSafePosition(scroll, scroll.getY());
+                            keyboardHeight = oldKeyboardHeight;
                         });
                         break;
                     }

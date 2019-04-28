@@ -1424,15 +1424,15 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                 }
             );
 
-            // if (iosVersion) {
-            //     el = dom.create({
-            //         id: 'ECUI-FIXED-BODY'
-            //     });
-            //     for (; document.body.firstChild; ) {
-            //         el.appendChild(document.body.firstChild);
-            //     }
-            //     document.body.appendChild(el);
-            // }
+            if (iosVersion) {
+                el = dom.create({
+                    id: 'ECUI-FIXED-BODY'
+                });
+                for (; document.body.firstChild; ) {
+                    el.appendChild(document.body.firstChild);
+                }
+                document.body.appendChild(el);
+            }
             core.init(document.body);
             el = null;
 
