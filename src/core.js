@@ -94,6 +94,10 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                         repaint();
                     } else if (viewHeight !== height) {
                         if (isToucher) {
+                            viewHeight = height;
+
+                            repaint();
+
                             // android 软键盘弹出和收起
                             var event = document.createEvent('HTMLEvents');
                             event.initEvent('keyboardchange', true, true);
@@ -109,10 +113,6 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                             }
 
                             document.dispatchEvent(event);
-
-                            viewHeight = height;
-
-                            repaint();
                         }
                     } else if (event && event.type === 'orientationchange') {
                         orientationHandle = util.timer(events.orientationchange, 100);

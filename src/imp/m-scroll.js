@@ -91,7 +91,7 @@
         if (keyboardHeight) {
             var mainTop = dom.getPosition(main).top + scroll.$$border[0];
             options.top += Math.min(0, window.scrollY - keyboardHeight + document.body.clientHeight - mainTop - Math.min(body.scrollHeight, main.clientHeight));
-            options.bottom += Math.max(0, window.scrollY - mainTop);
+            options.bottom += Math.max(0, window.scrollY + mainTop);
         }
 
         // 增加滚动边界的距离
@@ -635,6 +635,16 @@
 
                     keyboardHandle();
                     keyboardHandle = util.timer(scrollIntoViewIfNeeded, 100, this, height);
+                } else {
+                    for (scroll = core.findControl(event.target); scroll; scroll = scroll.getParent()) {
+                        if (scroll.$MScroll) {
+                            // 终止之前可能存在的惯性状态，并设置滚动层的位置
+    //                        dom.setStyle(scroll.getBody(), 'transform', '');
+                            core.drag(scroll);
+                            setSafePosition(scroll, scroll.getY());
+                            break;
+                        }
+                    }
                 }
             });
 
@@ -647,17 +657,6 @@
 
             dom.addEventListener(document, 'focusout', function (event) {
                 dom.removeEventListener(document, 'touchmove', util.preventEvent);
-                for (var scroll = core.findControl(event.target); scroll; scroll = scroll.getParent()) {
-                    if (scroll.$MScroll) {
-                        // 终止之前可能存在的惯性状态，并设置滚动层的位置
-//                        dom.setStyle(scroll.getBody(), 'transform', '');
-                        core.drag(scroll);
-                        keyboardHandle = scrollListener(function () {
-                            setSafePosition(scroll, scroll.getY());
-                        });
-                        break;
-                    }
-                }
             });
         }
     }
