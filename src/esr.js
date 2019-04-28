@@ -1846,7 +1846,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                     commandClose: '>>>'
                 });
 
-                for (var el = body.firstChild; el; el = nextSibling) {
+                for (var body = core.$('ECUI-FIXED-BODY') || document.body, el = body.firstChild; el; el = nextSibling) {
                     var nextSibling = el.nextSibling;
                     if (el.nodeType === 8) {
                         etpl.compile(el.textContent || el.nodeValue);
@@ -1894,8 +1894,6 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                         init();
                     }
                 });
-
-                body = null;
             }
 
             esrOptions = JSON.parse('{' + decodeURIComponent(value.replace(/(\w+)\s*=\s*(["A-Za-z0-9_]+)\s*($|,)/g, '"$1":$2$3')) + '}');
