@@ -1425,6 +1425,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
             );
 
             if (iosVersion) {
+                // 增加一个额外的层，使window.scrollY与document.body.scrollTop区分开来
                 el = dom.create({
                     id: 'ECUI-FIXED-BODY'
                 });
