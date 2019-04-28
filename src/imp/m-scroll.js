@@ -612,8 +612,8 @@
 
                     dom.removeEventListener(document, 'touchmove', util.preventEvent);
                     keyboardHeight = 0;
-                    window.scrollTo(0, 0);
-                    core.$('ECUI-FIXED-BODY').style.transform = '';
+                    // window.scrollTo(0, 0);
+                    // core.$('ECUI-FIXED-BODY').style.transform = '';
                     iosfixedList = null;
                 });
             });
