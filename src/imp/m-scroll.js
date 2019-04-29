@@ -13,6 +13,32 @@
         iosVersion = /(iPhone|iPad).*?OS (\d+(_\d+)?)/i.test(navigator.userAgent) ? +(RegExp.$2.replace('_', '.')) : undefined,
         safariVersion = !/(chrome|crios|ucbrowser)/i.test(navigator.userAgent) && /(\d+\.\d)(\.\d)?\s+.*safari/i.test(navigator.userAgent) ? +RegExp.$1 : undefined;
 //{/if}//
+    var topList = [],
+        bottomList = [];
+
+    ext.iosFixed = {
+        /**
+         * IOS fixed定位插件加载。
+         * @public
+         *
+         * @param {string} value 插件的参数，表示定位的位置，top或者是bottom
+         */
+        constructor: function (value) {
+            if (value === 'bottom') {
+                bottomList.push(this);
+            } else {
+                topList.push(this);
+            }
+        },
+
+        Events: {
+            dispose: function () {
+                util.remove(topList, this);
+                util.remove(bottomList, this);
+            }
+        }
+    };
+
     var keyboardHeight = 0,
         statusHeight = 0,
         innerKeyboardHeight;
@@ -96,15 +122,17 @@
             options.top += Math.min(0, window.scrollY - keyboardHeight + document.body.clientHeight - mainBottom);
             options.bottom += Math.max(0, window.scrollY - mainTop);
 
-            ext.iosFixed.getVisibles().forEach(function (item) {
-                if (!dom.contain(main.offsetParent, item.control.getMain())) {
-                    if (item.top) {
-                        bottom = Math.max(bottom, dom.getPosition(item.control.getMain()).top - window.scrollY + item.control.getHeight());
-                    } else {
-                        top = Math.min(top, dom.getPosition(item.control.getMain()).top - mainBottom);
-                    }
+            topList.forEach(function (control) {
+                if (control.isShow() && !dom.contain(main.offsetParent, control.getMain())) {
+                    bottom = Math.max(bottom, dom.getPosition(control.getMain()).top - window.scrollY + control.getHeight());
                 }
             });
+            bottomList.forEach(function (control) {
+                if (control.isShow() && !dom.contain(main.offsetParent, control.getMain())) {
+                    top = Math.min(top, dom.getPosition(control.getMain()).top - mainBottom);
+                }
+            });
+
             options.top += top;
             options.bottom += bottom;
         }
@@ -320,8 +348,11 @@
 //{/if}//
     function fixed(scrollY) {
         scrollY = scrollY === undefined ? window.scrollY : scrollY;
-        iosfixedList.forEach(function (item) {
-            dom.setStyle(item.control.getMain(), 'transform', 'translateY(' + (item.top ? scrollY : scrollY - keyboardHeight) + 'px)');
+        topList.forEach(function (control) {
+            dom.setStyle(control.getMain(), 'transform', 'translateY(' + scrollY + 'px)');
+        });
+        bottomList.forEach(function (control) {
+            dom.setStyle(control.getMain(), 'transform', 'translateY(' + (scrollY - keyboardHeight) + 'px)');
         });
     }
 
@@ -420,8 +451,7 @@
     }
 
     if (isToucher) {
-        var iosfixedList,
-            keyboardHandle = util.blank,
+        var keyboardHandle = util.blank,
             changeHandle = util.blank,
             observer = new MutationObserver(function (mutations) {
                 mutations.forEach(function (item) {
@@ -497,10 +527,6 @@
 
                 keyboardHandle();
 
-                if (!iosfixedList) {
-                    iosfixedList = ext.iosFixed.getVisibles();
-                }
-
                 // core.query(function (item) {
                 //     return item.$MScroll && item.isShow();
                 // }).forEach(function (item) {
@@ -526,12 +552,12 @@
 
                     keyboardHandle = scrollListener(function () {
                         if (lastScrollY !== window.scrollY) {
-                            iosfixedList.forEach(function (item) {
-                                item.control.getMain().style.visibility = 'hidden';
+                            topList.concat(bottomList).forEach(function (control) {
+                                control.getMain().style.visibility = 'hidden';
                             });
                             util.timer(function () {
-                                iosfixedList.forEach(function (item) {
-                                    item.control.getMain().style.visibility = '';
+                                topList.concat(bottomList).forEach(function (control) {
+                                    control.getMain().style.visibility = '';
                                 });
                             }, 200);
                         }
@@ -601,8 +627,8 @@
                     }
                 }
 
-                iosfixedList.forEach(function (item) {
-                    dom.setStyle(item.control.getMain(), 'transform', '');
+                topList.concat(bottomList).forEach(function (control) {
+                    dom.setStyle(control.getMain(), 'transform', '');
                 });
 
                 // core.query(function (item) {
@@ -622,9 +648,6 @@
                     }
 
                     dom.removeEventListener(document, 'touchmove', util.preventEvent);
-                    // window.scrollTo(0, 0);
-                    // core.$('ECUI-FIXED-BODY').style.transform = '';
-                    iosfixedList = null;
                 });
             });
         } else {
