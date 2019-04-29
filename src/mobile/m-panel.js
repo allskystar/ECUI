@@ -6,7 +6,8 @@
 //{if 0}//
     var core = ecui,
         dom = core.dom,
-        ui = core.ui;
+        ui = core.ui,
+        util = core.util;
 //{/if}//
     /**
      * 移动端容器控件。
@@ -22,6 +23,39 @@
             }
         ],
         {
+            /**
+             * @override
+             */
+            $dragend: function (event) {
+                ui.Control.prototype.$dragend.call(this, event);
+                if (util.hasIOSKeyboard(document.activeElement)) {
+                    dom.remove(document.activeElement.previousSibling);
+                    document.activeElement.style.display = '';
+                    util.timer(function () {
+                        document.activeElement.style.visibility = '';
+                    });
+                }
+
+            },
+
+            /**
+             * @override
+             */
+            $dragstart: function (event) {
+                ui.Control.prototype.$dragstart.call(this, event);
+                if (util.hasIOSKeyboard(document.activeElement)) {
+                    dom.insertBefore(dom.create(document.activeElement.tagName, {
+                        value: document.activeElement.value,
+                        className: document.activeElement.className,
+                        style: {
+                            cssText: document.activeElement.style.cssText
+                        }
+                    }), document.activeElement);
+                    document.activeElement.style.visibility = 'hidden';
+                    document.activeElement.style.display = 'none';
+                }
+            },
+
             /**
              * @override
              */

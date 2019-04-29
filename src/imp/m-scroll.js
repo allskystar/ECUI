@@ -41,7 +41,8 @@
 
     var keyboardHeight = 0,
         statusHeight = 0,
-        innerKeyboardHeight;
+        innerKeyboardHeight,
+        activeElement;
 
     if (iosVersion && safariVersion) {
         switch (screen.height) {
@@ -207,13 +208,6 @@
                 this.$MScroll.$dragend.call(this, event);
                 this.$MScrollData.scrolling = false;
                 this.$MScrollData.inertia = false;
-                if (keyboardHeight) {
-                    dom.remove(document.activeElement.previousSibling);
-                    document.activeElement.style.display = '';
-                    util.timer(function () {
-                        document.activeElement.style.visibility = '';
-                    });
-                }
             },
 
             /**
@@ -230,17 +224,6 @@
             $dragstart: function (event) {
                 this.$MScroll.$dragstart.call(this, event);
                 this.$MScrollData.scrolling = true;
-                if (keyboardHeight) {
-                    dom.insertBefore(dom.create(document.activeElement.tagName, {
-                        value: document.activeElement.value,
-                        className: document.activeElement.className,
-                        style: {
-                            cssText: document.activeElement.style.cssText
-                        }
-                    }), document.activeElement);
-                    document.activeElement.style.visibility = 'hidden';
-                    document.activeElement.style.display = 'none';
-                }
             },
 
             /**
@@ -375,13 +358,13 @@
     }
 
     function scrollIntoViewIfNeeded(height) {
-        for (var scroll = core.findControl(document.activeElement); scroll; scroll = scroll.getParent()) {
+        for (var scroll = core.findControl(activeElement); scroll; scroll = scroll.getParent()) {
             if (scroll.$MScroll) {
                 var main = scroll.getMain(),
                     scrollY = scroll.getY(),
                     scrollTop = dom.getPosition(main).top,
                     scrollHeight = scroll.getHeight() - height,
-                    activeTop = dom.getPosition(document.activeElement).top - window.scrollY + scrollY;
+                    activeTop = dom.getPosition(activeElement).top - window.scrollY + scrollY;
                 break;
             }
         }
@@ -389,10 +372,10 @@
         if (!scroll) {
             scrollTop = 0;
             scrollHeight = document.body.clientHeight - height;
-            activeTop = dom.getPosition(document.activeElement).top - window.scrollY;
+            activeTop = dom.getPosition(activeElement).top - window.scrollY;
         }
 
-        var activeHeight = document.activeElement.offsetHeight,
+        var activeHeight = activeElement.offsetHeight,
             infoHeight = /MicroMessanger/.test(navigator.userAgent) ? 30 : 0, // 处理微信提示信息的高度
             y = 0;
 
@@ -496,7 +479,7 @@
             dom.addEventListener(document, 'touchend', function (event) {
                 if (disabledInputs.indexOf(event.target) >= 0) {
                     util.timer(function () {
-                        if (document.activeElement !== event.target) {
+                        if (activeElement !== event.target) {
                             event.target.disabled = true;
                             observer.takeRecords();
                         }
@@ -516,25 +499,37 @@
                 } else if (!oldHeight) {
                     dom.addEventListener(document, 'touchmove', util.preventEvent);
                 }
-                if (oldHeight && keyboardHeight) {
-                    fixed();
-                } else {
-                    changeHandle = scrollListener(function () {
+
+                if (keyboardHeight) {
+                    if (oldHeight) {
                         fixed();
-                    });
+                    } else {
+                        changeHandle = scrollListener(function () {
+                            fixed();
+                        });
+                    }
+                } else {
+                    window.scrollTo(0, 0);
+                    for (var scroll = core.findControl(activeElement); scroll; scroll = scroll.getParent()) {
+                        if (scroll.$MScroll) {
+                            setSafePosition(scroll, scroll.getY());
+                            break;
+                        }
+                    }
                 }
             });
 
             dom.addEventListener(document, 'focusin', function (event) {
-                var target = event.target,
-                    lastScrollY;
+                var lastScrollY;
 
-                if (!util.hasIOSKeyboard(target)) {
+                activeElement = event.target;
+
+                if (!util.hasIOSKeyboard(activeElement)) {
                     return;
                 }
 
                 Array.prototype.slice.call(document.getElementsByTagName('INPUT')).concat(Array.prototype.slice.call(document.getElementsByTagName('TEXTAREA'))).forEach(function (item) {
-                    if (item !== target) {
+                    if (item !== activeElement) {
                         if (!item.disabled) {
                             item.disabled = true;
                             disabledInputs.push(item);
@@ -566,7 +561,7 @@
                     }
 //{/if}//
                     // 焦点控件切换
-                    core.setFocused(core.findControl(target));
+                    core.setFocused(core.findControl(activeElement));
 
                     keyboardHandle = scrollListener(function () {
                         if (lastScrollY !== window.scrollY) {
@@ -624,7 +619,9 @@
             });
 
             dom.addEventListener(document, 'focusout', function (event) {
-                if (!util.hasIOSKeyboard(event.target)) {
+                activeElement = event.target;
+
+                if (!util.hasIOSKeyboard(activeElement)) {
                     return;
                 }
 
@@ -636,7 +633,7 @@
 
                 keyboardHandle();
 
-                for (var scroll = core.findControl(event.target); scroll; scroll = scroll.getParent()) {
+                for (var scroll = core.findControl(activeElement); scroll; scroll = scroll.getParent()) {
                     if (scroll.$MScroll) {
                         // 终止之前可能存在的惯性状态，并设置滚动层的位置
                         core.drag(scroll);
@@ -661,6 +658,8 @@
 
                 keyboardHandle = scrollListener(function () {
                     keyboardHeight = 0;
+                    window.scrollTo(0, 0);
+
                     if (scroll) {
                         setSafePosition(scroll, scroll.getY());
                     }
@@ -671,15 +670,14 @@
         } else {
             // android，处理软键盘问题
             dom.addEventListener(window, 'keyboardchange', function (event) {
-                var height = event.height,
-                    target = document.activeElement;
+                var height = event.height;
 
                 if (height) {
                     // 打开软键盘
-                    target.scrollIntoViewIfNeeded();
+                    activeElement.scrollIntoViewIfNeeded();
 
                     if (window.scrollY) {
-                        for (var scroll = core.findControl(document.activeElement); scroll; scroll = scroll.getParent()) {
+                        for (var scroll = core.findControl(activeElement); scroll; scroll = scroll.getParent()) {
                             if (scroll.$MScroll) {
                                 var main = scroll.getMain();
                                 scroll.setPosition(scroll.getX(), Math.max(scroll.getHeight() - height - main.scrollHeight, scroll.getY()) - window.scrollY);
@@ -695,15 +693,18 @@
             });
 
             dom.addEventListener(window, 'focusin', function (event) {
+                activeElement = event.target;
                 // 解决软键盘状态下切换的情况
                 dom.addEventListener(document, 'touchmove', util.preventEvent);
                 // 焦点控件切换
-                core.setFocused(core.findControl(event.target));
+                core.setFocused(core.findControl(activeElement));
             });
 
             dom.addEventListener(document, 'focusout', function (event) {
+                activeElement = event.target;
+
                 dom.removeEventListener(document, 'touchmove', util.preventEvent);
-                for (var scroll = core.findControl(event.target); scroll; scroll = scroll.getParent()) {
+                for (var scroll = core.findControl(activeElement); scroll; scroll = scroll.getParent()) {
                     if (scroll.$MScroll) {
                         // 终止之前可能存在的惯性状态，并设置滚动层的位置
 //                        dom.setStyle(scroll.getBody(), 'transform', '');
