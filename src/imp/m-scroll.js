@@ -207,6 +207,13 @@
                 this.$MScroll.$dragend.call(this, event);
                 this.$MScrollData.scrolling = false;
                 this.$MScrollData.inertia = false;
+                if (keyboardHeight) {
+                    dom.remove(document.activeElement.previousSibling);
+                    document.activeElement.style.display = '';
+                    util.timer(function () {
+                        document.activeElement.style.visibility = '';
+                    });
+                }
             },
 
             /**
@@ -223,6 +230,17 @@
             $dragstart: function (event) {
                 this.$MScroll.$dragstart.call(this, event);
                 this.$MScrollData.scrolling = true;
+                if (keyboardHeight) {
+                    dom.insertBefore(dom.create(document.activeElement.tagName, {
+                        value: document.activeElement.value,
+                        className: document.activeElement.className,
+                        style: {
+                            cssText: document.activeElement.style.cssText
+                        }
+                    }), document.activeElement);
+                    document.activeElement.style.visibility = 'hidden';
+                    document.activeElement.style.display = 'none';
+                }
             },
 
             /**
