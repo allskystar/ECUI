@@ -6,6 +6,7 @@
 
 @fields
 _aOptions    - 选项框数组
+_eText       - 文本框
 */
 //{if 0}//
 (function () {
@@ -24,6 +25,7 @@ _aOptions    - 选项框数组
             util.setDefault(options, 'enter', 'bottom');
             util.setDefault(options, 'mask', '0.5');
             util.setDefault(options, 'readOnly', true);
+            util.setDefault(options, 'inputType', 'hidden');
 
             var popupEl = dom.create({
                     className: options.classes.join('-popup ') + 'ui-popup ui-hide'
@@ -31,6 +33,11 @@ _aOptions    - 选项框数组
                 children = dom.children(el).filter(function (item) {
                     return item.tagName !== 'INPUT';
                 });
+
+            el.appendChild(dom.create({
+                className: options.classes.join('-text ')
+            }));
+            this._eText = el.lastChild;
 
             ui.InputControl.call(this, el, options);
 
@@ -163,6 +170,14 @@ _aOptions    - 选项框数组
             },
 
             /**
+             * @override
+             */
+            $dispose: function () {
+                this._eText = null;
+                ui.InputControl.prototype.$dispose.call(this);
+            },
+
+            /**
              * 获取选项控件。
              * @public
              *
@@ -171,6 +186,20 @@ _aOptions    - 选项框数组
              */
             getOptions: function (index) {
                 return this._aOptions[index];
+            },
+
+            /**
+             * @override
+             */
+            getValue: function () {
+                return util.decodeHTML(this._eText.innerHTML);
+            },
+
+            /**
+             * @override
+             */
+            setValue: function (value) {
+                this._eText.innerHTML = util.encodeHTML(value);
             }
         },
         ui.MPopup
