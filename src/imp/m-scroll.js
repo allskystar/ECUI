@@ -527,7 +527,7 @@
                     changeHandle = util.timer(function () {
                         window.scrollTo(0, 0);
                         allSafePosition();
-                    });
+                    }, 100);
                 }
             });
 
