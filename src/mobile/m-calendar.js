@@ -60,12 +60,7 @@ _uDate   - 日部件
                 ui.MMultiOptions.prototype.$click.call(this, event);
                 if (dom.contain(this.getMain(), event.target)) {
                     var value = this.getValue();
-                    if (value) {
-                        value = value.split('-');
-                        this._uYear.setValue(value[0]);
-                        this._uMonth.setValue(+value[1]);
-                        this._uDate.setValue(+value[2]);
-                    } else {
+                    if (!value) {
                         value = new Date();
                         this._uYear.setValue(value.getFullYear());
                         this._uMonth.setValue(value.getMonth() + 1);

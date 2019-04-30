@@ -53,7 +53,23 @@ _eText       - 文本框
                 this._aOptions.push(core.$fastCreate(this.Options, item, this, core.getOptions(item)));
             }, this);
 
-            this._sFormat = options.format;
+            var source = this._sFormat = options.format || '',
+                des = '';
+            this._aMap = [];
+
+            for (;;) {
+                if (/\{([0-9]+)\}/.test(source)) {
+                    source = RegExp.rightContext;
+                    this._aMap.push(+RegExp.$1);
+                    var text = RegExp.leftContext;
+                    des += util.encodeRegExp(text) + '(.*)';
+                } else {
+                    des += util.encodeRegExp(source);
+                    break;
+                }
+            }
+
+            this._oRegExp = new RegExp(des);
         },
         {
             /**
@@ -82,36 +98,44 @@ _eText       - 文本框
              */
             Options: core.inherits(
                 ui.Control,
-                function (el, options) {
-                    ui.Control.call(this, el, options);
-
-                    var values = options.values;
-
-                    if ('string' === typeof values) {
-                        values = values.split(/[\-,]/);
-                    }
-                    values[0] = +values[0];
-                    values[1] = +values[1];
-                    if (values[2]) {
-                        values[2] = +values[2];
-                    } else {
-                        values[2] = 1;
-                    }
-                    for (var i = values[0], ret = [];; i += values[2]) {
-                        ret.push('<div ui="value:' + i + '" class="' + options.classes.join('-item ') + 'ui-item">' + (options.format ? util.stringFormat(options.format, i) : i) + '</div>');
-                        if (i === values[1]) {
-                            break;
+                [
+                    function (el, options) {
+                        if (options.value !== undefined) {
+                            this.setValue(options.value);
                         }
+                    },
+                    function (el, options) {
+                        ui.Control.call(this, el, options);
+
+                        var values = options.values;
+                        this._sPrefix = '';
+
+                        if ('string' === typeof values) {
+                            if (values.indexOf(',') < 0) {
+                                var ret = /^([0-9]+)-([0-9]+)(:([0-9]+))?(\|(.+))?$/.exec(values);
+                                this._sPrefix = ret[6] || '';
+                                ret = [+ret[1], +ret[2], +ret[4] || 1];
+                                values = [];
+                                for (var i = ret[0]; i <= ret[1]; i += ret[2]) {
+                                    values.push(i);
+                                }
+                            } else {
+                                values = values.split(',');
+                            }
+                        }
+
+                        this.getBody().innerHTML = values.map(function (item) {
+                            return '<div ui="value:' + (this._sPrefix + item).slice(-this._sPrefix.length) + '" class="' + options.classes.join('-item ') + 'ui-item">' + (options.format ? util.stringFormat(options.format, item) : item) + '</div>';
+                        }.bind(this)).join('');
+
+                        this._aItems = [];
+                        dom.children(el).forEach(function (item) {
+                            this._aItems.push(core.$fastCreate(this.Item, item, this, core.getOptions(item)));
+                        }, this);
+
+                        this.setOptionSize(3);
                     }
-                    this.getBody().innerHTML = ret.join('');
-
-                    this._aItems = [];
-                    dom.children(el).forEach(function (item) {
-                        this._aItems.push(core.$fastCreate(this.Item, item, this, core.getOptions(item)));
-                    }, this);
-
-                    this.setOptionSize(3);
-                },
+                ],
                 {
                     /**
                      * 选项部件。
@@ -123,16 +147,14 @@ _eText       - 文本框
                             ui.Control.call(this, el, options);
                             this._sValue = options.value || this.getContent();
                         }
-                    )
-                },
-                ui.MOptions,
-                {
+                    ),
+
                     /**
                      * @override
                      */
-                    $dragend: function (event) {
-                        ui.MScroll.Methods.$dragend.call(this, event);
-                        core.dispatchEvent(this.getParent(), 'change');
+                    $initStructure: function (width, height) {
+                        ui.Control.prototype.$initStructure.call(this, width, height);
+                        this.setPosition(0, (3 - this._aItems.indexOf(this.getSelected())) * this.$$itemHeight);
                     },
 
                     /**
@@ -142,7 +164,8 @@ _eText       - 文本框
                      * @return {string} 选中控件的值
                      */
                     getValue: function () {
-                        return this._cSelect ? this._cSelect._sValue : '';
+                        var selected = this.getSelected();
+                        return selected ? selected._sValue : '';
                     },
 
                     /**
@@ -152,15 +175,27 @@ _eText       - 文本框
                      * @param {string} value 控件的值
                      */
                     setValue: function (value) {
-                        value = String(value);
+                        value = (this._sPrefix + value).slice(-this._sPrefix.length);
                         for (var i = 0, item; item = this._aItems[i]; i++) {
                             if (item._sValue === value) {
-                                this.setPosition(0, (3 - i) * this.$$itemHeight);
+                                if (this.isCached()) {
+                                    this.setPosition(0, (3 - i) * this.$$itemHeight);
+                                }
                                 this.setSelected(item);
                                 return;
                             }
                         }
                         this.setSelected();
+                    }
+                },
+                ui.MOptions,
+                {
+                    /**
+                     * @override
+                     */
+                    $dragend: function (event) {
+                        ui.MScroll.Methods.$dragend.call(this, event);
+                        core.dispatchEvent(this.getParent(), 'change');
                     }
                 }
             )
@@ -172,6 +207,21 @@ _eText       - 文本框
             $blur: function (event) {
                 this.getPopup().hide();
                 ui.InputControl.prototype.$blur.call(this, event);
+            },
+
+            /**
+             * @override
+             */
+            $click: function (event) {
+                ui.InputControl.prototype.$click.call(this, event);
+                if (dom.contain(this.getMain(), event.target)) {
+                    var ret = this._oRegExp.exec(this.getValue());
+                    if (ret) {
+                        ret.slice(1).forEach(function (value, index) {
+                            this._aOptions[this._aMap[index]].setValue(value);
+                        }.bind(this));
+                    }
+                }
             },
 
             /**

@@ -144,9 +144,9 @@
              */
             setSelected: function (item) {
                 item = item || null;
-                if (this._cSelect !== item) {
-                    if (this._cSelect) {
-                        this._cSelect.alterStatus('-selected');
+                if (this._cSelected !== item) {
+                    if (this._cSelected) {
+                        this._cSelected.alterStatus('-selected');
                     }
                     if (item) {
                         item.alterStatus('+selected');
@@ -154,7 +154,7 @@
                     } else {
                         core.setFocused(this);
                     }
-                    this._cSelect = item;
+                    this._cSelected = item;
                 }
             }
         }

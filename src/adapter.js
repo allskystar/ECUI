@@ -1207,6 +1207,22 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
             },
 
             /**
+             * 对目标字符串进行正则编码。
+             * @public
+             *
+             * @param {string} source 目标字符串
+             * @return {string} 结果字符串
+             */
+            encodeRegExp: function (source) {
+                return source.replace(
+                    /[{}()|+*$.\^\[\]\\]/g,
+                    function (match) {
+                        return '\\' + match;
+                    }
+                );
+            },
+
+            /**
              * 格式化日期对象。
              * @public
              *
@@ -1421,9 +1437,9 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
             stringFormat: function (source) {
                 var args = arguments;
                 return source.replace(
-                    /\{(0*)([0-9]+)\}/g,
-                    function (match, prefix, index) {
-                        return prefix ? (prefix + args[+index + 1]).slice(-prefix.length - 1) : args[+index + 1];
+                    /\{([0-9]+)\}/g,
+                    function (match, index) {
+                        return args[+index + 1];
                     }
                 );
             },
