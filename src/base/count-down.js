@@ -100,15 +100,19 @@ _oTimer         - 定时器
                 if (!isContinue) {
                     this._nDown = this._nTime;
                 }
-                this._oTimer = util.timer(function () {
-                    var time = Date.now();
-                    this._nDown = Math.max(0, this._nDown + (lastTime - time) / 1000);
-                    lastTime = time;
-                    this.getBody().innerHTML = formatTime(this._nDown);
-                    if (this._nDown <= 0) {
-                        this._oTimer();
-                    }
-                }, -1, this);
+                this._oTimer = util.timer(
+                    function () {
+                        var time = Date.now();
+                        this._nDown = Math.max(0, this._nDown + (lastTime - time) / 1000);
+                        lastTime = time;
+                        this.getBody().innerHTML = formatTime(this._nDown);
+                        if (this._nDown <= 0) {
+                            this._oTimer();
+                        }
+                    },
+                    -1,
+                    this
+                );
             },
 
             /**

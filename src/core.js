@@ -602,7 +602,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                             if (document.activeElement !== event.target) {
                                 event.target.focus();
                             }
-                        }, 0);
+                        });
                         commonParent = true;
                     }
                 }

@@ -427,11 +427,14 @@
         var lastScrollY = window.scrollY,
             // 保证1s后至少能触发一次执行
             waitHandle = util.timer(onscroll, 1000),
-            checkHandle = util.timer(function () {
-                if (window.scrollY !== lastScrollY) {
-                    onscroll();
-                }
-            }, -20);
+            checkHandle = util.timer(
+                function () {
+                    if (window.scrollY !== lastScrollY) {
+                        onscroll();
+                    }
+                },
+                -20
+            );
 
         return function () {
             waitHandle();
@@ -485,12 +488,15 @@
 
             dom.addEventListener(document, 'touchend', function (event) {
                 if (disabledInputs.indexOf(event.target) >= 0) {
-                    util.timer(function () {
-                        if (document.activeElement !== event.target) {
-                            event.target.disabled = true;
-                            observer.takeRecords();
-                        }
-                    }, 20);
+                    util.timer(
+                        function () {
+                            if (document.activeElement !== event.target) {
+                                event.target.disabled = true;
+                                observer.takeRecords();
+                            }
+                        },
+                        20
+                    );
                 }
             });
 
@@ -518,10 +524,11 @@
                         }
                     }
                 } else {
-                    window.scrollTo(0, 0);
+                    changeHandle = util.timer(function () {
+                        window.scrollTo(0, 0);
+                        allSafePosition();
+                    });
                 }
-
-                allSafePosition();
             });
 
             dom.addEventListener(document, 'focusin', function (event) {
@@ -648,12 +655,20 @@
                 //     }
                 // });
 
-                keyboardHandle = scrollListener(function () {
-                    keyboardHeight = 0;
-                    window.scrollTo(0, 0);
-                    allSafePosition();
-                    dom.removeEventListener(document, 'touchmove', util.preventEvent);
-                });
+                if (window.scrollY) {
+                    keyboardHandle = scrollListener(function () {
+                        keyboardHeight = 0;
+                        window.scrollTo(0, 0);
+                        allSafePosition();
+                        dom.removeEventListener(document, 'touchmove', util.preventEvent);
+                    });
+                } else {
+                    keyboardHandle = util.timer(function () {
+                        keyboardHeight = 0;
+                        allSafePosition();
+                        dom.removeEventListener(document, 'touchmove', util.preventEvent);
+                    }, 100);
+                }
             });
         } else {
             // android，处理软键盘问题

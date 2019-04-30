@@ -54,16 +54,19 @@
                             core.mask(data.mask);
                             core.addEventListener(popup, 'hide', hideHandler);
 
-                            util.timer(function () {
-                                core.addGestureListeners(popup, {
-                                    tap: function (event) {
-                                        if (!dom.contain(popup.getMain(), event.target)) {
-                                            popup.hide();
-                                            core.removeGestureListeners(popup);
+                            util.timer(
+                                function () {
+                                    core.addGestureListeners(popup, {
+                                        tap: function (event) {
+                                            if (!dom.contain(popup.getMain(), event.target)) {
+                                                popup.hide();
+                                                core.removeGestureListeners(popup);
+                                            }
                                         }
-                                    }
-                                });
-                            }, 100);
+                                    });
+                                },
+                                100
+                            );
                         }
 
                         style.top = style.right = style.bottom = style.left = 'auto';

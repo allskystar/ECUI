@@ -28,11 +28,12 @@
              */
             $dragend: function (event) {
                 ui.Control.prototype.$dragend.call(this, event);
-                if (util.hasIOSKeyboard(document.activeElement)) {
-                    dom.remove(document.activeElement.previousSibling);
-                    document.activeElement.style.display = '';
+                var activeElement = document.activeElement;
+                if (util.hasIOSKeyboard(activeElement)) {
+                    dom.remove(activeElement.previousSibling);
+                    activeElement.style.display = '';
                     util.timer(function () {
-                        document.activeElement.style.visibility = '';
+                        activeElement.style.visibility = '';
                     });
                 }
 
