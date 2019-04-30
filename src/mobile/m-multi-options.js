@@ -5,6 +5,7 @@
 </div>
 
 @fields
+_sFormat     - 格式化字符串
 _aOptions    - 选项框数组
 _eText       - 文本框
 */
@@ -49,6 +50,8 @@ _eText       - 文本框
                 popupEl.getControl().getBody().appendChild(item);
                 this._aOptions.push(core.$fastCreate(this.Options, item, this, core.getOptions(item)));
             }, this);
+
+            this._sFormat = options.format;
         },
         {
             /**
@@ -167,6 +170,21 @@ _eText       - 文本框
             $blur: function (event) {
                 this.getPopup().hide();
                 ui.InputControl.prototype.$blur.call(this, event);
+            },
+
+            /**
+             * 确认事件的默认处理。
+             * @event
+             */
+            $confirm: function () {
+                this.setValue(
+                    util.stringFormat.apply(
+                        null,
+                        [this._sFormat].concat(this._aOptions.map(function (options) {
+                            return options.getValue();
+                        }))
+                    )
+                );
             },
 
             /**

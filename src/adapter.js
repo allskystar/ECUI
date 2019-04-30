@@ -1421,9 +1421,9 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
             stringFormat: function (source) {
                 var args = arguments;
                 return source.replace(
-                    /\{([0-9]+)\}/g,
-                    function (match, index) {
-                        return args[+index + 1];
+                    /\{(0*)([0-9]+)\}/g,
+                    function (match, prefix, index) {
+                        return prefix ? (prefix + args[+index + 1]).slice(-prefix.length - 1) : args[+index + 1];
                     }
                 );
             },
