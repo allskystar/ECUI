@@ -516,28 +516,30 @@
                 var oldHeight = keyboardHeight;
                 keyboardHeight = Math.max(0, event.height - statusHeight);
 
-                changeHandle();
-                if (!keyboardHeight) {
-                    dom.removeEventListener(document, 'touchmove', util.preventEvent);
-                } else if (!oldHeight) {
-                    dom.addEventListener(document, 'touchmove', util.preventEvent);
-                }
-
-                if (keyboardHeight) {
-                    if (util.hasIOSKeyboard(document.activeElement)) {
-                        if (oldHeight) {
-                            fixed();
-                        } else {
-                            changeHandle = scrollListener(function () {
-                                fixed();
-                            });
-                        }
+                if (oldHeight !== keyboardHeight) {
+                    changeHandle();
+                    if (!keyboardHeight) {
+                        dom.removeEventListener(document, 'touchmove', util.preventEvent);
+                    } else if (!oldHeight) {
+                        dom.addEventListener(document, 'touchmove', util.preventEvent);
                     }
-                } else {
-                    changeHandle = util.timer(function () {
-                        window.scrollTo(0, 0);
-                        allSafePosition();
-                    }, 100);
+
+                    if (keyboardHeight) {
+                        if (util.hasIOSKeyboard(document.activeElement)) {
+                            if (oldHeight) {
+                                fixed();
+                            } else {
+                                changeHandle = scrollListener(function () {
+                                    fixed();
+                                });
+                            }
+                        }
+                    } else {
+                        changeHandle = util.timer(function () {
+                            window.scrollTo(0, 0);
+                            allSafePosition();
+                        }, 100);
+                    }
                 }
             });
 
