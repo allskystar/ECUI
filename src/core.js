@@ -2298,7 +2298,9 @@ outer:          for (var caches = [], target = event.target, el; target; target 
             if (inertiaHandles[uid]) {
                 inertiaHandles[uid]();
                 delete inertiaHandles[uid];
-                core.dispatchEvent(control, 'dragend', event);
+                var dragEvent = new ECUIEvent();
+                dragEvent.dragend = true;
+                dragAnimationFrame(currEnv, control, dragEvent);
             }
 
             if (event && activedControl !== undefined && currEnv.type !== 'drag') {
