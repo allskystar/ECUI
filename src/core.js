@@ -1160,7 +1160,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
      */
     function dragAnimationFrame(env, target, event) {
         if (window.requestAnimationFrame) {
-            if (env.event.dragend) {
+            if (event.dragend) {
                 // 遇到结束事件，强制中止
                 if (env.event) {
                     target.setPosition(env.event.x, env.event.y);
