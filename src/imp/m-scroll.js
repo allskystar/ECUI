@@ -349,10 +349,7 @@
     }
 //{/if}//
     function scrollIntoViewIfNeededHandler() {
-        changeHandle();
-        changeHandle = util.timer(function () {
-            scrollIntoViewIfNeeded(keyboardHeight);
-        }, 100);
+        scrollIntoViewIfNeeded(keyboardHeight);
     }
 
     function fixed(scrollY) {
