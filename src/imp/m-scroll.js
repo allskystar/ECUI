@@ -361,8 +361,11 @@
     function scrollIntoViewIfNeeded(height) {
         for (var scroll = core.findControl(document.activeElement); scroll; scroll = scroll.getParent()) {
             if (scroll.$MScroll) {
-                var main = scroll.getMain(),
-                    scrollY = scroll.getY(),
+                var main = scroll.getMain();
+                main.scrollTop = 0;
+                main.scrollLeft = 0;
+
+                var scrollY = scroll.getY(),
                     scrollTop = dom.getPosition(main).top,
                     scrollHeight = scroll.getHeight() - height,
                     activeTop = dom.getPosition(document.activeElement).top - window.scrollY + scrollY;
@@ -537,6 +540,10 @@
                 if (!util.hasIOSKeyboard(event.target)) {
                     return;
                 }
+
+                dom.addEventListener(event.target, 'input', function (event) {
+                    scrollIntoViewIfNeeded(keyboardHeight);
+                });
 
                 Array.prototype.slice.call(document.getElementsByTagName('INPUT')).concat(Array.prototype.slice.call(document.getElementsByTagName('TEXTAREA'))).forEach(function (item) {
                     if (item !== event.target) {
