@@ -125,11 +125,12 @@
 
             topList.forEach(function (control) {
                 if (control.isShow() && !dom.contain(main.offsetParent, control.getMain())) {
-                    bottom = Math.max(bottom, dom.getPosition(control.getMain()).top - window.scrollY + control.getHeight());
+                    bottom = Math.max(bottom, dom.getPosition(control.getMain()).top + control.getHeight() - window.scrollY);
                 }
             });
             bottomList.forEach(function (control) {
                 if (control.isShow() && !dom.contain(main.offsetParent, control.getMain())) {
+                    debugger;
                     top = Math.min(top, dom.getPosition(control.getMain()).top - mainBottom);
                 }
             });
@@ -409,16 +410,15 @@
             waitHandle();
 
             if (lastScrollY === window.scrollY) {
-                window.cancelAnimationFrame(handle);
-                handle = window.requestAnimationFrame(function () {
+                window.requestAnimationFrame(function () {
                     if (fn) {
                         fn();
+                        fn = null;
                     }
                 });
             } else {
                 lastScrollY = window.scrollY;
-                window.cancelAnimationFrame(handle);
-                handle = window.requestAnimationFrame(onscroll);
+                window.requestAnimationFrame(onscroll);
             }
         }
 
@@ -429,16 +429,13 @@
             waitHandle = util.timer(onscroll, 1000),
             checkHandle = util.timer(function () {
                 if (window.scrollY !== lastScrollY) {
-                    waitHandle();
                     onscroll();
                 }
-            }, -20),
-            handle;
+            }, -20);
 
         return function () {
             waitHandle();
             checkHandle();
-            window.cancelAnimationFrame(handle);
             fn = null;
         };
     }
