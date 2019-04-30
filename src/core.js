@@ -737,6 +737,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                         dragmove(track, env, Math.round(mx + vx * t - ax * t * t / 2), Math.round(my + vy * t - ay * t * t / 2));
                         if (t >= inertia || (x === track.x && y === track.y)) {
                             inertiaHandles[uid]();
+                            delete inertiaHandles[uid];
                             if (env.event && startX === x && startY === y) {
                                 env.event.inertia = false;
                             }
@@ -1238,6 +1239,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
 
                         if (percent >= 1) {
                             inertiaHandles[uid]();
+                            delete inertiaHandles[uid];
                             finish();
                         }
                     },
@@ -2296,6 +2298,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
             if (inertiaHandles[uid]) {
                 inertiaHandles[uid]();
                 delete inertiaHandles[uid];
+                core.dispatchEvent(control, 'dragend', event);
             }
 
             if (event && activedControl !== undefined && currEnv.type !== 'drag') {
