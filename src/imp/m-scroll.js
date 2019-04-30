@@ -711,13 +711,15 @@
             });
 
             dom.addEventListener(window, 'focusin', function (event) {
+                dom.addEventListener(event.target, 'input', scrollIntoViewIfNeededHandler);
                 // 解决软键盘状态下切换的情况
                 dom.addEventListener(document, 'touchmove', util.preventEvent);
                 // 焦点控件切换
                 core.setFocused(core.findControl(event.target));
             });
 
-            dom.addEventListener(document, 'focusout', function () {
+            dom.addEventListener(document, 'focusout', function (event) {
+                dom.removeEventListener(event.target, 'input', scrollIntoViewIfNeededHandler);
                 dom.removeEventListener(document, 'touchmove', util.preventEvent);
                 keyboardHandle = scrollListener(function () {
                     allSafePosition();
