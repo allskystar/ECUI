@@ -125,12 +125,13 @@
 
             topList.forEach(function (control) {
                 if (control.isShow() && !dom.contain(main.offsetParent, control.getMain())) {
-                    bottom = Math.max(bottom, dom.getPosition(control.getMain()).top + control.getHeight() - window.scrollY);
+                    bottom = Math.max(bottom, dom.getPosition(control.getMain()).top + control.getHeight() - Math.max(window.scrollY, mainTop));
                 }
             });
             bottomList.forEach(function (control) {
                 if (control.isShow() && !dom.contain(main.offsetParent, control.getMain())) {
-                    top = Math.min(top, dom.getPosition(control.getMain()).top - document.body.clientHeight);
+                    var controlTop = dom.getPosition(control.getMain()).top;
+                    top = Math.min(top, Math.max(Math.min(0, controlTop - mainBottom), controlTop - window.scrollY + keyboardHeight - document.body.clientHeight));
                 }
             });
 
