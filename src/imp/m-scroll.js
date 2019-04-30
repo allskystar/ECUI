@@ -425,7 +425,7 @@
 
         var lastScrollY = window.scrollY,
             // 保证1s后至少能触发一次执行
-            waitHandle = util.timer(onscroll, 10000),
+            waitHandle = util.timer(onscroll, 1000),
             checkHandle = util.timer(function () {
                 if (window.scrollY !== lastScrollY) {
                     onscroll();
