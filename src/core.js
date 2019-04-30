@@ -1198,13 +1198,9 @@ outer:          for (var caches = [], target = event.target, el; target; target 
      */
     function dragend(event, env, target) {
         function finish() {
-            if (env.event) {
-                env.event.dragend = true;
-            } else {
-                core.dispatchEvent(target, 'dragend', event);
-                dom.removeClass(document.body, 'ui-drag');
-            }
-            delete inertiaHandles[uid];
+            var dragEvent = new ECUIEvent();
+            dragEvent.dragend = true;
+            dragAnimationFrame(env, target, dragEvent);
         }
 
         if (!target.getMain()) {
