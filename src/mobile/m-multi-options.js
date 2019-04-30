@@ -19,6 +19,8 @@ _eText       - 文本框
     /**
      * 多选项输入框控件。
      * @control
+     * options 属性：
+     * format  选中时的字符串格式
      */
     ui.MMultiOptions = core.inherits(
         ui.InputControl,
