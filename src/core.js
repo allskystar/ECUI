@@ -1160,20 +1160,27 @@ outer:          for (var caches = [], target = event.target, el; target; target 
      */
     function dragAnimationFrame(env, target, event) {
         if (window.requestAnimationFrame) {
-            if (!env.event) {
-                window.requestAnimationFrame(function () {
-                    if (env.event) {
-                        target.setPosition(env.event.x, env.event.y);
-                        core.dispatchEvent(target, 'dragmove', env.event);
-                        if (env.event.dragend) {
-                            core.dispatchEvent(target, 'dragend', env.event);
-                            dom.removeClass(document.body, 'ui-drag');
+            if (env.event.dragend) {
+                // 遇到结束事件，强制中止
+                if (env.event) {
+                    target.setPosition(env.event.x, env.event.y);
+                    core.dispatchEvent(target, 'dragmove', env.event);
+                    env.event = null;
+                }
+                core.dispatchEvent(target, 'dragend', event);
+                dom.removeClass(document.body, 'ui-drag');
+            } else {
+                if (!env.event) {
+                    window.requestAnimationFrame(function () {
+                        if (env.event) {
+                            target.setPosition(env.event.x, env.event.y);
+                            core.dispatchEvent(target, 'dragmove', env.event);
+                            env.event = null;
                         }
-                        env.event = null;
-                    }
-                });
+                    });
+                }
+                env.event = event;
             }
-            env.event = event;
         } else {
             target.setPosition(event.x, event.y);
             core.dispatchEvent(target, 'dragmove', event);

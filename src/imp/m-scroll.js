@@ -41,8 +41,7 @@
 
     var keyboardHeight = 0,
         statusHeight = 0,
-        innerKeyboardHeight,
-        activeElement;
+        innerKeyboardHeight;
 
     if (iosVersion && safariVersion) {
         switch (screen.height) {
@@ -99,6 +98,7 @@
                 bottom: data.bottom !== undefined ? data.bottom : 0
             }
         );
+
         // 如果内容不够外部区域的宽度，不需要滚动
         if (options.left > options.right) {
             options.left = options.right;
@@ -130,8 +130,7 @@
             });
             bottomList.forEach(function (control) {
                 if (control.isShow() && !dom.contain(main.offsetParent, control.getMain())) {
-                    debugger;
-                    top = Math.min(top, dom.getPosition(control.getMain()).top - mainBottom);
+                    top = Math.min(top, dom.getPosition(control.getMain()).top - document.body.clientHeight);
                 }
             });
 
@@ -359,13 +358,13 @@
     }
 
     function scrollIntoViewIfNeeded(height) {
-        for (var scroll = core.findControl(activeElement); scroll; scroll = scroll.getParent()) {
+        for (var scroll = core.findControl(document.activeElement); scroll; scroll = scroll.getParent()) {
             if (scroll.$MScroll) {
                 var main = scroll.getMain(),
                     scrollY = scroll.getY(),
                     scrollTop = dom.getPosition(main).top,
                     scrollHeight = scroll.getHeight() - height,
-                    activeTop = dom.getPosition(activeElement).top - window.scrollY + scrollY;
+                    activeTop = dom.getPosition(document.activeElement).top - window.scrollY + scrollY;
                 break;
             }
         }
@@ -373,10 +372,10 @@
         if (!scroll) {
             scrollTop = 0;
             scrollHeight = document.body.clientHeight - height;
-            activeTop = dom.getPosition(activeElement).top - window.scrollY;
+            activeTop = dom.getPosition(document.activeElement).top - window.scrollY;
         }
 
-        var activeHeight = activeElement.offsetHeight,
+        var activeHeight = document.activeElement.offsetHeight,
             infoHeight = /MicroMessanger/.test(navigator.userAgent) ? 30 : 0, // 处理微信提示信息的高度
             y = 0;
 
@@ -426,7 +425,7 @@
 
         var lastScrollY = window.scrollY,
             // 保证1s后至少能触发一次执行
-            waitHandle = util.timer(onscroll, 1000),
+            waitHandle = util.timer(onscroll, 10000),
             checkHandle = util.timer(function () {
                 if (window.scrollY !== lastScrollY) {
                     onscroll();
@@ -438,6 +437,16 @@
             checkHandle();
             fn = null;
         };
+    }
+
+    function allSafePosition() {
+        core.query(function (control) {
+            if (control.$MScroll) {
+                // 终止之前可能存在的惯性状态，并设置滚动层的位置
+                core.drag(control);
+                setSafePosition(control, control.getY());
+            }
+        });
     }
 
     function setSafePosition(scroll, y) {
@@ -476,7 +485,7 @@
             dom.addEventListener(document, 'touchend', function (event) {
                 if (disabledInputs.indexOf(event.target) >= 0) {
                     util.timer(function () {
-                        if (activeElement !== event.target) {
+                        if (document.activeElement !== event.target) {
                             event.target.disabled = true;
                             observer.takeRecords();
                         }
@@ -498,35 +507,31 @@
                 }
 
                 if (keyboardHeight) {
-                    if (oldHeight) {
-                        fixed();
-                    } else {
-                        changeHandle = scrollListener(function () {
+                    if (util.hasIOSKeyboard(document.activeElement)) {
+                        if (oldHeight) {
                             fixed();
-                        });
+                        } else {
+                            changeHandle = scrollListener(function () {
+                                fixed();
+                            });
+                        }
                     }
                 } else {
                     window.scrollTo(0, 0);
-                    for (var scroll = core.findControl(activeElement); scroll; scroll = scroll.getParent()) {
-                        if (scroll.$MScroll) {
-                            setSafePosition(scroll, scroll.getY());
-                            break;
-                        }
-                    }
                 }
+
+                allSafePosition();
             });
 
             dom.addEventListener(document, 'focusin', function (event) {
                 var lastScrollY;
 
-                activeElement = event.target;
-
-                if (!util.hasIOSKeyboard(activeElement)) {
+                if (!util.hasIOSKeyboard(event.target)) {
                     return;
                 }
 
                 Array.prototype.slice.call(document.getElementsByTagName('INPUT')).concat(Array.prototype.slice.call(document.getElementsByTagName('TEXTAREA'))).forEach(function (item) {
-                    if (item !== activeElement) {
+                    if (item !== event.target) {
                         if (!item.disabled) {
                             item.disabled = true;
                             disabledInputs.push(item);
@@ -558,7 +563,7 @@
                     }
 //{/if}//
                     // 焦点控件切换
-                    core.setFocused(core.findControl(activeElement));
+                    core.setFocused(core.findControl(event.target));
 
                     keyboardHandle = scrollListener(function () {
                         if (lastScrollY !== window.scrollY) {
@@ -616,9 +621,7 @@
             });
 
             dom.addEventListener(document, 'focusout', function (event) {
-                activeElement = event.target;
-
-                if (!util.hasIOSKeyboard(activeElement)) {
+                if (!util.hasIOSKeyboard(event.target)) {
                     return;
                 }
 
@@ -629,15 +632,6 @@
                 disabledInputs = [];
 
                 keyboardHandle();
-
-                for (var scroll = core.findControl(activeElement); scroll; scroll = scroll.getParent()) {
-                    if (scroll.$MScroll) {
-                        // 终止之前可能存在的惯性状态，并设置滚动层的位置
-                        core.drag(scroll);
-                        setSafePosition(scroll, scroll.getY());
-                        break;
-                    }
-                }
 
                 topList.concat(bottomList).forEach(function (control) {
                     dom.setStyle(control.getMain(), 'transform', '');
@@ -656,11 +650,7 @@
                 keyboardHandle = scrollListener(function () {
                     keyboardHeight = 0;
                     window.scrollTo(0, 0);
-
-                    if (scroll) {
-                        setSafePosition(scroll, scroll.getY());
-                    }
-
+                    allSafePosition();
                     dom.removeEventListener(document, 'touchmove', util.preventEvent);
                 });
             });
@@ -671,10 +661,10 @@
 
                 if (height) {
                     // 打开软键盘
-                    activeElement.scrollIntoViewIfNeeded();
+                    document.activeElement.scrollIntoViewIfNeeded();
 
                     if (window.scrollY) {
-                        for (var scroll = core.findControl(activeElement); scroll; scroll = scroll.getParent()) {
+                        for (var scroll = core.findControl(document.activeElement); scroll; scroll = scroll.getParent()) {
                             if (scroll.$MScroll) {
                                 var main = scroll.getMain();
                                 scroll.setPosition(scroll.getX(), Math.max(scroll.getHeight() - height - main.scrollHeight, scroll.getY()) - window.scrollY);
@@ -690,28 +680,17 @@
             });
 
             dom.addEventListener(window, 'focusin', function (event) {
-                activeElement = event.target;
                 // 解决软键盘状态下切换的情况
                 dom.addEventListener(document, 'touchmove', util.preventEvent);
                 // 焦点控件切换
-                core.setFocused(core.findControl(activeElement));
+                core.setFocused(core.findControl(event.target));
             });
 
-            dom.addEventListener(document, 'focusout', function (event) {
-                activeElement = event.target;
-
+            dom.addEventListener(document, 'focusout', function () {
                 dom.removeEventListener(document, 'touchmove', util.preventEvent);
-                for (var scroll = core.findControl(activeElement); scroll; scroll = scroll.getParent()) {
-                    if (scroll.$MScroll) {
-                        // 终止之前可能存在的惯性状态，并设置滚动层的位置
-//                        dom.setStyle(scroll.getBody(), 'transform', '');
-                        core.drag(scroll);
-                        keyboardHandle = scrollListener(function () {
-                            setSafePosition(scroll, scroll.getY());
-                        });
-                        break;
-                    }
-                }
+                keyboardHandle = scrollListener(function () {
+                    allSafePosition();
+                });
             });
         }
     }
