@@ -348,6 +348,13 @@
     } catch (ignore) {
     }
 //{/if}//
+    function scrollIntoViewIfNeededHandler() {
+        changeHandle();
+        changeHandle = util.timer(function () {
+            scrollIntoViewIfNeeded(keyboardHeight);
+        }, 100);
+    }
+
     function fixed(scrollY) {
         scrollY = scrollY === undefined ? window.scrollY : scrollY;
         topList.forEach(function (control) {
@@ -361,14 +368,17 @@
     function scrollIntoViewIfNeeded(height) {
         for (var scroll = core.findControl(document.activeElement); scroll; scroll = scroll.getParent()) {
             if (scroll.$MScroll) {
-                var main = scroll.getMain();
-                main.scrollTop = 0;
-                main.scrollLeft = 0;
+                var main = scroll.getMain(),
+                    scrollTop = main.scrollTop;
+                if (scrollTop) {
+                    main.scrollTop = 0;
+                    scroll.setPosition(scroll.getX(), scroll.getY() - scrollTop);
+                }
 
-                var scrollY = scroll.getY(),
-                    scrollTop = dom.getPosition(main).top,
-                    scrollHeight = scroll.getHeight() - height,
-                    activeTop = dom.getPosition(document.activeElement).top - window.scrollY + scrollY;
+                scrollTop = dom.getPosition(main).top;
+                var scrollHeight = scroll.getHeight() - height,
+                    activeTop = dom.getPosition(document.activeElement).top - window.scrollY;
+
                 break;
             }
         }
@@ -396,7 +406,7 @@
         }
 
         if (scroll) {
-            setSafePosition(scroll, scrollY + y);
+            setSafePosition(scroll, scroll.getY() + y);
         } else if (y) {
             window.scrollTo(0, window.scrollY + y);
         }
@@ -541,9 +551,7 @@
                     return;
                 }
 
-                dom.addEventListener(event.target, 'input', function (event) {
-                    scrollIntoViewIfNeeded(keyboardHeight);
-                });
+                dom.addEventListener(event.target, 'input', scrollIntoViewIfNeededHandler);
 
                 Array.prototype.slice.call(document.getElementsByTagName('INPUT')).concat(Array.prototype.slice.call(document.getElementsByTagName('TEXTAREA'))).forEach(function (item) {
                     if (item !== event.target) {
@@ -592,6 +600,7 @@
                             }, 200);
                         }
                         fixed();
+                        scrollIntoViewIfNeededHandler();
                     });
                 } else {
                     keyboardHandle = scrollListener(function () {
@@ -639,6 +648,8 @@
                 if (!util.hasIOSKeyboard(event.target)) {
                     return;
                 }
+
+                dom.removeEventListener(event.target, 'input', scrollIntoViewIfNeededHandler);
 
                 observer.disconnect();
                 disabledInputs.forEach(function (item) {
