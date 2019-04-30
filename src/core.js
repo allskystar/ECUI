@@ -1157,20 +1157,12 @@ outer:          for (var caches = [], target = event.target, el; target; target 
      *
      * @param {object} env ECUI 框架运行环境
      * @param {ecui.ui.Control} target 被拖拽的 ECUI 控件
-     * @param {ECUIEvent} event ECUI 事件对象
+     * @param {ECUIEvent} event ECUI 事件对象，如果是dragend，这个值为undefined
      */
     function dragAnimationFrame(env, target, event) {
-        if (window.requestAnimationFrame) {
-            if (event.dragend) {
-                // 遇到结束事件，强制中止
-                if (env.event) {
-                    target.setPosition(env.event.x, env.event.y);
-                    core.dispatchEvent(target, 'dragmove', env.event);
-                    env.event = null;
-                }
-                core.dispatchEvent(target, 'dragend', event);
-                dom.removeClass(document.body, 'ui-drag');
-            } else {
+        if (event) {
+            // dragmove
+            if (window.requestAnimationFrame) {
                 if (!env.event) {
                     window.requestAnimationFrame(function () {
                         if (env.event) {
@@ -1181,10 +1173,20 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                     });
                 }
                 env.event = event;
+            } else {
+                target.setPosition(event.x, event.y);
+                core.dispatchEvent(target, 'dragmove', event);
             }
         } else {
-            target.setPosition(event.x, event.y);
-            core.dispatchEvent(target, 'dragmove', event);
+            // dragend
+            if (env.event) {
+                // 之前存在未完成的dragmove，先完成
+                target.setPosition(env.event.x, env.event.y);
+                core.dispatchEvent(target, 'dragmove', env.event);
+                env.event = null;
+            }
+            core.dispatchEvent(target, 'dragend');
+            dom.removeClass(document.body, 'ui-drag');
         }
     }
 
@@ -1197,12 +1199,6 @@ outer:          for (var caches = [], target = event.target, el; target; target 
      * @param {ecui.ui.Control} target 被拖拽的 ECUI 控件
      */
     function dragend(event, env, target) {
-        function finish() {
-            var dragEvent = new ECUIEvent();
-            dragEvent.dragend = true;
-            dragAnimationFrame(env, target, dragEvent);
-        }
-
         if (!target.getMain()) {
             // 控件已经被销毁，不要发送事件
             return;
@@ -1236,7 +1232,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                         if (percent >= 1) {
                             inertiaHandles[uid]();
                             delete inertiaHandles[uid];
-                            finish();
+                            dragAnimationFrame(env, target);
                         }
                     },
                     300,
@@ -1255,7 +1251,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                 return;
             }
         }
-        finish();
+        dragAnimationFrame(env, target);
     }
 
     /**
@@ -2294,9 +2290,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
             if (inertiaHandles[uid]) {
                 inertiaHandles[uid]();
                 delete inertiaHandles[uid];
-                var dragEvent = new ECUIEvent();
-                dragEvent.dragend = true;
-                dragAnimationFrame(currEnv, control, dragEvent);
+                dragAnimationFrame(currEnv, control);
             }
 
             if (event && activedControl !== undefined && currEnv.type !== 'drag') {
