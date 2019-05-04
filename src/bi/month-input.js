@@ -34,13 +34,19 @@
 
             ui.Control.call(this, el, options);
 
-            this._aCells = Array.apply(null, el.getElementsByTagName('TD')).map(function (item, index) {
-                return core.$fastCreate(index < 4 ? ui.Control : this.Month, item, this, { value: index - 4 });
-            }, this);
+            this._aCells = Array.apply(null, el.getElementsByTagName('TD')).map(
+                function (item, index) {
+                    return core.$fastCreate(index < 4 ? ui.Control : this.Month, item, this, { value: index - 4 });
+                },
+                this
+            );
 
-            this.MONTHS.forEach(function (item, index) {
-                this._aCells[index + 4].getBody().innerHTML = item;
-            }, this);
+            this.MONTHS.forEach(
+                function (item, index) {
+                    this._aCells[index + 4].getBody().innerHTML = item;
+                },
+                this
+            );
 
             // 生成日历控件结构
             dom.insertHTML(

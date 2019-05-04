@@ -39,7 +39,8 @@ _eInput - 选项对应的input，form提交时使用
                 'ui-listbox-item',
                 function (el, options) {
                     ui.Item.call(this, el, options);
-                    el.appendChild(this._eInput = dom.setInput(null, options.parent._sName, 'hidden')).value = options.value === undefined ? dom.getText(el) : options.value;
+                    dom.insertHTML(el, 'beforeEnd', '<input type="hidden" name="' + options.parent._sName + '">');
+                    el.lastChild.value = options.value === undefined ? dom.getText(el) : options.value;
                     this.setSelected(!!options.selected);
                 },
                 {
@@ -66,7 +67,7 @@ _eInput - 选项对应的input，form提交时使用
                         ui.Item.prototype.$setParent.call(this, parent);
 
                         if (parent instanceof ui.Listbox) {
-                            this._eInput = dom.setInput(this._eInput, parent._sName);
+                            this._eInput.name = parent._sName;
                         }
                     },
 
@@ -156,7 +157,7 @@ _eInput - 选项对应的input，form提交时使用
             setName: function (name) {
                 this.getItems().forEach(function (item) {
                     // 需要将下属所有的输入框名称全部改变
-                    item._eInput = dom.setInput(item._eInput, name);
+                    item._eInput.name = name;
                 });
                 this._sName = name;
             }

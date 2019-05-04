@@ -92,21 +92,24 @@ _nBottomIndex  - 下部隐藏的选项序号
                     items.map(function (item) {
                         item.cache();
                         return item.getOuter().offsetWidth ? item : null;
-                    }).forEach(function (item, index) {
-                        if (item) {
-                            if (index < this._nTopIndex) {
-                                item.hide();
-                                this._nTopIndex++;
-                                this._nTopHidden += item.getHeight();
-                                this._nBottomIndex++;
-                            } else if (index > this._nBottomIndex) {
-                                item.hide();
-                                this._nBottomHidden += item.getHeight();
-                            } else if (index === this._nBottomIndex) {
-                                this._nBottomIndex++;
+                    }).forEach(
+                        function (item, index) {
+                            if (item) {
+                                if (index < this._nTopIndex) {
+                                    item.hide();
+                                    this._nTopIndex++;
+                                    this._nTopHidden += item.getHeight();
+                                    this._nBottomIndex++;
+                                } else if (index > this._nBottomIndex) {
+                                    item.hide();
+                                    this._nBottomHidden += item.getHeight();
+                                } else if (index === this._nBottomIndex) {
+                                    this._nBottomIndex++;
+                                }
                             }
-                        }
-                    }, this);
+                        },
+                        this
+                    );
                 }
                 // 解决items不够填充整个listview区域
                 var top = Math.min(0, this.getHeight() - this.$$bodyHeight);
@@ -308,10 +311,13 @@ _nBottomIndex  - 下部隐藏的选项序号
                 this._nTopHidden = this._nBottomHidden = 0;
                 this._nTopIndex = this._nBottomIndex = 0;
                 this.preventAlterItems();
-                this.getItems().forEach(function (item) {
-                    ui.Items.Methods.remove.call(this, item);
-                    item.dispose();
-                }, this);
+                this.getItems().forEach(
+                    function (item) {
+                        ui.Items.Methods.remove.call(this, item);
+                        item.dispose();
+                    },
+                    this
+                );
                 this.premitAlterItems();
                 this.add(data);
                 this._eHeader.innerHTML = this.HTML_REFRESHED;

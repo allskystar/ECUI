@@ -26,10 +26,13 @@ _aSelect - 全部的下拉框控件列表
             ui.Control.call(this, el, options);
 
             this._aSelect = [];
-            dom.children(el).forEach(function (item, index) {
-                item.className += this.Select.CLASS + (index ? 'ui-hide' : '');
-                this._aSelect.push(core.$fastCreate(this.Select, item, this));
-            }, this);
+            dom.children(el).forEach(
+                function (item, index) {
+                    item.className += this.Select.CLASS + (index ? 'ui-hide' : '');
+                    this._aSelect.push(core.$fastCreate(this.Select, item, this));
+                },
+                this
+            );
         },
         {
             /**
@@ -147,16 +150,19 @@ _aSelect - 全部的下拉框控件列表
                                         });
 
                                         var selected = this.getSelected();
-                                        core.request(util.stringFormat.apply(null, args), function (data) {
-                                            if (selected === this.getSelected() && !select.getLength()) {
-                                                select.removeAll();
-                                                core.dispatchEvent(parent, 'request', {data: data, owner: select});
-                                                select.add(data);
-                                                item._aChildren = select.getItems();
-                                                select.show();
-                                                effect.grade('this.style.left=#100->' + (25 * index) + '%#', 400, { $: select.getOuter() });
+                                        core.request(
+                                            util.stringFormat.apply(null, args),
+                                            function (data) {
+                                                if (selected === this.getSelected() && !select.getLength()) {
+                                                    select.removeAll();
+                                                    core.dispatchEvent(parent, 'request', {data: data, owner: select});
+                                                    select.add(data);
+                                                    item._aChildren = select.getItems();
+                                                    select.show();
+                                                    effect.grade('this.style.left=#100->' + (25 * index) + '%#', 400, { $: select.getOuter() });
+                                                }
                                             }
-                                        });
+                                        );
                                     }
                                 }
                             }

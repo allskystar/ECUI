@@ -26,8 +26,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
         dragStopHandler = util.blank, // ios设备上移出webview区域停止事件
         touchTarget,              // touch点击的目标，用于防止ios下的点击穿透处理
         isTouchMoved,
-        ecuiName = 'ui',          // Element 中用于自动渲染的 ecui 属性名称
-        isGlobalId,               // 是否自动将 ecui 的标识符全局化
+        ecuiOptions,              // ECUI 参数
 
         viewWidth,                // 浏览器宽高属性
         viewHeight,               // 浏览器宽高属性
@@ -78,46 +77,49 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                     orientationHandle();
                 }
 
-                orientationHandle = util.timer(function () {
-                    var width = document.documentElement.clientWidth,
-                        height = document.documentElement.clientHeight;
+                orientationHandle = util.timer(
+                    function () {
+                        var width = document.documentElement.clientWidth,
+                            height = document.documentElement.clientHeight;
 
-                    if (viewWidth !== width) {
-                        var fontSize = util.toNumber(dom.getStyle(dom.parent(document.body), 'font-size'));
-                        fontSizeCache.forEach(function (item) {
-                            item[0]['font-size'] = Math.round(fontSize * item[1]) + 'px';
-                        });
+                        if (viewWidth !== width) {
+                            var fontSize = util.toNumber(dom.getStyle(dom.parent(document.body), 'font-size'));
+                            fontSizeCache.forEach(function (item) {
+                                item[0]['font-size'] = Math.round(fontSize * item[1]) + 'px';
+                            });
 
-                        viewWidth = width;
-                        viewHeight = height;
-
-                        repaint();
-                    } else if (viewHeight !== height) {
-                        if (isToucher) {
-                            // android 软键盘弹出和收起
-                            var event = document.createEvent('HTMLEvents');
-                            event.initEvent('keyboardchange', true, true);
-
-                            if (height > viewHeight + 100) {
-                                // 软键盘收起，失去焦点
-                                if (document.activeElement && document.activeElement.blur) {
-                                    document.activeElement.blur();
-                                }
-                                event.height = 0;
-                            } else {
-                                event.height = viewHeight - height;
-                            }
-
-                            document.dispatchEvent(event);
-
+                            viewWidth = width;
                             viewHeight = height;
 
                             repaint();
+                        } else if (viewHeight !== height) {
+                            if (isToucher) {
+                                // android 软键盘弹出和收起
+                                var event = document.createEvent('HTMLEvents');
+                                event.initEvent('keyboardchange', true, true);
+
+                                if (height > viewHeight + 100) {
+                                    // 软键盘收起，失去焦点
+                                    if (document.activeElement && document.activeElement.blur) {
+                                        document.activeElement.blur();
+                                    }
+                                    event.height = 0;
+                                } else {
+                                    event.height = viewHeight - height;
+                                }
+
+                                document.dispatchEvent(event);
+
+                                viewHeight = height;
+
+                                repaint();
+                            }
+                        } else if (event && event.type === 'orientationchange') {
+                            orientationHandle = util.timer(events.orientationchange, 100);
                         }
-                    } else if (event && event.type === 'orientationchange') {
-                        orientationHandle = util.timer(events.orientationchange, 100);
-                    }
-                }, 100);
+                    },
+                    100
+                );
             },
 
             // pad pro/surface pro等设备上的事件处理
@@ -156,9 +158,12 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                             isTouchMoved = false;
                             tracks[pointerId] = track;
                         }
+
                         checkActived(event);
                         currEnv.mousedown(event);
-                        onpressure(event, event.getNative().pressure >= 0.4);
+                        if (trackId) {
+                            onpressure(event, event.getNative().pressure >= 0.4);
+                        }
                     }
                 }
             },
@@ -167,7 +172,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                 var pointerId = event.pointerId,
                     track = tracks[event.pointerType] || tracks[pointerId];
 
-                if ((event.pointerType === 'mouse' && (!pointers.length || pointers[0] === track)) || pointerId === trackId) {
+                if ((event.pointerType === 'mouse' && (!pointers.length || pointers[0] === track)) || (pointerId === trackId && !isToucher)) {
                     if (!track) {
                         track = {};
                     }
@@ -195,15 +200,15 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
             pointerout: function (event) {
                 if (event.pointerType === 'mouse') {
-                    events.mouseout(core.wrapEvent(event));
-                } else if (event.pointerId === trackId) {
-                    // touch结束
+                    mouseEvents.mouseout(core.wrapEvent(event));
+                } else if (event.pointerId === trackId && !isToucher) {
+                    // pointer结束
                     bubble(hoveredControl, 'mouseout', core.wrapEvent(event), hoveredControl = null);
                 }
             },
 
             pointerover: function (event) {
-                events.mouseover(core.wrapEvent(event));
+                mouseEvents.mouseover(core.wrapEvent(event));
             },
 
             pointerup: function (event) {
@@ -211,7 +216,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                     track = tracks[event.pointerType] || tracks[pointerId];
 
                 if (track) {
-                    if ((event.pointerType === 'mouse' && pointers[0] === track) || pointerId === trackId) {
+                    if ((event.pointerType === 'mouse' && pointers[0] === track) || (pointerId === trackId && !isToucher)) {
                         // 鼠标右键点击不触发事件
                         track.pageX = event.pageX;
                         track.pageY = event.pageY;
@@ -269,76 +274,82 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                 }
 
                 dragStopHandler();
-                initTouchTracks(event, function () {
-                    if (event.touches.length === 1) {
-                        isTouchMoved = false;
+                initTouchTracks(
+                    event,
+                    function () {
+                        if (event.touches.length === 1) {
+                            isTouchMoved = false;
 
-                        var track = tracks[trackId = event.touches[0].identifier];
+                            var track = tracks[trackId = event.touches[0].identifier];
 
-                        event = core.wrapEvent(event);
+                            event = core.wrapEvent(event);
 
-                        event.pageX = track.pageX;
-                        event.pageY = track.pageY;
-                        event.clientX = track.clientX;
-                        event.clientY = track.clientY;
-                        event.target = track.target;
-                        event.track = track;
+                            event.pageX = track.pageX;
+                            event.pageY = track.pageY;
+                            event.clientX = track.clientX;
+                            event.clientY = track.clientY;
+                            event.target = track.target;
+                            event.track = track;
 
-                        lastClientX = event.clientX;
-                        lastClientY = event.clientY;
-
-                        track.lastMoveTime = Date.now();
-                        checkActived(event);
-                        currEnv.mouseover(event);
-                        currEnv.mousedown(event);
-                        onpressure(event, event.getNative().touches[0].force === 1);
-                    }
-                });
-            },
-
-            touchmove: function (event) {
-                initTouchTracks(event, function () {
-                    event = core.wrapEvent(event);
-
-                    var noPrimaryMove = true;
-
-                    Array.prototype.slice.call(event.getNative().changedTouches).forEach(function (item) {
-                        var track = tracks[item.identifier];
-                        event.pageX = item.pageX;
-                        event.pageY = item.pageY;
-                        event.clientX = item.clientX;
-                        event.clientY = item.clientY;
-
-                        calcSpeed(track, event);
-
-                        if (item.identifier === trackId) {
                             lastClientX = event.clientX;
                             lastClientY = event.clientY;
 
-                            if ((Math.sqrt(track.speedX * track.speedX + track.speedY * track.speedY) > HIGH_SPEED) && isTouchMoved === false) {
-                                isTouchMoved = true;
-                            }
-
-                            event.track = track;
-                            currEnv.mousemove(event);
-
-                            var target = event.target;
-                            event.target = getElementFromEvent(event);
-                            if (hoveredControl !== event.getControl()) {
-                                currEnv.mouseover(event);
-                            }
-                            event.target = target;
-                            onpressure(event, item.force === 1);
-                            ongesture(event.getNative().touches, event);
-
-                            noPrimaryMove = false;
+                            track.lastMoveTime = Date.now();
+                            checkActived(event);
+                            currEnv.mouseover(event);
+                            currEnv.mousedown(event);
+                            onpressure(event, event.getNative().touches[0].force === 1);
                         }
-                    });
-
-                    if (noPrimaryMove) {
-                        event.preventDefault();
                     }
-                });
+                );
+            },
+
+            touchmove: function (event) {
+                initTouchTracks(
+                    event,
+                    function () {
+                        event = core.wrapEvent(event);
+
+                        var noPrimaryMove = true;
+
+                        Array.prototype.slice.call(event.getNative().changedTouches).forEach(function (item) {
+                            var track = tracks[item.identifier];
+                            event.pageX = item.pageX;
+                            event.pageY = item.pageY;
+                            event.clientX = item.clientX;
+                            event.clientY = item.clientY;
+
+                            calcSpeed(track, event);
+
+                            if (item.identifier === trackId) {
+                                lastClientX = event.clientX;
+                                lastClientY = event.clientY;
+
+                                if ((Math.sqrt(track.speedX * track.speedX + track.speedY * track.speedY) > HIGH_SPEED) && isTouchMoved === false) {
+                                    isTouchMoved = true;
+                                }
+
+                                event.track = track;
+                                currEnv.mousemove(event);
+
+                                var target = event.target;
+                                event.target = getElementFromEvent(event);
+                                if (hoveredControl !== event.getControl()) {
+                                    currEnv.mouseover(event);
+                                }
+                                event.target = target;
+                                onpressure(event, item.force === 1);
+                                ongesture(event.getNative().touches, event);
+
+                                noPrimaryMove = false;
+                            }
+                        });
+
+                        if (noPrimaryMove) {
+                            event.preventDefault();
+                        }
+                    }
+                );
             },
 
             touchend: function (event) {
@@ -348,101 +359,62 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                 var track = tracks[trackId],
                     noPrimaryEnd = true;
 
-                initTouchTracks(event, function () {
-                    Array.prototype.slice.call(event.changedTouches).forEach(function (item) {
-                        if (item.identifier === trackId) {
-                            if (isTouchMoved) {
-                                // 产生了滚屏操作，不响应ECUI事件
-                                bubble(activedControl, 'deactivate');
-                                activedControl = undefined;
-                            }
-
-                            event = core.wrapEvent(event);
-
-                            event.track = track;
-                            event.pageX = item.pageX;
-                            event.pageY = item.pageY;
-                            event.clientX = item.clientX;
-                            event.clientY = item.clientY;
-
-                            currEnv.mouseup(event);
-                            enableGesture = true;
-
-                            bubble(hoveredControl, 'mouseout', event, hoveredControl = null);
-                            trackId = undefined;
-                            if (event.getNative().type === 'touchend') {
-                                onpressure(event, false);
-                                ongesture(event.getNative().changedTouches, event);
-                            }
-
-                            var target = event.target;
-                            if (target.tagName !== 'INPUT' && target.tagName !== 'TEXTAREA') {
-                                // 点击到非INPUT区域需要失去焦点
-                                if (isTouchClick(track)) {
-                                    document.activeElement.blur();
+                initTouchTracks(
+                    event,
+                    function () {
+                        Array.prototype.slice.call(event.changedTouches).forEach(function (item) {
+                            if (item.identifier === trackId) {
+                                if (isTouchMoved) {
+                                    // 产生了滚屏操作，不响应ECUI事件
+                                    bubble(activedControl, 'deactivate');
+                                    activedControl = undefined;
                                 }
+
+                                event = core.wrapEvent(event);
+
+                                event.track = track;
+                                event.pageX = item.pageX;
+                                event.pageY = item.pageY;
+                                event.clientX = item.clientX;
+                                event.clientY = item.clientY;
+
+                                currEnv.mouseup(event);
+                                enableGesture = true;
+
+                                bubble(hoveredControl, 'mouseout', event, hoveredControl = null);
+                                trackId = undefined;
+                                if (event.getNative().type === 'touchend') {
+                                    onpressure(event, false);
+                                    ongesture(event.getNative().changedTouches, event);
+                                }
+
+                                var target = event.target;
+                                if (target.tagName !== 'INPUT' && target.tagName !== 'TEXTAREA') {
+                                    // 点击到非INPUT区域需要失去焦点
+                                    if (isTouchClick(track)) {
+                                        document.activeElement.blur();
+                                    }
+                                }
+
+                                // 记录touchend时的dom元素，阻止事件穿透
+                                touchTarget = target;
+                                noPrimaryEnd = false;
                             }
+                        });
 
-                            // 记录touchend时的dom元素，阻止事件穿透
-                            touchTarget = target;
-                            noPrimaryEnd = false;
+                        if (noPrimaryEnd) {
+                            event.preventDefault();
                         }
-                    });
 
-                    if (noPrimaryEnd) {
-                        event.preventDefault();
+                        if (trackId && !tracks[trackId]) {
+                            tracks[trackId] = track;
+                        }
                     }
-
-                    if (trackId && !tracks[trackId]) {
-                        tracks[trackId] = track;
-                    }
-                });
+                );
             },
 
             touchcancel: function (event) {
                 events.touchend(event);
-            },
-
-            mousedown: function (event) {
-                event = core.wrapEvent(event);
-                // 仅监听鼠标左键
-                if (event.which === 1) {
-                    startSimulationScroll(event);
-                    event.track = tracks;
-                    tracks.lastMoveTime = Date.now();
-                    checkActived(event);
-                    currEnv.mousedown(event);
-                }
-            },
-
-            mousemove: function (event) {
-                event = core.wrapEvent(event);
-
-                // 点击在滚动条上，不会触发mouseup事件，但会触发mousemove事件
-                stopSimulationScroll(event);
-                calcSpeed(tracks, event);
-
-                event.track = tracks;
-                currEnv.mousemove(event);
-            },
-
-            mouseout: function (event) {
-                currEnv.mouseout(core.wrapEvent(event));
-            },
-
-            mouseover: function (event) {
-                currEnv.mouseover(core.wrapEvent(event));
-            },
-
-            mouseup: function (event) {
-                event = core.wrapEvent(event);
-
-                if (event.which === 1) {
-                    stopSimulationScroll(event);
-                    event.track = tracks;
-                    currEnv.mouseup(event);
-                    tracks = {};
-                }
             },
 
             // 鼠标点击时控件如果被屏弊需要取消点击事件的默认处理，此时链接将不能提交
@@ -504,6 +476,49 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                 if (keyCode === event.which) {
                     // 一次多个键被按下，只有最后一个被按下的键松开时取消键值码
                     keyCode = 0;
+                }
+            }
+        },
+        mouseEvents = {
+            mousedown: function (event) {
+                event = core.wrapEvent(event);
+                // 仅监听鼠标左键
+                if (event.which === 1) {
+                    startSimulationScroll(event);
+                    event.track = tracks;
+                    tracks.lastMoveTime = Date.now();
+                    checkActived(event);
+                    currEnv.mousedown(event);
+                }
+            },
+
+            mousemove: function (event) {
+                event = core.wrapEvent(event);
+
+                // 点击在滚动条上，不会触发mouseup事件，但会触发mousemove事件
+                stopSimulationScroll(event);
+                calcSpeed(tracks, event);
+
+                event.track = tracks;
+                currEnv.mousemove(event);
+            },
+
+            mouseout: function (event) {
+                currEnv.mouseout(core.wrapEvent(event));
+            },
+
+            mouseover: function (event) {
+                currEnv.mouseover(core.wrapEvent(event));
+            },
+
+            mouseup: function (event) {
+                event = core.wrapEvent(event);
+
+                if (event.which === 1) {
+                    stopSimulationScroll(event);
+                    event.track = tracks;
+                    currEnv.mouseup(event);
+                    tracks = {};
                 }
             }
         },
@@ -584,9 +599,12 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                     var href = el.href;
                     if (href !== JAVASCRIPT + ':void(0)') {
                         el.href = JAVASCRIPT + ':void(0)';
-                        util.timer(function () {
-                            el.href = href;
-                        }, 100);
+                        util.timer(
+                            function () {
+                                el.href = href;
+                            },
+                            100
+                        );
                     }
                 }
 
@@ -687,9 +705,12 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                 dragStopHandler();
                 if (iosVersion && (event.clientX < 0 || event.clientX >= view.width || event.clientY < 0 || event.clientY >= view.height)) {
                     // 延后500ms执行，无意中的滑出不会受到影响
-                    dragStopHandler = util.timer(function () {
-                        dragEnv.mouseup(event);
-                    }, 500);
+                    dragStopHandler = util.timer(
+                        function () {
+                            dragEnv.mouseup(event);
+                        },
+                        500
+                    );
                 } else {
                     dragmove(event.track, currEnv, event.clientX, event.clientY);
                 }
@@ -728,22 +749,25 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                     var startX = track.x,
                         startY = track.y;
 
-                    inertiaHandles[uid] = util.timer(function () {
-                        var time = (Date.now() - start) / 1000,
-                            t = Math.min(time, inertia),
-                            x = track.x,
-                            y = track.y;
+                    inertiaHandles[uid] = util.timer(
+                        function () {
+                            var time = (Date.now() - start) / 1000,
+                                t = Math.min(time, inertia),
+                                x = track.x,
+                                y = track.y;
 
-                        dragmove(track, env, Math.round(mx + vx * t - ax * t * t / 2), Math.round(my + vy * t - ay * t * t / 2));
-                        if (t >= inertia || (x === track.x && y === track.y)) {
-                            inertiaHandles[uid]();
-                            delete inertiaHandles[uid];
-                            if (env.event && startX === x && startY === y) {
-                                env.event.inertia = false;
+                            dragmove(track, env, Math.round(mx + vx * t - ax * t * t / 2), Math.round(my + vy * t - ay * t * t / 2));
+                            if (t >= inertia || (x === track.x && y === track.y)) {
+                                inertiaHandles[uid]();
+                                delete inertiaHandles[uid];
+                                if (env.event && startX === x && startY === y) {
+                                    env.event.inertia = false;
+                                }
+                                dragend(dragEvent, env, target);
                             }
-                            dragend(dragEvent, env, target);
-                        }
-                    }, -1);
+                        },
+                        -1
+                    );
                     // } else {
                     //     var x = target.getX(),
                     //         y = target.getY(),
@@ -1345,10 +1369,14 @@ outer:          for (var caches = [], target = event.target, el; target; target 
      */
     function initEnvironment() {
         if (scrollNarrow === undefined) {
-            var options = core.getOptions(document.body, 'data-ecui') || {},
-                el;
+            ecuiOptions = Object.assign(
+                {
+                    name: 'ui'
+                },
+                core.getOptions(document.body, 'data-ecui') || {}
+            );
 
-            if ((options.device === 'mobile' && !isToucher) || (options.device === 'pc' && isToucher)) {
+            if ((ecuiOptions.device === 'mobile' && !isToucher) || (ecuiOptions.device === 'pc' && isToucher)) {
                 if (core.onerrordevice) {
                     core.onerrordevice();
                 }
@@ -1374,27 +1402,20 @@ outer:          for (var caches = [], target = event.target, el; target; target 
             }
 
             // 设置全局事件处理
-            for (var key in events) {
-                if (events.hasOwnProperty(key)) {
-                    var type = key.slice(0, 5);
-                    if (!((type === 'mouse' && (isPointer || isToucher)) || (type === 'touch' && !isToucher) || (type === 'point' && !isPointer))) {
-                        dom.addEventListener(document, key, events[key]);
-                    }
-                }
+            if (!isToucher && !isPointer) {
+                Object.assign(events, mouseEvents);
             }
+            dom.addEventListeners(document, events);
 
             dom.insertHTML(document.body, 'BEFOREEND', '<div class="ui-valid"><div></div></div>');
             // 检测Element宽度与高度的计算方式
-            el = document.body.lastChild;
+            var el = document.body.lastChild;
             flgFixedSize = el.offsetWidth !== 80;
             scrollNarrow = el.offsetWidth - el.clientWidth - 2;
             dom.remove(el);
 
-            ecuiName = options.name || ecuiName;
-            isGlobalId = options.globalId;
-
-            if (options.load) {
-                for (var text = options.load; /^\s*(\w+)\s*(\([^)]+\))?\s*($|,)/.test(text); ) {
+            if (ecuiOptions.load) {
+                for (var text = ecuiOptions.load; /^\s*(\w+)\s*(\([^)]+\))?\s*($|,)/.test(text); ) {
                     text = RegExp['$\''];
                     try {
                         core[RegExp.$1].load(RegExp.$2 ? RegExp.$2.slice(1, -1) : '');
@@ -1543,9 +1564,6 @@ outer:          for (var caches = [], target = event.target, el; target; target 
 //{/if}//
             namedControls[options.id] = control;
             control.$ID = options.id;
-            if (isGlobalId) {
-                window[util.toCamelCase(options.id)] = control;
-            }
         }
 
         if (options.ext) {
@@ -2405,7 +2423,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
          * @return {string} 当前的初始化属性名
          */
         getAttributeName: function () {
-            return ecuiName;
+            return ecuiOptions.name;
         },
 
         /**
@@ -2475,7 +2493,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
          * @return {object} 初始化选项对象
          */
         getOptions: function (el, attributeName) {
-            attributeName = attributeName || ecuiName;
+            attributeName = attributeName || ecuiOptions.name;
 
             var text = dom.getAttribute(el, attributeName),
                 options;
@@ -2565,16 +2583,22 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                         }
                     }
 
-                    subClass.interfaces.forEach(function (imp) {
-                        this[imp.NAME + 'Data'] = {};
-                    }, this);
+                    subClass.interfaces.forEach(
+                        function (imp) {
+                            this[imp.NAME + 'Data'] = {};
+                        },
+                        this
+                    );
                     subClass.constructor.call(this, el, options);
                     el = this.getMain();
-                    subClass.interfaces.forEach(function (imp) {
-                        if (imp.constructor) {
-                            imp.constructor.call(this, el, options);
-                        }
-                    }, this);
+                    subClass.interfaces.forEach(
+                        function (imp) {
+                            if (imp.constructor) {
+                                imp.constructor.call(this, el, options);
+                            }
+                        },
+                        this
+                    );
                     if (subClass.afterinterfaces) {
                         subClass.afterinterfaces.call(this, el, options);
                     }
@@ -2668,7 +2692,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                     console.warn('The element is not in the Document');
                 }
 //{/if}//
-                var list = dom.getAttribute(el, ecuiName) ? [el] : [],
+                var list = dom.getAttribute(el, ecuiOptions.name) ? [el] : [],
                     controls = [],
                     options;
 
@@ -2679,13 +2703,25 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                 initRecursion++;
 
                 dom.toArray(el.all || el.getElementsByTagName('*')).forEach(function (item) {
-                    if (dom.getAttribute(item, ecuiName)) {
+                    // 修正ios下flex布局的问题
+                    if (iosVersion < 11) {
+                        if (dom.getStyle(item, 'display').indexOf('flex') >= 0) {
+                            dom.children(item).forEach(function (el) {
+                                list.push([el, el.offsetWidth, el.offsetHeight]);
+                            });
+                        }
+                    }
+
+                    if (dom.getAttribute(item, ecuiOptions.name)) {
                         list.push(item);
                     }
                 });
 
                 list.forEach(function (item) {
-                    if (options = core.getOptions(item)) {
+                    if (item instanceof Array) {
+                        item[0].style.width = item[1] + 'px';
+                        item[0].style.height = item[2] + 'px';
+                    } else if (options = core.getOptions(item)) {
                         if (item.getControl) {
                             oncreate(item.getControl(), options);
                             return;
@@ -2730,7 +2766,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                 initRecursion--;
 
                 // 防止循环引用
-                el = null;
+                list = el = null;
             }
         },
 

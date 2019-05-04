@@ -48,9 +48,12 @@ _eBar            - 下划线 DOM 元素
             el.style.transition = 'all 0.5s';
             event.target = items[index].getBody();
             core.dispatchEvent(items[index], 'click', event);
-            util.timer(function () {
-                el.style.transition = '';
-            }, 500);
+            util.timer(
+                function () {
+                    el.style.transition = '';
+                },
+                500
+            );
         } else {
             // 第一个右滑，最后一个左滑时，修正拖拽位移
             this.setSelected(this._cSelected);
@@ -258,10 +261,14 @@ _eBar            - 下划线 DOM 元素
                             main.appendChild(this._eBar);
                         }
 
-                        util.timer(function () {
-                            this._eBar.style.left = (item.getX() + this.$$barMargin / 2) + 'px';
-                            this._eBar.style.width = (item.getWidth() - this.$$barMargin) + 'px';
-                        }, 0, this);
+                        util.timer(
+                            function () {
+                                this._eBar.style.left = (item.getX() + this.$$barMargin / 2) + 'px';
+                                this._eBar.style.width = (item.getWidth() - this.$$barMargin) + 'px';
+                            },
+                            0,
+                            this
+                        );
                     } else {
                         item.getBody().appendChild(this._eBar);
                     }

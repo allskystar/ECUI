@@ -88,9 +88,7 @@ _bRequired       - 是否必须选择
         ui.InputControl,
         'ui-checkbox',
         function (el, options) {
-            util.setDefault(options, 'inputType', 'checkbox');
-
-            ui.InputControl.call(this, el, options);
+            ui.InputControl.call(this, el, Object.assign({inputType: 'checkbox'}, options));
 
             // 保存节点选中状态，用于修复IE6/7下移动DOM节点时选中状态发生改变的问题
             this._bDefault = this.getInput().defaultChecked;
@@ -276,11 +274,14 @@ _bRequired       - 是否必须选择
             setChecked: function (checked) {
                 setStatus(this, checked ? 0 : 1);
                 // 如果有从属复选框，全部改为与当前复选框相同的状态
-                this._aDependents.forEach(function (item) {
-                    item._cSubject = null;
-                    item.setChecked(checked);
-                    item._cSubject = this;
-                }, this);
+                this._aDependents.forEach(
+                    function (item) {
+                        item._cSubject = null;
+                        item.setChecked(checked);
+                        item._cSubject = this;
+                    },
+                    this
+                );
             },
 
             /**

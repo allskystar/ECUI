@@ -144,9 +144,12 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
                     )
                 ));
 
-                var cells = dom.toArray(el.lastChild.getElementsByTagName('TD')).map(function (item, index) {
-                    return core.$fastCreate(index < 7 ? ui.Control : this.Cell, item, this);
-                }, this);
+                var cells = dom.toArray(el.lastChild.getElementsByTagName('TD')).map(
+                    function (item, index) {
+                        return core.$fastCreate(index < 7 ? ui.Control : this.Cell, item, this);
+                    },
+                    this
+                );
 
                 for (var i = 0; i < 7; i++) {
                     cells[i].getBody().innerHTML = this.WEEKNAMES[(i + this._nWeekday) % 7];
@@ -305,45 +308,48 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
 
                 setSelected(this);
 
-                (cells || this._aCells).slice(7).forEach(function (item, index) {
-                    var date = new Date(firstDay.getTime() + (day + index) * 3600000 * 24),
-                        el = item.getOuter();
+                (cells || this._aCells).slice(7).forEach(
+                    function (item, index) {
+                        var date = new Date(firstDay.getTime() + (day + index) * 3600000 * 24),
+                            el = item.getOuter();
 
-                    item._nYear = date.getFullYear();
-                    item._nMonth = date.getMonth();
-                    item.getBody().innerHTML = item._nDay = date.getDate();
+                        item._nYear = date.getFullYear();
+                        item._nMonth = date.getMonth();
+                        item.getBody().innerHTML = item._nDay = date.getDate();
 
-                    if (date >= begin && date <= end) {
-                        if (index && !(index % 7)) {
-                            dom.removeClass(dom.parent(el), 'ui-extra');
-                            delete item._bRowExtra;
+                        if (date >= begin && date <= end) {
+                            if (index && !(index % 7)) {
+                                dom.removeClass(dom.parent(el), 'ui-extra');
+                                delete item._bRowExtra;
+                            }
+                            dom.removeClass(el, 'ui-extra');
+                            delete item._bExtra;
+                            if (date === this._oDate) {
+                                setSelected(this, item);
+                            }
+                            item.enable();
+                        } else {
+                            if (index && !(index % 7) && !item._bRowExtra) {
+                                dom.addClass(dom.parent(el), 'ui-extra');
+                                item._bRowExtra = true;
+                            }
+                            if (!item._bExtra) {
+                                dom.addClass(el, 'ui-extra');
+                                item._bExtra = true;
+                            }
+                            if (this._bExtra) {
+                                item.disable();
+                            }
                         }
-                        dom.removeClass(el, 'ui-extra');
-                        delete item._bExtra;
-                        if (date === this._oDate) {
-                            setSelected(this, item);
-                        }
-                        item.enable();
-                    } else {
-                        if (index && !(index % 7) && !item._bRowExtra) {
-                            dom.addClass(dom.parent(el), 'ui-extra');
-                            item._bRowExtra = true;
-                        }
-                        if (!item._bExtra) {
-                            dom.addClass(el, 'ui-extra');
-                            item._bExtra = true;
-                        }
-                        if (this._bExtra) {
-                            item.disable();
-                        }
-                    }
 
-                    if (date - today) {
-                        dom.removeClass(el, 'ui-today');
-                    } else {
-                        dom.addClass(el, 'ui-today');
-                    }
-                }, this);
+                        if (date - today) {
+                            dom.removeClass(el, 'ui-today');
+                        } else {
+                            dom.addClass(el, 'ui-today');
+                        }
+                    },
+                    this
+                );
 
                 if (oldYear !== dateYear || oldMonth !== dateMonth) {
                     core.dispatchEvent(this, 'change');

@@ -16,8 +16,7 @@ _bRequired - 是否必须选择
 //{if 0}//
     var core = ecui,
         dom = core.dom,
-        ui = core.ui,
-        util = core.util;
+        ui = core.ui;
 //{/if}//
     /**
      * 为控件的 INPUT 节点绑定事件。
@@ -70,9 +69,7 @@ _bRequired - 是否必须选择
         ui.InputControl,
         'ui-radio',
         function (el, options) {
-            util.setDefault(options, 'inputType', 'radio');
-
-            ui.InputControl.call(this, el, options);
+            ui.InputControl.call(this, el, Object.assign({inputType: 'radio'}, options));
 
             // 保存节点选中状态，用于修复IE6/7下移动DOM节点时选中状态发生改变的问题
             this._bDefault = this.getInput().defaultChecked;

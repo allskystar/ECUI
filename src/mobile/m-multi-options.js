@@ -25,11 +25,6 @@ _eText       - 文本框
     ui.MMultiOptions = core.inherits(
         ui.InputControl,
         function (el, options) {
-            util.setDefault(options, 'enter', 'bottom');
-            util.setDefault(options, 'mask', '0.5');
-            util.setDefault(options, 'readOnly', true);
-            util.setDefault(options, 'inputType', 'hidden');
-
             var popupEl = dom.create({
                     className: options.classes.join('-popup ') + 'ui-popup ui-hide'
                 }),
@@ -42,16 +37,19 @@ _eText       - 文本框
             }));
             this._eText = el.lastChild;
 
-            ui.InputControl.call(this, el, options);
+            ui.InputControl.call(this, el, Object.assign({enter: 'bottom', mask: 0.5, inputType: 'hidden'}, options));
 
             this.setPopup(core.$fastCreate(this.Popup, popupEl, this));
 
             this._aOptions = [];
-            children.forEach(function (item) {
-                dom.addClass(item, this.Options.CLASS);
-                popupEl.getControl().getBody().appendChild(item);
-                this._aOptions.push(core.$fastCreate(this.Options, item, this, core.getOptions(item)));
-            }, this);
+            children.forEach(
+                function (item) {
+                    dom.addClass(item, this.Options.CLASS);
+                    popupEl.getControl().getBody().appendChild(item);
+                    this._aOptions.push(core.$fastCreate(this.Options, item, this, core.getOptions(item)));
+                },
+                this
+            );
 
             var source = this._sFormat = options.format || '',
                 des = '';
@@ -95,6 +93,8 @@ _eText       - 文本框
             /**
              * 选项框部件。
              * @unit
+             * options 属性：
+             * format  文本用于显示的样式
              */
             Options: core.inherits(
                 ui.Control,
@@ -124,14 +124,20 @@ _eText       - 文本框
                             }
                         }
 
-                        this.getBody().innerHTML = values.map(function (item) {
-                            return '<div ui="value:' + (this._sPrefix + item).slice(-this._sPrefix.length) + '" class="' + options.classes.join('-item ') + 'ui-item">' + (options.format ? util.stringFormat(options.format, item) : item) + '</div>';
-                        }.bind(this)).join('');
+                        this.getBody().innerHTML = values.map(
+                            function (item) {
+                                return '<div ui="value:' + (this._sPrefix + item).slice(-this._sPrefix.length) + '" class="' + options.classes.join('-item ') + 'ui-item">' + (options.format ? util.stringFormat(options.format, item) : item) + '</div>';
+                            },
+                            this
+                        ).join('');
 
                         this._aItems = [];
-                        dom.children(el).forEach(function (item) {
-                            this._aItems.push(core.$fastCreate(this.Item, item, this, core.getOptions(item)));
-                        }, this);
+                        dom.children(el).forEach(
+                            function (item) {
+                                this._aItems.push(core.$fastCreate(this.Item, item, this, core.getOptions(item)));
+                            },
+                            this
+                        );
 
                         this.setOptionSize(3);
                     }
@@ -217,9 +223,12 @@ _eText       - 文本框
                 if (dom.contain(this.getMain(), event.target)) {
                     var ret = this._oRegExp.exec(this.getValue());
                     if (ret) {
-                        ret.slice(1).forEach(function (value, index) {
-                            this._aOptions[this._aMap[index]].setValue(value);
-                        }.bind(this));
+                        ret.slice(1).forEach(
+                            function (value, index) {
+                                this._aOptions[this._aMap[index]].setValue(value);
+                            },
+                            this
+                        );
                     }
                 }
             },

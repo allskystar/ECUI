@@ -95,21 +95,29 @@
                             w: 0,
                             h: 0,
                             $ready: function () {
-                                util.timer(function () {
-                                    this.offset.x = this.getX();
-                                    this.offset.y = this.getY();
-                                }.bind(this), 100);
+                                util.timer(
+                                    function () {
+                                        this.offset.x = this.getX();
+                                        this.offset.y = this.getY();
+                                    },
+                                    100,
+                                    this
+                                );
                             }
                         }
                     ),
                     $ready: function () {
-                        util.timer(function () {
-                            this.offset.x = this.getX();
-                            this.offset.y = this.getY();
+                        util.timer(
+                            function () {
+                                this.offset.x = this.getX();
+                                this.offset.y = this.getY();
 
-                            this.w = this.getWidth();
-                            this.h = this.getHeight();
-                        }.bind(this), 1);
+                                this.w = this.getWidth();
+                                this.h = this.getHeight();
+                            },
+                            1,
+                            this
+                        );
                     },
                     $mousedown: function (event) {
                         this.offset.bx = this._bImg.getX();

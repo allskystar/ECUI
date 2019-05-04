@@ -62,9 +62,13 @@
      */
     core.$messagebox = function (className, text, buttonTexts) {
         if (!instance) {
-            dom.addEventListener(window, 'resize', function () {
-                instance.center();
-            });
+            dom.addEventListener(
+                window,
+                'resize',
+                function () {
+                    instance.center();
+                }
+            );
         }
 
         var instance = core.getSingleton(MessageBox),

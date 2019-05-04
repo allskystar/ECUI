@@ -102,15 +102,18 @@ _aSelect - 全部的下拉框控件列表
 
                                     var selected = this.getSelected(),
                                         currSelect = select;
-                                    core.request(util.stringFormat.apply(null, args), function (data) {
-                                        if (selected === this.getSelected()) {
-                                            currSelect.removeAll();
-                                            core.dispatchEvent(parent, 'request', {data: data, owner: currSelect});
-                                            currSelect.add(data);
-                                            item._aChildren = currSelect.getItems();
-                                            currSelect.setValue(currSelect.getValue());
-                                        }
-                                    }.bind(this));
+                                    core.request(
+                                        util.stringFormat.apply(null, args),
+                                        function (data) {
+                                            if (selected === this.getSelected()) {
+                                                currSelect.removeAll();
+                                                core.dispatchEvent(parent, 'request', {data: data, owner: currSelect});
+                                                currSelect.add(data);
+                                                item._aChildren = currSelect.getItems();
+                                                currSelect.setValue(currSelect.getValue());
+                                            }
+                                        }.bind(this)
+                                    );
                                 }
                             }
                         }
@@ -137,18 +140,21 @@ _aSelect - 全部的下拉框控件列表
 
                 var el = this.getMain();
                 this._aSelect = [];
-                dom.toArray(el.all || el.getElementsByTagName('*')).forEach(function (item) {
-                    if (item.getControl) {
-                        item = item.getControl();
-                        if (item instanceof ui.Select && this._aSelect.indexOf(item) < 0) {
+                dom.toArray(el.all || el.getElementsByTagName('*')).forEach(
+                    function (item) {
+                        if (item.getControl) {
+                            item = item.getControl();
+                            if (item instanceof ui.Select && this._aSelect.indexOf(item) < 0) {
+                                this._aSelect.push(item);
+                            }
+                        } else if (item.tagName === 'SELECT') {
+                            item.className += this.Select.CLASS;
+                            item = core.$fastCreate(this.Select, item, this, core.getOptions(item));
                             this._aSelect.push(item);
                         }
-                    } else if (item.tagName === 'SELECT') {
-                        item.className += this.Select.CLASS;
-                        item = core.$fastCreate(this.Select, item, this, core.getOptions(item));
-                        this._aSelect.push(item);
-                    }
-                }, this);
+                    },
+                    this
+                );
             },
 
             /**

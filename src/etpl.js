@@ -91,9 +91,12 @@
      * @return {string} 字符串字面化结果
      */
     function regexpLiteral(source) {
-        return source.replace(/[\^\[\]\$\(\)\{\}\?\*\.\+]/g, function (c) {
-            return '\\' + c;
-        });
+        return source.replace(
+            /[\^\[\]\$\(\)\{\}\?\*\.\+]/g,
+            function (c) {
+                return '\\' + c;
+            }
+        );
     }
 
     /**
@@ -479,9 +482,12 @@
                 node.addChild(child.clone());
             });
 
-            this.cloneProps.forEach(function (prop) {
-                node[prop] = this[prop];
-            }, this);
+            this.cloneProps.forEach(
+                function (prop) {
+                    node[prop] = this[prop];
+                },
+                this
+            );
 
             return node;
         }

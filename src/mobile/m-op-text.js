@@ -22,12 +22,15 @@
         function (el, options) {
             ui.Text.call(this, el, options);
             var input = this.getInput();
-            Array.prototype.slice.call(el.getElementsByTagName('INPUT')).forEach(function (item) {
-                if (item !== input) {
-                    item.disabled = !!iosVersion;
-                    core.$fastCreate(this.Button, item, this, {focusable: false});
-                }
-            }, this);
+            Array.prototype.slice.call(el.getElementsByTagName('INPUT')).forEach(
+                function (item) {
+                    if (item !== input) {
+                        item.disabled = !!iosVersion;
+                        core.$fastCreate(this.Button, item, this, {focusable: false});
+                    }
+                },
+                this
+            );
         },
         {
             /**

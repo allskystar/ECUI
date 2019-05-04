@@ -44,9 +44,13 @@ _oTest      匹配合法性的正则表达式
              */
             $click: function (event) {
                 ui.Text.prototype.$click.call(this, event);
-                util.timer(function () {
-                    setSelection(this, this.getSelectionStart());
-                }.bind(this));
+                util.timer(
+                    function () {
+                        setSelection(this, this.getSelectionStart());
+                    },
+                    0,
+                    this
+                );
             },
 
             /**

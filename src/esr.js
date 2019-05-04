@@ -268,21 +268,27 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                         // IE第一次进入，不能back，否则会退出框架
                         pauseStatus = true;
                         history.back();
-                        var handle = util.timer(function () {
-                            if (!/~DENY_CACHE/.test(location.href)) {
-                                esr.setLocation(loc);
-                                pauseStatus = false;
-                                handle();
-                            }
-                        }, -10);
+                        var handle = util.timer(
+                            function () {
+                                if (!/~DENY_CACHE/.test(location.href)) {
+                                    esr.setLocation(loc);
+                                    pauseStatus = false;
+                                    handle();
+                                }
+                            },
+                            -10
+                        );
                     } else {
                         esr.setLocation(loc);
                     }
                 } else {
                     setLocation(loc);
-                    util.timer(function () {
-                        location.replace('#' + loc);
-                    }, 100);
+                    util.timer(
+                        function () {
+                            location.replace('#' + loc);
+                        },
+                        100
+                    );
                 }
 
                 route.CACHE = undefined;
@@ -306,9 +312,14 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                             }
                         }
                     }
-                    if (route.model(context, function () {
-                            esr.render(route);
-                        }) !== false) {
+                    if (
+                        route.model(
+                            context,
+                            function () {
+                                esr.render(route);
+                            }
+                        ) !== false
+                    ) {
                         esr.render(route);
                     }
                 } else if (!route.model.length) {
@@ -323,20 +334,24 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                             }
                         }
                     }
-                    esr.request(route.model, function () {
-                        esr.render(route);
-                    }, function (err) {
-                        err = (route.onerror || esr.onrequesterror || util.blank)(err);
+                    esr.request(
+                        route.model,
+                        function () {
+                            esr.render(route);
+                        },
+                        function (err) {
+                            err = (route.onerror || esr.onrequesterror || util.blank)(err);
 
-                        // 出错需要清除缓存
-                        if (route.CACHE !== false) {
-                            route.CACHE = undefined;
+                            // 出错需要清除缓存
+                            if (route.CACHE !== false) {
+                                route.CACHE = undefined;
+                            }
+
+                            callRouteComplete();
+
+                            return err;
                         }
-
-                        callRouteComplete();
-
-                        return err;
-                    });
+                    );
                 }
             }
         } else {
@@ -721,14 +736,17 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                             // IE第一次进入，不能back，否则会退出框架
                             pauseStatus = true;
                             history.back();
-                            var handle = util.timer(function () {
-                                if (/~HISTORY=(\d+)/.test(location.href)) {
-                                    esr.setLocation(loc);
-                                    esr.callRoute(loc);
-                                    pauseStatus = false;
-                                    handle();
-                                }
-                            }, -10);
+                            var handle = util.timer(
+                                function () {
+                                    if (/~HISTORY=(\d+)/.test(location.href)) {
+                                        esr.setLocation(loc);
+                                        esr.callRoute(loc);
+                                        pauseStatus = false;
+                                        handle();
+                                    }
+                                },
+                                -10
+                            );
                         } else {
                             esr.setLocation(loc);
                             esr.callRoute(loc);
@@ -736,16 +754,19 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                         return;
                     }
                     pauseStatus = true;
-                    util.timer(function () {
-                        pauseStatus = false;
-                        location.replace('#' + loc);
-                        // ie下使用中间iframe作为中转控制
-                        // 其他浏览器直接调用控制器方法
-                        if (!addIEHistory(loc)) {
-                            setLocation(loc);
-                            esr.callRoute(loc);
-                        }
-                    }, 100);
+                    util.timer(
+                        function () {
+                            pauseStatus = false;
+                            location.replace('#' + loc);
+                            // ie下使用中间iframe作为中转控制
+                            // 其他浏览器直接调用控制器方法
+                            if (!addIEHistory(loc)) {
+                                setLocation(loc);
+                                esr.callRoute(loc);
+                            }
+                        },
+                        100
+                    );
                 }
             }
         }
@@ -858,23 +879,26 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
         if (rule) {
             var data;
 
-            rule = rule.replace(/\$\{([^}]+)\}/g, function (match, name) {
-                name = name.split('|');
-                if (name[0].charAt(0) !== '&') {
-                    var value = util.parseValue(name[0], context);
-                } else {
-                    value = util.parseValue(name[0].slice(1));
+            rule = rule.replace(
+                /\$\{([^}]+)\}/g,
+                function (match, name) {
+                    name = name.split('|');
+                    if (name[0].charAt(0) !== '&') {
+                        var value = util.parseValue(name[0], context);
+                    } else {
+                        value = util.parseValue(name[0].slice(1));
+                    }
+                    value = value === undefined ? (name[1] || '') : value;
+                    if (isUrl) {
+                        value = encodeURIComponent(value);
+                    }
+                    if (match === rule) {
+                        data = value;
+                        return '';
+                    }
+                    return value;
                 }
-                value = value === undefined ? (name[1] || '') : value;
-                if (isUrl) {
-                    value = encodeURIComponent(value);
-                }
-                if (match === rule) {
-                    data = value;
-                    return '';
-                }
-                return value;
-            });
+            );
 
             return data || rule;
         }
@@ -1442,13 +1466,18 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                 afterrender(route);
             } else if ('function' === typeof route.view) {
                 beforerender(route);
-                if (route.view(context, function (name) {
-                        if (name) {
-                            render(route, name);
-                        } else {
-                            afterrender(route);
+                if (
+                    route.view(
+                        context,
+                        function (name) {
+                            if (name) {
+                                render(route, name);
+                            } else {
+                                afterrender(route);
+                            }
                         }
-                    }) !== false) {
+                    ) !== false
+                ) {
                     afterrender(route);
                 }
             } else if (etpl.getRenderer(route.view)) {
@@ -1765,28 +1794,36 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                     parentElement,
                     nextSibling;
 
-                core.addEventListener(layer, 'confirm', function (event) {
-                    if (onconfirm) {
-                        onconfirm(event);
-                    }
-                    history.back();
-                });
-                core.addEventListener(layer, 'hide', function () {
-                    if (content) {
-                        if (content instanceof ui.Control) {
-                            content.setParent();
-                        } else if ('string' === typeof content) {
-                            core.dispose(container, true);
-                            container.innerHTML = '';
-                        } else {
-                            if (parentElement) {
-                                parentElement.insertBefore(content, nextSibling);
-                            }
+                core.addEventListener(
+                    layer,
+                    'confirm',
+                    function (event) {
+                        if (onconfirm) {
+                            onconfirm(event);
                         }
-                        content = null;
+                        history.back();
                     }
-                    core.removeControlListeners(core.findControl(container));
-                });
+                );
+                core.addEventListener(
+                    layer,
+                    'hide',
+                    function () {
+                        if (content) {
+                            if (content instanceof ui.Control) {
+                                content.setParent();
+                            } else if ('string' === typeof content) {
+                                core.dispose(container, true);
+                                container.innerHTML = '';
+                            } else {
+                                if (parentElement) {
+                                    parentElement.insertBefore(content, nextSibling);
+                                }
+                            }
+                            content = null;
+                        }
+                        core.removeControlListeners(core.findControl(container));
+                    }
+                );
 
                 esr.setData('AppSelectTitle', options.title || '');
 
@@ -1997,21 +2034,27 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                 }
 
                 value[1] = value[1].split(',');
-                value[1].forEach(function (item) {
-                    if (autoRender[item]) {
-                        autoRender[item].push([this, setData]);
-                    } else {
-                        autoRender[item] = [[this, setData]];
-                    }
-                }, this);
+                value[1].forEach(
+                    function (item) {
+                        if (autoRender[item]) {
+                            autoRender[item].push([this, setData]);
+                        } else {
+                            autoRender[item] = [[this, setData]];
+                        }
+                    },
+                    this
+                );
 
                 var nodata = true;
-                value[1].forEach(function (item) {
-                    if (context[item] !== undefined) {
-                        setData.call(this, context[item]);
-                        nodata = false;
-                    }
-                }, this);
+                value[1].forEach(
+                    function (item) {
+                        if (context[item] !== undefined) {
+                            setData.call(this, context[item]);
+                            nodata = false;
+                        }
+                    },
+                    this
+                );
                 if (nodata) {
                     this.getBody().innerHTML = '';
                 }

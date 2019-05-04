@@ -33,10 +33,7 @@ _uOptions     - 下拉选择框
         ui.$select,
         'ui-mobile-select',
         function (el, options) {
-            util.setDefault(options, 'enter', 'bottom');
-            util.setDefault(options, 'mask', '0.5');
-
-            ui.$select.call(this, el, options);
+            ui.$select.call(this, el, Object.assign({enter: 'bottom', mask: 0.5, inputType: 'hidden'}, options));
 
             this.$getSection('Options').setOptionSize(options.optionSize || 3);
         },

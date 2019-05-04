@@ -133,23 +133,26 @@ YVBarAxisControl.render(options);
                 }
 
                 var x = x1;
-                options.xAxis.data.forEach(function (item, index) {
-                    var grid = options.xAxis.grid[index + 1],
-                        w = grid * xUnit;
+                options.xAxis.data.forEach(
+                    function (item, index) {
+                        var grid = options.xAxis.grid[index + 1],
+                            w = grid * xUnit;
 
-                    if (item) {
-                        var value = options.series.data[index],
-                            h0 = Math.max(0, (y2 - y1) * -min / (max - min)),
-                            h = (y2 - y1) * (value - min) / (max - min) - h0,
-                            cx = x + w / 2,
-                            cy = height - y1 - h / 2 - h0;
+                        if (item) {
+                            var value = options.series.data[index],
+                                h0 = Math.max(0, (y2 - y1) * -min / (max - min)),
+                                h = (y2 - y1) * (value - min) / (max - min) - h0,
+                                cx = x + w / 2,
+                                cy = height - y1 - h / 2 - h0;
 
-                        this.drawText(cx, height - y1, item, 'category-text');
-                        this.$drawItem(index, cx, cy, w * options.series.ratio.width, Math.abs(h), options.series);
-                        this.drawText(cx, height - y1 - Math.max(0, h * options.series.ratio.text) - h0, options.yAxis.formatter ? util.stringFormat(options.yAxis.formatter, value) : value, 'item-text');
-                    }
-                    x += w;
-                }, this);
+                            this.drawText(cx, height - y1, item, 'category-text');
+                            this.$drawItem(index, cx, cy, w * options.series.ratio.width, Math.abs(h), options.series);
+                            this.drawText(cx, height - y1 - Math.max(0, h * options.series.ratio.text) - h0, options.yAxis.formatter ? util.stringFormat(options.yAxis.formatter, value) : value, 'item-text');
+                        }
+                        x += w;
+                    },
+                    this
+                );
 
                 ui.SVG.prototype.render.call(this);
             }

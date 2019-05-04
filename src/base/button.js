@@ -16,8 +16,7 @@
 (function () {
     var core = ecui,
         dom = core.dom,
-        ui = core.ui,
-        util = core.util;
+        ui = core.ui;
 //{/if}//
     /**
      * 按钮控件。
@@ -28,8 +27,7 @@
         ui.Control,
         'ui-button',
         function (el, options) {
-            util.setDefault(options, 'userSelect', false);
-            ui.Control.call(this, el, options);
+            ui.Control.call(this, el, Object.assign({userSelect: false}, options));
         },
         {
             /**

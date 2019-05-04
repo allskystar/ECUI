@@ -151,11 +151,15 @@ _ePlaceHolder - 为空时的提示信息标签
                     textAlign = dom.getStyle(el, 'textAlign');
 
                 if (textAlign === 'end' || textAlign === 'right') {
-                    util.timer(function () {
-                        if (!this.getSelectionStart()) {
-                            this.setSelection(el.value.length);
-                        }
-                    }, 400, this);
+                    util.timer(
+                        function () {
+                            if (!this.getSelectionStart()) {
+                                this.setSelection(el.value.length);
+                            }
+                        },
+                        400,
+                        this
+                    );
                 }
             },
 

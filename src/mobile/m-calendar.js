@@ -15,8 +15,7 @@ _uDate   - 日部件
 (function () {
     var core = ecui,
         dom = core.dom,
-        ui = core.ui,
-        util = core.util;
+        ui = core.ui;
 //{/if}//
     /**
      * 移动端日历输入控件。
@@ -26,9 +25,7 @@ _uDate   - 日部件
         ui.MMultiOptions,
         'ui-mobile-calendar',
         function (el, options) {
-            util.setDefault(options, 'format', this.FORMAT);
-
-            ui.MMultiOptions.call(this, el, options);
+            ui.MMultiOptions.call(this, el, Object.assign({format: this.FORMAT}, options));
 
             this._uYear = this.getOptions(0);
             this._uMonth = this.getOptions(1);
@@ -36,7 +33,7 @@ _uDate   - 日部件
         },
         {
             // 默认的输出格式
-            FORMAT: '{0}-{01}-{02}',
+            FORMAT: '{0}-{1}-{2}',
 
             /**
              * 选项改变事件的默认处理。
@@ -59,9 +56,8 @@ _uDate   - 日部件
             $click: function (event) {
                 ui.MMultiOptions.prototype.$click.call(this, event);
                 if (dom.contain(this.getMain(), event.target)) {
-                    var value = this.getValue();
-                    if (!value) {
-                        value = new Date();
+                    if (!this.getValue()) {
+                        var value = new Date();
                         this._uYear.setValue(value.getFullYear());
                         this._uMonth.setValue(value.getMonth() + 1);
                         this._uDate.setValue(value.getDate());

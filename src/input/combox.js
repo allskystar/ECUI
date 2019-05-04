@@ -44,8 +44,7 @@
         ui.Select,
         '*ui-combox',
         function (el, options) {
-            util.setDefault(options, 'readOnly', false);
-            ui.Select.call(this, el, options);
+            ui.Select.call(this, el, Object.assign({readOnly: false}, options));
 
             el = this.$getSection('Text').getBody();
 
@@ -133,9 +132,13 @@
              */
             $keydown: function (event) {
                 ui.Select.prototype.$keydown.call(this, event);
-                util.timer(function () {
-                    this.$setPlaceholder();
-                }, 0, this);
+                util.timer(
+                    function () {
+                        this.$setPlaceholder();
+                    },
+                    0,
+                    this
+                );
             },
 
             /**

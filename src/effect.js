@@ -190,14 +190,18 @@ ECUI动画效果库，支持对CSS3动画效果的模拟并扩展了相应的功
                                 percent = timingFn(actualDuration / duration);
                             }
 
-                            fn(el, percent, function (name, index, percent) {
-                                var start = data[name][fn === keyframes.forward ? index - 1 : index + 1],
-                                    end = data[name][index];
-                                if ('number' === typeof start) {
-                                    return data['$' + name].replace('#', start + ((end - start) * percent));
+                            fn(
+                                el,
+                                percent,
+                                function (name, index, percent) {
+                                    var start = data[name][fn === keyframes.forward ? index - 1 : index + 1],
+                                        end = data[name][index];
+                                    if ('number' === typeof start) {
+                                        return data['$' + name].replace('#', start + ((end - start) * percent));
+                                    }
+                                    return 'rgb(' + Math.round(start[0] + ((end[0] - start[0]) * percent)) + ',' + Math.round(start[1] + ((end[1] - start[1]) * percent)) + ',' + Math.round(start[2] + ((end[2] - start[2]) * percent)) + ')';
                                 }
-                                return 'rgb(' + Math.round(start[0] + ((end[0] - start[0]) * percent)) + ',' + Math.round(start[1] + ((end[1] - start[1]) * percent)) + ',' + Math.round(start[2] + ((end[2] - start[2]) * percent)) + ')';
-                            });
+                            );
 
                             if (actualDuration >= duration) {
                                 if (--count) {
@@ -234,13 +238,22 @@ ECUI动画效果库，支持对CSS3动画效果的模拟并扩展了相应的功
          */
         createKeyframes: function (source) {
             function parse(exp, first) {
-                return exp.replace(/@(\w+)/g, function ($, name) {
-                    return '"+' + (first ? 'ecui.dom.getStyle(e,"' + name + '")' : 'd.' + name + '[0]') + '+"';
-                }).replace(/@\((.+)\)/g, function ($, exp) {
-                    return '"+(' + exp.replace(/([A-Za-z]+)/g, function ($, name) {
-                        return 'ecui.util.toNumber(' + (first ? 'ecui.dom.getStyle(e,"' + name + '")' : 'd.' + name + '[0]') + ')';
-                    }) + ')+"';
-                });
+                return exp.replace(
+                    /@(\w+)/g,
+                    function ($, name) {
+                        return '"+' + (first ? 'ecui.dom.getStyle(e,"' + name + '")' : 'd.' + name + '[0]') + '+"';
+                    }
+                ).replace(
+                    /@\((.+)\)/g,
+                    function ($, exp) {
+                        return '"+(' + exp.replace(
+                            /([A-Za-z]+)/g,
+                            function ($, name) {
+                                return 'ecui.util.toNumber(' + (first ? 'ecui.dom.getStyle(e,"' + name + '")' : 'd.' + name + '[0]') + ')';
+                            }
+                        ) + ')+"';
+                    }
+                );
             }
 
             var times = [],
@@ -345,52 +358,62 @@ ECUI动画效果库，支持对CSS3动画效果的模拟并扩展了相应的功
          */
         grade: function (fn, duration, options, transition) {
             if ('string' === typeof fn) {
-                fn = new Function('p', '$', fn.replace(/#.+?#/g, function (item) {
-                    item = item.slice(1, -1);
+                fn = new Function(
+                    'p',
+                    '$',
+                    fn.replace(
+                        /#.+?#/g,
+                        function (item) {
+                            item = item.slice(1, -1);
 
-                    var list = item.split('->'),
-                        math = '',
-                        value = list[0].split(':');
+                            var list = item.split('->'),
+                                math = '',
+                                value = list[0].split(':');
 
-                    if (value.length > 1) {
-                        math = 'Math.' + value[0];
-                        list[0] = value[1];
-                    }
+                            if (value.length > 1) {
+                                math = 'Math.' + value[0];
+                                list[0] = value[1];
+                            }
 
-                    var currValue = new Function('$', 'return ' + list[0]).call(options.$, options);
-                    /-?[0-9]+(\.[0-9]+)?/.test(currValue);
-                    currValue = +RegExp['$&'];
+                            var currValue = new Function('$', 'return ' + list[0]).call(options.$, options);
+                            /-?[0-9]+(\.[0-9]+)?/.test(currValue);
+                            currValue = +RegExp['$&'];
 
-                    /-?[0-9]+(\.[0-9]+)?/.test(list[1]);
-                    value = +RegExp['$&'];
+                            /-?[0-9]+(\.[0-9]+)?/.test(list[1]);
+                            value = +RegExp['$&'];
 
-                    return (RegExp.leftContext ? '"' + RegExp.leftContext.replace('"', '\\"') + '"+' : '') + math + '(' + currValue + '+(' + value + '-(' + currValue + ')' + ')*p)' + (RegExp.rightContext ? '+"' + RegExp.rightContext.replace('"', '\\"') + '"' : '');
-                }));
+                            return (RegExp.leftContext ? '"' + RegExp.leftContext.replace('"', '\\"') + '"+' : '') + math + '(' + currValue + '+(' + value + '-(' + currValue + ')' + ')*p)' + (RegExp.rightContext ? '+"' + RegExp.rightContext.replace('"', '\\"') + '"' : '');
+                        }
+                    )
+                );
             }
 
             var startTime = Date.now(),
-                stop = util.timer(function () {
-                    var currTime = Date.now() - startTime,
-                        percent;
-                    if (currTime >= duration) {
-                        percent = 1;
-                        stop();
-                    } else {
-                        percent = transition(currTime / duration);
-                    }
-                    // 保存引用防止调用时options对象已经被释放
-                    var tmpOptions = options;
-                    fn.call(tmpOptions.$, percent, tmpOptions);
-                    if (tmpOptions.onstep) {
-                        tmpOptions.onstep.call(tmpOptions.$, percent, tmpOptions);
-                    }
-                    if (percent >= 1) {
-                        if (tmpOptions.onfinish) {
-                            tmpOptions.onfinish.call(tmpOptions.$, tmpOptions);
+                stop = util.timer(
+                    function () {
+                        var currTime = Date.now() - startTime,
+                            percent;
+                        if (currTime >= duration) {
+                            percent = 1;
+                            stop();
+                        } else {
+                            percent = transition(currTime / duration);
                         }
-                        fn = options = transition = null;
-                    }
-                }, -1);
+                        // 保存引用防止调用时options对象已经被释放
+                        var tmpOptions = options;
+                        fn.call(tmpOptions.$, percent, tmpOptions);
+                        if (tmpOptions.onstep) {
+                            tmpOptions.onstep.call(tmpOptions.$, percent, tmpOptions);
+                        }
+                        if (percent >= 1) {
+                            if (tmpOptions.onfinish) {
+                                tmpOptions.onfinish.call(tmpOptions.$, tmpOptions);
+                            }
+                            fn = options = transition = null;
+                        }
+                    },
+                    -1
+                );
 
             if ('function' !== typeof transition) {
                 transition = effect.FN_CubicBezier.apply(null, __ECUI__CubicBezier[transition || 'ease'] || transition);

@@ -121,13 +121,16 @@ _eInput        - INPUT对象
      * @private
      */
     function blur() {
-        util.timer(function () {
-            var tagName = document.activeElement.tagName;
-            if (tagName === 'INPUT' || tagName === 'SELECT' || tagName === 'TEXTAREA' || tagName === 'BUTTON') {
-                // 键盘操作焦点移向了另一个输入框，重新设置焦点
-                core.setFocused(core.findControl(document.activeElement));
-            }
-        }, 10);
+        util.timer(
+            function () {
+                var tagName = document.activeElement.tagName;
+                if (tagName === 'INPUT' || tagName === 'SELECT' || tagName === 'TEXTAREA' || tagName === 'BUTTON') {
+                    // 键盘操作焦点移向了另一个输入框，重新设置焦点
+                    core.setFocused(core.findControl(document.activeElement));
+                }
+            },
+            10
+        );
     }
 
     /**
@@ -221,20 +224,23 @@ _eInput        - INPUT对象
                 inputEl.className = '';
                 inputEl.style.cssText = '';
                 el.appendChild(inputEl);
+//{if 0}//
+                if ((options.inputType === 'textarea' && inputEl.tagName === 'TEXTAREA') || inputEl.type !== options.inputType || options.name !== undefined || options.value !== undefined || options.readOnly !== undefined || options.checked !== undefined) {
+                    console.warn('显式定义了输入框不要再重复设置参数');
+                }
+//{/if}//
             } else {
                 inputEl = el.getElementsByTagName('INPUT')[0] || el.getElementsByTagName('TEXTAREA')[0];
-                if (!inputEl) {
-                    inputEl = dom.setInput(null, options.name, options.inputType);
-                    inputEl.defaultValue = inputEl.value = options.value || '';
-                    el.appendChild(inputEl);
+//{if 0}//
+                if (inputEl && ((options.inputType === 'textarea' && inputEl.tagName === 'TEXTAREA') || inputEl.type !== options.inputType || options.name !== undefined || options.value !== undefined || options.readOnly !== undefined || options.checked !== undefined)) {
+                    console.warn('显式定义了输入框不要再重复设置参数');
                 }
-            }
-
-            if (options.readOnly) {
-                inputEl.readOnly = true;
-            }
-            if (options.checked) {
-                inputEl.defaultChecked = inputEl.checked = true;
+//{/if}//
+                if (!inputEl) {
+                    dom.insertHTML(el, 'beforeEnd', '<' + (options.inputType === 'textarea' ? 'textarea' : 'input' + (options.inputType ? ' type="' + options.inputType + '"' : '') + (options.name ? ' name="' + options.name + '"' : '') + (options.readOnly ? ' readOnly' : '') + (options.checked ? ' checked' : '')) + '>');
+                    inputEl = el.lastChild;
+                    inputEl.defaultValue = inputEl.value = options.value || '';
+                }
             }
 
             ui.Control.call(this, el, options);
@@ -260,11 +266,7 @@ _eInput        - INPUT对象
                 core.$bind(input, this);
                 if (input.type !== 'hidden') {
                     // 对于IE或者textarea的变化，需要重新绑定相关的控件事件
-                    for (var name in events) {
-                        if (events.hasOwnProperty(name)) {
-                            dom.addEventListener(input, name, events[name]);
-                        }
-                    }
+                    dom.addEventListeners(input, events);
                 }
             },
 
@@ -551,11 +553,7 @@ _eInput        - INPUT对象
              * @param {string} name 表单项名称
              */
             setName: function (name) {
-                var el = dom.setInput(this._eInput, name || '');
-                if (this._eInput !== el) {
-                    this._eInput = el;
-                    this.$bindEvent(el);
-                }
+                this._eInput.name = name;
             },
 
             /**

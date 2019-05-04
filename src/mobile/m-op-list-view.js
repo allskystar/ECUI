@@ -66,10 +66,13 @@ _cItem    - 当前处于激活的选项
                     $cache: function (style) {
                         ui.MListView.prototype.Item.prototype.$cache.call(this, style);
                         this.$$sumWidth = 0;
-                        this.$$opWidth = dom.children(this.getBody()).slice(1).map(function (item) {
-                            this.$$sumWidth += item.offsetWidth;
-                            return item.offsetWidth;
-                        }, this);
+                        this.$$opWidth = dom.children(this.getBody()).slice(1).map(
+                            function (item) {
+                                this.$$sumWidth += item.offsetWidth;
+                                return item.offsetWidth;
+                            },
+                            this
+                        );
                     },
 
                     /**
@@ -135,15 +138,18 @@ _cItem    - 当前处于激活的选项
                             limit = x < -sum * 3 / 4 ? -sum : 0;
 
                         Object.assign(this.getParent().getRange(), {left: limit, right: limit});
-                        dom.children(this.getBody()).forEach(function (item, index) {
-                            if (index) {
-                                item.style.transform = 'translateX(' + (x * sum / this.$$sumWidth - offset) + 'px)';
-                                sum -= this.$$opWidth[index - 1];
-                                offset += this.$$opWidth[index - 1];
-                            } else {
-                                item.style.transform = 'translateX(' + x + 'px)';
-                            }
-                        }, this);
+                        dom.children(this.getBody()).forEach(
+                            function (item, index) {
+                                if (index) {
+                                    item.style.transform = 'translateX(' + (x * sum / this.$$sumWidth - offset) + 'px)';
+                                    sum -= this.$$opWidth[index - 1];
+                                    offset += this.$$opWidth[index - 1];
+                                } else {
+                                    item.style.transform = 'translateX(' + x + 'px)';
+                                }
+                            },
+                            this
+                        );
                     }
                 }
             ),

@@ -93,11 +93,14 @@ _aChildren     - 子控件集合
             this._bAutoType = options.autoType;
 
             // 初始化子控件
-            this._aChildren = list ? list.map(function (item) {
-                item = createChild(item, this, options);
-                item.$setParent(this);
-                return item;
-            }, this) : [];
+            this._aChildren = list ? list.map(
+                function (item) {
+                    item = createChild(item, this, options);
+                    item.$setParent(this);
+                    return item;
+                },
+                this
+            ) : [];
 
             refresh(this);
         },

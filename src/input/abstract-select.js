@@ -36,7 +36,7 @@ _uOptions     - 下拉选择框
     ui.$select = core.inherits(
         ui.InputControl,
         function (el, options) {
-            util.setDefault(options, 'readOnly', true);
+            options = Object.assign({readOnly: true}, options);
 
             if (el.tagName === 'SELECT') {
                 options.name = el.name;
@@ -355,13 +355,16 @@ _uOptions     - 下拉选择框
              * @param {string} value 需要选中的值
              */
             setValue: function (value) {
-                if (this.getItems().every(function (item) {
-                        if (item._sValue === value) {
-                            this.setSelected(item);
-                            return false;
-                        }
-                        return true;
-                    }, this)) {
+                if (this.getItems().every(
+                        function (item) {
+                            if (item._sValue === value) {
+                                this.setSelected(item);
+                                return false;
+                            }
+                            return true;
+                        },
+                        this
+                    )) {
                     // 找不到满足条件的项，将选中的值清除
                     this.setSelected();
                 }

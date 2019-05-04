@@ -73,13 +73,16 @@ _aLabel    - 标签信息数组
         [
             function () {
                 this._aLabel = [];
-                dom.children(this.getBody()).forEach(function (item) {
-                    if (item.tagName === 'STRONG') {
-                        this._aLabel.push({
-                            el: item
-                        });
-                    }
-                }, this);
+                dom.children(this.getBody()).forEach(
+                    function (item) {
+                        if (item.tagName === 'STRONG') {
+                            this._aLabel.push({
+                                el: item
+                            });
+                        }
+                    },
+                    this
+                );
             }
         ],
         {

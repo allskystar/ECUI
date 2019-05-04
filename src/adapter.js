@@ -74,13 +74,28 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
             },
 
             /**
+             * 批量挂载事件。
+             * @public
+             *
+             * @param {object} obj 响应事件的对象
+             * @param {events} obj 事件函数映射
+             */
+            addEventListeners: function (obj, events) {
+                for (var key in events) {
+                    if (events.hasOwnProperty(key)) {
+                        dom.addEventListener(obj, key, events[key]);
+                    }
+                }
+            },
+
+            /**
              * 获取所有 parentNode 为指定 Element 的子 Element 集合。
              * @public
              *
              * @param {HTMLElement} el Element 对象
              * @return {Array} Element 对象数组
              */
-            children: function (el) {
+            children: ieVersion < 9 ? function (el) {
                 var result = [];
                 for (el = el.firstChild; el; el = el.nextSibling) {
                     if (el.nodeType === 1) {
@@ -88,6 +103,8 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                     }
                 }
                 return result;
+            } : function (el) {
+                return dom.toArray(el.children);
             },
 
             /**
@@ -153,9 +170,12 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                 if (ieVersion < 10) {
                     var reg = ieVersion > 6 ? new RegExp('[_' + (ieVersion > 7 ? '\\*\\+' : '') + ']\\w+:[^;}]+[;}]', 'g') : null;
                     if (reg) {
-                        cssText = cssText.replace(reg, function (match) {
-                            return match.slice(-1) === '}' ? '}' : '';
-                        });
+                        cssText = cssText.replace(
+                            reg,
+                            function (match) {
+                                return match.slice(-1) === '}' ? '}' : '';
+                            }
+                        );
                     }
                     el.styleSheet.cssText = cssText;
                 } else {
@@ -569,53 +589,6 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
             },
 
             /**
-             * 设置输入框的表单项属性。
-             * 如果没有指定一个表单项，setInput 方法将创建一个表单项。
-             * @public
-             *
-             * @param {HTMLElement} el InputElement 对象
-             * @param {string} name 新的表单项名称，默认与 el 相同
-             * @param {string} type 新的表单项类型，默认为 el 相同
-             * @return {HTMLElement} 设置后的 InputElement 对象
-             */
-            setInput: function (el, name, type) {
-                if (!el) {
-                    if (type === 'textarea') {
-                        el = dom.create('TEXTAREA');
-                    } else {
-                        if (ieVersion < 9) {
-                            return dom.create('<input type="' + (type || '') + '" name="' + (name || '') + '">');
-                        }
-                        el = dom.create('INPUT');
-                    }
-                }
-
-                name = name === undefined ? el.name : name;
-                type = type === undefined ? el.type : type;
-
-                if (el.name !== name || el.type !== type) {
-                    if ((ieVersion < 10 && type !== 'textarea') || (el.type !== type && (el.type === 'textarea' || type === 'textarea'))) {
-                        var oldEl = el;
-                        dom.insertHTML(
-                            oldEl,
-                            'AFTEREND',
-                            '<' + (type === 'textarea' ? 'textarea' : 'input type="' + type + '"') + ' name="' + name + '" class="' + el.className + '" style="' + el.style.cssText + '" ' + (el.disabled ? 'disabled' : '') + (el.readOnly ? ' readOnly' : '') + '>'
-                        );
-                        el = oldEl.nextSibling;
-                        el.value = oldEl.value;
-                        if (type === 'radio' || type === 'checkbox') {
-                            el.checked = oldEl.checked;
-                        }
-                        dom.remove(oldEl);
-                    } else {
-                        el.type = type;
-                        el.name = name;
-                    }
-                }
-                return el;
-            },
-
-            /**
              * 设置 Element 对象的样式值。
              * @public
              *
@@ -639,11 +612,13 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              * @param {HTMLCollection} elements Element 集合
              * @return {Array} Element 数组
              */
-            toArray: function (elements) {
+            toArray: ieVersion < 9 ? function (elements) {
                 for (var i = 0, ret = [], el; el = elements[i++]; ) {
                     ret.push(el);
                 }
                 return ret;
+            } : function (elements) {
+                return Array.prototype.slice.call(elements);
             }
         },
         effect: {},
@@ -924,11 +899,14 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                         socket.onerror = onerror;
                         // 关闭之前的心跳处理
                         heartInterval();
-                        heartInterval = util.timer(function () {
-                            if (socket.readyState === 1) {
-                                socket.send(JSON.stringify({type: 0}));
-                            }
-                        }, -15000);
+                        heartInterval = util.timer(
+                            function () {
+                                if (socket.readyState === 1) {
+                                    socket.send(JSON.stringify({type: 0}));
+                                }
+                            },
+                            -15000
+                        );
                         socket.onclose = function () {
                             // 连接意外关闭，重新打开连接
                             websocket();
@@ -1412,21 +1390,6 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
             },
 
             /**
-             * 设置缺省的属性值。
-             * 如果对象的属性已经被设置，setDefault 方法不进行任何处理，否则将默认值设置到指定的属性上。
-             * @public
-             *
-             * @param {object} obj 被设置的对象
-             * @param {string} key 属性名
-             * @param {object} value 属性的默认值
-             */
-            setDefault: function (obj, key, value) {
-                if (!obj.hasOwnProperty(key)) {
-                    obj[key] = value;
-                }
-            },
-
-            /**
              * 字符串格式化，{01}表示第一个参数填充到这个位置，占用两个字符的宽度，不足使用0填充。
              * @public
              *
@@ -1736,9 +1699,9 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
         };
     } else {
         (function () {
-            var localStorage = dom.setInput(null, null, 'hidden');
+            dom.insertHTML(document.body, 'beforeEnd', '<input type="hidden">');
+            var localStorage = document.body.lastChild;
             localStorage.addBehavior('#default#userData');
-            document.body.appendChild(localStorage);
 
             util.getLocalStorage = function (key) {
                 localStorage.load('ECUI');

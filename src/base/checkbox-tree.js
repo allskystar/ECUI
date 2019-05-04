@@ -55,15 +55,18 @@ _uCheckbox - 复选框控件
                     options
                 );
 
-            this.getChildren().forEach(function (item) {
-                if (options.subject) {
-                    if (options.subject === true) {
-                        item._uCheckbox.setSubject(this._uCheckbox);
-                    } else {
-                        core.delegate(options.subject, item._uCheckbox, item._uCheckbox.setSubject);
+            this.getChildren().forEach(
+                function (item) {
+                    if (options.subject) {
+                        if (options.subject === true) {
+                            item._uCheckbox.setSubject(this._uCheckbox);
+                        } else {
+                            core.delegate(options.subject, item._uCheckbox, item._uCheckbox.setSubject);
+                        }
                     }
-                }
-            }, this);
+                },
+                this
+            );
         },
         {
             /**

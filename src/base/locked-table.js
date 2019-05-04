@@ -312,12 +312,18 @@ _eRight      - 右侧乐定行的Element元素
             $initStructure: function (width, height) {
                 ui.Table.prototype.$initStructure.call(this, width, height);
 
-                this._aHeadRows.forEach(function (item) {
-                    splitRow(this, item);
-                }, this);
-                this._aRows.forEach(function (item) {
-                    splitRow(this, item);
-                }, this);
+                this._aHeadRows.forEach(
+                    function (item) {
+                        splitRow(this, item);
+                    },
+                    this
+                );
+                this._aRows.forEach(
+                    function (item) {
+                        splitRow(this, item);
+                    },
+                    this
+                );
 
                 var table = dom.parent(this.getBody()),
                     head = this.$getSection('Head').getMain().lastChild;
@@ -336,12 +342,18 @@ _eRight      - 右侧乐定行的Element元素
             $resize: function (event) {
                 ui.Table.prototype.$resize.call(this, event);
 
-                this._aHeadRows.forEach(function (item) {
-                    restoreRow(this, item);
-                }, this);
-                this._aRows.forEach(function (item) {
-                    restoreRow(this, item);
-                }, this);
+                this._aHeadRows.forEach(
+                    function (item) {
+                        restoreRow(this, item);
+                    },
+                    this
+                );
+                this._aRows.forEach(
+                    function (item) {
+                        restoreRow(this, item);
+                    },
+                    this
+                );
 
                 var leftHead = this._uLeftHead.getMain(),
                     rightHead = this._uRightHead.getMain(),

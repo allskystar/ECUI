@@ -566,17 +566,23 @@ _aStatus            - 控件当前的状态集合
                     if (this._sSubType) {
                         dom.removeClass(
                             this._eMain,
-                            classes.map(function (item) {
-                                return this._aStatus.join(item + '-' + this._sSubType);
-                            }, this).join('')
+                            classes.map(
+                                function (item) {
+                                    return this._aStatus.join(item + '-' + this._sSubType);
+                                },
+                                this
+                            ).join('')
                         );
                     }
                     if (subtype) {
                         dom.addClass(
                             this._eMain,
-                            classes.map(function (item) {
-                                return this._aStatus.join(item + '-' + subtype);
-                            }, this).join('')
+                            classes.map(
+                                function (item) {
+                                    return this._aStatus.join(item + '-' + subtype);
+                                },
+                                this
+                            ).join('')
                         );
                     }
                     this._sSubType = subtype;
@@ -667,9 +673,12 @@ _aStatus            - 控件当前的状态集合
                     var classes = this.getClasses();
                     classes.push('');
 
-                    this._aStatus.slice(2).forEach(function (item) {
-                        dom.removeClass(this._eMain, classes.join(item));
-                    }, this);
+                    this._aStatus.slice(2).forEach(
+                        function (item) {
+                            dom.removeClass(this._eMain, classes.join(item));
+                        },
+                        this
+                    );
 
                     this._aStatus = this._aStatus.slice(0, 2);
                 }
@@ -792,9 +801,12 @@ _aStatus            - 控件当前的状态集合
                 var classes = core.$getClasses(this.constructor, this._sClass);
                 if (this._sSubType) {
                     classes = classes.concat(
-                        classes.map(function (item) {
-                            return item + '-' + this._sSubType;
-                        }, this)
+                        classes.map(
+                            function (item) {
+                                return item + '-' + this._sSubType;
+                            },
+                            this
+                        )
                     );
                 }
                 return classes;
@@ -1207,9 +1219,12 @@ _aStatus            - 控件当前的状态集合
                     classes = this.getClasses();
 
                     this._eMain.className =
-                        classes.map(function (item) {
-                            return this._aStatus.join(item);
-                        }, this).join('') + className;
+                        classes.map(
+                            function (item) {
+                                return this._aStatus.join(item);
+                            },
+                            this
+                        ).join('') + className;
                 }
             },
 

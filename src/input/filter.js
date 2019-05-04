@@ -76,18 +76,21 @@ _oHandler   - 定时器句柄
                 function request() {
                     this._sRequest = this.getInput().value;
                     var args = [this._sUrl, this._sRequest];
-                    core.request(util.stringFormat.apply(null, args), function (data) {
-                        var text = this.getInput().value;
-                        if (this._sRequest !== text) {
-                            // 数据请求过程中输入框又产生了变化，重新请求
-                            if (text) {
-                                this._oHandler = util.timer(request, 1000, this);
+                    core.request(
+                        util.stringFormat.apply(null, args),
+                        function (data) {
+                            var text = this.getInput().value;
+                            if (this._sRequest !== text) {
+                                // 数据请求过程中输入框又产生了变化，重新请求
+                                if (text) {
+                                    this._oHandler = util.timer(request, 1000, this);
+                                }
+                            } else {
+                                delete this._oHandler;
+                                this.add(data);
                             }
-                        } else {
-                            delete this._oHandler;
-                            this.add(data);
-                        }
-                    }.bind(this));
+                        }.bind(this)
+                    );
                 }
 
                 if (this._sUrl) {
