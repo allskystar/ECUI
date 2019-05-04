@@ -311,6 +311,7 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
                      * @override
                      */
                     $hide: function () {
+                        ui.Control.prototype.$hide.call(this);
                         this.$setStyles('display', 'none');
                     },
 
@@ -366,6 +367,7 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
                      * @override
                      */
                     $show: function () {
+                        ui.Control.prototype.$show.call(this);
                         this.$setStyles('display', '');
                     },
 
