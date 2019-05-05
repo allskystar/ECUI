@@ -68,6 +68,7 @@ _eText       - 文本框
             }
 
             this._oRegExp = new RegExp(des);
+            this._sPlaceHolder = options.placeholder || dom.getAttribute(this.getInput(), 'placeholder') || '';
         },
         {
             /**
@@ -257,6 +258,28 @@ _eText       - 文本框
             },
 
             /**
+             * @override
+             */
+            $ready: function (event) {
+                ui.InputControl.prototype.$ready.call(this, event);
+                this.setValue(this.getValue());
+            },
+
+            /**
+             * @override
+             */
+            $setValue: function (value) {
+                ui.InputControl.prototype.$ready.call(this, value);
+                if (value) {
+                    this.alterStatus('-placeholder');
+                    this._eText.innerHTML = util.encodeHTML(value);
+                } else {
+                    this.alterStatus('+placeholder');
+                    this._eText.innerHTML = this._sPlaceHolder;
+                }
+            },
+
+            /**
              * 获取选项控件。
              * @public
              *
@@ -265,20 +288,6 @@ _eText       - 文本框
              */
             getOptions: function (index) {
                 return this._aOptions[index];
-            },
-
-            /**
-             * @override
-             */
-            getValue: function () {
-                return util.decodeHTML(this._eText.innerHTML);
-            },
-
-            /**
-             * @override
-             */
-            setValue: function (value) {
-                this._eText.innerHTML = util.encodeHTML(value);
             }
         },
         ui.MPopup

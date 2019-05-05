@@ -485,22 +485,31 @@
                 touchstart: function (event) {
                     if (disabledInputs.indexOf(event.target) >= 0) {
                         event.target.disabled = false;
-                        observer.takeRecords();
+                    } else {
+                        disabledInputs.forEach(function (item) {
+                            item.disabled = false;
+                        });
                     }
+                    observer.takeRecords();
                 },
 
                 touchend: function (event) {
-                    if (disabledInputs.indexOf(event.target) >= 0) {
-                        util.timer(
-                            function () {
+                    util.timer(
+                        function () {
+                            if (disabledInputs.indexOf(event.target) >= 0) {
                                 if (document.activeElement !== event.target) {
                                     event.target.disabled = true;
                                     observer.takeRecords();
                                 }
-                            },
-                            20
-                        );
-                    }
+                            } else {
+                                disabledInputs.forEach(function (item) {
+                                    item.disabled = true;
+                                });
+                                observer.takeRecords();
+                            }
+                        },
+                        20
+                    );
                 },
 
                 keyboardchange: function (event) {
