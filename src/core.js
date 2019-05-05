@@ -91,7 +91,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                             viewWidth = width;
                             viewHeight = height;
 
-                            repaint();
+                            core.repaint();
                         } else if (viewHeight !== height) {
                             if (isToucher) {
                                 // android 软键盘弹出和收起
@@ -112,7 +112,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
                                 viewHeight = height;
 
-                                repaint();
+                                core.repaint();
                             }
                         } else if (event && event.type === 'orientationchange') {
                             orientationHandle = util.timer(events.orientationchange, 100);
@@ -1370,9 +1370,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
     function initEnvironment() {
         if (scrollNarrow === undefined) {
             ecuiOptions = Object.assign(
-                {
-                    name: 'ui'
-                },
+                {name: 'ui'},
                 core.getOptions(document.body, 'data-ecui') || {}
             );
 
@@ -1784,63 +1782,6 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                     return;
                 }
             }
-        }
-    }
-
-    /**
-     * 重绘浏览器区域的控件。
-     * repaint 方法在页面改变大小时自动触发，一些特殊情况下，例如包含框架的页面，页面变化时不会触发 onresize 事件，需要手工调用 repaint 函数重绘所有的控件。
-     * @private
-     */
-    function repaint() {
-        function filter(item) {
-            return item.getParent() === resizeList && item.isShow();
-        }
-
-        // 拖拽状态时不进行窗体大小改变
-        if (currEnv.type === 'drag') {
-            return;
-        }
-
-        // 隐藏所有遮罩层
-        core.mask(false);
-
-        // 按广度优先查找所有正在显示的控件，保证子控件一定在父控件之后
-        for (var i = 0, list = [], resizeList = null, widthList; resizeList !== undefined; resizeList = list[i++]) {
-            Array.prototype.push.apply(list, core.query(filter));
-        }
-
-        resizeList = list.filter(function (item) {
-            core.dispatchEvent(item, 'resize', widthList = new ECUIEvent('repaint'));
-            // 这里与Control控件的$resize方法存在强耦合，repaint有值表示在$resize中没有进行针对ie的width值回填
-            if (widthList.repaint) {
-                return item;
-            }
-        });
-
-        if (resizeList.length) {
-            // 由于强制设置了100%，因此改变ie下控件的大小必须从内部向外进行
-            // 为避免多次reflow，增加一次循环
-            widthList = resizeList.map(function (item) {
-                return item.getMain().offsetWidth;
-            });
-            resizeList.forEach(function (item, index) {
-                item.getMain().style.width = widthList[index] - (isStrict ? item.$getBasicWidth() * 2 : 0) + 'px';
-            });
-        }
-
-        list.forEach(function (item) {
-            item.cache(true);
-        });
-        list.forEach(function (item) {
-            item.initStructure();
-        });
-
-        if (ieVersion < 8) {
-            // 解决 ie6/7 下直接显示遮罩层，读到的浏览器大小实际未更新的问题
-            util.timer(core.mask, 0, null, true);
-        } else {
-            core.mask(true);
         }
     }
 
@@ -2945,6 +2886,78 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                 if (gestureListeners[i][0] === control) {
                     gestureListeners.splice(i, 1);
                 }
+            }
+        },
+
+        /**
+         * 重绘浏览器区域的控件。
+         * repaint 方法在页面改变大小时自动触发，一些特殊情况下，例如包含框架的页面，页面变化时不会触发 onresize 事件，需要手工调用 repaint 函数重绘所有的控件。
+         * @public
+         */
+        repaint: function () {
+            function filter(item) {
+                return item.getParent() === resizeList && item.isShow();
+            }
+
+            // 拖拽状态时不进行窗体大小改变
+            if (currEnv.type === 'drag') {
+                return;
+            }
+
+            // 隐藏所有遮罩层
+            core.mask(false);
+
+            if (iosVersion < 11) {
+                list = [];
+                dom.toArray(document.all).forEach(function (el) {
+                    if (dom.getStyle(el, 'display').indexOf('flex') >= 0) {
+                        dom.children(el).forEach(function (el) {
+                            list.push([el, el.offsetWidth, el.offsetHeight]);
+                        });
+                    }
+                });
+                list.forEach(function (item) {
+                    item[0].style.width = item[1] + 'px';
+                    item[0].style.height = item[2] + 'px';
+                });
+            }
+
+            // 按广度优先查找所有正在显示的控件，保证子控件一定在父控件之后
+            for (var i = 0, list = [], resizeList = null, widthList; resizeList !== undefined; resizeList = list[i++]) {
+                Array.prototype.push.apply(list, core.query(filter));
+            }
+
+            resizeList = list.filter(function (item) {
+                core.dispatchEvent(item, 'resize', widthList = new ECUIEvent('repaint'));
+                // 这里与Control控件的$resize方法存在强耦合，repaint有值表示在$resize中没有进行针对ie的width值回填
+                if (widthList.repaint) {
+                    return item;
+                }
+            });
+
+            if (resizeList.length) {
+                // 由于强制设置了100%，因此改变ie下控件的大小必须从内部向外进行
+                // 为避免多次reflow，增加一次循环
+                widthList = resizeList.map(function (item) {
+                    return item.getMain().offsetWidth;
+                });
+                resizeList.forEach(function (item, index) {
+                    item.getMain().style.width = widthList[index] - (isStrict ? item.$getBasicWidth() * 2 : 0) + 'px';
+                });
+            }
+
+            list.forEach(function (item) {
+                item.cache(true);
+            });
+            list.forEach(function (item) {
+                item.initStructure();
+            });
+
+            if (ieVersion < 8) {
+                // 解决 ie6/7 下直接显示遮罩层，读到的浏览器大小实际未更新的问题
+                util.timer(core.mask, 0, null, true);
+            } else {
+                core.mask(true);
             }
         },
 
