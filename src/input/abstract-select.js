@@ -234,7 +234,7 @@ _uOptions     - 下拉选择框
                     this.alterStatus('-placeholder');
                 } else {
                     this.alterStatus('+placeholder');
-                    this.setText(dom.getAttribute(this.getInput(), 'placeholder'));
+                    this.setText(dom.getAttribute(this.getInput(), 'placeholder') || '');
                 }
             },
 

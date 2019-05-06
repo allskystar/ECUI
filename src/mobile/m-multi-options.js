@@ -276,7 +276,7 @@ _eText       - 文本框
                     this.alterStatus('-placeholder');
                 } else {
                     this.alterStatus('+placeholder');
-                    value = dom.getAttribute(this.getInput(), 'placeholder');
+                    value = dom.getAttribute(this.getInput(), 'placeholder') || '';
                 }
                 this._eText.innerHTML = util.encodeHTML(value);
             },
