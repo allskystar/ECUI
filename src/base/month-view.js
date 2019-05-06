@@ -69,8 +69,10 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
                 this._oEnd = new Date(options.end);
             }
             this._nOffset = +options.offset || 1;
-            this._oDate = options.date ? new Date(options.date) : new Date();
             this._nWeekday = +options.weekday || 0;
+
+            var date = options.date ? new Date(options.date) : new Date();
+            this._oDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
 
             this._aCells = this.$initView(options);
         },
@@ -90,7 +92,7 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
                      */
                     $click: function (event) {
                         event.item = this;
-                        event.date = new Date(this._nYear, this._nMonth, this._nDay);
+                        event.date = this._oDate;
                         core.dispatchEvent(this.getParent(), 'dateclick', event);
                     },
 
@@ -100,8 +102,8 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
                      *
                      * @return {number} 一个月中的第几天
                      */
-                    getDay: function () {
-                        return this._nDay;
+                    getDate: function () {
+                        return this._oDate;
                     }
                 }
             ),
@@ -207,6 +209,26 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
             },
 
             /**
+             * 获取日历控件当前月的第一天。
+             * @public
+             *
+             * @return {Date} 第一天的日期对象
+             */
+            getFirstDay: function () {
+                return this._oFirst;
+            },
+
+            /**
+             * 获取日历控件当前月的最后一天。
+             * @public
+             *
+             * @return {Date} 最后一天的日期对象
+             */
+            getLastDay: function () {
+                return this._oLast;
+            },
+
+            /**
              * 获取日历控件当前显示的月份。
              * @public
              *
@@ -257,7 +279,9 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
             setDate: function (date) {
                 this._oDate = date ? new Date(date.getTime()) : undefined;
                 date = date || new Date();
-                this.setView(date.getFullYear(), date.getMonth() + 1);
+
+                var day = date.getDate();
+                this.setView(date.getFullYear(), date.getMonth() + (this._nOffset < 0 ? day < -this._nOffset ? 1 : 2 : day < this._nOffset ? 0 : 1));
             },
 
             /**
@@ -305,6 +329,8 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
 
                 this._nYear = dateYear;
                 this._nMonth = dateMonth;
+                this._oFirst = firstDay;
+                this._oLast = lastDay;
 
                 setSelected(this);
 
@@ -313,8 +339,7 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
                         var date = new Date(firstDay.getTime() + (day + index) * 3600000 * 24),
                             el = item.getOuter();
 
-                        item._nYear = date.getFullYear();
-                        item._nMonth = date.getMonth();
+                        item._oDate = date;
                         item.getBody().innerHTML = item._nDay = date.getDate();
 
                         if (date >= begin && date <= end) {
@@ -324,7 +349,7 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
                             }
                             dom.removeClass(el, 'ui-extra');
                             delete item._bExtra;
-                            if (date === this._oDate) {
+                            if (date - this._oDate === 0) {
                                 setSelected(this, item);
                             }
                             item.enable();
