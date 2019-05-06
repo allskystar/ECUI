@@ -12,7 +12,6 @@
 
 @fields
 _bRequired    - 是否必须选择
-_sPlaceHolder - 为空时的提示信息内容
 _cSelected    - 当前选中的选项
 _uText        - 下拉框的文本框
 _uOptions     - 下拉选择框
@@ -86,7 +85,6 @@ _uOptions     - 下拉选择框
             this._uOptions = core.$fastCreate(this.Options, optionsEl, this, {focusable: false});
 
             this._bRequired = !!options.required;
-            this._sPlaceHolder = options.placeholder || dom.getAttribute(this.getInput(), 'placeholder') || '';
 
             this.setPopup(this._uOptions);
             this.$setBody(this._uOptions.getBody());
@@ -236,7 +234,7 @@ _uOptions     - 下拉选择框
                     this.alterStatus('-placeholder');
                 } else {
                     this.alterStatus('+placeholder');
-                    this.setText(this._sPlaceHolder);
+                    this.setText(dom.getAttribute(this.getInput(), 'placeholder'));
                 }
             },
 

@@ -37,7 +37,7 @@ _eText       - 文本框
             }));
             this._eText = el.lastChild;
 
-            ui.InputControl.call(this, el, Object.assign({enter: 'bottom', mask: 0.5, inputType: 'hidden'}, options));
+            ui.InputControl.call(this, el, Object.assign({inputType: 'hidden'}, options));
 
             this.setPopup(core.$fastCreate(this.Popup, popupEl, this));
 
@@ -68,7 +68,9 @@ _eText       - 文本框
             }
 
             this._oRegExp = new RegExp(des);
-            this._sPlaceHolder = options.placeholder || dom.getAttribute(this.getInput(), 'placeholder') || '';
+
+            options.enter = 'bottom';
+            options.mask = 0.5;
         },
         {
             /**
@@ -272,11 +274,11 @@ _eText       - 文本框
                 ui.InputControl.prototype.$setValue.call(this, value);
                 if (value) {
                     this.alterStatus('-placeholder');
-                    this._eText.innerHTML = util.encodeHTML(value);
                 } else {
                     this.alterStatus('+placeholder');
-                    this._eText.innerHTML = this._sPlaceHolder;
+                    value = dom.getAttribute(this.getInput(), 'placeholder');
                 }
+                this._eText.innerHTML = util.encodeHTML(value);
             },
 
             /**

@@ -18,8 +18,7 @@ _uOptions     - 下拉选择框
 (function () {
 //{if 0}//
     var core = ecui,
-        ui = core.ui,
-        util = core.util;
+        ui = core.ui;
 //{/if}//
     /**
      * 下拉框控件。
@@ -33,9 +32,12 @@ _uOptions     - 下拉选择框
         ui.$select,
         'ui-mobile-select',
         function (el, options) {
-            ui.$select.call(this, el, Object.assign({enter: 'bottom', mask: 0.5, inputType: 'hidden'}, options));
+            ui.$select.call(this, el, Object.assign({inputType: 'hidden'}, options));
 
             this.$getSection('Options').setOptionSize(options.optionSize || 3);
+
+            options.enter = 'bottom';
+            options.mask = 0.5;
         },
         {
             /**
