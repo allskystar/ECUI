@@ -216,7 +216,7 @@
              */
             $dragmove: function (event) {
                 this.$MScroll.$dragmove.call(this, event);
-                this.$MScrollData.inertia = event.inertia;
+                this.$MScrollData.inertia = !!event.inertia;
             },
 
             /**

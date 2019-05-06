@@ -1209,8 +1209,10 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                 core.dispatchEvent(target, 'dragmove', env.event);
                 env.event = null;
             }
-            core.dispatchEvent(target, 'dragend', event === undefined ? undefined : {force: true});
-            dom.removeClass(document.body, 'ui-drag');
+            if (event === undefined) {
+                core.dispatchEvent(target, 'dragend');
+                dom.removeClass(document.body, 'ui-drag');
+            }
         }
     }
 
@@ -2245,17 +2247,18 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                 return;
             }
             // 控件之前处于惯性状态必须停止
-            var uid = control.getUID();
+            var uid = control.getUID(),
+                force;
+
             if (inertiaHandles[uid]) {
                 inertiaHandles[uid]();
                 delete inertiaHandles[uid];
                 dragAnimationFrame(currEnv, control, false);
+                force = true;
             }
 
             if (event && activedControl !== undefined && currEnv.type !== 'drag') {
                 setEnv(dragEnv);
-
-                dom.addClass(document.body, 'ui-drag');
 
                 // 判断鼠标没有mouseup
                 var parent = control.getOuter().offsetParent || document.documentElement,
@@ -2299,7 +2302,11 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                 event.track.logicX = event.clientX;
                 event.track.logicY = event.clientY;
                 control.setPosition(x, y);
-                core.dispatchEvent(control, 'dragstart', {track: event.track});
+
+                if (!force) {
+                    core.dispatchEvent(control, 'dragstart', {track: event.track});
+                    dom.addClass(document.body, 'ui-drag');
+                }
 
                 //这里不能preventDefault事件，否则input的软键盘无法出现
             }
