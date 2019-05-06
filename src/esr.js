@@ -947,12 +947,12 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
         var oldModule = getModuleName(currLocation),
             newModule = getModuleName(loc);
 
-        currLocation = loc;
-
-        if (oldModule !== newModule) {
+        if (!currLocation || oldModule !== newModule) {
             dom.removeClass(document.body, 'module-' + oldModule.slice(0, -1).replace(/[._]/g, '-').replace(/\//g, '_'));
             dom.addClass(document.body, 'module-' + newModule.slice(0, -1).replace(/[._]/g, '-').replace(/\//g, '_'));
         }
+
+        currLocation = loc;
     }
 
     /**
