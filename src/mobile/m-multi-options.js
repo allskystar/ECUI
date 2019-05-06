@@ -269,7 +269,7 @@ _eText       - 文本框
              * @override
              */
             $setValue: function (value) {
-                ui.InputControl.prototype.$ready.call(this, value);
+                ui.InputControl.prototype.$setValue.call(this, value);
                 if (value) {
                     this.alterStatus('-placeholder');
                     this._eText.innerHTML = util.encodeHTML(value);
