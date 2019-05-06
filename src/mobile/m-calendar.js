@@ -56,13 +56,16 @@ _uDate   - 日部件
             $click: function (event) {
                 ui.MMultiOptions.prototype.$click.call(this, event);
                 if (dom.contain(this.getMain(), event.target)) {
-                    if (!this.getValue()) {
-                        var value = new Date();
-                        this._uYear.setValue(value.getFullYear());
-                        this._uMonth.setValue(value.getMonth() + 1);
-                        this._uDate.setValue(value.getDate());
+                    var date = new Date();
+                    if (!this._uYear.getValue()) {
+                        this._uYear.setValue(date.getFullYear());
                     }
-                    core.dispatchEvent(this, 'change');
+                    if (!this._uMonth.getValue()) {
+                        this._uMonth.setValue(date.getMonth() + 1);
+                    }
+                    if (!this._uDate.getValue()) {
+                        this._uDate.setValue(date.getDate());
+                    }
                 }
             }
         }

@@ -241,14 +241,18 @@ _eText       - 文本框
              * @event
              */
             $confirm: function () {
-                this.setValue(
-                    util.stringFormat.apply(
+                var oldValue = this.getValue(),
+                    value = util.stringFormat.apply(
                         null,
                         [this._sFormat].concat(this._aOptions.map(function (options) {
                             return options.getValue();
                         }))
-                    )
-                );
+                    );
+
+                if (oldValue !== value) {
+                    this.setValue(value);
+                    core.dispatchEvent(this, 'change');
+                }
             },
 
             /**
