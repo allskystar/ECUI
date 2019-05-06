@@ -1181,7 +1181,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
      *
      * @param {object} env ECUI 框架运行环境
      * @param {ecui.ui.Control} target 被拖拽的 ECUI 控件
-     * @param {ECUIEvent} event ECUI 事件对象，如果是dragend，这个值为undefined
+     * @param {ECUIEvent} event ECUI 事件对象，如果是dragend，这个值为 undefined(正常中止) 或 false(强行中止)
      */
     function dragAnimationFrame(env, target, event) {
         if (event) {
@@ -1209,7 +1209,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                 core.dispatchEvent(target, 'dragmove', env.event);
                 env.event = null;
             }
-            core.dispatchEvent(target, 'dragend');
+            core.dispatchEvent(target, 'dragend', event === undefined ? undefined : {force: true});
             dom.removeClass(document.body, 'ui-drag');
         }
     }
@@ -2249,7 +2249,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
             if (inertiaHandles[uid]) {
                 inertiaHandles[uid]();
                 delete inertiaHandles[uid];
-                dragAnimationFrame(currEnv, control);
+                dragAnimationFrame(currEnv, control, false);
             }
 
             if (event && activedControl !== undefined && currEnv.type !== 'drag') {

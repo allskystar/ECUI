@@ -151,10 +151,12 @@ _nDelay   - 延迟时间，如果不自动轮播这个值为0
              */
             $dragend: function (event) {
                 ui.MPanel.prototype.$dragend.call(this, event);
-                this.start();
-                var el = this.getBody();
-                if (el.firstChild !== el.lastChild) {
-                    refresh(this);
+                if (!event.force) {
+                    this.start();
+                    var el = this.getBody();
+                    if (el.firstChild !== el.lastChild) {
+                        refresh(this);
+                    }
                 }
             },
 
