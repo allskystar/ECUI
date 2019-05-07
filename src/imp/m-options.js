@@ -57,7 +57,7 @@
              */
             $cache: function (style) {
                 this.$MOptions.$cache.call(this, style);
-                this.$$itemHeight = util.toNumber(core.getCustomStyle(style, 'item-height'));
+                this.$$itemHeight = util.toNumber(dom.getCustomStyle(style, 'item-height'));
                 this.$alterItems();
             },
 

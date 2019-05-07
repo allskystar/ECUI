@@ -222,6 +222,24 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
             },
 
             /**
+             * 获取自定义样式。
+             * 标签自身的 content 样式没有意义，所以可以用于自定义样式的扩展。在 IE 9以下浏览器中，使用 filter 自定义样式。
+             * @public
+             *
+             * @param {HTMLElement|CSSStyle} item Element 对象或样式对象
+             * @param {string} name 自定义样式名称
+             * @return {string} 自定义样式值
+             */
+            getCustomStyle: function (item, name) {
+                if (dom.isElement(item)) {
+                    item = dom.getStyle(item);
+                }
+                var text = ieVersion < 9 ? item.filter : item.content ? item.content.trim().slice(1, -1) : '';
+                new RegExp('(^|\\s*)' + name + '\\s*:([^;]+)(;|$)').test(text);
+                return (RegExp.$2 || '').trim();
+            },
+
+            /**
              * 获取 Element 对象的页面位置。
              * getPosition 方法将返回指定 Element 对象的位置信息。属性如下：
              * left {number} X轴坐标

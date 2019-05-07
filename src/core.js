@@ -867,7 +867,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                         if (!el) {
                             break outer;
                         }
-                        if (core.getCustomStyle('pointer-events') === 'none') {
+                        if (dom.getCustomStyle(el, 'pointer-events') === 'none') {
                             caches.push([el, el.style.visibility]);
                             el.style.visibility = 'hidden';
                             break;
@@ -2372,21 +2372,6 @@ outer:          for (var caches = [], target = event.target, el; target; target 
          */
         getAttributeName: function () {
             return ecuiOptions.name;
-        },
-
-        /**
-         * 获取自定义样式。
-         * 标签自身的 content 样式没有意义，所以可以用于自定义样式的扩展。在 IE 9以下浏览器中，使用 filter 自定义样式。
-         * @public
-         *
-         * @param {HTMLElement} style Element 样式对象
-         * @param {string} name 自定义样式名称
-         * @return {string} 自定义样式值
-         */
-        getCustomStyle: function (style, name) {
-            var text = ieVersion < 9 ? style.filter : style.content ? style.content.trim().slice(1, -1) : '';
-            new RegExp('(^|\\s*)' + name + '\\s*:([^;]+)(;|$)').test(text);
-            return (RegExp.$2 || '').trim();
         },
 
         /**
