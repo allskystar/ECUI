@@ -1572,6 +1572,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                 }
             } : undefined,
 
+            userSelect: iosVersion ? 'webkitUserSelect' : 'userSelect',
             transform: iosVersion < 9 ? 'webkitTransform' : undefined,
 
             'float': ieVersion ? 'styleFloat' : 'cssFloat'
