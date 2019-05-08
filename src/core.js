@@ -2356,7 +2356,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
          * @param {HTMLElement} el 需要遍历flex元素的根元素
          */
         flexFixed: function (el) {
-            if (iosVersion < 11) {
+            if (iosVersion < 11 && ecuiOptions.flexFixed) {
                 var list = [];
                 [el].concat(dom.toArray(el.getElementsByTagName('*'))).forEach(flexElementToArray, list);
                 list.forEach(flexElementToBoxing);
@@ -2677,7 +2677,9 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                 initRecursion++;
 
                 dom.toArray(el.all || el.getElementsByTagName('*')).forEach(function (item) {
-                    flexElementToArray.call(list, item);
+                    if (iosVersion < 11 && ecuiOptions.flexFixed) {
+                        flexElementToArray.call(list, item);
+                    }
 
                     if (dom.getAttribute(item, ecuiOptions.name)) {
                         list.push(item);
