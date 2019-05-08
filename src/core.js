@@ -1315,7 +1315,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
      */
     function flexElementToArray(el) {
         var style = dom.getStyle(el);
-        if (style.display.indexOf('flex') >= 0 && core.getCustomStyle(style, 'flex-fixed') && el.offsetWidth) {
+        if (style.display.indexOf('flex') >= 0 && dom.getCustomStyle(style, 'flex-fixed') && el.offsetWidth) {
             dom.children(el).forEach(function (el) {
                 if (el.offsetWidth && el.offsetHeight) {
                     this.push([el, el.offsetWidth, el.offsetHeight]);
