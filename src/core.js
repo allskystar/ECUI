@@ -1308,6 +1308,34 @@ outer:          for (var caches = [], target = event.target, el; target; target 
     }
 
     /**
+     * 遍历flex元素并放入待处理list中。
+     * @private
+     *
+     * @param {HTMLElement} el DOM 元素
+     */
+    function flexElementToArray(el) {
+        var style = dom.getStyle(el);
+        if (style.display.indexOf('flex') >= 0 && core.getCustomStyle(style, 'flex-fixed') && el.offsetWidth) {
+            dom.children(el).forEach(function (el) {
+                if (el.offsetWidth && el.offsetHeight) {
+                    this.push([el, el.offsetWidth, el.offsetHeight]);
+                }
+            });
+        }
+    }
+
+    /**
+     * 遍历flex元素并设置大小。
+     * @private
+     *
+     * @param {Array} item DOM 元素信息
+     */
+    function flexElementToBoxing(item) {
+        item[0].style.width = item[1] + 'px';
+        item[0].style.height = item[2] + 'px';
+    }
+
+    /**
      * 获取两个控件的公共父控件。
      * @private
      *
@@ -2324,24 +2352,14 @@ outer:          for (var caches = [], target = event.target, el; target; target 
         /**
          * flex修正。
          * @public
+         *
+         * @param {HTMLElement} el 需要遍历flex元素的根元素
          */
-        flexFixed: function (element) {
+        flexFixed: function (el) {
             if (iosVersion < 11) {
                 var list = [];
-                dom.toArray(element).forEach(function (item) {
-                    var style = dom.getStyle(item);
-                    if (style.display.indexOf('flex') >= 0 && core.getCustomStyle(style, 'flex-fixed') && item.offsetWidth) {
-                        dom.children(item).forEach(function (el) {
-                            if (el.offsetWidth && el.offsetHeight) {
-                                list.push([el, el.offsetWidth, el.offsetHeight]);
-                            }
-                        });
-                    }
-                });
-                list.forEach(function (item) {
-                    item[0].style.width = item[1] + 'px';
-                    item[0].style.height = item[2] + 'px';
-                });
+                [el].concat(dom.toArray(el.all)).forEach(flexElementToArray, list);
+                list.forEach(flexElementToBoxing);
             }
         },
 
@@ -2659,17 +2677,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                 initRecursion++;
 
                 dom.toArray(el.all || el.getElementsByTagName('*')).forEach(function (item) {
-                    // 修正ios下flex布局的问题
-                    if (iosVersion < 11) {
-                        var style = dom.getStyle(item);
-                        if (style.display.indexOf('flex') >= 0 && core.getCustomStyle(style, 'flex-fixed') && item.offsetWidth) {
-                            dom.children(item).forEach(function (el) {
-                                if (el.offsetWidth && el.offsetHeight) {
-                                    list.push([el, el.offsetWidth, el.offsetHeight]);
-                                }
-                            });
-                        }
-                    }
+                    flexElementToArray.call(list, item);
 
                     if (dom.getAttribute(item, ecuiOptions.name)) {
                         list.push(item);
@@ -2678,8 +2686,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
 
                 list.forEach(function (item) {
                     if (item instanceof Array) {
-                        item[0].style.width = item[1] + 'px';
-                        item[0].style.height = item[2] + 'px';
+                        flexElementToBoxing(item);
                     } else if (options = core.getOptions(item)) {
                         if (item.getControl) {
                             oncreate(item.getControl(), options);
@@ -2924,7 +2931,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
 
             // 隐藏所有遮罩层
             core.mask(false);
-            core.flexFixed(document.all);
+            core.flexFixed(document.body);
 
             // 按广度优先查找所有正在显示的控件，保证子控件一定在父控件之后
             for (var i = 0, list = [], resizeList = null, widthList; resizeList !== undefined; resizeList = list[i++]) {
