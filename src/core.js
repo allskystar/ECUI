@@ -2358,7 +2358,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
         flexFixed: function (el) {
             if (iosVersion < 11) {
                 var list = [];
-                [el].concat(dom.toArray(el.all)).forEach(flexElementToArray, list);
+                [el].concat(dom.toArray(el.getElementsByTagName('*'))).forEach(flexElementToArray, list);
                 list.forEach(flexElementToBoxing);
             }
         },
