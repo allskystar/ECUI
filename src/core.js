@@ -701,6 +701,8 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             mousedown: util.blank,
 
             mousemove: function (event) {
+                bubble(event.getControl(), 'mousemove', event);
+
                 var view = util.getView();
                 dragStopHandler();
                 if (iosVersion && (event.clientX < 0 || event.clientX >= view.width || event.clientY < 0 || event.clientY >= view.height)) {
@@ -716,9 +718,6 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                 }
                 event.preventDefault();
             },
-
-            mouseout: util.blank,
-            mouseover: util.blank,
 
             mouseup: function (event) {
                 dragStopHandler();
@@ -3056,6 +3055,9 @@ outer:          for (var caches = [], target = event.target, el; target; target 
             if (event.clientX !== undefined) {
                 lastClientX = event.clientX;
                 lastClientY = event.clientY;
+            } else {
+                event.clientX = lastClientX;
+                event.clientY = lastClientY;
             }
 
             return new ECUIEvent(event.type, event);
