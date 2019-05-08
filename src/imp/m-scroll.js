@@ -188,18 +188,21 @@
              * @override
              */
             $activate: function (event) {
+                this.$MScroll.$activate.call(this, event);
+
                 if (keyboardHeight && iosVersion < 9) {
                     return;
                 }
-                this.cache();
 
-                this.$MScroll.$activate.call(this, event);
+                if (!util.hasIOSKeyboard(event.target)) {
+                    this.cache();
 
-                core.drag(
-                    this,
-                    event,
-                    getOptions(this)
-                );
+                    core.drag(
+                        this,
+                        event,
+                        getOptions(this)
+                    );
+                }
             },
 
             /**
@@ -209,6 +212,19 @@
                 this.$MScroll.$dragend.call(this, event);
                 this.$MScrollData.scrolling = false;
                 this.$MScrollData.inertia = false;
+
+                var activeElement = document.activeElement;
+                if (util.hasIOSKeyboard(activeElement) && activeElement.value) {
+                    // 当input有placeholder的时候，会导致光标无法隐藏
+                    this.$MScrollData._oHandler = util.timer(
+                        function () {
+                            dom.setStyle(activeElement, 'userSelect', '');
+                            delete this.$MScrollData._oHandler;
+                        },
+                        50,
+                        this
+                    );
+                }
             },
 
             /**
@@ -225,6 +241,14 @@
             $dragstart: function (event) {
                 this.$MScroll.$dragstart.call(this, event);
                 this.$MScrollData.scrolling = true;
+
+                if (util.hasIOSKeyboard(document.activeElement)) {
+                    if (this.$MScrollData._oHandler) {
+                        this.$MScrollData._oHandler();
+                    } else {
+                        dom.setStyle(document.activeElement, 'userSelect', 'none');
+                    }
+                }
             },
 
             /**
@@ -342,7 +366,25 @@
         }
     };
 
-    function scrollIntoViewIfNeededHandler() {
+    function scrollIntoViewIfNeededHandler(event) {
+        if (event && iosVersion) {
+            dom.setStyle(event.target, 'userSelect', '');
+            if (event.target.value === event.data) {
+                util.timer(function () {
+                    var input = event.target,
+                        type = input.type,
+                        pos = input.value.length;
+
+                    if ('number' === typeof input.selectionStart) {
+                        input.setSelectionRange(pos, pos);
+                    } else {
+                        input.type = 'text';
+                        input.setSelectionRange(pos, pos);
+                        input.type = type;
+                    }
+                });
+            }
+        }
         scrollIntoViewIfNeeded(keyboardHeight);
     }
 
@@ -554,6 +596,7 @@
                     }
 
                     dom.addEventListener(event.target, 'input', scrollIntoViewIfNeededHandler);
+                    dom.addEventListener(event.target, 'keydown', scrollIntoViewIfNeededHandler);
 
                     Array.prototype.slice.call(document.getElementsByTagName('INPUT')).concat(Array.prototype.slice.call(document.getElementsByTagName('TEXTAREA'))).forEach(function (item) {
                         if (item !== event.target) {
@@ -605,6 +648,7 @@
                                 window.scrollTo(0, Math.min(lastScrollY, keyboardHeight));
 
                                 fixed();
+                                scrollIntoViewIfNeededHandler();
                             });
                         });
                     }
@@ -616,6 +660,7 @@
                     }
 
                     dom.removeEventListener(event.target, 'input', scrollIntoViewIfNeededHandler);
+                    dom.removeEventListener(event.target, 'keydown', scrollIntoViewIfNeededHandler);
 
                     observer.disconnect();
                     disabledInputs.forEach(function (item) {
