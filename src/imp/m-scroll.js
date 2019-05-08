@@ -450,36 +450,36 @@
      * @private
      */
     function scrollListener(fn) {
-
-        function onscroll() {
-            checkHandle();
-            waitHandle();
-
-            if (lastScrollY === window.scrollY) {
-                window.requestAnimationFrame(function () {
-                    if (fn) {
-                        fn();
-                        fn = null;
-                    }
-                });
-            } else {
-                lastScrollY = window.scrollY;
-                window.requestAnimationFrame(onscroll);
-            }
-        }
-
         keyboardHandle();
 
         var lastScrollY = window.scrollY,
             // 保证1s后至少能触发一次执行
-            waitHandle = util.timer(onscroll, 1000),
+            waitHandle = util.timer(
+                function () {
+                    checkHandle();
+                    waitHandle();
+                    if (fn) {
+                        fn();
+                    }
+                },
+                1000
+            ),
             checkHandle = util.timer(
                 function () {
                     if (window.scrollY !== lastScrollY) {
-                        onscroll();
+                        checkHandle();
+                        waitHandle();
+                        util.timer(
+                            function () {
+                                if (fn) {
+                                    fn();
+                                }
+                            },
+                            200 // ios键盘动画时间
+                        );
                     }
                 },
-                -20
+                -1
             );
 
         return function () {
@@ -569,14 +569,12 @@
                         }
 
                         if (keyboardHeight) {
-                            if (util.hasIOSKeyboard(document.activeElement)) {
-                                if (oldHeight) {
+                            if (oldHeight) {
+                                fixed();
+                            } else {
+                                changeHandle = scrollListener(function () {
                                     fixed();
-                                } else {
-                                    changeHandle = scrollListener(function () {
-                                        fixed();
-                                    });
-                                }
+                                });
                             }
                         } else {
                             changeHandle = util.timer(
@@ -591,6 +589,36 @@
                 },
 
                 focusin: function (event) {
+                    function calcKeyboardHeight() {
+                        var lastScrollY = window.scrollY;
+                        keyboardHandle = util.timer(
+                            function () {
+                                if (window.scrollY !== lastScrollY && window.scrollY !== document.body.scrollHeight) {
+                                    keyboardHandle();
+                                    keyboardHeight = window.scrollY - statusHeight;
+                                    dom.addEventListener(window, 'touchmove', util.preventEvent);
+                                    // 复位
+                                    document.body.style.visibility = '';
+                                    window.scrollTo(0, lastScrollY);
+
+                                    fixed();
+                                    scrollIntoViewIfNeededHandler();
+                                } else {
+                                    document.body.style.visibility = 'hidden';
+                                    window.scrollTo(0, document.body.scrollHeight);
+                                }
+                            },
+                            -1
+                        );
+
+                        util.timer(
+                            function () {
+                                document.body.style.visibility = '';
+                            },
+                            200
+                        );
+                    }
+
                     if (!util.hasIOSKeyboard(event.target)) {
                         return;
                     }
@@ -618,6 +646,9 @@
                             fixed();
                             scrollIntoViewIfNeededHandler();
                         });
+                    } else if (iosVersion !== 11.1 && iosVersion !== 11.2 && dom.getPosition(event.target).top + event.target.offsetHeight < document.body.scrollHeight - (safariVersion ? innerKeyboardHeight : innerKeyboardHeight + statusHeight) * 1.2) {
+                        // 初始的0位置需要延迟执行
+                        calcKeyboardHeight();
                     } else {
                         keyboardHandle = scrollListener(function () {
                             if (iosVersion === 11.1 || iosVersion === 11.2) {
@@ -627,29 +658,7 @@
                                 return;
                             }
 
-                            // 第一次触发，开始测试软键盘高度
-                            var lastScrollY = window.scrollY;
-                            document.body.style.visibility = 'hidden';
-
-                            util.timer(
-                                function () {
-                                    document.body.style.visibility = '';
-                                },
-                                500
-                            );
-
-                            window.scrollTo(0, document.body.scrollHeight);
-                            keyboardHandle = scrollListener(function () {
-                                // 第二次触发，计算软键盘高度
-                                keyboardHeight = window.scrollY - statusHeight;
-                                dom.addEventListener(window, 'touchmove', util.preventEvent);
-                                // 复位
-                                document.body.style.visibility = '';
-                                window.scrollTo(0, Math.min(lastScrollY, keyboardHeight));
-
-                                fixed();
-                                scrollIntoViewIfNeededHandler();
-                            });
+                            calcKeyboardHeight();
                         });
                     }
                 },
