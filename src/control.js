@@ -1331,6 +1331,7 @@ _aStatus            - 控件当前的状态集合
                     }.bind(this)).forEach(function (item) {
                         item.cache();
                     });
+                    core.flexFixed(this.getMain());
                     return true;
                 }
                 return false;
