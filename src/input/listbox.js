@@ -40,6 +40,8 @@ _eInput - 选项对应的input，form提交时使用
                 function (el, options) {
                     ui.Item.call(this, el, options);
                     dom.insertHTML(el, 'beforeEnd', '<input type="hidden" name="' + options.parent._sName + '">');
+
+                    this._eInput = el.lastChild;
                     el.lastChild.value = options.value === undefined ? dom.getText(el) : options.value;
                     this.setSelected(!!options.selected);
                 },
