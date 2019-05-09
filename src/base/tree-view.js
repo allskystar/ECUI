@@ -359,6 +359,17 @@ _aChildren     - 子控件集合
             },
 
             /**
+             * 获取当前树视图控件的指定子树视图控件。
+             * @public
+             *
+             * @param {number} index 子树视图控件的序号
+             * @return {ecui.ui.TreeView} 树视图控件列表
+             */
+            getChild: function (index) {
+                return this._aChildren[index] || null;
+            },
+
+            /**
              * 获取当前树视图控件的所有子树视图控件。
              * @public
              *
@@ -388,6 +399,16 @@ _aChildren     - 子控件集合
              */
             isCollapsed: function () {
                 return !this._eChildren || this._bCollapsed;
+            },
+
+            /**
+             * 获取当前树视图控件的所有子树视图控件。
+             * @public
+             *
+             * @param {number} index 需要移除的项的序号
+             */
+            remove: function (index) {
+                this._aChildren[index].setParent();
             }
         }
     );

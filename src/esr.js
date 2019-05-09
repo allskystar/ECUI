@@ -1000,6 +1000,10 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                         pauseStatus = true;
 
                         core.disable();
+                        util.timer(function () {
+                            core.enable();
+                        }, 400);
+
                         if (!route.CACHE) {
                             dom.addClass(layerEl, 'ui-transition');
                         }
@@ -1026,8 +1030,6 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                                     renders.forEach(function (item) {
                                         item();
                                     });
-
-                                    core.enable();
                                 }
                             }
                         );
