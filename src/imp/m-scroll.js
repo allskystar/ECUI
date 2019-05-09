@@ -494,6 +494,10 @@
     }
 
     function allSafePosition() {
+        if (iosVersion) {
+            window.scrollTo(0, 0);
+            fixed();
+        }
         core.query(function (control) {
             return control.$MScroll && control.isShow();
         }).forEach(function (control) {
@@ -585,13 +589,7 @@
                                 }
                             }
                         } else {
-                            changeHandle = util.timer(
-                                function () {
-                                    window.scrollTo(0, 0);
-                                    allSafePosition();
-                                },
-                                100
-                            );
+                            changeHandle = util.timer(allSafePosition, 100);
                         }
                     }
                 },
@@ -696,12 +694,7 @@
 
                     keyboardHandle();
 
-                    topList.concat(bottomList).forEach(function (control) {
-                        dom.setStyle(control.getMain(), 'transform', '');
-                    });
-
                     keyboardHandle = scrollListener(function () {
-                        window.scrollTo(0, 0);
                         keyboardHeight = 0;
                         allSafePosition();
                         dom.removeEventListener(window, 'touchmove', util.preventEvent);
@@ -743,9 +736,7 @@
                 focusout: function (event) {
                     dom.removeEventListener(event.target, 'input', scrollIntoViewIfNeededHandler);
                     dom.removeEventListener(window, 'touchmove', util.preventEvent);
-                    keyboardHandle = scrollListener(function () {
-                        allSafePosition();
-                    });
+                    keyboardHandle = scrollListener(allSafePosition);
                 }
             };
 
