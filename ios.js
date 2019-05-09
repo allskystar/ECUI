@@ -8,4 +8,10 @@
         }
         oldAjax(url, options);
     };
+
+    ecui.ready(function () {
+        if (ecui.$('ECUI-FIXED-INPUT')) {
+            ecui.dom.remove(ecui.$('ECUI-FIXED-INPUT'));
+        }
+    });
 }());
