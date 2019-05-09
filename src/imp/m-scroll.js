@@ -389,13 +389,12 @@
         scrollIntoViewIfNeeded(keyboardHeight);
     }
 
-    function fixed(scrollY) {
-        scrollY = scrollY === undefined ? window.scrollY : scrollY;
+    function fixed() {
         topList.forEach(function (control) {
-            dom.setStyle(control.getMain(), 'transform', 'translateY(' + scrollY + 'px)');
+            dom.setStyle(control.getMain(), 'transform', 'translateY(' + window.scrollY + 'px)');
         });
         bottomList.forEach(function (control) {
-            dom.setStyle(control.getMain(), 'transform', 'translateY(' + (scrollY - keyboardHeight) + 'px)');
+            dom.setStyle(control.getMain(), 'transform', 'translateY(' + (window.scrollY - keyboardHeight) + 'px)');
         });
     }
 
@@ -633,15 +632,17 @@
 
                         keyboardHandle = scrollListener(function () {
                             if (iosVersion === 11.1 || iosVersion === 11.2) {
-                                keyboardHeight = safariVersion ? window.scrollY : window.scrollY + statusHeight;
+                                keyboardHeight = safariVersion ? window.scrollY - 5 : window.scrollY + statusHeight - 5;
 
                                 realTarget.focus();
                                 realTarget = null;
                                 fixedInput.disabled = true;
 
+                                window.scrollTo(0, 0);
                                 keyboardHandle = scrollListener(function () {
                                     dom.addEventListener(window, 'touchmove', util.preventEvent);
                                     fixed();
+                                    scrollIntoViewIfNeededHandler();
                                 });
                             } else {
                                 // 第一次触发，开始测试软键盘高度
