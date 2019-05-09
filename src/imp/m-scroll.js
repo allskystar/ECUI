@@ -603,7 +603,7 @@
                         return;
                     }
 
-                    if (iosVersion === 11.1 || iosVersion === 11.2) {
+                    if (fixedInput) {
                         realTarget = event.target;
                     }
 
@@ -631,13 +631,13 @@
                             scrollIntoViewIfNeededHandler();
                         });
                     } else {
-                        if (iosVersion === 11.1 || iosVersion === 11.2) {
+                        if (fixedInput) {
                             fixedInput.disabled = false;
                             fixedInput.focus();
                         }
 
                         keyboardHandle = scrollListener(function () {
-                            if (iosVersion === 11.1 || iosVersion === 11.2) {
+                            if (fixedInput) {
                                 keyboardHeight = safariVersion ? window.scrollY - 5 : window.scrollY + statusHeight - 5;
 
                                 realTarget.focus();
