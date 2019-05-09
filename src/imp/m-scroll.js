@@ -41,34 +41,35 @@
 
     var keyboardHeight = 0,
         statusHeight = 0,
-        innerKeyboardHeight;
+//        innerKeyboardHeight,
+        realTarget;
 
     if (iosVersion && safariVersion) {
         switch (screen.height) {
         case 568:
             // iphone 5S/SE
             statusHeight = 44;
-            innerKeyboardHeight = 253;
+//            innerKeyboardHeight = 253;
             break;
         case 667:
             // iphone 6/7/8/6S
             statusHeight = 44;
-            innerKeyboardHeight = iosVersion < 12 ? 258 : 260;
+//            innerKeyboardHeight = iosVersion < 12 ? 258 : 260;
             break;
         case 736:
             // iphone 6/7/8 Plus
             statusHeight = 44;
-            innerKeyboardHeight = 271;
+//            innerKeyboardHeight = 271;
             break;
         case 812:
             // iphone X/XS
             statusHeight = 83;
-            innerKeyboardHeight = iosVersion < 12 ? 294 : 296;
+//            innerKeyboardHeight = iosVersion < 12 ? 294 : 296;
             break;
         case 896:
             // iphone XR/XS max
             statusHeight = 83;
-            innerKeyboardHeight = 307;
+//            innerKeyboardHeight = 307;
             break;
         }
     }
@@ -591,8 +592,14 @@
                 },
 
                 focusin: function (event) {
-                    if (!util.hasIOSKeyboard(event.target)) {
+                    var fixedInput = core.$('ECUI-FIXED-INPUT');
+
+                    if (!util.hasIOSKeyboard(event.target) || realTarget === event.target || event.target === fixedInput) {
                         return;
+                    }
+
+                    if (iosVersion === 11.1 || iosVersion === 11.2) {
+                        realTarget = event.target;
                     }
 
                     dom.addEventListener(event.target, 'input', scrollIntoViewIfNeededHandler);
@@ -619,43 +626,54 @@
                             scrollIntoViewIfNeededHandler();
                         });
                     } else {
+                        if (iosVersion === 11.1 || iosVersion === 11.2) {
+                            fixedInput.disabled = false;
+                            fixedInput.focus();
+                        }
+
                         keyboardHandle = scrollListener(function () {
                             if (iosVersion === 11.1 || iosVersion === 11.2) {
-                                keyboardHeight = safariVersion ? innerKeyboardHeight : innerKeyboardHeight + statusHeight;
-                                dom.addEventListener(window, 'touchmove', util.preventEvent);
-                                fixed();
-                                return;
-                            }
+                                keyboardHeight = safariVersion ? window.scrollY : window.scrollY + statusHeight;
 
-                            // 第一次触发，开始测试软键盘高度
-                            var lastScrollY = window.scrollY;
-                            document.body.style.visibility = 'hidden';
+                                realTarget.focus();
+                                realTarget = null;
+                                fixedInput.disabled = true;
 
-                            util.timer(
-                                function () {
+                                keyboardHandle = scrollListener(function () {
+                                    dom.addEventListener(window, 'touchmove', util.preventEvent);
+                                    fixed();
+                                });
+                            } else {
+                                // 第一次触发，开始测试软键盘高度
+                                var lastScrollY = window.scrollY;
+                                document.body.style.visibility = 'hidden';
+
+                                util.timer(
+                                    function () {
+                                        document.body.style.visibility = '';
+                                    },
+                                    500
+                                );
+
+                                window.scrollTo(0, document.body.scrollHeight);
+                                keyboardHandle = scrollListener(function () {
+                                    // 第二次触发，计算软键盘高度
+                                    keyboardHeight = window.scrollY - statusHeight;
+                                    dom.addEventListener(window, 'touchmove', util.preventEvent);
+                                    // 复位
                                     document.body.style.visibility = '';
-                                },
-                                500
-                            );
+                                    window.scrollTo(0, Math.min(lastScrollY, keyboardHeight));
 
-                            window.scrollTo(0, document.body.scrollHeight);
-                            keyboardHandle = scrollListener(function () {
-                                // 第二次触发，计算软键盘高度
-                                keyboardHeight = window.scrollY - statusHeight;
-                                dom.addEventListener(window, 'touchmove', util.preventEvent);
-                                // 复位
-                                document.body.style.visibility = '';
-                                window.scrollTo(0, Math.min(lastScrollY, keyboardHeight));
-
-                                fixed();
-                                scrollIntoViewIfNeededHandler();
-                            });
+                                    fixed();
+                                    scrollIntoViewIfNeededHandler();
+                                });
+                            }
                         });
                     }
                 },
 
                 focusout: function (event) {
-                    if (!util.hasIOSKeyboard(event.target)) {
+                    if (!util.hasIOSKeyboard(event.target) || realTarget === event.target || event.target === core.$('ECUI-FIXED-INPUT')) {
                         return;
                     }
 
@@ -675,23 +693,12 @@
                         dom.setStyle(control.getMain(), 'transform', '');
                     });
 
-                    if (window.scrollY) {
-                        keyboardHandle = scrollListener(function () {
-                            keyboardHeight = 0;
-                            window.scrollTo(0, 0);
-                            allSafePosition();
-                            dom.removeEventListener(window, 'touchmove', util.preventEvent);
-                        });
-                    } else {
-                        keyboardHandle = util.timer(
-                            function () {
-                                keyboardHeight = 0;
-                                allSafePosition();
-                                dom.removeEventListener(window, 'touchmove', util.preventEvent);
-                            },
-                            100
-                        );
-                    }
+                    keyboardHandle = scrollListener(function () {
+                        window.scrollTo(0, 0);
+                        keyboardHeight = 0;
+                        allSafePosition();
+                        dom.removeEventListener(window, 'touchmove', util.preventEvent);
+                    });
                 }
             } : {
                 // android，处理软键盘问题

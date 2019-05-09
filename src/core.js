@@ -614,19 +614,8 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                     dblclick = Date.now() - lastClick.time < 500,
                     commonParent;
 
-                if (click) { // TouchEvent
-                    if ((event.target.tagName === 'INPUT' && event.target.type !== 'radio' && event.target.type !== 'checkbox') || event.target.tagName === 'TEXTAREA') {
-                        util.timer(function () {
-                            if (document.activeElement !== event.target) {
-                                event.target.focus();
-                            }
-                        });
-                        commonParent = true;
-                    }
-                }
-
                 if (activedControl !== undefined) {
-                    if (click && !commonParent) { // TouchEvent
+                    if (click && ((event.target.tagName !== 'INPUT' || event.target.type === 'radio' || event.target.type === 'checkbox') && event.target.tagName !== 'TEXTAREA')) { // TouchEvent
                         core.setFocused(activedControl);
                     }
 
@@ -1484,6 +1473,10 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                     el.appendChild(document.body.firstChild);
                 }
                 document.body.appendChild(el);
+
+                if (iosVersion === 11.1 || iosVersion === 11.2) {
+                    document.body.appendChild(dom.create('INPUT', {id: 'ECUI-FIXED-INPUT'})).disabled = true;
+                }
             }
             core.init(document.body);
             el = null;
