@@ -458,7 +458,7 @@
         function onscroll() {
             checkHandle();
             waitHandle();
-
+            // 键盘可能分几次步骤弹出，需要找到不再继续变化的时候才触发函数
             if (lastScrollY === window.scrollY) {
                 window.requestAnimationFrame(function () {
                     if (fn) {
