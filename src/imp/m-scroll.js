@@ -441,7 +441,11 @@
         if (scroll) {
             setSafePosition(scroll, scroll.getY() + y);
         } else if (y) {
-            window.scrollTo(0, window.scrollY + y);
+            if (iosVersion) {
+                core.$('ECUI-FIXED-BODY').scrollTop = y;
+            } else {
+                window.scrollTo(0, window.scrollY + y);
+            }
         }
     }
 
@@ -572,9 +576,11 @@
                             if (util.hasIOSKeyboard(document.activeElement)) {
                                 if (oldHeight) {
                                     fixed();
+                                    scrollIntoViewIfNeededHandler();
                                 } else {
                                     changeHandle = scrollListener(function () {
                                         fixed();
+                                        scrollIntoViewIfNeededHandler();
                                     });
                                 }
                             }
