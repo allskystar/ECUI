@@ -41,6 +41,7 @@
 
     var keyboardHeight = 0,
         statusHeight = 0,
+        fixedHeight = 0,
 //        innerKeyboardHeight,
         realTarget;
 
@@ -49,21 +50,25 @@
         case 568:
             // iphone 5S/SE
             statusHeight = 44;
+            fixedHeight = 13;
 //            innerKeyboardHeight = 253;
             break;
         case 667:
             // iphone 6/7/8/6S
             statusHeight = 44;
+            fixedHeight = 13;
 //            innerKeyboardHeight = iosVersion < 12 ? 258 : 260;
             break;
         case 736:
             // iphone 6/7/8 Plus
             statusHeight = 44;
+            fixedHeight = 13;
 //            innerKeyboardHeight = 271;
             break;
         case 812:
             // iphone X/XS
             statusHeight = 83;
+            fixedHeight = 6;
 //            innerKeyboardHeight = iosVersion < 12 ? 294 : 296;
             break;
         case 896:
@@ -625,6 +630,9 @@
                         core.setFocused(core.findControl(event.target));
 
                         keyboardHandle = scrollListener(function () {
+                            if (fixedInput) {
+                                window.scrollTo(0, 0);
+                            }
                             fixed();
                             scrollIntoViewIfNeededHandler();
                         });
@@ -636,7 +644,7 @@
 
                         keyboardHandle = scrollListener(function () {
                             if (fixedInput) {
-                                keyboardHeight = safariVersion ? window.scrollY - 5 : window.scrollY + statusHeight - 5;
+                                keyboardHeight = window.scrollY - fixedHeight;
 
                                 realTarget.focus();
                                 realTarget = null;
