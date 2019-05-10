@@ -1,4 +1,4 @@
-var daikuan = {},
+var yiche = {},
     ui = {};
 ecui.dom.getParent = ecui.dom.parent;
 ecui.util.extend = Object.assign;

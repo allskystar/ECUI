@@ -217,9 +217,7 @@
                                 this.Listbox,
                                 el.appendChild(dom.create('div', {
                                     className: 'ui-listbox',
-                                    innerHTML: houer.map(function (item) {
-                                        return '<div ui="value:' + item.value + '">' + item.code + '</div>';
-                                    }).join('')
+                                    innerHTML: houer.map(function (item) { return '<div ui="value:' + item.value + '">' + item.code + '</div>'; }).join('')
                                 })),
                                 this,
                                 {
@@ -230,9 +228,7 @@
                                 this.Listbox,
                                 el.appendChild(dom.create('div', {
                                     className: 'ui-listbox',
-                                    innerHTML: minute.map(function (item) {
-                                        return '<div ui="value:' + item.value + '">' + item.code + '</div>';
-                                    }).join('')
+                                    innerHTML: minute.map(function (item) { return '<div ui="value:' + item.value + '">' + item.code + '</div>'; }).join('')
                                 })),
                                 this,
                                 {
@@ -243,9 +239,7 @@
                                 this.Listbox,
                                 el.appendChild(dom.create('div', {
                                     className: 'ui-listbox',
-                                    innerHTML: houer.map(function (item) {
-                                        return '<div ui="value:' + item.value + '">' + item.code + '</div>';
-                                    }).join('')
+                                    innerHTML: houer.map(function (item) { return '<div ui="value:' + item.value + '">' + item.code + '</div>'; }).join('')
                                 })),
                                 this,
                                 {
@@ -256,9 +250,7 @@
                                 this.Listbox,
                                 el.appendChild(dom.create('div', {
                                     className: 'ui-listbox',
-                                    innerHTML: minute.map(function (item) {
-                                        return '<div ui="value:' + item.value + '">' + item.code + '</div>';
-                                    }).join('')
+                                    innerHTML: minute.map(function (item) { return '<div ui="value:' + item.value + '">' + item.code + '</div>'; }).join('')
                                 })),
                                 this,
                                 {
@@ -290,14 +282,11 @@
                                         if (this._sValue === '00') {
                                             this.setSelected(this.getItem(0));
                                         } else {
-                                            this.getItems().forEach(
-                                                function (item) {
-                                                    if (item.getValue() === this._sValue) {
-                                                        this.setSelected(item);
-                                                    }
-                                                },
-                                                this
-                                            );
+                                            this.getItems().forEach(function (item) {
+                                                if (item.getValue() === this._sValue) {
+                                                    this.setSelected(item);
+                                                }
+                                            }.bind(this));
                                         }
                                     },
 

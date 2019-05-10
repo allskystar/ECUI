@@ -165,7 +165,14 @@
 
                 (item instanceof Array ? item : [item]).forEach(
                     function (item) {
-                        if (!(item instanceof ui.Item)) {
+                        if (item instanceof ui.Item) {
+                            // 选项控件位于其它items对象中，先进行移除
+                            var parent = item.getParent();
+                            if (parent && !parent.remove(item)) {
+                                // 不允许移除子控件，直接结束
+                                return;
+                            }
+                        } else {
                             // 根据是字符串还是Element对象选择不同的初始化方式
                             if (dom.isElement(item)) {
                                 var text = dom.getAttribute(item, core.getAttributeName()),

@@ -21,19 +21,19 @@
      * 菜单控件。
      * @control
      */
-    ui.Menu = core.inherits(
+    ui.PopupMenu = core.inherits(
         ui.Control,
         'ui-menu',
         {
             Item: core.inherits(
                 ui.Item,
-                'ui-menu-item',
+                'ui-popup-menu-item',
                 function (el, options) {
                     if (el.tagName === 'UL') {
                         var popup = el;
                         el = dom.insertBefore(dom.first(el), popup);
                         document.body.appendChild(popup);
-                        dom.addClass(popup, 'ui-menu ui-hide');
+                        dom.addClass(popup, 'ui-popup-menu ui-hide');
                     }
 
                     ui.Item.call(this, el, options);
@@ -43,20 +43,18 @@
                     }
                 },
                 {
-                    $mouseover: function (event) {
-                        ui.Item.prototype.$mouseover.call(this, event);
-                        if (this._cPopup) {
-                            this._cPopup.show();
-                            var pos = dom.getPosition(this.getMain()),
-                                height = this._cPopup.getHeight();
-                            this._cPopup.setPosition(pos.left + this.getWidth() - 4, pos.top - Math.round((height - this.getHeight()) / 2));
-                        }
-                    },
-
                     $mouseout: function (event) {
                         ui.Item.prototype.$mouseout.call(this, event);
                         if (this._cPopup) {
                             this._cPopup.hide();
+                        }
+                    },
+
+                    $mouseover: function (event) {
+                        ui.Item.prototype.$mouseover.call(this, event);
+                        if (this._cPopup) {
+                            this._cPopup.show();
+                            this._cPopup.assignTo(this);
                         }
                     },
 
@@ -78,7 +76,15 @@
                 }
             ),
 
-            $alterItems: util.blank
+            $alterItems: util.blank,
+
+            assignTo: function (control) {
+                var pos = dom.getPosition(control.getMain()),
+                    height  = this.getHeight(),
+                    view = util.getView();
+
+                this.setPosition(Math.min(pos.left + control.getWidth() - 4, view.right - this.getWidth()), Math.max(0, Math.min(pos.top - Math.round((height - control.getHeight()) / 2), view.bottom - height)));
+            }
         },
         ui.Items
     );

@@ -107,11 +107,8 @@ _nDelay   - 延迟时间，如果不自动轮播这个值为0
                 bottom: 0
             });
 
-            if (el.firstChild !== el.lastChild) {
-                if (options.delay) {
-                    this._nDelay = options.delay * 1000;
-                    this.start();
-                }
+            if (options.delay) {
+                this._nDelay = options.delay * 1000;
             }
         },
         {
@@ -172,6 +169,8 @@ _nDelay   - 延迟时间，如果不自动轮播这个值为0
                     dom.insertBefore(dom.create('IMG'), el.firstChild);
                     dom.insertAfter(dom.create('IMG'), el.lastChild);
                     show(this, 0);
+
+                    this.start();
                 }
             },
 

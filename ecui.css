@@ -4,7 +4,10 @@
     *display: inline;
     *zoom: 1;
 }
-
+.opacity0() {
+    opacity: 0;
+    filter: alpha(opacity=00);
+}
 .width100rate() {
     width: 100% !important;
     padding-right: 0px !important;
@@ -39,7 +42,7 @@
 @import (less) 'css/popup.css';
 
 @import (less) 'css/button.css';
-@import (less) 'css/menu.css';
+@import (less) 'css/popup-menu.css';
 @import (less) 'css/image.css';
 @import (less) 'css/dialog.css';
 @import (less) 'css/progress.css';
@@ -74,3 +77,5 @@
 @import (less) 'css/m-tab.css';
 
 @import (less) 'css/svg.css';
+
+@import (less) 'css/bi-controls.css';

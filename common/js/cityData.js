@@ -3,7 +3,7 @@
      * 城市地区数据来源于http://www.stats.gov.cn/tjsj/tjbz/xzqhdm/201703/t20170310_1471429.html
      */
 
-    daikuan.cities = {
+    yiche.cities = {
         "110000": "北京市",
         "110100": "北京市",
         "110101": "东城区",

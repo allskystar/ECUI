@@ -35,23 +35,21 @@
                 var value = this.getRoot().getParent().getParent().getInput().value;
                 if (value === this._sValue) {
                     this.getRoot().getParent().getParent().setSelected(this);
+                    console.log(event);
                     core.dispatchEvent(this.getRoot().getParent().getParent(), 'change', event);
                 }
             },
             onready: function (event) {
-                ecui.util.timer(
-                    function () {
-                        if (this.getRoot().getParent().getParent().getInput()) {
-                            var value = this.getRoot().getParent().getParent().getInput().value;
-                            if (value === this._sValue) {
-                                this.getRoot().getParent().getParent().setSelected(this);
-                                core.dispatchEvent(this.getRoot().getParent().getParent(), 'change', event);
-                            }
+                ecui.util.timer(function () {
+                    if (this.getRoot().getParent().getParent().getInput()) {
+                        var value = this.getRoot().getParent().getParent().getInput().value;
+                        if (value === this._sValue) {
+                            this.getRoot().getParent().getParent().setSelected(this);
+                            console.log(event);
+                            core.dispatchEvent(this.getRoot().getParent().getParent(), 'change', event);
                         }
-                    },
-                    0,
-                    this
-                );
+                    }
+                }.bind(this), 0);
             }
         }
     );

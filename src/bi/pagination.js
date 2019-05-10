@@ -43,35 +43,25 @@ _nTotalPage       - 总页数
         'ui-pagination',
         function (el, options) {
             ui.Control.call(this, el, options);
-            if (FeatureFlags.PAGEON_1) {
-                // page值的形式: offset,total,pageSize,totalPage
-                var page = options.page.split(',');
-                // 定义当前页数
-                this._nCurrentPage = Math.ceil((+page[0] + 1) / +page[2]);
-                // 定义总页数
-                this._nTotalPage = +page[3];
+            // page值的形式: offset,total,pageSize,totalPage
+            var page = options.page.split(',');
+            // 定义当前页数
+            this._nCurrentPage = Math.ceil((+page[0] + 1) / +page[2]);
+            // 定义总页数
+            this._nTotalPage = +page[3];
 
-                el.innerHTML = '<div class="pagination"></div>'
-                                + '<div class="pagination-msgBox clearfix">'
-                                + (options.skipInput ? '<div class="pagination-msg">第<input class="ui-text ui-input" />页</div>' : '')
-                                + '<div class="pagination-msg">共' + this._nTotalPage + '页</div>'
-                                + '<div class="pagination-msg">共' + (+page[1]) + '条</div>'
-                                + '</div>';
-                this.$setBody(el.firstChild);
-                if (options.skipInput) {
-                    this._uSkipInput = core.$fastCreate(ui.Text, el.children[1].firstChild.children[0], this);
-                    this._uSkipInput.setValue(this._nCurrentPage);
-                    this._uSkipInput.oninput = validate;
-                    this._uSkipInput.onkeydown = skipTo;
-                }
-
-            } else {
-                var offset = options.page.split('-');
-                var pageSize = +offset[1] - offset[0] + 1;
-                // 定义当前页数
-                this._nCurrentPage = Math.ceil(+offset[1] / pageSize);
-                // 定义总页数
-                this._nTotalPage = Math.ceil(options.total / pageSize);
+            el.innerHTML = '<div class="pagination"></div>'
+                            + '<div class="pagination-msgBox clearfix">'
+                            + (options.skipInput ? '<div class="pagination-msg">第<input class="ui-text ui-input" />页</div>' : '')
+                            + '<div class="pagination-msg">共' + this._nTotalPage + '页</div>'
+                            + '<div class="pagination-msg">共' + (+page[1]) + '条</div>'
+                            + '</div>';
+            this.$setBody(el.firstChild);
+            if (options.skipInput) {
+                this._uSkipInput = core.$fastCreate(ui.Text, el.children[1].firstChild.children[0], this);
+                this._uSkipInput.setValue(this._nCurrentPage);
+                this._uSkipInput.oninput = validate;
+                this._uSkipInput.onkeydown = skipTo;
             }
         },
         {
@@ -144,12 +134,8 @@ _nTotalPage       - 总页数
                     html.push(start === currentPage ? '<strong>' + start + '</strong>' : '<span>' + start + '</span>');
                 }
 
-                if (FeatureFlags.PAGEON_1) {
-                    // 填充数字按钮区
-                    this.getBody().innerHTML = util.stringFormat('<{0}>&lt;&lt;</{0}><{0}>&lt;</{0}>', currentPage === 1 ? 'font' : 'span') + html.join('') + util.stringFormat('<{0}>&gt;</{0}><{0}>&gt;&gt;</{0}>', currentPage === totalPage ? 'font' : 'span');
-                } else {
-                    this.getMain().innerHTML = util.stringFormat('<{0}>&lt;&lt;</{0}><{0}>&lt;</{0}>', currentPage === 1 ? 'font' : 'span') + html.join('') + util.stringFormat('<{0}>&gt;</{0}><{0}>&gt;&gt;</{0}>', currentPage === totalPage ? 'font' : 'span');
-                }
+                // 填充数字按钮区
+                this.getBody().innerHTML = util.stringFormat('<{0} class="first">&lt;&lt;</{0}><{0} class="prev">&lt;</{0}>', currentPage === 1 ? 'font' : 'span') + html.join('') + util.stringFormat('<{0} class="next">&gt;</{0}><{0} class="last">&gt;&gt;</{0}>', currentPage === totalPage ? 'font' : 'span');
             },
             go: function (pageNo) {
                 ecui.esr.callRoute(ecui.esr.findRoute(this).NAME + '~pageNo=' + pageNo, true);

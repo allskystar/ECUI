@@ -18,7 +18,7 @@ var ecui;
     document.write('<script type="text/javascript" src="src/imp/m-options.js"></script>');
 
     document.write('<script type="text/javascript" src="src/base/button.js"></script>');
-    document.write('<script type="text/javascript" src="src/base/menu.js"></script>');
+    document.write('<script type="text/javascript" src="src/base/popup-menu.js"></script>');
     document.write('<script type="text/javascript" src="src/base/image.js"></script>');
     document.write('<script type="text/javascript" src="src/base/month-view.js"></script>');
     document.write('<script type="text/javascript" src="src/base/calendar.js"></script>');

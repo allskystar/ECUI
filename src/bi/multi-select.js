@@ -30,6 +30,8 @@
         ui.InputControl,
         'ui-custome-check-box',
         function (el, options) {
+            util.setDefault(options, 'readOnly', true);
+            util.setDefault(options, 'inputType', 'text');
             var oldEl = el;
             el = dom.insertBefore(
                 dom.create(
@@ -43,7 +45,7 @@
                 ),
                 el
             );
-            ui.InputControl.call(this, el, Object.assign({readOnly: true, inputType: 'text'}, options));
+            ui.InputControl.call(this, el, options);
 
             oldEl.className += ' ui-custome-check-box-popup ui-popup ui-hide';
             this._uPopup = core.$fastCreate(ui.Control, oldEl, this);
@@ -61,25 +63,19 @@
                 if (target.tagName === 'BUTTON') {
                     this._uPopup.hide();
                     if (ecui.dom.hasClass(target, 'sure')) {
-                        var checkBox = ecui.query(
-                            function (item) {
-                                return item instanceof ecui.ui.Checkbox && item.getParent() === this.getPopup();
-                            },
-                            this
-                        );
+                        var checkBox = ecui.query(function (item) {
+                            return item instanceof ecui.ui.Checkbox && item.getParent() === this.getPopup();
+                        }, this);
                         // this._cValue = [];
                         var content = [];
-                        checkBox.forEach(
-                            function (item) {
-                                if (item.isChecked()) {
-                                    if (!_this._cValue.includes(item.getValue())) {
-                                        value.push(item.getValue());
-                                        content.push(ecui.dom.getParent(item.getMain()).innerText);
-                                    }
+                        checkBox.forEach(function (item) {
+                            if (item.isChecked()) {
+                                if (!_this._cValue.includes(item.getValue())) {
+                                    value.push(item.getValue());
+                                    content.push(ecui.dom.getParent(item.getMain()).innerText);
                                 }
-                            },
-                            this
-                        );
+                            }
+                        }, this);
 
                         // 添加选项的value
                         this._cValue = this._cValue.concat(value);

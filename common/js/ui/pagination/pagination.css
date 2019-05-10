@@ -34,9 +34,11 @@
 	.pagination,
 	.pagination-msgBox {
 		display: inline-block;
+		vertical-align: middle;
 	}
 	.pagination-msg {
 		display: inline-block;
+		vertical-align: middle;
 		margin-left: 15px;
 	}
 }

@@ -63,20 +63,16 @@
                         } else {
                             parent.setSelection(0, 0);
                         }
-                        util.timer(
-                            function () {
-                                if (this._bEmpty) {
-                                    delete this._bEmpty;
-                                    parent.setValue('');
-                                    parent.setSelection(0, 0);
-                                } else {
-                                    parent.setSelection(parent.getValue().length);
-                                }
-                                core.setFocused(parent);
-                            },
-                            0,
-                            this
-                        );
+                        util.timer(function () {
+                            if (this._bEmpty) {
+                                delete this._bEmpty;
+                                parent.setValue('');
+                                parent.setSelection(0, 0);
+                            } else {
+                                parent.setSelection(parent.getValue().length);
+                            }
+                            core.setFocused(parent);
+                        }, 0, this);
                     } : util.blank
                 }
             )
