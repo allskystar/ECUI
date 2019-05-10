@@ -39,7 +39,7 @@
                     ui.Item.call(this, el, options);
 
                     if (popup) {
-                        this.setPopup(core.$fastCreate(ui.Menu, popup, this));
+                        this.setPopup(core.$fastCreate(ui.PopupMenu, popup, this));
                     }
                 },
                 {
