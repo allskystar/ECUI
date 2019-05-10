@@ -23,7 +23,7 @@
      */
     ui.PopupMenu = core.inherits(
         ui.Control,
-        'ui-menu',
+        'ui-popup-menu',
         {
             Item: core.inherits(
                 ui.Item,
