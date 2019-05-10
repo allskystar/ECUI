@@ -606,10 +606,6 @@
                         return;
                     }
 
-                    if (fixedInput) {
-                        realTarget = event.target;
-                    }
-
                     dom.addEventListener(event.target, 'input', scrollIntoViewIfNeededHandler);
                     dom.addEventListener(event.target, 'keydown', scrollIntoViewIfNeededHandler);
 
@@ -638,6 +634,7 @@
                         });
                     } else {
                         if (fixedInput) {
+                            realTarget = event.target;
                             fixedInput.disabled = false;
                             fixedInput.focus();
                         }
