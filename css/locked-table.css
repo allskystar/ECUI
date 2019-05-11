@@ -13,7 +13,6 @@
         background: transparent !important;
         content: 'pointer-events: none';
         filter: pointer-events(none);
-        pointer-events: none !important;
     }
 
     .ui-locked-table-body {
