@@ -6,7 +6,7 @@ ecui.ext.esr = ecui.ext.data;
     var oldFn = ecui.$create;
     ecui.$create = function (UIClass, options) {
         var primary = options.main ? options.main.className.trim().split(' ')[0] : '',
-            classes = UIClass.TYPES[0].slice();
+            classes = options.classes = UIClass.TYPES[0].slice();
 
         if (primary !== classes[0]) {
             classes.push(primary);
