@@ -225,14 +225,14 @@ _eInput        - INPUT对象
                 inputEl.style.cssText = '';
                 el.appendChild(inputEl);
 //{if 0}//
-                if ((options.inputType === 'textarea' && inputEl.tagName === 'TEXTAREA') || inputEl.type !== options.inputType || options.name !== undefined || options.value !== undefined || options.readOnly !== undefined || options.checked !== undefined || options.placeholder !== undefined) {
+                if ((options.inputType === 'textarea' && inputEl.tagName === 'TEXTAREA') || (options.inputType && inputEl.type !== options.inputType) || options.name !== undefined || options.value !== undefined || options.readOnly !== undefined || options.checked !== undefined || options.placeholder !== undefined) {
                     console.warn('显式定义了输入框不要再重复设置参数');
                 }
 //{/if}//
             } else {
                 inputEl = el.getElementsByTagName('INPUT')[0] || el.getElementsByTagName('TEXTAREA')[0];
 //{if 0}//
-                if (inputEl && ((options.inputType === 'textarea' && inputEl.tagName === 'TEXTAREA') || inputEl.type !== options.inputType || options.name !== undefined || options.value !== undefined || options.readOnly !== undefined || options.checked !== undefined || options.placeholder !== undefined)) {
+                if (inputEl && ((options.inputType === 'textarea' && inputEl.tagName === 'TEXTAREA') || (options.inputType && inputEl.type !== options.inputType) || options.name !== undefined || options.value !== undefined || options.readOnly !== undefined || options.checked !== undefined || options.placeholder !== undefined)) {
                     console.warn('显式定义了输入框不要再重复设置参数');
                 }
 //{/if}//

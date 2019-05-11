@@ -83,6 +83,8 @@ _aLabel    - 标签信息数组
                     },
                     this
                 );
+
+                setSelected(this, this._aLabel[0]);
             }
         ],
         {
@@ -111,14 +113,6 @@ _aLabel    - 标签信息数组
             $initStructure: function (width, height) {
                 ui.MPanel.prototype.$initStructure.call(this, width, height);
                 this.setScrollRange({top: -this._aLabel[this._aLabel.length - 1].top});
-            },
-
-            /**
-             * @override
-             */
-            $ready: function (options) {
-                ui.MPanel.prototype.$ready.call(this, options);
-                setSelected(this, this._aLabel[0]);
             },
 
             /**

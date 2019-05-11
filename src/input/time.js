@@ -3,7 +3,6 @@
 <input ui="type:time" name="test" />
 或:
 <div ui="type:time;name:test;value:00:00:00">
-    <!-- 如果ec中不指定name,value，也可以在input中指定 -->
     <input name="test" value="00:00:00" />
 </div>
 

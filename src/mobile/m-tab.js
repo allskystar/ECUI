@@ -73,7 +73,14 @@ _eBar            - 下划线 DOM 元素
         function (el, options) {
             ui.Tab.call(this, el, options);
             if (options.bar) {
-                this._eBar = dom.create({className: options.classes.join('-bar ')});
+                this._eBar = dom.create({className: this.getUnitClass(ui.MTab, 'bar')});
+            }
+
+            if (options.gesture !== false) {
+                core.addGestureListeners(this, {
+                    swipeleft: swipe,
+                    swiperight: swipe
+                });
             }
         },
         {
@@ -175,20 +182,6 @@ _eBar            - 下划线 DOM 元素
              */
             $setPositionByTitle: function (x) {
                 dom.setStyle(this.getBody(), 'transform', 'translate3d(' + x + 'px,0px,0px)');
-            },
-
-            /**
-             * @override
-             */
-            $ready: function (event) {
-                if (event.options.gesture !== false) {
-                    core.addGestureListeners(this, {
-                        swipeleft: swipe,
-                        swiperight: swipe
-                    });
-                }
-
-                ui.Tab.prototype.$ready.call(this, event);
             },
 
             /**

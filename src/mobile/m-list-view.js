@@ -2,7 +2,7 @@
 @example
 <ul ui="type:m-list-view">
   <li>单条数据内容</li>
-  ...
+  <li>单条数据内容</li>
 </ul>
 
 @fields
@@ -47,18 +47,18 @@ _nBottomIndex  - 下部隐藏的选项序号
         ui.Control,
         'ui-mobile-listview',
         [
-            function (el, options) {
+            function () {
                 var body = this.getBody();
-                this._eHeader = dom.insertBefore(dom.create({className: options.classes.join('-header ')}), body);
-                this._eFooter = dom.insertAfter(dom.create({className: options.classes.join('-footer ')}), body);
+                this._eHeader = dom.insertBefore(dom.create({className: this.getUnitClass(ui.MListView, 'header')}), body);
+                this._eFooter = dom.insertAfter(dom.create({className: this.getUnitClass(ui.MListView, 'footer')}), body);
                 dom.insertAfter(this._eEmpty, body);
                 this._oHandle = util.blank;
             },
             function (el, options) {
                 if (options.customEmpty) {
-                    dom.addClass(this._eEmpty = dom.remove(dom.last(el)), options.classes.join('-empty-body '));
+                    dom.addClass(this._eEmpty = dom.remove(dom.last(el)), this.getUnitClass(ui.MListView, 'empty-body'));
                 } else {
-                    this._eEmpty = dom.create({className: options.classes.join('-empty-body ')});
+                    this._eEmpty = dom.create({className: this.getUnitClass(ui.MListView, 'empty-body')});
                 }
                 ui.Control.call(this, el, options);
                 this._sStatus = '';

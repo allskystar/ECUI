@@ -1,9 +1,9 @@
 /*
 @example
 <div ui="type:multi-select;name:test">
-    <!-- 这里放选项内容 -->
-    <div>选项</div>
-    ...
+    <div>选项一</div>
+    <div>选项二</div>
+    <div>选项三</div>
 </div>
 
 @fields
@@ -25,13 +25,13 @@ _eInput - 选项对应的input，form提交时使用
         ui.InputControl,
         'ui-multi-select',
         function (el, options) {
-            var optionsEl = dom.create({className: this.Options.CLASS + options.classes.join('-options ') + 'ui-popup ui-hide'});
+            var optionsEl = dom.create({className: this.getUnitClass(ui.MultiSelect, 'options') + this.Options.CLASS + ' ui-popup ui-hide'});
             for (; el.firstChild; ) {
                 optionsEl.appendChild(el.firstChild);
             }
             ui.InputControl.call(this, el, options);
             dom.insertBefore(
-                this._eText = dom.create('DIV', { className: options.classes.join('-text ') }),
+                this._eText = dom.create('DIV', { className: this.getUnitClass(ui.MultiSelect, 'text') }),
                 dom.last(el)
             );
             this.setPopup(core.$fastCreate(this.Options, optionsEl, this, {name: options.name}));

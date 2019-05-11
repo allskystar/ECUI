@@ -42,9 +42,12 @@ _sFormat        - 显示格式
         function (el, options) {
             ui.Control.call(this, el, options);
             this._nBase = options.time.endsWith('ms') ? +options.time.slice(0, -2) : +options.time * 1000;
-            this._bImmediate = !!options.immediate;
             this._sFormat = options.format || this.FORMAT;
             this.reset();
+
+            if (options.immediate) {
+                this.start();
+            }
         },
         {
             FORMAT: '{0}:{1}:{2}',
@@ -55,16 +58,6 @@ _sFormat        - 显示格式
             $dispose: function () {
                 this.stop();
                 ui.Control.prototype.$dispose.call(this);
-            },
-
-            /**
-             * @override
-             */
-            $ready: function (event) {
-                ui.Control.prototype.$ready.call(this, event);
-                if (this._bImmediate) {
-                    this.start();
-                }
             },
 
             /**

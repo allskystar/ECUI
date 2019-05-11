@@ -1,6 +1,6 @@
 /*
 @example
-<div ui="type:couple-slider"></div>
+<div ui="type:couple-slider;segment:5"></div>
 */
 //{if 0}//
 (function () {
@@ -33,8 +33,8 @@
         ui.InputControl,
         'ui-couple-slider',
         function (el, options) {
-            var className = options.classes.join('-slider ');
-            dom.insertHTML(el, 'afterBegin', '<div class="' + options.classes.join('-bg ') + '"></div><div class="' + options.classes.join('-mask ') + '"></div><div class="' + className + '"></div><div class="' + className + '"></div>');
+            var className = this.getUnitClass(ui.CoupleSlider, 'slider');
+            dom.insertHTML(el, 'afterBegin', '<div class="' + this.getUnitClass(ui.CoupleSlider, 'bg') + '"></div><div class="' + this.getUnitClass(ui.CoupleSlider, 'mask') + '"></div><div class="' + className + '"></div><div class="' + className + '"></div>');
 
             var children = dom.children(el);
 

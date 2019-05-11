@@ -21,10 +21,10 @@
 
         SUPER: ui.MScroll,
 
-        constructor: function (el, options) {
+        constructor: function (el) {
             dom.addClass(el, 'ui-mobile-options');
             this.$MOptionsData.mask = dom.insertBefore(dom.create({
-                className: options.classes.join('-mask ') + 'ui-mobile-options-mask'
+                className: this.getUnitClass(ui.Control, 'mask') + ' ui-mobile-options-mask'
             }), this.getBody());
         },
 
