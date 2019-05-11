@@ -1,17 +1,17 @@
 /*
 @example
 <ul ui="type:tree-view;collapsed:false">
-    <li>根节点</li>
+  <li>根节点</li>
 
-    <li>子节点一</li>
-    <li>子节点二</li>
-    <ul class="ui-hide">
-        <li>子节点三</li>
+  <li>子节点一</li>
+  <li>子节点二</li>
+  <ul class="ui-hide">
+    <li>子节点三</li>
 
-        <li>孙节点一</li>
-        <li>孙节点二</li>
-        <li>孙节点三</li>
-    </ul>
+    <li>孙节点一</li>
+    <li>孙节点二</li>
+    <li>孙节点三</li>
+  </ul>
 </ul>
 
 @fields

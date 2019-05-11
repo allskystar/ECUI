@@ -155,8 +155,8 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
             el.appendChild(
                 this._eLayout = dom.create(
                     {
-                        className: options.classes.join('-layout '),
-                        innerHTML: '<div class="ui-table-layout-body"></div><div class="ui-table-body"></div><div class="ui-table-head"><table cellspacing="0" class="' + table.className + '" style="' + table.style.cssText + '"><tbody></tbody></table></div>'
+                        className: this.getUnitClass(ui.Table, 'layout'),
+                        innerHTML: '<div class="' + this.getUnitClass(ui.Table, 'layout-body') + '"></div><div class="' + this.getUnitClass(ui.Table, 'body') + '"></div><div class="' + this.getUnitClass(ui.Table, 'head') + '"><table cellspacing="0" class="' + table.className + '" style="' + table.style.cssText + '"><tbody></tbody></table></div>'
                     }
                 )
             );
@@ -168,9 +168,9 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
                 body = list[1],
                 headRowCount = 1,
                 o = head,
-                rowClass = this._sRowClass = ' ' + options.classes.join('-row '),
-                hcellClass = this._sHCellClass = ' ' + options.classes.join('-hcell '),
-                cellClass = this._sCellClass = ' ' + options.classes.join('-cell '),
+                rowClass = this._sRowClass = ' ' + this.getUnitClass(ui.Table, 'row'),
+                hcellClass = this._sHCellClass = ' ' + this.getUnitClass(ui.Table, 'hcell'),
+                cellClass = this._sCellClass = ' ' + this.getUnitClass(ui.Table, 'cell'),
                 rows = this._aRows = [],
                 cols = this._aHCells = [],
                 colspans = [];

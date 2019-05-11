@@ -2566,11 +2566,18 @@ outer:          for (var caches = [], target = event.target, el; target; target 
             if (superClass) {
                 util.inherits(subClass, superClass);
 
-                if (realType && realType.charAt(0) === '*') {
-                    (subClass.TYPES = superClass.TYPES.slice())[0] = realType.slice(1);
-                } else {
-                    subClass.TYPES = (realType ? [realType] : []).concat(superClass.TYPES);
-                }
+                realType = realType ? (realType.charAt(0) === '*' ? realType.slice(1) : [realType]) : [];
+                subClass.TYPES = [realType instanceof Array ? realType : [realType]];
+
+                superClass.TYPES.forEach(function (item) {
+                    if (realType instanceof Array) {
+                        item = realType.concat(item);
+                    } else {
+                        item = item.slice();
+                        item[0] = realType;
+                    }
+                    subClass.TYPES.push(item);
+                });
             } else {
                 // ecui.ui.Control的特殊初始化设置
                 subClass.TYPES = [];

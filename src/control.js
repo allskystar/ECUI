@@ -854,11 +854,19 @@ _aStatus            - 控件当前的状态集合
              * 获取部件的样式。
              * @public
              *
+             * @param {Function} baseClass 控件的构造函数，表示从这个基类开始处理部件样式
              * @param {string} name 部件名称
              * @return {string} HTML 片断
              */
-            getUnitClass: function (name) {
-                return this.constructor.TYPES.join('-' + name + ' ') + '-' + name;
+            getUnitClass: function (baseClass, name) {
+                for (var i = 0, clazz = this.constructor; clazz; i++) {
+                    if (clazz === baseClass) {
+                        break;
+                    }
+                    clazz = clazz.superClass.constructor;
+                }
+
+                return this.constructor.TYPES[i].join('-' + name + ' ') + '-' + name;
             },
 
             /**
