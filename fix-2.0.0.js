@@ -8,7 +8,7 @@ ecui.ext.esr = ecui.ext.data;
         var primary = options.main ? options.main.className.trim().split(' ')[0] : '',
             classes = options.classes = UIClass.TYPES[0].slice();
 
-        if (primary !== classes[0]) {
+        if (primary && primary !== classes[0]) {
             classes.push(primary);
         }
         classes.push(' ');
