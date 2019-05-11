@@ -73,7 +73,7 @@ _aChildren     - 子控件集合
                 this._bCollapsed = !!options.collapsed;
 
                 if (el.tagName === 'UL') {
-                    el.className += ' ' + this.getUnitClass('children');
+                    dom.addClass(el, this.getUnitClass('children'));
 
                     if (options.collapsed) {
                         dom.addClass(el, 'ui-hide');

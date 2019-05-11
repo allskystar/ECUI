@@ -29,22 +29,22 @@ _uClose     - 关闭按钮
         ui.Layer,
         'ui-dialog',
         function (el, options) {
-            var bodyEl = dom.create({className: options.classes.join('-body ')}),
+            var bodyEl = dom.create({className: this.getUnitClass('body')}),
                 titleEl = dom.first(el),
                 closeEl;
 
             if (titleEl && titleEl.tagName === 'STRONG') {
-                titleEl.className += ' ' + options.classes.join('-title ');
+                dom.assClass(titleEl, this.getUnitClass('title'));
                 dom.remove(titleEl);
             } else {
-                titleEl = dom.create('STRONG', {className: options.classes.join('-title ')});
+                titleEl = dom.create('STRONG', {className: this.getUnitClass('title')});
             }
 
             for (; el.firstChild; ) {
                 bodyEl.appendChild(el.firstChild);
             }
 
-            el.innerHTML = '<div class="' + options.classes.join('-close ') + '"></div>';
+            el.innerHTML = '<div class="' + this.getUnitClass('close') + '"></div>';
             closeEl = el.lastChild;
             el.appendChild(titleEl);
             el.appendChild(bodyEl);
