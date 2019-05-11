@@ -1,20 +1,17 @@
 /*
 @example
-<ul ui="type:tree-view;">
-  <!-- 显示的文本，如果没有label整个内容就是节点的文本 -->
-  <div>公司</div>
-  <!-- 子控件 -->
-  <li>董事会</li>
-  <li>监事会</li>
-  <ul>
-    <div>总经理</div>
-    <li>行政部</li>
-    <li>人事部</li>
-    <li>财务部</li>
-    <li>市场部</li>
-    <li>销售部</li>
-    <li>技术部</li>
-  </ul>
+<ul ui="type:tree-view;collapsed:false">
+    <li>根节点</li>
+
+    <li>子节点一</li>
+    <li>子节点二</li>
+    <ul class="ui-hide">
+        <li>子节点三</li>
+
+        <li>孙节点一</li>
+        <li>孙节点二</li>
+        <li>孙节点三</li>
+    </ul>
 </ul>
 
 @fields
@@ -38,27 +35,9 @@ _aChildren     - 子控件集合
      * @param {ecui.ui.TreeView} tree 树控件
      */
     function refresh(tree) {
-        if (tree._aChildren) {
-            tree.alterSubType(tree._aChildren.length ? (tree._bCollapsed ? 'collapsed' : 'expanded') : (!tree._eChildren || tree._bAutoType ? 'leaf' : 'empty'));
+        if (tree._eChildren) {
+            tree.alterSubType(tree._aChildren.length ? (tree._bCollapsed ? 'collapsed' : 'expanded') : 'empty');
         }
-    }
-
-    /**
-     * 建立子树视图控件。
-     * @private
-     *
-     * @param {HTMLElement} el 子树的 Element 对象
-     * @param {ecui.ui.TreeView} parent 父树视图控件
-     * @param {object} options 初始化选项，参见 create 方法
-     * @return {ecui.ui.TreeView} 子树视图控件
-     */
-    function createChild(el, parent, options) {
-        el.className += parent.constructor.CLASS;
-        options = Object.assign({}, options);
-//{if 0}//
-        delete options.id;
-//{/if}//
-        return core.$fastCreate(parent.constructor, el, null, Object.assign(options, core.getOptions(el) || {}));
     }
 
     /**
@@ -66,44 +45,49 @@ _aChildren     - 子控件集合
      * 包含普通子控件或者子树视图控件，普通子控件显示在它的文本区域，如果是子树视图控件，将在专门的子树视图控件区域显示。子树视图控件区域可以被收缩隐藏或是展开显示，默认情况下点击树视图控件就改变子树视图控件区域的状态。
      * options 属性：
      * collapsed      子树区域是否收缩，默认为展开
-     * autoType       是否自动根据子节点数量转换节点的状态(叶子节点/非叶子节点)
-     * expandSelected 是否展开选中的节点，如果不自动展开，需要点击左部的小区域图标才有效，默认自动展开
      * @control
      */
     ui.TreeView = core.inherits(
         ui.Control,
         'ui-treeview',
-        function (el, options) {
-            if (el.tagName === 'UL') {
-                var childrenEl = this._eChildren = el;
-                el = dom.insertBefore(dom.first(el), el);
-                el.className = childrenEl.className;
-                childrenEl.className = options.classes.join('-children ');
-
-                var list = dom.children(childrenEl);
-
-                if (options.collapsed) {
-                    dom.addClass(childrenEl, 'ui-hide');
+        [
+            function (el, options) {
+                if (this._eChildren) {
+                    // 初始化子控件
+                    this._aChildren = dom.children(this._eChildren).map(
+                        function (item) {
+//{if 0}//
+                            return core.$fastCreate(this.constructor, item, this, Object.assign({}, options, {id: ''}, core.getOptions(item) || {}));
+//{else}//                            return core.$fastCreate(this.constructor, item, this, Object.assign({}, options, core.getOptions(item) || {}));
+//{/if}//
+                        },
+                        this
+                    );
+                } else {
+                    this._aChildren = [];
                 }
+
+                refresh(this);
+            },
+            function (el, options) {
+                this._bCollapsed = !!options.collapsed;
+
+                if (el.tagName === 'UL') {
+                    el.className += ' ' + this.getUnitClass('children');
+
+                    if (options.collapsed) {
+                        dom.addClass(el, 'ui-hide');
+                    } else if (dom.hasClass(el, 'ui-hide')) {
+                        this._bCollapsed = true;
+                    }
+
+                    this._eChildren = el;
+                    el = dom.insertBefore(dom.first(el), el);
+                }
+
+                ui.Control.call(this, el, options);
             }
-
-            ui.Control.call(this, el, options);
-
-            this._bCollapsed = !!options.collapsed;
-            this._bAutoType = options.autoType;
-
-            // 初始化子控件
-            this._aChildren = list ? list.map(
-                function (item) {
-                    item = createChild(item, this, options);
-                    item.$setParent(this);
-                    return item;
-                },
-                this
-            ) : [];
-
-            refresh(this);
-        },
+        ],
         {
             /**
              * 控件点击时改变子树视图控件的显示/隐藏状态。
@@ -295,7 +279,7 @@ _aChildren     - 子控件集合
 
                 if ('string' === typeof item) {
                     el = dom.create('LI', {innerHTML: item});
-                    item = createChild(el, this, options);
+                    item = core.$fastCreate(this.constructor, el, null, Object.assign({}, options, {id: ''}, core.getOptions(el) || {}));
                 }
 
                 // 这里需要先 setParent，否则 getRoot 的值将不正确

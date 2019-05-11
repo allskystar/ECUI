@@ -74,7 +74,7 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
             var date = options.date ? new Date(options.date) : new Date();
             this._oDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
 
-            this._aCells = this.$initView(options);
+            this._aCells = this.$initView();
         },
         {
             WEEKNAMES: ['日', '一', '二', '三', '四', '五', '六'],
@@ -129,20 +129,19 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
              * 初始化视图区域(子类可以多次初始化)。
              * @protected
              *
-             * @param {Object} options 参数化参数
              * @return {Array} 视图区域数组，可以在 setView 中使用
              */
-            $initView: function (options) {
+            $initView: function () {
                 var el = this.getBody();
                 dom.insertHTML(el, 'beforeEnd', util.stringFormat(
                     '<table><thead>{1}</thead><tbody>{0}{0}{0}{0}{0}{0}</tbody></table>',
                     util.stringFormat(
                         '<tr>{0}{0}{0}{0}{0}{0}{0}</tr>',
-                        '<td class="' + options.classes.join('-date ') + '"></td>'
+                        '<td class="' + this.getUnitClass('date') + '"></td>'
                     ),
                     util.stringFormat(
                         '<tr>{0}{0}{0}{0}{0}{0}{0}</tr>',
-                        '<td class="' + options.classes.join('-title ') + '"></td>'
+                        '<td class="' + this.getUnitClass('title') + '"></td>'
                     )
                 ));
 

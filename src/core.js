@@ -1910,9 +1910,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
             options = options || {};
 
             var parent = options.parent,
-                el = options.main,
-                primary = options.primary || options.id || '',
-                className;
+                el = options.main;
 
             options.uid = 'ecui-' + (++uniqueIndex);
 
@@ -1922,26 +1920,12 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                     return el.getControl();
                 }
 
-                if (UIClass.CLASS || primary) {
-                    el.className = className = el.className + ' ' + primary + UIClass.CLASS;
-                } else {
-                    className = el.className;
-                }
-
-                // 如果没有指定基本样式，使用控件的样式作为基本样式
-                /\s*([^\s]+)/.test(className);
-                options.primary = RegExp.$1;
+                options.primary = UIClass.CLASS;
             } else {
                 // 没有传入主元素，需要自动生成，此种情况比较少见，不推荐使用
-                el = options.main = dom.create({className: primary + UIClass.CLASS});
-                if (!primary) {
-                    options.primary = UIClass.TYPES[0];
-                }
+                el = options.main = dom.create({className: UIClass.CLASS});
             }
 
-            // 生成控件
-            options.classes = core.$getClasses(UIClass, options.primary);
-            options.classes.push('');
             var control = new UIClass(el, options);
 
             if (parent) {
@@ -1987,14 +1971,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
             options = options || {};
 
             options.uid = 'ecui-' + (++uniqueIndex);
-            if (!options.primary) {
-                if (/\s*([^\s]+)/.test(el.className)) {
-                    options.primary = RegExp.$1;
-                }
-            }
 
-            options.classes = core.$getClasses(UIClass, options.primary);
-            options.classes.push('');
             var control = new UIClass(el, options);
             control.$setParent(parent);
             oncreate(control, options);
@@ -2003,20 +1980,6 @@ outer:          for (var caches = [], target = event.target, el; target; target 
             core.dispatchEvent(control, 'ready', {options: options});
 
             return control;
-        },
-
-        /**
-         * 获取控件的当前样式组。
-         * @private
-         *
-         * @param {Function} UIClass 控件类
-         * @param {string} current 控件的当前样式
-         * @return {Array} 样式数组
-         */
-        $getClasses: function (UIClass, current) {
-            return current && current !== UIClass.TYPES[0] ?
-                    UIClass.TYPES.concat([current]) :
-                    UIClass.TYPES.slice();
         },
 
         /**
@@ -2612,7 +2575,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                 // ecui.ui.Control的特殊初始化设置
                 subClass.TYPES = [];
             }
-            subClass.CLASS = subClass.TYPES.length ? ' ' + subClass.TYPES.join(' ') + ' ' : ' ';
+            subClass.CLASS = subClass.TYPES.length ? ' ' + subClass.TYPES.join(' ') : '';
 
             for (var superMethods = [], item; item = arguments[index++]; ) {
                 if (item.NAME) {

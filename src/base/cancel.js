@@ -1,10 +1,10 @@
 /*
 @example
-<div ui="type:cancel">确认</div>
+<div ui="type:cancel">取消</div>
 或
-<button ui="type:cancel">确认</button>
+<button ui="type:cancel">取消</button>
 或
-<input ui="type:cancel" value="确认" type="button">
+<input ui="type:cancel" type="button" value="取消">
 */
 //{if 0}//
 (function () {

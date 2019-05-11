@@ -14,7 +14,6 @@ _bGesture           - 控件是否允许手势操作
 _bCached            - 控件是否已经读入缓存
 _bReady             - 控件是否已经完全生成
 _sUID               - 控件的内部ID
-_sPrimary           - 控件定义时的基本样式
 _sClass             - 控件的当前样式
 _sSubType           - 控件的子类型
 _sWidth             - 控件的基本宽度值，可能是百分比或者空字符串
@@ -78,8 +77,7 @@ _aStatus            - 控件当前的状态集合
      * options 属性：
      * id          名称，指定后可以使用 ecui.get([id]) 的方式获取控件
      * uid         唯一标识符，不可自行定义，系统自动生成
-     * primary     基本样式，控件初始的样式，不可自行定义，缺省设置为关联的 DOM 元素 class 属性第一项，如果关联元素没有 class 属性，设置为控件的类型样式，可以使用 {'Control-getPrimary'|method} 函数获取
-     * current     当前样式，控件当前的样式，缺省设置为基本样式，使用 {'Control-getClass'|method} 与 {'Control-setClass'|method} 获取与设置
+     * primary     主元素需要绑定的样式
      * disabled    是否失效，如果设置失效，控件忽略所有事件，缺省值为 false
      * capturable  是否接收交互事件，如果设置不接收交互事件，交互事件由控件的父控件处理，缺省值为 true
      * userSelect  是否允许选中内容，缺省值为 true
@@ -93,9 +91,11 @@ _aStatus            - 控件当前的状态集合
 
             this._eMain = this._eBody = el;
 
+            if (options.primary) {
+                el.className += options.primary;
+            }
             this._sUID = options.uid;
-            this._sPrimary = options.primary || '';
-            this._sClass = options.current || this._sPrimary;
+            this._sClass = el.className.trim().split(' ')[0];
 
             this._bDisabled = !!options.disabled;
             this._bCapturable = options.capturable !== false;
@@ -562,7 +562,11 @@ _aStatus            - 控件当前的状态集合
              */
             alterSubType: function (subtype) {
                 if (this._sSubType !== subtype) {
-                    var classes = core.$getClasses(this.constructor, this._sClass);
+                    var classes = this.constructor.TYPES.slice();
+                    if (this._sClass !== classes[0]) {
+                        classes.push(this._sClass);
+                    }
+
                     if (this._sSubType) {
                         dom.removeClass(
                             this._eMain,
@@ -782,7 +786,6 @@ _aStatus            - 控件当前的状态集合
 
             /**
              * 获取控件的当前样式。
-             * getClass 方法返回控件当前使用的样式，扩展样式分别附加在类型样式与当前样式之后，从而实现控件的状态样式改变，详细的描述请参见 alterStatus 方法。当前样式与 getPrimary 方法返回的基本样式存在区别，在控件生成初期，当前样式等于基本样式，基本样式在初始化后无法改变，setClass 方法改变当前样式。
              * @public
              *
              * @return {string} 控件的当前样式
@@ -798,7 +801,10 @@ _aStatus            - 控件当前的状态集合
              * @return {Array} 控件的全部样式
              */
             getClasses: function () {
-                var classes = core.$getClasses(this.constructor, this._sClass);
+                var classes = this.constructor.TYPES.slice();
+                if (this._sClass !== classes[0]) {
+                    classes.push(this._sClass);
+                }
                 if (this._sSubType) {
                     classes = classes.concat(
                         classes.map(
@@ -842,6 +848,17 @@ _aStatus            - 控件当前的状态集合
              */
             getContent: function () {
                 return this._eBody.innerHTML;
+            },
+
+            /**
+             * 获取部件的样式。
+             * @public
+             *
+             * @param {string} name 部件名称
+             * @return {string} HTML 片断
+             */
+            getUnitClass: function (name) {
+                return this.constructor.TYPES.join('-' + name + ' ') + '-' + name;
             },
 
             /**
@@ -919,17 +936,6 @@ _aStatus            - 控件当前的状态集合
              */
             getPositionElement: function () {
                 return this.getOuter();
-            },
-
-            /**
-             * 获取控件的基本样式。
-             * getPrimary 方法返回控件生成时指定的 primary 参数(参见 create 方法)。基本样式与通过 getClass 方法返回的当前样式存在区别，在控件生成初期，当前样式等于基本样式，基本样式在初始化后无法改变，setClass 方法改变当前样式。
-             * @public
-             *
-             * @return {string} 控件的基本样式
-             */
-            getPrimary: function () {
-                return this._sPrimary;
             },
 
             /**
@@ -1204,11 +1210,9 @@ _aStatus            - 控件当前的状态集合
              * setClass 方法改变控件的当前样式，扩展样式分别附加在类型样式与当前样式之后，从而实现控件的状态样式改变，详细的描述请参见 alterStatus 方法。控件的当前样式通过 getClass 方法获取。
              * @public
              *
-             * @param {string} currClass 控件的当前样式名称
+             * @param {string} currClass 控件的当前样式名称，不允许为空
              */
             setClass: function (currClass) {
-                currClass = currClass || this._sPrimary;
-
                 // 如果基本样式没有改变不需要执行
                 if (currClass !== this._sClass) {
                     var classes = this.getClasses(),
