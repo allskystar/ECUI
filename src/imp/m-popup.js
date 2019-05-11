@@ -39,7 +39,7 @@
                     var view = util.getView(),
                         data = this.$MPopupData,
                         popup = this.getPopup(),
-                        el = popup.getOuter(),
+                        el = popup.getMain(),
                         style = el.style;
 
                     if (!dom.parent(el)) {
@@ -48,7 +48,7 @@
 
                     this.$MPopup.$click.call(this, event);
 
-                    if (dom.contain(this.getOuter(), event.target)) {
+                    if (dom.contain(this.getMain(), event.target)) {
                         popup.show();
                         if (data.mask) {
                             core.mask(data.mask);
@@ -103,7 +103,7 @@
              * @override
              */
             $dispose: function () {
-                var el = this.$MPopupData.popup.getOuter();
+                var el = this.$MPopupData.popup.getMain();
                 if (el) {
                     dom.remove(el);
                 }

@@ -73,7 +73,7 @@ _aChildren     - 子控件集合
                 this._bCollapsed = !!options.collapsed;
 
                 if (el.tagName === 'UL') {
-                    dom.addClass(el, this.getUnitClass('children'));
+                    dom.addClass(el, this.getUnitClass(ui.TreeView, 'children'));
 
                     if (options.collapsed) {
                         dom.addClass(el, 'ui-hide');
@@ -248,7 +248,7 @@ _aChildren     - 子控件集合
 
                 // 将子树区域显示在主元素之后
                 if (this._eChildren) {
-                    dom.insertAfter(this._eChildren, this.getOuter());
+                    dom.insertAfter(this._eChildren, this.getMain());
                 }
             },
 
@@ -285,15 +285,15 @@ _aChildren     - 子控件集合
                 // 这里需要先 setParent，否则 getRoot 的值将不正确
                 if (!this._eChildren) {
                     this._eChildren = dom.create('UL', {className: this.getPrimary() + '-children ' + this.getType() + '-children'});
-                    dom.insertAfter(this._eChildren, this.getOuter());
+                    dom.insertAfter(this._eChildren, this.getMain());
                 }
                 item.setParent(this);
 
                 if (item.getParent()) {
-                    el = item.getOuter();
+                    el = item.getMain();
                     util.remove(list, item);
                     if (list[index]) {
-                        dom.insertBefore(el, list[index].getOuter());
+                        dom.insertBefore(el, list[index].getMain());
                         list.splice(index, 0, item);
                     } else {
                         this._eChildren.appendChild(el);

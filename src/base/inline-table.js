@@ -20,7 +20,7 @@
         <td>1999</td>
       </tr>
       <tr>
-        <td>百度（纳斯达克：BIDU），全球最大的中文搜索引擎、最大的中文网站。百度愿景是：成为最懂用户，并能帮助人们成长的全球顶级高科技公司。</td>
+        <td colspan="4">百度（纳斯达克：BIDU），全球最大的中文搜索引擎、最大的中文网站。百度愿景是：成为最懂用户，并能帮助人们成长的全球顶级高科技公司。</td>
       </tr>
     </tbody>
   </table>
@@ -33,7 +33,7 @@
         ui = core.ui;
 //{/if}//
     function initExtendRow(row) {
-        dom.addClass(row.getMain(), 'ui-inline-table-extend-row');
+        dom.addClass(row.getMain(), row.getParent().getUnitClass(ui.InlineTable, 'extend-row'));
         row.setMerge(true);
         row.hide();
     }

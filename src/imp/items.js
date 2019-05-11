@@ -158,7 +158,7 @@
                 var list = this.$ItemsData.items,
                     items = [],
                     UIClass = this.Item || ui.Item,
-                    el = list[index] ? list[index].getOuter() : null,
+                    el = list[index] ? list[index].getMain() : null,
                     body = this.getBody();
 
                 this.preventAlterItems();
@@ -209,7 +209,7 @@
 
                         // 选项控件，直接添加
                         if (core.dispatchEvent(this, 'append', {child: item})) {
-                            body.appendChild(item.getOuter());
+                            body.appendChild(item.getMain());
                             item.$setParent(this);
                             items.push(item);
                         }
@@ -221,7 +221,7 @@
                 if (el) {
                     list.splice(list.length - items.length, items.length);
                     items.forEach(function (item) {
-                        dom.insertBefore(item.getOuter(), el);
+                        dom.insertBefore(item.getMain(), el);
                     });
                     Array.prototype.splice.apply(list, [index, 0].concat(items));
                 }
@@ -327,7 +327,7 @@
                 if (item) {
                     this.preventAlterItems();
                     if (core.dispatchEvent(this, 'remove', {child: item})) {
-                        dom.remove(item.getOuter());
+                        dom.remove(item.getMain());
                         item.$setParent();
                         this.premitAlterItems();
                         this.alterItems();

@@ -31,12 +31,12 @@ _eTitle        - 日历头部信息提示区
             dom.insertHTML(
                 el,
                 'AFTERBEGIN',
-                '<div class="' + this.getUnitClass('header') + '"><div class="' +
-                    this.getUnitClass('title') + '"></div><div class="' +
-                    this.getUnitClass('prev-year') + ui.Button.CLASS + '">&lt;&lt;</div><div class="' +
-                    this.getUnitClass('prev-month') + ui.Button.CLASS + '">&lt;</div><div class="' +
-                    this.getUnitClass('next-month') + ui.Button.CLASS + '">&gt;</div><div class="' +
-                    this.getUnitClass('next-year') + ui.Button.CLASS + '">&gt;&gt;</div></div>'
+                '<div class="' + this.getUnitClass(ui.Calendar, 'header') + '"><div class="' +
+                    this.getUnitClass(ui.Calendar, 'title') + '"></div><div class="' +
+                    this.getUnitClass(ui.Calendar, 'prev-year') + this.Button.CLASS + '">&lt;&lt;</div><div class="' +
+                    this.getUnitClass(ui.Calendar, 'prev-month') + this.Button.CLASS + '">&lt;</div><div class="' +
+                    this.getUnitClass(ui.Calendar, 'next-month') + this.Button.CLASS + '">&gt;</div><div class="' +
+                    this.getUnitClass(ui.Calendar, 'next-year') + this.Button.CLASS + '">&gt;&gt;</div></div>'
             );
 
             // 获取el所有直属节点

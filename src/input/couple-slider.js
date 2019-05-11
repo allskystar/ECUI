@@ -106,7 +106,7 @@
                 var segWidth = this.getClientWidth() / this._nSegment,
                     v1 = this._aSlider[0].getX(),
                     v2 = this._aSlider[1].getX(),
-                    pos = dom.getPosition(this.getOuter()),
+                    pos = dom.getPosition(this.getMain()),
                     x = event.pageX - pos.left;
 
                 if (Math.abs(x - v1) < Math.abs(x - v2)) {

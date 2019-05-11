@@ -169,7 +169,7 @@ _uOptions     - 下拉选择框
              * @protected
              */
             $alterItems: function () {
-                if (dom.parent(this._uOptions.getOuter()) && this._uOptions.isShow()) {
+                if (dom.parent(this._uOptions.getMain()) && this._uOptions.isShow()) {
                     this._uOptions.$alterItems();
                     this._bAlterItems = false;
                 } else {

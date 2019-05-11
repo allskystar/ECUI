@@ -26,14 +26,14 @@
      * @param {ecui.ui.Control} popup 弹出层控件
      */
     function setPopupPosition(popup) {
-        var popupEl = popup.getOuter(),
+        var popupEl = popup.getMain(),
             owner = ui.Popup.getOwner(),
             scrollLeft = popupEl.scrollLeft,
             scrollTop = popupEl.scrollTop;
 
         dom.remove(popupEl);
 
-        for (var el = owner.getOuter(), container = dom.parent(el); container !== document.body; container = dom.parent(container)) {
+        for (var el = owner.getMain(), container = dom.parent(el); container !== document.body; container = dom.parent(container)) {
             if (container.scrollHeight !== container.clientHeight) {
                 break;
             }
@@ -99,7 +99,7 @@
              */
             $click: function (event) {
                 this.$Popup.$click.call(this, event);
-                if (dom.contain(this.getOuter(), event.target)) {
+                if (dom.contain(this.getMain(), event.target)) {
                     if (this.$PopupData.popup.isShow()) {
                         this.$PopupData.popup.hide();
                     } else {
@@ -112,7 +112,7 @@
              * @override
              */
             $dispose: function () {
-                var el = this.$PopupData.popup.getOuter();
+                var el = this.$PopupData.popup.getMain();
                 if (el) {
                     dom.remove(el);
                 }
@@ -137,7 +137,7 @@
             $scroll: function (event) {
                 this.$Popup.$scroll.call(this, event);
 
-                if (!dom.contain(this.$PopupData.popup.getOuter(), event.target)) {
+                if (!dom.contain(this.$PopupData.popup.getMain(), event.target)) {
                     if (event.type === 'mousedown') {
                         // ie6/7/8下有可能scroll事件是由mousedown点击滚动条触发的
                         this.$PopupData.popup.hide();
@@ -165,7 +165,7 @@
                 if (!this.$PopupData.popup.isShow()) {
                     owners.push(this);
 
-                    var el = this.$PopupData.popup.getOuter();
+                    var el = this.$PopupData.popup.getMain();
 
                     if (!dom.parent(el)) {
                         // 第一次显示时需要进行下拉选项部分的初始化，将其挂载到 DOM 树中

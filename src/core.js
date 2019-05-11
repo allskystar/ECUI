@@ -1251,7 +1251,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                     },
                     300,
                     {
-                        $: env.el || target.getOuter(),
+                        $: env.el || target.getMain(),
                         x: x,
                         y: y
                     }
@@ -1935,7 +1935,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                     control.appendTo(parent);
                 }
             } else {
-                control.$setParent(core.findControl(dom.parent(control.getOuter())));
+                control.$setParent(core.findControl(dom.parent(control.getMain())));
             }
 
             oncreate(control, options);
@@ -2015,7 +2015,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
          */
         cacheAtShow: function (el) {
             core.query(function (item) {
-                return dom.contain(el, item.getOuter());
+                return dom.contain(el, item.getMain());
             }).sort(function (a, b) {
                 var ia = 0,
                     ib = 0,
@@ -2150,7 +2150,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
             // 判断一个控件是否位于一个DOM元素之下
             function contain(el, control) {
                 for (; control; control = control.getParent()) {
-                    if (dom.contain(el, control.getOuter())) {
+                    if (dom.contain(el, control.getMain())) {
                         return true;
                     }
                 }
@@ -2164,7 +2164,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                 core.$clearState(control);
             } else {
                 parent = core.findControl(dom.parent(control));
-                // 以下判断需要考虑control.getOuter()物理上不属于control但逻辑上属于的情况
+                // 以下判断需要考虑control.getMain()物理上不属于control但逻辑上属于的情况
                 if (focusedControl && contain(control, focusedControl)) {
                     core.setFocused(parent);
                 }
@@ -2183,7 +2183,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
             }
 
             singletons.forEach(function (item) {
-                if (isControl ? control.contain(item) : !!item.getOuter() && contain(control, item)) {
+                if (isControl ? control.contain(item) : !!item.getMain() && contain(control, item)) {
                     item.setParent();
                 }
             });
@@ -2191,8 +2191,8 @@ outer:          for (var caches = [], target = event.target, el; target; target 
             // 需要删除的控件先放入一个集合中等待遍历结束后再删除，否则控件链将产生变化
             var index = 0;
             allControls.slice().filter(function (item) {
-                if (isControl ? control.contain(item) : !!item.getOuter() && contain(control, item)) {
-                    if (!onlyChild || (isControl ? control !== item : control !== item.getOuter())) {
+                if (isControl ? control.contain(item) : !!item.getMain() && contain(control, item)) {
+                    if (!onlyChild || (isControl ? control !== item : control !== item.getMain())) {
                         util.remove(independentControls, item);
                         allControls.splice(index, 1);
                         if (item = namedMap[item.getUID()]) {
@@ -2244,7 +2244,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                 setEnv(dragEnv);
 
                 // 判断鼠标没有mouseup
-                var parent = control.getOuter().offsetParent || document.documentElement,
+                var parent = control.getMain().offsetParent || document.documentElement,
                     style = dom.getStyle(parent);
 
                 // 拖拽范围默认不超出上级元素区域
