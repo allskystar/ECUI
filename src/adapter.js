@@ -234,8 +234,12 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                 if (dom.isElement(item)) {
                     item = dom.getStyle(item);
                 }
-                var text = ieVersion < 9 ? item.filter : item.content ? item.content.trim().slice(1, -1) : '';
-                new RegExp('(^|\\s*)' + name + '\\s*:([^;]+)(;|$)').test(text);
+                if (ieVersion < 9) {
+                    new RegExp('(^|\\s*)' + name + '\\s*\\(([^;]+)\\)(;|$)').test(item.filter);
+                } else {
+                    new RegExp('(^|\\s*)' + name + '\\s*:([^;]+)(;|$)').test(item.content ? item.content.trim().slice(1, -1) : '');
+                }
+                
                 return (RegExp.$2 || '').trim();
             },
 

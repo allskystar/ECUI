@@ -7,11 +7,13 @@
         z-index: -1 !important;
     }
 
-    .ui-locked-table-height {
-        width: 0px !important;
+    .ui-locked-table-empty {
         padding: 0px !important;
         border: 0px !important;
         background: transparent !important;
+        content: 'pointer-events: none';
+        filter: pointer-events(none);
+        pointer-events: none !important;
     }
 
     .ui-locked-table-body {

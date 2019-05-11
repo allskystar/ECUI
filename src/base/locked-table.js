@@ -38,7 +38,6 @@ _eRight      - 右侧乐定行的Element元素
         ui = core.ui,
         util = core.util,
 
-        firefoxVersion = /firefox\/(\d+\.\d)/i.test(navigator.userAgent) ? +RegExp.$1 : undefined,
         ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined,
         safariVersion = !/(chrome|crios|ucbrowser)/i.test(navigator.userAgent) && /(\d+\.\d)(\.\d)?\s+.*safari/i.test(navigator.userAgent) ? +RegExp.$1 : undefined;
 //{/if}//
@@ -71,6 +70,8 @@ _eRight      - 右侧乐定行的Element元素
         row._eLeft.style.height = row._eRight.style.height = row.getMain().style.height = '';
 
         if (row._bEmpty) {
+            row._eLeft.lastChild.previousSibling.setAttribute('colspan', row._bEmpty);
+            dom.removeClass(row._eLeft.lastChild, 'ui-hide');
             delete row._bEmpty;
             if (ieVersion < 9) {
                 el.removeChild(el.firstChild);
@@ -115,11 +116,13 @@ _eRight      - 右侧乐定行的Element元素
         });
 
         if (!body.innerHTML.trim()) {
-            row._bEmpty = true;
+            row._bEmpty = dom.getAttribute(row._eLeft.lastChild.previousSibling, 'colspan') || ' ';
+            row._eLeft.lastChild.previousSibling.setAttribute('colspan', 2);
+            dom.addClass(row._eLeft.lastChild, 'ui-hide');
             if (ieVersion < 9) {
-                body.appendChild(dom.create('TD', {className: table.getUnitClass(ui.Table, 'hcell')}));
+                body.appendChild(dom.create('TD', {className: table.getUnitClass(ui.Table, table.getHRows().indexOf(row) < 0 ? 'cell' : 'hcell')}));
             } else {
-                body.innerHTML = '<td class="' + table.getUnitClass(ui.Table, 'hcell') + '"></td>';
+                body.innerHTML = '<td class="' + table.getUnitClass(ui.Table, table.getHRows().indexOf(row) < 0 ? 'cell' : 'hcell') + '"></td>';
             }
         }
 
@@ -156,7 +159,7 @@ _eRight      - 右侧乐定行的Element元素
             totalRows.forEach(
                 function (item, index) {
                     item = item.getMain();
-                    list[index] = '<tr class="' + item.className + '" style="' + item.style.cssText + '"><td class="' + this.getUnitClass(ui.LockedTable, 'height') + '"></td></tr>';
+                    list[index] = '<tr class="' + item.className + '" style="' + item.style.cssText + '"><td class="ui-locked-table-empty"></td></tr>';
                 },
                 this
             );
@@ -227,7 +230,7 @@ _eRight      - 右侧乐定行的Element元素
             $beforescroll: function (event) {
                 ui.Table.prototype.$beforescroll.call(this, event);
 
-                if (firefoxVersion || ieVersion < 7) {
+                if (ieVersion < 7) {
                     return;
                 }
                 var layout = this.getLayout(),
@@ -335,7 +338,8 @@ _eRight      - 右侧乐定行的Element元素
                     head = this.$getSection('Head').getMain().lastChild;
 
                 this._eFill.style.width = this.$$tableWidth + 'px';
-                this._uLeftHead.getMain().style.width = this._uLeftMain.getMain().style.width = (this.$$leftTDWidth + this.$$paddingLeft) + 'px';
+                this._uLeftHead.getMain().style.width = width + 'px';
+                this._uLeftMain.getMain().style.width = (this.$$leftTDWidth + this.$$paddingLeft) + 'px';
                 this._uRightHead.getMain().style.width = this._uRightMain.getMain().style.width = (this.$$rightTDWidth + this.$$paddingRight) + 'px';
                 table.style.marginLeft = head.style.marginLeft = this.$$paddingLeft + 'px';
                 table.style.width = head.style.width = (this.$$tableWidth - this.$$paddingLeft - this.$$paddingRight) + 'px';

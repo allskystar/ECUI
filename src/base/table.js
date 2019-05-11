@@ -40,7 +40,6 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
         ui = core.ui,
         util = core.util,
 
-        firefoxVersion = /firefox\/(\d+\.\d)/i.test(navigator.userAgent) ? +RegExp.$1 : undefined,
         ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined;
 //{/if}//
     /**
@@ -571,7 +570,7 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
              */
             $beforescroll: function (event) {
                 ui.Control.prototype.$beforescroll.call(this, event);
-                if (firefoxVersion || ieVersion < 7) {
+                if (ieVersion < 7) {
                     return;
                 }
 

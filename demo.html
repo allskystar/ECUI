@@ -14,9 +14,30 @@
     <script type="text/javascript" src="fix-2.0.0.js"></script>
 </head>
 <body style="overflow: auto">
-<ul ui="type:m-list-view">
-  <li>单条数据内容</li>
-  <li>单条数据内容</li>
-</ul>
+<div ui="type:locked-table;left-lock:1" style="width:600px">
+  <table style="width:750px">
+    <!-- 表头区域 -->
+    <thead>
+      <tr>
+        <th colspan="4" style="overflow:visible">长行</th>
+      </tr>
+      <tr>
+        <th style="width:200px;">公司名</th>
+        <th style="width:200px;">url</th>
+        <th style="width:250px;">地址</th>
+        <th style="width:100px;">创办时间</th>
+      </tr>
+    </thead>
+    <!-- 内容行区域 -->
+    <tbody>
+      <tr>
+        <td>百度</td>
+        <td>www.baidu.com</td>
+        <td>中国北京中关村</td>
+        <td>1999</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
 </body>
 </html>
