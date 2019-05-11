@@ -181,18 +181,12 @@
                                     item.setAttribute(core.getAttributeName(), text);
                                     options = {};
                                 }
-                                if (!options.primary) {
-                                    options.primary = item.className.trim().split(' ')[0] || UIClass.TYPES[0];
-                                }
                             } else {
                                 if ('string' === typeof item) {
                                     options = {};
                                     options[this.TEXTNAME] = item;
                                 } else {
                                     options = item;
-                                }
-                                if (!options.primary) {
-                                    options.primary = UIClass.TYPES[0];
                                 }
                                 item = dom.create(
                                     {

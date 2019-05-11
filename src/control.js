@@ -90,7 +90,9 @@ _aStatus            - 控件当前的状态集合
             core.$bind(el, this);
 
             this._eMain = this._eBody = el;
-
+if (options.primary instanceof Array) {
+    debugger;
+}
             if (options.primary) {
                 el.className += options.primary;
             }

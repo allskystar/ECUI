@@ -2581,9 +2581,9 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                 subClass.TYPES.push(realType instanceof Array ? realType : [realType]);
             } else {
                 // ecui.ui.Control的特殊初始化设置
-                subClass.TYPES = [];
+                subClass.TYPES = [[]];
             }
-            subClass.CLASS = subClass.TYPES.length ? ' ' + subClass.TYPES[0].join(' ') : '';
+            subClass.CLASS = subClass.TYPES[0].length ? ' ' + subClass.TYPES[0].join(' ') : '';
 
             for (var superMethods = [], item; item = arguments[index++]; ) {
                 if (item.NAME) {

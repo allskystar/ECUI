@@ -12,7 +12,7 @@ ecui.ext.esr = ecui.ext.data;
             classes.push(primary);
         }
         classes.push(' ');
-        oldFn.call(this, UIClass, options);
+        return oldFn.call(this, UIClass, options);
     };
 }());
 

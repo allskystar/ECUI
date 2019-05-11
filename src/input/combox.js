@@ -1,16 +1,16 @@
 /*
 @example
-<select ui="type:combox" name="age">
-    <option value="20">20</option>
-    <option value="21" selected="selected">21</option>
-    <option value="22">22</option>
+<select ui="type:combox;placeholder:请输入" name="age">
+  <option value="20">20</option>
+  <option value="21">21</option>
+  <option value="22">22</option>
 </select>
 或
-<div ui="type:combox;name:age;value:21">
-    <!-- 这里可以放input元素，如果没有自动生成 -->
-    <div ui="value:20">20</div>
-    <div ui="value:21">21</div>
-    <div ui="value:22">22</div>
+<div ui="type:combox;name:age;value:21;placeholder:请输入">
+  <!-- 这里可以放input元素，如果没有自动生成 -->
+  <div ui="value:20">20</div>
+  <div ui="value:21">21</div>
+  <div ui="value:22">22</div>
 </div>
 */
 (function () {
@@ -48,7 +48,8 @@
 
             el = this.$getSection('Text').getBody();
 
-            var placeholder = options.placeholder || dom.getAttribute(this.getInput(), 'placeholder');
+            var placeholder = options.placeholder || dom.getAttribute(this.getInput(), 'placeholder') || '';
+            this.getInput().setAttribute('placeholder', placeholder);
             el.innerHTML = ieVersion < 10 ? '<div class="ui-placeholder">' + placeholder + '</div><input>' : '<input placeholder="' + util.encodeHTML(placeholder) + '">';
             this._eTextInput = el.lastChild;
             this.$bindEvent(this._eTextInput);
@@ -118,13 +119,18 @@
                         selected = item;
                     }
                 });
+
                 if (selected) {
                     this.setSelected(selected);
                 } else {
-                    this.setSelected();
-                    this.$setPlaceholder();
-                    refresh(this);
+                    selected = this.getSelected();
+                    if (selected) {
+                        selected.alterStatus('-selected');
+                        this.$setSelected(null);
+                    }
                 }
+                this.$setPlaceholder();
+                refresh(this);
             },
 
             /**

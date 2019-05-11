@@ -73,8 +73,8 @@ _uOptions     - 下拉选择框
                 }
             }
 
-            optionsEl.className = options.classes.join('-options ') + 'ui-popup ui-hide';
-            el.innerHTML = '<div class="' + options.classes.join('-text ') + '"></div>';
+            optionsEl.className = this.getUnitClass(ui.$select, 'options') + ' ui-popup ui-hide';
+            el.innerHTML = '<div class="' + this.getUnitClass(ui.$select, 'text') + '"></div>';
             if (input) {
                 el.appendChild(input);
             }
@@ -311,13 +311,13 @@ _uOptions     - 下拉选择框
                     if (item) {
                         item.alterStatus('+selected');
                         this.setText(item.getContent());
-                        ui.InputControl.prototype.setValue.call(this, item._sValue);
+                        this.$setValue(item._sValue);
                         if (this._uOptions.isShow()) {
                             core.setFocused(item);
                         }
                     } else {
                         this.setText('');
-                        ui.InputControl.prototype.setValue.call(this, '');
+                        this.$setValue('');
                         if (this.contain(core.getFocused())) {
                             core.setFocused(this);
                         }

@@ -1,6 +1,6 @@
 /*
 @example
-<div ui="type:calendar-input"></div>
+<div ui="type:calendar-input;name:calendar;placeholder:请输入"></div>
 */
 (function () {
 //{if 0}//
