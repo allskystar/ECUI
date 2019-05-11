@@ -1,6 +1,6 @@
 /*
 @example
-<div ui="type:progress-bar;max:100;value:0"></div>
+<div ui="type:progress-bar;max:100;value:35"></div>
 
 @fields
 _eMask   - 完成的进度比例内容区域
@@ -21,7 +21,7 @@ _eMask   - 完成的进度比例内容区域
         function (el, options) {
             ui.Progress.call(this, el, options);
 
-            el.innerHTML = '<div class="' + options.classes.join('-mask ') + '"></div>';
+            el.innerHTML = '<div class="' + this.getUnitClass(ui.ProgressBar, 'mask') + '"></div>';
             this._eMask = el.lastChild;
         },
         {

@@ -1,13 +1,10 @@
 /*
 @example
 <div ui="type:tab;selected:1">
-    <!-- 包含容器的选项卡 -->
     <div>
         <strong>标题1</strong>
-        <!-- 这里是容器 -->
-        ...
+        标题1文本内容
     </div>
-    <!-- 仅有标题的选项卡，以下selected定义与控件定义是一致的，可以忽略其中之一 -->
     <strong ui="selected:true">标题2</strong>
 </div>
 
@@ -51,20 +48,29 @@ _eContainer      - 容器 DOM 元素
     ui.Tab = core.inherits(
         ui.Control,
         'ui-tab',
-        function (el, options) {
-            var titleEl = dom.create({className: options.classes.join('-title ')}),
-                containerEl = dom.create({className: options.classes.join('-container ')});
+        [
+            function (el, options) {
+                if (options.selected) {
+                    this.setSelected(+options.selected);
+                } else if (!this._cSelected) {
+                    this.setSelected(0);
+                }
+            },
+            function (el, options) {
+                var titleEl = dom.create({className: this.getUnitClass(ui.Tab, 'title')}),
+                    containerEl = dom.create({className: this.getUnitClass(ui.Tab, 'container')});
 
-            for (; el.firstChild; ) {
-                titleEl.appendChild(el.firstChild);
+                for (; el.firstChild; ) {
+                    titleEl.appendChild(el.firstChild);
+                }
+                el.appendChild(titleEl);
+                this._eContainer = el.appendChild(containerEl);
+
+                ui.Control.call(this, el, options);
+
+                this.$setBody(titleEl);
             }
-            el.appendChild(titleEl);
-            this._eContainer = el.appendChild(containerEl);
-
-            ui.Control.call(this, el, options);
-
-            this.$setBody(titleEl);
-        },
+        ],
         {
             /**
              * 选项部件。
@@ -112,7 +118,7 @@ _eContainer      - 容器 DOM 元素
                     }
 
                     if (options.parent && options.selected) {
-                        options.parent._cSelected = this;
+                        options.parent.setSelected(this);
                     }
                 },
                 {
@@ -200,14 +206,6 @@ _eContainer      - 容器 DOM 元素
                 } else {
                     core.dispatchEvent(this, 'containerclick', event);
                 }
-            },
-
-            /**
-             * @override
-             */
-            $ready: function (event) {
-                this.setSelected(this._cSelected || +(event.options.selected) || 0);
-                ui.Control.prototype.$ready.call(this, event.options);
             },
 
             /**

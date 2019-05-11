@@ -1,6 +1,6 @@
 /*
 @example
-<div ui="type:count-down;time:200;immediate"></div>
+<div ui="type:timer;time:200;immediate"></div>
 
 @fields
 _bImmediate     - 是否直接开始倒计时
@@ -18,15 +18,15 @@ _sFormat        - 显示格式
      * 格式化时间。
      * @private
      *
-     * @param {ecui.ui.CountDown} countDown 计时器控件
+     * @param {ecui.ui.Timer} timer 计时器控件
      */
-    function refresh(countDown) {
-        var hours = Math.floor(countDown._nTime / 3600000),
-            minutes = Math.floor((countDown._nTime % 3600000) / 60000),
-            second = Math.floor((countDown._nTime % 60000) / 1000),
-            msecond = countDown._nTime % 1000;
+    function refresh(timer) {
+        var hours = Math.floor(timer._nTime / 3600000),
+            minutes = Math.floor((timer._nTime % 3600000) / 60000),
+            second = Math.floor((timer._nTime % 60000) / 1000),
+            msecond = timer._nTime % 1000;
 
-        countDown.getBody().innerHTML = util.stringFormat(countDown._sFormat, ('0' + hours).slice(-2), ('0' + minutes).slice(-2), ('0' + second).slice(-2), ('000' + msecond).slice(-4));
+        timer.getBody().innerHTML = util.stringFormat(timer._sFormat, ('0' + hours).slice(-2), ('0' + minutes).slice(-2), ('0' + second).slice(-2), ('000' + msecond).slice(-4));
     }
 
     /**
@@ -37,7 +37,7 @@ _sFormat        - 显示格式
      * format      显示格式，{0}表示时，{1}表示分，{2}表示秒，{3}表示毫秒
      * @control
      */
-    ui.CountDown = core.inherits(
+    ui.Timer = core.inherits(
         ui.Control,
         function (el, options) {
             ui.Control.call(this, el, options);

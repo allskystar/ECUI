@@ -1,13 +1,13 @@
 /*
 @example
-<ul ui="type:menu">
-    <li>选项一</li>
-    <li>选项二</li>
-    <ul>
-        <li>子选项组名</li>
-        <li>子选项一</li>
-        <li>子选项二</li>
-    </ul>
+<ul ui="type:popup-menu">
+  <li>选项一</li>
+  <li>选项二</li>
+  <ul>
+    <li>子选项组名</li>
+    <li>子选项一</li>
+    <li>子选项二</li>
+  </ul>
 </ul>
 */
 //{if 0}//
@@ -25,6 +25,10 @@
         ui.Control,
         'ui-popup-menu',
         {
+            /**
+             * 菜单项部件。
+             * @unit
+             */
             Item: core.inherits(
                 ui.Item,
                 'ui-popup-menu-item',
@@ -39,10 +43,13 @@
                     ui.Item.call(this, el, options);
 
                     if (popup) {
-                        this.setPopup(core.$fastCreate(ui.PopupMenu, popup, this));
+                        this.setChildMenu(core.$fastCreate(ui.PopupMenu, popup, this));
                     }
                 },
                 {
+                    /**
+                     * @override
+                     */
                     $mouseout: function (event) {
                         ui.Item.prototype.$mouseout.call(this, event);
                         if (this._cPopup) {
@@ -50,6 +57,9 @@
                         }
                     },
 
+                    /**
+                     * @override
+                     */
                     $mouseover: function (event) {
                         ui.Item.prototype.$mouseover.call(this, event);
                         if (this._cPopup) {
@@ -58,7 +68,13 @@
                         }
                     },
 
-                    setPopup: function (popup) {
+                    /**
+                     * 设置子菜单。
+                     * @public
+                     *
+                     * @param {ecui.ui.PopupMenu} popup 弹出菜单控件
+                     */
+                    setChildMenu: function (popup) {
                         if (this._cPopup !== popup) {
                             if (this._cPopup) {
                                 this._cPopup.hide();
@@ -76,8 +92,17 @@
                 }
             ),
 
+            /**
+             * @override
+             */
             $alterItems: util.blank,
 
+            /**
+             * 菜单自动对齐。
+             * @public
+             *
+             * @param {ecui.ui.Control} control 需要对齐的控件
+             */
             assignTo: function (control) {
                 var pos = dom.getPosition(control.getMain()),
                     height  = this.getHeight(),

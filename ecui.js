@@ -34,7 +34,8 @@ var ecui;
     document.write('<script type="text/javascript" src="src/base/progress-circle.js"></script>');
     document.write('<script type="text/javascript" src="src/base/locked-table.js"></script>');
     document.write('<script type="text/javascript" src="src/base/inline-table.js"></script>');
-    document.write('<script type="text/javascript" src="src/base/count-down.js"></script>');
+    document.write('<script type="text/javascript" src="src/base/timer.js"></script>');
+    document.write('<script type="text/javascript" src="src/base/clock.js"></script>');
 
     document.write('<script type="text/javascript" src="src/input/upload.js"></script>');
     document.write('<script type="text/javascript" src="src/input/input-control.js"></script>');

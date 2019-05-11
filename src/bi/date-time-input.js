@@ -43,7 +43,7 @@
             this._eEndInput = dom.insertAfter(dom.create('input', { name: names[1], readOnly: true, className: ' ui-hide' }), this.getInput());
             this._bRequired = !!options.required;
             this._sValue = options.value || this.getInput().value;
-            var optionsEl = dom.create('DIV', {className: options.classes.join('-options ') + 'ui-popup ui-hide'});
+            var optionsEl = dom.create('DIV', {className: this.getUnitCLass(ui.BIDateTime, 'options') + 'ui-popup ui-hide'});
             this._uOptions = ecui.$fastCreate(this.Options, optionsEl, this, { focusable: false, value: this._sValue});
             this.setPopup(this._uOptions);
         },
@@ -211,7 +211,7 @@
                             dom.insertHTML(
                                 el,
                                 'AFTERBEGIN',
-                                '<div class="' + options.classes.join('-header ') + '"><div class="">开始时间</div><div class="">结束时间</div></div>'
+                                '<div class="' + this.getUnitCLass(ui.BIDateTime.prototype.Options.prototype.DoubleCalendar.prototype.TimeCalendar, 'header') + '"><div class="">开始时间</div><div class="">结束时间</div></div>'
                             );
                             this._uStartHouer = ecui.$fastCreate(
                                 this.Listbox,

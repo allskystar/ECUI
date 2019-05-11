@@ -4,7 +4,7 @@
 或
 <button ui="type:submit">确认</button>
 或
-<input ui="type:submit" value="确认" type="button">
+<input ui="type:submit" type="button" value="确认">
 */
 //{if 0}//
 (function () {
