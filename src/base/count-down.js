@@ -1,13 +1,12 @@
 /*
 @example
-<div ui="type:count-down;time:200"></div>
+<div ui="type:count-down;time:200;immediate"></div>
 
 @fields
-_bMillisecond   - 是否精确到毫秒，默认精确到秒
 _bImmediate     - 是否直接开始倒计时
-_nTime          - 倒计时的时长，单位秒
-_nDown          - 倒计时剩余的时长，单位秒
-_oTimer         - 定时器
+_nBase          - 倒计时的基础时长，单位毫秒
+_nTime          - 倒计时的剩余时长，单位毫秒
+_sFormat        - 显示格式
 */
 (function () {
 //{if 0}//
@@ -19,36 +18,37 @@ _oTimer         - 定时器
      * 格式化时间。
      * @private
      *
-     * @param {number} time 剩余的时间，单位秒
+     * @param {ecui.ui.CountDown} countDown 计时器控件
      */
-    function formatTime(time) {
-        var hours = Math.floor(time / 3600),
-            minutes = Math.floor((time % 3600) / 60),
-            second = time % 60;
+    function refresh(countDown) {
+        var hours = Math.floor(countDown._nTime / 3600000),
+            minutes = Math.floor((countDown._nTime % 3600000) / 60000),
+            second = Math.floor((countDown._nTime % 60000) / 1000),
+            msecond = countDown._nTime % 1000;
 
-        second = this._bMillisecond ? Math.floor(second * 1000) / 1000 : Math.floor(second);
-
-        return (hours < 10 ? '0' + hours : hours) + ':' + (minutes < 10 ? '0' + minutes : minutes) + ':' + (second < 10 ? '0' + second : second);
+        countDown.getBody().innerHTML = util.stringFormat(countDown._sFormat, ('0' + hours).slice(-2), ('0' + minutes).slice(-2), ('0' + second).slice(-2), ('000' + msecond).slice(-4));
     }
 
     /**
      * 计时器控件。
      * options 属性：
-     * time        倒计时的时长
-     * millisecond 倒计时是否以毫秒为单位，默认为false
+     * time        倒计时的时长，默认单位秒，允许使用ms后缀表示毫秒
      * immediate   是否直接开始倒计时，默认为false
+     * format      显示格式，{0}表示时，{1}表示分，{2}表示秒，{3}表示毫秒
      * @control
      */
     ui.CountDown = core.inherits(
         ui.Control,
         function (el, options) {
             ui.Control.call(this, el, options);
-            this._nTime = +options.time;
-            this._bMillisecond = !!options.millisecond;
+            this._nBase = options.time.endsWith('ms') ? +options.time.slice(0, -2) : +options.time * 1000;
             this._bImmediate = !!options.immediate;
-            this.getBody().innerHTML = formatTime(this._nTime);
+            this._sFormat = options.format || this.FORMAT;
+            this.reset();
         },
         {
+            FORMAT: '{0}:{1}:{2}',
+
             /**
              * @override
              */
@@ -73,14 +73,15 @@ _oTimer         - 定时器
              */
             reset: function () {
                 this.stop();
-                this.getBody().innerHTML = formatTime(this._nTime);
+                this._nTime = this._nBase;
+                refresh(this);
             },
 
             /**
              * 设置定时器时间。
              * @public
              *
-             * @param {number} time 定时器时间
+             * @param {number} time 定时器时间，单位毫秒
              */
             setTime: function (time) {
                 this._nTime = time;
@@ -89,25 +90,19 @@ _oTimer         - 定时器
             /**
              * 定时器开始。
              * @public
-             *
-             * @param {boolean} isContinue 是否从终止状态继续，否则重新计时
              */
-            start: function (isContinue) {
-                if (this._oTimer) {
-                    this._oTimer();
-                }
+            start: function () {
+                this.stop();
+
                 var lastTime = Date.now();
-                if (!isContinue) {
-                    this._nDown = this._nTime;
-                }
-                this._oTimer = util.timer(
+                this.stop = util.timer(
                     function () {
                         var time = Date.now();
-                        this._nDown = Math.max(0, this._nDown + (lastTime - time) / 1000);
+                        this._nTime = Math.max(0, this._nTime + lastTime - time);
                         lastTime = time;
-                        this.getBody().innerHTML = formatTime(this._nDown);
-                        if (this._nDown <= 0) {
-                            this._oTimer();
+                        refresh(this);
+                        if (this._nTime <= 0) {
+                            this.stop();
                         }
                     },
                     -1,
@@ -119,9 +114,7 @@ _oTimer         - 定时器
              * 定时器终止。
              * @public
              */
-            stop: function () {
-                this._oTimer();
-            }
+            stop: util.blank
         }
     );
 }());
