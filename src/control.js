@@ -562,7 +562,7 @@ _aStatus            - 控件当前的状态集合
              */
             alterSubType: function (subtype) {
                 if (this._sSubType !== subtype) {
-                    var classes = this.constructor.TYPES.slice();
+                    var classes = this.constructor.TYPES[0].slice();
                     if (this._sClass !== classes[0]) {
                         classes.push(this._sClass);
                     }
@@ -801,7 +801,7 @@ _aStatus            - 控件当前的状态集合
              * @return {Array} 控件的全部样式
              */
             getClasses: function () {
-                var classes = this.constructor.TYPES.slice();
+                var classes = this.constructor.TYPES[0].slice();
                 if (this._sClass !== classes[0]) {
                     classes.push(this._sClass);
                 }
@@ -859,14 +859,14 @@ _aStatus            - 控件当前的状态集合
              * @return {string} HTML 片断
              */
             getUnitClass: function (baseClass, name) {
-                for (var i = 0, clazz = this.constructor; clazz; i++) {
+                for (var i = 1, clazz = this.constructor; clazz; i++) {
                     if (clazz === baseClass) {
                         break;
                     }
                     clazz = clazz.superClass.constructor;
                 }
 
-                return this.constructor.TYPES[i].join('-' + name + ' ') + '-' + name;
+                return this.constructor.TYPES[this.constructor.TYPES.length - i].join('-' + name + ' ') + '-' + name;
             },
 
             /**
@@ -953,7 +953,7 @@ _aStatus            - 控件当前的状态集合
              * @return {string} 控件的类型
              */
             getType: function () {
-                return this.constructor.TYPES[0];
+                return this.constructor.TYPES[0][0];
             },
 
             /**

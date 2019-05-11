@@ -2567,7 +2567,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                 util.inherits(subClass, superClass);
 
                 realType = realType ? (realType.charAt(0) === '*' ? realType.slice(1) : [realType]) : [];
-                subClass.TYPES = [realType instanceof Array ? realType : [realType]];
+                subClass.TYPES = [];
 
                 superClass.TYPES.forEach(function (item) {
                     if (realType instanceof Array) {
@@ -2578,6 +2578,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                     }
                     subClass.TYPES.push(item);
                 });
+                subClass.TYPES.push(realType instanceof Array ? realType : [realType]);
             } else {
                 // ecui.ui.Control的特殊初始化设置
                 subClass.TYPES = [];
