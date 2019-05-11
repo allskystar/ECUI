@@ -416,7 +416,6 @@ _eRight      - 右侧乐定行的Element元素
              * @override
              */
             cache: function (force) {
-                debugger;
                 this._uLeftHead.cache(force);
                 this._uRightHead.cache(force);
                 this._aHeadRows.forEach(function (item) {
