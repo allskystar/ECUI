@@ -1,23 +1,26 @@
 /*
 @example
-<div ui="type:locked-table;left-lock:2;right-lock:1">
-    <table>
-        <!-- 当前节点的列定义，如果有特殊格式，需要使用width样式 -->
-        <thead>
-            <tr>
-                <th>标题</th>
-                ...
-            </tr>
-        </thead>
-        <tbody>
-            <!-- 这里放单元格序列 -->
-            <tr>
-                <td>单元格一</td>
-                ...
-            </tr>
-            ...
-        </tbody>
-    </table>
+<div ui="type:locked-table;left-lock:1" style="width:600px">
+  <table style="width:750px">
+    <!-- 表头区域 -->
+    <thead>
+      <tr>
+        <th style="width:200px;">公司名</th>
+        <th style="width:200px;">url</th>
+        <th style="width:250px;">地址</th>
+        <th style="width:100px;">创办时间</th>
+      </tr>
+    </thead>
+    <!-- 内容行区域 -->
+    <tbody>
+      <tr>
+        <td>百度</td>
+        <td>www.baidu.com</td>
+        <td>中国北京中关村</td>
+        <td>1999</td>
+      </tr>
+    </tbody>
+  </table>
 </div>
 
 @fields
@@ -114,9 +117,9 @@ _eRight      - 右侧乐定行的Element元素
         if (!body.innerHTML.trim()) {
             row._bEmpty = true;
             if (ieVersion < 9) {
-                body.appendChild(dom.create('TD', {className: 'ui-locked-table-hcell ui-table-hcell'}));
+                body.appendChild(dom.create('TD', {className: table.getUnitClass(ui.Table, 'hcell')}));
             } else {
-                body.innerHTML = '<td class="ui-locked-table-hcell ui-table-hcell"></td>';
+                body.innerHTML = '<td class="' + table.getUnitClass(ui.Table, 'hcell') + '"></td>';
             }
         }
 
@@ -150,19 +153,22 @@ _eRight      - 右侧乐定行的Element元素
             this._nLeft = options.leftLock || 0;
             this._nRight = this.getColumnCount() - (options.rightLock || 0);
 
-            totalRows.forEach(function (item, index) {
-                item = item.getMain();
-                list[index] = '<tr class="' + item.className + '" style="' + item.style.cssText + '"><td class="ui-locked-table-height"></td></tr>';
-            });
+            totalRows.forEach(
+                function (item, index) {
+                    item = item.getMain();
+                    list[index] = '<tr class="' + item.className + '" style="' + item.style.cssText + '"><td class="' + this.getUnitClass(ui.LockedTable, 'height') + '"></td></tr>';
+                },
+                this
+            );
 
-            o = '<table cellspacing="0" class="ui-locked-table-{0} ui-locked-table-body ' + dom.parent(this.getBody()).className + '"><tbody>' + list.splice(headRows.length, rows.length).join('') + '</tbody></table><table cellspacing="0" class="ui-locked-table-{0} ui-locked-table-head ' + this.$getSection('Head').getMain().className + '"><thead>' + list.join('') + '</thead></table>';
+            o = '<table cellspacing="0" class="' + this.getUnitClass(ui.LockedTable, '{0}') + ' ' + this.getUnitClass(ui.LockedTable, 'body') + ' ' + dom.parent(this.getBody()).className + '"><tbody>' + list.splice(headRows.length, rows.length).join('') + '</tbody></table><table cellspacing="0" class="' + this.getUnitClass(ui.LockedTable, '{0}') + ' ' + this.$getSection('Head').getMain().className + '"><thead>' + list.join('') + '</thead></table>';
             if (core.getScrollNarrow()) {
                 layout = el;
             }
             dom.insertHTML(
                 layout,
                 'beforeEnd',
-                '<div class="ui-locked-table-fill"></div>' + util.stringFormat(o, 'right') + util.stringFormat(o, 'left')
+                '<div class="' + this.getUnitClass(ui.LockedTable, 'fill') + '"></div>' + util.stringFormat(o, 'right') + util.stringFormat(o, 'left')
             );
             el = layout.lastChild;
             for (i = 0; i < 4; i++) {
