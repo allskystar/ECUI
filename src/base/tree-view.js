@@ -56,10 +56,7 @@ _aChildren     - 子控件集合
                     // 初始化子控件
                     this._aChildren = dom.children(this._eChildren).map(
                         function (item) {
-//{if 0}//
-                            return core.$fastCreate(this.constructor, item, this, Object.assign({}, options, {id: ''}, core.getOptions(item) || {}));
-//{else}//                            return core.$fastCreate(this.constructor, item, this, Object.assign({}, options, core.getOptions(item) || {}));
-//{/if}//
+                            return core.$fastCreate(this.constructor, item, this, Object.assign({}, options, core.getOptions(item) || {}));
                         },
                         this
                     );
@@ -86,6 +83,8 @@ _aChildren     - 子控件集合
                 }
 
                 ui.Control.call(this, el, options);
+
+                delete options.id;
             }
         ],
         {
