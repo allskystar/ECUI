@@ -70,7 +70,7 @@ _eRight      - 右侧乐定行的Element元素
         row._eLeft.style.height = row._eRight.style.height = row.getMain().style.height = '';
 
         if (row._bEmpty) {
-            row._eLeft.lastChild.previousSibling.setAttribute('colspan', row._bEmpty);
+            row._eLeft.lastChild.previousSibling.setAttribute('colSpan', row._bEmpty);
             dom.removeClass(row._eLeft.lastChild, 'ui-hide');
             delete row._bEmpty;
             if (ieVersion < 9) {
@@ -115,9 +115,11 @@ _eRight      - 右侧乐定行的Element元素
             }
         });
 
-        if (!body.innerHTML.trim()) {
-            row._bEmpty = dom.getAttribute(row._eLeft.lastChild.previousSibling, 'colspan') || ' ';
-            row._eLeft.lastChild.previousSibling.setAttribute('colspan', 2);
+        if (body.innerHTML.trim()) {
+            row._eLeft.lastChild.style.width = (table.getClientWidth() - table.$$leftTDWidth - table.$$paddingLeft) + 'px';
+        } else {
+            row._bEmpty = dom.getAttribute(row._eLeft.lastChild.previousSibling, 'colSpan') || ' ';
+            row._eLeft.lastChild.previousSibling.setAttribute('colSpan', 2);
             dom.addClass(row._eLeft.lastChild, 'ui-hide');
             if (ieVersion < 9) {
                 body.appendChild(dom.create('TD', {className: table.getUnitClass(ui.Table, table.getHRows().indexOf(row) < 0 ? 'cell' : 'hcell')}));
@@ -242,7 +244,7 @@ _eRight      - 右侧乐定行的Element元素
                     rightHeadStyle = this._uRightHead.getMain().style,
                     leftMainStyle = this._uLeftMain.getMain().style,
                     rightMainStyle = this._uRightMain.getMain().style,
-                    fixed = dom.contain(this.getMain(), event.target) && event.deltaX;
+                    fixed = dom.contain(this.getMain(), event.target) && event.deltaY;
 
                 if (this.$getSection('Head').getMain().style.position === 'fixed' || fixed) {
                     leftHeadStyle.position = rightHeadStyle.position = 'fixed';
@@ -295,6 +297,8 @@ _eRight      - 右侧乐定行的Element元素
              * @override
              */
             $headscroll: function () {
+                ui.Table.prototype.$headscroll.call(this);
+
                 var leftHeadStyle = this._uLeftHead.getMain().style,
                     rightHeadStyle = this._uRightHead.getMain().style,
                     leftMainStyle = this._uLeftMain.getMain().style,
@@ -338,8 +342,7 @@ _eRight      - 右侧乐定行的Element元素
                     head = this.$getSection('Head').getMain().lastChild;
 
                 this._eFill.style.width = this.$$tableWidth + 'px';
-                this._uLeftHead.getMain().style.width = width + 'px';
-                this._uLeftMain.getMain().style.width = (this.$$leftTDWidth + this.$$paddingLeft) + 'px';
+                this._uLeftHead.getMain().style.width = this._uLeftMain.getMain().style.width = width + 'px';
                 this._uRightHead.getMain().style.width = this._uRightMain.getMain().style.width = (this.$$rightTDWidth + this.$$paddingRight) + 'px';
                 table.style.marginLeft = head.style.marginLeft = this.$$paddingLeft + 'px';
                 table.style.width = head.style.width = (this.$$tableWidth - this.$$paddingLeft - this.$$paddingRight) + 'px';

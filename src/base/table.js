@@ -305,6 +305,7 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
              */
             HCell: core.inherits(
                 ui.Control,
+                'ui-table-hcell',
                 {
                     /**
                      * @override

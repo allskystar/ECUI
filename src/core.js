@@ -669,7 +669,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             mousedown: util.blank,
 
             mousemove: function (event) {
-                bubble(event.getControl(), 'mousemove', event);
+                envStack[envStack.length - 1].mousemove(event);
 
                 var view = util.getView();
                 dragStopHandler();
@@ -829,7 +829,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             this.clientY = event.clientY;
             this.which = event.which;
             if (ieVersion <= 10) {
-outer:          for (var caches = [], target = event.target, el; target && target.tagName !== 'HTML'; target = getElementFromEvent(event)) {
+outer:          for (var caches = [], target = event.target, el; target && target.tagName !== 'BODY'; target = getElementFromEvent(event)) {
                     for (el = target;; el = dom.parent(el)) {
                         if (!el) {
                             break outer;
