@@ -5,6 +5,13 @@
     <div>选项二</div>
     <div>选项三</div>
 </div>
+或
+<div ui="type:multi-select">
+    <input name="test">
+    <div>选项一</div>
+    <div>选项二</div>
+    <div>选项三</div>
+</div>
 
 @fields
 _sName  - 多选框内所有input的名称

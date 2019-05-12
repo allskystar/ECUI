@@ -1,11 +1,11 @@
 /*
 @example
-<input ui="type:input-control" type="password" name="passwd" value="1111">
+<input ui="type:input-control" type="password" name="passwd" value="1111" placeholder="请输入">
 或:
-<div ui="type:input-control;name:passwd;value:1111;inputType:password"></div>
+<div ui="type:input-control;name:passwd;value:1111;inputType:password;placeholder:请输入"></div>
 或:
 <div ui="type:input-control">
-    <input type="password" name="passwd" value="1111">
+    <input type="password" name="passwd" value="1111" placeholder="请输入">
 </div>
 
 @fields

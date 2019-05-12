@@ -1,13 +1,13 @@
 /*
 @example
-<ul ui="type:popup-menu">
-  <li>选项一</li>
-  <li>选项二</li>
-  <ul>
-    <li>子选项组名</li>
-    <li>子选项一</li>
-    <li>子选项二</li>
-  </ul>
+<ul ui="type:menu">
+    <li>选项一</li>
+    <li>选项二</li>
+    <ul>
+        <li>子选项组名</li>
+        <li>子选项一</li>
+        <li>子选项二</li>
+    </ul>
 </ul>
 */
 //{if 0}//

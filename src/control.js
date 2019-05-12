@@ -91,7 +91,7 @@ _aStatus            - 控件当前的状态集合
 
             this._eMain = this._eBody = el;
             if (options.primary) {
-                el.className += options.primary;
+                el.className = (options.id || '') + ' ' + el.className + options.primary;
             }
             this._sUID = options.uid;
             this._sClass = el.className.trim().split(' ')[0];

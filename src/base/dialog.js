@@ -1,8 +1,8 @@
 /*
 @example
 <div ui="type:dialog">
-  <strong>标题</strong>
-  窗体文本
+    <strong>标题</strong>
+    窗体HTML文本
 </div>
 
 @fields

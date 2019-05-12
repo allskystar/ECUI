@@ -1,17 +1,24 @@
 /*
 @example
-<select ui="type:filter" name="age">
+<select ui="type:filter;placeholder:请输入" name="age">
     <option value="20">20</option>
-    <option value="21" selected="selected">21</option>
+    <option value="21" selected>21</option>
     <option value="22">22</option>
 </select>
 或
 <div ui="type:filter;name:age;value:21">
-    <!-- 这里可以放input元素，如果没有自动生成 -->
     <div ui="value:20">20</div>
     <div ui="value:21">21</div>
     <div ui="value:22">22</div>
 </div>
+或
+<div ui="type:filter">
+    <input name="age" value="21" placeholder="请输入">
+    <div ui="value:20">20</div>
+    <div ui="value:21">21</div>
+    <div ui="value:22">22</div>
+</div>
+
 
 @fields
 _bCustom    - 是否允许用户自己输入内容，如果不允许，不选择的输入失焦会自动清除

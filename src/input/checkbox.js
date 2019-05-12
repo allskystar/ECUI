@@ -5,7 +5,7 @@
 <div ui="type:checkbox;name:city;value:beijing;checked:true;subject:china"></div>
 或
 <div ui="type:checkbox;subject:china">
-  <input name="city" value="beijing" checked="checked" type="checkbox">
+    <input name="city" value="beijing" checked="checked" type="checkbox">
 </div>
 
 @fields

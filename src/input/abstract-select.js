@@ -9,6 +9,12 @@
     <div ui="value:male">男</div>
     <div ui="value:female">女</div>
 </div>
+或
+<div ui="type:select">
+    <input type="hidden" name="sex" value="male" placeholder="请选择">
+    <div ui="value:male">男</div>
+    <div ui="value:female">女</div>
+</div>
 
 @fields
 _bRequired    - 是否必须选择
