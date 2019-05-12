@@ -89,8 +89,29 @@
         }
     );
 
+    function setAttribute(fn, name, value) {
+        value = value || null;
+        var oldValue = this.$ItemsData['_' + name];
+        if (oldValue !== value) {
+            if (oldValue) {
+                oldValue.alterStatus('-' + name);
+            }
+            if (value) {
+                value.alterStatus('+' + name);
+            }
+            fn.call(this, oldValue, value);
+            this.$ItemsData['_' + name] = value;
+        }
+    }
+
     ui.Items = {
         NAME: '$Items',
+
+        defineAttribute: function (UIClass, name, fn) {
+            UIClass.prototype['set' + name.chatAt(0).toUpperCase() + name.slice(1)] = function (value) {
+                setAttribute.call(this, fn, name, value);
+            };
+        },
 
         constructor: function () {
             this.$ItemsData.prevent = 0;
