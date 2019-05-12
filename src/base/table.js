@@ -187,12 +187,12 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
 
             o = '<div class="' + this.getUnitClass(ui.Table, 'body') + '"></div><div class="' + this.getUnitClass(ui.Table, 'head') + '"><table cellspacing="0" class="' + table.className + '" style="' + table.style.cssText + '"><tbody></tbody></table></div>';
             if (core.getScrollNarrow()) {
-                dom.insertHTML(el, 'beforeEnd', '<div class="' + this.getUnitClass(ui.Table, 'layout-scrollbar') + ' ui-layout"><div class="' + this.getUnitClass(ui.Table, 'layout-body') + '"></div></div>' + o);
+                dom.insertHTML(el, 'beforeEnd', '<div class="' + this.getUnitClass(ui.Table, 'layout') + '"><div class="' + this.getUnitClass(ui.Table, 'layout-body') + '"></div></div>' + o);
                 o = el.lastChild;
                 o.previousSibling.appendChild(table);
                 this._eLayout = o.previousSibling.previousSibling;
             } else {
-                dom.insertHTML(el, 'beforeEnd', '<div class="' + this.getUnitClass(ui.Table, 'layout-touchpad') + ' ui-layout">' + o + '</div>');
+                dom.insertHTML(el, 'beforeEnd', '<div class="' + this.getUnitClass(ui.Table, 'layout') + '">' + o + '</div>');
                 this._eLayout = el.lastChild;
                 this._eLayout.firstChild.appendChild(table);
                 o = this._eLayout.lastChild;
