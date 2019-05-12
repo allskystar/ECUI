@@ -34,7 +34,8 @@
         dom.remove(popupEl);
 
         for (var el = owner.getMain(), container = dom.parent(el); container !== document.body; container = dom.parent(container)) {
-            if (container.scrollHeight !== container.clientHeight) {
+            var overflow = dom.getStyle(container, 'overflow');
+            if (container.scrollHeight !== container.clientHeight && (overflow === 'auto' || overflow === 'scroll')) {
                 break;
             }
         }
