@@ -337,7 +337,7 @@ _eRight      - 右侧乐定行的Element元素
                     head = this.$getSection('Head').getMain().lastChild;
 
                 this._eFill.style.width = this.$$tableWidth + 'px';
-                this._uLeftHead.getMain().style.width = this._uLeftMain.getMain().style.width = (width - core.getScrollNarrow()) + 'px';
+                this._uLeftHead.getMain().style.width = this._uLeftMain.getMain().style.width = (width - (this._eLayout.scrollHeight > this._eLayout.clientHeight ? core.getScrollNarrow() : 0)) + 'px';
                 this._uRightHead.getMain().style.width = this._uRightMain.getMain().style.width = (this.$$rightTDWidth + this.$$paddingRight) + 'px';
                 table.style.marginLeft = head.style.marginLeft = this.$$paddingLeft + 'px';
                 table.style.width = head.style.width = (this.$$tableWidth - this.$$paddingLeft - this.$$paddingRight) + 'px';

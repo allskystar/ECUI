@@ -151,16 +151,6 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
             this._nHeadFloat = options.headFloat === undefined ? undefined : options.headFloat === true ? 0 : +options.headFloat;
             this._nHeadMargin = options.headMargin || 0;
 
-            el.appendChild(
-                this._eLayout = dom.create(
-                    {
-                        className: this.getUnitClass(ui.Table, 'layout'),
-                        innerHTML: '<div class="' + this.getUnitClass(ui.Table, 'layout-body') + '"></div><div class="' + this.getUnitClass(ui.Table, 'body') + '"></div><div class="' + this.getUnitClass(ui.Table, 'head') + '"><table cellspacing="0" class="' + table.className + '" style="' + table.style.cssText + '"><tbody></tbody></table></div>'
-                    }
-                )
-            );
-            this._eLayout.lastChild.previousSibling.appendChild(table);
-
             var i = 0,
                 list = dom.children(table),
                 head = list[0],
@@ -195,16 +185,22 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
 
             ui.Control.call(this, el, options);
 
+            o = '<div class="' + this.getUnitClass(ui.Table, 'body') + '"></div><div class="' + this.getUnitClass(ui.Table, 'head') + '"><table cellspacing="0" class="' + table.className + '" style="' + table.style.cssText + '"><tbody></tbody></table></div>';
+            if (core.getScrollNarrow()) {
+                dom.insertHTML(el, 'beforeEnd', '<div class="' + this.getUnitClass(ui.Table, 'layout') + '" style="overflow:auto"><div class="' + this.getUnitClass(ui.Table, 'layout-body') + '"></div></div>' + o);
+                o = el.lastChild;
+                o.previousSibling.appendChild(table);
+                this._eLayout = o.previousSibling.previousSibling;
+            } else {
+                dom.insertHTML(el, 'beforeEnd', '<div class="' + this.getUnitClass(ui.Table, 'layout') + '" style="overflow:hidden">' + o + '</div>');
+                this._eLayout = el.lastChild;
+                this._eLayout.firstChild.appendChild(table);
+                o = this._eLayout.lastChild;
+            }
+
             // 初始化表格区域
             this.$setBody(body);
-            (this._uHead = core.$fastCreate(ui.Control, this._eLayout.lastChild, this)).$setBody(head);
-
-            if (core.getScrollNarrow()) {
-                el.appendChild(this._eLayout.lastChild);
-                el.insertBefore(this._eLayout.lastChild, el.lastChild);
-            } else {
-                dom.remove(this._eLayout.firstChild);
-            }
+            (this._uHead = core.$fastCreate(ui.Control, o, this)).$setBody(head);
 
             // 以下初始化所有的行控件
             for (i = 0; o = list[i]; i++) {
