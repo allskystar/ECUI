@@ -179,8 +179,9 @@ _eRight      - 右侧乐定行的Element元素
 
             var left = this._uLeftHead = core.$fastCreate(ui.Control, list[0], this),
                 right = this._uRightHead = core.$fastCreate(ui.Control, list[2], this);
-            left.$setBody(left = left.getMain().lastChild);
-            right.$setBody(right = right.getMain().lastChild);
+
+            left.$setBody(left = left.getMain().firstChild);
+            right.$setBody(right = right.getMain().firstChild);
 
             for (i = 0, left = dom.children(left), right = dom.children(right); el = left[i]; ) {
                 initLockedRow(headRows[i], el, right[i++]);
