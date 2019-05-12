@@ -583,15 +583,16 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
                     }
                 }
 
+                var style = this._uHead.getMain().style,
+                    pos = dom.getPosition(this._eLayout),
+                    view = util.getView(),
+                    top = pos.top - view.top,
+                    main = this.getMain();
+
+                this.$$fixedTop = Math.min(this.getClientHeight() - this.$$paddingTop - this._nHeadMargin + top, Math.max(this._nHeadFloat || 0, top));
+
                 if (this._nHeadFloat !== undefined) {
                     if (event.deltaY) {
-                        var style = this._uHead.getMain().style,
-                            pos = dom.getPosition(this._eLayout),
-                            view = util.getView(),
-                            top = pos.top - view.top,
-                            main = this.getMain();
-
-                        this.$$fixedTop = Math.min(this.getClientHeight() - this.$$paddingTop - this._nHeadMargin + top, Math.max(this._nHeadFloat, top));
                         if (this.isShow() && (this.$$fixedTop <= this._nHeadFloat || (dom.contain(main, event.target) && main.scrollHeight !== main.clientHeight))) {
                             if (this._oScrollHandler) {
                                 this._oScrollHandler();
@@ -687,7 +688,7 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
                 if (this._nHeadFloat !== undefined) {
                     var style = this._uHead.getMain().style;
                     style.position = '';
-                    style.top = (Math.min(this.getClientHeight() - this.$$paddingTop - this._nHeadMargin, Math.max(0, this._nHeadFloat + util.getView().top - dom.getPosition(this.getMain()).top)) + this._eLayout.scrollTop) + 'px';
+                    style.top = (Math.min(this.getClientHeight() - this.$$paddingTop - this._nHeadMargin, Math.max(0, this._nHeadFloat + util.getView().top - dom.getPosition(this.getMain()).top))) + 'px';
                     style.left = '0px';
                     if (!core.getScrollNarrow()) {
                         style.clip = ieVersion < 8 ? 'rect(0,100%,100%,0)' : 'auto';

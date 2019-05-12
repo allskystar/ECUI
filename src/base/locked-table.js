@@ -1,26 +1,24 @@
 /*
 @example
 <div ui="type:locked-table;left-lock:1" style="width:600px">
-  <table style="width:750px">
-    <!-- 表头区域 -->
-    <thead>
-      <tr>
-        <th style="width:200px;">公司名</th>
-        <th style="width:200px;">url</th>
-        <th style="width:250px;">地址</th>
-        <th style="width:100px;">创办时间</th>
-      </tr>
-    </thead>
-    <!-- 内容行区域 -->
-    <tbody>
-      <tr>
-        <td>百度</td>
-        <td>www.baidu.com</td>
-        <td>中国北京中关村</td>
-        <td>1999</td>
-      </tr>
-    </tbody>
-  </table>
+    <table style="width:750px">
+        <thead>
+            <tr>
+                <th style="width:200px;">公司名</th>
+                <th style="width:200px;">url</th>
+                <th style="width:250px;">地址</th>
+                <th style="width:100px;">创办时间</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>百度</td>
+                <td>www.baidu.com</td>
+                <td>中国北京中关村</td>
+                <td>1999</td>
+            </tr>
+        </tbody>
+    </table>
 </div>
 
 @fields
@@ -158,13 +156,10 @@ _eRight      - 右侧乐定行的Element元素
             this._nLeft = options.leftLock || 0;
             this._nRight = this.getColumnCount() - (options.rightLock || 0);
 
-            totalRows.forEach(
-                function (item, index) {
-                    item = item.getMain();
-                    list[index] = '<tr class="' + item.className + '" style="' + item.style.cssText + '"><td class="ui-locked-table-empty"></td></tr>';
-                },
-                this
-            );
+            totalRows.forEach(function (item, index) {
+                item = item.getMain();
+                list[index] = '<tr class="' + item.className + '" style="' + item.style.cssText + '"><td class="ui-locked-table-empty"></td></tr>';
+            });
 
             o = '<table cellspacing="0" class="' + this.getUnitClass(ui.LockedTable, '{0}') + ' ' + this.getUnitClass(ui.LockedTable, 'body') + ' ' + dom.parent(this.getBody()).className + '"><tbody>' + list.splice(headRows.length, rows.length).join('') + '</tbody></table><table cellspacing="0" class="' + this.getUnitClass(ui.LockedTable, '{0}') + ' ' + this.$getSection('Head').getMain().className + '"><thead>' + list.join('') + '</thead></table>';
             if (core.getScrollNarrow()) {
@@ -257,7 +252,7 @@ _eRight      - 右侧乐定行的Element元素
                     leftMainStyle.position = rightMainStyle.position = 'fixed';
                     leftMainStyle.left = leftHeadStyle.left;
                     rightMainStyle.left = rightHeadStyle.left;
-                    var scrollTop = layout.scrollTop - this.$$paddingTop;
+                    var scrollTop = (core.getScrollNarrow() ? layout.scrollTop : layout.firstChild.scrollTop) - this.$$paddingTop;
                     leftMainStyle.top = rightMainStyle.top = top - scrollTop + 'px';
                     leftMainStyle.clip = 'rect(' + scrollTop + 'px ' + this.$$paddingLeft + 'px ' + (scrollTop + this.getClientHeight() - this.$$scrollFixed[1]) + 'px 0px)';
                     rightMainStyle.clip = 'rect(' + scrollTop + 'px ' + this.$$paddingRight + 'px ' + (scrollTop + this.getClientHeight() - this.$$scrollFixed[1]) + 'px 0px)';
@@ -310,11 +305,11 @@ _eRight      - 右侧乐定行的Element元素
                 if (core.getScrollNarrow()) {
                     leftHeadStyle.left = leftMainStyle.left = '0px';
                     rightHeadStyle.left = rightMainStyle.left = (Math.min(this.getWidth(), this.$$tableWidth) - this.$$paddingRight - this.$$rightTDWidth - this.$$scrollFixed[0]) + 'px';
-                    leftMainStyle.top = rightMainStyle.top = this.$$paddingTop + 'px';
+                    leftMainStyle.top = rightMainStyle.top = (this.$$paddingTop - this.getLayout().scrollTop) + 'px';
                 } else {
                     leftHeadStyle.left = leftMainStyle.left = this.getLayout().scrollLeft + 'px';
                     rightHeadStyle.left = rightMainStyle.left = (Math.min(this.getWidth(), this.$$tableWidth) - this.$$paddingRight + this.getLayout().scrollLeft - this.$$rightTDWidth - this.$$scrollFixed[0]) + 'px';
-                    leftMainStyle.top = rightMainStyle.top = (this.$$paddingTop + this.getLayout().scrollTop - dom.parent(this.$getSection('Head').getMain()).scrollTop) + 'px';
+                    leftMainStyle.top = rightMainStyle.top = (this.$$paddingTop - this.getLayout().firstChild.scrollTop - dom.parent(this.$getSection('Head').getMain()).scrollTop) + 'px';
                     leftMainStyle.clip = rightMainStyle.clip = ieVersion < 8 ? 'rect(0,100%,100%,0)' : 'auto';
                 }
             },
@@ -342,7 +337,7 @@ _eRight      - 右侧乐定行的Element元素
                     head = this.$getSection('Head').getMain().lastChild;
 
                 this._eFill.style.width = this.$$tableWidth + 'px';
-                this._uLeftHead.getMain().style.width = this._uLeftMain.getMain().style.width = width + 'px';
+                this._uLeftHead.getMain().style.width = this._uLeftMain.getMain().style.width = (width - core.getScrollNarrow()) + 'px';
                 this._uRightHead.getMain().style.width = this._uRightMain.getMain().style.width = (this.$$rightTDWidth + this.$$paddingRight) + 'px';
                 table.style.marginLeft = head.style.marginLeft = this.$$paddingLeft + 'px';
                 table.style.width = head.style.width = (this.$$tableWidth - this.$$paddingLeft - this.$$paddingRight) + 'px';
