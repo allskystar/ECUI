@@ -7,8 +7,9 @@
     position: relative;
     overflow: hidden !important;
 
-    .ui-table-layout {
+    .ui-table-layout-scrollbar {
         position: relative !important;
+        overflow: auto !important;
         padding: 0px !important;
         border: 0px !important;
         margin: 0px !important;
@@ -18,6 +19,14 @@
             border: 0px !important;
             margin: 0px !important;
         }
+    }
+
+    .ui-table-layout-touchpad {
+        position: relative !important;
+        overflow: hidden !important;
+        padding: 0px !important;
+        border: 0px !important;
+        margin: 0px !important;
 
         .ui-table-body {
             position: static;
