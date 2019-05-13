@@ -67,7 +67,7 @@
              */
             Item: core.inherits(
                 ui.Select.prototype.Item,
-                'ui-combox-item'
+                '*ui-combox-item'
             ),
 
             /**

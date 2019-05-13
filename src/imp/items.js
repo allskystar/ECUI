@@ -56,6 +56,13 @@
                             }
                         }
                     }
+                    for (var name in oldParent.$ItemsData.properties) {
+                        if (oldParent.$ItemsData.properties.hasOwnProperty(name)) {
+                            if (oldParent.$ItemsData.properties[name] === this) {
+                                oldParent[name]();
+                            }
+                        }
+                    }
                 }
 
                 ui.Control.prototype.$setParent.call(this, parent);
@@ -89,33 +96,43 @@
         }
     );
 
-    function setAttribute(fn, name, value) {
-        value = value || null;
-        var oldValue = this.$ItemsData['_' + name];
-        if (oldValue !== value) {
-            if (oldValue) {
-                oldValue.alterStatus('-' + name);
-            }
-            if (value) {
-                value.alterStatus('+' + name);
-            }
-            fn.call(this, oldValue, value);
-            this.$ItemsData['_' + name] = value;
-        }
-    }
-
     ui.Items = {
         NAME: '$Items',
 
-        defineAttribute: function (UIClass, name, fn) {
-            UIClass.prototype['set' + name.chatAt(0).toUpperCase() + name.slice(1)] = function (value) {
-                setAttribute.call(this, fn, name, value);
+        defineProperty: function (UIClass, name) {
+            var propertyName = '$set' + name.charAt(0).toUpperCase() + name.slice(1);
+
+            UIClass.prototype[propertyName] = function (item) {
+                item = item || null;
+                var oldItem = this.$ItemsData.properties[propertyName] || null;
+                if (oldItem !== item) {
+                    if (oldItem) {
+                        oldItem.alterStatus('-' + name);
+                    }
+                    if (item) {
+                        item.alterStatus('+' + name);
+                    }
+                    this.$ItemsData.properties[propertyName] = item;
+                    return oldItem;
+                }
+            };
+
+            UIClass.prototype[propertyName.slice(1)] = function (item) {
+                var oldItem = this[propertyName](item);
+                if (oldItem !== undefined) {
+                    core.dispatchEvent(this, 'propertychange', {name: name, item: item, history: oldItem});
+                }
+            };
+
+            UIClass.prototype['g' + propertyName.slice(2)] = function () {
+                return this.$ItemsData.properties[propertyName] || null;
             };
         },
 
         constructor: function () {
             this.$ItemsData.prevent = 0;
             this.$ItemsData.items = [];
+            this.$ItemsData.properties = {};
 
             this.preventAlterItems();
 
@@ -211,15 +228,14 @@
                                 }
                                 item = dom.create(
                                     {
-                                        className: options.primary,
                                         innerHTML: options[this.TEXTNAME]
                                     }
                                 );
                             }
 
                             options.parent = this;
+                            options.primary = UIClass.CLASS;
                             item = core.$fastCreate(UIClass, item, null, options);
-                            item.getMain().className += UIClass.CLASS;
                         }
 
                         // 选项控件，直接添加
