@@ -207,6 +207,27 @@ _eContainer      - 容器 DOM 元素
             },
 
             /**
+             * 属性改变事件的默认处理。
+             * @event
+             */
+            $propertychange: function (event) {
+                if (event.name === 'selected') {
+                    if (event.history) {
+                        if (event.history._eContainer && (!event.item || event.history._eContainer !== event.item._eContainer)) {
+                            dom.removeClass(event.history._eContainer, event.history.getType() + '-selected');
+                        }
+                    }
+
+                    if (event.item) {
+                        if (event.item._eContainer && (!event.history || event.history._eContainer !== event.item._eContainer)) {
+                            dom.addClass(event.item._eContainer, event.item.getType() + '-selected');
+                            core.cacheAtShow(event.item._eContainer);
+                        }
+                    }
+                }
+            },
+
+            /**
              * @override
              */
             $remove: function (event) {
@@ -229,27 +250,6 @@ _eContainer      - 容器 DOM 元素
              */
             getContainer: function () {
                 return this._eContainer;
-            },
-
-            /**
-             * 属性改变事件的默认处理。
-             * @event
-             */
-            $propertychange: function (event) {
-                if (event.name === 'selected') {
-                    if (event.history) {
-                        if (event.history._eContainer && (!event.item || event.history._eContainer !== event.item._eContainer)) {
-                            dom.removeClass(event.history._eContainer, event.history.getType() + '-selected');
-                        }
-                    }
-
-                    if (event.item) {
-                        if (event.item._eContainer && (!event.history || event.history._eContainer !== event.item._eContainer)) {
-                            dom.addClass(event.item._eContainer, event.item.getType() + '-selected');
-                            core.cacheAtShow(event.item._eContainer);
-                        }
-                    }
-                }
             }
         },
         ui.Items
