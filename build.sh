@@ -260,7 +260,7 @@ then
     do
         if [ -f $file ]
         then
-            if [ ! $file = "ecui.js" ] && [ ! $file = "ecui.css" ] && [ ! $file = "common.js" ] && [ ! $file = "common.css" ] && [ ! $file = "ie-es5.js" ] && [ ! $file = "options.js" ] && [ ! $file = "ios.js" ] && [ ! $file = "android.js" ]
+            if [ ! $file = "ecui.js" ] && [ ! $file = "ecui.css" ] && [ ! $file = "common.js" ] && [ ! $file = "common.css" ] && [ ! $file = "ie-es5.js" ] && [ ! $file = "options.js" ] && [ ! $file = "ios.js" ] && [ ! $file = "android.js" ] && [ ! "${file%%-*}" = "compatible" ]
             then
                 continue
             fi
