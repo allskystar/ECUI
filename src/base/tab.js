@@ -47,29 +47,20 @@ _eContainer      - 容器 DOM 元素
     ui.Tab = core.inherits(
         ui.Control,
         'ui-tab',
-        [
-            function (el, options) {
-                if (options.selected) {
-                    this.setSelected(+options.selected);
-                } else if (!this._cSelected) {
-                    this.setSelected(0);
-                }
-            },
-            function (el, options) {
-                var titleEl = dom.create({className: this.getUnitClass(ui.Tab, 'title')}),
-                    containerEl = dom.create({className: this.getUnitClass(ui.Tab, 'container')});
+        function (el, options) {
+            var titleEl = dom.create({className: this.getUnitClass(ui.Tab, 'title')}),
+                containerEl = dom.create({className: this.getUnitClass(ui.Tab, 'container')});
 
-                for (; el.firstChild; ) {
-                    titleEl.appendChild(el.firstChild);
-                }
-                el.appendChild(titleEl);
-                this._eContainer = el.appendChild(containerEl);
-
-                ui.Control.call(this, el, options);
-
-                this.$setBody(titleEl);
+            for (; el.firstChild; ) {
+                titleEl.appendChild(el.firstChild);
             }
-        ],
+            el.appendChild(titleEl);
+            this._eContainer = el.appendChild(containerEl);
+
+            ui.Control.call(this, el, options);
+
+            this.$setBody(titleEl);
+        },
         {
             /**
              * 选项部件。
@@ -224,6 +215,18 @@ _eContainer      - 容器 DOM 元素
                             core.cacheAtShow(event.item._eContainer);
                         }
                     }
+                }
+            },
+
+            /**
+             * @override
+             */
+            $ready: function (event) {
+                ui.Control.prototype.$ready.call(this, event);
+                if (event.options.selected) {
+                    this.setSelected(+event.options.selected);
+                } else if (!this._cSelected) {
+                    this.setSelected(0);
                 }
             },
 

@@ -22,24 +22,27 @@ _nMax    - 进度最大值
     ui.Progress = core.inherits(
         ui.Control,
         'ui-progress',
-        [
-            function () {
-                core.dispatchEvent(this, 'progress');
-            },
-            function (el, options) {
-                ui.Control.call(this, el, options);
+        function (el, options) {
+            ui.Control.call(this, el, options);
 
-                this._sFormat = options.format;
-                this._nMax = options.max || 100;
-                this._nValue = options.value || 0;
-            }
-        ],
+            this._sFormat = options.format;
+            this._nMax = options.max || 100;
+            this._nValue = options.value || 0;
+        },
         {
             /**
              * 进度变化事件。
              * @event
              */
             $progress: util.blank,
+
+            /**
+             * @override
+             */
+            $ready: function (event) {
+                ui.Control.prototype.$ready.call(this, event);
+                core.dispatchEvent(this, 'progress');
+            },
 
             /**
              * 获取进度的最大值。
