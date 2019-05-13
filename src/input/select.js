@@ -174,7 +174,7 @@ _nOptionSize  - 下接选择框可以用于选择的条目数量
                                 var oldIndex = list.indexOf(selected),
                                     index = Math.min(Math.max(0, oldIndex + which - 39), list.length - 1);
                                 if (oldIndex !== index) {
-                                    this.setSelectedIndex(index);
+                                    this.setSelected(index);
                                     core.dispatchEvent(this, 'change', event);
                                 }
                             }

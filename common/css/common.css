@@ -559,14 +559,9 @@ a {
         cursor: pointer;
     }
 
-    .ui-item-hover {
+    .ui-item-selecting {
         color: #ffffff;
         background-color: #368cda;
-    }
-
-    .ui-item-focus {
-        color: #368cda;
-        background-color: #ffffff;
     }
 }
 

@@ -118,6 +118,10 @@
             };
 
             UIClass.prototype[propertyName.slice(1)] = function (item) {
+                if ('number' === typeof item) {
+                    item = this.getItem(item);
+                }
+
                 var oldItem = this[propertyName](item);
                 if (oldItem !== undefined) {
                     core.dispatchEvent(this, 'propertychange', {name: name, item: item, history: oldItem});

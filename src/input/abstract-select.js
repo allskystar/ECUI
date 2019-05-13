@@ -292,16 +292,6 @@ _uOptions     - 下拉选择框
             },
 
             /**
-             * 根据序号选中选项。
-             * @public
-             *
-             * @param {number} index 选项的序号
-             */
-            setSelectedIndex: function (index) {
-                this.setSelected(this.getItems()[index]);
-            },
-
-            /**
              * 设置控件显示的文本。
              * @public
              *

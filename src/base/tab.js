@@ -9,7 +9,6 @@
 </div>
 
 @fields
-_cSelected       - 当前选中的选项卡
 _eContainer      - 容器 DOM 元素
 */
 (function () {
@@ -233,45 +232,28 @@ _eContainer      - 容器 DOM 元素
             },
 
             /**
-             * 获得当前选中的选项卡控件。
-             *
-             * @return {ecui.ui.Tab.Item} 选中的选项卡控件
+             * 属性改变事件的默认处理。
+             * @event
              */
-            getSelected: function () {
-                return this._cSelected;
-            },
-
-            /**
-             * 设置被选中的选项卡。
-             * @public
-             *
-             * @param {number|ecui.ui.Tab.Item} item 选项卡子选项的索引/选项卡子选项控件
-             */
-            setSelected: function (item) {
-                if ('number' === typeof item) {
-                    item = this.getItem(item);
-                }
-
-                if (item && this._cSelected !== item) {
-                    if (this._cSelected) {
-                        this._cSelected.alterStatus('-selected');
-                        if (this._cSelected._eContainer && (!item || this._cSelected._eContainer !== item._eContainer)) {
-                            dom.removeClass(this._cSelected._eContainer, this._cSelected.getType() + '-selected');
+            $propertychange: function (event) {
+                if (event.name === 'selected') {
+                    if (event.history) {
+                        if (event.history._eContainer && (!event.item || event.history._eContainer !== event.item._eContainer)) {
+                            dom.removeClass(event.history._eContainer, event.history.getType() + '-selected');
                         }
                     }
 
-                    if (item) {
-                        item.alterStatus('+selected');
-                        if (item._eContainer && (!this._cSelected || this._cSelected._eContainer !== item._eContainer)) {
-                            dom.addClass(item._eContainer, item.getType() + '-selected');
-                            core.cacheAtShow(item._eContainer);
+                    if (event.item) {
+                        if (event.item._eContainer && (!event.history || event.history._eContainer !== event.item._eContainer)) {
+                            dom.addClass(event.item._eContainer, event.item.getType() + '-selected');
+                            core.cacheAtShow(event.item._eContainer);
                         }
                     }
-
-                    this._cSelected = item;
                 }
             }
         },
         ui.Items
     );
+
+    ui.Items.defineProperty(ui.Tab, 'selected');
 }());
