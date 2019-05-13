@@ -44,7 +44,6 @@ _aSelect - 全部的下拉框控件列表
                 function (el, options) {
                     ui.MPanel.call(this, el, options);
                     this._sUrl =  options.url;
-                    this._cSelected = null;
                 },
                 {
                     /**
@@ -111,33 +110,25 @@ _aSelect - 全部的下拉框控件列表
                     $alterItems: util.blank,
 
                     /**
-                     * 设置选中的项。
-                     * @public
-                     *
-                     * @param {ecui.ui.Item} item 选中的项
+                     * 属性改变事件的默认处理。
+                     * @event
                      */
-                    setSelected: function (item) {
-                        item = item || null;
-                        if (this._cSelected !== item) {
+                    $propertychange: function (event) {
+                        if (event.name === 'selected') {
                             var parent = this.getParent(),
                                 index = parent._aSelect.indexOf(this);
 
-                            if (this._cSelected) {
-                                this._cSelected.alterStatus('-selected');
-                            }
-                            if (item) {
-                                item.alterStatus('+selected');
-
+                            if (event.item) {
                                 var select = parent._aSelect[++index];
-                                if (item._aChildren) {
+                                if (event.item._aChildren) {
                                     if (select) {
                                         select.removeAll();
-                                        if (item._aChildren[0] instanceof ui.Item) {
-                                            select.add(item._aChildren);
+                                        if (event.item._aChildren[0] instanceof ui.Item) {
+                                            select.add(event.item._aChildren);
                                         } else {
-                                            core.dispatchEvent(parent, 'request', {data: item._aChildren, owner: select});
-                                            select.add(item._aChildren);
-                                            item._aChildren = select.getItems();
+                                            core.dispatchEvent(parent, 'request', {data: event.item._aChildren, owner: select});
+                                            select.add(event.item._aChildren);
+                                            event.item._aChildren = select.getItems();
                                         }
                                         select.show();
                                         effect.grade('this.style.left=#100->' + (25 * index) + '%#', 400, { $: select.getMain() });
@@ -157,7 +148,7 @@ _aSelect - 全部的下拉框控件列表
                                                     select.removeAll();
                                                     core.dispatchEvent(parent, 'request', {data: data, owner: select});
                                                     select.add(data);
-                                                    item._aChildren = select.getItems();
+                                                    event.item._aChildren = select.getItems();
                                                     select.show();
                                                     effect.grade('this.style.left=#100->' + (25 * index) + '%#', 400, { $: select.getMain() });
                                                 }
@@ -166,23 +157,12 @@ _aSelect - 全部的下拉框控件列表
                                     }
                                 }
                             }
-                            this._cSelected = item;
 
                             // 清除后续多级联动项
                             for (; select = parent._aSelect[++index]; ) {
                                 select.hide();
                             }
                         }
-                    },
-
-                    /**
-                     * 获取选中的项。
-                     * @public
-                     *
-                     * @return {ecui.ui.Item} 选中的项
-                     */
-                    getSelected: function () {
-                        return this._cSelected;
                     }
                 },
                 ui.Items
@@ -220,6 +200,8 @@ _aSelect - 全部的下拉框控件列表
             }
         }
     );
+
+    ui.Items.defineProperty(ui.MMultilevelSelect.prototype.Select, 'selected');
 //{if 0}//
 }());
 //{/if}//
