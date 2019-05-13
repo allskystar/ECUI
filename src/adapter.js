@@ -395,7 +395,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              * @param {string} position 插入 html 的位置信息，取值为 beforeBegin,afterBegin,beforeEnd,afterEnd
              * @param {string} html 要插入的 html 代码
              */
-            insertHTML: firefoxVersion ? function () {
+            insertHTML: firefoxVersion ? (function () {
                 var HTMLPosition = {
                     AFTERBEGIN: 'selectNodeContents',
                     BEFOREEND: 'selectNodeContents',
@@ -411,7 +411,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                     range.collapse(position.length > 9);
                     range.insertNode(range.createContextualFragment(html));
                 };
-            } : ieVersion === 10 ? function (el, position, html) {
+            }()) : ieVersion === 10 ? function (el, position, html) {
                 var parent = dom.parent(el);
                 if (!parent) {
                     dom.create().appendChild(el);
