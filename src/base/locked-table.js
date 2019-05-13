@@ -228,9 +228,9 @@ _eRight      - 右侧乐定行的Element元素
             $beforescroll: function (event) {
                 ui.Table.prototype.$beforescroll.call(this, event);
 
-                if (ieVersion < 7) {
-                    return;
-                }
+                // if (ieVersion < 7) {
+                //     return;
+                // }
                 var layout = this.getLayout(),
                     pos = dom.getPosition(layout),
                     view = util.getView(),
