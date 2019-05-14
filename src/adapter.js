@@ -1366,83 +1366,6 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
             },
 
             /**
-             * 制作类。
-             * @public
-             *
-             * @param {Function} constructor 构造函数
-             * @param {Array} fields 私有属性域(包含私有方法名)
-             * @param {object} methods 方法列表
-             * @return {Function} 制作完成的类
-             */
-            makeClass: (function () {
-                var classIndex = 1;
-
-                return function (constructor, fields, methods) {
-                    var uid = 'ECUI-CLASS-' + classIndex++;
-
-                    function beforeCall(obj, scope) {
-                        fields.forEach(function (name) {
-                            if (obj.hasOwnProperty(name)) {
-                                scope[name] = obj[name];
-                            }
-                            obj[name] = obj[uid][name];
-                        });
-                    }
-
-                    function afterCall(obj, scope) {
-                        fields.forEach(function (name) {
-                            if (!privateMethods[name]) {
-                                // 私有方法不允许回写
-                                obj[uid][name] = obj[name];
-                            }
-                            if (scope.hasOwnProperty(name)) {
-                                obj[name] = scope[name];
-                            } else {
-                                delete obj[name];
-                            }
-                        });
-                    }
-
-                    var newClass = function () {
-                            var scope = {};
-                            this[uid] = Object.assign({}, privateMethods);
-                            beforeCall(this, scope);
-                            constructor.apply(this, arguments);
-                            afterCall(this, scope);
-                        },
-                        privateMethods = {};
-
-                    for (var name in methods) {
-                        if (methods.hasOwnProperty(name)) {
-                            if ('function' === typeof methods[name]) {
-                                if (fields.indexOf(name) < 0) {
-                                    newClass.prototype[name] = (function (name) {
-                                        return function () {
-                                            var scope = {};
-                                            beforeCall(this, scope);
-                                            methods[name].apply(this, arguments);
-                                            afterCall(this, scope);
-                                        };
-                                    }(name));
-                                } else {
-                                    privateMethods[name] = (function (name) {
-                                        return function () {
-                                            methods[name].apply(this, arguments);
-                                        };
-                                    }(name));
-                                }
-                            } else {
-                                newClass.prototype[name] = methods[name];
-                            }
-                        }
-                    }
-
-                    newClass.Methods = methods;
-                    return newClass;
-                };
-            }()),
-
-            /**
              * 从指定的命名空间中取出值。
              * @public
              *
@@ -1751,6 +1674,110 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                 hasReady = false;
                 loadedHandler();
             }
+        };
+    }());
+
+    (function () {
+        var classIndex = 1,
+            classes = {};
+
+        /**
+         * 重新定义类的方法，动态为类增加新的方法。
+         * @public
+         *
+         * @param {Function} Class 类对象
+         * @param {string} name 方法名
+         * @param {Function} method 方法函数
+         */
+        util.defineMethod = function (Class, name, method) {
+            var data = classes[Class.CLASSID];
+            if (!data.Methods[name]) {
+                Class.prototype[name] = function () {
+                    var scope = {};
+                    data.onbefore(this, scope);
+                    method.apply(this, arguments);
+                    data.onafter(this, scope);
+                };
+            }
+            data.Methods[name] = method;
+        };
+
+        /**
+         * 制作类。
+         * @public
+         *
+         * @param {Function} constructor 构造函数
+         * @param {Array} fields 私有属性域(包含私有方法名)
+         * @param {object} methods 方法集合
+         * @return {Function} 制作完成的类
+         */
+        util.makeClass = function (constructor, fields, methods) {
+            function onbefore(obj, scope) {
+                fields.forEach(function (name) {
+                    if (obj.hasOwnProperty(name)) {
+                        scope[name] = obj[name];
+                    }
+                    obj[name] = obj[newClass.CLASSID][name];
+                });
+            }
+
+            function onafter(obj, scope) {
+                fields.forEach(function (name) {
+                    if (!privateMethods[name]) {
+                        // 私有方法不允许回写
+                        obj[newClass.CLASSID][name] = obj[name];
+                    }
+                    if (scope.hasOwnProperty(name)) {
+                        obj[name] = scope[name];
+                    } else {
+                        delete obj[name];
+                    }
+                });
+            }
+
+            var newClass = function () {
+                    var scope = {};
+                    this[newClass.CLASSID] = Object.assign({}, privateMethods);
+                    onbefore(this, scope);
+                    constructor.apply(this, arguments);
+                    onafter(this, scope);
+                },
+                privateMethods = {};
+
+            newClass.CLASSID = 'CLASS-' + classIndex++;
+            methods = Object.assign({}, methods);
+
+            for (var name in methods) {
+                if (methods.hasOwnProperty(name)) {
+                    if ('function' === typeof methods[name]) {
+                        if (fields.indexOf(name) < 0) {
+                            newClass.prototype[name] = (function (name) {
+                                return function () {
+                                    var scope = {};
+                                    onbefore(this, scope);
+                                    methods[name].apply(this, arguments);
+                                    onafter(this, scope);
+                                };
+                            }(name));
+                        } else {
+                            privateMethods[name] = (function (name) {
+                                return function () {
+                                    methods[name].apply(this, arguments);
+                                };
+                            }(name));
+                        }
+                    } else {
+                        newClass.prototype[name] = methods[name];
+                    }
+                }
+            }
+
+            classes[newClass.CLASSID] = {
+                onbefore: onbefore,
+                onafter: onafter,
+                Methods: methods
+            };
+            return newClass;
         };
     }());
 
