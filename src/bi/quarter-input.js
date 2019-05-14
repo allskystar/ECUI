@@ -149,8 +149,8 @@
             /**
              * @override
              */
-            $ready: function (event) {
-                ui.Control.prototype.$ready.call(this, event);
+            $ready: function () {
+                ui.Control.prototype.$ready.call(this);
                 this.setTitle();
             },
             setTitle: function () {

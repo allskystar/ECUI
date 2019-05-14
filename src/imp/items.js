@@ -168,8 +168,8 @@
             /**
              * @override
              */
-            $ready: function (event) {
-                this.$Items.$ready.call(this, event);
+            $ready: function () {
+                this.$Items.$ready.call(this);
                 if (this.isCached()) {
                     this.alterItems();
                 }
@@ -239,6 +239,7 @@
 
                             options.parent = this;
                             options.primary = UIClass.CLASS;
+                            options.index = index || list.length;
                             item = core.$fastCreate(UIClass, item, null, options);
                         }
 

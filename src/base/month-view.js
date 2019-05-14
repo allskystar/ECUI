@@ -172,8 +172,8 @@ _cSelected  - 当前选择的日历单元格
             /**
              * @override
              */
-            $ready: function (event) {
-                ui.Control.prototype.$ready.call(this, event);
+            $ready: function () {
+                ui.Control.prototype.$ready.call(this);
                 this.setView(this._oDate.getFullYear(), this._oDate.getMonth() + 1);
             },
 

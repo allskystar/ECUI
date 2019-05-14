@@ -422,8 +422,8 @@ _eInput        - INPUT对象
             /**
              * @override
              */
-            $ready: function (event) {
-                ui.Control.prototype.$ready.call(this, event);
+            $ready: function () {
+                ui.Control.prototype.$ready.call(this);
                 this.saveToDefault();
             },
 

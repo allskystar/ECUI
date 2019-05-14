@@ -39,8 +39,8 @@ _nMax    - 进度最大值
             /**
              * @override
              */
-            $ready: function (event) {
-                ui.Control.prototype.$ready.call(this, event);
+            $ready: function () {
+                ui.Control.prototype.$ready.call(this);
                 core.dispatchEvent(this, 'progress');
             },
 
