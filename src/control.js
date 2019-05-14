@@ -862,7 +862,7 @@ _aStatus            - 控件当前的状态集合
                     if (clazz === baseClass) {
                         break;
                     }
-                    clazz = clazz.superClass.constructor;
+                    clazz = clazz.superClass;
                 }
 
                 return this.constructor.TYPES[this.constructor.TYPES.length - i].join('-' + name + ' ') + '-' + name;

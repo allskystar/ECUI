@@ -2486,7 +2486,7 @@ outer:          for (var caches = [], target = event.target, el; target && targe
          * @param {Function} superClass 父控件类
          * @param {boolean} singleton 是否单例
          * @param {string} type 子控件的类型样式
-         * @param {Function} constructor 子控件的标准构造函数，如果忽略将直接调用父控件类的构造函数
+         * @param {Function|Array} constructor 子控件的标准构造函数，如果忽略将直接调用父控件类的构造函数
          * @param {object} ... 控件扩展的方法
          * @return {Function} 新控件的构造函数
          */
@@ -2554,6 +2554,32 @@ outer:          for (var caches = [], target = event.target, el; target && targe
             }
             subClass.interfaces = [];
 
+            for (var superMethods = [], item; item = arguments[index++]; ) {
+                if (item.NAME) {
+                    if (item.SUPER) {
+                        if (item.SUPER instanceof Array) {
+                            superMethods.push.apply(this, item.SUPER);
+                        } else {
+                            superMethods.push(item.SUPER);
+                        }
+                    }
+                }
+                superMethods.push(item);
+            }
+            superMethods.forEach(function (item) {
+                if (item.NAME) {
+                    subClass.interfaces.push(item);
+                    // 对接口的处理
+                    var Clazz = new Function();
+                    Clazz.prototype = superClass.prototype;
+                    var interfaceMethods = new Clazz();
+                    Object.assign(interfaceMethods, subClass.prototype);
+                    subClass.prototype[item.NAME] = interfaceMethods;
+                    item = item.Methods;
+                }
+                Object.assign(subClass.prototype, item);
+            });
+
             if (superClass) {
                 util.inherits(subClass, superClass);
 
@@ -2575,32 +2601,6 @@ outer:          for (var caches = [], target = event.target, el; target && targe
                 subClass.TYPES = [[]];
             }
             subClass.CLASS = subClass.TYPES[0].length ? ' ' + subClass.TYPES[0].join(' ') : '';
-
-            for (var superMethods = [], item; item = arguments[index++]; ) {
-                if (item.NAME) {
-                    if (item.SUPER) {
-                        if (item.SUPER instanceof Array) {
-                            superMethods.push.apply(this, item.SUPER);
-                        } else {
-                            superMethods.push(item.SUPER);
-                        }
-                    }
-                }
-                superMethods.push(item);
-            }
-            superMethods.forEach(function (item) {
-                if (item.NAME) {
-                    subClass.interfaces.push(item);
-                    // 对接口的处理
-                    var Clazz = new Function();
-                    Clazz.prototype = superClass.prototype;
-                    var prototype = new Clazz();
-                    Object.assign(prototype, subClass.prototype);
-                    subClass.prototype[item.NAME] = prototype;
-                    item = item.Methods;
-                }
-                Object.assign(subClass.prototype, item);
-            });
 
             // 释放闭包占用的资源
             superClass = type = constructor = realConstructor = null;

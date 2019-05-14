@@ -1362,10 +1362,74 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                 Clazz.prototype = superClass.prototype;
                 Object.assign(subClass.prototype = new Clazz(), oldPrototype);
                 subClass.prototype.constructor = subClass;
-                subClass.superClass = superClass.prototype;
-
-                return subClass.prototype;
+                subClass.superClass = superClass;
             },
+
+            /**
+             * 类方法与属性私有化。
+             * @public
+             *
+             * @param {Function} clazz 原始类
+             * @param {Array} properties 需要私有化的方法名与属性名
+             * @param {Function} 私有化处理后生成的新类
+             */
+            makePrivate: (function () {
+                var classIndex = 1;
+
+                return function (clazz, properties) {
+                    var uid = 'ECUI-CLASS-' + classIndex++;
+
+                    function beforeCall(obj, scope) {
+                        properties.forEach(function (name) {
+                            if (obj.hasOwnProperty(name)) {
+                                scope[name] = obj[name];
+                            }
+                            obj[name] = obj[uid][name];
+                        });
+                    }
+
+                    function afterCall(obj, scope) {
+                        properties.forEach(function (name) {
+                            if (!privateMethods[name]) {
+                                // 私有方法不允许回写
+                                obj[uid][name] = obj[name];
+                            }
+                            if (scope.hasOwnProperty(name)) {
+                                obj[name] = scope[name];
+                            } else {
+                                delete obj[name];
+                            }
+                        });
+                    }
+
+                    var newClass = function () {
+                            var scope = {};
+                            this[uid] = Object.assign({}, privateMethods);
+                            beforeCall(this, scope);
+                            clazz.apply(this, arguments);
+                            afterCall(this, scope);
+                        },
+                        privateMethods = {};
+
+                    for (var name in clazz.prototype) {
+                        if (clazz.prototype.hasOwnProperty(name)) {
+                            if ('function' === typeof clazz.prototype[name]) {
+                                (properties.indexOf(name) < 0 ? newClass.prototype : privateMethods)[name] = (function (name) {
+                                    return function () {
+                                        var scope = {};
+                                        beforeCall(this, scope);
+                                        clazz.prototype[name].apply(this, arguments);
+                                        afterCall(this, scope);
+                                    };
+                                }(name));
+                            }
+                        }
+                    }
+
+                    newClass.Methods = clazz.prototype;
+                    return newClass;
+                };
+            }()),
 
             /**
              * 从指定的命名空间中取出值。
