@@ -1366,21 +1366,22 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
             },
 
             /**
-             * 类方法与属性私有化。
+             * 制作类。
              * @public
              *
-             * @param {Function} clazz 原始类
-             * @param {Array} properties 需要私有化的方法名与属性名
-             * @param {Function} 私有化处理后生成的新类
+             * @param {Function} constructor 构造函数
+             * @param {Array} fields 私有属性域(包含私有方法名)
+             * @param {object} methods 方法列表
+             * @return {Function} 制作完成的类
              */
-            makePrivate: (function () {
+            makeClass: (function () {
                 var classIndex = 1;
 
-                return function (clazz, properties) {
+                return function (constructor, fields, methods) {
                     var uid = 'ECUI-CLASS-' + classIndex++;
 
                     function beforeCall(obj, scope) {
-                        properties.forEach(function (name) {
+                        fields.forEach(function (name) {
                             if (obj.hasOwnProperty(name)) {
                                 scope[name] = obj[name];
                             }
@@ -1389,7 +1390,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                     }
 
                     function afterCall(obj, scope) {
-                        properties.forEach(function (name) {
+                        fields.forEach(function (name) {
                             if (!privateMethods[name]) {
                                 // 私有方法不允许回写
                                 obj[uid][name] = obj[name];
@@ -1406,27 +1407,37 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                             var scope = {};
                             this[uid] = Object.assign({}, privateMethods);
                             beforeCall(this, scope);
-                            clazz.apply(this, arguments);
+                            constructor.apply(this, arguments);
                             afterCall(this, scope);
                         },
                         privateMethods = {};
 
-                    for (var name in clazz.prototype) {
-                        if (clazz.prototype.hasOwnProperty(name)) {
-                            if ('function' === typeof clazz.prototype[name]) {
-                                (properties.indexOf(name) < 0 ? newClass.prototype : privateMethods)[name] = (function (name) {
-                                    return function () {
-                                        var scope = {};
-                                        beforeCall(this, scope);
-                                        clazz.prototype[name].apply(this, arguments);
-                                        afterCall(this, scope);
-                                    };
-                                }(name));
+                    for (var name in methods) {
+                        if (methods.hasOwnProperty(name)) {
+                            if ('function' === typeof methods[name]) {
+                                if (fields.indexOf(name) < 0) {
+                                    newClass.prototype[name] = (function (name) {
+                                        return function () {
+                                            var scope = {};
+                                            beforeCall(this, scope);
+                                            methods[name].apply(this, arguments);
+                                            afterCall(this, scope);
+                                        };
+                                    }(name));
+                                } else {
+                                    privateMethods[name] = (function (name) {
+                                        return function () {
+                                            methods[name].apply(this, arguments);
+                                        };
+                                    }(name));
+                                }
+                            } else {
+                                newClass.prototype[name] = methods[name];
                             }
                         }
                     }
 
-                    newClass.Methods = clazz.prototype;
+                    newClass.Methods = methods;
                     return newClass;
                 };
             }()),
