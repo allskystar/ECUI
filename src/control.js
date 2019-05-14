@@ -1275,24 +1275,26 @@ _aStatus            - 控件当前的状态集合
              * @param {number} height 控件的高度
              */
             setSize: function (width, height) {
-                // 控件新的大小不允许小于最小值
-                if (width < this.getMinimumWidth()) {
-                    width = 0;
-                }
-                if (height < this.getMinimumHeight()) {
-                    height = 0;
-                }
+                if (this._bCached) {
+                    // 控件新的大小不允许小于最小值
+                    if (width < this.getMinimumWidth()) {
+                        width = 0;
+                    }
+                    if (height < this.getMinimumHeight()) {
+                        height = 0;
+                    }
 
-                this.$setSize(width, height);
-                if (width) {
-                    this._sWidth = this._eMain.style.width;
-                }
-                if (height) {
-                    this._sHeight = this._eMain.style.height;
-                }
+                    this.$setSize(width, height);
+                    if (width) {
+                        this._sWidth = this._eMain.style.width;
+                    }
+                    if (height) {
+                        this._sHeight = this._eMain.style.height;
+                    }
 
-                this.$restoreStructure();
-                this.initStructure();
+                    this.$restoreStructure();
+                    this.initStructure();
+                }
             },
 
             /**
