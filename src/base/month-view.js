@@ -57,24 +57,28 @@ _cSelected  - 当前选择的日历单元格
     ui.MonthView = core.inherits(
         ui.Control,
         'ui-monthview',
-        function (el, options) {
-            ui.Control.call(this, el, options);
+        [
+            function () {
+                this._aCells = this.$initView();
+            },
 
-            this._bExtra = options.extra === 'disable';
-            if (options.begin) {
-                this._oBegin = new Date(options.begin);
+            function (el, options) {
+                ui.Control.call(this, el, options);
+
+                this._bExtra = options.extra === 'disable';
+                if (options.begin) {
+                    this._oBegin = new Date(options.begin);
+                }
+                if (options.end) {
+                    this._oEnd = new Date(options.end);
+                }
+                this._nOffset = +options.offset || 1;
+                this._nWeekday = +options.weekday || 0;
+
+                var date = options.date ? new Date(options.date) : new Date();
+                this._oDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
             }
-            if (options.end) {
-                this._oEnd = new Date(options.end);
-            }
-            this._nOffset = +options.offset || 1;
-            this._nWeekday = +options.weekday || 0;
-
-            var date = options.date ? new Date(options.date) : new Date();
-            this._oDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-
-            this._aCells = this.$initView();
-        },
+        ],
         {
             WEEKNAMES: ['日', '一', '二', '三', '四', '五', '六'],
 

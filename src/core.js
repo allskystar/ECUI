@@ -14,7 +14,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
         fontSizeCache = core.fontSizeCache,
         isToucher = document.ontouchstart !== undefined,
         isPointer = !!window.PointerEvent, // 使用pointer事件序列，请一定在需要滚动的元素上加上touch-action:none
-        isStrict = document.compatMode === 'CSS1Compat',
+        //isStrict = document.compatMode === 'CSS1Compat',
         iosVersion = /(iPhone|iPad).*?OS (\d+(_\d+)?)/i.test(navigator.userAgent) ? +(RegExp.$2.replace('_', '.')) : undefined,
         ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined,
         chromeVersion = /Chrome\/(\d+\.\d)/i.test(navigator.userAgent) ? +RegExp.$1 : undefined,
@@ -559,6 +559,11 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
                 if (hoveredControl !== event.getControl()) {
                     currEnv.mouseover(event);
+                }
+
+                if (event.getNative().type === 'touchmove' && currEnv.type !== 'drag') {
+                    onbeforescroll(event);
+                    onscroll(event);
                 }
             },
 
@@ -1136,14 +1141,15 @@ outer:          for (var caches = [], target = event.target, el; target && targe
     function disposeControl(control) {
         try {
             var fn = control.ondispose;
+            control.ondispose = util.preventEvent;
             if (fn) {
-                control.ondispose = util.blank;
                 fn.call(control);
             }
         } catch (ignore) {
         }
         util.remove(singletons, control);
         core.dispatchEvent(control, 'dispose');
+        control.$dispose();
     }
 
     /**
@@ -1731,13 +1737,7 @@ outer:          for (var caches = [], target = event.target, el; target && targe
                     -1
                 );
             } else {
-                scrollHandler = util.timer(
-                    function () {
-                        scrollHandler = null;
-                        onscroll(event);
-                    },
-                    50
-                );
+                onscroll(event);
             }
         }
     }

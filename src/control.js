@@ -228,8 +228,8 @@ _aStatus            - 控件当前的状态集合
             $dispose: function () {
                 this._eMain.getControl = null;
                 this._eMain = this._eBody = null;
-                // 取消 $ready 的操作，防止控件在 onload 结束前被 dispose，从而引发 $ready 访问的信息错误的问题
-                this.$ready = util.blank;
+                // 取消初始化的操作，防止控件在 onload 结束前被 dispose，从而引发初始化访问的信息错误的问题
+                this.initStructure = util.blank;
             },
 
             /**
@@ -423,8 +423,6 @@ _aStatus            - 控件当前的状态集合
 
             /**
              * 初始化完成事件。
-             * event 属性：
-             * options 初始化选项
              * @event
              */
             $ready: function () {
@@ -1054,7 +1052,7 @@ _aStatus            - 控件当前的状态集合
                 this.$initStructure(this.getClientWidth(), this.getClientHeight());
                 if (!this._bReady) {
                     // 第一次结构化触发ready执行
-                    this.$ready();
+                    core.dispatchEvent(this, 'ready');
                 }
             },
 
