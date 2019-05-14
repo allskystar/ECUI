@@ -98,7 +98,10 @@ _aStatus            - 控件当前的状态集合
                 el.className = (options.id || '') + ' ' + el.className + options.primary;
             }
             this._sUID = options.uid;
-            this._sClass = el.className.trim().split(' ')[0];
+            // svg classname 是数组 不能做trim操作
+            if ('string' === typeof el.className) {
+                this._sClass = el.className.trim().split(' ')[0];
+            }
 
             this._bDisabled = !!options.disabled;
             this._bCapturable = options.capturable !== false;
