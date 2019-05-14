@@ -7,7 +7,7 @@ ecui.ext.esr = ecui.ext.data;
 (function () {
     var oldFn = ecui.$create;
     ecui.$create = function (UIClass, options) {
-        var primary = options.main ? options.main.className.trim().split(' ')[0] : '',
+        var primary = options.main && 'string' === typeof options.main.className ? options.main.className.trim().split(' ')[0] : '',
             classes = options.classes = UIClass.TYPES[0].slice();
 
         if (primary && primary !== classes[0]) {
@@ -23,7 +23,7 @@ ecui.ext.esr = ecui.ext.data;
     ecui.$fastCreate = function (UIClass, el, parent, options) {
         options = options || {};
 
-        var primary = el ? el.className.trim().split(' ')[0] : '',
+        var primary = el && 'string' === typeof el.className ? el.className.trim().split(' ')[0] : '',
             classes = options.classes = UIClass.TYPES[0].slice();
 
         if (primary && primary !== classes[0]) {

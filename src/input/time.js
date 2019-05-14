@@ -36,6 +36,7 @@ _oTest      匹配合法性的正则表达式
         function (el, options) {
             ui.Text.call(this, el, options);
             this._oTest = new RegExp('^[0-2]\\d:[0-5]\\d' + (options.second !== false ? ':[0-5]\\d' : '') + '$');
+            this._sFormat = options.second !== false ? '00:00:00' : '00:00';
         },
         {
             /**
@@ -109,11 +110,11 @@ _oTest      匹配合法性的正则表达式
             /**
              * @override
              */
-            $ready: function (event) {
-                ui.Text.prototype.$ready.call(this, event);
+            $ready: function () {
+                ui.Text.prototype.$ready.call(this);
                 this._sLastValue = this.getValue();
                 if (!this._sLastValue) {
-                    this.setValue(event.options.second !== false ? '00:00:00' : '00:00');
+                    this.setValue(this._sFormat);
                 }
             },
 

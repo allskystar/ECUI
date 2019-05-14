@@ -166,8 +166,8 @@ _bRequired       - 是否必须选择
             /**
              * @override
              */
-            $ready: function (event) {
-                ui.InputControl.prototype.$ready.call(this, event);
+            $ready: function () {
+                ui.InputControl.prototype.$ready.call(this);
                 if (!this._aDependents.length) {
                     // 如果控件是主复选框，应该直接根据从属复选框的状态来显示自己的状态
                     setStatus(this, this.getInput().checked ? 0 : 1);

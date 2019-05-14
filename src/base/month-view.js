@@ -59,8 +59,9 @@ _cSelected  - 当前选择的日历单元格
         'ui-monthview',
         [
             function () {
-                this.setView(this._oDate.getFullYear(), this._oDate.getMonth() + 1);
+                this._aCells = this.$initView();
             },
+
             function (el, options) {
                 ui.Control.call(this, el, options);
 
@@ -76,8 +77,6 @@ _cSelected  - 当前选择的日历单元格
 
                 var date = options.date ? new Date(options.date) : new Date();
                 this._oDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-
-                this._aCells = this.$initView();
             }
         ],
         {
@@ -172,6 +171,14 @@ _cSelected  - 当前选择的日历单元格
                 }
 
                 return cells;
+            },
+
+            /**
+             * @override
+             */
+            $ready: function () {
+                ui.Control.prototype.$ready.call(this);
+                this.setView(this._oDate.getFullYear(), this._oDate.getMonth() + 1);
             },
 
             /**

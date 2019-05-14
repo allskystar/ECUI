@@ -1458,6 +1458,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              */
             preventEvent: function (event) {
                 event.preventDefault();
+                return false;
             },
 
             /**

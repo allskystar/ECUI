@@ -266,8 +266,8 @@ _eText       - 文本框
             /**
              * @override
              */
-            $ready: function (event) {
-                ui.InputControl.prototype.$ready.call(this, event);
+            $ready: function () {
+                ui.InputControl.prototype.$ready.call(this);
                 this.setValue(this.getValue());
             },
 

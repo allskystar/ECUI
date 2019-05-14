@@ -760,8 +760,8 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
             /**
              * @override
              */
-            $resize: function (event) {
-                ui.Control.prototype.$resize.call(this, event);
+            $restoreStructure: function (event) {
+                ui.Control.prototype.$restoreStructure.call(this, event);
 
                 this._aHeadRows.forEach(function (item) {
                     resizeRow(item);
@@ -770,7 +770,7 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
                     resizeRow(item);
                 });
                 this._aHCells.forEach(function (item) {
-                    item.$resize();
+                    item.$restoreStructure();
                 });
 
                 dom.insertBefore(this._uHead.getBody(), this.getBody());

@@ -149,10 +149,11 @@
             /**
              * @override
              */
-            $ready: function (event) {
-                ui.Control.prototype.$ready.call(this, event);
+            $ready: function () {
+                ui.Control.prototype.$ready.call(this);
                 this.setTitle();
             },
+
             setTitle: function () {
                 this._eTitle.innerHTML = util.stringFormat(this.TITLEFORMAT, this._nYear);
             },

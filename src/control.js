@@ -34,6 +34,10 @@ _aStatus            - 控件当前的状态集合
 //{/if}//
     var waitReadyList;
 
+    function calcWidth(control, width) {
+        control._eMain.style.width = width - (core.isContentBox(control._eMain) ? control.$getBasicWidth() * 2 : 0) + 'px';
+    }
+
     /**
      * 设置控件的父对象。
      * @private
@@ -94,7 +98,10 @@ _aStatus            - 控件当前的状态集合
                 el.className = (options.id || '') + ' ' + el.className + options.primary;
             }
             this._sUID = options.uid;
-            this._sClass = el.className.trim().split(' ')[0];
+            // svg classname 是数组 不能做trim操作
+            if ('string' === typeof el.className) {
+                this._sClass = el.className.trim().split(' ')[0];
+            }
 
             this._bDisabled = !!options.disabled;
             this._bCapturable = options.capturable !== false;
@@ -224,8 +231,8 @@ _aStatus            - 控件当前的状态集合
             $dispose: function () {
                 this._eMain.getControl = null;
                 this._eMain = this._eBody = null;
-                // 取消 $ready 的操作，防止控件在 onload 结束前被 dispose，从而引发 $ready 访问的信息错误的问题
-                this.$ready = util.blank;
+                // 取消初始化的操作，防止控件在 onload 结束前被 dispose，从而引发初始化访问的信息错误的问题
+                this.initStructure = util.blank;
             },
 
             /**
@@ -419,8 +426,6 @@ _aStatus            - 控件当前的状态集合
 
             /**
              * 初始化完成事件。
-             * event 属性：
-             * options 初始化选项
              * @event
              */
             $ready: function () {
@@ -434,16 +439,13 @@ _aStatus            - 控件当前的状态集合
             $remove: util.blank,
 
             /**
-             * 重绘事件。
-             * @event
+             * 控件结构恢复。
+             * @protected
+             *
+             * @param {boolean} isBatch 是否为批量处理
+             * @param {Function} 延后处理函数(交给核心处理)
              */
-            $repaint: util.blank,
-
-            /**
-             * 尺寸改变事件。
-             * @event
-             */
-            $resize: function (event) {
+            $restoreStructure: function (isBatch) {
                 this._eMain.style.width = this._sWidth;
                 this._eMain.style.height = this._sHeight;
                 if (ieVersion < 8) {
@@ -451,11 +453,12 @@ _aStatus            - 控件当前的状态集合
                     var style = dom.getStyle(this._eMain);
                     if (style.width === 'auto' && style.display === 'block') {
                         this._eMain.style.width = '100%';
-                        if (event.type !== 'repaint') {
-                            this._eMain.style.width = this._eMain.offsetWidth - (core.isContentBox(this._eMain) ? this.$getBasicWidth() * 2 : 0) + 'px';
-                        } else {
-                            event.repaint = true;
+                        if (isBatch) {
+                            return function (control, width) {
+                                calcWidth(control, width);
+                            };
                         }
+                        calcWidth(this, this._eMain.offsetWidth);
                     }
                 }
             },
@@ -622,12 +625,11 @@ _aStatus            - 控件当前的状态集合
              */
             cache: function (force) {
                 if ((force || !this._bCached) && this.getMain().offsetWidth) {
-                    // 之前未进行过缓存相关操作，强制缓存，否则不执行initStructure
                     force = this._bCached === undefined;
                     this._bCached = true;
                     this.$cache(dom.getStyle(this._eMain));
-                    if (force && this._bReady) {
-                        // 之前缓存过，因为clearCache方法标记为需要重新缓存，不需要再次主动执行initStructure方法
+                    if (force && this.init === util.blank) {
+                        // 已经初始化，但第一次缓存的控件进行结构化
                         this.initStructure();
                     }
                     return true;
@@ -1007,46 +1009,42 @@ _aStatus            - 控件当前的状态集合
              * 控件初始化。
              * init 方法在控件缓存读取后调用，有关控件生成的完整过程描述请参见 基础控件。
              * @public
-             *
-             * @param {object} options 初始化选项(参见 ECUI 控件)
              */
-            init: function (options) {
-                if (!this._bReady) {
-                    if (this._bDisabled) {
-                        this.alterStatus('+disabled');
-                        dom.addClass(this.getMain(), 'ui-disabled');
-                    }
+            init: function () {
+                if (this._bDisabled) {
+                    this.alterStatus('+disabled');
+                    dom.addClass(this.getMain(), 'ui-disabled');
+                }
 
-                    var el = this.getMain();
-
+                var el = this.getMain();
+                if (el.style.display === 'none') {
+                    this.$hide();
+                    el.style.display = '';
+                } else if (this._bCached) {
+                    // 处于显示状态的控件需要完成初始化
                     if (waitReadyList === null) {
-                        // 页面已经加载完毕，直接运行 $ready 方法
-                        core.dispatchEvent(this, 'ready', {options: options});
+                        // 页面已经加载完毕，直接初始化结构
+                        this.initStructure();
                     } else {
                         if (!waitReadyList) {
-                            // 页面未加载完成，首先将 $ready 方法的调用存放在调用序列中
+                            // 页面未加载完成，将需要初始化的控件存放在调用序列中
                             // 需要这么做的原因是 ie 的 input 回填机制，一定要在 onload 之后才触发
-                            // ECUI 应该避免直接使用 ecui.get(xxx) 导致初始化，所有的代码应该在 onload 之后运行
                             waitReadyList = [];
                             util.timer(
                                 function () {
                                     waitReadyList.forEach(function (item) {
-                                        core.dispatchEvent(item.control, 'ready', {options: item.options});
+                                        item.initStructure();
                                     });
                                     waitReadyList = null;
                                 }
                             );
                         }
-                        waitReadyList.push({control: this, options: options});
+                        waitReadyList.push(this);
                     }
 
-                    if (el.style.display === 'none') {
-                        this.$hide();
-                        el.style.display = '';
-                    } else if (this._bCached) {
-                        this.initStructure();
-                    }
                 }
+
+                this.init = util.blank;
             },
 
             /**
@@ -1055,7 +1053,10 @@ _aStatus            - 控件当前的状态集合
              */
             initStructure: function () {
                 this.$initStructure(this.getClientWidth(), this.getClientHeight());
-                core.dispatchEvent(this, 'repaint');
+                if (!this._bReady) {
+                    // 第一次结构化触发ready执行
+                    core.dispatchEvent(this, 'ready');
+                }
             },
 
             /**
@@ -1173,21 +1174,12 @@ _aStatus            - 控件当前的状态集合
 
             /**
              * 控件刷新。
-             * repaint 方法不改变控件的内容与大小进行重绘。控件如果生成后不位于文档 DOM 树中，样式无法被正常读取，控件显示后如果不是预期的效果，需要调用 repaint 方法刷新。
              * @public
              */
             repaint: function () {
+                this.$restoreStructure();
                 this.cache(true);
                 this.initStructure();
-            },
-
-            /**
-             * 控件重置大小并刷新。
-             * resize 方法重新计算并设置控件的大小，浏览器可视化区域发生变化时，可能需要改变控件大小，框架会自动调用控件的 resize 方法。
-             */
-            resize: function () {
-                this.$resize();
-                this.repaint();
             },
 
             /**
@@ -1284,24 +1276,26 @@ _aStatus            - 控件当前的状态集合
              * @param {number} height 控件的高度
              */
             setSize: function (width, height) {
-                // 控件新的大小不允许小于最小值
-                if (width < this.getMinimumWidth()) {
-                    width = 0;
-                }
-                if (height < this.getMinimumHeight()) {
-                    height = 0;
-                }
+                if (this._bCached) {
+                    // 控件新的大小不允许小于最小值
+                    if (width < this.getMinimumWidth()) {
+                        width = 0;
+                    }
+                    if (height < this.getMinimumHeight()) {
+                        height = 0;
+                    }
 
-                this.$setSize(width, height);
-                if (width) {
-                    this._sWidth = this._eMain.style.width;
-                }
-                if (height) {
-                    this._sHeight = this._eMain.style.height;
-                }
+                    this.$setSize(width, height);
+                    if (width) {
+                        this._sWidth = this._eMain.style.width;
+                    }
+                    if (height) {
+                        this._sHeight = this._eMain.style.height;
+                    }
 
-                this.$resize();
-                this.initStructure();
+                    this.$restoreStructure();
+                    this.initStructure();
+                }
             },
 
             /**
