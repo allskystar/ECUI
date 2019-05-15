@@ -1713,56 +1713,68 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
          * @return {Function} 制作完成的类
          */
         util.makeClass = function (constructor, fields, methods, interfaces) {
-            function save(obj, privateNames, data, scope) {
-                privateNames.forEach(function (name) {
+            function save(obj, names, data, cache) {
+                names.forEach(function (name) {
                     if (!privateMethods[name]) {
                         // 私有方法不允许回写
                         data[name] = obj[name];
                     }
-                    if (scope.hasOwnProperty(name)) {
-                        obj[name] = scope[name];
+                    if (cache.hasOwnProperty(name)) {
+                        obj[name] = cache[name];
                     } else {
                         delete obj[name];
                     }
                 });
             }
 
-            function fill(obj, privateNames, data, scope) {
-                privateNames.forEach(function (name) {
+            function fill(obj, names, data, cache) {
+                names.forEach(function (name) {
                     if (obj.hasOwnProperty(name)) {
-                        scope[name] = obj[name];
+                        cache[name] = obj[name];
                     }
                     obj[name] = data[name];
                 });
             }
 
-            function onbefore(obj, privateNames, data, scope) {
-                var size = obj['CALL-STACK'].length;
-                if (size) {
-                    save.apply(null, obj['CALL-STACK'][size - 1]);
+            function onbefore(obj, privateNames, data, cache) {
+                var stack = obj['CALL-STACK'],
+                    item = stack[stack.length - 1];
+                if (item) {
+                    save(obj, item[0], item[1], item[2]);
                 }
-                fill(obj, privateNames, data, scope);
-                obj['CALL-STACK'].push([obj, privateNames, data, scope]);
+                fill(obj, privateNames, data, cache);
+                obj['CALL-STACK'].push([privateNames, data, cache]);
             }
 
-            function onafter(obj, privateNames, data, scope) {
-                save(obj, privateNames, data, scope);
-                obj['CALL-STACK'].pop();
-                var size = obj['CALL-STACK'].length;
-                if (size) {
-                    fill.apply(null, obj['CALL-STACK'][size - 1]);
+            function onafter(obj, privateNames, data, cache) {
+                save(obj, privateNames, data, cache);
+
+                var stack = obj['CALL-STACK'],
+                    item = stack[stack.length - 2];
+                stack.pop();
+                if (item) {
+                    fill(obj, item[0], item[1], item[2]);
                 }
             }
 
             function safecall(fn) {
-                var stack = this['CALL-STACK'],
-                    args = stack[stack.length - 1];
+                var stack = this['CALL-STACK'];
 
-                save.apply(null, args);
+                stack.reverse().forEach(
+                    function (item) {
+                        save(this, item[0], item[1], item[2]);
+                    },
+                    this
+                );
                 this['CALL-STACK'] = [];
                 fn();
                 this['CALL-STACK'] = stack;
-                fill.apply(null, args);
+                stack.reverse().forEach(
+                    function (item) {
+                        fill(this, item[0], item[1], item[2]);
+                    },
+                    this
+                );
             }
 
             if (!(constructor instanceof Function)) {
