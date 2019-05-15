@@ -1735,7 +1735,6 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
 
             // 恢复受保护属性的原始值
             function restoreProtected(obj, names, cache) {
-                delete interfaceMethods['this'];
                 for (var superClass = newClass['super']; superClass; superClass = superClass['super']) {
                     classes[superClass.CLASSID].Protected.forEach(function (name) {
                         if (names.indexOf(name) < 0) {
@@ -1757,7 +1756,6 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
 
             // 填充私有的属性值
             function fillPrivate(obj, names, data, cache) {
-                interfaceMethods['this'] = obj;
                 names.forEach(function (name) {
                     if (obj.hasOwnProperty(name)) {
                         cache[name] = obj[name];
@@ -1937,23 +1935,21 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                         if (interfaceMethods[name]) {
                             interfaceMethods[name] = (function (name, fn) {
                                 return function () {
-                                    var scope = {},
-                                        self = interfaceMethods['this'] || this;
-                                    onbefore(self, inf.Fields, self[inf.CLASSID], scope);
-                                    fn.apply(self, arguments);
-                                    var ret = inf.Methods[name].apply(self, arguments);
-                                    onafter(self, inf.Fields, self[inf.CLASSID], scope);
+                                    var scope = {};
+                                    onbefore(this, inf.Fields, this[inf.CLASSID], scope);
+                                    fn.apply(this, arguments);
+                                    var ret = inf.Methods[name].apply(this, arguments);
+                                    onafter(this, inf.Fields, this[inf.CLASSID], scope);
                                     return ret;
                                 };
                             }(name, interfaceMethods[name]));
                         } else {
                             interfaceMethods[name] = (function (name) {
                                 return function () {
-                                    var scope = {},
-                                        self = interfaceMethods['this'] || this;
-                                    onbefore(self, inf.Fields, self[inf.CLASSID], scope);
-                                    var ret = inf.Methods[name].apply(self, arguments);
-                                    onafter(self, inf.Fields, self[inf.CLASSID], scope);
+                                    var scope = {};
+                                    onbefore(this, inf.Fields, this[inf.CLASSID], scope);
+                                    var ret = inf.Methods[name].apply(this, arguments);
+                                    onafter(this, inf.Fields, this[inf.CLASSID], scope);
                                     return ret;
                                 };
                             }(name));
