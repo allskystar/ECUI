@@ -1735,6 +1735,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
 
             // 恢复受保护属性的原始值
             function restoreProtected(obj, names, cache) {
+                delete interfaceMethods['this'];
                 for (var superClass = newClass['super']; superClass; superClass = superClass['super']) {
                     classes[superClass.CLASSID].Protected.forEach(function (name) {
                         if (names.indexOf(name) < 0) {
@@ -1756,6 +1757,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
 
             // 填充私有的属性值
             function fillPrivate(obj, names, data, cache) {
+                interfaceMethods['this'] = obj;
                 names.forEach(function (name) {
                     if (obj.hasOwnProperty(name)) {
                         cache[name] = obj[name];
@@ -1935,21 +1937,23 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                         if (interfaceMethods[name]) {
                             interfaceMethods[name] = (function (name, fn) {
                                 return function () {
-                                    var scope = {};
-                                    onbefore(this, inf.Fields, this[inf.CLASSID], scope);
-                                    fn.apply(this, arguments);
-                                    var ret = inf.Methods[name].apply(this, arguments);
-                                    onafter(this, inf.Fields, this[inf.CLASSID], scope);
+                                    var scope = {},
+                                        self = interfaceMethods['this'] || this;
+                                    onbefore(self, inf.Fields, self[inf.CLASSID], scope);
+                                    fn.apply(self, arguments);
+                                    var ret = inf.Methods[name].apply(self, arguments);
+                                    onafter(self, inf.Fields, self[inf.CLASSID], scope);
                                     return ret;
                                 };
                             }(name, interfaceMethods[name]));
                         } else {
                             interfaceMethods[name] = (function (name) {
                                 return function () {
-                                    var scope = {};
-                                    onbefore(this, inf.Fields, this[inf.CLASSID], scope);
-                                    var ret = inf.Methods[name].apply(this, arguments);
-                                    onafter(this, inf.Fields, this[inf.CLASSID], scope);
+                                    var scope = {},
+                                        self = interfaceMethods['this'] || this;
+                                    onbefore(self, inf.Fields, self[inf.CLASSID], scope);
+                                    var ret = inf.Methods[name].apply(self, arguments);
+                                    onafter(self, inf.Fields, self[inf.CLASSID], scope);
                                     return ret;
                                 };
                             }(name));
@@ -1984,14 +1988,44 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
          * @param {Array} fields 私有属性域(包含私有方法名)
          * @return {Function} 制作完成的接口
          */
-        util.makeInterface = function (methods, fields) {
-            fields = fields || [];
-            fields.push('safecall');
+        util.makeInterface = function (fields, methods) {
+            var index = 2,
+                realFields = fields,
+                realMethods = methods;
+
+            if (!(realFields instanceof Array)) {
+                index--;
+                realMethods = realFields;
+                realFields = [];
+            }
+
+            if (!realMethods || realMethods.CLASSID) {
+                index--;
+                realMethods = {};
+            }
+
+            realFields.push('safecall');
+
+            Array.prototype.slice.call(arguments, index).forEach(function (inf) {
+                for (var name in inf) {
+                    if (inf.hasOwnProperty(name)) {
+                        if (realMethods[name]) {
+
+                        } else {
+                            realMethods[name] = (function (name) {
+                                return function () {
+                                    return inf[name].call(this);
+                                };
+                            }());
+                        }
+                    }
+                }
+            });
 
             return {
                 CLASSID: 'CLASS-' + classIndex++,
-                Fields: fields,
-                Methods: methods
+                Fields: realFields,
+                Methods: realMethods
             };
         };
     }());
