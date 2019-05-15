@@ -1695,8 +1695,9 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                 Class.prototype[name] = function () {
                     var scope = {};
                     data.onbefore(this, data.Fields, this[Class.CLASSID], scope);
-                    method.apply(this, arguments);
+                    var ret = method.apply(this, arguments);
                     data.onafter(this, data.Fields, this[Class.CLASSID], scope);
+                    return ret;
                 };
             }
             data.Methods[name] = method;
@@ -1713,7 +1714,9 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
          * @return {Function} 制作完成的类
          */
         util.makeClass = function (constructor, fields, methods) {
-            function save(obj, names, data, cache) {
+
+            // 恢复私有属性的原始值
+            function restorePrivate(obj, names, data, cache) {
                 names.forEach(function (name) {
                     if (protectedField.indexOf(name) < 0) {
                         //受保护的属性在最后一次性回写
@@ -1730,7 +1733,8 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                 });
             }
 
-            function saveProtected(obj, names, cache) {
+            // 恢复受保护属性的原始值
+            function restoreProtected(obj, names, cache) {
                 for (var superClass = newClass['super']; superClass; superClass = superClass['super']) {
                     classes[superClass.CLASSID].Protected.forEach(function (name) {
                         if (names.indexOf(name) < 0) {
@@ -1750,7 +1754,8 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                 }
             }
 
-            function fill(obj, names, data, cache) {
+            // 填充私有的属性值
+            function fillPrivate(obj, names, data, cache) {
                 names.forEach(function (name) {
                     if (obj.hasOwnProperty(name)) {
                         cache[name] = obj[name];
@@ -1759,6 +1764,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                 });
             }
 
+            // 填充受保护的属性值
             function fillProtected(obj, names, cache) {
                 for (var superClass = newClass['super']; superClass; superClass = superClass['super']) {
                     classes[superClass.CLASSID].Protected.forEach(function (name) {
@@ -1780,17 +1786,17 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                 var stack = obj['CALL-STACK'],
                     item = stack[stack.length - 1];
                 if (item) {
-                    save(obj, item[0], item[1], item[2]);
+                    restorePrivate(obj, item[0], item[1], item[2]);
                 } else {
                     // 第一次进入，遍历protected的值
                     fillProtected(obj, privateNames.slice(), cache);
                 }
-                fill(obj, privateNames, data, cache);
+                fillPrivate(obj, privateNames, data, cache);
                 obj['CALL-STACK'].push([privateNames, data, cache]);
             }
 
             function onafter(obj, privateNames, data, cache) {
-                save(obj, privateNames, data, cache);
+                restorePrivate(obj, privateNames, data, cache);
 
                 var stack = obj['CALL-STACK'],
                     item = stack[stack.length - 2];
@@ -1798,34 +1804,36 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                 stack.pop();
 
                 if (item) {
-                    fill(obj, item[0], item[1], item[2]);
+                    fillPrivate(obj, item[0], item[1], item[2]);
                 } else {
                     // 离开时回填并清除
-                    saveProtected(obj, privateNames.slice(), cache);
+                    restoreProtected(obj, privateNames.slice(), cache);
                 }
             }
 
+            // 安全调用，用于保护/恢复调用前后的对象环境
             function safecall(fn) {
                 var stack = this['CALL-STACK'],
                     item = stack[0];
 
                 stack.reverse().forEach(
                     function (item) {
-                        save(this, item[0], item[1], item[2]);
+                        restorePrivate(this, item[0], item[1], item[2]);
                     },
                     this
                 );
-                saveProtected(this, item[0].slice(), item[2]);
+                restoreProtected(this, item[0].slice(), item[2]);
                 this['CALL-STACK'] = [];
-                fn();
+                var ret = fn();
                 this['CALL-STACK'] = stack;
                 stack.reverse().forEach(
                     function (item) {
-                        fill(this, item[0], item[1], item[2]);
+                        fillPrivate(this, item[0], item[1], item[2]);
                     },
                     this
                 );
                 fillProtected(this, item[0].slice(), item[2]);
+                return ret;
             }
 
             var newClass = function () {
@@ -1857,19 +1865,40 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                 protectedField = [],
                 privateMethods = {},
                 interfaceMethods = {},
-                interfaces = Array.prototype.slice.call(arguments, 3);
+                index = 3,
+                realConstructor = constructor,
+                realFields = fields,
+                realMethods = methods;
 
-            constructor = constructor || new Function('this["super"].apply(this,arguments)');
-            fields = (fields || []).map(
-                function (item) {
-                    if (item.charAt(0) === '*') {
-                        item = item.slice(1);
-                        protectedField.push(item);
+            if (!(realConstructor instanceof Function)) {
+                index--;
+                realMethods = realFields;
+                realFields = realConstructor;
+                realConstructor = new Function('this["super"].apply(this,arguments)');
+            }
+
+            if (!(realFields instanceof Array)) {
+                index--;
+                realMethods = realFields;
+                realFields = [];
+            } else {
+                realFields = realFields.map(
+                    function (item) {
+                        if (item.charAt(0) === '*') {
+                            item = item.slice(1);
+                            protectedField.push(item);
+                        }
+                        return item;
                     }
-                    return item;
-                }
-            );
-            methods = methods || {};
+                );
+            }
+
+            if (!realMethods || realMethods.CLASSID) {
+                index--;
+                realMethods = {};
+            }
+
+            var interfaces = Array.prototype.slice.call(arguments, index);
 
             newClass.CLASSID = 'CLASS-' + classIndex++;
             fields.push('super');
