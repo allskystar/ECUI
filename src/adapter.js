@@ -1694,9 +1694,9 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
             if (!data.Methods[name]) {
                 Class.prototype[name] = function () {
                     var scope = {};
-                    data.onbefore(this, scope);
+                    data.onbefore(this, data.Fields, this[Class.CLASSID], scope);
                     method.apply(this, arguments);
-                    data.onafter(this, scope);
+                    data.onafter(this, data.Fields, this[Class.CLASSID], scope);
                 };
             }
             data.Methods[name] = method;
@@ -1755,9 +1755,13 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
             }
 
             function safecall(fn) {
-                var args = this['CALL-STACK'][this['CALL-STACK'].length - 1];
+                var stack = this['CALL-STACK'],
+                    args = stack[stack.length - 1];
+
                 save.apply(null, args);
+                this['CALL-STACK'] = [];
                 fn();
+                this['CALL-STACK'] = stack;
                 fill.apply(null, args);
             }
 
@@ -1846,29 +1850,20 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                         if (interfaceMethods[name]) {
                             interfaceMethods[name] = (function (name, fn) {
                                 return function () {
-                                    if (inf.Fields) {
-                                        var scope = {};
-                                        onbefore(this, inf.Fields, this[inf.CLASSID], scope);
-                                        fn.apply(this, arguments);
-                                        inf.Methods[name].apply(this, arguments);
-                                        onafter(this, inf.Fields, this[inf.CLASSID], scope);
-                                    } else {
-                                        fn.apply(this, arguments);
-                                        inf.Methods[name].apply(this, arguments);
-                                    }
+                                    var scope = {};
+                                    onbefore(this, inf.Fields, this[inf.CLASSID], scope);
+                                    fn.apply(this, arguments);
+                                    inf.Methods[name].apply(this, arguments);
+                                    onafter(this, inf.Fields, this[inf.CLASSID], scope);
                                 };
                             }(name, interfaceMethods[name]));
                         } else {
                             interfaceMethods[name] = (function (name) {
                                 return function () {
-                                    if (inf.Fields) {
-                                        var scope = {};
-                                        onbefore(this, inf.Fields, this[inf.CLASSID], scope);
-                                        inf.Methods[name].apply(this, arguments);
-                                        onafter(this, inf.Fields, this[inf.CLASSID], scope);
-                                    } else {
-                                        inf.Methods[name].apply(this, arguments);
-                                    }
+                                    var scope = {};
+                                    onbefore(this, inf.Fields, this[inf.CLASSID], scope);
+                                    inf.Methods[name].apply(this, arguments);
+                                    onafter(this, inf.Fields, this[inf.CLASSID], scope);
                                 };
                             }(name));
                         }
@@ -1887,7 +1882,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
             classes[newClass.CLASSID] = {
                 onbefore: onbefore,
                 onafter: onafter,
-                interfaces: interfaceMethods,
+                Fields: fields,
                 Methods: methods
             };
             return newClass;
