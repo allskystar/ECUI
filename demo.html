@@ -12,18 +12,22 @@
     <script type="text/javascript" src="options.js"></script>
     <script type="text/javascript" src="ecui.js"></script>
     <script>
+function test() {
+    son.a = 50;
+    son.test1();
+}
 Imp1 = ecui.util.makeInterface(
     {
         test: function () {
             this.a = 10;
             console.log('imp1-test', this.a);
-            this.test1();
+            this.safecall(test);
         },
         test1: function () {
             console.log(this.a);
         }
     },
-    ['a']
+    ['a']//定义a是接口Imp1的私有变量
 );
 Imp2 = ecui.util.makeInterface(
     {
@@ -36,14 +40,13 @@ Parent = ecui.util.makeClass(
     function () {
         this.type = 'parent';
     },
-    ['type']
+    ['type']//定义type是类Parent的私有变量
 );
 Son = ecui.util.makeClass(
     function () {
-        this['super']();
         this.type = 'son';
     },
-    ['type'],
+    ['type'],//定义type是类Son的私有变量
     {
         test: function () {
             console.log(this.type);
@@ -54,6 +57,7 @@ Son = ecui.util.makeClass(
 );
 ecui.util.inherits(Son, Parent);
 var son = new Son();
+son.test();
     </script>
     <style>
     </style>

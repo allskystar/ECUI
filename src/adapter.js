@@ -1792,9 +1792,10 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
             var newClass = function () {
                     var call = safecall.bind(this),
                         scope = {},
+                        superClass = newClass['super'],
                         data = this[newClass.CLASSID] = Object.assign(
                             {
-                                'super': newClass['super'] || Object,
+                                'super': superClass || Object,
                                 'interface': interfaceMethods,
                                 safecall: call
                             },
@@ -1810,6 +1811,10 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                     onbefore(this, fields, data, scope);
                     constructor.apply(this, arguments);
                     onafter(this, fields, data, scope);
+
+                    if (superClass && !this[superClass.CLASSID]) {
+                        superClass.apply(this, arguments);
+                    }
                 },
                 privateMethods = {},
                 interfaceMethods = {};
