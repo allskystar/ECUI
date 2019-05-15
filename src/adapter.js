@@ -1730,6 +1730,26 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                 });
             }
 
+            function saveProtected(obj, names, cache) {
+                for (var superClass = newClass['super']; superClass; superClass = superClass['super']) {
+                    classes[superClass.CLASSID].Protected.forEach(function (name) {
+                        if (names.indexOf(name) < 0) {
+                            names.push(name);
+                            if (!privateMethods[name]) {
+                                // 方法不允许回写
+                                obj[superClass.CLASSID][name] = obj[name];
+                            }
+                            if (cache.hasOwnProperty(name)) {
+                                // 如果cache为unknown表示之前初始化未完成
+                                obj[name] = cache[name];
+                            } else {
+                                delete obj[name];
+                            }
+                        }
+                    });
+                }
+            }
+
             function fill(obj, names, data, cache) {
                 names.forEach(function (name) {
                     if (obj.hasOwnProperty(name)) {
@@ -1739,6 +1759,23 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                 });
             }
 
+            function fillProtected(obj, names, cache) {
+                for (var superClass = newClass['super']; superClass; superClass = superClass['super']) {
+                    classes[superClass.CLASSID].Protected.forEach(function (name) {
+                        if (names.indexOf(name) < 0) {
+                            names.push(name);
+
+                            if (obj[superClass.CLASSID]) {
+                                if (obj.hasOwnProperty(name)) {
+                                    cache[name] = obj[name];
+                                }
+                                obj[name] = obj[superClass.CLASSID][name];
+                            }
+                        }
+                    });
+                }
+            }
+
             function onbefore(obj, privateNames, data, cache) {
                 var stack = obj['CALL-STACK'],
                     item = stack[stack.length - 1];
@@ -1746,20 +1783,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                     save(obj, item[0], item[1], item[2]);
                 } else {
                     // 第一次进入，遍历protected的值
-                    for (var names = privateNames.slice(), superClass = newClass['super']; superClass; superClass = superClass['super']) {
-                        classes[superClass.CLASSID].Protected.forEach(function (name) {
-                            if (names.indexOf(name) < 0) {
-                                names.push(name);
-
-                                if (obj[superClass.CLASSID]) {
-                                    if (obj.hasOwnProperty(name)) {
-                                        cache[name] = obj[name];
-                                    }
-                                    obj[name] = obj[superClass.CLASSID][name];
-                                }
-                            }
-                        });
-                    }
+                    fillProtected(obj, privateNames.slice(), cache);
                 }
                 fill(obj, privateNames, data, cache);
                 obj['CALL-STACK'].push([privateNames, data, cache]);
@@ -1777,28 +1801,13 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                     fill(obj, item[0], item[1], item[2]);
                 } else {
                     // 离开时回填并清除
-                    for (var names = privateNames.slice(), superClass = newClass['super']; superClass; superClass = superClass['super']) {
-                        classes[superClass.CLASSID].Protected.forEach(function (name) {
-                            if (names.indexOf(name) < 0) {
-                                names.push(name);
-                                if (!privateMethods[name]) {
-                                    // 方法不允许回写
-                                    obj[superClass.CLASSID][name] = obj[name];
-                                }
-                                if (cache.hasOwnProperty(name)) {
-                                    // 如果cache为unknown表示之前初始化未完成
-                                    obj[name] = cache[name];
-                                } else {
-                                    delete obj[name];
-                                }
-                            }
-                        });
-                    }
+                    saveProtected(obj, privateNames.slice(), cache);
                 }
             }
 
             function safecall(fn) {
-                var stack = this['CALL-STACK'];
+                var stack = this['CALL-STACK'],
+                    item = stack[0];
 
                 stack.reverse().forEach(
                     function (item) {
@@ -1806,6 +1815,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                     },
                     this
                 );
+                saveProtected(this, item[0].slice(), item[2]);
                 this['CALL-STACK'] = [];
                 fn();
                 this['CALL-STACK'] = stack;
@@ -1815,6 +1825,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                     },
                     this
                 );
+                fillProtected(this, item[0].slice(), item[2]);
             }
 
             var newClass = function () {
