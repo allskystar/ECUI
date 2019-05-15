@@ -1703,22 +1703,6 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
         };
 
         /**
-         * 制作接口。
-         * @public
-         *
-         * @param {object} methods 方法集合
-         * @param {Array} fields 私有属性域(包含私有方法名)
-         * @return {Function} 制作完成的接口
-         */
-        util.makeInterface = function (methods, fields) {
-            return {
-                CLASSID: 'CLASS-' + classIndex++,
-                Fields: fields,
-                Methods: methods
-            };
-        };
-
-        /**
          * 制作类。
          * @public
          *
@@ -1770,6 +1754,13 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                 }
             }
 
+            function safecall(fn) {
+                var args = this['CALL-STACK'][this['CALL-STACK'].length - 1];
+                save.apply(null, args);
+                fn();
+                fill.apply(null, args);
+            }
+
             if (!(constructor instanceof Function)) {
                 interfaces = methods;
                 methods = fields;
@@ -1795,12 +1786,19 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
             interfaces = interfaces || [];
 
             var newClass = function () {
-                    var scope = {},
-                        data = this[newClass.CLASSID] = Object.assign({'super': newClass['super'] || Object, 'interface': interfaceMethods}, privateMethods);
+                    var call = safecall.bind(this),
+                        scope = {},
+                        data = this[newClass.CLASSID] = Object.assign(
+                            {
+                                'super': newClass['super'] || Object,
+                                'interface': interfaceMethods,
+                                call: call
+                            },
+                            privateMethods
+                        );
+
                     interfaces.forEach(function (inf) {
-                        if (inf.Fields) {
-                            this[inf.CLASSID] = {};
-                        }
+                        this[inf.CLASSID] = {call: call};
                     }, this);
                     if (!this['CALL-STACK']) {
                         this['CALL-STACK'] = [];
@@ -1815,6 +1813,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
             newClass.CLASSID = 'CLASS-' + classIndex++;
             fields.push('super');
             fields.push('interface');
+            fields.push('call');
 
             for (var name in methods) {
                 if (methods.hasOwnProperty(name)) {
@@ -1892,6 +1891,25 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                 Methods: methods
             };
             return newClass;
+        };
+
+        /**
+         * 制作接口。
+         * @public
+         *
+         * @param {object} methods 方法集合
+         * @param {Array} fields 私有属性域(包含私有方法名)
+         * @return {Function} 制作完成的接口
+         */
+        util.makeInterface = function (methods, fields) {
+            fields = fields || [];
+            fields.push('call');
+
+            return {
+                CLASSID: 'CLASS-' + classIndex++,
+                Fields: fields,
+                Methods: methods
+            };
         };
     }());
 
