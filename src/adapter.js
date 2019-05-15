@@ -1766,17 +1766,15 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
 
             // 填充受保护的属性值
             function fillProtected(obj, names, cache) {
-                for (var superClass = newClass['super']; superClass; superClass = superClass['super']) {
+                for (var superClass = newClass['super']; superClass && obj[superClass.CLASSID]; superClass = superClass['super']) {
                     classes[superClass.CLASSID].Protected.forEach(function (name) {
                         if (names.indexOf(name) < 0) {
                             names.push(name);
 
-                            if (obj[superClass.CLASSID]) {
-                                if (obj.hasOwnProperty(name)) {
-                                    cache[name] = obj[name];
-                                }
-                                obj[name] = obj[superClass.CLASSID][name];
+                            if (obj.hasOwnProperty(name)) {
+                                cache[name] = obj[name];
                             }
+                            obj[name] = obj[superClass.CLASSID][name];
                         }
                     });
                 }
