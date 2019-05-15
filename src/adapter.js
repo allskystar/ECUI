@@ -1792,13 +1792,13 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                             {
                                 'super': newClass['super'] || Object,
                                 'interface': interfaceMethods,
-                                call: call
+                                safecall: call
                             },
                             privateMethods
                         );
 
                     interfaces.forEach(function (inf) {
-                        this[inf.CLASSID] = {call: call};
+                        this[inf.CLASSID] = {safecall: call};
                     }, this);
                     if (!this['CALL-STACK']) {
                         this['CALL-STACK'] = [];
@@ -1813,7 +1813,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
             newClass.CLASSID = 'CLASS-' + classIndex++;
             fields.push('super');
             fields.push('interface');
-            fields.push('call');
+            fields.push('safecall');
 
             for (var name in methods) {
                 if (methods.hasOwnProperty(name)) {
@@ -1903,7 +1903,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
          */
         util.makeInterface = function (methods, fields) {
             fields = fields || [];
-            fields.push('call');
+            fields.push('safecall');
 
             return {
                 CLASSID: 'CLASS-' + classIndex++,
