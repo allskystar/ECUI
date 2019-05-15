@@ -1709,20 +1709,23 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
          * @param {Function} constructor 构造函数
          * @param {Array} fields 私有属性域(包含私有方法名)
          * @param {object} methods 方法集合
-         * @param {Array} interfaces 接口集合列表
+         * @param {object} ... 接口集合列表
          * @return {Function} 制作完成的类
          */
-        util.makeClass = function (constructor, fields, methods, interfaces) {
+        util.makeClass = function (constructor, fields, methods) {
             function save(obj, names, data, cache) {
                 names.forEach(function (name) {
-                    if (!privateMethods[name]) {
-                        // 私有方法不允许回写
-                        data[name] = obj[name];
-                    }
-                    if (cache.hasOwnProperty(name)) {
-                        obj[name] = cache[name];
-                    } else {
-                        delete obj[name];
+                    if (protectedField.indexOf(name) < 0) {
+                        //受保护的属性在最后一次性回写
+                        if (!privateMethods[name]) {
+                            // 方法不允许回写
+                            data[name] = obj[name];
+                        }
+                        if (cache.hasOwnProperty(name)) {
+                            obj[name] = cache[name];
+                        } else {
+                            delete obj[name];
+                        }
                     }
                 });
             }
@@ -1741,6 +1744,22 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                     item = stack[stack.length - 1];
                 if (item) {
                     save(obj, item[0], item[1], item[2]);
+                } else {
+                    // 第一次进入，遍历protected的值
+                    for (var names = privateNames.slice(), superClass = newClass['super']; superClass; superClass = superClass['super']) {
+                        classes[superClass.CLASSID].Protected.forEach(function (name) {
+                            if (names.indexOf(name) < 0) {
+                                names.push(name);
+
+                                if (obj[superClass.CLASSID]) {
+                                    if (obj.hasOwnProperty(name)) {
+                                        cache[name] = obj[name];
+                                    }
+                                    obj[name] = obj[superClass.CLASSID][name];
+                                }
+                            }
+                        });
+                    }
                 }
                 fill(obj, privateNames, data, cache);
                 obj['CALL-STACK'].push([privateNames, data, cache]);
@@ -1751,9 +1770,30 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
 
                 var stack = obj['CALL-STACK'],
                     item = stack[stack.length - 2];
+
                 stack.pop();
+
                 if (item) {
                     fill(obj, item[0], item[1], item[2]);
+                } else {
+                    // 离开时回填并清除
+                    for (var names = privateNames.slice(), superClass = newClass['super']; superClass; superClass = superClass['super']) {
+                        classes[superClass.CLASSID].Protected.forEach(function (name) {
+                            if (names.indexOf(name) < 0) {
+                                names.push(name);
+                                if (!privateMethods[name]) {
+                                    // 方法不允许回写
+                                    obj[superClass.CLASSID][name] = obj[name];
+                                }
+                                if (cache.hasOwnProperty(name)) {
+                                    // 如果cache为unknown表示之前初始化未完成
+                                    obj[name] = cache[name];
+                                } else {
+                                    delete obj[name];
+                                }
+                            }
+                        });
+                    }
                 }
             }
 
@@ -1777,30 +1817,6 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                 );
             }
 
-            if (!(constructor instanceof Function)) {
-                interfaces = methods;
-                methods = fields;
-                fields = constructor;
-                constructor = new Function('this["super"].apply(this,arguments)');
-            }
-
-            if (!(fields instanceof Array) || 'string' !== typeof fields[0]) {
-                interfaces = methods;
-                methods = fields;
-                fields = [];
-            }
-
-            if (methods) {
-                if (methods instanceof Array) {
-                    interfaces = methods;
-                    methods = {};
-                } else {
-                    methods = Object.assign({}, methods);
-                }
-            }
-
-            interfaces = interfaces || [];
-
             var newClass = function () {
                     var call = safecall.bind(this),
                         scope = {},
@@ -1822,14 +1838,27 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                     }
                     onbefore(this, fields, data, scope);
                     constructor.apply(this, arguments);
-                    onafter(this, fields, data, scope);
-
                     if (superClass && !this[superClass.CLASSID]) {
                         superClass.apply(this, arguments);
                     }
+                    onafter(this, fields, data, scope);
                 },
+                protectedField = [],
                 privateMethods = {},
-                interfaceMethods = {};
+                interfaceMethods = {},
+                interfaces = Array.prototype.slice.call(arguments, 3);
+
+            constructor = constructor || new Function('this["super"].apply(this,arguments)');
+            fields = (fields || []).map(
+                function (item) {
+                    if (item.charAt(0) === '*') {
+                        item = item.slice(1);
+                        protectedField.push(item);
+                    }
+                    return item;
+                }
+            );
+            methods = methods || {};
 
             newClass.CLASSID = 'CLASS-' + classIndex++;
             fields.push('super');
@@ -1844,14 +1873,15 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                                 return function () {
                                     var scope = {};
                                     onbefore(this, fields, this[newClass.CLASSID], scope);
-                                    methods[name].apply(this, arguments);
+                                    var ret = methods[name].apply(this, arguments);
                                     onafter(this, fields, this[newClass.CLASSID], scope);
+                                    return ret;
                                 };
                             }(name));
                         } else {
                             privateMethods[name] = (function (name) {
                                 return function () {
-                                    methods[name].apply(this, arguments);
+                                    return methods[name].apply(this, arguments);
                                 };
                             }(name));
                         }
@@ -1870,8 +1900,9 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                                     var scope = {};
                                     onbefore(this, inf.Fields, this[inf.CLASSID], scope);
                                     fn.apply(this, arguments);
-                                    inf.Methods[name].apply(this, arguments);
+                                    var ret = inf.Methods[name].apply(this, arguments);
                                     onafter(this, inf.Fields, this[inf.CLASSID], scope);
+                                    return ret;
                                 };
                             }(name, interfaceMethods[name]));
                         } else {
@@ -1879,8 +1910,9 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                                 return function () {
                                     var scope = {};
                                     onbefore(this, inf.Fields, this[inf.CLASSID], scope);
-                                    inf.Methods[name].apply(this, arguments);
+                                    var ret = inf.Methods[name].apply(this, arguments);
                                     onafter(this, inf.Fields, this[inf.CLASSID], scope);
+                                    return ret;
                                 };
                             }(name));
                         }
@@ -1899,6 +1931,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
             classes[newClass.CLASSID] = {
                 onbefore: onbefore,
                 onafter: onafter,
+                Protected: protectedField,
                 Fields: fields,
                 Methods: methods
             };
