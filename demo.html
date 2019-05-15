@@ -11,33 +11,134 @@
     <link rel="stylesheet/less" type="text/css" href="common.css">
     <script type="text/javascript" src="options.js"></script>
     <script type="text/javascript" src="ecui.js"></script>
-    <script type="text/javascript" src="fix-2.0.0.js"></script>
+    <script>
+Imp1 = ecui.util.makeInterface(
+    {
+        test: function () {
+            this.a = 10;
+            console.log('imp1-test', this.a);
+            this.test1();
+        },
+        test1: function () {
+            console.log(this.a);
+        }
+    },
+    ['a']
+);
+Imp2 = ecui.util.makeInterface(
+    {
+        test: function () {
+            console.log('imp2-test', this.a);
+        }
+    }
+);
+Parent = ecui.util.makeClass(
+    function () {
+        this.type = 'parent';
+    },
+    ['type']
+);
+Son = ecui.util.makeClass(
+    function () {
+        this['super']();
+        this.type = 'son';
+    },
+    ['type'],
+    {
+        test: function () {
+            console.log(this.type);
+            this['interface'].test.call(this);
+        }
+    },
+    [Imp1, Imp2]
+);
+ecui.util.inherits(Son, Parent);
+var son = new Son();
+    </script>
+    <style>
+    </style>
 </head>
 <body style="overflow: auto">
-<div ui="type:locked-table;left-lock:1" style="width:600px">
-  <table style="width:750px">
-    <!-- 表头区域 -->
-    <thead>
-      <tr>
-        <th colspan="4" style="overflow:visible">长行</th>
-      </tr>
-      <tr>
-        <th style="width:200px;">公司名</th>
-        <th style="width:200px;">url</th>
-        <th style="width:250px;">地址</th>
-        <th style="width:100px;">创办时间</th>
-      </tr>
-    </thead>
-    <!-- 内容行区域 -->
-    <tbody>
-      <tr>
-        <td>百度</td>
-        <td>www.baidu.com</td>
-        <td>中国北京中关村</td>
-        <td>1999</td>
-      </tr>
-    </tbody>
-  </table>
+<div>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <div style="background:red;height:20px" ui="ext-ceiling:0"></div>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <div style="background:yellow;height:20px" ui="ext-ceiling:20"></div>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    结束
 </div>
 </body>
 </html>

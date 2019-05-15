@@ -1362,7 +1362,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                 Clazz.prototype = superClass.prototype;
                 Object.assign(subClass.prototype = new Clazz(), oldPrototype);
                 subClass.prototype.constructor = subClass;
-                subClass.superClass = superClass;
+                subClass['super'] = superClass;
             },
 
             /**
@@ -1703,29 +1703,37 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
         };
 
         /**
+         * 制作接口。
+         * @public
+         *
+         * @param {object} methods 方法集合
+         * @param {Array} fields 私有属性域(包含私有方法名)
+         * @return {Function} 制作完成的接口
+         */
+        util.makeInterface = function (methods, fields) {
+            return {
+                CLASSID: 'CLASS-' + classIndex++,
+                Fields: fields,
+                Methods: methods
+            };
+        };
+
+        /**
          * 制作类。
          * @public
          *
          * @param {Function} constructor 构造函数
          * @param {Array} fields 私有属性域(包含私有方法名)
          * @param {object} methods 方法集合
+         * @param {Array} interfaces 接口集合列表
          * @return {Function} 制作完成的类
          */
-        util.makeClass = function (constructor, fields, methods) {
-            function onbefore(obj, scope) {
-                fields.forEach(function (name) {
-                    if (obj.hasOwnProperty(name)) {
-                        scope[name] = obj[name];
-                    }
-                    obj[name] = obj[newClass.CLASSID][name];
-                });
-            }
-
-            function onafter(obj, scope) {
-                fields.forEach(function (name) {
+        util.makeClass = function (constructor, fields, methods, interfaces) {
+            function save(obj, privateNames, data, scope) {
+                privateNames.forEach(function (name) {
                     if (!privateMethods[name]) {
                         // 私有方法不允许回写
-                        obj[newClass.CLASSID][name] = obj[name];
+                        data[name] = obj[name];
                     }
                     if (scope.hasOwnProperty(name)) {
                         obj[name] = scope[name];
@@ -1735,17 +1743,78 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                 });
             }
 
+            function fill(obj, privateNames, data, scope) {
+                privateNames.forEach(function (name) {
+                    if (obj.hasOwnProperty(name)) {
+                        scope[name] = obj[name];
+                    }
+                    obj[name] = data[name];
+                });
+            }
+
+            function onbefore(obj, privateNames, data, scope) {
+                var size = obj['CALL-STACK'].length;
+                if (size) {
+                    save.apply(null, obj['CALL-STACK'][size - 1]);
+                }
+                fill(obj, privateNames, data, scope);
+                obj['CALL-STACK'].push([obj, privateNames, data, scope]);
+            }
+
+            function onafter(obj, privateNames, data, scope) {
+                save(obj, privateNames, data, scope);
+                obj['CALL-STACK'].pop();
+                var size = obj['CALL-STACK'].length;
+                if (size) {
+                    fill.apply(null, obj['CALL-STACK'][size - 1]);
+                }
+            }
+
+            if (!(constructor instanceof Function)) {
+                interfaces = methods;
+                methods = fields;
+                fields = constructor;
+                constructor = new Function('this["super"].apply(this,arguments)');
+            }
+
+            if (!(fields instanceof Array) || 'string' !== typeof fields[0]) {
+                interfaces = methods;
+                methods = fields;
+                fields = [];
+            }
+
+            if (methods) {
+                if (methods instanceof Array) {
+                    interfaces = methods;
+                    methods = {};
+                } else {
+                    methods = Object.assign({}, methods);
+                }
+            }
+
+            interfaces = interfaces || [];
+
             var newClass = function () {
-                    var scope = {};
-                    this[newClass.CLASSID] = Object.assign({}, privateMethods);
-                    onbefore(this, scope);
+                    var scope = {},
+                        data = this[newClass.CLASSID] = Object.assign({'super': newClass['super'] || Object, 'interface': interfaceMethods}, privateMethods);
+                    interfaces.forEach(function (inf) {
+                        if (inf.Fields) {
+                            this[inf.CLASSID] = {};
+                        }
+                    }, this);
+                    if (!this['CALL-STACK']) {
+                        this['CALL-STACK'] = [];
+                    }
+                    onbefore(this, fields, data, scope);
                     constructor.apply(this, arguments);
-                    onafter(this, scope);
+                    onafter(this, fields, data, scope);
                 },
-                privateMethods = {};
+                privateMethods = {},
+                interfaceMethods = {};
 
             newClass.CLASSID = 'CLASS-' + classIndex++;
-            methods = Object.assign({}, methods);
+            fields.push('super');
+            fields.push('interface');
 
             for (var name in methods) {
                 if (methods.hasOwnProperty(name)) {
@@ -1754,9 +1823,9 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                             newClass.prototype[name] = (function (name) {
                                 return function () {
                                     var scope = {};
-                                    onbefore(this, scope);
+                                    onbefore(this, fields, this[newClass.CLASSID], scope);
                                     methods[name].apply(this, arguments);
-                                    onafter(this, scope);
+                                    onafter(this, fields, this[newClass.CLASSID], scope);
                                 };
                             }(name));
                         } else {
@@ -1772,9 +1841,54 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                 }
             }
 
+            interfaces.forEach(function (inf) {
+                for (var name in inf.Methods) {
+                    if (inf.Methods.hasOwnProperty(name)) {
+                        if (interfaceMethods[name]) {
+                            interfaceMethods[name] = (function (name, fn) {
+                                return function () {
+                                    if (inf.Fields) {
+                                        var scope = {};
+                                        onbefore(this, inf.Fields, this[inf.CLASSID], scope);
+                                        fn.apply(this, arguments);
+                                        inf.Methods[name].apply(this, arguments);
+                                        onafter(this, inf.Fields, this[inf.CLASSID], scope);
+                                    } else {
+                                        fn.apply(this, arguments);
+                                        inf.Methods[name].apply(this, arguments);
+                                    }
+                                };
+                            }(name, interfaceMethods[name]));
+                        } else {
+                            interfaceMethods[name] = (function (name) {
+                                return function () {
+                                    if (inf.Fields) {
+                                        var scope = {};
+                                        onbefore(this, inf.Fields, this[inf.CLASSID], scope);
+                                        inf.Methods[name].apply(this, arguments);
+                                        onafter(this, inf.Fields, this[inf.CLASSID], scope);
+                                    } else {
+                                        inf.Methods[name].apply(this, arguments);
+                                    }
+                                };
+                            }(name));
+                        }
+                    }
+                }
+            });
+
+            for (name in interfaceMethods) {
+                if (interfaceMethods.hasOwnProperty(name)) {
+                    if (!newClass.prototype[name]) {
+                        newClass.prototype[name] = interfaceMethods[name];
+                    }
+                }
+            }
+
             classes[newClass.CLASSID] = {
                 onbefore: onbefore,
                 onafter: onafter,
+                interfaces: interfaceMethods,
                 Methods: methods
             };
             return newClass;
