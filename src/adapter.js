@@ -1680,7 +1680,155 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
 
     (function () {
         var classIndex = 1,
-            classes = {};
+            classes = {},
+            callStack = [[{}, null, [], {}]];
+//{if 0}//
+        core.util.callStack = callStack;
+//{/if}//
+        function setPrivate(scope, caller, fields, caches) {
+            fields.forEach(function (name) {
+                if (name.charAt(0) !== '*' && name.charAt(0) !== '+') {
+                    if (caller.hasOwnProperty(name)) {
+                        caches[name] = caller[name];
+                    }
+                    caller[name] = scope[name];
+                }
+            });
+        }
+
+        function setProtected(scope, caller, fields, caches) {
+            if (caller) {
+                for (var clazz = caller.constructor; clazz; clazz = clazz['super']) {
+                    classes[clazz.CLASSID].Fields.forEach(function (name) {
+                        if (name.charAt(0) === '*') {
+                            name = name.slice(1);
+                            if (caller.hasOwnProperty(name)) {
+                                caches[name] = caller[name];
+                            }
+                            caller[name] = caller[clazz.CLASSID][name];
+                        }
+                    });
+                }
+            }
+        }
+
+        function resetPrivate(scope, caller, fields, caches) {
+            fields.forEach(function (name) {
+                if (name.charAt(0) !== '*' && name.charAt(0) !== '+') {
+                    scope[name] = caller[name];
+                    if (caches.hasOwnProperty(name)) {
+                        caller[name] = caches[name];
+                    } else {
+                        delete caller[name];
+                    }
+                }
+            });
+        }
+
+        function resetProtected(scope, caller, fields, caches) {
+            if (caller) {
+                for (var clazz = caller.constructor; clazz; clazz = clazz['super']) {
+                    classes[clazz.CLASSID].Fields.forEach(function (name) {
+                        if (name.charAt(0) === '*') {
+                            name = name.slice(1);
+                            caller[clazz.CLASSID][name] = caller[name];
+                            if (caches.hasOwnProperty(name)) {
+                                caller[name] = caches[name];
+                            } else {
+                                delete caller[name];
+                            }
+                        }
+                    });
+                }
+            }
+        }
+
+        function onbefore(scope, caller, fields) {
+            var item = callStack[callStack.length - 1],
+                caches = {};
+            if (scope === item[0]) {
+                callStack.push([scope, caller, fields, caches]);
+                return;
+            }
+
+            if (caller) {
+                for (var clazz = caller.constructor; clazz; clazz = clazz['super']) {
+                    classes[clazz.CLASSID].Fields.forEach(function (name) {
+                        if (name.charAt(0) === '+') {
+                            name = name.slice(1);
+                            if (caller.hasOwnProperty(name) && !caller[clazz.CLASSID].hasOwnProperty(name)) {
+                                caller[clazz.CLASSID][name] = caller[name];
+                            }
+                        }
+                    });
+                }
+            }
+
+            resetPrivate.apply(null, item);
+            setPrivate(scope, caller, fields, caches);
+            if (caller !== item[1]) {
+                resetProtected.apply(null, item);
+                setProtected(scope, caller, fields, caches);
+            }
+
+            callStack.push([scope, caller, fields, caches]);
+
+            if (caller) {
+                for (clazz = caller.constructor; clazz; clazz = clazz['super']) {
+                    classes[clazz.CLASSID].Fields.forEach(function (name) {
+                        if (name.charAt(0) === '+') {
+                            name = name.slice(1);
+                            if (caller[clazz.CLASSID].hasOwnProperty(name)) {
+                                caller[name] = caller[clazz.CLASSID][name];
+                            }
+                        }
+                    });
+                }
+            }
+        }
+
+        function onafter() {
+            var args = callStack.pop(),
+                item = callStack[callStack.length - 1],
+                caller = args[1];
+
+            if (args[0] === item[0]) {
+                return;
+            }
+
+            if (caller) {
+                for (var clazz = caller.constructor; clazz; clazz = clazz['super']) {
+                    classes[clazz.CLASSID].Fields.forEach(function (name) {
+                        if (name.charAt(0) === '+') {
+                            name = name.slice(1);
+                            if (caller.hasOwnProperty(name) && !caller[clazz.CLASSID].hasOwnProperty(name)) {
+                                caller[clazz.CLASSID][name] = caller[name];
+                            }
+                        }
+                    });
+                }
+            }
+
+            if (caller !== item[1]) {
+                resetProtected.apply(null, args);
+                setProtected.apply(null, item);
+            }
+            resetPrivate.apply(null, args);
+            setPrivate.apply(null, item);
+
+            if (caller) {
+                for (clazz = caller.constructor; clazz; clazz = clazz['super']) {
+                    classes[clazz.CLASSID].Fields.forEach(function (name) {
+                        if (name.charAt(0) === '+') {
+                            name = name.slice(1);
+                            if (caller[clazz.CLASSID].hasOwnProperty(name)) {
+                                caller[name] = caller[clazz.CLASSID][name];
+                            }
+                        }
+                    });
+                }
+            }
+        }
 
         /**
          * 重新定义类的方法，动态为类增加新的方法。
@@ -1697,7 +1845,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                     var scope = {};
                     data.onbefore(this, data.Fields, this[Class.CLASSID], scope);
                     var ret = method.apply(this, arguments);
-                    data.onafter(this, data.Fields, this[Class.CLASSID], scope);
+                    data.onafter();
                     return ret;
                 };
             }
@@ -1716,117 +1864,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
          * @return {Function} 制作完成的类
          */
         util.makeClass = function (superClass, constructor, fields, methods) {
-
-            // 恢复私有属性的原始值
-            function restorePrivate(obj, names, data, cache) {
-                names.forEach(function (name) {
-                    if (protectedFields.indexOf(name) < 0) {
-                        //受保护的属性在最后一次性回写
-                        if (!privateMethods[name]) {
-                            // 方法不允许回写
-                            data[name] = obj[name];
-                        }
-                        if (cache.hasOwnProperty(name)) {
-                            obj[name] = cache[name];
-                        } else {
-                            delete obj[name];
-                        }
-                    }
-                });
-            }
-
-            // 恢复受保护属性的原始值
-            function restoreProtected(obj, names, cache) {
-                names = names.slice();
-                for (var superClass = newClass; superClass; superClass = superClass['super']) {
-                    classes[superClass.CLASSID].Protected.forEach(function (name) {
-                        if (names.indexOf(name) < 0 || protectedFields.indexOf(name) >= 0) {
-                            names.push(name);
-                            if (!privateMethods[name]) {
-                                // 方法不允许回写
-                                obj[superClass.CLASSID][name] = obj[name];
-                            }
-                            if (cache.hasOwnProperty(name)) {
-                                // 如果cache为unknown表示之前初始化未完成
-                                obj[name] = cache[name];
-                            } else {
-                                delete obj[name];
-                            }
-                        }
-                    });
-                }
-            }
-
-            // 填充私有的属性值
-            function fillPrivate(obj, names, data, cache) {
-                names.forEach(function (name) {
-                    if (obj.hasOwnProperty(name)) {
-                        cache[name] = obj[name];
-                    }
-                    obj[name] = data[name];
-                });
-            }
-
-            // 填充受保护的属性值
-            function fillProtected(obj, names, cache) {
-                names = names.slice();
-                for (var superClass = newClass; superClass; superClass = superClass['super']) {
-                    classes[superClass.CLASSID].Protected.forEach(function (name) {
-                        if (names.indexOf(name) < 0 || protectedFields.indexOf(name) >= 0) {
-                            names.push(name);
-
-                            if (obj.hasOwnProperty(name)) {
-                                cache[name] = obj[name];
-                            }
-                            obj[name] = obj[superClass.CLASSID][name];
-                        }
-                    });
-                }
-            }
-
-            function onbefore(obj, privateNames, data, cache) {
-                var stack = obj['CALL-STACK'],
-                    item = stack[stack.length - 1];
-                if (item) {
-                    restorePrivate(obj, item[0], item[1], item[2]);
-                } else {
-                    // 第一次进入，遍历protected的值
-                    fillProtected(obj, privateNames, cache);
-                }
-                fillPrivate(obj, privateNames, data, cache);
-                obj['CALL-STACK'].push([privateNames, data, cache]);
-
-                for (var superClass = newClass; superClass; superClass = superClass['super']) {
-                    classes[superClass.CLASSID].Final.forEach(function (name) {
-                        obj[name] = obj[superClass.CLASSID][name];
-                    });
-                }
-            }
-
-            function onafter(obj, privateNames, data, cache) {
-                for (var superClass = newClass; superClass; superClass = superClass['super']) {
-                    classes[superClass.CLASSID].Final.forEach(function (name) {
-                        if (!obj[superClass.CLASSID].hasOwnProperty(name)) {
-                            obj[superClass.CLASSID][name] = obj[name];
-                        }
-                    });
-                }
-
-                restorePrivate(obj, privateNames, data, cache);
-
-                var stack = obj['CALL-STACK'],
-                    item = stack[stack.length - 2];
-
-                stack.pop();
-
-                if (item) {
-                    fillPrivate(obj, item[0], item[1], item[2]);
-                } else {
-                    // 离开时回填并清除
-                    restoreProtected(obj, privateNames, cache);
-                }
-            }
-
+/*
             // 安全调用，用于保护/恢复调用前后的对象环境
             function safecall(fn) {
                 var stack = this['CALL-STACK'],
@@ -1851,51 +1889,42 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                 fillProtected(this, item[0], item[2]);
                 return ret;
             }
-
+*/
             var newClass = function () {
-                    var call = safecall.bind(this);
-
-                    if (!this['CALL-STACK']) {
-                        this['CALL-STACK'] = [];
-
+                    if (!this[newClass.CLASSID]) {
                         for (var clazz = newClass; clazz; clazz = clazz['super']) {
-                            this[clazz.CLASSID] = Object.assign(
-                                {
-                                    safecall: call
-                                },
-                                privateMethods
-                            );
+                            this[clazz.CLASSID] = {};
                         }
                     }
+                    var args = arguments;
 
-                    interfaces.forEach(function (inf) {
-                        this[inf.CLASSID] = {safecall: call};
-                    }, this);
+                    this[newClass.CLASSID]['super'] = (superClass || Object).prototype;
+                    this[newClass.CLASSID]['interface'] = interfaceMethods;
 
-                    var scope = {},
-                        data = this[newClass.CLASSID],
-                        args = arguments;
-                    data['super'] = (superClass || Object).prototype;
-                    data['interface'] = interfaceMethods;
+                    interfaces.forEach(
+                        function (inf) {
+                            this[inf.CLASSID] = {};
+                        },
+                        this
+                    );
 
-                    onbefore(this, realFields, data, scope);
+                    onbefore(this[newClass.CLASSID], this, realFields);
                     realConstructor.apply(this, args);
                     if (superClass && !this[superClass.CLASSID]['super']) {
                         superClass.apply(this, args);
                     }
-                    interfaces.forEach(function (inf) {
-                        if (inf.Constructor) {
-                            var scope = {};
-                            onbefore(this, inf.Fields, this[inf.CLASSID], scope);
-                            inf.Constructor.apply(this, args);
-                            onafter(this, inf.Fields, this[inf.CLASSID], scope);
-                        }
-                    }, this);
-                    onafter(this, realFields, data, scope);
+                    interfaces.forEach(
+                        function (inf) {
+                            if (inf.Constructor) {
+                                onbefore(this[inf.CLASSID], this, inf.Fields);
+                                inf.Constructor.apply(this, args);
+                                onafter();
+                            }
+                        },
+                        this
+                    );
+                    onafter();
                 },
-                protectedFields = [],
-                finalFields = [],
-                privateMethods = {},
                 interfaceMethods = {},
                 index = 4,
                 realConstructor = constructor,
@@ -1913,21 +1942,6 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                 index--;
                 realMethods = realFields;
                 realFields = [];
-            } else {
-                realFields = realFields.map(
-                    function (item) {
-                        var c = item.charAt(0);
-                        if (c === '*') {
-                            item = item.slice(1);
-                            protectedFields.push(item);
-                        } else if (c === '+') {
-                            item = item.slice(1);
-                            protectedFields.push(item);
-                            finalFields.push(item);
-                        }
-                        return item;
-                    }
-                );
             }
 
             if (!realMethods || realMethods.CLASSID) {
@@ -1940,28 +1954,18 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
             newClass.CLASSID = 'CLASS-' + classIndex++;
             realFields.push('super');
             realFields.push('interface');
-            realFields.push('safecall');
 
             for (var name in realMethods) {
                 if (realMethods.hasOwnProperty(name)) {
                     if (realMethods[name] instanceof Function && !realMethods[name].CLASSID) {
-                        if (realFields.indexOf(name) < 0) {
-                            newClass.prototype[name] = (function (name) {
-                                return function () {
-                                    var scope = {};
-                                    onbefore(this, realFields, this[newClass.CLASSID], scope);
-                                    var ret = realMethods[name].apply(this, arguments);
-                                    onafter(this, realFields, this[newClass.CLASSID], scope);
-                                    return ret;
-                                };
-                            }(name));
-                        } else {
-                            privateMethods[name] = (function (name) {
-                                return function () {
-                                    return realMethods[name].apply(this, arguments);
-                                };
-                            }(name));
-                        }
+                        newClass.prototype[name] = (function (name) {
+                            return function () {
+                                onbefore(this[newClass.CLASSID], this, realFields);
+                                var ret = realMethods[name].apply(this, arguments);
+                                onafter();
+                                return ret;
+                            };
+                        }(name));
                     } else {
                         newClass.prototype[name] = realMethods[name];
                     }
@@ -1974,21 +1978,19 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                         if (interfaceMethods[name]) {
                             interfaceMethods[name] = (function (name, fn) {
                                 return function () {
-                                    var scope = {};
-                                    onbefore(this, inf.Fields, this[inf.CLASSID], scope);
+                                    onbefore(this[inf.CLASSID], this, inf.Fields);
                                     fn.apply(this, arguments);
                                     var ret = inf.Methods[name].apply(this, arguments);
-                                    onafter(this, inf.Fields, this[inf.CLASSID], scope);
+                                    onafter();
                                     return ret;
                                 };
                             }(name, interfaceMethods[name]));
                         } else {
                             interfaceMethods[name] = (function (name) {
                                 return function () {
-                                    var scope = {};
-                                    onbefore(this, inf.Fields, this[inf.CLASSID], scope);
+                                    onbefore(this[inf.CLASSID], this, inf.Fields);
                                     var ret = inf.Methods[name].apply(this, arguments);
-                                    onafter(this, inf.Fields, this[inf.CLASSID], scope);
+                                    onafter();
                                     return ret;
                                 };
                             }(name));
@@ -2020,10 +2022,6 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
             }
 
             classes[newClass.CLASSID] = {
-                onbefore: onbefore,
-                onafter: onafter,
-                Final: finalFields,
-                Protected: protectedFields,
                 Fields: realFields,
                 Methods: realMethods
             };
@@ -2063,8 +2061,6 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                 realMethods = {};
             }
 
-            realFields.push('safecall');
-
             Array.prototype.slice.call(arguments, index).forEach(function (inf) {
                 for (var name in inf) {
                     if (inf.hasOwnProperty(name)) {
@@ -2086,6 +2082,15 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                 Constructor: realConstructor,
                 Fields: realFields,
                 Methods: realMethods
+            };
+        };
+
+        util.makeSafecall = function (fn) {
+            return function () {
+                onbefore({}, null, []);
+                var ret = fn.apply(null, arguments);
+                onafter();
+                return ret;
             };
         };
     }());
