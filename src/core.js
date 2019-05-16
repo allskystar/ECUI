@@ -1968,8 +1968,6 @@ outer:          for (var caches = [], target = event.target, el; target && targe
             oncreate(control, options);
             allControls.push(control);
 
-            core.dispatchEvent(control, 'ready', {options: options});
-
             return control;
         },
 
@@ -2490,11 +2488,12 @@ outer:          for (var caches = [], target = event.target, el; target && targe
          * @param {object} ... 控件扩展的方法
          * @return {Function} 新控件的构造函数
          */
-        inherits: function (superClass, singleton, type, constructor) {
-            var index = 4,
+        inherits: function (superClass, singleton, type, constructor, fields) {
+            var index = 5,
                 realSingleton = singleton,
                 realType = type,
                 realConstructor = constructor,
+                realFields = fields,
                 subClass = function (el, options) {
                     if (subClass.singleton) {
                         for (var i = 0, item; item = singletons[i++]; ) {
@@ -2504,25 +2503,7 @@ outer:          for (var caches = [], target = event.target, el; target && targe
                         }
                     }
 
-                    subClass.interfaces.forEach(
-                        function (imp) {
-                            this[imp.NAME + 'Data'] = {};
-                        },
-                        this
-                    );
                     subClass.constructor.call(this, el, options);
-                    el = this.getMain();
-                    subClass.interfaces.forEach(
-                        function (imp) {
-                            if (imp.constructor) {
-                                imp.constructor.call(this, el, options);
-                            }
-                        },
-                        this
-                    );
-                    if (subClass.afterinterfaces) {
-                        subClass.afterinterfaces.call(this, el, options);
-                    }
 
                     if (subClass.singleton) {
                         singletons.push(this);
@@ -2531,58 +2512,35 @@ outer:          for (var caches = [], target = event.target, el; target && targe
 
             if ('boolean' !== typeof realSingleton) {
                 index--;
+                realFields = realConstructor;
                 realConstructor = realType;
                 realType = realSingleton;
                 realSingleton = false;
             }
-            subClass.singleton = realSingleton;
 
             if ('string' !== typeof realType) {
                 index--;
+                realFields = realConstructor;
                 realConstructor = realType;
                 realType = '';
             }
 
-            if (realConstructor instanceof Array) {
-                subClass.constructor = realConstructor[1] || superClass;
-                subClass.afterinterfaces = realConstructor[0];
-            } else if ('function' !== typeof realConstructor) {
-                subClass.constructor = superClass;
+            if ('function' !== typeof realConstructor) {
                 index--;
-            } else {
-                subClass.constructor = realConstructor;
+                realFields = realConstructor;
+                realConstructor = superClass;
             }
-            subClass.interfaces = [];
 
-            for (var superMethods = [], item; item = arguments[index++]; ) {
-                if (item.NAME) {
-                    if (item.SUPER) {
-                        if (item.SUPER instanceof Array) {
-                            superMethods.push.apply(this, item.SUPER);
-                        } else {
-                            superMethods.push(item.SUPER);
-                        }
-                    }
-                }
-                superMethods.push(item);
+            if (!(realFields instanceof Array)) {
+                index--;
+                realFields = [];
             }
-            superMethods.forEach(function (item) {
-                if (item.NAME) {
-                    subClass.interfaces.push(item);
-                    // 对接口的处理
-                    var Clazz = new Function();
-                    Clazz.prototype = superClass.prototype;
-                    var interfaceMethods = new Clazz();
-                    Object.assign(interfaceMethods, subClass.prototype);
-                    subClass.prototype[item.NAME] = interfaceMethods;
-                    item = item.Methods;
-                }
-                Object.assign(subClass.prototype, item);
-            });
+
+            subClass = util.makeClass.apply(null, [superClass, subClass, realFields].concat(Array.prototype.slice.call(arguments, index)));
+            subClass.singleton = realSingleton;
+            subClass.constructor = realConstructor;
 
             if (superClass) {
-                util.inherits(subClass, superClass);
-
                 realType = realType ? (realType.charAt(0) === '*' ? realType.slice(1) : [realType]) : [];
                 subClass.TYPES = [];
 

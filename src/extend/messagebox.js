@@ -221,6 +221,7 @@
         hideHandle();
         hideHandle = util.timer(instance.hide, delay || 2000, instance);
 
+        instance.clearCache();
         instance.show();
         instance.center();
     };

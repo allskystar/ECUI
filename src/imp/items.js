@@ -25,7 +25,7 @@
                 var parent = this.getParent();
                 if (parent) {
                     event.item = this;
-                    event.index = parent.$ItemsData.items.indexOf(this);
+                    event.index = parent.getItems().indexOf(this);
                     core.dispatchEvent(parent, 'itemclick', event);
                 }
             },
@@ -39,33 +39,6 @@
                 if (parent) {
                     parent.alterItems();
                 }
-            },
-
-            /**
-             * @override
-             */
-            $setParent: function (parent) {
-                var oldParent = this.getParent();
-                if (oldParent) {
-                    for (var key in oldParent) {
-                        if (oldParent[key] === this) {
-                            if (key.charAt(0) === '_' && oldParent['set' + key.slice(2)]) {
-                                oldParent['set' + key.slice(2)]();
-                            } else if (oldParent.hasOwnProperty(key)) {
-                                oldParent[key] = null;
-                            }
-                        }
-                    }
-                    for (var name in oldParent.$ItemsData.properties) {
-                        if (oldParent.$ItemsData.properties.hasOwnProperty(name)) {
-                            if (oldParent.$ItemsData.properties[name] === this) {
-                                oldParent[name]();
-                            }
-                        }
-                    }
-                }
-
-                ui.Control.prototype.$setParent.call(this, parent);
             },
 
             /**
@@ -86,7 +59,7 @@
             setParent: function (parent) {
                 var oldParent = this.getParent();
                 if (parent) {
-                    if (parent.$Items && !oldParent) {
+                    if (parent.isInstance(ui.Items) && !oldParent) {
                         parent.add(this);
                     }
                 } else if (oldParent) {
@@ -96,47 +69,10 @@
         }
     );
 
-    ui.Items = {
-        NAME: '$Items',
-
-        defineProperty: function (UIClass, name) {
-            var propertyName = '$set' + name.charAt(0).toUpperCase() + name.slice(1);
-
-            UIClass.prototype[propertyName] = function (item) {
-                item = item || null;
-                var oldItem = this.$ItemsData.properties[propertyName] || null;
-                if (oldItem !== item) {
-                    if (oldItem) {
-                        oldItem.alterStatus('-' + name);
-                    }
-                    if (item) {
-                        item.alterStatus('+' + name);
-                    }
-                    this.$ItemsData.properties[propertyName] = item;
-                    return oldItem;
-                }
-            };
-
-            UIClass.prototype[propertyName.slice(1)] = function (item) {
-                if ('number' === typeof item) {
-                    item = this.getItem(item);
-                }
-
-                var oldItem = this[propertyName](item);
-                if (oldItem !== undefined) {
-                    core.dispatchEvent(this, 'propertychange', {name: name, item: item, history: oldItem});
-                }
-            };
-
-            UIClass.prototype['g' + propertyName.slice(2)] = function () {
-                return this.$ItemsData.properties[propertyName] || null;
-            };
-        },
-
-        constructor: function () {
-            this.$ItemsData.prevent = 0;
-            this.$ItemsData.items = [];
-            this.$ItemsData.properties = {};
+    ui.Items = util.makeInterface(
+        function () {
+            this.prevent = 0;
+            this.items = [];
 
             this.preventAlterItems();
 
@@ -145,11 +81,8 @@
 
             this.premitAlterItems();
         },
-
-        Methods: {
-            // 选项控件的文本在 options 中的名称
-            TEXTNAME: '#text',
-
+        ['items', 'prevent'],
+        {
             /**
              * 选项组只允许添加选项控件，添加成功后会自动调用 alterItems 方法。
              * @override
@@ -157,9 +90,8 @@
             $append: function (event) {
                 // 检查待新增的控件是否为选项控件
                 if (event.child instanceof (this.Item || ui.Item)) {
-                    this.$Items.$append.call(this, event);
                     if (event.returnValue !== false) {
-                        this.$ItemsData.items.push(event.child);
+                        this.items.push(event.child);
                         this.alterItems();
                     }
                 }
@@ -169,7 +101,6 @@
              * @override
              */
             $ready: function () {
-                this.$Items.$ready.call(this);
                 if (this.isCached()) {
                     this.alterItems();
                 }
@@ -181,9 +112,8 @@
              */
             $remove: function (event) {
                 core.$clearState(event.child);
-                this.$Items.$remove.call(this, event);
                 if (event.returnValue !== false) {
-                    util.remove(this.$ItemsData.items, event.child);
+                    util.remove(this.items, event.child);
                 }
             },
 
@@ -197,7 +127,7 @@
              * @return {Array} 子选项控件数组
              */
             add: function (item, index) {
-                var list = this.$ItemsData.items,
+                var list = this.items,
                     items = [],
                     UIClass = this.Item || ui.Item,
                     el = list[index] ? list[index].getMain() : null,
@@ -226,7 +156,7 @@
                             } else {
                                 if ('string' === typeof item) {
                                     options = {};
-                                    options[this.TEXTNAME] = item;
+                                    options[this.TEXTNAME || '#text'] = item;
                                 } else {
                                     options = item;
                                 }
@@ -277,7 +207,7 @@
              * @public
              */
             alterItems: function () {
-                if (!this.$ItemsData.prevent) {
+                if (!this.prevent) {
                     if (this.isReady() && !this.isShow()) {
                         this.clearCache();
                     } else {
@@ -290,16 +220,12 @@
              * @override
              */
             cache: function (force) {
-                if (this.$Items.cache.call(this, force)) {
-                    this.$ItemsData.items.forEach(function (item) {
-                        item.cache(force);
-                    });
-                    if (this.isReady()) {
-                        this.$alterItems();
-                    }
-                    return true;
+                this.items.forEach(function (item) {
+                    item.cache(force);
+                });
+                if (this.isReady()) {
+                    this.$alterItems();
                 }
-                return false;
             },
 
             /**
@@ -310,7 +236,7 @@
              * @return {ecui.ui.Item} 子选项控件
              */
             getItem: function (index) {
-                return this.$ItemsData.items[index] || null;
+                return this.items[index] || null;
             },
 
             /**
@@ -320,7 +246,7 @@
              * @return {Array} 子选项控件数组
              */
             getItems: function () {
-                return this.$ItemsData.items.slice();
+                return this.items.slice();
             },
 
             /**
@@ -330,7 +256,7 @@
              * @return {Number} 子选项数量
              */
             getLength: function () {
-                return this.$ItemsData.items.length;
+                return this.items.length;
             },
 
             /**
@@ -338,7 +264,7 @@
              * @public
              */
             premitAlterItems: function () {
-                this.$ItemsData.prevent--;
+                this.prevent--;
             },
 
             /**
@@ -346,7 +272,7 @@
              * @public
              */
             preventAlterItems: function () {
-                this.$ItemsData.prevent++;
+                this.prevent++;
             },
 
             /**
@@ -358,7 +284,7 @@
              */
             remove: function (item) {
                 if ('number' === typeof item) {
-                    item = this.$ItemsData.items[item];
+                    item = this.items[item];
                 }
                 if (item) {
                     this.preventAlterItems();
@@ -395,5 +321,61 @@
                 this.alterItems();
             }
         }
+    );
+
+    var definedInterface = {};
+
+    ui.Items.defineProperty = function (name) {
+        if (definedInterface[name]) {
+            return definedInterface[name];
+        }
+
+        var propertyName = '$set' + name.charAt(0).toUpperCase() + name.slice(1),
+            methods = {};
+
+        // item移除时选项组需要释放状态
+        methods.$remove = function (event) {
+            if (this.value === event.child) {
+                this[propertyName.slice(1)]();
+            }
+        };
+
+        // 底层的$setXXXX方法
+        methods[propertyName] = function (item) {
+            item = item || null;
+            var oldItem = this.value;
+            if (oldItem !== item) {
+                if (oldItem) {
+                    oldItem.alterStatus('-' + name);
+                }
+                if (item) {
+                    item.alterStatus('+' + name);
+                }
+                this.value = item;
+                return oldItem || null;
+            }
+        };
+
+        // setXXXX方法，会发送propertychange事件
+        methods[propertyName.slice(1)] = function (item) {
+            if ('number' === typeof item) {
+                item = this.getItem(item);
+            }
+
+            var oldItem = this[propertyName](item);
+            if (oldItem !== undefined) {
+                core.dispatchEvent(this, 'propertychange', {name: name, item: item, history: oldItem});
+            }
+        };
+
+        // getXXXX方法，获取属性的值
+        methods['g' + propertyName.slice(2)] = function () {
+            return this.value || null;
+        };
+
+        return definedInterface[name] = util.makeInterface(
+            ['value'],
+            methods
+        );
     };
 }());

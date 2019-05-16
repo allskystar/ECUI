@@ -1,25 +1,5 @@
 /*
 @example
-<select ui="type:select;placeholder:请选择" name="sex">
-    <option value="male" selected="selected">男</option>
-    <option value="female">女</option>
-</select>
-或
-<div ui="type:select;name:sex;value:male;placeholder:请选择">
-    <div ui="value:male">男</div>
-    <div ui="value:female">女</div>
-</div>
-或
-<div ui="type:select">
-    <input type="hidden" name="sex" value="male" placeholder="请选择">
-    <div ui="value:male">男</div>
-    <div ui="value:female">女</div>
-</div>
-
-@fields
-_bRequired    - 是否必须选择
-_uText        - 下拉框的文本框
-_uOptions     - 下拉选择框
 */
 (function () {
 //{if 0}//
@@ -37,7 +17,7 @@ _uOptions     - 下拉选择框
      * required       是否必须选择
      * @control
      */
-    ui.$select = core.inherits(
+    ui.$AbstractSelect = core.inherits(
         ui.InputControl,
         function (el, options) {
             options = Object.assign({readOnly: true}, options);
@@ -48,10 +28,10 @@ _uOptions     - 下拉选择框
 
                 var optionsEl = dom.create(
                         {
-                            innerHTML: dom.toArray(el.options).map(
+                            innerHTML: dom.toArray(el.$Options).map(
                                 function (item) {
                                     var optionText = dom.getAttribute(item, core.getAttributeName());
-                                    return '<div ' + core.getAttributeName() + '="value:' + util.encodeHTML(item.value) + (optionText ? ';' + util.encodeHTML(optionText) : '') + '">' + util.encodeHTML(item.text) + '</div>';
+                                    return '<div ' + core.getAttributeName() + '="value:' + util.encodeHTML(item.value) + (optionText ? ';' + util.encodeHTML(optionText) : '') + '">' + util.encodeHTML(item.$Text) + '</div>';
                                 }
                             ).join('')
                         }
@@ -78,22 +58,26 @@ _uOptions     - 下拉选择框
                 }
             }
 
-            optionsEl.className = this.getUnitClass(ui.$select, 'options') + ' ui-popup ui-hide';
-            el.innerHTML = '<div class="' + this.getUnitClass(ui.$select, 'text') + '"></div>';
+            optionsEl.className = this.getUnitClass(ui.$AbstractSelect, 'options') + ' ui-popup ui-hide';
+            el.innerHTML = '<div class="' + this.getUnitClass(ui.$AbstractSelect, 'text') + '"></div>';
             if (input) {
                 el.appendChild(input);
             }
 
             ui.InputControl.call(this, el, options);
 
-            this._uText = core.$fastCreate(ui.Item, el.firstChild, this, {capturable: false});
-            this._uOptions = core.$fastCreate(this.Options, optionsEl, this, {focusable: false});
+            this.$Text = core.$fastCreate(ui.Item, el.firstChild, this, {capturable: false});
+            this.$Options = core.$fastCreate(this.Options, optionsEl, this, {focusable: false});
 
-            this._bRequired = !!options.required;
+            this.required = !!options.required;
 
-            this.setPopup(this._uOptions);
-            this.$setBody(this._uOptions.getBody());
+            this.setPopup(this.$Options);
+            this.$setBody(this.$Options.getBody());
         },
+        [
+            '+$Options', '+$Text',
+            'required'
+        ],
         {
             /**
              * 选项框部件。
@@ -133,7 +117,7 @@ _uOptions     - 下拉选择框
                     $click: function (event) {
                         ui.Item.prototype.$click.call(this, event);
                         var parent = this.getParent();
-                        parent._uOptions.hide();
+                        parent.$Options.hide();
                         if (parent.getSelected() !== this) {
                             parent.setSelected(this);
                             core.dispatchEvent(parent, 'change', event);
@@ -174,8 +158,8 @@ _uOptions     - 下拉选择框
              * @protected
              */
             $alterItems: function () {
-                if (dom.parent(this._uOptions.getMain()) && this._uOptions.isShow()) {
-                    this._uOptions.$alterItems();
+                if (dom.parent(this.$Options.getMain()) && this.$Options.isShow()) {
+                    this.$Options.$alterItems();
                     this._bAlterItems = false;
                 } else {
                     this._bAlterItems = true;
@@ -196,8 +180,8 @@ _uOptions     - 下拉选择框
             $initStructure: function (width, height) {
                 ui.InputControl.prototype.$initStructure.call(this, width, height);
                 // 设置文本区域
-                if (this._uText.isCached()) {
-                    this._uText.$setSize(width, height);
+                if (this.$Text.isCached()) {
+                    this.$Text.$setSize(width, height);
                 }
             },
 
@@ -210,7 +194,7 @@ _uOptions     - 下拉选择框
                     if (event.item) {
                         this.setText(event.item.getContent());
                         this.$setValue(event.item._sValue);
-                        if (this._uOptions.isShow()) {
+                        if (this.$Options.isShow()) {
                             core.setFocused(event.item);
                         }
                     } else {
@@ -226,8 +210,8 @@ _uOptions     - 下拉选择框
             /**
              * @override
              */
-            $ready: function (options) {
-                ui.InputControl.prototype.$ready.call(this, options);
+            $ready: function () {
+                ui.InputControl.prototype.$ready.call(this);
                 this.setValue(this.getInput().value);
                 this._bAlterItems = true;
             },
@@ -267,7 +251,7 @@ _uOptions     - 下拉选择框
              */
             $validate: function () {
                 ui.InputControl.prototype.$validate.call(this);
-                if (this.getValue() === '' &&  this._bRequired) {
+                if (this.getValue() === '' &&  this.required) {
                     core.dispatchEvent(this, 'error');
                     return false;
                 }
@@ -277,7 +261,7 @@ _uOptions     - 下拉选择框
              * @override
              */
             cache: function (force) {
-                this._uText.cache(force);
+                this.$Text.cache(force);
                 ui.InputControl.prototype.cache.call(this, force);
             },
 
@@ -288,7 +272,7 @@ _uOptions     - 下拉选择框
              * @return {string} 用于显示的文本
              */
             getText: function () {
-                return this._uText.getContent();
+                return this.$Text.getContent();
             },
 
             /**
@@ -298,7 +282,7 @@ _uOptions     - 下拉选择框
              * @param {string} text 用于显示的文本
              */
             setText: function (text) {
-                this._uText.getBody().innerHTML = text;
+                this.$Text.getBody().innerHTML = text;
             },
 
             /**
@@ -324,8 +308,7 @@ _uOptions     - 下拉选择框
                 }
             }
         },
-        ui.Items
+        ui.Items,
+        ui.Items.defineProperty('selected')
     );
-
-    ui.Items.defineProperty(ui.$select, 'selected');
 }());

@@ -79,30 +79,23 @@
 
     var owners = [];
 
-    ui.Popup = {
-        NAME: '$Popup',
-
-        getOwner: function () {
-            return owners[owners.length - 1];
-        },
-
-        Methods: {
+    ui.Popup = util.makeInterface(
+        ['control'],
+        {
             /**
              * @override
              */
-            $blur: function (event) {
-                this.$Popup.$blur.call(this, event);
-                this.$PopupData.popup.hide();
+            $blur: function () {
+                this.control.hide();
             },
 
             /**
              * @override
              */
             $click: function (event) {
-                this.$Popup.$click.call(this, event);
                 if (dom.contain(this.getMain(), event.target)) {
-                    if (this.$PopupData.popup.isShow()) {
-                        this.$PopupData.popup.hide();
+                    if (this.control.isShow()) {
+                        this.control.hide();
                     } else {
                         this.popup();
                     }
@@ -113,22 +106,19 @@
              * @override
              */
             $dispose: function () {
-                var el = this.$PopupData.popup.getMain();
+                var el = this.control.getMain();
                 if (el) {
                     dom.remove(el);
                 }
                 this.setPopup();
-                this.$Popup.$dispose.call(this);
             },
 
             /**
              * @override
              */
-            $repaint: function (event) {
-                this.$Popup.$repaint.call(this, event);
-
-                if (this.$PopupData.popup.isShow()) {
-                    setPopupPosition(this.$PopupData.popup);
+            $repaint: function () {
+                if (this.control.isShow()) {
+                    setPopupPosition(this.control);
                 }
             },
 
@@ -136,14 +126,12 @@
              * @override
              */
             $scroll: function (event) {
-                this.$Popup.$scroll.call(this, event);
-
-                if (!dom.contain(this.$PopupData.popup.getMain(), event.target)) {
+                if (!dom.contain(this.control.getMain(), event.target)) {
                     if (event.type === 'mousedown') {
                         // ie6/7/8下有可能scroll事件是由mousedown点击滚动条触发的
-                        this.$PopupData.popup.hide();
+                        this.control.hide();
                     } else if (ui.Popup.getOwner()) {
-                        setPopupPosition(this.$PopupData.popup);
+                        setPopupPosition(this.control);
                     }
                 }
             },
@@ -155,7 +143,7 @@
              * @return {ecui.ui.Control} 弹出层控件
              */
             getPopup: function () {
-                return this.$PopupData.popup;
+                return this.control;
             },
 
             /**
@@ -163,20 +151,20 @@
              * @public
              */
             popup: function () {
-                if (!this.$PopupData.popup.isShow()) {
+                if (!this.control.isShow()) {
                     owners.push(this);
 
-                    var el = this.$PopupData.popup.getMain();
+                    var el = this.control.getMain();
 
                     if (!dom.parent(el)) {
                         // 第一次显示时需要进行下拉选项部分的初始化，将其挂载到 DOM 树中
                         document.body.appendChild(el);
-                        showPopup(this.$PopupData.popup);
+                        showPopup(this.control);
                         if (this.$initPopup) {
                             this.$initPopup();
                         }
                     } else {
-                        showPopup(this.$PopupData.popup);
+                        showPopup(this.control);
                     }
                 }
             },
@@ -188,8 +176,12 @@
              * @param {ecui.ui.Control} control 弹出层控件
              */
             setPopup: function (control) {
-                this.$PopupData.popup = control;
+                this.control = control;
             }
         }
+    );
+
+    ui.Popup.getOwner = function () {
+        return owners[owners.length - 1];
     };
 }());

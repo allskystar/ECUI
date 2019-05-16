@@ -1,11 +1,17 @@
 /*
 @example
-<select ui="type:select" name="sex">
+<select ui="type:select;placeholder:请选择" name="sex">
     <option value="male" selected="selected">男</option>
     <option value="female">女</option>
 </select>
 或
-<div ui="type:select;name:sex;value:male">
+<div ui="type:select;name:sex;value:male;placeholder:请选择">
+    <div ui="value:male">男</div>
+    <div ui="value:female">女</div>
+</div>
+或
+<div ui="type:select">
+    <input type="hidden" name="sex" value="male" placeholder="请选择">
     <div ui="value:male">男</div>
     <div ui="value:female">女</div>
 </div>
@@ -22,20 +28,6 @@ _nOptionSize  - 下接选择框可以用于选择的条目数量
         ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined;
 //{/if}//
     /**
-     * 下拉框刷新。
-     * @private
-     *
-     * @param {ecui.ui.Select} select 下拉框控件
-     */
-    function refresh(select) {
-        var item = select.getSelected();
-        if (item) {
-            select.setSelecting(item);
-        }
-        select.$getSection('Options').getBody().scrollTop = select.getClientHeight() * select.getItems().indexOf(item);
-    }
-
-    /**
      * 下拉框控件。
      * 扩展了原生 SelectElement 的功能，允许指定下拉选项框的最大选项数量，在屏幕显示不下的时候，会自动显示在下拉框的上方。在没有选项时，下拉选项框有一个选项的高度。下拉框控件允许使用键盘与滚轮操作，在下拉选项框打开时，可以通过回车键或鼠标点击选择，上下键选择选项的当前条目，在关闭下拉选项框后，只要拥有焦点，就可以通过滚轮上下选择选项。
      * options 属性：
@@ -44,12 +36,12 @@ _nOptionSize  - 下接选择框可以用于选择的条目数量
      * @control
      */
     ui.Select = core.inherits(
-        ui.$select,
+        ui.$AbstractSelect,
         'ui-select',
         function (el, options) {
             // 初始化下拉区域最多显示的选项数量
             this._nOptionSize = options.optionSize || this.DEFAULT_OPTION_SIZE;
-            ui.$select.call(this, el, options);
+            ui.$AbstractSelect.call(this, el, options);
         },
         {
             DEFAULT_OPTION_SIZE: 10,
@@ -59,7 +51,7 @@ _nOptionSize  - 下接选择框可以用于选择的条目数量
              * @unit
              */
             Options: core.inherits(
-                ui.$select.prototype.Options,
+                ui.$AbstractSelect.prototype.Options,
                 {
                     /**
                      * 选项控件发生变化的处理。
@@ -84,8 +76,8 @@ _nOptionSize  - 下接选择框可以用于选择的条目数量
                      * @override
                      */
                     $show: function () {
-                        ui.$select.prototype.Options.prototype.$show.call(this);
-                        refresh(this.getParent());
+                        ui.$AbstractSelect.prototype.Options.prototype.$show.call(this);
+                        this.getParent().$refresh();
                     }
                 }
             ),
@@ -95,7 +87,7 @@ _nOptionSize  - 下接选择框可以用于选择的条目数量
              * @unit
              */
             Item: core.inherits(
-                ui.$select.prototype.Item,
+                ui.$AbstractSelect.prototype.Item,
                 'ui-select-item',
                 {
                     /**
@@ -103,7 +95,7 @@ _nOptionSize  - 下接选择框可以用于选择的条目数量
                      * @override
                      */
                     $mouseover: function (event) {
-                        ui.$select.prototype.Item.prototype.$mouseover.call(this, event);
+                        ui.$AbstractSelect.prototype.Item.prototype.$mouseover.call(this, event);
 
                         var parent = this.getParent();
                         if (parent) {
@@ -208,6 +200,18 @@ _nOptionSize  - 下接选择框可以用于选择的条目数量
             },
 
             /**
+             * 下拉框刷新。
+             * @protected
+             */
+            $refresh: function () {
+                var item = this.getSelected();
+                if (item) {
+                    this.setSelecting(item);
+                }
+                this.$Options.getBody().scrollTop = this.getClientHeight() * this.getItems().indexOf(item);
+            },
+
+            /**
              * 设置下拉框允许显示的选项数量。
              * 如果实际选项数量小于这个数量，没有影响，否则将出现垂直滚动条，通过滚动条控制其它选项的显示。
              * @public
@@ -218,13 +222,12 @@ _nOptionSize  - 下接选择框可以用于选择的条目数量
                 this._nOptionSize = value;
                 this.alterItems();
                 if (this.$getSection('Options').isShow()) {
-                    refresh(this);
+                    this.$refresh();
                     this.setPopupPosition();
                 }
             }
         },
-        ui.Popup
+        ui.Popup,
+        ui.Items.defineProperty('selecting')
     );
-
-    ui.Items.defineProperty(ui.Select, 'selecting');
 }());

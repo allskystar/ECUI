@@ -7,12 +7,6 @@
 <div ui="type:input-control">
     <input type="password" name="passwd" value="1111" placeholder="请输入">
 </div>
-
-@fields
-_bIME          - 是否正在使用输入法
-_bBlur         - 失去焦点时是否需要校验
-_bError        - 是否出错
-_eInput        - INPUT对象
 */
 (function () {
 //{if 0}//
@@ -25,7 +19,8 @@ _eInput        - INPUT对象
         iosVersion = /(iPhone|iPad).*?OS (\d+(_\d+)?)/i.test(navigator.userAgent) ? +(RegExp.$2.replace('_', '.')) : undefined,
         ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined;
 //{/if}//
-    var timer = util.blank,
+    var IMEStatus = {},
+        timer = util.blank,
         // INPUT事件集合对象
         events = {
             /**
@@ -38,7 +33,7 @@ _eInput        - INPUT对象
                 core.dispatchEvent(control, 'input', event);
                 timer = util.timer(
                     function () {
-                        control._bIME = false;
+                        delete IMEStatus[control.getUID()];
                     }
                 );
             },
@@ -49,7 +44,7 @@ _eInput        - INPUT对象
              */
             compositionstart: iosVersion ? util.blank : function (event) {
                 timer();
-                core.wrapEvent(event).target.getControl()._bIME = true;
+                IMEStatus[core.wrapEvent(event).target.getControl().getUID()] = true;
             },
 
             /**
@@ -80,13 +75,14 @@ _eInput        - INPUT对象
              */
             input: function (event) {
                 event = core.wrapEvent(event);
-                var control = event.target.getControl();
-                if (!control._bIME) {
+                var control = event.target.getControl(),
+                    uid = control.getUID();
+                if (!IMEStatus[uid]) {
                     // 防止ie11修改placeholder引起的input重入
-                    control._bIME = true;
+                    IMEStatus[uid] = true;
                     core.dispatchEvent(control, 'input', event);
                     util.timer(function () {
-                        control._bIME = false;
+                        delete IMEStatus[uid];
                     });
                 }
             },
@@ -243,18 +239,23 @@ _eInput        - INPUT对象
                 }
             }
 
+            console.log(this['super']);
             ui.Control.call(this, el, options);
 
-            this._eInput = inputEl;
+            this.input = inputEl;
             this.$bindEvent(inputEl);
 
             if (options.valid) {
                 options = options.valid.split(',');
                 if (options.indexOf('blur') >= 0) {
-                    this._bBlur = true;
+                    this.blurValid = true;
                 }
             }
         },
+        [
+            'input',
+            'blurValid', 'error'
+        ],
         {
             /**
              * 为控件的 INPUT 节点绑定事件。
@@ -274,23 +275,23 @@ _eInput        - INPUT对象
              * @override
              */
             $blur: function (event) {
-                if (document.activeElement === this._eInput) {
+                if (document.activeElement === this.input) {
                     if (isToucher) {
-                        dom.removeEventListener(this._eInput, 'focusout', events.focusout);
-                        this._eInput.blur();
-                        dom.addEventListener(this._eInput, 'focusout', events.focusout);
+                        dom.removeEventListener(this.input, 'focusout', events.focusout);
+                        this.input.blur();
+                        dom.addEventListener(this.input, 'focusout', events.focusout);
                     } else {
                         if (events.blur) {
-                            dom.removeEventListener(this._eInput, 'blur', events.blur);
+                            dom.removeEventListener(this.input, 'blur', events.blur);
                         }
-                        this._eInput.blur();
+                        this.input.blur();
                         if (events.blur) {
-                            dom.addEventListener(this._eInput, 'blur', events.blur);
+                            dom.addEventListener(this.input, 'blur', events.blur);
                         }
                     }
                 }
 
-                if (this._bBlur) {
+                if (this.blurValid) {
                     core.dispatchEvent(this, 'validate');
                 }
 
@@ -309,9 +310,9 @@ _eInput        - INPUT对象
                         break;
                     }
                 }
-                if (this._bError) {
+                if (this.error) {
                     this.alterSubType('');
-                    this._bError = false;
+                    this.error = false;
                 }
             },
 
@@ -321,15 +322,15 @@ _eInput        - INPUT对象
              */
             $disable: function () {
                 ui.Control.prototype.$disable.call(this);
-                this._eInput.disabled = true;
+                this.input.disabled = true;
             },
 
             /**
              * @override
              */
             $dispose: function () {
-                this._eInput.getControl = null;
-                this._eInput = null;
+                this.input.getControl = null;
+                this.input = null;
                 ui.Control.prototype.$dispose.call(this);
             },
 
@@ -339,7 +340,7 @@ _eInput        - INPUT对象
              */
             $enable: function () {
                 ui.Control.prototype.$enable.call(this);
-                this._eInput.disabled = false;
+                this.input.disabled = false;
             },
 
             /**
@@ -356,7 +357,7 @@ _eInput        - INPUT对象
                         return false;
                     }
                 }
-                this._bError = true;
+                this.error = true;
                 this.alterSubType('error');
             },
 
@@ -378,11 +379,12 @@ _eInput        - INPUT对象
                                 active.blur();
                             }
                         }
-                        dom.removeEventListener(this._eInput, 'focusin', events.focusin);
-                        this._eInput.focus();
-                        dom.addEventListener(this._eInput, 'focusin', events.focusin);
+                        dom.removeEventListener(this.input, 'focusin', events.focusin);
+                        this.input.focus();
+                        dom.addEventListener(this.input, 'focusin', events.focusin);
                     }
                 } else {
+                    var input = this.input;
                     util.timer(
                         function () {
                             var active = document.activeElement;
@@ -400,9 +402,9 @@ _eInput        - INPUT对象
                                         }
                                     }
                                 }
-                                dom.removeEventListener(this._eInput, 'focus', events.focus);
-                                this._eInput.focus();
-                                dom.addEventListener(this._eInput, 'focus', events.focus);
+                                dom.removeEventListener(input, 'focus', events.focus);
+                                input.focus();
+                                dom.addEventListener(input, 'focus', events.focus);
                             }
                         },
                         0,
@@ -440,7 +442,7 @@ _eInput        - INPUT对象
              */
             $setParent: function (parent) {
                 ui.Control.prototype.$setParent.call(this, parent);
-                if (parent = this._eInput.form) {
+                if (parent = this.input.form) {
                     if (parent.getControl === undefined) {
                         dom.addEventListener(parent, 'submit', submitHandler);
                         dom.addEventListener(parent, 'reset', resetHandler);
@@ -461,11 +463,11 @@ _eInput        - INPUT对象
 
                 // 停止事件，避免重入引发死循环
                 if (func) {
-                    dom.removeEventListener(this._eInput, 'propertychange', func);
+                    dom.removeEventListener(this.input, 'propertychange', func);
                 }
-                this._eInput.value = value;
+                this.input.value = value;
                 if (func) {
-                    dom.addEventListener(this._eInput, 'propertychange', func);
+                    dom.addEventListener(this.input, 'propertychange', func);
                 }
             },
 
@@ -512,7 +514,7 @@ _eInput        - INPUT对象
              * @return {HTMLElement} InputElement 对象
              */
             getInput: function () {
-                return this._eInput;
+                return this.input;
             },
 
             /**
@@ -523,7 +525,7 @@ _eInput        - INPUT对象
              * @return {string} INPUT 对象名称
              */
             getName: function () {
-                return this._eInput.name;
+                return this.input.name;
             },
 
             /**
@@ -534,7 +536,7 @@ _eInput        - INPUT对象
              * @return {string} 控件的值
              */
             getValue: function () {
-                return this._eInput.value;
+                return this.input.value;
             },
 
             /**
@@ -542,7 +544,7 @@ _eInput        - INPUT对象
              * @public
              */
             saveToDefault: function () {
-                this._eInput.defaultValue = this._eInput.value;
+                this.input.defaultValue = this.input.value;
             },
 
             /**
@@ -553,7 +555,7 @@ _eInput        - INPUT对象
              * @param {string} name 表单项名称
              */
             setName: function (name) {
-                this._eInput.name = name;
+                this.input.name = name;
             },
 
             /**
