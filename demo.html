@@ -12,137 +12,66 @@
     <script type="text/javascript" src="options.js"></script>
     <script type="text/javascript" src="ecui.js"></script>
     <script>
-function test() {
-    son.a = 50;
-    son.test1();
-}
-Imp1 = ecui.util.makeInterface(
+test = ecui.util.makeSafecall(function () {
+    console.log(son1.value, son2.value);
+});
+Imp = ecui.util.makeInterface(
     {
         test: function () {
-            this.a = 10;
-            console.log('imp1-test', this.a);
-            this.safecall(test);
-        },
-        test1: function () {
-            console.log(this.a);
-        }
-    },
-    ['a']//定义a是接口Imp1的私有变量
-);
-Imp2 = ecui.util.makeInterface(
-    {
-        test: function () {
-            console.log('imp2-test', this.a);
+            console.log('imp', this['super']);
+            console.log('imp-test');
         }
     }
 );
-Parent = ecui.util.makeClass(
+Base = ecui.util.makeClass(
+    null,
     function () {
-        this.type = 'parent';
     },
-    ['type']//定义type是类Parent的私有变量
-);
-Son = ecui.util.makeClass(
-    function () {
-        this.type = 'son';
-    },
-    ['type'],//定义type是类Son的私有变量
+    ['+value'],
     {
-        test: function () {
-            console.log(this.type);
-            this['interface'].test.call(this);
+        log: function () {
+            console.log(this.value);
+        },
+        visit: function () {
+            console.log('call-before', this['super']);
+            test();
+            console.log('call-after', this['super']);
+            console.log(son1.value, son2.value);
         }
     },
-    [Imp1, Imp2]
+    Imp
 );
-ecui.util.inherits(Son, Parent);
-var son = new Son();
-son.test();
+Son = ecui.util.makeClass(
+    Base,
+    function (value) {
+        this.value = value;
+        console.log('constructor-before', this['super']);
+        this['super']();
+        console.log('constructor-after', this['super']);
+        this.log();
+        console.log('constructor-call', this['super']);
+    },
+    {
+        log: function () {
+            console.log('call', this['super']);
+            console.log(this.value);
+        },
+        test: function () {
+            this['super'].test.call(this);
+        }
+    }
+);
+son1 = new Son('son1');
+son2 = new Son('son2');
+son1.visit();
+//son2.value = 10;
+//son2.visit();
     </script>
-    <style>
-    </style>
 </head>
-<body style="overflow: auto">
-<div>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <div style="background:red;height:20px" ui="ext-ceiling:0"></div>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <div style="background:yellow;height:20px" ui="ext-ceiling:20"></div>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    结束
+<body>
+<div ui="type:select;name:sex;value:male;placeholder:请选择">
+    <div ui="value:male">男</div>
+    <div ui="value:female">女</div>
 </div>
 </body>
 </html>

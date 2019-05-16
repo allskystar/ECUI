@@ -239,7 +239,6 @@
                 }
             }
 
-            console.log(this['super']);
             ui.Control.call(this, el, options);
 
             this.input = inputEl;

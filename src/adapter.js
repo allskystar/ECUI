@@ -1681,11 +1681,11 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
     (function () {
         var classIndex = 1,
             classes = {},
-            callStack = [[{}, null, [], {}]];
+            callStack = [[null, {}, [], {}]];
 //{if 0}//
         core.util.callStack = callStack;
 //{/if}//
-        function setPrivate(scope, caller, fields, caches) {
+        function setPrivate(caller, scope, fields, caches) {
             fields.forEach(function (name) {
                 if (name.charAt(0) !== '*' && name.charAt(0) !== '+') {
                     if (caller.hasOwnProperty(name)) {
@@ -1696,7 +1696,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
             });
         }
 
-        function setProtected(scope, caller, fields, caches) {
+        function setProtected(caller, scope, fields, caches) {
             if (caller) {
                 for (var clazz = caller.constructor; clazz; clazz = clazz['super']) {
                     classes[clazz.CLASSID].Fields.forEach(function (name) {
@@ -1712,7 +1712,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
             }
         }
 
-        function resetPrivate(scope, caller, fields, caches) {
+        function resetPrivate(caller, scope, fields, caches) {
             fields.forEach(function (name) {
                 if (name.charAt(0) !== '*' && name.charAt(0) !== '+') {
                     scope[name] = caller[name];
@@ -1725,7 +1725,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
             });
         }
 
-        function resetProtected(scope, caller, fields, caches) {
+        function resetProtected(caller, scope, fields, caches) {
             if (caller) {
                 for (var clazz = caller.constructor; clazz; clazz = clazz['super']) {
                     classes[clazz.CLASSID].Fields.forEach(function (name) {
@@ -1743,11 +1743,18 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
             }
         }
 
-        function onbefore(scope, caller, fields) {
+        function onbefore(caller, scope, fields) {
             var item = callStack[callStack.length - 1],
                 caches = {};
-            if (scope === item[0]) {
-                callStack.push([scope, caller, fields, caches]);
+
+            if (caller) {
+                if (caller.hasOwnProperty('super')) {
+                    caches['super'] = caller['super'];
+                }
+            }
+
+            if (scope === item[1]) {
+                callStack.push([caller, scope, fields, caches]);
                 return;
             }
 
@@ -1765,13 +1772,13 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
             }
 
             resetPrivate.apply(null, item);
-            setPrivate(scope, caller, fields, caches);
-            if (caller !== item[1]) {
+            setPrivate(caller, scope, fields, caches);
+            if (caller !== item[0]) {
                 resetProtected.apply(null, item);
-                setProtected(scope, caller, fields, caches);
+                setProtected(caller, scope, fields, caches);
             }
 
-            callStack.push([scope, caller, fields, caches]);
+            callStack.push([caller, scope, fields, caches]);
 
             if (caller) {
                 for (clazz = caller.constructor; clazz; clazz = clazz['super']) {
@@ -1790,9 +1797,17 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
         function onafter() {
             var args = callStack.pop(),
                 item = callStack[callStack.length - 1],
-                caller = args[1];
+                caller = args[0];
 
-            if (args[0] === item[0]) {
+            if (caller) {
+                if (args[3].hasOwnProperty('super')) {
+                    caller['super'] = args[3]['super'];
+                } else {
+                    delete caller['super'];
+                }
+            }
+
+            if (args[1] === item[1]) {
                 return;
             }
 
@@ -1809,7 +1824,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                 }
             }
 
-            if (caller !== item[1]) {
+            if (caller !== item[0]) {
                 resetProtected.apply(null, args);
                 setProtected.apply(null, item);
             }
@@ -1842,8 +1857,8 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
             var data = classes[Class.CLASSID];
             if (!data.Methods[name]) {
                 Class.prototype[name] = function () {
-                    var scope = {};
-                    data.onbefore(this, data.Fields, this[Class.CLASSID], scope);
+                    data.onbefore(this, this[Class.CLASSID], data.Fields);
+                    this['super'] = (Class['super'] || Object).prototype;
                     var ret = method.apply(this, arguments);
                     data.onafter();
                     return ret;
@@ -1864,32 +1879,6 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
          * @return {Function} 制作完成的类
          */
         util.makeClass = function (superClass, constructor, fields, methods) {
-/*
-            // 安全调用，用于保护/恢复调用前后的对象环境
-            function safecall(fn) {
-                var stack = this['CALL-STACK'],
-                    item = stack[0];
-
-                stack.reverse().forEach(
-                    function (item) {
-                        restorePrivate(this, item[0], item[1], item[2]);
-                    },
-                    this
-                );
-                restoreProtected(this, item[0], item[2]);
-                this['CALL-STACK'] = [];
-                var ret = fn();
-                this['CALL-STACK'] = stack;
-                stack.reverse().forEach(
-                    function (item) {
-                        fillPrivate(this, item[0], item[1], item[2]);
-                    },
-                    this
-                );
-                fillProtected(this, item[0], item[2]);
-                return ret;
-            }
-*/
             var newClass = function () {
                     if (!this[newClass.CLASSID]) {
                         for (var clazz = newClass; clazz; clazz = clazz['super']) {
@@ -1898,7 +1887,6 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                     }
                     var args = arguments;
 
-                    this[newClass.CLASSID]['super'] = (superClass || Object).prototype;
                     this[newClass.CLASSID]['interface'] = interfaceMethods;
 
                     interfaces.forEach(
@@ -1908,15 +1896,17 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                         this
                     );
 
-                    onbefore(this[newClass.CLASSID], this, realFields);
+                    onbefore(this, this[newClass.CLASSID], realFields);
+                    this['super'] = superClass;
                     realConstructor.apply(this, args);
-                    if (superClass && !this[superClass.CLASSID]['super']) {
+                    if (superClass && !this[superClass.CLASSID]['interface']) {
                         superClass.apply(this, args);
                     }
                     interfaces.forEach(
                         function (inf) {
                             if (inf.Constructor) {
-                                onbefore(this[inf.CLASSID], this, inf.Fields);
+                                onbefore(this, this[inf.CLASSID], inf.Fields);
+                                delete this['super'];
                                 inf.Constructor.apply(this, args);
                                 onafter();
                             }
@@ -1935,7 +1925,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                 index--;
                 realMethods = realFields;
                 realFields = realConstructor;
-                realConstructor = new Function('this["super"].constructor.apply(this,arguments)');
+                realConstructor = new Function('this["super"].apply(this,arguments)');
             }
 
             if (!(realFields instanceof Array)) {
@@ -1952,7 +1942,6 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
             var interfaces = Array.prototype.slice.call(arguments, index);
 
             newClass.CLASSID = 'CLASS-' + classIndex++;
-            realFields.push('super');
             realFields.push('interface');
 
             for (var name in realMethods) {
@@ -1960,7 +1949,8 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                     if (realMethods[name] instanceof Function && !realMethods[name].CLASSID) {
                         newClass.prototype[name] = (function (name) {
                             return function () {
-                                onbefore(this[newClass.CLASSID], this, realFields);
+                                onbefore(this, this[newClass.CLASSID], realFields);
+                                this['super'] = (superClass || Object).prototype;
                                 var ret = realMethods[name].apply(this, arguments);
                                 onafter();
                                 return ret;
@@ -1978,7 +1968,8 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                         if (interfaceMethods[name]) {
                             interfaceMethods[name] = (function (name, fn) {
                                 return function () {
-                                    onbefore(this[inf.CLASSID], this, inf.Fields);
+                                    onbefore(this, this[inf.CLASSID], inf.Fields);
+                                    delete this['super'];
                                     fn.apply(this, arguments);
                                     var ret = inf.Methods[name].apply(this, arguments);
                                     onafter();
@@ -1988,7 +1979,8 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                         } else {
                             interfaceMethods[name] = (function (name) {
                                 return function () {
-                                    onbefore(this[inf.CLASSID], this, inf.Fields);
+                                    onbefore(this, this[inf.CLASSID], inf.Fields);
+                                    delete this['super'];
                                     var ret = inf.Methods[name].apply(this, arguments);
                                     onafter();
                                     return ret;
@@ -2087,7 +2079,8 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
 
         util.makeSafecall = function (fn) {
             return function () {
-                onbefore({}, null, []);
+                onbefore(null, {}, []);
+                delete this['super'];
                 var ret = fn.apply(null, arguments);
                 onafter();
                 return ret;
