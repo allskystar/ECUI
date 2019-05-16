@@ -1795,9 +1795,23 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                 }
                 fillPrivate(obj, privateNames, data, cache);
                 obj['CALL-STACK'].push([privateNames, data, cache]);
+
+                for (var superClass = newClass; superClass && obj[superClass.CLASSID]; superClass = superClass['super']) {
+                    classes[superClass.CLASSID].Final.forEach(function (name) {
+                        obj[name] = obj[superClass.CLASSID][name];
+                    });
+                }
             }
 
             function onafter(obj, privateNames, data, cache) {
+                for (var superClass = newClass; superClass; superClass = superClass['super']) {
+                    classes[superClass.CLASSID].Final.forEach(function (name) {
+                        if (!obj[superClass.CLASSID].hasOwnProperty(name)) {
+                            obj[superClass.CLASSID][name] = obj[name];
+                        }
+                    });
+                }
+
                 restorePrivate(obj, privateNames, data, cache);
 
                 var stack = obj['CALL-STACK'],
@@ -1979,6 +1993,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
             classes[newClass.CLASSID] = {
                 onbefore: onbefore,
                 onafter: onafter,
+                Final: finalFields,
                 Protected: protectedFields,
                 Fields: realFields,
                 Methods: realMethods
