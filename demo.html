@@ -25,16 +25,22 @@ Imp = ecui.util.makeInterface(
 );
 Base = ecui.util.makeClass(
     null,
-    function () {
-    },
-    ['+value'],
     {
-        log: function () {
-            console.log(this.value);
+        'private': {
+            'visit':  function () {
+                this.visit = 10;
+                test();
+                console.log(son1.value, son2.value);
+            }
         },
-        visit: function () {
-            test();
-            console.log(son1.value, son2.value);
+        final: {
+            value: undefined
+        },
+        'public': {
+            log:  function () {
+                this.visit();
+                console.log(this.value);
+            }
         }
     },
     Imp
@@ -42,22 +48,23 @@ Base = ecui.util.makeClass(
 Son = ecui.util.makeClass(
     Base,
     function (value) {
-        this.value = value;
         _super();
-        this.log();
+        this.value = value;
     },
     {
-        log: function () {
-            console.log(this.value);
-        },
-        test: function () {
-            _super.test();
+        'public': {
+            log: function () {
+                console.log(this.value);
+            },
+            test: function () {
+                _super.log();
+            }
         }
     }
 );
 son1 = new Son('son1');
 son2 = new Son('son2');
-son1.visit();
+son1.test();
 //son2.value = 10;
 //son2.visit();
     </script>
