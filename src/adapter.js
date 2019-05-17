@@ -1711,7 +1711,10 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
 
         function resetPrivate(caller, Class, caches) {
             classes[Class.CLASSID].PrivateFields.forEach(function (name) {
-                caller[Class.CLASSID][name] = caller[name];
+                if (!classes[Class.CLASSID].Prototype[name]) {
+                    // 受保护的函数不允许回写
+                    caller[Class.CLASSID][name] = caller[name];
+                }
                 if (caches.hasOwnProperty(name)) {
                     caller[name] = caches[name];
                 } else {
@@ -1724,7 +1727,10 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
             if (caller) {
                 for (var clazz = caller.constructor; clazz; clazz = clazz['super']) {
                     classes[clazz.CLASSID].ProtectedFields.forEach(function (name) {
-                        caller[clazz.CLASSID][name] = caller[name];
+                        if (!classes[clazz.CLASSID].Prototype[name]) {
+                            // 受保护的函数不允许回写
+                            caller[clazz.CLASSID][name] = caller[name];
+                        }
                         if (caches.hasOwnProperty(name)) {
                             caller[name] = caches[name];
                         } else {
@@ -1846,7 +1852,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
          */
         util.defineMethod = function (Class, name, method) {
             var data = classes[Class.CLASSID];
-            if (!data.Methods[name]) {
+            if (!data.Prototype[name]) {
                 Class.prototype[name] = function () {
                     data.onbefore(this, Class);
                     var ret = method.apply(this, arguments);
@@ -1854,7 +1860,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                     return ret;
                 };
             }
-            data.Methods[name] = method;
+            data.Prototype[name] = method;
         };
 
         /**
@@ -1864,11 +1870,11 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
          * @param {Function} superClass 父类
          * @param {Function} constructor 构造函数
          * @param {Array} fields 私有属性域(包含私有方法名)
-         * @param {object} methods 方法集合
+         * @param {object} prototype 原型链
          * @param {object} ... 接口集合列表
          * @return {Function} 制作完成的类
          */
-        util.makeClass = function (superClass, constructor, fields, methods) {
+        util.makeClass = function (superClass, constructor, fields, prototype) {
             var newClass = function () {
                     if (!this[newClass.CLASSID]) {
                         for (var clazz = newClass; clazz; clazz = clazz['super']) {
@@ -1877,6 +1883,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                     }
                     var args = arguments;
 
+                    Object.assign(this[newClass.CLASSID], methods);
                     this[newClass.CLASSID]['interface'] = interfaceMethods;
 
                     interfaces.forEach(
@@ -1906,31 +1913,32 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                 privateFields = [],
                 protectedFields = [],
                 finalFields = [],
+                methods = {},
                 interfaceMethods = {},
                 index = 4,
                 realConstructor = constructor,
                 realFields = fields,
-                realMethods = methods;
+                realPrototype = prototype;
 
-            if (!(realConstructor instanceof Function)) {
+            if ('function' !== typeof realConstructor) {
                 index--;
-                realMethods = realFields;
+                realPrototype = realFields;
                 realFields = realConstructor;
                 realConstructor = new Function('this["super"].apply(this,arguments)');
             }
 
             if (!(realFields instanceof Array)) {
                 index--;
-                realMethods = realFields;
+                realPrototype = realFields;
                 realFields = [];
             }
 
-            if (!realMethods || realMethods.CLASSID) {
+            if (!realPrototype || realPrototype.CLASSID) {
                 index--;
-                realMethods = {};
+                realPrototype = {};
             }
 
-            realFields.forEach(function (name) {
+            realFields = realFields.map(function (name) {
                 var c = name.charAt(0);
                 if (c === '*') {
                     protectedFields.push(name.slice(0));
@@ -1946,32 +1954,35 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
             newClass.CLASSID = 'CLASS-' + classIndex++;
             realFields.push('interface');
 
-            for (var name in realMethods) {
-                if (realMethods.hasOwnProperty(name)) {
-                    if (realMethods[name] instanceof Function && !realMethods[name].CLASSID) {
+            for (var name in realPrototype) {
+                if (realPrototype.hasOwnProperty(name)) {
+                    if (realPrototype[name].CLASSID || 'function' !== typeof realPrototype[name]) {
+                        newClass.prototype[name] = realPrototype[name];
+                    } else {
                         newClass.prototype[name] = (function (name) {
                             return function () {
                                 onbefore(this, newClass);
-                                var ret = realMethods[name].apply(this, arguments);
+                                var ret = realPrototype[name].apply(this, arguments);
                                 onafter();
                                 return ret;
                             };
                         }(name));
-                    } else {
-                        newClass.prototype[name] = realMethods[name];
+                        if (privateFields.indexOf(name) >= 0 || protectedFields.indexOf(name) >= 0 || finalFields.indexOf(name) >= 0) {
+                            methods[name] = newClass.prototype[name];
+                        }
                     }
                 }
             }
 
             interfaces.forEach(function (inf) {
-                for (var name in inf.Methods) {
-                    if (inf.Methods.hasOwnProperty(name)) {
+                for (var name in inf.Prototype) {
+                    if (inf.Prototype.hasOwnProperty(name)) {
                         if (interfaceMethods[name]) {
                             interfaceMethods[name] = (function (name, fn) {
                                 return function () {
                                     onbefore(this, inf);
                                     fn.apply(this, arguments);
-                                    var ret = inf.Methods[name].apply(this, arguments);
+                                    var ret = inf.Prototype[name].apply(this, arguments);
                                     onafter();
                                     return ret;
                                 };
@@ -1980,7 +1991,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                             interfaceMethods[name] = (function (name) {
                                 return function () {
                                     onbefore(this, inf);
-                                    var ret = inf.Methods[name].apply(this, arguments);
+                                    var ret = inf.Prototype[name].apply(this, arguments);
                                     onafter();
                                     return ret;
                                 };
@@ -2016,7 +2027,8 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                 PrivateFields: privateFields,
                 ProtectedFields: protectedFields,
                 FinalFields: finalFields,
-                Methods: realMethods
+                Methods: methods,
+                Prototype: realPrototype
             };
             return newClass;
         };
@@ -2026,41 +2038,41 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
          * @public
          *
          * @param {Function} constructor 接口的初始化函数
-         * @param {object} methods 方法集合
+         * @param {object} prototype 实例方法集合
          * @param {Array} fields 私有属性域(包含私有方法名)
          * @return {Function} 制作完成的接口
          */
-        util.makeInterface = function (constructor, fields, methods) {
+        util.makeInterface = function (constructor, fields, prototype) {
             var index = 3,
                 realConstructor = constructor,
                 realFields = fields,
-                realMethods = methods;
+                realPrototype = prototype;
 
             if (!(realConstructor instanceof Function)) {
                 index--;
-                realMethods = realFields;
+                realPrototype = realFields;
                 realFields = realConstructor;
                 realConstructor = null;
             }
 
             if (!(realFields instanceof Array)) {
                 index--;
-                realMethods = realFields;
+                realPrototype = realFields;
                 realFields = [];
             }
 
-            if (!realMethods || realMethods.CLASSID) {
+            if (!realPrototype || realPrototype.CLASSID) {
                 index--;
-                realMethods = {};
+                realPrototype = {};
             }
 
             Array.prototype.slice.call(arguments, index).forEach(function (inf) {
                 for (var name in inf) {
                     if (inf.hasOwnProperty(name)) {
-                        if (realMethods[name]) {
+                        if (realPrototype[name]) {
 
                         } else {
-                            realMethods[name] = (function (name) {
+                            realPrototype[name] = (function (name) {
                                 return function () {
                                     return inf[name].apply(this, arguments);
                                 };
@@ -2074,14 +2086,15 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                 CLASSID: 'CLASS-' + classIndex++,
                 Constructor: realConstructor,
                 Fields: realFields,
-                Methods: realMethods
+                Prototype: realPrototype
             };
 
             classes[newClass.CLASSID] = {
                 PrivateFields: realFields,
                 ProtectedFields: [],
                 FinalFields: [],
-                Methods: realMethods
+                Methods: {},
+                Prototype: realPrototype
             };
 
             return newClass;
@@ -2090,7 +2103,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
         util.makeStatic = function (fn) {
             return function () {
                 onbefore(null, NullClass);
-                var ret = fn.apply(null, arguments);
+                var ret = fn.apply(this, arguments);
                 onafter();
                 return ret;
             };
