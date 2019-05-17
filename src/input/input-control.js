@@ -251,321 +251,324 @@
                 }
             }
         },
-        [
-            'input',
-            'blurValid', 'error'
-        ],
         {
-            /**
-             * 为控件的 INPUT 节点绑定事件。
-             * @public
-             *
-             * @param {InputElement} input 输入元素
-             */
-            $bindEvent: function (input) {
-                core.$bind(input, this);
-                if (input.type !== 'hidden') {
-                    // 对于IE或者textarea的变化，需要重新绑定相关的控件事件
-                    dom.addEventListeners(input, events);
-                }
+            'private': {
+                input:      undefined,
+                blurValid:  false,
+                error:      false
             },
-
-            /**
-             * @override
-             */
-            $blur: function (event) {
-                if (document.activeElement === this.input) {
-                    if (isToucher) {
-                        dom.removeEventListener(this.input, 'focusout', events.focusout);
-                        this.input.blur();
-                        dom.addEventListener(this.input, 'focusout', events.focusout);
-                    } else {
-                        if (events.blur) {
-                            dom.removeEventListener(this.input, 'blur', events.blur);
-                        }
-                        this.input.blur();
-                        if (events.blur) {
-                            dom.addEventListener(this.input, 'blur', events.blur);
-                        }
+            'public': {
+                /**
+                 * 为控件的 INPUT 节点绑定事件。
+                 * @public
+                 *
+                 * @param {InputElement} input 输入元素
+                 */
+                $bindEvent: function (input) {
+                    core.$bind(input, this);
+                    if (input.type !== 'hidden') {
+                        // 对于IE或者textarea的变化，需要重新绑定相关的控件事件
+                        dom.addEventListeners(input, events);
                     }
-                }
+                },
 
-                if (this.blurValid) {
-                    core.dispatchEvent(this, 'validate');
-                }
-
-                ui.Control.prototype.$blur.call(this, event);
-            },
-
-            /**
-             * 清除错误样式。
-             * @protected
-             *
-             */
-            $clearErrorStyle: function () {
-                for (var control = this; control = control.getParent(); ) {
-                    if (control instanceof ui.InputGroup) {
-                        control.alterSubType('');
-                        break;
-                    }
-                }
-                if (this.error) {
-                    this.alterSubType('');
-                    this.error = false;
-                }
-            },
-
-            /**
-             * 控件失效，阻止输入框提交。
-             * @override
-             */
-            $disable: function () {
-                ui.Control.prototype.$disable.call(this);
-                this.input.disabled = true;
-            },
-
-            /**
-             * @override
-             */
-            $dispose: function () {
-                this.input.getControl = null;
-                this.input = null;
-                ui.Control.prototype.$dispose.call(this);
-            },
-
-            /**
-             * 控件解除失效，需要将输入框设置为可提交。
-             * @override
-             */
-            $enable: function () {
-                ui.Control.prototype.$enable.call(this);
-                this.input.disabled = false;
-            },
-
-            /**
-             * 控件格式校验错误的默认处理。
-             * @protected
-             *
-             * @param {ECUIEvent} event 事件对象
-             * @return {boolean} 是否由控件自身处理错误
-             */
-            $error: function () {
-                for (var control = this; control = control.getParent(); ) {
-                    if (control instanceof ui.InputGroup) {
-                        core.dispatchEvent(control, 'error');
-                        return false;
-                    }
-                }
-                this.error = true;
-                this.alterSubType('error');
-            },
-
-            /**
-             * @override
-             */
-            $focus: function (event) {
-                ui.Control.prototype.$focus.call(this, event);
-
-                if (isToucher) {
-                    var active = document.activeElement;
-                    if (!active.getControl || active.getControl() !== this) {
-                        if (active.tagName !== 'BODY') {
-                            if (active.getControl) {
-                                dom.removeEventListener(active, 'focusout', events.focusout);
-                                active.blur();
-                                dom.addEventListener(active, 'focusout', events.focusout);
-                            } else {
-                                active.blur();
+                /**
+                 * @override
+                 */
+                $blur: function (event) {
+                    if (document.activeElement === this.input) {
+                        if (isToucher) {
+                            dom.removeEventListener(this.input, 'focusout', events.focusout);
+                            this.input.blur();
+                            dom.addEventListener(this.input, 'focusout', events.focusout);
+                        } else {
+                            if (events.blur) {
+                                dom.removeEventListener(this.input, 'blur', events.blur);
+                            }
+                            this.input.blur();
+                            if (events.blur) {
+                                dom.addEventListener(this.input, 'blur', events.blur);
                             }
                         }
-                        dom.removeEventListener(this.input, 'focusin', events.focusin);
-                        this.input.focus();
-                        dom.addEventListener(this.input, 'focusin', events.focusin);
                     }
-                } else {
-                    var input = this.input;
-                    util.timer(
-                        function () {
-                            var active = document.activeElement;
-                            if (!active.getControl || active.getControl() !== this) {
-                                if (active.tagName !== 'BODY') {
-                                    if (active.getControl) {
-                                        dom.removeEventListener(active, 'blur', events.blur);
-                                        if (active.blur) {
-                                            active.blur();
-                                        }
-                                        dom.addEventListener(active, 'blur', events.blur);
-                                    } else {
-                                        if (active.blur) {
-                                            active.blur();
+
+                    if (this.blurValid) {
+                        core.dispatchEvent(this, 'validate');
+                    }
+
+                    ui.Control.prototype.$blur.call(this, event);
+                },
+
+                /**
+                 * 清除错误样式。
+                 * @protected
+                 *
+                 */
+                $clearErrorStyle: function () {
+                    for (var control = this; control = control.getParent(); ) {
+                        if (control instanceof ui.InputGroup) {
+                            control.alterSubType('');
+                            break;
+                        }
+                    }
+                    if (this.error) {
+                        this.alterSubType('');
+                        this.error = false;
+                    }
+                },
+
+                /**
+                 * 控件失效，阻止输入框提交。
+                 * @override
+                 */
+                $disable: function () {
+                    ui.Control.prototype.$disable.call(this);
+                    this.input.disabled = true;
+                },
+
+                /**
+                 * @override
+                 */
+                $dispose: function () {
+                    this.input.getControl = null;
+                    this.input = null;
+                    ui.Control.prototype.$dispose.call(this);
+                },
+
+                /**
+                 * 控件解除失效，需要将输入框设置为可提交。
+                 * @override
+                 */
+                $enable: function () {
+                    ui.Control.prototype.$enable.call(this);
+                    this.input.disabled = false;
+                },
+
+                /**
+                 * 控件格式校验错误的默认处理。
+                 * @protected
+                 *
+                 * @param {ECUIEvent} event 事件对象
+                 * @return {boolean} 是否由控件自身处理错误
+                 */
+                $error: function () {
+                    for (var control = this; control = control.getParent(); ) {
+                        if (control instanceof ui.InputGroup) {
+                            core.dispatchEvent(control, 'error');
+                            return false;
+                        }
+                    }
+                    this.error = true;
+                    this.alterSubType('error');
+                },
+
+                /**
+                 * @override
+                 */
+                $focus: function (event) {
+                    ui.Control.prototype.$focus.call(this, event);
+
+                    if (isToucher) {
+                        var active = document.activeElement;
+                        if (!active.getControl || active.getControl() !== this) {
+                            if (active.tagName !== 'BODY') {
+                                if (active.getControl) {
+                                    dom.removeEventListener(active, 'focusout', events.focusout);
+                                    active.blur();
+                                    dom.addEventListener(active, 'focusout', events.focusout);
+                                } else {
+                                    active.blur();
+                                }
+                            }
+                            dom.removeEventListener(this.input, 'focusin', events.focusin);
+                            this.input.focus();
+                            dom.addEventListener(this.input, 'focusin', events.focusin);
+                        }
+                    } else {
+                        var input = this.input;
+                        util.timer(
+                            function () {
+                                var active = document.activeElement;
+                                if (!active.getControl || active.getControl() !== this) {
+                                    if (active.tagName !== 'BODY') {
+                                        if (active.getControl) {
+                                            dom.removeEventListener(active, 'blur', events.blur);
+                                            if (active.blur) {
+                                                active.blur();
+                                            }
+                                            dom.addEventListener(active, 'blur', events.blur);
+                                        } else {
+                                            if (active.blur) {
+                                                active.blur();
+                                            }
                                         }
                                     }
+                                    dom.removeEventListener(input, 'focus', events.focus);
+                                    input.focus();
+                                    dom.addEventListener(input, 'focus', events.focus);
                                 }
-                                dom.removeEventListener(input, 'focus', events.focus);
-                                input.focus();
-                                dom.addEventListener(input, 'focus', events.focus);
-                            }
-                        },
-                        0,
-                        this
-                    );
-                }
-            },
-
-            /**
-             * 内容改变事件。
-             * @event
-             */
-            $input: function () {
-                this.$clearErrorStyle();
-            },
-
-            /**
-             * @override
-             */
-            $ready: function () {
-                ui.Control.prototype.$ready.call(this);
-                this.saveToDefault();
-            },
-
-            /**
-             * 重置事件。
-             * @event
-             */
-            $reset: function (event) {
-                this.$ready(event);
-            },
-
-            /**
-             * @override
-             */
-            $setParent: function (parent) {
-                ui.Control.prototype.$setParent.call(this, parent);
-                if (parent = this.input.form) {
-                    if (parent.getControl === undefined) {
-                        dom.addEventListener(parent, 'submit', submitHandler);
-                        dom.addEventListener(parent, 'reset', resetHandler);
-                        parent.getControl = null;
+                            },
+                            0,
+                            this
+                        );
                     }
+                },
+
+                /**
+                 * 内容改变事件。
+                 * @event
+                 */
+                $input: function () {
+                    this.$clearErrorStyle();
+                },
+
+                /**
+                 * @override
+                 */
+                $ready: function () {
+                    ui.Control.prototype.$ready.call(this);
+                    this.saveToDefault();
+                },
+
+                /**
+                 * 重置事件。
+                 * @event
+                 */
+                $reset: function (event) {
+                    this.$ready(event);
+                },
+
+                /**
+                 * @override
+                 */
+                $setParent: function (parent) {
+                    ui.Control.prototype.$setParent.call(this, parent);
+                    if (parent = this.input.form) {
+                        if (parent.getControl === undefined) {
+                            dom.addEventListener(parent, 'submit', submitHandler);
+                            dom.addEventListener(parent, 'reset', resetHandler);
+                            parent.getControl = null;
+                        }
+                    }
+                },
+
+                /**
+                 * 设置控件的值。
+                 * 如果需要绕过控件的逻辑处理设置基础表单项的值，请使用此方法，不要直接对表单项进行 value 属性的设置。
+                 * @protected
+                 *
+                 * @param {string} value 控件的值
+                 */
+                $setValue: function (value) {
+                    var func = events.propertychange;
+
+                    // 停止事件，避免重入引发死循环
+                    if (func) {
+                        dom.removeEventListener(this.input, 'propertychange', func);
+                    }
+                    this.input.value = value;
+                    if (func) {
+                        dom.addEventListener(this.input, 'propertychange', func);
+                    }
+                },
+
+                /**
+                 * 输入提交事件。
+                 * @event
+                 */
+                $submit: function (event) {
+                    if (!core.dispatchEvent(this, 'validate')) {
+                        event.preventDefault();
+                    }
+                },
+
+                /**
+                 * 输入格式校验事件。
+                 * @event
+                 */
+                $validate: util.blank,
+
+                /**
+                 * 获取控件进行提交的名称，默认使用 getName 的返回值。
+                 * @public
+                 *
+                 * @return {string} 控件的表单名称
+                 */
+                getFormName: function () {
+                    return this.getName();
+                },
+
+                /**
+                 * 获取控件进行提交的值，默认使用 getValue 的返回值。
+                 * @public
+                 *
+                 * @return {string} 控件的表单值
+                 */
+                getFormValue: function () {
+                    return this.getValue();
+                },
+
+                /**
+                 * 获取控件的输入元素。
+                 * @public
+                 *
+                 * @return {HTMLElement} InputElement 对象
+                 */
+                getInput: function () {
+                    return this.input;
+                },
+
+                /**
+                 * 获取控件的名称。
+                 * 输入控件可以在表单中被提交，getName 方法返回提交时用的表单项名称，表单项名称可以使用 setName 方法改变。
+                 * @public
+                 *
+                 * @return {string} INPUT 对象名称
+                 */
+                getName: function () {
+                    return this.input.name;
+                },
+
+                /**
+                 * 获取控件的值。
+                 * getValue 方法返回提交时表单项的值，使用 setValue 方法设置。
+                 * @public
+                 *
+                 * @return {string} 控件的值
+                 */
+                getValue: function () {
+                    return this.input.value;
+                },
+
+                /**
+                 * 保存控件的值为默认值，供form表单的reset方法使用。
+                 * @public
+                 */
+                saveToDefault: function () {
+                    this.input.defaultValue = this.input.value;
+                },
+
+                /**
+                 * 设置控件的名称。
+                 * 输入控件可以在表单中被提交，setName 方法设置提交时用的表单项名称，表单项名称可以使用 getName 方法获取。
+                 * @public
+                 *
+                 * @param {string} name 表单项名称
+                 */
+                setName: function (name) {
+                    this.input.name = name;
+                },
+
+                /**
+                 * 设置控件的值。
+                 * setValue 方法设置提交时表单项的值，使用 getValue 方法获取设置的值。
+                 * @public
+                 *
+                 * @param {string} value 控件的值
+                 */
+                setValue: function (value) {
+                    this.$setValue(value);
                 }
-            },
-
-            /**
-             * 设置控件的值。
-             * 如果需要绕过控件的逻辑处理设置基础表单项的值，请使用此方法，不要直接对表单项进行 value 属性的设置。
-             * @protected
-             *
-             * @param {string} value 控件的值
-             */
-            $setValue: function (value) {
-                var func = events.propertychange;
-
-                // 停止事件，避免重入引发死循环
-                if (func) {
-                    dom.removeEventListener(this.input, 'propertychange', func);
-                }
-                this.input.value = value;
-                if (func) {
-                    dom.addEventListener(this.input, 'propertychange', func);
-                }
-            },
-
-            /**
-             * 输入提交事件。
-             * @event
-             */
-            $submit: function (event) {
-                if (!core.dispatchEvent(this, 'validate')) {
-                    event.preventDefault();
-                }
-            },
-
-            /**
-             * 输入格式校验事件。
-             * @event
-             */
-            $validate: util.blank,
-
-            /**
-             * 获取控件进行提交的名称，默认使用 getName 的返回值。
-             * @public
-             *
-             * @return {string} 控件的表单名称
-             */
-            getFormName: function () {
-                return this.getName();
-            },
-
-            /**
-             * 获取控件进行提交的值，默认使用 getValue 的返回值。
-             * @public
-             *
-             * @return {string} 控件的表单值
-             */
-            getFormValue: function () {
-                return this.getValue();
-            },
-
-            /**
-             * 获取控件的输入元素。
-             * @public
-             *
-             * @return {HTMLElement} InputElement 对象
-             */
-            getInput: function () {
-                return this.input;
-            },
-
-            /**
-             * 获取控件的名称。
-             * 输入控件可以在表单中被提交，getName 方法返回提交时用的表单项名称，表单项名称可以使用 setName 方法改变。
-             * @public
-             *
-             * @return {string} INPUT 对象名称
-             */
-            getName: function () {
-                return this.input.name;
-            },
-
-            /**
-             * 获取控件的值。
-             * getValue 方法返回提交时表单项的值，使用 setValue 方法设置。
-             * @public
-             *
-             * @return {string} 控件的值
-             */
-            getValue: function () {
-                return this.input.value;
-            },
-
-            /**
-             * 保存控件的值为默认值，供form表单的reset方法使用。
-             * @public
-             */
-            saveToDefault: function () {
-                this.input.defaultValue = this.input.value;
-            },
-
-            /**
-             * 设置控件的名称。
-             * 输入控件可以在表单中被提交，setName 方法设置提交时用的表单项名称，表单项名称可以使用 getName 方法获取。
-             * @public
-             *
-             * @param {string} name 表单项名称
-             */
-            setName: function (name) {
-                this.input.name = name;
-            },
-
-            /**
-             * 设置控件的值。
-             * setValue 方法设置提交时表单项的值，使用 getValue 方法获取设置的值。
-             * @public
-             *
-             * @param {string} value 控件的值
-             */
-            setValue: function (value) {
-                this.$setValue(value);
             }
         }
     );

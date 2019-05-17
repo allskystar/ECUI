@@ -2484,16 +2484,16 @@ outer:          for (var caches = [], target = event.target, el; target && targe
          * @param {Function} superClass 父控件类
          * @param {boolean} singleton 是否单例
          * @param {string} type 子控件的类型样式
-         * @param {Function|Array} constructor 子控件的标准构造函数，如果忽略将直接调用父控件类的构造函数
+         * @param {Function} constructor 子控件的标准构造函数，如果忽略将直接调用父控件类的构造函数
+         * @param {object} properties 子控件的属性集合
          * @param {object} ... 控件扩展的方法
          * @return {Function} 新控件的构造函数
          */
-        inherits: function (superClass, singleton, type, constructor, fields) {
-            var index = 5,
+        inherits: function (superClass, singleton, type, constructor) {
+            var index = 4,
                 realSingleton = singleton,
                 realType = type,
                 realConstructor = constructor,
-                realFields = fields,
                 subClass = function (el, options) {
                     if (subClass.singleton) {
                         for (var i = 0, item; item = singletons[i++]; ) {
@@ -2512,7 +2512,6 @@ outer:          for (var caches = [], target = event.target, el; target && targe
 
             if ('boolean' !== typeof realSingleton) {
                 index--;
-                realFields = realConstructor;
                 realConstructor = realType;
                 realType = realSingleton;
                 realSingleton = false;
@@ -2520,23 +2519,16 @@ outer:          for (var caches = [], target = event.target, el; target && targe
 
             if ('string' !== typeof realType) {
                 index--;
-                realFields = realConstructor;
                 realConstructor = realType;
                 realType = '';
             }
 
             if ('function' !== typeof realConstructor) {
                 index--;
-                realFields = realConstructor;
                 realConstructor = superClass;
             }
 
-            if (!(realFields instanceof Array)) {
-                index--;
-                realFields = [];
-            }
-
-            subClass = util.makeClass.apply(null, [superClass, subClass, realFields].concat(Array.prototype.slice.call(arguments, index)));
+            subClass = util.makeClass.apply(null, [superClass, subClass].concat(Array.prototype.slice.call(arguments, index)));
             subClass.singleton = realSingleton;
             subClass.constructor = realConstructor;
 

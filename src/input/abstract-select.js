@@ -74,11 +74,16 @@
             this.setPopup(this.$Options);
             this.$setBody(this.$Options.getBody());
         },
-        [
-            '+$Options', '+$Text',
-            'required'
-        ],
         {
+            'private': {
+                required: undefined
+            },
+
+            final: {
+                $Options: undefined,
+                $Text: undefined
+            },
+
             /**
              * 选项框部件。
              * @unit
@@ -102,15 +107,21 @@
 
             /**
              * 选项部件。
+             * options 属性：
+             * value 选项的值
              * @unit
              */
             Item: core.inherits(
                 ui.Item,
                 function (el, options) {
                     ui.Item.call(this, el, options);
-                    this._sValue = options.value === undefined ? dom.getText(el) : String(options.value);
+                    this.value = options.value === undefined ? dom.getText(el) : String(options.value);
                 },
                 {
+                    'private': {
+                        value: undefined
+                    },
+
                     /**
                      * @override
                      */
@@ -132,7 +143,7 @@
                      * @return {string} 选项的值
                      */
                     getValue: function () {
-                        return this._sValue;
+                        return this.value;
                     },
 
                     /**
@@ -144,7 +155,7 @@
                      */
                     setValue: function (value) {
                         var parent = this.getParent();
-                        this._sValue = value;
+                        this.value = value;
                         if (parent && this === parent.getSelected()) {
                             // 当前被选中项的值发生变更需要同步更新控件的值
                             ui.InputControl.prototype.setValue.call(parent, value);
@@ -193,7 +204,7 @@
                 if (event.name === 'selected') {
                     if (event.item) {
                         this.setText(event.item.getContent());
-                        this.$setValue(event.item._sValue);
+                        this.$setValue(event.item.getValue());
                         if (this.$Options.isShow()) {
                             core.setFocused(event.item);
                         }
@@ -295,7 +306,7 @@
             setValue: function (value) {
                 if (this.getItems().every(
                         function (item) {
-                            if (item._sValue === value) {
+                            if (item.getValue() === value) {
                                 this.setSelected(item);
                                 return false;
                             }
