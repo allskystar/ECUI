@@ -1682,10 +1682,9 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
         var classIndex = 1,
             NullClass = {CLASSID: 'CLASS-0'},
             classes = {'CLASS-0': {PrivateFields: [], ProtectedFields: [], FinalFields: []}},
-            callStack = [[null, NullClass, {}]];
-//{if 0}//
-        core.util.callStack = callStack;
-//{/if}//
+            callStack = [[null, NullClass, {}]],
+            superMethods = {};
+
         function setPrivate(caller, Class, caches) {
             classes[Class.CLASSID].PrivateFields.forEach(function (name) {
                 if (caller.hasOwnProperty(name)) {
@@ -1752,17 +1751,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
 
             if (caller) {
                 caches['super'] = _super;
-                var superClass = caller.constructor['super'];
-                if (caller[Class.CLASSID]['super']) {
-                    _super = caller[Class.CLASSID]['super'][0];
-                    caller[Class.CLASSID]['super'][1]++;
-                } else {
-                    _super = superClass.bind(caller);
-                    for (var name in superClass.prototype) {
-                        _super[name] = 'function' === typeof superClass.prototype[name] ? superClass.prototype[name].bind(caller) : superClass.prototype[name];
-                    }
-                    caller[Class.CLASSID]['super'] = [_super, 0];
-                }
+                _super = caller[Class.CLASSID]['super'];
             }
 
             if (Class === item[1]) {
@@ -1807,11 +1796,6 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                 Class = args[1];
 
             if (caller) {
-                if (!caller[Class.CLASSID]['super'][1]) {
-                    delete caller[Class.CLASSID]['super'];
-                } else {
-                    caller[Class.CLASSID]['super'][1]--;
-                }
                 _super = args[2]['super'];
             }
 
@@ -1847,6 +1831,15 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
             }
         }
 
+        function makeSuperMethod(name) {
+            if (!superMethods[name]) {
+                superMethods[name] = function () {
+                    this['super'][name].apply(this['this'], arguments);
+                };
+            }
+            return superMethods[name];
+        }
+
         function makeProxy(Class, fn, listener) {
             if (fn.CLASSID || 'function' !== typeof fn) {
                 // 类或者非函数，不需要包装上下文处理
@@ -1854,9 +1847,9 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
             }
             if (listener) {
                 return function () {
+                    listener.apply(this, arguments);
                     onbefore(this, Class);
                     var ret = fn.apply(this, arguments);
-                    listener.apply(this, arguments);
                     onafter();
                     return ret;
                 };
@@ -1911,6 +1904,17 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                         }
                     }
 
+                    if (superClass) {
+                        clazz = this[Class.CLASSID]['super'] = superClass.bind(this);
+                        for (var name in Class.prototype) {
+                            if ('function' === typeof Class.prototype[name] && !Class.prototype[name].CLASSID) {
+                                clazz[name] = makeSuperMethod(name);
+                            }
+                        }
+                        clazz['super'] = superClass.prototype;
+                        clazz['this'] = this;
+                    }
+
                     // 填充全部的初始化变量
                     Object.assign(this[Class.CLASSID], initValues);
                     // 初始化所有接口的属性域
@@ -1924,7 +1928,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                     // 调用全部类和接口的构造函数
                     onbefore(this, Class);
                     realConstructor.apply(this, args);
-                    if (superClass && !this[superClass.CLASSID]['interface']) {
+                    if (superClass && !this[superClass.CLASSID]['super']) {
                         console.warn('父类没有初始化');
                     }
                     interfaces.forEach(
@@ -1987,6 +1991,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
             fillProperties('protected', protectedFields);
 
             // 处理public属性
+            Class.SuperProxy = {};
             if (data = realProperties['public'] || realProperties) {
                 for (name in data) {
                     if (data.hasOwnProperty(name)) {
