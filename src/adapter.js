@@ -1697,12 +1697,15 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
 
         function setProtected(caller, Class, caches) {
             if (caller) {
-                for (var clazz = caller.constructor; clazz; clazz = clazz['super']) {
+                for (var names = [], clazz = caller.constructor; clazz; clazz = clazz['super']) {
                     classes[clazz.CLASSID].ProtectedFields.forEach(function (name) {
-                        if (caller.hasOwnProperty(name)) {
-                            caches[name] = caller[name];
+                        if (names.indexOf(name) < 0) {
+                            if (caller.hasOwnProperty(name)) {
+                                caches[name] = caller[name];
+                            }
+                            caller[name] = caller[clazz.CLASSID][name];
+                            names.push(name);
                         }
-                        caller[name] = caller[clazz.CLASSID][name];
                     });
                 }
             }
@@ -1724,16 +1727,19 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
 
         function resetProtected(caller, Class, caches) {
             if (caller) {
-                for (var clazz = caller.constructor; clazz; clazz = clazz['super']) {
+                for (var names = [], clazz = caller.constructor; clazz; clazz = clazz['super']) {
                     classes[clazz.CLASSID].ProtectedFields.forEach(function (name) {
-                        if ('function' !== classes[clazz.CLASSID][name]) {
-                            // 函数不允许回写
-                            caller[clazz.CLASSID][name] = caller[name];
-                        }
-                        if (caches.hasOwnProperty(name)) {
-                            caller[name] = caches[name];
-                        } else {
-                            delete caller[name];
+                        if (names.indexOf(name) < 0) {
+                            if ('function' !== classes[clazz.CLASSID][name]) {
+                                // 函数不允许回写
+                                caller[clazz.CLASSID][name] = caller[name];
+                            }
+                            if (caches.hasOwnProperty(name)) {
+                                caller[name] = caches[name];
+                            } else {
+                                delete caller[name];
+                            }
+                            names.push(name);
                         }
                     });
                 }
