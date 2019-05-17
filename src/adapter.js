@@ -1740,7 +1740,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                 caches = {};
 
             if (caller) {
-                caches.prototype = _super;
+                caches['super'] = _super;
                 var superClass = caller.constructor['super'];
                 if (caller[Class.CLASSID]['super']) {
                     _super = caller[Class.CLASSID]['super'][0];
@@ -1801,7 +1801,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                 } else {
                     caller[Class.CLASSID]['super'][1]--;
                 }
-                _super = args[2].prototype;
+                _super = args[2]['super'];
             }
 
             if (Class === item[1]) {
@@ -2087,7 +2087,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
             return newClass;
         };
 
-        util.makeSafecall = function (fn) {
+        util.makeStatic = function (fn) {
             return function () {
                 onbefore(null, NullClass);
                 var ret = fn.apply(null, arguments);

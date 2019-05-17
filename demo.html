@@ -12,7 +12,7 @@
     <script type="text/javascript" src="options.js"></script>
     <script type="text/javascript" src="ecui.js"></script>
     <script>
-test = ecui.util.makeSafecall(function () {
+test = ecui.util.makeStatic(function () {
     console.log(son1.value, son2.value);
 });
 Imp = ecui.util.makeInterface(
@@ -33,9 +33,7 @@ Base = ecui.util.makeClass(
             console.log(this.value);
         },
         visit: function () {
-            console.log('call-before', this['super']);
             test();
-            console.log('call-after', this['super']);
             console.log(son1.value, son2.value);
         }
     },
@@ -45,19 +43,15 @@ Son = ecui.util.makeClass(
     Base,
     function (value) {
         this.value = value;
-        console.log('constructor-before', this['super']);
-        this['super']();
-        console.log('constructor-after', this['super']);
+        _super();
         this.log();
-        console.log('constructor-call', this['super']);
     },
     {
         log: function () {
-            console.log('call', this['super']);
             console.log(this.value);
         },
         test: function () {
-            this['super'].test.call(this);
+            _super.test();
         }
     }
 );
