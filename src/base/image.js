@@ -49,7 +49,7 @@ _nRatio    原始的宽高比例
              * @override
              */
             $activate: function (event) {
-                ui.Control.prototype.$activate.call(this, event);
+                _super.$activate(event);
                 core.drag(
                     this,
                     event,
@@ -63,16 +63,16 @@ _nRatio    原始的宽高比例
              * @override
              */
             $cache: function (style) {
-                ui.Control.prototype.$cache.call(this, style);
-                this._nCenterX = ui.Control.prototype.getX.call(this) + this.getWidth() / 2;
-                this._nCenterY = ui.Control.prototype.getY.call(this) + this.getHeight() / 2;
+                _super.$cache(style);
+                this._nCenterX = _super.getX() + this.getWidth() / 2;
+                this._nCenterY = _super.getY() + this.getHeight() / 2;
             },
 
             /**
              * @override
              */
             $mousewheel: function (event) {
-                ui.Control.prototype.$mousewheel.call(this, event);
+                _super.$mousewheel(event);
                 var delta = event.deltaY,
                     width = Math.max(this._nMinWidth, this.getWidth() - delta * 2);
 
@@ -102,7 +102,7 @@ _nRatio    原始的宽高比例
             setPosition: function (x, y) {
                 this._nCenterX = x;
                 this._nCenterY = y;
-                ui.Control.prototype.setPosition.call(this, Math.round(x - this.getWidth() / 2), Math.round(y - this.getHeight() / 2));
+                _super.setPosition(Math.round(x - this.getWidth() / 2), Math.round(y - this.getHeight() / 2));
             }
         }
     );

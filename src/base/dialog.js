@@ -4,10 +4,6 @@
     <strong>标题</strong>
     窗体HTML文本
 </div>
-
-@fields
-_uTitle     - 标题栏
-_uClose     - 关闭按钮
 */
 (function () {
 //{if 0}//
@@ -49,11 +45,16 @@ _uClose     - 关闭按钮
 
             ui.Layer.call(this, el, options);
 
-            this._uClose = core.$fastCreate(this.Close, closeEl, this);
-            this._uTitle = core.$fastCreate(this.Title, titleEl, this, {userSelect: false});
+            this.$Close = core.$fastCreate(this.Close, closeEl, this);
+            this.$Title = core.$fastCreate(this.Title, titleEl, this);
             this.$setBody(bodyEl);
         },
         {
+            'final': {
+                $Close: undefined,
+                $Title: undefined
+            },
+
             /**
              * 关闭按钮部件。
              * @unit
@@ -66,7 +67,7 @@ _uClose     - 关闭按钮
                      * @override
                      */
                     $click: function (event) {
-                        ui.Button.prototype.$click.call(this, event);
+                        _super.$click(event);
                         this.getParent().hide();
                     }
                 }
@@ -79,12 +80,16 @@ _uClose     - 关闭按钮
             Title: core.inherits(
                 ui.Control,
                 {
+                    SUPER_OPTIONS: {
+                        userSelect: false
+                    },
+
                     /**
                      * 标题栏激活时触发拖动，如果当前窗体未得到焦点则得到焦点。
                      * @override
                      */
                     $activate: function (event) {
-                        ui.Control.prototype.$activate.call(this, event);
+                        _super.$activate(event);
                         core.drag(this.getParent(), event);
                     }
                 }
@@ -94,7 +99,7 @@ _uClose     - 关闭按钮
              * @override
              */
             $cache: function (style) {
-                ui.Layer.prototype.$cache.call(this, style);
+                _super.$cache(style);
                 style = dom.getStyle(this.getBody());
                 if (ieVersion < 8) {
                     var list = style.borderWidth.split(' ');
@@ -112,21 +117,21 @@ _uClose     - 关闭按钮
                     this.$$bodyPadding = [util.toNumber(style.paddingTop), util.toNumber(style.paddingRight), util.toNumber(style.paddingBottom), util.toNumber(style.paddingLeft)];
                 }
 
-                this.$$titleHeight = this._uTitle.getMain().offsetHeight;
+                this.$$titleHeight = this.$Title.getMain().offsetHeight;
             },
 
             /**
              * @override
              */
             getMinimumHeight: function () {
-                return ui.Layer.prototype.getMinimumHeight.call(this) + this.$$bodyBorder[0] + this.$$bodyBorder[2] + this.$$bodyPadding[0] + this.$$bodyPadding[2] + this.$$titleHeight;
+                return _super.getMinimumHeight() + this.$$bodyBorder[0] + this.$$bodyBorder[2] + this.$$bodyPadding[0] + this.$$bodyPadding[2] + this.$$titleHeight;
             },
 
             /**
              * @override
              */
             getMinimumWidth: function () {
-                return ui.Layer.prototype.getMinimumWidth.call(this) + this.$$bodyBorder[1] + this.$$bodyBorder[3] + this.$$bodyPadding[1] + this.$$bodyPadding[3];
+                return _super.getMinimumWidth() + this.$$bodyBorder[1] + this.$$bodyBorder[3] + this.$$bodyPadding[1] + this.$$bodyPadding[3];
             },
 
             /**
@@ -136,7 +141,7 @@ _uClose     - 关闭按钮
              * @param {string} text 窗体标题
              */
             setTitle: function (text) {
-                this._uTitle.getBody().innerHTML = text || '';
+                this.$Title.getBody().innerHTML = text || '';
             }
         }
     );

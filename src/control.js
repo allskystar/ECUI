@@ -337,7 +337,7 @@
              * @return {ecui.ui.Control} 部件对象
              */
             $getSection: function (name) {
-                return this['_u' + name];
+                return this['_u' + name] || this['$' + name];
             },
 
             /**

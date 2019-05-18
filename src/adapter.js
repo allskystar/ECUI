@@ -1846,24 +1846,20 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
             return superMethods[name];
         }
 
-        function makeProxy(Class, fn, listener) {
-            if (fn.CLASSID || 'function' !== typeof fn) {
-                // 类或者非函数，不需要包装上下文处理
-                return fn;
-            }
-            if (listener) {
-                return function () {
-                    listener.apply(this, arguments);
-                    onbefore(this, Class);
-                    var ret = fn.apply(this, arguments);
-                    onafter();
-                    return ret;
-                };
-            }
+        function makeProxy(Class, fn, before, after) {
             return function () {
+                if (before) {
+                    before.apply(this, arguments);
+                }
                 onbefore(this, Class);
-                var ret = fn.apply(this, arguments);
-                onafter();
+                try {
+                    var ret = fn.apply(this, arguments);
+                } finally {
+                    onafter();
+                }
+                if (after) {
+                    after.apply(this, arguments);
+                }
                 return ret;
             };
         }
@@ -1878,6 +1874,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
          */
         util.defineMethod = function (Class, name, method) {
             Class.prototype[name] = makeProxy(Class, method);
+            classes[Class.CLASSID].SuperMethods[name] = makeSuperMethod(name);
         };
 
         /**
@@ -1920,23 +1917,29 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
 
                     // 调用全部类和接口的构造函数
                     onbefore(this, Class);
-                    realConstructor.apply(this, args);
+                    try {
+                        realConstructor.apply(this, args);
 //{if 0}//
-                    if (superClass && !this[superClass.CLASSID]['interface']) {
-                        console.warn('父类没有初始化');
-                    }
+                        if (superClass && !this[superClass.CLASSID]['interface']) {
+                            console.warn('父类没有初始化');
+                        }
 //{/if}//
-                    interfaces.forEach(
-                        function (inf) {
-                            if (inf.Constructor) {
-                                onbefore(this, inf);
-                                inf.Constructor.apply(this, args);
-                                onafter();
-                            }
-                        },
-                        this
-                    );
-                    onafter();
+                        interfaces.forEach(
+                            function (inf) {
+                                if (inf.Constructor) {
+                                    onbefore(this, inf);
+                                    try {
+                                        inf.Constructor.apply(this, args);
+                                    } finally {
+                                        onafter();
+                                    }
+                                }
+                            },
+                            this
+                        );
+                    } finally {
+                        onafter();
+                    }
                 },
                 privateFields = [],
                 protectedFields = [],
@@ -1996,10 +1999,11 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
             if (data = realProperties['public'] || realProperties) {
                 for (name in data) {
                     if (data.hasOwnProperty(name)) {
-                        Class.prototype[name] = makeProxy(Class, data[name]);
                         if ('function' === typeof data[name] && !data[name].CLASSID) {
+                            Class.prototype[name] = makeProxy(Class, data[name]);
                             superMethods[name] = makeSuperMethod(name);
-//                            superMethods.prototype[name] = Class.prototype[name];
+                        } else {
+                            Class.prototype[name] = data[name];
                         }
                     }
                 }
@@ -2009,7 +2013,9 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
             interfaces.forEach(function (inf) {
                 for (var name in inf.Public) {
                     if (inf.Public.hasOwnProperty(name)) {
-                        interfaceMethods[name] = makeProxy(inf, inf.Public[name], interfaceMethods[name]);
+                        if ('function' === typeof inf.Public[name] && !inf.Public[name].CLASSID) {
+                            interfaceMethods[name] = makeProxy(inf, inf.Public[name], interfaceMethods[name]);
+                        }
                     }
                 }
             });
@@ -2032,6 +2038,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                         }
                     } else {
                         Class.prototype[name] = interfaceMethods[name];
+                        superMethods[name] = makeSuperMethod(name);
                     }
                 }
             }
@@ -2113,12 +2120,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
         };
 
         util.makeStatic = function (fn) {
-            return function () {
-                onbefore(null, NullClass);
-                var ret = fn.apply(this, arguments);
-                onafter();
-                return ret;
-            };
+            return makeProxy(NullClass, fn);
         };
     }());
 

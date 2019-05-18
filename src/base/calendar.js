@@ -36,7 +36,7 @@
                     // 生成日历控件结构
                     dom.insertHTML(
                         el,
-                        'AFTERBEGIN',
+                        'afterBegin',
                         '<div class="' + this.getUnitClass(ui.Calendar, 'header') + '"><div class="' +
                             this.getUnitClass(ui.Calendar, 'title') + '"></div><div class="' +
                             this.getUnitClass(ui.Calendar, 'prev-year') + this.Button.CLASS + '">&lt;&lt;</div><div class="' +
