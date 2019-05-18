@@ -1871,16 +1871,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
          * @param {Function} method 方法函数
          */
         util.defineMethod = function (Class, name, method) {
-            var data = classes[Class.CLASSID];
-            if (!data.Prototype[name]) {
-                Class.prototype[name] = function () {
-                    data.onbefore(this, Class);
-                    var ret = method.apply(this, arguments);
-                    data.onafter();
-                    return ret;
-                };
-            }
-            data.Prototype[name] = method;
+            Class.prototype[name] = makeProxy(Class, method);
         };
 
         /**
