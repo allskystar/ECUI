@@ -70,10 +70,19 @@ son1.test();
     </script>
 </head>
 <body>
-    <div ui="type:month-view;date:2009/04/17"></div>
-<div ui="type:dialog">
-    <strong>标题</strong>
-    窗体HTML文本
-</div>
+<ul ui="type:popup-menu">
+    <li>选项一</li>
+    <li>选项二</li>
+    <ul>
+        <li>子选项组名</li>
+        <li>子选项一</li>
+        <li>子选项二</li>
+        <ul>
+            <li>孙选项组名</li>
+            <li>孙选项一</li>
+            <li>孙选项二</li>
+        </ul>
+    </ul>
+</ul>
 </body>
 </html>

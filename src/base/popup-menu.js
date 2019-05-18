@@ -1,12 +1,17 @@
 /*
 @example
-<ul ui="type:menu">
+<ul ui="type:popup-menu">
     <li>选项一</li>
     <li>选项二</li>
     <ul>
         <li>子选项组名</li>
         <li>子选项一</li>
         <li>子选项二</li>
+        <ul>
+            <li>孙选项组名</li>
+            <li>孙选项一</li>
+            <li>孙选项二</li>
+        </ul>
     </ul>
 </ul>
 */
@@ -25,6 +30,14 @@
         ui.Control,
         'ui-popup-menu',
         {
+            'private': {
+                left: true
+            },
+
+            'final': {
+                $Popup: undefined
+            },
+
             /**
              * 菜单项部件。
              * @unit
@@ -43,7 +56,9 @@
                     ui.Item.call(this, el, options);
 
                     if (popup) {
-                        this.setChildMenu(core.$fastCreate(ui.PopupMenu, popup, this));
+                        this.$Popup = core.$fastCreate(ui.PopupMenu, popup, this);
+                        this.$Popup.hide();
+                        this.alterStatus('+group');
                     }
                 },
                 {
@@ -51,9 +66,9 @@
                      * @override
                      */
                     $mouseout: function (event) {
-                        ui.Item.prototype.$mouseout.call(this, event);
-                        if (this._cPopup) {
-                            this._cPopup.hide();
+                        _super.$mouseout(event);
+                        if (this.$Popup) {
+                            this.$Popup.hide();
                         }
                     },
 
@@ -61,32 +76,10 @@
                      * @override
                      */
                     $mouseover: function (event) {
-                        ui.Item.prototype.$mouseover.call(this, event);
-                        if (this._cPopup) {
-                            this._cPopup.show();
-                            this._cPopup.assignTo(this);
-                        }
-                    },
-
-                    /**
-                     * 设置子菜单。
-                     * @public
-                     *
-                     * @param {ecui.ui.PopupMenu} popup 弹出菜单控件
-                     */
-                    setChildMenu: function (popup) {
-                        if (this._cPopup !== popup) {
-                            if (this._cPopup) {
-                                this._cPopup.hide();
-                            }
-                            if (!this._cPopup ^ !popup) {
-                                if (this._cPopup) {
-                                    this.alterStatus('-group');
-                                } else {
-                                    this.alterStatus('+group');
-                                }
-                            }
-                            this._cPopup = popup || null;
+                        _super.$mouseover(event);
+                        if (this.$Popup) {
+                            this.$Popup.show();
+                            this.$Popup.assignTo(this);
                         }
                     }
                 }
@@ -105,10 +98,27 @@
              */
             assignTo: function (control) {
                 var pos = dom.getPosition(control.getMain()),
+                    controlWidth = control.getWidth(),
+                    width = this.getWidth(),
                     height  = this.getHeight(),
-                    view = util.getView();
+                    view = util.getView(),
+                    x;
 
-                this.setPosition(Math.min(pos.left + control.getWidth() - 4, view.right - this.getWidth()), Math.max(0, Math.min(pos.top - Math.round((height - control.getHeight()) / 2), view.bottom - height)));
+                if (this.left) {
+                    x = pos.left + controlWidth - 4;
+                    if (x > view.right - width) {
+                        this.left = false;
+                        x = pos.left - width + 4;
+                    }
+                } else {
+                    x = pos.left - width + 4;
+                    if (x < view.left) {
+                        this.left = true;
+                        x = pos.left + controlWidth - 4;
+                    }
+                }
+
+                this.setPosition(Math.max(view.left, Math.min(x, view.right - width)), Math.max(view.top, Math.min(pos.top - Math.round((height - control.getHeight()) / 2), view.bottom - height)));
             }
         },
         ui.Items

@@ -51,8 +51,8 @@
         }
         var elPos = dom.getPosition(el),
             containerPos = dom.getPosition(container),
-            top = elPos.top - containerPos.top - util.toNumber(style.borderTopWidth),
-            left = elPos.left - containerPos.left - util.toNumber(style.borderLeftWidth),
+            top = elPos.top - containerPos.top - util.toNumber(style.borderTopWidth) + container.scrollTop,
+            left = elPos.left - containerPos.left - util.toNumber(style.borderLeftWidth) + container.scrollLeft,
             popupTop = top + owner.getHeight(),
             popupLeft = left,
             height = popup.getHeight(),
