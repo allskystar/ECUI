@@ -2120,7 +2120,12 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
         };
 
         util.makeStatic = function (fn) {
-            return makeProxy(NullClass, fn);
+            return function () {
+                onbefore(null, NullClass);
+                var ret = fn.apply(this, arguments);
+                onafter();
+                return ret;
+            };
         };
     }());
 
