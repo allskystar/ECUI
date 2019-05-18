@@ -3,7 +3,7 @@
 <div ui="type:progress-bar;max:100;value:35"></div>
 
 @fields
-_eMask   - 完成的进度比例内容区域
+mask   - 完成的进度比例内容区域
 */
 //{if 0}//
 (function () {
@@ -22,14 +22,18 @@ _eMask   - 完成的进度比例内容区域
             _super(el, options);
 
             el.innerHTML = '<div class="' + this.getUnitClass(ui.ProgressBar, 'mask') + '"></div>';
-            this._eMask = el.lastChild;
+            this.mask = el.lastChild;
         },
         {
+            'private': {
+                mask: undefined
+            },
+
             /**
              * @override
              */
             $dispose: function () {
-                this._eMask = null;
+                this.mask = null;
                 _super.$dispose();
             },
 
@@ -37,7 +41,7 @@ _eMask   - 完成的进度比例内容区域
              * @override
              */
             $progress: function () {
-                this._eMask.style.clip = 'rect(0px,' + Math.round(this.getValue() * this.getWidth() / this.getMax()) + 'px,' + this.getHeight() + 'px,0px)';
+                this.mask.style.clip = 'rect(0px,' + Math.round(this.getValue() * this.getWidth() / this.getMax()) + 'px,' + this.getHeight() + 'px,0px)';
             }
         }
     );

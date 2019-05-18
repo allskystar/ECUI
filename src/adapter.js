@@ -1846,19 +1846,13 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
             return superMethods[name];
         }
 
-        function makeProxy(Class, fn, before, after) {
+        function makeProxy(Class, fn) {
             return function () {
-                if (before) {
-                    before.apply(this, arguments);
-                }
                 onbefore(this, Class);
                 try {
                     var ret = fn.apply(this, arguments);
                 } finally {
                     onafter();
-                }
-                if (after) {
-                    after.apply(this, arguments);
                 }
                 return ret;
             };
@@ -1911,6 +1905,8 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                     interfaces.forEach(
                         function (inf) {
                             this[inf.CLASSID] = {};
+                            // 填充全部的初始化变量
+                            Object.assign(this[inf.CLASSID], classes[inf.CLASSID].InitValues);
                         },
                         this
                     );
@@ -1918,18 +1914,21 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                     // 调用全部类和接口的构造函数
                     onbefore(this, Class);
                     try {
-                        realConstructor.apply(this, args);
+                        if (realConstructor) {
+                            realConstructor.apply(this, args);
 //{if 0}//
-                        if (superClass && !this[superClass.CLASSID]['interface']) {
-                            console.warn('父类没有初始化');
-                        }
+                            if (superClass && superClass['super'] && !this[superClass.CLASSID]['super']) {
+                                console.warn('父类没有初始化');
+                            }
 //{/if}//
+                        }
+
                         interfaces.forEach(
                             function (inf) {
-                                if (inf.Constructor) {
+                                if (classes[inf.CLASSID].Constructor) {
                                     onbefore(this, inf);
                                     try {
-                                        inf.Constructor.apply(this, args);
+                                        classes[inf.CLASSID].Constructor.apply(this, args);
                                     } finally {
                                         onafter();
                                     }
@@ -1945,7 +1944,6 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                 protectedFields = [],
                 finalFields = [],
                 initValues = {},
-                interfaceMethods = {},
                 index = 3,
                 realConstructor = constructor,
                 realProperties = properties;
@@ -1953,7 +1951,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
             if ('function' !== typeof realConstructor) {
                 index--;
                 realProperties = realConstructor;
-                realConstructor = superClass || Object;
+                realConstructor = superClass;
             }
 
             if (!realProperties || realProperties.CLASSID) {
@@ -1967,8 +1965,6 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                 name;
 
             Class.CLASSID = 'CLASS-' + classIndex++;
-            initValues['interface'] = interfaceMethods;
-            privateFields.push('interface');
 
             function fillProperties(type, fields) {
                 var isProtected = type === 'protected';
@@ -2009,39 +2005,27 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                 }
             }
 
-            // 处理接口的属性
-            interfaces.forEach(function (inf) {
-                for (var name in inf.Public) {
-                    if (inf.Public.hasOwnProperty(name)) {
-                        if ('function' === typeof inf.Public[name] && !inf.Public[name].CLASSID) {
-                            interfaceMethods[name] = makeProxy(inf, inf.Public[name], interfaceMethods[name]);
-                        }
-                    }
-                }
-            });
-
             if (superClass) {
                 util.inherits(Class, superClass);
             }
 
-            for (name in interfaceMethods) {
-                if (interfaceMethods.hasOwnProperty(name)) {
+            // 处理接口的属性
+            interfaces.forEach(function (inf) {
+                for (var name in classes[inf.CLASSID].PublicFields) {
                     if (Class.prototype[name]) {
-                        if (!Class.prototype.hasOwnProperty(name)) {
-                            Class.prototype[name] = (function (fn, listener) {
-                                return function () {
-                                    var ret = fn.apply(this, arguments);
-                                    listener.apply(this, arguments);
-                                    return ret;
-                                };
-                            }(Class.prototype[name], interfaceMethods[name]));
-                        }
+                        Class.prototype[name] = (function (oldFn, newFn) {
+                            return function () {
+                                var ret = oldFn.apply(this, arguments);
+                                newFn.apply(this, arguments);
+                                return ret;
+                            };
+                        }(Class.prototype[name], classes[inf.CLASSID].PublicFields[name]));
                     } else {
-                        Class.prototype[name] = interfaceMethods[name];
+                        Class.prototype[name] = classes[inf.CLASSID].PublicFields[name];
                         superMethods[name] = makeSuperMethod(name);
                     }
                 }
-            }
+            });
 
             classes[Class.CLASSID] = {
                 PrivateFields: privateFields,
@@ -2058,65 +2042,54 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
          * @public
          *
          * @param {Function} constructor 接口的初始化函数
-         * @param {object} prototype 实例方法集合
-         * @param {Array} fields 私有属性域(包含私有方法名)
+         * @param {object} properties 属性集合
          * @return {Function} 制作完成的接口
          */
-        util.makeInterface = function (constructor, fields, prototype) {
-            var index = 3,
-                realConstructor = constructor,
-                realFields = fields,
-                realPrototype = prototype;
+        util.makeInterface = function () {
+            var Class = {
+                    CLASSID: 'CLASS-' + classIndex++
+                },
+                index = 0,
+                constructor = 'function' === typeof arguments[index] ? arguments[index++] : null,
+                properties = arguments[index] && !arguments[index].CLASSID ? arguments[index++] : {},
+                privateFields = [],
+                publicFields = {},
+                initValues = {},
+                data;
 
-            if (!(realConstructor instanceof Function)) {
-                index--;
-                realPrototype = realFields;
-                realFields = realConstructor;
-                realConstructor = null;
+            if (data = properties['private']) {
+                for (var name in data) {
+                    if (data.hasOwnProperty(name)) {
+                        if (data[name] !== undefined) {
+                            initValues[name] = data[name];
+                        }
+                        privateFields.push(name);
+                    }
+                }
+                delete properties['private'];
             }
 
-            if (!(realFields instanceof Array)) {
-                index--;
-                realPrototype = realFields;
-                realFields = [];
-            }
-
-            if (!realPrototype || realPrototype.CLASSID) {
-                index--;
-                realPrototype = {};
-            }
-
-            Array.prototype.slice.call(arguments, index).forEach(function (inf) {
-                for (var name in inf) {
-                    if (inf.hasOwnProperty(name)) {
-                        if (realPrototype[name]) {
-
-                        } else {
-                            realPrototype[name] = (function (name) {
-                                return function () {
-                                    return inf[name].apply(this, arguments);
-                                };
-                            }());
+            // 处理public属性
+            if (data = properties['public'] || properties) {
+                for (name in data) {
+                    if (data.hasOwnProperty(name)) {
+                        if ('function' === typeof data[name] && !data[name].CLASSID) {
+                            publicFields[name] = makeProxy(Class, data[name]);
                         }
                     }
                 }
-            });
+            }
 
-            var newClass = {
-                CLASSID: 'CLASS-' + classIndex++,
-                Constructor: realConstructor,
-                Fields: realFields,
-                Public: realPrototype
-            };
-
-            classes[newClass.CLASSID] = {
-                PrivateFields: realFields,
+            classes[Class.CLASSID] = {
+                Constructor: constructor,
+                PrivateFields: privateFields,
                 ProtectedFields: [],
                 FinalFields: [],
-                Public: realPrototype
+                PublicFields: publicFields,
+                InitValues: initValues
             };
 
-            return newClass;
+            return Class;
         };
 
         util.makeStatic = function (fn) {

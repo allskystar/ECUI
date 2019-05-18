@@ -2426,7 +2426,7 @@ outer:          for (var caches = [], target = event.target, el; target && targe
 
                     var info = RegExp.$4,
                         value = RegExp.$5;
-                    (RegExp.$2 ? (options.ext = options.ext || {}) : options)[util.toCamelCase(RegExp.$3)] = info ? value === 'true' ? true : value === 'false' ? false : value.charAt(0) === '&' ? JSON.parse(decodeURIComponent(value.slice(1))) : decodeURIComponent(value) : true;
+                    (RegExp.$2 ? (options.ext = options.ext || {}) : options)[util.toCamelCase(RegExp.$3)] = info ? value.charAt(0) === '&' ? JSON.parse(decodeURIComponent(value.slice(1))) : decodeURIComponent(value) : true;
                 }
 
                 if (core.onparseoptions) {
@@ -2517,7 +2517,7 @@ outer:          for (var caches = [], target = event.target, el; target && targe
                                 if ('function' === typeof defaultOptions[name]) {
                                     this[name] = defaultOptions[name](options[name]);
                                 } else {
-                                    this[name] = options[name] ? new defaultOptions[name].constructor(options[name]) : defaultOptions[name];
+                                    this[name] = options[name] ? defaultOptions[name].constructor(options[name]) : defaultOptions[name];
                                 }
                             }
                         }

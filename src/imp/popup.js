@@ -80,8 +80,11 @@
     var owners = [];
 
     ui.Popup = util.makeInterface(
-        ['control'],
         {
+            'private': {
+                control: undefined
+            },
+
             /**
              * @override
              */

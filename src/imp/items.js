@@ -81,8 +81,12 @@
 
             this.premitAlterItems();
         },
-        ['items', 'prevent'],
         {
+            'private': {
+                items: undefined,
+                prevent: undefined
+            },
+
             /**
              * 选项组只允许添加选项控件，添加成功后会自动调用 alterItems 方法。
              * @override
@@ -127,10 +131,12 @@
              * @return {Array} 子选项控件数组
              */
             add: function (item, index) {
-                var list = this.items,
-                    items = [],
+                if (!index || index > this.items.length) {
+                    index = this.items.length;
+                }
+                var items = [],
                     UIClass = this.Item || ui.Item,
-                    el = list[index] ? list[index].getMain() : null,
+                    el = this.items[index] ? this.items[index].getMain() : null,
                     body = this.getBody();
 
                 this.preventAlterItems();
@@ -169,7 +175,7 @@
 
                             options.parent = this;
                             options.primary = UIClass.CLASS;
-                            options.index = index || list.length;
+                            options.index = index++;
                             item = core.$fastCreate(UIClass, item, null, options);
                         }
 
@@ -185,11 +191,11 @@
 
                 // 改变选项控件的位置
                 if (el) {
-                    list.splice(list.length - items.length, items.length);
+                    this.items.splice(this.items.length - items.length, items.length);
                     items.forEach(function (item) {
                         dom.insertBefore(item.getMain(), el);
                     });
-                    Array.prototype.splice.apply(list, [index, 0].concat(items));
+                    Array.prototype.splice.apply(this.items, [index, 0].concat(items));
                 }
 
                 this.premitAlterItems();
@@ -331,7 +337,11 @@
         }
 
         var propertyName = '$set' + name.charAt(0).toUpperCase() + name.slice(1),
-            methods = {};
+            methods = {
+                'private': {
+                    value: undefined
+                }
+            };
 
         // item移除时选项组需要释放状态
         methods.$remove = function (event) {
@@ -373,9 +383,6 @@
             return this.value || null;
         };
 
-        return definedInterface[name] = util.makeInterface(
-            ['value'],
-            methods
-        );
+        return definedInterface[name] = util.makeInterface(methods);
     };
 }());

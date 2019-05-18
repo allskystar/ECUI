@@ -1,10 +1,6 @@
 /*
 @example
 <div ui="type:progress;max:100;value:0"></div>
-
-@fields
-_nValue  - 进度值
-_nMax    - 进度最大值
 */
 //{if 0}//
 (function () {
@@ -22,14 +18,12 @@ _nMax    - 进度最大值
     ui.Progress = core.inherits(
         ui.Control,
         'ui-progress',
-        function (el, options) {
-            _super(el, options);
-
-            this._sFormat = options.format;
-            this._nMax = options.max || 100;
-            this._nValue = options.value || 0;
-        },
         {
+            DEFAULT_OPTIONS: {
+                max: Number(100),
+                value: Number(0)
+            },
+
             /**
              * 进度变化事件。
              * @event
@@ -51,7 +45,7 @@ _nMax    - 进度最大值
              * @return {number} 进度的最大值
              */
             getMax: function () {
-                return this._nMax;
+                return this.max;
             },
 
             /**
@@ -61,7 +55,7 @@ _nMax    - 进度最大值
              * @return {number} 进度的当前值
              */
             getValue: function () {
-                return this._nValue;
+                return this.value;
             },
 
             /**
@@ -72,9 +66,9 @@ _nMax    - 进度最大值
              */
             setMax: function (max) {
                 max = Math.max(1, max);
-                if (this._nMax !== max) {
-                    this._nMax = max;
-                    this._nValue = Math.min(this._nValue, this._nMax);
+                if (this.max !== max) {
+                    this.max = max;
+                    this.value = Math.min(this.value, this.max);
                     core.dispatchEvent(this, 'progress');
                 }
             },
@@ -86,9 +80,9 @@ _nMax    - 进度最大值
              * @param {number} value 进度的当前值
              */
             setValue: function (value) {
-                value = Math.max(Math.min(this._nMax, value), 0);
-                if (this._nValue !== value) {
-                    this._nValue = value;
+                value = Math.max(Math.min(this.max, value), 0);
+                if (this.value !== value) {
+                    this.value = value;
                     core.dispatchEvent(this, 'progress');
                 }
             }
