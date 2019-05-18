@@ -73,7 +73,6 @@
              * @override
              */
             $initView: function () {
-                debugger;
                 var cells = _super.$initView(),
                     el = this.getMain();
 

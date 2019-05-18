@@ -1906,11 +1906,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
 
                     if (superClass) {
                         clazz = this[Class.CLASSID]['super'] = superClass.bind(this);
-                        for (var name in Class.prototype) {
-                            if ('function' === typeof Class.prototype[name] && !Class.prototype[name].CLASSID) {
-                                clazz[name] = makeSuperMethod(name);
-                            }
-                        }
+                        Object.assign(clazz, classes[Class.CLASSID].SuperMethods);
                         clazz['super'] = superClass.prototype;
                         clazz['this'] = this;
                     }
@@ -1966,6 +1962,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
             }
 
             var interfaces = Array.prototype.slice.call(arguments, index),
+                superMethods = superClass ? Object.assign({}, classes[superClass.CLASSID].MethodNames) : {},
                 data,
                 name;
 
@@ -1993,11 +1990,13 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
             fillProperties('protected', protectedFields);
 
             // 处理public属性
-            Class.SuperProxy = {};
             if (data = realProperties['public'] || realProperties) {
                 for (name in data) {
                     if (data.hasOwnProperty(name)) {
                         Class.prototype[name] = makeProxy(Class, data[name]);
+                        if ('function' === typeof data[name] && !data[name].CLASSID) {
+                            superMethods[name] = makeSuperMethod(name);
+                        }
                     }
                 }
             }
@@ -2036,7 +2035,8 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
             classes[Class.CLASSID] = {
                 PrivateFields: privateFields,
                 ProtectedFields: protectedFields,
-                FinalFields: finalFields
+                FinalFields: finalFields,
+                SuperMethods: superMethods
             };
             return Class;
         };

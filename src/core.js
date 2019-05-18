@@ -2531,6 +2531,9 @@ outer:          for (var caches = [], target = event.target, el; target && targe
                 superOptions = properties.SUPER_OPTIONS,
                 defaultOptions = properties.DEFAULT_OPTIONS;
 
+                delete properties.SUPER_OPTIONS;
+                delete properties.DEFAULT_OPTIONS;
+
             if (defaultOptions) {
                 if (!properties['private']) {
                     properties['private'] = {};
