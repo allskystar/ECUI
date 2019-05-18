@@ -57,7 +57,7 @@ _eContainer      - 容器 DOM 元素
             el.appendChild(titleEl);
             this._eContainer = el.appendChild(containerEl);
 
-            ui.Control.call(this, el, options);
+            _super(el, options);
 
             this.$setBody(titleEl);
 
@@ -80,7 +80,7 @@ _eContainer      - 容器 DOM 元素
                         el = dom.first(el);
                     }
 
-                    ui.Item.call(this, el, options);
+                    _super(el, options);
 
                     if (containerEl) {
                         if (options.parent) {
@@ -121,7 +121,7 @@ _eContainer      - 容器 DOM 元素
                             this._eContainer.getControl = null;
                             this._eContainer = null;
                         }
-                        ui.Item.prototype.$dispose.call(this);
+                        _super.$dispose();
                     },
 
                     /**
@@ -134,7 +134,7 @@ _eContainer      - 容器 DOM 元素
                             parent.getMain().appendChild(this._eContainer);
                         }
 
-                        ui.Item.prototype.$setParent.call(this, parent);
+                        _super.$setParent(parent);
                     },
 
                     /**
@@ -180,7 +180,7 @@ _eContainer      - 容器 DOM 元素
              */
             $dispose: function () {
                 this._eContainer = null;
-                ui.Control.prototype.$dispose.call(this);
+                _super.$dispose();
             },
 
             /**
@@ -224,7 +224,7 @@ _eContainer      - 容器 DOM 元素
              * @override
              */
             $ready: function () {
-                ui.Control.prototype.$ready.call(this);
+                _super.$ready();
                 this.setSelected(this._nSelected || 0);
                 delete this._nSelected;
             },
@@ -241,7 +241,7 @@ _eContainer      - 容器 DOM 元素
                     this.setSelected(index === list.length - 1 ? index - 1 : index + 1);
                 }
 
-                ui.Control.prototype.$remove.call(this, event);
+                _super.$remove(event);
             },
 
             /**

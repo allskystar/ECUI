@@ -82,7 +82,7 @@ _aChildren     - 子控件集合
                     el = dom.insertBefore(dom.first(el), el);
                 }
 
-                ui.Control.call(this, el, options);
+                _super(el, options);
 
                 delete options.id;
             }
@@ -93,7 +93,7 @@ _aChildren     - 子控件集合
              * @override
              */
             $click: function (event) {
-                ui.Control.prototype.$click.call(this, event);
+                _super.$click(event);
 
                 for (var control = event.getControl(); control !== this; control = control.getParent()) {
                     if (control instanceof ui.TreeView) {
@@ -118,7 +118,7 @@ _aChildren     - 子控件集合
              */
             $dispose: function () {
                 this._eChildren = null;
-                ui.Control.prototype.$dispose.call(this);
+                _super.$dispose();
             },
 
             /**
@@ -137,7 +137,7 @@ _aChildren     - 子控件集合
              * @override
              */
             $hide: function () {
-                ui.Control.prototype.$hide.call(this);
+                _super.$hide();
 
                 if (this._eChildren) {
                     dom.addClass(this._eChildren, 'ui-hide');
@@ -148,7 +148,7 @@ _aChildren     - 子控件集合
              * @override
              */
             $mouseout: function (event) {
-                ui.Control.prototype.$mouseout.call(this, event);
+                _super.$mouseout(event);
 
                 if (hovered) {
                     if (!this.contain(hovered)) {
@@ -169,7 +169,7 @@ _aChildren     - 子控件集合
              * @override
              */
             $mouseover: function (event) {
-                ui.Control.prototype.$mouseover.call(this, event);
+                _super.$mouseover(event);
 
                 if (hovered) {
                     if (this.contain(hovered)) {
@@ -243,7 +243,7 @@ _aChildren     - 子控件集合
                     refresh(oldParent);
                 }
 
-                ui.Control.prototype.$setParent.call(this, parent);
+                _super.$setParent(parent);
 
                 // 将子树区域显示在主元素之后
                 if (this._eChildren) {
@@ -256,7 +256,7 @@ _aChildren     - 子控件集合
              * @override
              */
             $show: function () {
-                ui.Control.prototype.$show.call(this);
+                _super.$show();
 
                 if (this._eChildren && !this._bCollapsed) {
                     dom.removeClass(this._eChildren, 'ui-hide');

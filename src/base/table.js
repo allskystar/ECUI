@@ -183,7 +183,7 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
                 }
             }
 
-            ui.Control.call(this, el, options);
+            _super(el, options);
 
             o = '<div class="' + this.getUnitClass(ui.Table, 'body') + '"></div><div class="' + this.getUnitClass(ui.Table, 'head') + '"><table cellspacing="0" class="' + table.className + '" style="' + table.style.cssText + '"><tbody></tbody></table></div>';
             if (core.getScrollNarrow()) {
@@ -273,7 +273,7 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
                      * @override
                      */
                     $click: function (event) {
-                        ui.Control.prototype.$click.call(this, event);
+                        _super.$click(event);
                         event.cell = this;
                         core.dispatchEvent(this.getParent().getParent(), 'cellclick', event);
                     },
@@ -306,7 +306,7 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
                      * @override
                      */
                     $hide: function () {
-                        ui.Control.prototype.$hide.call(this);
+                        _super.$hide();
                         this.$setStyles('display', 'none');
                     },
 
@@ -362,7 +362,7 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
                      * @override
                      */
                     $show: function () {
-                        ui.Control.prototype.$show.call(this);
+                        _super.$show();
                         this.$setStyles('display', '');
                     },
 
@@ -410,7 +410,7 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
             Row: core.inherits(
                 ui.Control,
                 function (el, options) {
-                    ui.Control.call(this, el, options);
+                    _super(el, options);
                     this._bMerge = !!options.merge;
                 },
                 {
@@ -418,7 +418,7 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
                      * @override
                      */
                     $click: function (event) {
-                        ui.Control.prototype.$click.call(this, event);
+                        _super.$click(event);
                         event.row = this;
                         core.dispatchEvent(this.getParent(), 'rowclick', event);
                     },
@@ -428,7 +428,7 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
                      */
                     $dispose: function () {
                         this._aElements = null;
-                        ui.Control.prototype.$dispose.call(this);
+                        _super.$dispose();
                     },
 
                     /**
@@ -475,7 +475,7 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
                             }
                         }
 
-                        ui.Control.prototype.$hide.call(this);
+                        _super.$hide();
                     },
 
                     /**
@@ -511,7 +511,7 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
                             }
                         }
 
-                        ui.Control.prototype.$show.call(this);
+                        _super.$show();
                     },
 
                     /**
@@ -565,7 +565,7 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
              * @override
              */
             $beforescroll: function (event) {
-                ui.Control.prototype.$beforescroll.call(this, event);
+                _super.$beforescroll(event);
                 // if (ieVersion < 7) {
                 //     return;
                 // }
@@ -614,7 +614,7 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
              * @override
              */
             $cache: function (style) {
-                ui.Control.prototype.$cache.call(this, style);
+                _super.$cache(style);
 
                 this.$$paddingTop = this._uHead.getBody().offsetHeight;
 
@@ -638,7 +638,7 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
              */
             $dispose: function () {
                 this._eLayout = null;
-                ui.Control.prototype.$dispose.call(this);
+                _super.$dispose();
             },
 
             /**
@@ -695,7 +695,7 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
              * @override
              */
             $initStructure: function (width, height) {
-                ui.Control.prototype.$initStructure.call(this, width, height);
+                _super.$initStructure(width, height);
 
                 this._aHCells.forEach(function (item) {
                     item.$setSize(item.getWidth());
@@ -744,7 +744,7 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
              * @override
              */
             $mousewheel: function (event) {
-                ui.Control.prototype.$mousewheel.call(this, event);
+                _super.$mousewheel(event);
 
                 var el = this._eLayout,
                     left = Math.min(el.scrollWidth - el.clientWidth, Math.max(0, el.scrollLeft + event.deltaX)),
@@ -761,7 +761,7 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
              * @override
              */
             $restoreStructure: function (event) {
-                ui.Control.prototype.$restoreStructure.call(this, event);
+                _super.$restoreStructure(event);
 
                 this._aHeadRows.forEach(function (item) {
                     resizeRow(item);
@@ -802,7 +802,7 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
              * @override
              */
             $scroll: function (event) {
-                ui.Control.prototype.$scroll.call(this, event);
+                _super.$scroll(event);
                 if (this._oScrollHandler) {
                     this._oScrollHandler();
                     this._oScrollHandler = null;
@@ -968,7 +968,7 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
                 this._aHCells.forEach(function (item) {
                     item.cache(force);
                 });
-                ui.Control.prototype.cache.call(this, force);
+                _super.cache(force);
             },
 
             /**

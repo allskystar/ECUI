@@ -53,7 +53,7 @@
                         dom.addClass(popup, 'ui-popup-menu ui-hide');
                     }
 
-                    ui.Item.call(this, el, options);
+                    _super(el, options);
 
                     if (popup) {
                         this.$Popup = core.$fastCreate(ui.PopupMenu, popup, this);

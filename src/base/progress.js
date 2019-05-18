@@ -23,7 +23,7 @@ _nMax    - 进度最大值
         ui.Control,
         'ui-progress',
         function (el, options) {
-            ui.Control.call(this, el, options);
+            _super(el, options);
 
             this._sFormat = options.format;
             this._nMax = options.max || 100;
@@ -40,7 +40,7 @@ _nMax    - 进度最大值
              * @override
              */
             $ready: function () {
-                ui.Control.prototype.$ready.call(this);
+                _super.$ready();
                 core.dispatchEvent(this, 'progress');
             },
 

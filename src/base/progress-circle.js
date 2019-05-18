@@ -17,7 +17,7 @@
         ui.Progress,
         'ui-progress-circle',
         function (el, options) {
-            ui.Progress.call(this, el, options);
+            _super(el, options);
 
             el.innerHTML = '<svg><path fill="#000"></path></svg>';
             this._ePath = el.lastChild.lastChild;
@@ -28,14 +28,14 @@
              */
             $dispose: function () {
                 this._ePath = null;
-                ui.Progress.prototype.$dispose.call(this);
+                _super.$dispose();
             },
 
             /**
              * @override
              */
             $initStructure: function (width, height) {
-                ui.Progress.prototype.$initStructure.call(this, width, height);
+                _super.$initStructure(width, height);
                 var el = dom.parent(this._ePath);
                 el.style.width = width + 'px';
                 el.style.height = height + 'px';

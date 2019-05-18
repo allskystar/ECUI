@@ -43,7 +43,7 @@
             el.appendChild(titleEl);
             el.appendChild(bodyEl);
 
-            ui.Layer.call(this, el, options);
+            _super(el, options);
 
             this.$Close = core.$fastCreate(this.Close, closeEl, this);
             this.$Title = core.$fastCreate(this.Title, titleEl, this);

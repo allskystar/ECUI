@@ -19,7 +19,7 @@ _eMask   - 完成的进度比例内容区域
         ui.Progress,
         'ui-progress-bar',
         function (el, options) {
-            ui.Progress.call(this, el, options);
+            _super(el, options);
 
             el.innerHTML = '<div class="' + this.getUnitClass(ui.ProgressBar, 'mask') + '"></div>';
             this._eMask = el.lastChild;
@@ -30,7 +30,7 @@ _eMask   - 完成的进度比例内容区域
              */
             $dispose: function () {
                 this._eMask = null;
-                ui.Progress.prototype.$dispose.call(this);
+                _super.$dispose();
             },
 
             /**

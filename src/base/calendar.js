@@ -80,7 +80,7 @@
                      * @override
                      */
                     $click: function (event) {
-                        ui.Button.prototype.$click.call(this, event);
+                        _super.$click(event);
                         this.getParent().move(this.move);
                     }
                 }

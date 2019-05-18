@@ -19,7 +19,7 @@
         function (el, options) {
             // firefox下点击图片会自动进入选中状态
             options.userSelect = false;
-            ui.Control.call(this, el, options);
+            _super(el, options);
             if (el.width) {
                 this._load();
             } else {

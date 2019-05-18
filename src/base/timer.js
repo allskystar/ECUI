@@ -40,7 +40,7 @@ _sFormat        - 显示格式
     ui.Timer = core.inherits(
         ui.Control,
         function (el, options) {
-            ui.Control.call(this, el, options);
+            _super(el, options);
             this._nBase = options.time.endsWith('ms') ? +options.time.slice(0, -2) : +options.time * 1000;
             this._sFormat = options.format || this.FORMAT;
             this.reset();
@@ -57,7 +57,7 @@ _sFormat        - 显示格式
              */
             $dispose: function () {
                 this.stop();
-                ui.Control.prototype.$dispose.call(this);
+                _super.$dispose();
             },
 
             /**

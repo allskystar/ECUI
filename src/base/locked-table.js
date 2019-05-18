@@ -141,7 +141,7 @@ _eRight      - 右侧乐定行的Element元素
         ui.Table,
         'ui-locked-table',
         function (el, options) {
-            ui.Table.call(this, el, options);
+            _super(el, options);
 
             this._sTableWidth = dom.parent(this.getBody()).style.width;
 
@@ -208,7 +208,7 @@ _eRight      - 右侧乐定行的Element元素
                      * @override
                      */
                     $click: function (event) {
-                        ui.Table.prototype.Row.prototype.$click.call(this, event);
+                        _super.$click(event);
                         dom.parent(this._eLeft).className = dom.parent(this._eRight).className = this.getMain().className;
                     },
 
@@ -217,7 +217,7 @@ _eRight      - 右侧乐定行的Element元素
                      */
                     $dispose: function () {
                         this._eLeft = this._eRight = null;
-                        ui.Table.prototype.Row.prototype.$dispose.call(this);
+                        _super.$dispose();
                     }
                 }
             ),
@@ -226,7 +226,7 @@ _eRight      - 右侧乐定行的Element元素
              * @override
              */
             $beforescroll: function (event) {
-                ui.Table.prototype.$beforescroll.call(this, event);
+                _super.$beforescroll(event);
 
                 // if (ieVersion < 7) {
                 //     return;
@@ -264,7 +264,7 @@ _eRight      - 右侧乐定行的Element元素
              * @override
              */
             $cache: function (style) {
-                ui.Table.prototype.$cache.call(this, style);
+                _super.$cache(style);
 
                 this.$$paddingLeft = 0;
 
@@ -286,14 +286,14 @@ _eRight      - 右侧乐定行的Element元素
              */
             $dispose: function () {
                 this._eFill = null;
-                ui.Table.prototype.$dispose.call(this);
+                _super.$dispose();
             },
 
             /**
              * @override
              */
             $headscroll: function () {
-                ui.Table.prototype.$headscroll.call(this);
+                _super.$headscroll();
 
                 var leftHeadStyle = this._uLeftHead.getMain().style,
                     rightHeadStyle = this._uRightHead.getMain().style,
@@ -319,7 +319,7 @@ _eRight      - 右侧乐定行的Element元素
              * @override
              */
             $initStructure: function (width, height) {
-                ui.Table.prototype.$initStructure.call(this, width, height);
+                _super.$initStructure(width, height);
 
                 this._aHeadRows.forEach(
                     function (item) {
@@ -349,7 +349,7 @@ _eRight      - 右侧乐定行的Element元素
              * @override
              */
             $restoreStructure: function (event) {
-                ui.Table.prototype.$restoreStructure.call(this, event);
+                _super.$restoreStructure(event);
 
                 this._aHeadRows.forEach(
                     function (item) {
@@ -393,14 +393,14 @@ _eRight      - 右侧乐定行的Element元素
                         this._nRight++;
                     }
                 }
-                return ui.Table.prototype.addColumn.call(this, options, index);
+                return _super.addColumn(options, index);
             },
 
             /**
              * @override
              */
             addRow: function (data, index) {
-                var row = ui.Table.prototype.addRow.call(this, data, index),
+                var row = _super.addRow(data, index),
                     el = row.getMain(),
                     leftBody = this._uLeftMain.getBody(),
                     rightBody = this._uRightMain.getBody(),
@@ -433,14 +433,14 @@ _eRight      - 右侧乐定行的Element元素
                 this._aRows.forEach(function (item) {
                     item.cache(force);
                 });
-                ui.Table.prototype.cache.call(this, force);
+                _super.cache(force);
             },
 
             /**
              * @override
              */
             removeColumn: function (index) {
-                ui.Table.prototype.removeColumn.call(this, index);
+                _super.removeColumn(index);
                 if (index >= 0) {
                     if (index < this._nLeft) {
                         this._nLeft--;
@@ -465,7 +465,7 @@ _eRight      - 右侧乐定行的Element元素
                     leftBody.removeChild(dom.children(leftBody)[index]);
                     rightBody.removeChild(dom.children(rightBody)[index]);
 
-                    return ui.Table.prototype.removeRow.call(this, index);
+                    return _super.removeRow(index);
                 }
             }
         }
