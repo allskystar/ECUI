@@ -1,9 +1,6 @@
 /*
 @example
 <div ui="type:clock"></div>
-
-@fields
-_sFormat        - 显示格式
 */
 (function () {
 //{if 0}//
@@ -19,20 +16,25 @@ _sFormat        - 显示格式
      */
     ui.Clock = core.inherits(
         ui.Control,
-        function (el, options) {
-            ui.Control.call(this, el, options);
-            this._sFormat = options.format || this.FORMAT;
-            this.start();
-        },
         {
-            FORMAT: '{0}:{1}:{2}',
+            DEFAULT_OPTIONS: {
+                format: '{0}:{1}:{2}'
+            },
 
             /**
              * @override
              */
             $dispose: function () {
                 this.stop();
-                ui.Control.prototype.$dispose.call(this);
+                _super.$dispose();
+            },
+
+            /**
+             * @override
+             */
+            $ready: function () {
+                _super.$ready();
+                this.start();
             },
 
             /**
@@ -45,7 +47,7 @@ _sFormat        - 显示格式
                 this.stop = util.timer(
                     function () {
                         var date = new Date();
-                        this.getBody().innerHTML = util.stringFormat(this._sFormat, ('0' + date.getHours()).slice(-2), ('0' + date.getMinutes()).slice(-2), ('0' + date.getSeconds()).slice(-2), ('000' + date.getMilliseconds()).slice(-4));
+                        this.getBody().innerHTML = util.stringFormat(this.format, ('0' + date.getHours()).slice(-2), ('0' + date.getMinutes()).slice(-2), ('0' + date.getSeconds()).slice(-2), ('000' + date.getMilliseconds()).slice(-4));
                     },
                     -1,
                     this

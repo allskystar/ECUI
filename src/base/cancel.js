@@ -24,7 +24,7 @@
              * @override
              */
             $click: function (event) {
-                ui.Button.prototype.$click.call(this, event);
+                _super.$click(event);
                 for (var parent = this.getParent(); parent; parent = parent.getParent()) {
                     if (parent instanceof ui.Dialog) {
                         parent.hide();

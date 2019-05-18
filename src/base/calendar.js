@@ -29,7 +29,7 @@
                 /**
                  * @override
                  */
-                $initView1: function () {
+                $initView: function () {
                     var cells = _super.$initView(),
                         el = this.getMain();
 
