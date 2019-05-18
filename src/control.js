@@ -68,6 +68,7 @@
                 width:      undefined,
                 height:     undefined,
                 cached:     false,
+                created:    false,
                 gesture:    true,
                 readied:    false,
 
@@ -629,7 +630,7 @@
                     force = this.cached === undefined;
                     this.cached = true;
                     this.$cache(dom.getStyle(this.main));
-                    if (force && this.init === util.blank) {
+                    if (force && this.created) {
                         // 已经初始化，但第一次缓存的控件进行结构化
                         this.initStructure();
                     }
@@ -1042,7 +1043,7 @@
 
                 }
 
-                this.init = util.blank;
+                this.created = true;
             },
 
             /**
@@ -1086,6 +1087,16 @@
              */
             isCapturable: function () {
                 return this.capturable;
+            },
+
+            /**
+             * 判断控件是否生成。
+             * @public
+             *
+             * @return {boolean} 控件是否生成
+             */
+            isCreated: function () {
+                return this.created;
             },
 
             /**

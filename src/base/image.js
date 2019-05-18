@@ -1,10 +1,6 @@
 /*
 @example
 <img ui="type:image">
-
-@fields
-_nMinWidth 原始的宽度
-_nRatio    原始的宽高比例
 */
 (function () {
 //{if 0}//
@@ -12,20 +8,6 @@ _nRatio    原始的宽高比例
         dom = core.dom,
         ui = core.ui;
 //{/if}//
-    /**
-     * 图片加载事件。
-     * @private
-     */
-    function load(event) {
-        var control = event.target.getControl();
-        control._nMinWidth = event.target.width;
-        control._nRatio = event.target.height / event.target.width;
-        dom.removeEventListener(this, 'load', load);
-        if (control.isReady()) {
-            control.cache();
-        }
-    }
-
     /**
      * 图片控件。
      * 图片控件支持使用滚轮直接缩放图片的大小。
@@ -39,12 +21,30 @@ _nRatio    原始的宽高比例
             options.userSelect = false;
             ui.Control.call(this, el, options);
             if (el.width) {
-                load({target: el});
+                this._load();
             } else {
-                dom.addEventListener(el, 'load', load);
+                dom.addEventListener(el, 'load', this._load.bind(this));
             }
         },
         {
+            'private': {
+                'cx': undefined,
+                'cy': undefined,
+
+                /**
+                 * 图片加载事件。
+                 * @private
+                 */
+                _load: function (event) {
+                    this.minWidth = event.target.width;
+                    this.ratio = event.target.height / event.target.width;
+                    dom.removeEventListener(this, 'load', this._load);
+                    if (this.isCreated()) {
+                        this.cache();
+                    }
+                }
+            },
+
             /**
              * @override
              */
@@ -64,8 +64,8 @@ _nRatio    原始的宽高比例
              */
             $cache: function (style) {
                 _super.$cache(style);
-                this._nCenterX = _super.getX() + this.getWidth() / 2;
-                this._nCenterY = _super.getY() + this.getHeight() / 2;
+                this.cx = _super.getX() + this.getWidth() / 2;
+                this.cy = _super.getY() + this.getHeight() / 2;
             },
 
             /**
@@ -74,9 +74,9 @@ _nRatio    原始的宽高比例
             $mousewheel: function (event) {
                 _super.$mousewheel(event);
                 var delta = event.deltaY,
-                    width = Math.max(this._nMinWidth, this.getWidth() - delta * 2);
+                    width = Math.max(this.minWidth, this.getWidth() - delta * 2);
 
-                this.setSize(width, Math.round(width * this._nRatio));
+                this.setSize(width, Math.round(width * this.ratio));
                 this.setPosition(this.getX(), this.getY());
 
                 event.preventDefault();
@@ -86,22 +86,22 @@ _nRatio    原始的宽高比例
              * @override
              */
             getX: function () {
-                return this._nCenterX;
+                return this.cx;
             },
 
             /**
              * @override
              */
             getY: function () {
-                return this._nCenterY;
+                return this.cy;
             },
 
             /**
              * @override
              */
             setPosition: function (x, y) {
-                this._nCenterX = x;
-                this._nCenterY = y;
+                this.cx = x;
+                this.cy = y;
                 _super.setPosition(Math.round(x - this.getWidth() / 2), Math.round(y - this.getHeight() / 2));
             }
         }
