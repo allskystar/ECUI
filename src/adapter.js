@@ -1892,6 +1892,8 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                         // 初始化各层级类的属性域
                         for (var clazz = Class; clazz; clazz = clazz['super']) {
                             this[clazz.CLASSID] = {};
+                            // 填充全部的初始化变量
+                            Object.assign(this[clazz.CLASSID], classes[clazz.CLASSID].InitValues);
                         }
                     }
 
@@ -1902,8 +1904,6 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                         clazz['this'] = this;
                     }
 
-                    // 填充全部的初始化变量
-                    Object.assign(this[Class.CLASSID], initValues);
                     // 初始化所有接口的属性域
                     interfaces.forEach(
                         function (inf) {
@@ -2039,7 +2039,8 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                 PrivateFields: privateFields,
                 ProtectedFields: protectedFields,
                 FinalFields: finalFields,
-                SuperMethods: superMethods
+                SuperMethods: superMethods,
+                InitValues: initValues
             };
             return Class;
         };
