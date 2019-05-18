@@ -57,7 +57,7 @@
              * @override
              */
             $change: function (event) {
-                ui.MonthView.prototype.$change.call(this, event);
+                _super.$change(event);
                 this.setTitle(this.getYear(), this.getMonth());
             },
 
@@ -66,14 +66,15 @@
              */
             $dispose: function () {
                 this.title = null;
-                ui.MonthView.prototype.$dispose.call(this);
+                _super.$dispose();
             },
 
             /**
              * @override
              */
             $initView: function () {
-                var cells = ui.MonthView.prototype.$initView.call(this),
+                debugger;
+                var cells = _super.$initView(),
                     el = this.getMain();
 
                 // 生成日历控件结构

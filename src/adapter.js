@@ -1834,7 +1834,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
         function makeSuperMethod(name) {
             if (!superMethods[name]) {
                 superMethods[name] = function () {
-                    this['super'][name].apply(this['this'], arguments);
+                    return this['super'][name].apply(this['this'], arguments);
                 };
             }
             return superMethods[name];
