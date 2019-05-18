@@ -3,17 +3,10 @@
 <div ui="type:month-view;date:2009/04/17"></div>
 
 @fields
-_bExtra     - 扩展的日期是否响应事件
 _bRowExtra  - 当前是否有行扩展
-_nOffset    - 月份开始的偏移值，-26表示当前月的第一天是上个月的26号，默认是1
 _nYear      - 年份
 _nMonth     - 月份(0-11)
-_nWeekday   - 从周几开始显示，0表示周日
-_aCells     - 日历控件内的所有单元格，其中第0-6项是日历的头部星期名称
-_oBegin     - 开始日期
-_oEnd       - 结束日期
-_oDate      - 当前选择日期
-_cSelected  - 当前选择的日历单元格
+selected  - 当前选择的日历单元格
 */
 (function () {
 //{if 0}//
@@ -22,26 +15,6 @@ _cSelected  - 当前选择的日历单元格
         ui = core.ui,
         util = core.util;
 //{/if}//
-    /**
-     * 选中某个日期单元格。
-     * @private
-     *
-     * @param {ecui.ui.MonthView} view 日历视图对象
-     * @param {ecui.ui.MonthView.Cell} cell 日期单元格对象
-     */
-    function setSelected(view, cell) {
-        if (view._cSelected !== cell) {
-            if (view._cSelected) {
-                view._cSelected.alterStatus('-selected');
-            }
-
-            if (cell) {
-                cell.alterStatus('+selected');
-            }
-            view._cSelected = cell;
-        }
-    }
-
     /**
      * 月视图控件。
      * 提供指定月份的日历信息。
@@ -57,29 +30,54 @@ _cSelected  - 当前选择的日历单元格
     ui.MonthView = core.inherits(
         ui.Control,
         'ui-monthview',
-        [
-            function () {
-                this._aCells = this.$initView();
+        function (el, options) {
+            _super(el, options);
+            this.cells = this.$initView();
+        },
+        {
+            DEFAULT_OPTIONS: {
+                offset: Number(1),
+                weekday: Number(0),
+                begin: function (value) {
+                    return value ? new Date(value) : undefined;
+                },
+                end: function (value) {
+                    return value ? new Date(value) : undefined;
+                },
+                date: function (value) {
+                    var date = value ? new Date(value) : new Date();
+                    return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+                },
+                extra: function (value) {
+                    return value === 'disable';
+                }
             },
 
-            function (el, options) {
-                ui.Control.call(this, el, options);
+            'private': {
+                cells: undefined,
+                first: undefined,
+                last: undefined,
 
-                this._bExtra = options.extra === 'disable';
-                if (options.begin) {
-                    this._oBegin = new Date(options.begin);
-                }
-                if (options.end) {
-                    this._oEnd = new Date(options.end);
-                }
-                this._nOffset = +options.offset || 1;
-                this._nWeekday = +options.weekday || 0;
+                /**
+                 * 选中某个日期单元格。
+                 * @private
+                 *
+                 * @param {ecui.ui.MonthView.Cell} cell 日期单元格对象
+                 */
+                _setSelected: function (cell) {
+                    if (this.selected !== cell) {
+                        if (this.selected) {
+                            this.selected.alterStatus('-selected');
+                        }
 
-                var date = options.date ? new Date(options.date) : new Date();
-                this._oDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-            }
-        ],
-        {
+                        if (cell) {
+                            cell.alterStatus('+selected');
+                        }
+                        this.selected = cell;
+                    }
+                }
+            },
+
             WEEKNAMES: ['日', '一', '二', '三', '四', '五', '六'],
 
             /**
@@ -95,7 +93,7 @@ _cSelected  - 当前选择的日历单元格
                      */
                     $click: function (event) {
                         event.item = this;
-                        event.date = this._oDate;
+                        event.date = this.date;
                         core.dispatchEvent(this.getParent(), 'dateclick', event);
                     },
 
@@ -106,7 +104,7 @@ _cSelected  - 当前选择的日历单元格
                      * @return {Date} 单元格对应的日期
                      */
                     getDate: function () {
-                        return this._oDate;
+                        return this.date;
                     },
 
                     /**
@@ -116,7 +114,7 @@ _cSelected  - 当前选择的日历单元格
                      * @param {Date} date 单元格对应的日期
                      */
                     setDate: function (date) {
-                        this._oDate = date;
+                        this.date = date;
                         this.getBody().innerHTML = date.getDate();
                     }
                 }
@@ -135,8 +133,8 @@ _cSelected  - 当前选择的日历单元格
              * @event
              */
             $dateclick: function (event) {
-                this._oDate = event.date;
-                setSelected(this, event.item);
+                this.date = event.date;
+                this._setSelected(event.item);
             },
 
             /**
@@ -167,7 +165,7 @@ _cSelected  - 当前选择的日历单元格
                 );
 
                 for (var i = 0; i < 7; i++) {
-                    cells[i].getBody().innerHTML = this.WEEKNAMES[(i + this._nWeekday) % 7];
+                    cells[i].getBody().innerHTML = this.WEEKNAMES[(i + this.weekday) % 7];
                 }
 
                 return cells;
@@ -177,8 +175,8 @@ _cSelected  - 当前选择的日历单元格
              * @override
              */
             $ready: function () {
-                ui.Control.prototype.$ready.call(this);
-                this.setView(this._oDate.getFullYear(), this._oDate.getMonth() + 1);
+                _super.$ready();
+                this.setView(this.date.getFullYear(), this.date.getMonth() + 1);
             },
 
             /**
@@ -188,7 +186,7 @@ _cSelected  - 当前选择的日历单元格
              * @return {Date} 有效日期区间的开始
              */
             getBegin: function () {
-                return this._oBegin;
+                return this.begin;
             },
 
             /**
@@ -198,7 +196,7 @@ _cSelected  - 当前选择的日历单元格
              * @return {Array} 日期对象列表
              */
             getDays: function () {
-                return this._aCells.slice(7);
+                return this.cells.slice(7);
             },
 
             /**
@@ -208,7 +206,7 @@ _cSelected  - 当前选择的日历单元格
              * @return {Date} 日期对象
              */
             getDate: function () {
-                return this._oDate;
+                return this.date;
             },
 
             /**
@@ -218,7 +216,7 @@ _cSelected  - 当前选择的日历单元格
              * @return {Date} 有效日期区间的结束
              */
             getEnd: function () {
-                return this._oEnd;
+                return this.end;
             },
 
             /**
@@ -228,7 +226,7 @@ _cSelected  - 当前选择的日历单元格
              * @return {Date} 第一天的日期对象
              */
             getFirstDay: function () {
-                return this._oFirst;
+                return this.first;
             },
 
             /**
@@ -238,7 +236,7 @@ _cSelected  - 当前选择的日历单元格
              * @return {Date} 最后一天的日期对象
              */
             getLastDay: function () {
-                return this._oLast;
+                return this.last;
             },
 
             /**
@@ -258,7 +256,7 @@ _cSelected  - 当前选择的日历单元格
              * @return {ecui.ui.MonthView.Cell} 选中的控件
              */
             getSelected: function () {
-                return this._cSelected;
+                return this.selected;
             },
 
             /**
@@ -290,11 +288,11 @@ _cSelected  - 当前选择的日历单元格
              * @param {Date} date 日期
              */
             setDate: function (date) {
-                this._oDate = date ? new Date(date.getTime()) : undefined;
+                this.date = date ? new Date(date.getTime()) : undefined;
                 date = date || new Date();
 
                 var day = date.getDate();
-                this.setView(date.getFullYear(), date.getMonth() + (this._nOffset < 0 ? day < -this._nOffset ? 1 : 2 : day < this._nOffset ? 0 : 1));
+                this.setView(date.getFullYear(), date.getMonth() + (this.offset < 0 ? day < -this.offset ? 1 : 2 : day < this.offset ? 0 : 1));
             },
 
             /**
@@ -306,8 +304,8 @@ _cSelected  - 当前选择的日历单元格
              * @param {Date} end 结束日期，默认表示不限制结束日期
              */
             setRange: function (begin, end) {
-                this._oBegin = begin;
-                this._oEnd = end;
+                this.begin = begin;
+                this.end = end;
                 this.setView(this.getYear(), this.getMonth());
             },
 
@@ -323,9 +321,9 @@ _cSelected  - 当前选择的日历单元格
                 var today = new Date(),
                     dateYear = year || today.getFullYear(),
                     dateMonth = month !== undefined ? month - 1 : today.getMonth(),
-                    firstDay = new Date(dateYear, this._nOffset > 0 ? dateMonth : dateMonth - 1, this._nOffset > 0 ? this._nOffset : -this._nOffset),
-                    lastDay = new Date(dateYear, this._nOffset > 0 ? dateMonth + 1 : dateMonth, this._nOffset > 0 ? this._nOffset - 1 : -this._nOffset - 1),
-                    day = -(firstDay.getDay() + 7 - this._nWeekday) % 7,
+                    firstDay = new Date(dateYear, this.offset > 0 ? dateMonth : dateMonth - 1, this.offset > 0 ? this.offset : -this.offset),
+                    lastDay = new Date(dateYear, this.offset > 0 ? dateMonth + 1 : dateMonth, this.offset > 0 ? this.offset - 1 : -this.offset - 1),
+                    day = -(firstDay.getDay() + 7 - this.weekday) % 7,
                     begin = firstDay,
                     end = lastDay,
                     oldYear = this._nYear,
@@ -333,21 +331,21 @@ _cSelected  - 当前选择的日历单元格
 
                 today = new Date(today.getFullYear(), today.getMonth(), today.getDate());
 
-                if (this._oBegin > begin) {
-                    begin = this._oBegin;
+                if (this.begin > begin) {
+                    begin = this.begin;
                 }
-                if (this._oEnd < end) {
-                    end = this._oEnd;
+                if (this.end < end) {
+                    end = this.end;
                 }
 
                 this._nYear = dateYear;
                 this._nMonth = dateMonth;
-                this._oFirst = firstDay;
-                this._oLast = lastDay;
+                this.first = firstDay;
+                this.last = lastDay;
 
-                setSelected(this);
+                this._setSelected();
 
-                (cells || this._aCells).slice(7).forEach(
+                (cells || this.cells).slice(7).forEach(
                     function (item, index) {
                         var date = new Date(firstDay.getTime() + (day + index) * 3600000 * 24),
                             el = item.getMain();
@@ -360,9 +358,9 @@ _cSelected  - 当前选择的日历单元格
                                 delete item._bRowExtra;
                             }
                             dom.removeClass(el, 'ui-extra');
-                            delete item._bExtra;
-                            if (date - this._oDate === 0) {
-                                setSelected(this, item);
+                            delete item.extra;
+                            if (date - this.date === 0) {
+                                this._setSelected(item);
                             }
                             item.enable();
                         } else {
@@ -370,11 +368,11 @@ _cSelected  - 当前选择的日历单元格
                                 dom.addClass(dom.parent(el), 'ui-extra');
                                 item._bRowExtra = true;
                             }
-                            if (!item._bExtra) {
+                            if (!item.extra) {
                                 dom.addClass(el, 'ui-extra');
-                                item._bExtra = true;
+                                item.extra = true;
                             }
-                            if (this._bExtra) {
+                            if (this.extra) {
                                 item.disable();
                             }
                         }

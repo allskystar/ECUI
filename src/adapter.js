@@ -1928,9 +1928,11 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                     // 调用全部类和接口的构造函数
                     onbefore(this, Class);
                     realConstructor.apply(this, args);
-                    if (superClass && !this[superClass.CLASSID]['super']) {
+//{if 0}//
+                    if (superClass && !this[superClass.CLASSID]['interface']) {
                         console.warn('父类没有初始化');
                     }
+//{/if}//
                     interfaces.forEach(
                         function (inf) {
                             if (inf.Constructor) {

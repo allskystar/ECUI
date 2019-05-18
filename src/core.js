@@ -2489,13 +2489,14 @@ outer:          for (var caches = [], target = event.target, el; target && targe
          * @param {object} ... 控件扩展的方法
          * @return {Function} 新控件的构造函数
          */
-        inherits: function (superClass, singleton, type, constructor) {
-            var index = 4,
-                realSingleton = singleton,
-                realType = type,
-                realConstructor = constructor,
+        inherits: function (superClass) {
+            var index = 1,
+                singleton = 'boolean' === typeof arguments[index] ? arguments[index++] : false,
+                type = 'string' === typeof arguments[index] ? arguments[index++] : '',
+                constructor = 'function' === typeof arguments[index] ? arguments[index++] : superClass,
+                properties = arguments[index] && !arguments[index].CLASSID ? arguments[index++] : {},
                 subClass = function (el, options) {
-                    if (subClass.singleton) {
+                    if (singleton) {
                         for (var i = 0, item; item = singletons[i++]; ) {
                             if (item.constructor === subClass) {
                                 return item;
@@ -2503,57 +2504,66 @@ outer:          for (var caches = [], target = event.target, el; target && targe
                         }
                     }
 
-                    subClass.constructor.call(this, el, options);
+                    if (superOptions) {
+                        for (var name in superOptions) {
+                            if (superOptions.hasOwnProperty(name) && !options.hasOwnProperty(name)) {
+                                options[name] = superOptions[name];
+                            }
+                        }
+                    }
+                    if (defaultOptions) {
+                        for (name in defaultOptions) {
+                            if (defaultOptions.hasOwnProperty(name)) {
+                                if ('function' === typeof defaultOptions[name]) {
+                                    this[name] = defaultOptions[name](options[name]);
+                                } else {
+                                    this[name] = options[name] ? new defaultOptions[name].constructor(options[name]) : defaultOptions[name];
+                                }
+                            }
+                        }
+                    }
+                    (subClass.hasOwnProperty('constructor') ? subClass.constructor : constructor).call(this, el, options);
 
-                    if (subClass.singleton) {
+                    if (singleton) {
                         singletons.push(this);
                     }
-                };
+                },
+                superOptions = properties.SUPER_OPTIONS,
+                defaultOptions = properties.DEFAULT_OPTIONS;
 
-            if ('boolean' !== typeof realSingleton) {
-                index--;
-                realConstructor = realType;
-                realType = realSingleton;
-                realSingleton = false;
+            if (defaultOptions) {
+                if (!properties['private']) {
+                    properties['private'] = {};
+                }
+                for (var name in defaultOptions) {
+                    if (defaultOptions.hasOwnProperty(name)) {
+                        properties['private'][name] = undefined;
+                    }
+                }
             }
 
-            if ('string' !== typeof realType) {
-                index--;
-                realConstructor = realType;
-                realType = '';
-            }
-
-            if ('function' !== typeof realConstructor) {
-                index--;
-                realConstructor = superClass;
-            }
-
-            subClass = util.makeClass.apply(null, [superClass, subClass].concat(Array.prototype.slice.call(arguments, index)));
-            subClass.singleton = realSingleton;
-            subClass.constructor = realConstructor;
+            subClass = util.makeClass.apply(null, [superClass, subClass, properties].concat(Array.prototype.slice.call(arguments, index)));
 
             if (superClass) {
-                realType = realType ? (realType.charAt(0) === '*' ? realType.slice(1) : [realType]) : [];
+                type = type ? (type.charAt(0) === '*' ? type.slice(1) : [type]) : [];
                 subClass.TYPES = [];
 
                 superClass.TYPES.forEach(function (item) {
-                    if (realType instanceof Array) {
-                        item = realType.concat(item);
+                    if (type instanceof Array) {
+                        item = type.concat(item);
                     } else {
                         item = item.slice();
-                        item[0] = realType;
+                        item[0] = type;
                     }
                     subClass.TYPES.push(item);
                 });
-                subClass.TYPES.push(realType instanceof Array ? realType : [realType]);
+                subClass.TYPES.push(type instanceof Array ? type : [type]);
             } else {
                 // ecui.ui.Control的特殊初始化设置
                 subClass.TYPES = [[]];
             }
             subClass.CLASS = subClass.TYPES[0].length ? ' ' + subClass.TYPES[0].join(' ') : '';
 
-            // 释放闭包占用的资源
-            superClass = type = constructor = realConstructor = null;
             return subClass;
         },
 

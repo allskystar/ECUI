@@ -20,10 +20,11 @@
     ui.Button = core.inherits(
         ui.Control,
         'ui-button',
-        function (el, options) {
-            ui.Control.call(this, el, Object.assign({userSelect: false}, options));
-        },
         {
+            SUPER_OPTIONS: {
+                userSelect: false
+            },
+
             /**
              * 获取按钮所处于的表单元素。
              * @public
