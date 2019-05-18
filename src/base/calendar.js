@@ -25,6 +25,40 @@
                 title: undefined
             },
 
+            'protected': {
+                /**
+                 * @override
+                 */
+                $initView: function () {
+                    debugger;
+                    var cells = _super.$initView(),
+                        el = this.getMain();
+
+                    // 生成日历控件结构
+                    dom.insertHTML(
+                        el,
+                        'AFTERBEGIN',
+                        '<div class="' + this.getUnitClass(ui.Calendar, 'header') + '"><div class="' +
+                            this.getUnitClass(ui.Calendar, 'title') + '"></div><div class="' +
+                            this.getUnitClass(ui.Calendar, 'prev-year') + this.Button.CLASS + '">&lt;&lt;</div><div class="' +
+                            this.getUnitClass(ui.Calendar, 'prev-month') + this.Button.CLASS + '">&lt;</div><div class="' +
+                            this.getUnitClass(ui.Calendar, 'next-month') + this.Button.CLASS + '">&gt;</div><div class="' +
+                            this.getUnitClass(ui.Calendar, 'next-year') + this.Button.CLASS + '">&gt;&gt;</div></div>'
+                    );
+
+                    // 获取el所有直属节点
+                    var headers = dom.children(el.firstChild);
+                    // 定义头部展示区
+                    this.title = headers[0];
+                    core.$fastCreate(this.Button, headers[1], this, {move: -12});
+                    core.$fastCreate(this.Button, headers[2], this, {move: -1});
+                    core.$fastCreate(this.Button, headers[3], this, {move: 1});
+                    core.$fastCreate(this.Button, headers[4], this, {move: 12});
+
+                    return cells;
+                }
+            },
+
             /**
              * 控件头部展示格式。
              */
@@ -67,37 +101,6 @@
             $dispose: function () {
                 this.title = null;
                 _super.$dispose();
-            },
-
-            /**
-             * @override
-             */
-            $initView: function () {
-                var cells = _super.$initView(),
-                    el = this.getMain();
-
-                // 生成日历控件结构
-                dom.insertHTML(
-                    el,
-                    'AFTERBEGIN',
-                    '<div class="' + this.getUnitClass(ui.Calendar, 'header') + '"><div class="' +
-                        this.getUnitClass(ui.Calendar, 'title') + '"></div><div class="' +
-                        this.getUnitClass(ui.Calendar, 'prev-year') + this.Button.CLASS + '">&lt;&lt;</div><div class="' +
-                        this.getUnitClass(ui.Calendar, 'prev-month') + this.Button.CLASS + '">&lt;</div><div class="' +
-                        this.getUnitClass(ui.Calendar, 'next-month') + this.Button.CLASS + '">&gt;</div><div class="' +
-                        this.getUnitClass(ui.Calendar, 'next-year') + this.Button.CLASS + '">&gt;&gt;</div></div>'
-                );
-
-                // 获取el所有直属节点
-                var headers = dom.children(el.firstChild);
-                // 定义头部展示区
-                this.title = headers[0];
-                core.$fastCreate(this.Button, headers[1], this, {move: -12});
-                core.$fastCreate(this.Button, headers[2], this, {move: -1});
-                core.$fastCreate(this.Button, headers[3], this, {move: 1});
-                core.$fastCreate(this.Button, headers[4], this, {move: 12});
-
-                return cells;
             },
 
             /**

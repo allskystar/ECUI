@@ -74,6 +74,42 @@
                 }
             },
 
+            'protected': {
+                /**
+                 * 初始化视图区域(子类可以多次初始化)。
+                 * @protected
+                 *
+                 * @return {Array} 视图区域数组，可以在 setView 中使用
+                 */
+                $initView: function () {
+                    var el = this.getBody();
+                    dom.insertHTML(el, 'beforeEnd', util.stringFormat(
+                        '<table><thead>{1}</thead><tbody>{0}{0}{0}{0}{0}{0}</tbody></table>',
+                        util.stringFormat(
+                            '<tr>{0}{0}{0}{0}{0}{0}{0}</tr>',
+                            '<td class="' + this.getUnitClass(ui.MonthView, 'date') + '"></td>'
+                        ),
+                        util.stringFormat(
+                            '<tr>{0}{0}{0}{0}{0}{0}{0}</tr>',
+                            '<td class="' + this.getUnitClass(ui.MonthView, 'title') + '"></td>'
+                        )
+                    ));
+
+                    var cells = dom.toArray(el.lastChild.getElementsByTagName('TD')).map(
+                        function (item, index) {
+                            return core.$fastCreate(index < 7 ? ui.Control : this.Cell, item, this);
+                        },
+                        this
+                    );
+
+                    for (var i = 0; i < 7; i++) {
+                        cells[i].getBody().innerHTML = this.WEEKNAMES[(i + this.weekday) % 7];
+                    }
+
+                    return cells;
+                }
+            },
+
             WEEKNAMES: ['日', '一', '二', '三', '四', '五', '六'],
 
             /**
@@ -131,40 +167,6 @@
             $dateclick: function (event) {
                 this.date = event.date;
                 this._setSelected(event.item);
-            },
-
-            /**
-             * 初始化视图区域(子类可以多次初始化)。
-             * @protected
-             *
-             * @return {Array} 视图区域数组，可以在 setView 中使用
-             */
-            $initView: function () {
-                var el = this.getBody();
-                dom.insertHTML(el, 'beforeEnd', util.stringFormat(
-                    '<table><thead>{1}</thead><tbody>{0}{0}{0}{0}{0}{0}</tbody></table>',
-                    util.stringFormat(
-                        '<tr>{0}{0}{0}{0}{0}{0}{0}</tr>',
-                        '<td class="' + this.getUnitClass(ui.MonthView, 'date') + '"></td>'
-                    ),
-                    util.stringFormat(
-                        '<tr>{0}{0}{0}{0}{0}{0}{0}</tr>',
-                        '<td class="' + this.getUnitClass(ui.MonthView, 'title') + '"></td>'
-                    )
-                ));
-
-                var cells = dom.toArray(el.lastChild.getElementsByTagName('TD')).map(
-                    function (item, index) {
-                        return core.$fastCreate(index < 7 ? ui.Control : this.Cell, item, this);
-                    },
-                    this
-                );
-
-                for (var i = 0; i < 7; i++) {
-                    cells[i].getBody().innerHTML = this.WEEKNAMES[(i + this.weekday) % 7];
-                }
-
-                return cells;
             },
 
             /**

@@ -1897,8 +1897,8 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
 
                     if (superClass) {
                         clazz = this[Class.CLASSID]['super'] = superClass.bind(this);
-                        Object.assign(clazz, classes[Class.CLASSID].SuperMethods);
-                        clazz['super'] = superClass.prototype;
+                        Object.assign(clazz, classes[superClass.CLASSID].SuperMethods);
+                        clazz['super'] = classes[superClass.CLASSID].SuperMethods.prototype;
                         clazz['this'] = this;
                     }
 
@@ -1953,19 +1953,30 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
             }
 
             var interfaces = Array.prototype.slice.call(arguments, index),
-                superMethods = superClass ? Object.assign({}, classes[superClass.CLASSID].MethodNames) : {},
+                superMethods = {},
                 data,
                 name;
+
+            if (superClass) {
+                Object.assign(superMethods, classes[superClass.CLASSID].SuperMethods);
+                superMethods.prototype = Object.assign({}, superMethods.prototype);
+            } else {
+                superMethods.prototype = {};
+            }
 
             Class.CLASSID = 'CLASS-' + classIndex++;
             initValues['interface'] = interfaceMethods;
             privateFields.push('interface');
 
             function fillProperties(name, fields) {
+                var flag = name === 'protected';
                 if (data = realProperties[name]) {
                     for (name in data) {
                         if (data.hasOwnProperty(name)) {
-                            if (data[name] !== undefined) {
+                            if (flag && 'function' === typeof data[name] && !data[name].CLASSID) {
+                                superMethods[name] = makeSuperMethod(name);
+                                superMethods.prototype[name] = initValues[name] = makeProxy(Class, data[name]);
+                            } else if (data[name] !== undefined) {
                                 initValues[name] = data[name];
                             }
                             fields.push(name);
@@ -1987,6 +1998,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                         Class.prototype[name] = makeProxy(Class, data[name]);
                         if ('function' === typeof data[name] && !data[name].CLASSID) {
                             superMethods[name] = makeSuperMethod(name);
+                            superMethods.prototype[name] = Class.prototype[name];
                         }
                     }
                 }
