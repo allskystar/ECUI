@@ -1,12 +1,6 @@
 /*
 @example
 <div ui="type:month-view;date:2009/04/17"></div>
-
-@fields
-_bRowExtra  - 当前是否有行扩展
-_nYear      - 年份
-_nMonth     - 月份(0-11)
-selected  - 当前选择的日历单元格
 */
 (function () {
 //{if 0}//
@@ -57,6 +51,8 @@ selected  - 当前选择的日历单元格
                 cells: undefined,
                 first: undefined,
                 last: undefined,
+                year: undefined,
+                month: undefined,
 
                 /**
                  * 选中某个日期单元格。
@@ -246,7 +242,7 @@ selected  - 当前选择的日历单元格
              * @return {number} 月份(1-12)
              */
             getMonth: function () {
-                return this._nMonth + 1;
+                return this.month + 1;
             },
 
             /**
@@ -266,7 +262,7 @@ selected  - 当前选择的日历单元格
              * @return {number} 年份(19xx-20xx)
              */
             getYear: function () {
-                return this._nYear;
+                return this.year;
             },
 
             /**
@@ -277,7 +273,7 @@ selected  - 当前选择的日历单元格
              * @param {number} offsetMonth 日历移动的月份数
              */
             move: function (offsetMonth) {
-                var time = new Date(this._nYear, this._nMonth + offsetMonth, 1);
+                var time = new Date(this.year, this.month + offsetMonth, 1);
                 this.setView(time.getFullYear(), time.getMonth() + 1);
             },
 
@@ -326,8 +322,8 @@ selected  - 当前选择的日历单元格
                     day = -(firstDay.getDay() + 7 - this.weekday) % 7,
                     begin = firstDay,
                     end = lastDay,
-                    oldYear = this._nYear,
-                    oldMonth = this._nMonth;
+                    oldYear = this.year,
+                    oldMonth = this.month;
 
                 today = new Date(today.getFullYear(), today.getMonth(), today.getDate());
 
@@ -338,8 +334,8 @@ selected  - 当前选择的日历单元格
                     end = this.end;
                 }
 
-                this._nYear = dateYear;
-                this._nMonth = dateMonth;
+                this.year = dateYear;
+                this.month = dateMonth;
                 this.first = firstDay;
                 this.last = lastDay;
 
@@ -355,7 +351,6 @@ selected  - 当前选择的日历单元格
                         if (date >= begin && date <= end) {
                             if (index && !(index % 7)) {
                                 dom.removeClass(dom.parent(el), 'ui-extra');
-                                delete item._bRowExtra;
                             }
                             dom.removeClass(el, 'ui-extra');
                             delete item.extra;
@@ -364,9 +359,11 @@ selected  - 当前选择的日历单元格
                             }
                             item.enable();
                         } else {
-                            if (index && !(index % 7) && !item._bRowExtra) {
-                                dom.addClass(dom.parent(el), 'ui-extra');
-                                item._bRowExtra = true;
+                            if (index && !(index % 7)) {
+                                var parent = dom.parent(el);
+                                if (!dom.hasClass(parent, 'ui-extra')) {
+                                    dom.addClass(parent, 'ui-extra');
+                                }
                             }
                             if (!item.extra) {
                                 dom.addClass(el, 'ui-extra');

@@ -1,9 +1,6 @@
 /*
 @example
 <div ui="type:calendar;year:2009;month:11"></div>
-
-@fields
-_eTitle        - 日历头部信息提示区
 */
 //{if 0}//
 (function () {
@@ -24,6 +21,10 @@ _eTitle        - 日历头部信息提示区
         ui.MonthView,
         'ui-calendar',
         {
+            'private': {
+                title: undefined
+            },
+
             /**
              * 控件头部展示格式。
              */
@@ -37,17 +38,17 @@ _eTitle        - 日历头部信息提示区
              */
             Button: core.inherits(
                 ui.Button,
-                function (el, options) {
-                    ui.Button.call(this, el, options);
-                    this._nMove = options.move;
-                },
                 {
+                    DEFAULT_OPTIONS: {
+                        move: Number(0)
+                    },
+
                     /**
                      * @override
                      */
                     $click: function (event) {
                         ui.Button.prototype.$click.call(this, event);
-                        this.getParent().move(this._nMove);
+                        this.getParent().move(this.move);
                     }
                 }
             ),
@@ -64,7 +65,7 @@ _eTitle        - 日历头部信息提示区
              * @override
              */
             $dispose: function () {
-                this._eTitle = null;
+                this.title = null;
                 ui.MonthView.prototype.$dispose.call(this);
             },
 
@@ -90,7 +91,7 @@ _eTitle        - 日历头部信息提示区
                 // 获取el所有直属节点
                 var headers = dom.children(el.firstChild);
                 // 定义头部展示区
-                this._eTitle = headers[0];
+                this.title = headers[0];
                 core.$fastCreate(this.Button, headers[1], this, {move: -12});
                 core.$fastCreate(this.Button, headers[2], this, {move: -1});
                 core.$fastCreate(this.Button, headers[3], this, {move: 1});
@@ -106,7 +107,7 @@ _eTitle        - 日历头部信息提示区
              * @return {HTMLElement} title 元素
              */
             getTitle: function () {
-                return this._eTitle;
+                return this.title;
             },
 
             /**
@@ -117,7 +118,7 @@ _eTitle        - 日历头部信息提示区
              * @param {number} month 月(1-12)
              */
             setTitle: function (year, month) {
-                this._eTitle.innerHTML = util.stringFormat(this.TITLEFORMAT, year, month);
+                this.title.innerHTML = util.stringFormat(this.TITLEFORMAT, year, month);
             }
         }
     );

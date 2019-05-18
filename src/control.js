@@ -44,17 +44,19 @@
                 this.className = el.className.trim().split(' ')[0];
             }
 
-            this.capturable = options.capturable !== false;
-            this.disabled = !!options.disabled;
-            this.focusable = options.focusable !== false;
-            this.userSelect = options.userSelect !== false;
-
             this.status = ['', ' '];
 
             this.width = el.style.width;
             this.height = el.style.height;
         },
         {
+            DEFAULT_OPTIONS: {
+                capturable: Boolean(true),
+                disabled:   Boolean(false),
+                focusable:  Boolean(true),
+                userSelect: Boolean(true)
+            },
+
             'private': {
                 parent:     undefined,
                 main:       undefined,
@@ -66,12 +68,8 @@
                 width:      undefined,
                 height:     undefined,
                 cached:     false,
-                capturable: undefined,
-                disabled:   undefined,
-                focusable:  undefined,
                 gesture:    true,
                 readied:    false,
-                userSelect: undefined,
 
                 /**
                  * 设置控件的父对象。

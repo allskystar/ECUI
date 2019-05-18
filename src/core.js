@@ -2760,13 +2760,17 @@ outer:          for (var caches = [], target = event.target, el; target && targe
 
         /**
          * 查询满足条件的控件列表。
+         * 查询函数允许传入一段语法文本，多个限制条件使用#号分隔，如 instanceof ecui.ui.Item # getParent()===ecui.get('select')
          * @public
          *
-         * @param {Function} fn 查询函数
+         * @param {Function|string} fn 查询函数或语法字符串
          * @param {object} thisArg fn执行过程中的this对象
          * @return {Array} 控件列表
          */
         query: function (fn, thisArg) {
+            if ('string' === typeof fn) {
+                fn = new Function('$', 'return $ ' + fn.split('#').join(' && $'));
+            }
             return independentControls.filter(fn, thisArg);
         },
 
