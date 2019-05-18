@@ -45,12 +45,13 @@
                 this.stop();
 
                 this.stop = util.timer(
-                    function () {
+                    function (format) {
                         var date = new Date();
-                        this.getBody().innerHTML = util.stringFormat(this.format, ('0' + date.getHours()).slice(-2), ('0' + date.getMinutes()).slice(-2), ('0' + date.getSeconds()).slice(-2), ('000' + date.getMilliseconds()).slice(-4));
+                        this.setContent(util.stringFormat(format, ('0' + date.getHours()).slice(-2), ('0' + date.getMinutes()).slice(-2), ('0' + date.getSeconds()).slice(-2), ('000' + date.getMilliseconds()).slice(-4)));
                     },
                     -1,
-                    this
+                    this,
+                    this.format
                 );
             },
 
