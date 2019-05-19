@@ -39,12 +39,12 @@
 
             this.$setBody(titleEl);
 
-            var selected = +options.selected || 0;
+            var selectedIndex = +options.selected || 0;
             this.setSelected = function (index) {
-                selected = index;
+                selectedIndex = 'number' === typeof index ? index : Math.max(0, this.getItems().indexOf(index));
             };
             this.getSelected = function () {
-                return selected;
+                return this.getItem[selectedIndex] || selectedIndex;
             };
         },
         {
