@@ -1695,17 +1695,33 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
         }
 
         function setProtected(caller, Class, caches) {
+            function set(name) {
+                if (names.indexOf(name) < 0) {
+                    if (caller.hasOwnProperty(name)) {
+                        caches[name] = caller[name];
+                    }
+                    caller[name] = caller[clazz.CLASSID][name];
+                    names.push(name);
+                }
+            }
+
             if (caller) {
                 for (var names = [], clazz = caller.constructor; clazz; clazz = clazz['super']) {
-                    classes[clazz.CLASSID].ProtectedFields.forEach(function (name) {
-                        if (names.indexOf(name) < 0) {
-                            if (caller.hasOwnProperty(name)) {
-                                caches[name] = caller[name];
-                            }
-                            caller[name] = caller[clazz.CLASSID][name];
-                            names.push(name);
-                        }
-                    });
+                    classes[clazz.CLASSID].ProtectedFields.forEach(set);
+                }
+            }
+        }
+
+        function setFinal(caller) {
+            function set(name) {
+                if (caller[clazz.CLASSID].hasOwnProperty(name)) {
+                    caller[name] = caller[clazz.CLASSID][name];
+                }
+            }
+
+            if (caller) {
+                for (var clazz = caller.constructor; clazz; clazz = clazz['super']) {
+                    classes[clazz.CLASSID].FinalFields.forEach(set);
                 }
             }
         }
@@ -1725,22 +1741,38 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
         }
 
         function resetProtected(caller, Class, caches) {
+            function reset(name) {
+                if (names.indexOf(name) < 0) {
+                    if ('function' !== classes[clazz.CLASSID][name]) {
+                        // 函数不允许回写
+                        caller[clazz.CLASSID][name] = caller[name];
+                    }
+                    if (caches.hasOwnProperty(name)) {
+                        caller[name] = caches[name];
+                    } else {
+                        delete caller[name];
+                    }
+                    names.push(name);
+                }
+            }
+
             if (caller) {
                 for (var names = [], clazz = caller.constructor; clazz; clazz = clazz['super']) {
-                    classes[clazz.CLASSID].ProtectedFields.forEach(function (name) {
-                        if (names.indexOf(name) < 0) {
-                            if ('function' !== classes[clazz.CLASSID][name]) {
-                                // 函数不允许回写
-                                caller[clazz.CLASSID][name] = caller[name];
-                            }
-                            if (caches.hasOwnProperty(name)) {
-                                caller[name] = caches[name];
-                            } else {
-                                delete caller[name];
-                            }
-                            names.push(name);
-                        }
-                    });
+                    classes[clazz.CLASSID].ProtectedFields.forEach(reset);
+                }
+            }
+        }
+
+        function resetFinal(caller) {
+            function reset(name) {
+                if (caller.hasOwnProperty(name) && !caller[clazz.CLASSID].hasOwnProperty(name)) {
+                    caller[clazz.CLASSID][name] = caller[name];
+                }
+            }
+
+            if (caller) {
+                for (var clazz = caller.constructor; clazz; clazz = clazz['super']) {
+                    classes[clazz.CLASSID].FinalFields.forEach(reset);
                 }
             }
         }
@@ -1759,15 +1791,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                 return;
             }
 
-            if (caller) {
-                for (var clazz = caller.constructor; clazz; clazz = clazz['super']) {
-                    classes[clazz.CLASSID].FinalFields.forEach(function (name) {
-                        if (caller.hasOwnProperty(name) && !caller[clazz.CLASSID].hasOwnProperty(name)) {
-                            caller[clazz.CLASSID][name] = caller[name];
-                        }
-                    });
-                }
-            }
+            resetFinal(caller);
 
             resetPrivate.apply(null, item);
             setPrivate(caller, Class, caches);
@@ -1778,15 +1802,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
 
             callStack.push([caller, Class, caches]);
 
-            if (caller) {
-                for (clazz = caller.constructor; clazz; clazz = clazz['super']) {
-                    classes[clazz.CLASSID].FinalFields.forEach(function (name) {
-                        if (caller[clazz.CLASSID].hasOwnProperty(name)) {
-                            caller[name] = caller[clazz.CLASSID][name];
-                        }
-                    });
-                }
-            }
+            setFinal(caller);
         }
 
         function onafter() {
@@ -1803,15 +1819,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                 return;
             }
 
-            if (caller) {
-                for (var clazz = caller.constructor; clazz; clazz = clazz['super']) {
-                    classes[clazz.CLASSID].FinalFields.forEach(function (name) {
-                        if (caller.hasOwnProperty(name) && !caller[clazz.CLASSID].hasOwnProperty(name)) {
-                            caller[clazz.CLASSID][name] = caller[name];
-                        }
-                    });
-                }
-            }
+            resetFinal(caller);
 
             if (caller !== item[0]) {
                 resetProtected.apply(null, args);
@@ -1820,15 +1828,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
             resetPrivate.apply(null, args);
             setPrivate.apply(null, item);
 
-            if (caller) {
-                for (clazz = caller.constructor; clazz; clazz = clazz['super']) {
-                    classes[clazz.CLASSID].FinalFields.forEach(function (name) {
-                        if (caller[clazz.CLASSID].hasOwnProperty(name)) {
-                            caller[name] = caller[clazz.CLASSID][name];
-                        }
-                    });
-                }
-            }
+            setFinal(caller);
         }
 
         function checkProtected() {
@@ -1854,6 +1854,14 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                 } finally {
                     onafter();
                 }
+                return ret;
+            };
+        }
+
+        function addProxy(oldProxy, newProxy) {
+            return function () {
+                var ret = oldProxy.apply(this, arguments);
+                newProxy.apply(this, arguments);
                 return ret;
             };
         }
@@ -2013,13 +2021,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
             interfaces.forEach(function (inf) {
                 for (var name in classes[inf.CLASSID].PublicFields) {
                     if (Class.prototype[name]) {
-                        Class.prototype[name] = (function (oldFn, newFn) {
-                            return function () {
-                                var ret = oldFn.apply(this, arguments);
-                                newFn.apply(this, arguments);
-                                return ret;
-                            };
-                        }(Class.prototype[name], classes[inf.CLASSID].PublicFields[name]));
+                        Class.prototype[name] = addProxy(Class.prototype[name], classes[inf.CLASSID].PublicFields[name]);
                     } else {
                         Class.prototype[name] = classes[inf.CLASSID].PublicFields[name];
                         superMethods[name] = makeSuperMethod(name);

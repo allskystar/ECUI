@@ -12,70 +12,64 @@
     <script type="text/javascript" src="options.js"></script>
     <script type="text/javascript" src="ecui.js"></script>
     <script>
-test = ecui.util.makeStatic(function () {
-    console.log(son1.value, son2.value);
-});
-Imp = ecui.util.makeInterface(
-    {
-        test: function () {
-            console.log('imp', this['super']);
-            console.log('imp-test');
-        }
-    }
-);
 Base = ecui.util.makeClass(
     null,
+    function () {
+    },
     {
         'private': {
-            'visit':  function () {
-                this.visit = 10;
-                test();
-                console.log(son1.value, son2.value);
-            }
+            a: 1
         },
-        final: {
-            value: undefined
-        },
-        'public': {
-            log:  function () {
-                this.visit();
-                console.log(this.value);
-            }
+
+        printA: function () {
+            console.log(this.a);
         }
-    },
-    Imp
+    }
 );
 Son = ecui.util.makeClass(
     Base,
     function (value) {
         _super();
-        this.value = value;
     },
     {
-        'public': {
-            log: function () {
-                console.log(this.value);
-            },
-            test: function () {
-                _super.log();
-            }
+        'private': {
+            a: 10
+        },
+
+        printA: function () {
+            _super.printA();
+            console.log(this.a);
         }
     }
 );
-son1 = new Son('son1');
-son2 = new Son('son2');
-son1.test();
+son = new Son();
+son.printA();
 //son2.value = 10;
 //son2.visit();
     </script>
 </head>
 <body>
-<div ui="type:tab">
-    <div>
-        <strong>标题1</strong>
-        标题1文本内容
-    </div>
-    <strong ui="selected:true">标题2</strong>
+<div ui="type:table">
+  <table>
+    <!-- 表头区域 -->
+    <thead>
+      <tr>
+        <th style="width:200px;">公司名</th>
+        <th style="width:200px;">url</th>
+        <th style="width:250px;">地址</th>
+        <th style="width:100px;">创办时间</th>
+      </tr>
+    </thead>
+    <!-- 内容行区域 -->
+    <tbody>
+      <tr>
+        <td>百度</td>
+        <td>www.baidu.com</td>
+        <td>中国北京中关村</td>
+        <td>1999</td>
+      </tr>
+    </tbody>
+  </table>
 </div>
 </body>
 </html>

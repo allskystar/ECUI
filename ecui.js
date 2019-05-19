@@ -29,13 +29,13 @@ var ecui, _super;
     document.write('<script type="text/javascript" src="src/base/progress.js"></script>');
     document.write('<script type="text/javascript" src="src/base/progress-bar.js"></script>');
     document.write('<script type="text/javascript" src="src/base/progress-circle.js"></script>');
+    document.write('<script type="text/javascript" src="src/base/submit.js"></script>');
     document.write('<script type="text/javascript" src="src/base/tab.js"></script>');
-//     document.write('<script type="text/javascript" src="src/base/table.js"></script>');
-//     document.write('<script type="text/javascript" src="src/base/inline-table.js"></script>');
-//     document.write('<script type="text/javascript" src="src/base/locked-table.js"></script>');
+    document.write('<script type="text/javascript" src="src/base/table.js"></script>');
+    document.write('<script type="text/javascript" src="src/base/inline-table.js"></script>');
+    document.write('<script type="text/javascript" src="src/base/locked-table.js"></script>');
 
 //     document.write('<script type="text/javascript" src="src/base/tree-view.js"></script>');
-//     document.write('<script type="text/javascript" src="src/base/submit.js"></script>');
 //     document.write('<script type="text/javascript" src="src/base/timer.js"></script>');
 
 //     document.write('<script type="text/javascript" src="src/input/upload.js"></script>');

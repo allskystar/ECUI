@@ -2,26 +2,26 @@
 @example
 <!-- 如果需要滚动条，请设置div的width/height以及table的width样式，其中table的width如果大于div的width将出现横向滚动条，如果table的高度大于div的height将出现纵向滚动条 -->
 <div ui="type:table">
-  <table>
+    <table>
     <!-- 表头区域 -->
     <thead>
-      <tr>
-        <th style="width:200px;">公司名</th>
-        <th style="width:200px;">url</th>
-        <th style="width:250px;">地址</th>
-        <th style="width:100px;">创办时间</th>
-      </tr>
+        <tr>
+            <th style="width:200px;">公司名</th>
+            <th style="width:200px;">url</th>
+            <th style="width:250px;">地址</th>
+            <th style="width:100px;">创办时间</th>
+        </tr>
     </thead>
     <!-- 内容行区域 -->
     <tbody>
-      <tr>
-        <td>百度</td>
-        <td>www.baidu.com</td>
-        <td>中国北京中关村</td>
-        <td>1999</td>
-      </tr>
+        <tr>
+            <td>百度</td>
+            <td>www.baidu.com</td>
+            <td>中国北京中关村</td>
+            <td>1999</td>
+        </tr>
     </tbody>
-  </table>
+    </table>
 </div>
 
 @fields
@@ -66,39 +66,6 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
             table = row.getParent();
 
         return core.$fastCreate(table.Cell, main, row, Object.assign({}, table._aHCells[row._aElements.indexOf(main)]._oOptions));
-    }
-
-    /**
-     * 表格控件初始化一行。
-     * @private
-     *
-     * @param {ecui.ui.Table} table 表格控件
-     * @param {ecui.ui.Table.Row} row 行控件
-     */
-    function initRow(table, row) {
-        for (var i = 0, list = table._aHCells, el, item; item = list[i]; ) {
-            if ((el = row._aElements[i++]) && el !== item.getMain()) {
-                var width = item.getWidth() - item.getMinimumWidth();
-                while (row._aElements[i] === null) {
-                    width += list[i++].getWidth();
-                }
-                el.style.width = width + 'px';
-            }
-        }
-    }
-
-    /**
-     * 表格控件恢复一行。
-     * @private
-     *
-     * @param {ecui.ui.Table.Row} row 行控件
-     */
-    function resizeRow(row) {
-        row._aElements.forEach(function (item) {
-            if (item) {
-                item.style.width = '';
-            }
-        });
     }
 
     /**
@@ -481,6 +448,32 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
                     /**
                      * @override
                      */
+                    $initStructure: function () {
+                        for (var i = 0, list = this.getParent()._aHCells, el, item; item = list[i]; ) {
+                            if ((el = this._aElements[i++]) && el !== item.getMain()) {
+                                var width = item.getWidth() - item.getMinimumWidth();
+                                while (this._aElements[i] === null) {
+                                    width += list[i++].getWidth();
+                                }
+                                el.style.width = width + 'px';
+                            }
+                        }
+                    },
+
+                    /**
+                     * @override
+                     */
+                    $restoreStructure: function () {
+                        this._aElements.forEach(function (item) {
+                            if (item) {
+                                item.style.width = '';
+                            }
+                        });
+                    },
+
+                    /**
+                     * @override
+                     */
                     $show: function () {
                         var table = this.getParent(),
                             index = table._aRows.indexOf(this),
@@ -701,10 +694,10 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
                     item.$setSize(item.getWidth());
                 });
                 this._aHeadRows.forEach(function (item) {
-                    initRow(this, item);
+                    item.$initStructure();
                 }, this);
                 this._aRows.forEach(function (item) {
-                    initRow(this, item);
+                    item.$initStructure();
                 }, this);
 
                 dom.insertBefore(this._uHead.getBody(), this._uHead.getMain().lastChild.lastChild);
@@ -764,10 +757,10 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
                 _super.$restoreStructure(event);
 
                 this._aHeadRows.forEach(function (item) {
-                    resizeRow(item);
+                    item.$restoreStructure();
                 });
                 this._aRows.forEach(function (item) {
-                    resizeRow(item);
+                    item.$restoreStructure();
                 });
                 this._aHCells.forEach(function (item) {
                     item.$restoreStructure();
