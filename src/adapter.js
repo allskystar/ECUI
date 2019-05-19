@@ -1783,7 +1783,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
 
             if (caller) {
                 caches['super'] = _super;
-                _super = caller[Class.CLASSID]['super'];
+                _super = Class['super'] ? Object.assign(Class['super'].bind(caller), caller[Class.CLASSID]['super']) : null;
             }
 
             if (Class === item[1]) {
@@ -1903,7 +1903,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                     }
 
                     if (superClass) {
-                        clazz = this[Class.CLASSID]['super'] = superClass.bind(this);
+                        clazz = this[Class.CLASSID]['super'] = {};
                         Object.assign(clazz, classes[superClass.CLASSID].SuperMethods);
                         clazz['super'] = superClass.prototype;
                         clazz['this'] = this;
