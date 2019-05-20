@@ -23,7 +23,7 @@
             this.path = el.lastChild.lastChild;
         },
         {
-            'private': {
+            private: {
                 path: undefined
             },
 

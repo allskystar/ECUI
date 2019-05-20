@@ -25,13 +25,7 @@
 </div>
 
 @fields
-_nHeadFloat  - 表头飘浮的位置
-_nHeadMargin - 表头距离表底的高度
-_aHCells     - 表格头单元格控件对象
-_aRows       - 表格数据行对象
-_uHead       - 表头区域
 _aElements   - 行控件属性，行的列Element对象，如果当前列需要向左合并为null，需要向上合并为false
-_bMerge      - 行控件属性，是否在表格最后一列添加新列时自动合并
 */
 (function () {
 //{if 0}//
@@ -65,7 +59,7 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
         var row = dom.parent(main).getControl(),
             table = row.getParent();
 
-        return core.$fastCreate(table.Cell, main, row, Object.assign({}, table._aHCells[row._aElements.indexOf(main)]._oOptions));
+        return core.$fastCreate(table.Cell, main, row, Object.assign({}, table.hcells[row._aElements.indexOf(main)]._oOptions));
     }
 
     /**
@@ -115,9 +109,6 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
                 table = el.getElementsByTagName('TABLE')[0];
             }
 
-            this._nHeadFloat = options.headFloat === undefined ? undefined : options.headFloat === true ? 0 : +options.headFloat;
-            this._nHeadMargin = options.headMargin || 0;
-
             var i = 0,
                 list = dom.children(table),
                 head = list[0],
@@ -127,8 +118,8 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
                 rowClass = this._sRowClass = ' ' + this.getUnitClass(ui.Table, 'row'),
                 hcellClass = this._sHCellClass = ' ' + this.getUnitClass(ui.Table, 'hcell'),
                 cellClass = this._sCellClass = ' ' + this.getUnitClass(ui.Table, 'cell'),
-                rows = this._aRows = [],
-                cols = this._aHCells = [],
+                rows = this.rows = [],
+                cols = this.hcells = [],
                 colspans = [];
 
             table.setAttribute('cellSpacing', '0');
@@ -166,7 +157,7 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
             o.previousSibling.appendChild(table);
             // 初始化表格区域
             this.$setBody(body);
-            (this._uHead = core.$fastCreate(ui.Control, o, this)).$setBody(head);
+            (this.$Head = core.$fastCreate(ui.Control, o, this)).$setBody(head);
 
             // 以下初始化所有的行控件
             for (i = 0; o = list[i]; i++) {
@@ -209,7 +200,7 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
                             for (i = 0; o = rows[i]; i++) {
                                 el = o._aElements[j];
                                 if (el === undefined) {
-                                    this._aHeadRows = this._aRows.splice(0, headRowCount);
+                                    this.headRows = this.rows.splice(0, headRowCount);
                                     return;
                                 }
                                 if (el) {
@@ -228,6 +219,23 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
             }
         },
         {
+            DEFAULT_OPTIONS: {
+                headFloat: function (value) {
+                    return value === undefined ? undefined : value === true ? 0 : +value;
+                },
+                headMargin: Number(0)
+            },
+
+            private: {
+                row: undefined,
+                hcells: undefined,
+                headRows: undefined
+            },
+
+            protected: {
+                $Head: undefined
+            },
+
             /**
              * 单元格部件。
              * @unit
@@ -289,12 +297,12 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
                     $setStyles: function (name, value) {
                         var table = this.getParent(),
                             body = this.getMain(),
-                            cols = table._aHCells,
+                            cols = table.hcells,
                             index = cols.indexOf(this);
 
                         body.style[name] = value;
 
-                        table._aHeadRows.concat(table._aRows).forEach(function (item) {
+                        table.headRows.concat(table.rows).forEach(function (item) {
                             // 以下使用 body 表示列元素列表
                             body = item._aElements;
                             item = body[index];
@@ -341,7 +349,7 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
                      * @return {ecui.ui.Table.Cell} 单元格控件
                      */
                     getCell: function (rowIndex) {
-                        return this.getParent().getCell(rowIndex, this._aHCells.indexOf(this));
+                        return this.getParent().getCell(rowIndex, this.hcells.indexOf(this));
                     },
 
                     /**
@@ -352,8 +360,8 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
                      */
                     getCells: function () {
                         var result = [],
-                            i = this._aHCells.indexOf(this);
-                        this._aRows.forEach(function (item, index) {
+                            i = this.hcells.indexOf(this);
+                        this.rows.forEach(function (item, index) {
                             result[index] = item.getCell(i);
                         });
                         return result;
@@ -376,11 +384,11 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
              */
             Row: core.inherits(
                 ui.Control,
-                function (el, options) {
-                    _super(el, options);
-                    this._bMerge = !!options.merge;
-                },
                 {
+                    DEFAULT_OPTIONS: {
+                        merge: Boolean(false)
+                    },
+
                     /**
                      * @override
                      */
@@ -414,11 +422,11 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
                      */
                     $hide: function () {
                         var table = this.getParent(),
-                            index = table._aRows.indexOf(this),
-                            nextRow = table._aRows[index + 1],
+                            index = table.rows.indexOf(this),
+                            nextRow = table.rows[index + 1],
                             cell;
 
-                        for (var i = 0, o; table._aHCells[i]; i++) {
+                        for (var i = 0, o; table.hcells[i]; i++) {
                             o = this._aElements[i];
                             if (o === false) {
                                 o = table.$getElement(index - 1, i);
@@ -449,7 +457,7 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
                      * @override
                      */
                     $initStructure: function () {
-                        for (var i = 0, list = this.getParent()._aHCells, el, item; item = list[i]; ) {
+                        for (var i = 0, list = this.getParent().hcells, el, item; item = list[i]; ) {
                             if ((el = this._aElements[i++]) && el !== item.getMain()) {
                                 var width = item.getWidth() - item.getMinimumWidth();
                                 while (this._aElements[i] === null) {
@@ -476,11 +484,11 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
                      */
                     $show: function () {
                         var table = this.getParent(),
-                            index = table._aRows.indexOf(this),
-                            nextRow = table._aRows[index + 1],
+                            index = table.rows.indexOf(this),
+                            nextRow = table.rows[index + 1],
                             cell;
 
-                        for (var i = 0, o; table._aHCells[i]; i++) {
+                        for (var i = 0, o; table.hcells[i]; i++) {
                             o = this._aElements[i];
                             if (o === false) {
                                 o = table.$getElement(index - 1, i);
@@ -538,7 +546,7 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
                      * @param {boolean} flag 单元格尾部是否需要合并(针对新增的列)
                      */
                     setMerge: function (flag) {
-                        this._bMerge = flag;
+                        this.merge = flag;
                     },
 
                     /**
@@ -564,24 +572,24 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
                 // }
 
                 if (!(ieVersion < 9)) {
-                    for (var el = this._uHead.getMain(); el !== document.body; el = dom.parent(el)) {
+                    for (var el = this.$Head.getMain(); el !== document.body; el = dom.parent(el)) {
                         if (dom.getStyle(el, 'transform') !== 'none') {
                             return;
                         }
                     }
                 }
 
-                var style = this._uHead.getMain().style,
+                var style = this.$Head.getMain().style,
                     pos = dom.getPosition(this._eLayout),
                     view = util.getView(),
                     top = pos.top - view.top,
                     main = this.getMain();
 
-                this.$$fixedTop = Math.min(this.getClientHeight() - this.$$paddingTop - this._nHeadMargin + top, Math.max(this._nHeadFloat || 0, top));
+                this.$$fixedTop = Math.min(this.getClientHeight() - this.$$paddingTop - this.headMargin + top, Math.max(this.headFloat || 0, top));
 
-                if (this._nHeadFloat !== undefined) {
+                if (this.headFloat !== undefined) {
                     if (event.deltaY) {
-                        if (this.isShow() && (this.$$fixedTop <= this._nHeadFloat || (dom.contain(main, event.target) && main.scrollHeight !== main.clientHeight))) {
+                        if (this.isShow() && (this.$$fixedTop <= this.headFloat || (dom.contain(main, event.target) && main.scrollHeight !== main.clientHeight))) {
                             if (this._oScrollHandler) {
                                 this._oScrollHandler();
                                 this._oScrollHandler = null;
@@ -609,7 +617,7 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
             $cache: function (style) {
                 _super.$cache(style);
 
-                this.$$paddingTop = this._uHead.getBody().offsetHeight;
+                this.$$paddingTop = this.$Head.getBody().offsetHeight;
 
                 var table = dom.parent(this.getBody());
                 this.$$tableWidth = table.offsetWidth;
@@ -645,10 +653,10 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
              */
             $getElement: function (rowIndex, colIndex) {
                 if (rowIndex < 0) {
-                    var rows = this._aHeadRows;
-                    rowIndex += this._aHeadRows.length;
+                    var rows = this.headRows;
+                    rowIndex += this.headRows.length;
                 } else {
-                    rows = this._aRows;
+                    rows = this.rows;
                 }
 
                 var cols = rows[rowIndex] && rows[rowIndex]._aElements,
@@ -668,15 +676,15 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
             $headscroll: function () {
                 if (core.getScrollNarrow()) {
                     var el = dom.parent(dom.parent(this.getBody()));
-                    this._uHead.getMain().scrollLeft = this._eLayout.scrollLeft;
+                    this.$Head.getMain().scrollLeft = this._eLayout.scrollLeft;
                     el.scrollLeft = this._eLayout.scrollLeft;
                     el.scrollTop = this._eLayout.scrollTop;
                 }
 
-                if (this._nHeadFloat !== undefined) {
-                    var style = this._uHead.getMain().style;
+                if (this.headFloat !== undefined) {
+                    var style = this.$Head.getMain().style;
                     style.position = '';
-                    style.top = (Math.min(this.getClientHeight() - this.$$paddingTop - this._nHeadMargin, Math.max(0, this._nHeadFloat + util.getView().top - dom.getPosition(this.getMain()).top))) + 'px';
+                    style.top = (Math.min(this.getClientHeight() - this.$$paddingTop - this.headMargin, Math.max(0, this.headFloat + util.getView().top - dom.getPosition(this.getMain()).top))) + 'px';
                     style.left = '0px';
                     if (!core.getScrollNarrow()) {
                         style.clip = ieVersion < 8 ? 'rect(0,100%,100%,0)' : 'auto';
@@ -690,17 +698,17 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
             $initStructure: function (width, height) {
                 _super.$initStructure(width, height);
 
-                this._aHCells.forEach(function (item) {
+                this.hcells.forEach(function (item) {
                     item.$setSize(item.getWidth());
                 });
-                this._aHeadRows.forEach(function (item) {
+                this.headRows.forEach(function (item) {
                     item.$initStructure();
                 }, this);
-                this._aRows.forEach(function (item) {
+                this.rows.forEach(function (item) {
                     item.$initStructure();
                 }, this);
 
-                dom.insertBefore(this._uHead.getBody(), this._uHead.getMain().lastChild.lastChild);
+                dom.insertBefore(this.$Head.getBody(), this.$Head.getMain().lastChild.lastChild);
 
                 var narrow = core.getScrollNarrow(),
                     style = dom.parent(dom.parent(this.getBody())).style;
@@ -712,7 +720,7 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
                     this._eLayout.lastChild.style.height = this.$$tableHeight + 'px';
 
                     style.top = this.$$paddingTop + 'px';
-                    style.width = this._uHead.getMain().style.width = (width - (this.$$tableHeight > height || (this.$$tableHeight + narrow > height && this.$$tableWidth > width) ? narrow : 0)) + 'px';
+                    style.width = this.$Head.getMain().style.width = (width - (this.$$tableHeight > height || (this.$$tableHeight + narrow > height && this.$$tableWidth > width) ? narrow : 0)) + 'px';
                     style.height = (height - this.$$paddingTop - (this.$$tableWidth > width || (this.$$tableWidth + narrow > width && this.$$tableHeight > height) ? narrow : 0)) + 'px';
                 } else {
                     style.marginTop = this.$$paddingTop + 'px';
@@ -756,17 +764,17 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
             $restoreStructure: function (event) {
                 _super.$restoreStructure(event);
 
-                this._aHeadRows.forEach(function (item) {
+                this.headRows.forEach(function (item) {
                     item.$restoreStructure();
                 });
-                this._aRows.forEach(function (item) {
+                this.rows.forEach(function (item) {
                     item.$restoreStructure();
                 });
-                this._aHCells.forEach(function (item) {
+                this.hcells.forEach(function (item) {
                     item.$restoreStructure();
                 });
 
-                dom.insertBefore(this._uHead.getBody(), this.getBody());
+                dom.insertBefore(this.$Head.getBody(), this.getBody());
 
                 var style = dom.parent(dom.parent(this.getBody())).style;
 
@@ -816,8 +824,8 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
              * @return {ecui.ui.Table.HCell} 表头单元格控件
              */
             addColumn: function (options, index) {
-                var headRowCount = this._aHeadRows.length,
-                    rows = this._aHeadRows.concat(this._aRows),
+                var headRowCount = this.headRows.length,
+                    rows = this.headRows.concat(this.rows),
                     primary = options.primary || '',
                     el = dom.create(
                         'TH',
@@ -829,14 +837,14 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
                     col = core.$fastCreate(this.HCell, el, this),
                     row;
 
-                if (!this._aHCells[index]) {
-                    index = this._aHCells.length;
+                if (!this.hcells[index]) {
+                    index = this.hcells.length;
                 }
 
                 primary += this._sCellClass;
                 for (var i = 0, o; row = rows[i]; i++) {
                     o = row._aElements[index];
-                    if ((o === undefined && row._bMerge) || o === null) {
+                    if ((o === undefined && row.merge) || o === null) {
                         o = null;
                         // 出现跨列的插入列操作，需要修正colspan的属性值
                         var cell = this.$getElement(i - headRowCount, index),
@@ -858,7 +866,7 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
                         if (i < headRowCount) {
                             row._aElements.splice(index, 0, row.getBody().insertBefore(el, o));
                             el.setAttribute('rowSpan', headRowCount - i);
-                            this._aHCells.splice(index, 0, col);
+                            this.hcells.splice(index, 0, col);
                             i = headRowCount - 1;
                         } else {
                             row._aElements.splice(
@@ -898,21 +906,21 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
                     body = this.getBody(),
                     html = ['<table><tbody><tr class="' + this._sRowClass + '">'],
                     rowCols = [],
-                    row = this._aRows[index],
+                    row = this.rows[index],
                     col;
 
                 if (!row) {
-                    index = this._aRows.length;
+                    index = this.rows.length;
                 }
 
-                for (var i = 0; col = this._aHCells[i]; ) {
+                for (var i = 0; col = this.hcells[i]; ) {
                     if ((row && row._aElements[i] === false) || data[i] === false) {
                         rowCols[i++] = false;
                     } else {
                         // 如果部分列被隐藏，colspan/width 需要动态计算
                         rowCols[i] = true;
                         html[j++] = '<td class="' + this._sCellClass + '" style="';
-                        for (var o = i, colspan = col.isShow() ? 1 : 0, width = col.getWidth() - col.getMinimumWidth(); (col = this._aHCells[++i]) && (data[i] === null || data[i] === undefined); ) {
+                        for (var o = i, colspan = col.isShow() ? 1 : 0, width = col.getWidth() - col.getMinimumWidth(); (col = this.hcells[++i]) && (data[i] === null || data[i] === undefined); ) {
                             rowCols[i] = null;
                             if (col.isShow()) {
                                 colspan++;
@@ -933,10 +941,10 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
 
                 body.insertBefore(el, row ? row.getMain() : null);
                 row = core.$fastCreate(this.Row, el, this);
-                this._aRows.splice(index--, 0, row);
+                this.rows.splice(index--, 0, row);
 
                 // 以下使用 col 表示上一次执行了rowspan++操作的单元格，同一个单元格只需要增加一次
-                for (i = 0, el = el.firstChild, col = null; this._aHCells[i]; i++) {
+                for (i = 0, el = el.firstChild, col = null; this.hcells[i]; i++) {
                     if (o = rowCols[i]) {
                         rowCols[i] = el;
                         el.getControl = getControlBuilder();
@@ -958,7 +966,7 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
              * @override
              */
             cache: function (force) {
-                this._aHCells.forEach(function (item) {
+                this.hcells.forEach(function (item) {
                     item.cache(force);
                 });
                 _super.cache(force);
@@ -973,7 +981,7 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
              * @return {ecui.ui.Table.Cell} 单元格控件
              */
             getCell: function (rowIndex, colIndex) {
-                rowIndex = this._aRows[rowIndex];
+                rowIndex = this.rows[rowIndex];
                 return (rowIndex && rowIndex.getCell(colIndex)) || null;
             },
 
@@ -984,7 +992,7 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
              * @return {number} 表格列的数量
              */
             getColumnCount: function () {
-                return this._aHCells.length;
+                return this.hcells.length;
             },
 
             /**
@@ -996,7 +1004,7 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
              * @return {ecui.ui.Table.HCell} 表头单元格控件
              */
             getHCell: function (index) {
-                return this._aHCells[index] || null;
+                return this.hcells[index] || null;
             },
 
             /**
@@ -1006,7 +1014,7 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
              * @return {Array} 表头单元格控件数组
              */
             getHCells: function () {
-                return this._aHCells.slice();
+                return this.hcells.slice();
             },
 
             /**
@@ -1016,7 +1024,7 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
              * @return {Array} 表头行控件数组
              */
             getHRows: function () {
-                return this._aHeadRows.slice();
+                return this.headRows.slice();
             },
 
             /**
@@ -1037,7 +1045,7 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
              * @return {ecui.ui.Table.Row} 行控件
              */
             getRow: function (index) {
-                return this._aRows[index] || null;
+                return this.rows[index] || null;
             },
 
             /**
@@ -1047,7 +1055,7 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
              * @return {number} 表格行的数量
              */
             getRowCount: function () {
-                return this._aRows.length;
+                return this.rows.length;
             },
 
             /**
@@ -1057,7 +1065,7 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
              * @return {Array} 行控件列表
              */
             getRows: function () {
-                return this._aRows.slice();
+                return this.rows.slice();
             },
 
             /**
@@ -1067,7 +1075,7 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
              * @param {number} index 列序号，从0开始计数
              */
             removeAll: function () {
-                for (var i = this._aRows.length; i--; ) {
+                for (var i = this.rows.length; i--; ) {
                     this.removeRow(i);
                 }
             },
@@ -1079,7 +1087,7 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
              * @param {number} index 列序号，从0开始计数
              */
             removeColumn: function (index) {
-                var cols = this._aHCells,
+                var cols = this.hcells,
                     col = cols[index];
 
                 if (col) {
@@ -1089,7 +1097,7 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
                     core.dispose(col);
                     cols.splice(index, 1);
 
-                    this._aRows.forEach(function (item) {
+                    this.rows.forEach(function (item) {
                         cols = item._aElements;
                         if (item = cols[index]) {
                             if (cols[index + 1] === null) {
@@ -1118,14 +1126,14 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
              */
             removeRow: function (index) {
                 var i = 0,
-                    row = this._aRows[index],
-                    rowNext = this._aRows[index + 1],
+                    row = this.rows[index],
+                    rowNext = this.rows[index + 1],
                     body = row.getBody(),
                     o;
 
                 if (row) {
                     row.hide();
-                    for (; this._aHCells[i]; i++) {
+                    for (; this.hcells[i]; i++) {
                         if (o = row._aElements[i]) {
                             if (dom.parent(o) !== body) {
                                 rowNext._aElements[i] = o;
@@ -1139,7 +1147,7 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
 
                     dom.remove(row.getMain());
                     core.dispose(row);
-                    this._aRows.splice(index, 1);
+                    this.rows.splice(index, 1);
 
                     return row;
                 }
@@ -1152,7 +1160,7 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
              * @param {number|undefine} value 表头漂浮的位置
              */
             setHeadFloat: function (value) {
-                this._nHeadFloat = value;
+                this.headFloat = value;
             }
         }
     );

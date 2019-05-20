@@ -81,7 +81,7 @@
 
     ui.Popup = _interface(
         {
-            'private': {
+            private: {
                 control: undefined
             },
 

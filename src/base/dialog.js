@@ -50,7 +50,7 @@
             this.$setBody(bodyEl);
         },
         {
-            'final': {
+            final: {
                 $Close: undefined,
                 $Title: undefined
             },

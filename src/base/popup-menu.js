@@ -30,11 +30,11 @@
         ui.Control,
         'ui-popup-menu',
         {
-            'private': {
+            private: {
                 left: true
             },
 
-            'final': {
+            final: {
                 $Popup: undefined
             },
 

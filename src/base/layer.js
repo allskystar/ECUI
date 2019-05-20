@@ -22,7 +22,7 @@
     ui.Layer = core.inherits(
         ui.Control,
         {
-            'private': {
+            private: {
                 /**
                  * 刷新所有显示的窗体的zIndex属性。
                  * @private

@@ -48,7 +48,7 @@
             };
         },
         {
-            'private': {
+            private: {
                 container: undefined
             },
 
@@ -101,7 +101,7 @@
                     }
                 },
                 {
-                    'private': {
+                    private: {
                         /**
                          * 移除容器 DOM 元素。
                          * @private

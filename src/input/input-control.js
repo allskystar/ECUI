@@ -252,7 +252,7 @@
             }
         },
         {
-            'private': {
+            private: {
                 input:      undefined,
                 blurValid:  false,
                 error:      false

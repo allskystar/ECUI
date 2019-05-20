@@ -82,7 +82,7 @@
             this.premitAlterItems();
         },
         {
-            'private': {
+            private: {
                 items: undefined,
                 prevent: undefined
             },
@@ -338,7 +338,7 @@
 
         var propertyName = '$set' + name.charAt(0).toUpperCase() + name.slice(1),
             methods = {
-                'private': {
+                private: {
                     value: undefined
                 }
             };

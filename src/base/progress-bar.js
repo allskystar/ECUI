@@ -25,7 +25,7 @@ mask   - 完成的进度比例内容区域
             this.mask = el.lastChild;
         },
         {
-            'private': {
+            private: {
                 mask: undefined
             },
 
