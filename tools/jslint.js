@@ -2274,7 +2274,7 @@ klass:              do {
     function optional_identifier(variable) {
         if (next_token.identifier) {
             advance();
-            if (token.reserved && (!option.es5 || variable)) {
+            if (token.reserved && variable) {
                 token.warn('expected_identifier_a_reserved');
             }
             return token.string;

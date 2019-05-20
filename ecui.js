@@ -1,5 +1,6 @@
 var ecui, _super;
 (function () {
+    document.write('<script type="text/javascript" src="src/class.js"></script>');
     document.write('<script type="text/javascript" src="src/adapter.js"></script>');
     document.write('<script type="text/javascript" src="src/effect.js"></script>');
     document.write('<script type="text/javascript" src="src/etpl.js"></script>');

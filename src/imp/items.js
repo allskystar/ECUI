@@ -69,7 +69,7 @@
         }
     );
 
-    ui.Items = util.makeInterface(
+    ui.Items = _interface(
         function () {
             this.prevent = 0;
             this.items = [];
@@ -383,6 +383,6 @@
             return this.value || null;
         };
 
-        return definedInterface[name] = util.makeInterface(methods);
+        return definedInterface[name] = _interface(methods);
     };
 }());

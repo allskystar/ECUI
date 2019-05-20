@@ -12,12 +12,25 @@
     <script type="text/javascript" src="options.js"></script>
     <script type="text/javascript" src="ecui.js"></script>
     <script>
-Base = ecui.util.makeClass(
-    null,
-    function () {
+BaseImp = _interface({
+    test: function () {
+        console.log('test');
+    }
+});
+
+Imp = _interface.extends(BaseImp, {
+    private: {
+        a: 'inf'
     },
+
+    printA: function () {
+        console.log(this.a);
+    }
+});
+
+Base = _class(
     {
-        'private': {
+        private: {
             a: 1
         },
 
@@ -26,24 +39,28 @@ Base = ecui.util.makeClass(
         }
     }
 );
-Son = ecui.util.makeClass(
+Son = _class.extends(
     Base,
-    function (value) {
-        _super();
-    },
     {
-        'private': {
+        private: {
             a: 10
         },
 
         printA: function () {
             _super.printA();
             console.log(this.a);
+        },
+
+        static: {
+            print: function () {
+                son.printA();
+            }
         }
-    }
+    },
+    Imp
 );
 son = new Son();
-son.printA();
+Son.print();
 //son2.value = 10;
 //son2.visit();
     </script>

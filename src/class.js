@@ -1,0 +1,476 @@
+(function () {
+    var classIndex = 1,
+        NullClass = {CLASSID: 'CLASS-0'},
+        classes = {'CLASS-0': {PrivateFields: [], ProtectedFields: [], FinalFields: []}},
+        callStack = [[null, NullClass, {}]],
+        superMethods = {};
+
+    function setPrivate(caller, Class, caches) {
+        if (!classes[Class.CLASSID]) {
+            debugger;
+        }
+        classes[Class.CLASSID].PrivateFields.forEach(function (name) {
+            if (caller.hasOwnProperty(name)) {
+                caches[name] = caller[name];
+            }
+            caller[name] = caller[Class.CLASSID][name];
+        });
+    }
+
+    function setProtected(caller, Class, caches) {
+        function set(name) {
+            if (names.indexOf(name) < 0) {
+                if (caller.hasOwnProperty(name)) {
+                    caches[name] = caller[name];
+                }
+                caller[name] = caller[clazz.CLASSID][name];
+                names.push(name);
+            }
+        }
+
+        if (caller) {
+            for (var names = [], clazz = caller.constructor; clazz; clazz = clazz.super) {
+                classes[clazz.CLASSID].ProtectedFields.forEach(set);
+            }
+        }
+    }
+
+    function setFinal(caller) {
+        function set(name) {
+            if (caller[clazz.CLASSID].hasOwnProperty(name)) {
+                caller[name] = caller[clazz.CLASSID][name];
+            }
+        }
+
+        if (caller) {
+            for (var clazz = caller.constructor; clazz; clazz = clazz.super) {
+                classes[clazz.CLASSID].FinalFields.forEach(set);
+            }
+        }
+    }
+
+    function resetPrivate(caller, Class, caches) {
+        classes[Class.CLASSID].PrivateFields.forEach(function (name) {
+            if ('function' !== typeof classes[Class.CLASSID][name]) {
+                // 函数不允许回写
+                if (caller.hasOwnProperty(name)) {
+                    caller[Class.CLASSID][name] = caller[name];
+                } else {
+                    delete caller[Class.CLASSID][name];
+                }
+            }
+            if (caches.hasOwnProperty(name)) {
+                caller[name] = caches[name];
+            } else {
+                delete caller[name];
+            }
+        });
+    }
+
+    function resetProtected(caller, Class, caches) {
+        function reset(name) {
+            if (names.indexOf(name) < 0) {
+                if ('function' !== classes[clazz.CLASSID][name]) {
+                    // 函数不允许回写
+                    if (caller.hasOwnProperty(name)) {
+                        caller[clazz.CLASSID][name] = caller[name];
+                    } else {
+                        delete caller[clazz.CLASSID][name];
+                    }
+                }
+                if (caches.hasOwnProperty(name)) {
+                    caller[name] = caches[name];
+                } else {
+                    delete caller[name];
+                }
+                names.push(name);
+            }
+        }
+
+        if (caller) {
+            for (var names = [], clazz = caller.constructor; clazz; clazz = clazz.super) {
+                classes[clazz.CLASSID].ProtectedFields.forEach(reset);
+            }
+        }
+    }
+
+    function resetFinal(caller) {
+        function reset(name) {
+            if (caller.hasOwnProperty(name) && !caller[clazz.CLASSID].hasOwnProperty(name)) {
+                caller[clazz.CLASSID][name] = caller[name];
+            }
+        }
+
+        if (caller) {
+            for (var clazz = caller.constructor; clazz; clazz = clazz.super) {
+                classes[clazz.CLASSID].FinalFields.forEach(reset);
+            }
+        }
+    }
+
+    function onbefore(caller, Class) {
+        var item = callStack[callStack.length - 1],
+            caches = {};
+
+        if (caller) {
+            caches.super = _super;
+            _super = Class.super ? Object.assign(Class.super.bind(caller), caller[Class.CLASSID].super) : null;
+        }
+
+        if (Class === item[1]) {
+            callStack.push([caller, Class, caches]);
+            return;
+        }
+
+        resetFinal(caller);
+
+        resetPrivate.apply(null, item);
+        setPrivate(caller, Class, caches);
+        if (caller !== item[0]) {
+            resetProtected.apply(null, item);
+            setProtected(caller, Class, caches);
+        }
+
+        callStack.push([caller, Class, caches]);
+
+        setFinal(caller);
+    }
+
+    function onafter() {
+        var args = callStack.pop(),
+            item = callStack[callStack.length - 1],
+            caller = args[0],
+            Class = args[1];
+
+        if (caller) {
+            _super = args[2].super;
+        }
+
+        if (Class === item[1]) {
+            return;
+        }
+
+        resetFinal(caller);
+
+        if (caller !== item[0]) {
+            resetProtected.apply(null, args);
+            setProtected.apply(null, item);
+        }
+        resetPrivate.apply(null, args);
+        setPrivate.apply(null, item);
+
+        setFinal(caller);
+    }
+
+    function checkProtected() {
+        if (callStack[callStack.length - 1][0] !== this) {
+            throw new Error('The method is not visible.');
+        }
+    }
+
+    function makeSuperMethod(name) {
+        if (!superMethods[name]) {
+            superMethods[name] = function () {
+                return this.super[name].apply(this['this'], arguments);
+            };
+        }
+        return superMethods[name];
+    }
+
+    function makeProxy(Class, fn, before) {
+        return function () {
+            if (before) {
+                before.apply(this, arguments);
+            }
+            onbefore(this, Class);
+            try {
+                var ret = fn.apply(this, arguments);
+            } finally {
+                onafter();
+            }
+            return ret;
+        };
+    }
+
+    function addProxy(oldProxy, newProxy) {
+        return function () {
+            var ret = oldProxy.apply(this, arguments);
+            newProxy.apply(this, arguments);
+            return ret;
+        };
+    }
+
+    _class = function () {
+        return _class.extends.apply(this, [null].concat(Array.prototype.slice.call(arguments)));
+    };
+
+    /**
+     * 重新定义类的方法，动态为类增加新的方法。
+     * @public
+     *
+     * @param {Function} Class 类对象
+     * @param {string} name 方法名
+     * @param {Function} method 方法函数
+     */
+    _class.defineMethod = function (Class, name, method) {
+        Class.prototype[name] = makeProxy(Class, method);
+        classes[Class.CLASSID].SuperMethods[name] = makeSuperMethod(name);
+    };
+
+    /**
+     * 指定继承一个类与相关接口。
+     * @public
+     *
+     * @param {Function} superClass 父类
+     * @param {Array} properties 属性集合
+     * @param {object} ... 接口集合列表
+     * @return {Function} 制作完成的类
+     */
+    _class.extends = function (superClass) {
+        var index = 1,
+            properties = arguments[index] && !arguments[index].CLASSID ? arguments[index++] : {},
+            interfaces = Array.prototype.slice.call(arguments, index),
+            constructor = properties.constructor,
+            newClass = function () {
+                var args = arguments;
+
+                if (!this[newClass.CLASSID]) {
+                    // 初始化各层级类的属性域
+                    for (var clazz = newClass; clazz; clazz = clazz.super) {
+                        this[clazz.CLASSID] = {};
+                        // 填充全部的初始化变量
+                        Object.assign(this[clazz.CLASSID], classes[clazz.CLASSID].InitValues);
+                    }
+                }
+
+                if (superClass) {
+                    clazz = this[newClass.CLASSID].super = {};
+                    Object.assign(clazz, classes[superClass.CLASSID].SuperMethods);
+                    clazz.super = superClass.prototype;
+                    clazz['this'] = this;
+                }
+
+                // 初始化所有接口的属性域
+                interfaces.forEach(
+                    function (inf) {
+                        this[inf.CLASSID] = {};
+                        // 填充全部的初始化变量
+                        Object.assign(this[inf.CLASSID], classes[inf.CLASSID].InitValues);
+                    },
+                    this
+                );
+
+                // 调用全部类和接口的构造函数
+                onbefore(this, newClass);
+                try {
+                    if (constructor) {
+                        constructor.apply(this, args);
+//{if 0}//
+                        if (superClass && superClass.super && !this[superClass.CLASSID].super) {
+                            console.warn('父类没有初始化');
+                        }
+//{/if}//
+                    }
+
+                    interfaces.forEach(
+                        function (inf) {
+                            if (classes[inf.CLASSID].PublicFields.constructor) {
+                                onbefore(this, inf);
+                                try {
+                                    classes[inf.CLASSID].PublicFields.constructor.apply(this, args);
+                                } finally {
+                                    onafter();
+                                }
+                            }
+                        },
+                        this
+                    );
+                } finally {
+                    onafter();
+                }
+            },
+            privateFields = [],
+            protectedFields = [],
+            finalFields = [],
+            initValues = {},
+            superMethods = superClass ? Object.assign({}, classes[superClass.CLASSID].SuperMethods) : {},
+            data,
+            name;
+
+        if (superClass) {
+            var Class = new Function();
+
+            Class.prototype = superClass.prototype;
+            newClass.prototype = new Class();
+            newClass.prototype.constructor = newClass;
+            newClass.super = superClass;
+        }
+
+        delete properties.constructor;
+
+        newClass.CLASSID = 'CLASS-' + classIndex++;
+
+        // 处理私有属性
+        if (data = properties.private) {
+            for (name in data) {
+                if (data.hasOwnProperty(name)) {
+                    if (data[name] !== undefined) {
+                        initValues[name] = data[name];
+                    }
+                    privateFields.push(name);
+                }
+            }
+            delete properties.private;
+        }
+
+        // 处理保护属性
+        if (data = properties.protected) {
+            for (name in data) {
+                if (data.hasOwnProperty(name)) {
+                    if ('function' === typeof data[name] && !data[name].CLASSID) {
+                        newClass.prototype[name] = makeProxy(newClass, data[name], checkProtected);
+                        superMethods[name] = makeSuperMethod(name);
+                    } else {
+                        if (data[name] !== undefined) {
+                            initValues[name] = data[name];
+                        }
+                        protectedFields.push(name);
+                    }
+                }
+            }
+            delete properties.protected;
+        }
+
+        // 处理唯一赋值属性
+        if (data = properties.final) {
+            for (name in data) {
+                if (data.hasOwnProperty(name)) {
+                    if (data[name] !== undefined) {
+                        initValues[name] = data[name];
+                    }
+                    finalFields.push(name);
+                }
+            }
+            delete properties.final;
+        }
+
+        // 处理public属性
+        if (data = properties.public || properties) {
+            for (name in data) {
+                if (data.hasOwnProperty(name)) {
+                    if ('function' === typeof data[name] && !data[name].CLASSID) {
+                        newClass.prototype[name] = makeProxy(newClass, data[name]);
+                        superMethods[name] = makeSuperMethod(name);
+                    } else {
+                        newClass.prototype[name] = data[name];
+                    }
+                }
+            }
+        }
+
+        // 处理静态属性
+        Object.assign(newClass, properties.static);
+        delete properties.static;
+
+        // 处理接口的属性
+        interfaces.forEach(function (inf) {
+            for (var name in classes[inf.CLASSID].PublicFields) {
+                if (newClass.prototype[name]) {
+                    newClass.prototype[name] = addProxy(newClass.prototype[name], classes[inf.CLASSID].PublicFields[name]);
+                } else {
+                    newClass.prototype[name] = classes[inf.CLASSID].PublicFields[name];
+                    superMethods[name] = makeSuperMethod(name);
+                }
+            }
+        });
+
+        classes[newClass.CLASSID] = {
+            PrivateFields: privateFields,
+            ProtectedFields: protectedFields,
+            FinalFields: finalFields,
+            SuperMethods: superMethods,
+            InitValues: initValues
+        };
+
+        return newClass;
+    };
+
+    _interface = function (properties) {
+        return _interface.extends([], properties);
+    };
+
+    /**
+     * 制作接口。
+     * @public
+     *
+     * @param {Array|Function} superInterfaces 接口的数组或者接口对象
+     * @param {object} properties 属性集合
+     * @return {Function} 制作完成的接口
+     */
+    _interface.extends = function (superInterfaces, properties) {
+        if (!(superInterfaces instanceof Array)) {
+            superInterfaces = [superInterfaces];
+        }
+
+        var newClass = {
+                CLASSID: 'CLASS-' + classIndex++
+            },
+            privateFields = [],
+            publicFields = {},
+            initValues = {},
+            data;
+
+        superInterfaces.forEach(function (inf) {
+            for (var name in classes[inf.CLASSID].PublicFields) {
+                if (classes[inf.CLASSID].PublicFields.hasOwnProperty(name)) {
+                    publicFields[name] = publicFields[name] ? addProxy(publicFields[name], classes[inf.CLASSID].PublicFields[name]) : classes[inf.CLASSID].PublicFields[name];
+                }
+            }
+        });
+
+        if (data = properties.private) {
+            for (var name in data) {
+                if (data.hasOwnProperty(name)) {
+                    if (data[name] !== undefined) {
+                        initValues[name] = data[name];
+                    }
+                    privateFields.push(name);
+                }
+            }
+            delete properties.private;
+        }
+
+        // 处理public属性
+        if (data = properties.public || properties) {
+            for (name in data) {
+                if (data.hasOwnProperty(name)) {
+                    if ('function' === typeof data[name] && !data[name].CLASSID) {
+                        publicFields[name] = publicFields[name] ? addProxy(publicFields[name], data[name]) : makeProxy(newClass, data[name]);
+                    }
+                }
+            }
+        }
+
+        classes[newClass.CLASSID] = {
+            PrivateFields: privateFields,
+            ProtectedFields: [],
+            FinalFields: [],
+            PublicFields: publicFields,
+            InitValues: initValues
+        };
+
+        return newClass;
+    };
+
+    _static = function (fn) {
+        return function () {
+            onbefore(null, NullClass);
+            try {
+                var ret = fn.apply(this, arguments);
+            } finally {
+                onafter();
+            }
+            return ret;
+        };
+    };
+}());

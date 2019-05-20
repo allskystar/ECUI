@@ -2531,8 +2531,8 @@ outer:          for (var caches = [], target = event.target, el; target && targe
                 superOptions = properties.SUPER_OPTIONS,
                 defaultOptions = properties.DEFAULT_OPTIONS;
 
-                delete properties.SUPER_OPTIONS;
-                delete properties.DEFAULT_OPTIONS;
+            delete properties.SUPER_OPTIONS;
+            delete properties.DEFAULT_OPTIONS;
 
             if (defaultOptions) {
                 if (!properties['private']) {
@@ -2545,7 +2545,8 @@ outer:          for (var caches = [], target = event.target, el; target && targe
                 }
             }
 
-            subClass = util.makeClass.apply(null, [superClass, subClass, properties].concat(Array.prototype.slice.call(arguments, index)));
+            properties.constructor = subClass;
+            subClass = _class.extends.apply(null, [superClass, properties].concat(Array.prototype.slice.call(arguments, index)));
 
             if (superClass) {
                 type = type ? (type.charAt(0) === '*' ? type.slice(1) : [type]) : [];

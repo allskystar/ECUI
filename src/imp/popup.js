@@ -79,7 +79,7 @@
 
     var owners = [];
 
-    ui.Popup = util.makeInterface(
+    ui.Popup = _interface(
         {
             'private': {
                 control: undefined
