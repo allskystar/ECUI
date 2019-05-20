@@ -50,43 +50,41 @@ _aChildren     - 子控件集合
     ui.TreeView = core.inherits(
         ui.Control,
         'ui-treeview',
-        [
-            function (el, options) {
-                if (this._eChildren) {
-                    // 初始化子控件
-                    this._aChildren = dom.children(this._eChildren).map(
-                        function (item) {
-                            return core.$fastCreate(this.constructor, item, this, Object.assign({}, options, core.getOptions(item) || {}));
-                        },
-                        this
-                    );
-                } else {
-                    this._aChildren = [];
+        function (el, options) {
+            this._bCollapsed = !!options.collapsed;
+
+            if (el.tagName === 'UL') {
+                dom.addClass(el, this.getUnitClass(ui.TreeView, 'children'));
+
+                if (options.collapsed) {
+                    dom.addClass(el, 'ui-hide');
+                } else if (dom.hasClass(el, 'ui-hide')) {
+                    this._bCollapsed = true;
                 }
 
-                refresh(this);
-            },
-            function (el, options) {
-                this._bCollapsed = !!options.collapsed;
-
-                if (el.tagName === 'UL') {
-                    dom.addClass(el, this.getUnitClass(ui.TreeView, 'children'));
-
-                    if (options.collapsed) {
-                        dom.addClass(el, 'ui-hide');
-                    } else if (dom.hasClass(el, 'ui-hide')) {
-                        this._bCollapsed = true;
-                    }
-
-                    this._eChildren = el;
-                    el = dom.insertBefore(dom.first(el), el);
-                }
-
-                _super(el, options);
-
-                delete options.id;
+                this._eChildren = el;
+                el = dom.insertBefore(dom.first(el), el);
             }
-        ],
+
+            _super(el, options);
+
+            delete options.id;
+
+            el = this.getMain();
+            if (this._eChildren) {
+                // 初始化子控件
+                this._aChildren = dom.children(this._eChildren).map(
+                    function (item) {
+                        return core.$fastCreate(this.constructor, item, this, Object.assign({}, options, core.getOptions(item) || {}));
+                    },
+                    this
+                );
+            } else {
+                this._aChildren = [];
+            }
+
+            refresh(this);
+        },
         {
             /**
              * 控件点击时改变子树视图控件的显示/隐藏状态。

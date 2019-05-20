@@ -35,9 +35,8 @@ var ecui, _super;
     document.write('<script type="text/javascript" src="src/base/table.js"></script>');
     document.write('<script type="text/javascript" src="src/base/inline-table.js"></script>');
     document.write('<script type="text/javascript" src="src/base/locked-table.js"></script>');
-
-//     document.write('<script type="text/javascript" src="src/base/tree-view.js"></script>');
-//     document.write('<script type="text/javascript" src="src/base/timer.js"></script>');
+    document.write('<script type="text/javascript" src="src/base/timer.js"></script>');
+    document.write('<script type="text/javascript" src="src/base/tree-view.js"></script>');
 
 //     document.write('<script type="text/javascript" src="src/input/upload.js"></script>');
     document.write('<script type="text/javascript" src="src/input/input-control.js"></script>');

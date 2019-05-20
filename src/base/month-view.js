@@ -53,6 +53,7 @@
                 last: undefined,
                 year: undefined,
                 month: undefined,
+                selected: undefined,
 
                 /**
                  * 选中某个日期单元格。
