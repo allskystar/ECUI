@@ -851,29 +851,6 @@
             },
 
             /**
-             * 获取部件的样式。
-             * @public
-             *
-             * @param {Function} baseClass 控件的构造函数，表示从这个基类开始处理部件样式
-             * @param {string} name 部件名称
-             * @return {string} HTML 片断
-             */
-            getUnitClass: function (baseClass, name) {
-                for (var i = 1, clazz = this.constructor; clazz; i++) {
-                    if (clazz === baseClass) {
-                        break;
-                    }
-                    clazz = clazz['super'];
-                }
-
-                clazz = this.constructor.TYPES[this.constructor.TYPES.length - i].slice();
-                if (this.className !== clazz[0]) {
-                    clazz.push(this.className);
-                }
-                return clazz.join('-' + name + ' ') + '-' + name;
-            },
-
-            /**
              * 获取控件区域的高度。
              * @public
              *
@@ -958,6 +935,29 @@
              */
             getUID: function () {
                 return this.UID;
+            },
+
+            /**
+             * 获取部件的样式。
+             * @public
+             *
+             * @param {Function} baseClass 控件的构造函数，表示从这个基类开始处理部件样式
+             * @param {string} name 部件名称
+             * @return {string} HTML 片断
+             */
+            getUnitClass: function (baseClass, name) {
+                for (var i = 1, clazz = this.constructor; clazz; i++) {
+                    if (clazz === baseClass) {
+                        break;
+                    }
+                    clazz = clazz['super'];
+                }
+
+                clazz = this.constructor.TYPES[this.constructor.TYPES.length - i].slice();
+                if (this.className !== clazz[0]) {
+                    clazz.push(this.className);
+                }
+                return clazz.join('-' + name + ' ') + '-' + name;
             },
 
             /**
