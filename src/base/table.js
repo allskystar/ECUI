@@ -297,7 +297,7 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
                     $setStyles: function (name, value) {
                         var table = this.getParent(),
                             body = this.getMain(),
-                            cols = table.hcells,
+                            cols = table.getHCells(),
                             index = cols.indexOf(this);
 
                         body.style[name] = value;
@@ -349,7 +349,8 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
                      * @return {ecui.ui.Table.Cell} 单元格控件
                      */
                     getCell: function (rowIndex) {
-                        return this.getParent().getCell(rowIndex, this.hcells.indexOf(this));
+                        var parent = this.getParent();
+                        return parent.getCell(rowIndex, parent.getHCells().indexOf(this));
                     },
 
                     /**
@@ -360,7 +361,7 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
                      */
                     getCells: function () {
                         var result = [],
-                            i = this.hcells.indexOf(this);
+                            i = this.getParent().getHCells().indexOf(this);
                         this.rows.forEach(function (item, index) {
                             result[index] = item.getCell(i);
                         });
@@ -426,7 +427,7 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
                             nextRow = table.rows[index + 1],
                             cell;
 
-                        for (var i = 0, o; table.hcells[i]; i++) {
+                        for (var i = 0, o; table.getHCell(i); i++) {
                             o = this._aElements[i];
                             if (o === false) {
                                 o = table.$getElement(index - 1, i);
@@ -457,7 +458,7 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
                      * @override
                      */
                     $initStructure: function () {
-                        for (var i = 0, list = this.getParent().hcells, el, item; item = list[i]; ) {
+                        for (var i = 0, list = this.getParent().getHCells(), el, item; item = list[i]; ) {
                             if ((el = this._aElements[i++]) && el !== item.getMain()) {
                                 var width = item.getWidth() - item.getMinimumWidth();
                                 while (this._aElements[i] === null) {
@@ -488,7 +489,7 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
                             nextRow = table.rows[index + 1],
                             cell;
 
-                        for (var i = 0, o; table.hcells[i]; i++) {
+                        for (var i = 0, o; table.getHCell(i); i++) {
                             o = this._aElements[i];
                             if (o === false) {
                                 o = table.$getElement(index - 1, i);
