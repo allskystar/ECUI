@@ -396,6 +396,10 @@
 
         properties = interfaces = null;
 
+        newClass._cast = function (caller) {
+            return caller[newClass.CLASSID];
+        };
+
         return newClass;
     };
 
