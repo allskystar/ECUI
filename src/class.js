@@ -231,20 +231,18 @@
             newClass = function () {
                 // 初始化各层级类的属性域
                 for (var clazz = newClass; clazz; clazz = clazz.super) {
-                    this[clazz.CLASSID] = {};
                     // 填充全部的初始化变量
-                    Object.assign(this[clazz.CLASSID], classes[clazz.CLASSID].InitValues);
-                }
+                    this[clazz.CLASSID] = Object.assign({}, classes[clazz.CLASSID].InitValues);
 
-                // 初始化所有接口的属性域
-                interfaces.forEach(
-                    function (inf) {
-                        this[inf.CLASSID] = {};
-                        // 填充全部的初始化变量
-                        Object.assign(this[inf.CLASSID], classes[inf.CLASSID].InitValues);
-                    },
-                    this
-                );
+                    // 初始化所有接口的属性域
+                    classes[clazz.CLASSID].Interfaces.forEach(
+                        function (inf) {
+                            // 填充全部的初始化变量
+                            this[inf.CLASSID] = Object.assign({}, classes[inf.CLASSID].InitValues);
+                        },
+                        this
+                    );
+                }
 
                 classes[newClass.CLASSID].Constructor.apply(this, arguments);
             },
@@ -349,8 +347,6 @@
             }
         });
 
-        properties = null;
-
         classes[newClass.CLASSID] = {
             Constructor: function () {
                 var args = arguments;
@@ -374,7 +370,7 @@
 //{/if}//
                     }
 
-                    interfaces.forEach(
+                    classes[newClass.CLASSID].Interfaces.forEach(
                         function (inf) {
                             if (classes[inf.CLASSID].PublicFields.constructor) {
                                 onbefore(this, inf);
@@ -391,12 +387,15 @@
                     onafter();
                 }
             },
+            Interfaces: interfaces,
             PrivateFields: privateFields,
             ProtectedFields: protectedFields,
             FinalFields: finalFields,
             SuperMethods: superMethods,
             InitValues: initValues
         };
+
+        properties = interfaces = null;
 
         return newClass;
     };
