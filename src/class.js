@@ -433,6 +433,7 @@
             }
         });
 
+        // 处理私有属性，代码复制自_class.extends
         if (data = properties.private) {
             for (var name in data) {
                 if (data.hasOwnProperty(name)) {
@@ -443,6 +444,16 @@
                 }
             }
             delete properties.private;
+        }
+
+        // 处理静态属性，代码复制自_class.extends
+        if (data = properties.static) {
+            for (name in data) {
+                if (data.hasOwnProperty(name)) {
+                    newClass[name] = 'function' === typeof data[name] && !data[name].CLASSID ? _static(data[name]) : data[name];
+                }
+            }
+            delete properties.static;
         }
 
         // 处理public属性
