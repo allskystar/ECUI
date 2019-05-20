@@ -6,9 +6,6 @@
         superMethods = {};
 
     function setPrivate(caller, Class, caches) {
-        if (!classes[Class.CLASSID]) {
-            debugger;
-        }
         classes[Class.CLASSID].PrivateFields.forEach(function (name) {
             if (caller.hasOwnProperty(name)) {
                 caches[name] = caller[name];
@@ -114,7 +111,7 @@
 
         if (caller) {
             caches.super = _super;
-            _super = Class.super ? Object.assign(Class.super.bind(caller), caller[Class.CLASSID].super) : null;
+            _super = Class.super ? Object.assign(classes[Class.super.CLASSID].Constructor.bind(caller), caller[Class.CLASSID].super) : null;
         }
 
         if (Class === item[1]) {
@@ -171,7 +168,7 @@
     function makeSuperMethod(name) {
         if (!superMethods[name]) {
             superMethods[name] = function () {
-                return this.super[name].apply(this['this'], arguments);
+                return this.super[name].apply(this.this, arguments);
             };
         }
         return superMethods[name];
@@ -232,22 +229,11 @@
             interfaces = Array.prototype.slice.call(arguments, index),
             constructor = properties.constructor,
             newClass = function () {
-                var args = arguments;
-
-                if (!this[newClass.CLASSID]) {
-                    // 初始化各层级类的属性域
-                    for (var clazz = newClass; clazz; clazz = clazz.super) {
-                        this[clazz.CLASSID] = {};
-                        // 填充全部的初始化变量
-                        Object.assign(this[clazz.CLASSID], classes[clazz.CLASSID].InitValues);
-                    }
-                }
-
-                if (superClass) {
-                    clazz = this[newClass.CLASSID].super = {};
-                    Object.assign(clazz, classes[superClass.CLASSID].SuperMethods);
-                    clazz.super = superClass.prototype;
-                    clazz['this'] = this;
+                // 初始化各层级类的属性域
+                for (var clazz = newClass; clazz; clazz = clazz.super) {
+                    this[clazz.CLASSID] = {};
+                    // 填充全部的初始化变量
+                    Object.assign(this[clazz.CLASSID], classes[clazz.CLASSID].InitValues);
                 }
 
                 // 初始化所有接口的属性域
@@ -260,34 +246,7 @@
                     this
                 );
 
-                // 调用全部类和接口的构造函数
-                onbefore(this, newClass);
-                try {
-                    if (constructor) {
-                        constructor.apply(this, args);
-//{if 0}//
-                        if (superClass && superClass.super && !this[superClass.CLASSID].super) {
-                            console.warn('父类没有初始化');
-                        }
-//{/if}//
-                    }
-
-                    interfaces.forEach(
-                        function (inf) {
-                            if (classes[inf.CLASSID].PublicFields.constructor) {
-                                onbefore(this, inf);
-                                try {
-                                    classes[inf.CLASSID].PublicFields.constructor.apply(this, args);
-                                } finally {
-                                    onafter();
-                                }
-                            }
-                        },
-                        this
-                    );
-                } finally {
-                    onafter();
-                }
+                classes[newClass.CLASSID].Constructor.apply(this, arguments);
             },
             privateFields = [],
             protectedFields = [],
@@ -354,6 +313,16 @@
             delete properties.final;
         }
 
+        // 处理静态属性
+        if (data = properties.static) {
+            for (name in data) {
+                if (data.hasOwnProperty(name)) {
+                    newClass[name] = 'function' === typeof data[name] && !data[name].CLASSID ? _static(data[name]) : data[name];
+                }
+            }
+            delete properties.static;
+        }
+
         // 处理public属性
         if (data = properties.public || properties) {
             for (name in data) {
@@ -368,10 +337,6 @@
             }
         }
 
-        // 处理静态属性
-        Object.assign(newClass, properties.static);
-        delete properties.static;
-
         // 处理接口的属性
         interfaces.forEach(function (inf) {
             for (var name in classes[inf.CLASSID].PublicFields) {
@@ -384,7 +349,48 @@
             }
         });
 
+        properties = null;
+
         classes[newClass.CLASSID] = {
+            Constructor: function () {
+                var args = arguments;
+
+                if (superClass) {
+                    var clazz = this[newClass.CLASSID].super = {};
+                    Object.assign(clazz, classes[superClass.CLASSID].SuperMethods);
+                    clazz.super = superClass.prototype;
+                    clazz.this = this;
+                }
+
+                // 调用全部类和接口的构造函数
+                onbefore(this, newClass);
+                try {
+                    if (constructor) {
+                        constructor.apply(this, args);
+//{if 0}//
+                        if (superClass && superClass.super && !this[superClass.CLASSID].super) {
+                            console.warn('父类没有初始化');
+                        }
+//{/if}//
+                    }
+
+                    interfaces.forEach(
+                        function (inf) {
+                            if (classes[inf.CLASSID].PublicFields.constructor) {
+                                onbefore(this, inf);
+                                try {
+                                    classes[inf.CLASSID].PublicFields.constructor.apply(this, args);
+                                } finally {
+                                    onafter();
+                                }
+                            }
+                        },
+                        this
+                    );
+                } finally {
+                    onafter();
+                }
+            },
             PrivateFields: privateFields,
             ProtectedFields: protectedFields,
             FinalFields: finalFields,
