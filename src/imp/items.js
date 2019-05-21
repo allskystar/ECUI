@@ -71,7 +71,6 @@
 
     ui.Items = _interface(
         function () {
-            this.prevent = 0;
             this.items = [];
 
             this.preventAlterItems();
@@ -84,7 +83,7 @@
         {
             'private': {
                 items: undefined,
-                prevent: undefined
+                prevent: 0
             },
 
             /**
