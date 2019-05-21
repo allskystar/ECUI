@@ -39,14 +39,14 @@ var _super;
                 if (caller.hasOwnProperty(name)) {
                     caches[name] = caller[name];
                 }
-                caller[name] = caller[clazz.CLASSID][name];
+                caller[name] = caller[Class.CLASSID][name];
                 names.push(name);
             }
         }
 
         if (caller) {
-            for (var names = [], clazz = caller.constructor; clazz; clazz = clazz.super) {
-                classes[clazz.CLASSID].ProtectedFields.forEach(set);
+            for (var names = []; Class; Class = Class.super) {
+                classes[Class.CLASSID].ProtectedFields.forEach(set);
             }
         }
     }
@@ -96,12 +96,12 @@ var _super;
     function resetProtected(caller, Class, caches) {
         function reset(name) {
             if (names.indexOf(name) < 0) {
-                if ('function' !== classes[clazz.CLASSID][name]) {
+                if ('function' !== classes[Class.CLASSID][name]) {
                     // 函数不允许回写
                     if (caller.hasOwnProperty(name)) {
-                        caller[clazz.CLASSID][name] = caller[name];
+                        caller[Class.CLASSID][name] = caller[name];
                     } else {
-                        delete caller[clazz.CLASSID][name];
+                        delete caller[Class.CLASSID][name];
                     }
                 }
                 if (caches.hasOwnProperty(name)) {
@@ -114,8 +114,8 @@ var _super;
         }
 
         if (caller) {
-            for (var names = [], clazz = caller.constructor; clazz; clazz = clazz.super) {
-                classes[clazz.CLASSID].ProtectedFields.forEach(reset);
+            for (var names = []; Class; Class = Class.super) {
+                classes[Class.CLASSID].ProtectedFields.forEach(reset);
             }
         }
     }
@@ -153,10 +153,8 @@ var _super;
 
         if (!Object.defineProperty) {
             resetFinal(caller);
-            if (caller !== item[0]) {
-                resetProtected.apply(null, item);
-                setProtected(caller, Class, caches);
-            }
+            resetProtected.apply(null, item);
+            setProtected(caller, Class, caches);
             setFinal(caller);
         }
 
@@ -182,16 +180,15 @@ var _super;
 
         if (!Object.defineProperty) {
             resetFinal(caller);
-            if (caller !== item[0]) {
-                resetProtected.apply(null, args);
-                setProtected.apply(null, item);
-            }
+            resetProtected.apply(null, args);
+            setProtected.apply(null, item);
             setFinal(caller);
         }
     }
 
-    function checkProtected() {
-        if (callStack[callStack.length - 1][0] !== this) {
+    function checkProtected(Class) {
+        var item = callStack[callStack.length - 1];
+        if (item[0] !== this || !Class.isAssignableFrom(item[1])) {
             throw new Error('The property is not visible.');
         }
     }
@@ -208,7 +205,7 @@ var _super;
     function makeProxy(Class, fn, before) {
         return function () {
             if (before) {
-                before.apply(this, arguments);
+                before.apply(this, Class);
             }
             onbefore(this, Class);
             try {
@@ -264,11 +261,11 @@ var _super;
             if (!propertyDescriptors[name]) {
                 propertyDescriptors[name] = {
                     get: function () {
-                        checkProtected.apply(this);
+                        checkProtected.call(this, newClass);
                         return this[newClass.CLASSID][name];
                     },
                     set: function (value) {
-                        checkProtected.apply(this);
+                        checkProtected.call(this, newClass);
                         this[newClass.CLASSID][name] = value;
                     }
                 };
@@ -478,6 +475,15 @@ var _super;
 
         newClass._cast = function (caller) {
             return caller[newClass.CLASSID];
+        };
+
+        newClass.isAssignableFrom = function (subClass) {
+            for (; subClass; subClass = subClass.super) {
+                if (subClass === newClass) {
+                    return true;
+                }
+            }
+            return false;
         };
 
         return newClass;
