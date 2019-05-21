@@ -1,3 +1,4 @@
+var _super;
 (function () {
     var classIndex = 1,
         NullClass = {CLASSID: 'CLASS-0'},
@@ -10,7 +11,25 @@
             if (caller.hasOwnProperty(name)) {
                 caches[name] = caller[name];
             }
-            caller[name] = caller[Class.CLASSID][name];
+            if (Object.defineProperty) {
+                Object.defineProperty(
+                    caller,
+                    name,
+                    {
+                        configurable: true,
+                        get: function () {
+                            return caller[Class.CLASSID][name];
+                        },
+                        set: function (value) {
+                            if ('function' !== caller[Class.CLASSID[name]]) {
+                                caller[Class.CLASSID][name] = value;
+                            }
+                        }
+                    }
+                );
+            } else {
+                caller[name] = caller[Class.CLASSID][name];
+            }
         });
     }
 
@@ -48,18 +67,28 @@
 
     function resetPrivate(caller, Class, caches) {
         classes[Class.CLASSID].PrivateFields.forEach(function (name) {
-            if ('function' !== typeof classes[Class.CLASSID][name]) {
-                // 函数不允许回写
-                if (caller.hasOwnProperty(name)) {
-                    caller[Class.CLASSID][name] = caller[name];
-                } else {
+            if (Object.defineProperty) {
+                if (!caller.hasOwnProperty(name)) {
                     delete caller[Class.CLASSID][name];
                 }
-            }
-            if (caches.hasOwnProperty(name)) {
-                caller[name] = caches[name];
-            } else {
                 delete caller[name];
+                if (caches.hasOwnProperty) {
+                    caller[name] = caches[name];
+                }
+            } else {
+                if ('function' !== typeof classes[Class.CLASSID][name]) {
+                    // 函数不允许回写
+                    if (caller.hasOwnProperty(name)) {
+                        caller[Class.CLASSID][name] = caller[name];
+                    } else {
+                        delete caller[Class.CLASSID][name];
+                    }
+                }
+                if (caches.hasOwnProperty(name)) {
+                    caller[name] = caches[name];
+                } else {
+                    delete caller[name];
+                }
             }
         });
     }
@@ -119,18 +148,19 @@
             return;
         }
 
-        resetFinal(caller);
-
         resetPrivate.apply(null, item);
         setPrivate(caller, Class, caches);
-        if (caller !== item[0]) {
-            resetProtected.apply(null, item);
-            setProtected(caller, Class, caches);
+
+        if (!Object.defineProperty) {
+            resetFinal(caller);
+            if (caller !== item[0]) {
+                resetProtected.apply(null, item);
+                setProtected(caller, Class, caches);
+            }
+            setFinal(caller);
         }
 
         callStack.push([caller, Class, caches]);
-
-        setFinal(caller);
     }
 
     function onafter() {
@@ -147,21 +177,22 @@
             return;
         }
 
-        resetFinal(caller);
-
-        if (caller !== item[0]) {
-            resetProtected.apply(null, args);
-            setProtected.apply(null, item);
-        }
         resetPrivate.apply(null, args);
         setPrivate.apply(null, item);
 
-        setFinal(caller);
+        if (!Object.defineProperty) {
+            resetFinal(caller);
+            if (caller !== item[0]) {
+                resetProtected.apply(null, args);
+                setProtected.apply(null, item);
+            }
+            setFinal(caller);
+        }
     }
 
     function checkProtected() {
         if (callStack[callStack.length - 1][0] !== this) {
-            throw new Error('The method is not visible.');
+            throw new Error('The property is not visible.');
         }
     }
 
@@ -232,7 +263,7 @@
         var index = 1,
             properties = arguments[index] && !arguments[index].CLASSID ? arguments[index++] : {},
             interfaces = Array.prototype.slice.call(arguments, index),
-            constructor = properties.constructor,
+            constructor = properties.constructor === Object ? superClass : properties.constructor,
             newClass = function () {
                 // 初始化各层级类的属性域
                 for (var clazz = newClass; clazz; clazz = clazz.super) {
@@ -357,6 +388,48 @@
                     clazz.this = this;
                 }
 
+                if (Object.defineProperty) {
+                    protectedFields.forEach(
+                        function (name) {
+                            Object.defineProperty(
+                                this,
+                                name,
+                                {
+                                    get: function () {
+                                        checkProtected.apply(this);
+                                        return this[newClass.CLASSID][name];
+                                    },
+                                    set: function (value) {
+                                        checkProtected.apply(this);
+                                        this[newClass.CLASSID][name] = value;
+                                    }
+                                }
+                            );
+                        },
+                        this
+                    );
+
+                    finalFields.forEach(
+                        function (name) {
+                            Object.defineProperty(
+                                this,
+                                name,
+                                {
+                                    get: function () {
+                                        return this[newClass.CLASSID][name];
+                                    },
+                                    set: function (value) {
+                                        if (!this[newClass.CLASSID].hasOwnProperty(name)) {
+                                            this[newClass.CLASSID][name] = value;
+                                        }
+                                    }
+                                }
+                            );
+                        },
+                        this
+                    );
+                }
+
                 // 调用全部类和接口的构造函数
                 onbefore(this, newClass);
                 try {
@@ -369,7 +442,7 @@
 //{/if}//
                     }
 
-                    classes[newClass.CLASSID].Interfaces.forEach(
+                    interfaces.forEach(
                         function (inf) {
                             if (classes[inf.CLASSID].PublicFields.constructor) {
                                 onbefore(this, inf);
@@ -394,7 +467,7 @@
             InitValues: initValues
         };
 
-        properties = interfaces = null;
+        properties = null;
 
         newClass._cast = function (caller) {
             return caller[newClass.CLASSID];
