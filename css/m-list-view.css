@@ -3,7 +3,14 @@
     touch-action: none !important;
 
     .ui-mobile-listview-header {
+    	position: relative;
         .m-width100rate();
+
+        .ui-mobile-listview-title {
+        	position: absolute;
+        	width: 100%;
+        	bottom: 0px;
+        }
     }
 
     .ui-mobile-listview-footer {

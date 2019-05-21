@@ -28,7 +28,7 @@ _nBottomIndex  - 下部隐藏的选项序号
         var range = this.getRange();
         if (range && range.bottom) {
             range.top = Math.min(0, this.getHeight() - this.$$bodyHeight);
-            range.bottom = 0;
+            range.bottom = this.$$titleHeight;
         }
     }
 
@@ -49,7 +49,10 @@ _nBottomIndex  - 下部隐藏的选项序号
         [
             function (el, options) {
                 var body = this.getBody();
-                this._eHeader = dom.insertBefore(dom.create({className: options.classes.join('-header ')}), body);
+                this._eHeader = dom.insertBefore(dom.create({className: options.classes.join('-header '), innerHTML: '<div></div>'}), body);
+                if (this._eTitle) {
+                    this._eHeader.appendChild(this._eTitle);
+                }
                 this._eFooter = dom.insertAfter(dom.create({className: options.classes.join('-footer ')}), body);
                 dom.insertAfter(this._eEmpty, body);
                 this._oHandle = util.blank;
@@ -59,6 +62,12 @@ _nBottomIndex  - 下部隐藏的选项序号
                     dom.addClass(this._eEmpty = dom.remove(dom.last(el)), options.classes.join('-empty-body '));
                 } else {
                     this._eEmpty = dom.create({className: options.classes.join('-empty-body ')});
+                }
+                var first = dom.first(el);
+                if (first.tagName === 'STRONG') {
+                    this._eTitle = first;
+                    el.removeChild(first);
+                    dom.addClass(first, options.classes.join('-title '));
                 }
                 ui.Control.call(this, el, options);
                 this._sStatus = '';
@@ -124,12 +133,12 @@ _nBottomIndex  - 下部隐藏的选项序号
                 this.setRange(
                     {
                         top: top,
-                        bottom: 0
+                        bottom: this.$$titleHeight
                     }
                 );
                 if (this.isReady()) {
                     var y = this.getY();
-                    if (y <= top || (y > 0 && !top)) {
+                    if (y <= top || (y > this.$$titleHeight && !top)) {
                         this.setPosition(0, top);
                     }
                 }
@@ -152,6 +161,7 @@ _nBottomIndex  - 下部隐藏的选项序号
                     this.$$bodyPadding = [util.toNumber(style.paddingTop), util.toNumber(style.paddingRight), util.toNumber(style.paddingBottom), util.toNumber(style.paddingLeft)];
                 }
                 this.$$headerHeight = this._eHeader.offsetHeight;
+                this.$$titleHeight = this._eTitle ? this._eTitle.offsetHeight : 0;
                 this.$$footerHeight = this._eFooter.offsetHeight;
                 this.$$bodyHeight = body.offsetHeight;
             },
@@ -161,7 +171,7 @@ _nBottomIndex  - 下部隐藏的选项序号
              */
             $dispose: function () {
                 this._oHandle();
-                this._eHeader = this._eFooter = this._eEmpty = null;
+                this._eHeader = this._eFooter = this._eTitle = this._eEmpty = null;
                 ui.Control.prototype.$dispose.call(this);
             },
 
@@ -214,7 +224,7 @@ _nBottomIndex  - 下部隐藏的选项序号
              */
             $headerenter: function () {
                 setEnterAndLeave.call(this);
-                this._eHeader.innerHTML = this.HTML_REFRESH;
+                this._eHeader.firstChild.innerHTML = this.HTML_REFRESH;
             },
 
             /**
@@ -230,7 +240,7 @@ _nBottomIndex  - 下部隐藏的选项序号
                 ui.Control.prototype.$initStructure.call(this, width, height);
                 this.alterStatus(this.getLength() ? '-empty' : '+empty');
                 if (this.isReady()) {
-                    this.setPosition(0, 0);
+                    this.setPosition(0, this.$$titleHeight);
                 }
             },
 
@@ -250,7 +260,7 @@ _nBottomIndex  - 下部隐藏的选项序号
                 this._nTopHidden = this._nBottomHidden = 0;
                 this._nTopIndex = 0;
                 this._nBottomIndex = this.getLength();
-                this.setPosition(0, 0);
+                this.setPosition(0, this.$$titleHeight);
             },
 
             /**
@@ -320,7 +330,7 @@ _nBottomIndex  - 下部隐藏的选项序号
                 );
                 this.premitAlterItems();
                 this.add(data);
-                this._eHeader.innerHTML = this.HTML_REFRESHED;
+                this._eHeader.firstChild.innerHTML = this.HTML_REFRESHED;
                 this.reset();
                 this._eFooter.innerHTML = '';
             },
@@ -347,7 +357,7 @@ _nBottomIndex  - 下部隐藏的选项序号
                     if (status === 'header') {
                         options.y = this.getY();
                         this._oHandle = effect.grade(
-                            'this.setPosition(0,#$.y->0#)',
+                            'this.setPosition(0,#$.y->' + this.$$titleHeight + '#)',
                             400,
                             options
                         );
@@ -383,7 +393,7 @@ _nBottomIndex  - 下部隐藏的选项序号
                     if (this._sStatus === 'headercomplete') {
                         // 可以选择是否需要防止重复提交
                         if (core.dispatchEvent(this, 'refresh')) {
-                            this._eHeader.innerHTML = this.HTML_PREPARE;
+                            this._eHeader.firstChild.innerHTML = this.HTML_PREPARE;
                             this._bLoading = true;
                         }
                     } else if (this._sStatus === 'footercomplete') {
