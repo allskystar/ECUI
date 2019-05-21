@@ -47,7 +47,7 @@
                 }
             },
 
-            'private': {
+            private: {
                 cells: undefined,
                 first: undefined,
                 last: undefined,
@@ -75,7 +75,7 @@
                 }
             },
 
-            'protected': {
+            protected: {
                 /**
                  * 初始化视图区域(子类可以多次初始化)。
                  * @protected

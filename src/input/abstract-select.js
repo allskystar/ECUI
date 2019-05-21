@@ -75,7 +75,7 @@
             this.$setBody(this.$Options.getBody());
         },
         {
-            'private': {
+            private: {
                 required: undefined
             },
 
@@ -118,7 +118,7 @@
                     this.value = options.value === undefined ? dom.getText(el) : String(options.value);
                 },
                 {
-                    'private': {
+                    private: {
                         value: undefined
                     },
 

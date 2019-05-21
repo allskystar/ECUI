@@ -224,6 +224,11 @@
      * @return {Function} 制作完成的类
      */
     _class.extends = function (superClass) {
+        function initInterface(inf) {
+            // 填充全部的初始化变量
+            this[inf.CLASSID] = Object.assign({}, classes[inf.CLASSID].InitValues);
+        }
+
         var index = 1,
             properties = arguments[index] && !arguments[index].CLASSID ? arguments[index++] : {},
             interfaces = Array.prototype.slice.call(arguments, index),
@@ -235,13 +240,7 @@
                     this[clazz.CLASSID] = Object.assign({}, classes[clazz.CLASSID].InitValues);
 
                     // 初始化所有接口的属性域
-                    classes[clazz.CLASSID].Interfaces.forEach(
-                        function (inf) {
-                            // 填充全部的初始化变量
-                            this[inf.CLASSID] = Object.assign({}, classes[inf.CLASSID].InitValues);
-                        },
-                        this
-                    );
+                    classes[clazz.CLASSID].Interfaces.forEach(initInterface, this);
                 }
 
                 classes[newClass.CLASSID].Constructor.apply(this, arguments);
@@ -396,6 +395,10 @@
         };
 
         properties = interfaces = null;
+
+        newClass._cast = function (caller) {
+            return caller[newClass.CLASSID];
+        };
 
         return newClass;
     };

@@ -27,7 +27,7 @@
             }
         },
         {
-            'private': {
+            private: {
                 'cx': undefined,
                 'cy': undefined,
 

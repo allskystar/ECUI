@@ -57,7 +57,7 @@
                 userSelect: Boolean(true)
             },
 
-            'private': {
+            private: {
                 parent:     undefined,
                 main:       undefined,
                 body:       undefined,

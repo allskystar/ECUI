@@ -21,11 +21,11 @@
         ui.MonthView,
         'ui-calendar',
         {
-            'private': {
+            private: {
                 title: undefined
             },
 
-            'protected': {
+            protected: {
                 /**
                  * @override
                  */
