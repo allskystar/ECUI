@@ -231,7 +231,7 @@
                 handler: undefined
             },
 
-            protected: {
+            final: {
                 $Head: undefined
             },
 

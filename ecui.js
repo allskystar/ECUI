@@ -1,4 +1,4 @@
-var ecui, _super;
+var ecui;
 (function () {
     document.write('<script type="text/javascript" src="src/class.js"></script>');
     document.write('<script type="text/javascript" src="src/adapter.js"></script>');

@@ -260,6 +260,38 @@ var _super;
             this[inf.CLASSID] = Object.assign({}, classes[inf.CLASSID].InitValues);
         }
 
+        function makeProtectedDescriptor(name) {
+            if (!propertyDescriptors[name]) {
+                propertyDescriptors[name] = {
+                    get: function () {
+                        checkProtected.apply(this);
+                        return this[newClass.CLASSID][name];
+                    },
+                    set: function (value) {
+                        checkProtected.apply(this);
+                        this[newClass.CLASSID][name] = value;
+                    }
+                };
+            }
+            return propertyDescriptors[name];
+        }
+
+        function makeFinalDescriptor(name) {
+            if (!propertyDescriptors[name]) {
+                propertyDescriptors[name] = {
+                    get: function () {
+                        return this[newClass.CLASSID][name];
+                    },
+                    set: function (value) {
+                        if (!this[newClass.CLASSID].hasOwnProperty(name)) {
+                            this[newClass.CLASSID][name] = value;
+                        }
+                    }
+                };
+            }
+            return propertyDescriptors[name];
+        }
+
         var index = 1,
             properties = arguments[index] && !arguments[index].CLASSID ? arguments[index++] : {},
             interfaces = Array.prototype.slice.call(arguments, index),
@@ -281,6 +313,7 @@ var _super;
             finalFields = [],
             initValues = {},
             superMethods = superClass ? Object.assign({}, classes[superClass.CLASSID].SuperMethods) : {},
+            propertyDescriptors = {},
             data,
             name;
 
@@ -391,40 +424,14 @@ var _super;
                 if (Object.defineProperty) {
                     protectedFields.forEach(
                         function (name) {
-                            Object.defineProperty(
-                                this,
-                                name,
-                                {
-                                    get: function () {
-                                        checkProtected.apply(this);
-                                        return this[newClass.CLASSID][name];
-                                    },
-                                    set: function (value) {
-                                        checkProtected.apply(this);
-                                        this[newClass.CLASSID][name] = value;
-                                    }
-                                }
-                            );
+                            Object.defineProperty(this, name, makeProtectedDescriptor(name));
                         },
                         this
                     );
 
                     finalFields.forEach(
                         function (name) {
-                            Object.defineProperty(
-                                this,
-                                name,
-                                {
-                                    get: function () {
-                                        return this[newClass.CLASSID][name];
-                                    },
-                                    set: function (value) {
-                                        if (!this[newClass.CLASSID].hasOwnProperty(name)) {
-                                            this[newClass.CLASSID][name] = value;
-                                        }
-                                    }
-                                }
-                            );
+                            Object.defineProperty(this, name, makeFinalDescriptor(name));
                         },
                         this
                     );
