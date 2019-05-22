@@ -30,7 +30,7 @@ _bModal      - 是否使用showModal激活
         // 改变当前窗体之后的全部窗体z轴位置，将当前窗体置顶
         var num = layers.length - modalCount;
         layers.forEach(function (item, index) {
-            item.getOuter().style.zIndex = index >= num ? 32009 + (index - num) * 2 : 4095 + index;
+            item.getMain().style.zIndex = index >= num ? 32009 + (index - num) * 2 : 4095 + index;
         });
     }
 

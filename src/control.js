@@ -45,7 +45,7 @@ _aStatus            - 控件当前的状态集合
      */
     function alterParent(control, parent, parentElement) {
         var oldParent = control._cParent,
-            el = control.getOuter();
+            el = control.getMain();
 
         // 触发原来父控件的移除子控件事件
         if (parent !== oldParent) {
@@ -201,7 +201,7 @@ _aStatus            - 控件当前的状态集合
              * @event
              */
             $disable: function () {
-                dom.addClass(this.getOuter(), 'ui-disabled');
+                dom.addClass(this.getMain(), 'ui-disabled');
                 this.alterStatus('+disabled');
                 core.$clearState(this);
 
@@ -256,7 +256,7 @@ _aStatus            - 控件当前的状态集合
              * @event
              */
             $enable: function () {
-                dom.removeClass(this.getOuter(), 'ui-disabled');
+                dom.removeClass(this.getMain(), 'ui-disabled');
                 this.alterStatus('-disabled');
 
                 var el = this.getMain();
@@ -338,7 +338,7 @@ _aStatus            - 控件当前的状态集合
              * @event
              */
             $hide: function () {
-                dom.addClass(this.getOuter(), 'ui-hide');
+                dom.addClass(this.getMain(), 'ui-hide');
                 // 控件隐藏时需要清除状态
                 core.$clearState(this);
             },
@@ -521,7 +521,7 @@ _aStatus            - 控件当前的状态集合
              * @protected
              */
             $show: function () {
-                dom.removeClass(this.getOuter(), 'ui-hide');
+                dom.removeClass(this.getMain(), 'ui-hide');
                 this.cache();
             },
 
@@ -618,7 +618,7 @@ _aStatus            - 控件当前的状态集合
              * @return {boolean} 是否刷新缓存
              */
             cache: function (force) {
-                if ((force || !this._bCached) && this.getOuter().offsetWidth) {
+                if ((force || !this._bCached) && this.getMain().offsetWidth) {
                     // 之前未进行过缓存相关操作，强制缓存，否则不执行initStructure
                     force = this._bCached === undefined;
                     this._bCached = true;
@@ -642,7 +642,7 @@ _aStatus            - 控件当前的状态集合
              * @param {number} top y轴的坐标，如果不指定水平方向也居中
              */
             center: function (top) {
-                var parent = this.getOuter().offsetParent;
+                var parent = this.getMain().offsetParent;
 
                 if (!parent || parent.tagName === 'BODY' || parent.tagName === 'HTML') {
                     var view = util.getView(),
@@ -890,17 +890,6 @@ _aStatus            - 控件当前的状态集合
             },
 
             /**
-             * 获取控件的外层元素。
-             * getOuter 方法返回用于控制控件自身布局的外层元素。
-             * @public
-             *
-             * @return {HTMLElement} Element 对象
-             */
-            getOuter: function () {
-                return this._eMain;
-            },
-
-            /**
              * 获取父控件。
              * 控件接收的事件将向父控件冒泡处理，getParent 返回的结果是 ECUI 的逻辑父控件，父控件与子控件不一定存在 DOM 树层面的父子级关系。
              * @public
@@ -918,7 +907,7 @@ _aStatus            - 控件当前的状态集合
              * @return {HTMLElement} 控件用于设置 Position 的元素
              */
             getPositionElement: function () {
-                return this.getOuter();
+                return this.getMain();
             },
 
             /**
@@ -966,24 +955,24 @@ _aStatus            - 控件当前的状态集合
 
             /**
              * 获取控件的相对X轴坐标。
-             * getX 方法返回控件的外层元素的 offsetLeft 属性值。如果需要得到控件相对于整个文档的X轴坐标，请调用 getOuter 方法获得外层元素，然后调用 DOM 的相关函数计算(例如 ecui.dom.getPosition)。
+             * getX 方法返回控件的外层元素的 offsetLeft 属性值。如果需要得到控件相对于整个文档的X轴坐标，请调用 getMain 方法获得外层元素，然后调用 DOM 的相关函数计算(例如 ecui.dom.getPosition)。
              * @public
              *
              * @return {number} X轴坐标
              */
             getX: function () {
-                return this.isShow() ? this.getOuter().offsetLeft : 0;
+                return this.isShow() ? this.getMain().offsetLeft : 0;
             },
 
             /**
              * 获取控件的相对Y轴坐标。
-             * getY 方法返回控件的外层元素的 offsetTop 属性值。如果需要得到控件相对于整个文档的Y轴坐标，请调用 getOuter 方法获得外层元素，然后调用 DOM 的相关函数计算(例如 ecui.dom.getPosition)。
+             * getY 方法返回控件的外层元素的 offsetTop 属性值。如果需要得到控件相对于整个文档的Y轴坐标，请调用 getMain 方法获得外层元素，然后调用 DOM 的相关函数计算(例如 ecui.dom.getPosition)。
              * @public
              *
              * @return {number} Y轴坐标
              */
             getY: function () {
-                return this.isShow() ? this.getOuter().offsetTop : 0;
+                return this.isShow() ? this.getMain().offsetTop : 0;
             },
 
             /**
@@ -994,7 +983,7 @@ _aStatus            - 控件当前的状态集合
              * @return {boolean} 显示状态是否改变
              */
             hide: function () {
-                if (!dom.hasClass(this.getOuter(), 'ui-hide')) {
+                if (!dom.hasClass(this.getMain(), 'ui-hide')) {
                     core.dispatchEvent(this, 'hide');
                     return true;
                 }
@@ -1012,10 +1001,10 @@ _aStatus            - 控件当前的状态集合
                 if (!this._bReady) {
                     if (this._bDisabled) {
                         this.alterStatus('+disabled');
-                        dom.addClass(this.getOuter(), 'ui-disabled');
+                        dom.addClass(this.getMain(), 'ui-disabled');
                     }
 
-                    var el = this.getOuter();
+                    var el = this.getMain();
 
                     if (waitReadyList === null) {
                         // 页面已经加载完毕，直接运行 $ready 方法
@@ -1156,7 +1145,7 @@ _aStatus            - 控件当前的状态集合
              * @return {boolean} 控件是否显示
              */
             isShow: function () {
-                return !dom.hasClass(this.getOuter(), 'ui-hide') && !!this.getOuter().offsetWidth;
+                return !dom.hasClass(this.getMain(), 'ui-hide') && !!this.getMain().offsetWidth;
             },
 
             /**
@@ -1270,7 +1259,7 @@ _aStatus            - 控件当前的状态集合
              * @param {number} y 控件的Y轴坐标
              */
             setPosition: function (x, y) {
-                var style = this.getOuter().style;
+                var style = this.getMain().style;
                 style.left = x + 'px';
                 style.top = y + 'px';
             },
@@ -1312,7 +1301,7 @@ _aStatus            - 控件当前的状态集合
              * @return {boolean} 显示状态是否改变
              */
             show: function () {
-                if (dom.hasClass(this.getOuter(), 'ui-hide')) {
+                if (dom.hasClass(this.getMain(), 'ui-hide')) {
                     core.dispatchEvent(this, 'show');
                     core.query(function (item) {
                         return this.contain(item);

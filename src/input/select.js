@@ -178,7 +178,7 @@ _bAlterItems  - 是否延迟到显示时执行alterItems
                 ui.InputControl.prototype.$mousewheel.call(this, event);
                 var body = this.getBody(),
                     target = event.getTarget();
-                if (ieVersion < 9 || (target && dom.contain(body, target.getOuter()) && ((!body.scrollTop && event.deltaY < 0) || (body.scrollTop === body.scrollHeight - body.clientHeight && event.deltaY > 0)))) {
+                if (ieVersion < 9 || (target && dom.contain(body, target.getMain()) && ((!body.scrollTop && event.deltaY < 0) || (body.scrollTop === body.scrollHeight - body.clientHeight && event.deltaY > 0)))) {
                     event.preventDefault();
                 }
                 event.stopPropagation();

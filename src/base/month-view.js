@@ -337,7 +337,7 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
                 (cells || this._aCells).slice(7).forEach(
                     function (item, index) {
                         var date = new Date(firstDay.getTime() + (day + index) * 3600000 * 24),
-                            el = item.getOuter();
+                            el = item.getMain();
 
                         item._oDate = date;
                         item.getBody().innerHTML = item._nDay = date.getDate();

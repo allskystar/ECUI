@@ -229,10 +229,10 @@ _eRight      - 右侧乐定行的Element元素
                     view = util.getView(),
                     top = pos.top - view.top,
                     left = pos.left - view.left,
-                    leftHeadStyle = this._uLeftHead.getOuter().style,
-                    rightHeadStyle = this._uRightHead.getOuter().style,
-                    leftMainStyle = this._uLeftMain.getOuter().style,
-                    rightMainStyle = this._uRightMain.getOuter().style,
+                    leftHeadStyle = this._uLeftHead.getMain().style,
+                    rightHeadStyle = this._uRightHead.getMain().style,
+                    leftMainStyle = this._uLeftMain.getMain().style,
+                    rightMainStyle = this._uRightMain.getMain().style,
                     fixed = dom.contain(this.getMain(), event.target) && event.deltaX;
 
                 if (this.$getSection('Head').getMain().style.position === 'fixed' || fixed) {
@@ -286,13 +286,13 @@ _eRight      - 右侧乐定行的Element元素
              * @override
              */
             $headscroll: function () {
-                var leftHeadStyle = this._uLeftHead.getOuter().style,
-                    rightHeadStyle = this._uRightHead.getOuter().style,
-                    leftMainStyle = this._uLeftMain.getOuter().style,
-                    rightMainStyle = this._uRightMain.getOuter().style;
+                var leftHeadStyle = this._uLeftHead.getMain().style,
+                    rightHeadStyle = this._uRightHead.getMain().style,
+                    leftMainStyle = this._uLeftMain.getMain().style,
+                    rightMainStyle = this._uRightMain.getMain().style;
 
                 leftHeadStyle.position = rightHeadStyle.position = leftMainStyle.position = rightMainStyle.position = '';
-                leftHeadStyle.top = rightHeadStyle.top = this.$getSection('Head').getOuter().style.top;
+                leftHeadStyle.top = rightHeadStyle.top = this.$getSection('Head').getMain().style.top;
 
                 if (core.getScrollNarrow()) {
                     leftHeadStyle.left = leftMainStyle.left = '0px';
@@ -301,7 +301,7 @@ _eRight      - 右侧乐定行的Element元素
                 } else {
                     leftHeadStyle.left = leftMainStyle.left = this.getLayout().scrollLeft + 'px';
                     rightHeadStyle.left = rightMainStyle.left = (Math.min(this.getWidth(), this.$$tableWidth) - this.$$paddingRight + this.getLayout().scrollLeft - this.$$rightTDWidth - this.$$scrollFixed[0]) + 'px';
-                    leftMainStyle.top = rightMainStyle.top = (this.$$paddingTop + this.getLayout().scrollTop - dom.parent(this.$getSection('Head').getOuter()).scrollTop) + 'px';
+                    leftMainStyle.top = rightMainStyle.top = (this.$$paddingTop + this.getLayout().scrollTop - dom.parent(this.$getSection('Head').getMain()).scrollTop) + 'px';
                     leftMainStyle.clip = rightMainStyle.clip = ieVersion < 8 ? 'rect(0,100%,100%,0)' : 'auto';
                 }
             },

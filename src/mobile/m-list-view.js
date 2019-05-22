@@ -100,7 +100,7 @@ _nBottomIndex  - 下部隐藏的选项序号
                     this.$$bodyHeight = body.offsetHeight + this._nTopHidden + this._nBottomHidden;
                     items.map(function (item) {
                         item.cache();
-                        return item.getOuter().offsetWidth ? item : null;
+                        return item.getMain().offsetWidth ? item : null;
                     }).forEach(
                         function (item, index) {
                             if (item) {

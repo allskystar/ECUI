@@ -140,7 +140,7 @@ _aSelect - 全部的下拉框控件列表
                                             item._aChildren = select.getItems();
                                         }
                                         select.show();
-                                        effect.grade('this.style.left=#100->' + (25 * index) + '%#', 400, { $: select.getOuter() });
+                                        effect.grade('this.style.left=#100->' + (25 * index) + '%#', 400, { $: select.getMain() });
                                     }
                                 } else if (select) {
                                     var args = [select._sUrl];
@@ -159,7 +159,7 @@ _aSelect - 全部的下拉框控件列表
                                                     select.add(data);
                                                     item._aChildren = select.getItems();
                                                     select.show();
-                                                    effect.grade('this.style.left=#100->' + (25 * index) + '%#', 400, { $: select.getOuter() });
+                                                    effect.grade('this.style.left=#100->' + (25 * index) + '%#', 400, { $: select.getMain() });
                                                 }
                                             }
                                         );

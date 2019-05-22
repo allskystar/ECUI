@@ -33,7 +33,7 @@ drag - 拖拽控件
                 }
             },
             $mousedown: function (event) {
-                left = ecui.dom.getPosition(this.getOuter()).left;
+                left = ecui.dom.getPosition(this.getMain()).left;
                 var boxes = this.getMain().getElementsByTagName('TD');
                 this.$clear();
                 width = boxes[0].offsetWidth;

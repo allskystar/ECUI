@@ -202,7 +202,7 @@ _eBar            - 下划线 DOM 元素
              * @override
              */
             getX: function () {
-                return this.isShow() ? (this._bIsTitle === undefined ? this.getOuter().offsetLeft : this._bIsTitle ? this.$getXByTitle() : this.$getXByContainer()) : 0;
+                return this.isShow() ? (this._bIsTitle === undefined ? this.getMain().offsetLeft : this._bIsTitle ? this.$getXByTitle() : this.$getXByContainer()) : 0;
             },
 
             /**

@@ -24,7 +24,7 @@
             {
                 $hide: function (event) {
                     ui.Dialog.prototype.$hide.call(this, event);
-                    dom.removeClass(this.getOuter(), instanceClass);
+                    dom.removeClass(this.getMain(), instanceClass);
                 }
             }
         ),
@@ -72,7 +72,7 @@
         }
 
         var instance = core.getSingleton(MessageBox),
-            outer = instance.getOuter(),
+            outer = instance.getMain(),
             body = instance.getBody(),
             elContent = body.firstChild,
             elButton = body.lastChild,
@@ -209,7 +209,7 @@
         var className = tipClass[type],
             instance = core.getSingleton(Tip),
             elContent = instance.getBody().firstChild,
-            outer = instance.getOuter();
+            outer = instance.getMain();
 
         if (!dom.parent(outer)) {
             document.body.appendChild(outer);
