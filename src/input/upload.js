@@ -98,8 +98,8 @@
             /**
              * @override
              */
-            $ready: function (event) {
-                ui.Control.prototype.$ready.call(this, event);
+            $ready: function () {
+                ui.Control.prototype.$ready.call(this);
                 dom.addEventListener(this._eFile, 'change', fileChangeHandler.bind(this));
             },
 

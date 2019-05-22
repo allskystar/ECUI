@@ -1,9 +1,9 @@
 /*
 @example
 <div ui="type:listbox;name:test">
-    <!-- 这里放选项内容 -->
-    <div>选项</div>
-    ...
+    <div>选项一</div>
+    <div>选项二</div>
+    <div>选项三</div>
 </div>
 
 @fields

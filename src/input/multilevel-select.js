@@ -135,8 +135,8 @@ _aSelect - 全部的下拉框控件列表
             /**
              * @override
              */
-            $ready: function (event) {
-                ui.InputControl.prototype.$ready.call(this, event);
+            $ready: function () {
+                ui.InputControl.prototype.$ready.call(this);
 
                 var el = this.getMain();
                 this._aSelect = [];

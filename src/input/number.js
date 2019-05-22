@@ -67,6 +67,7 @@ _oTest      匹配合法性的正则表达式
                 ui.Text.prototype.$input.call(this, event);
 
                 var value = this.getValue();
+
                 if (this._oTest.test(value)) {
                     var min = this.$getMinValue(),
                         max = this.$getMaxValue();
@@ -82,8 +83,8 @@ _oTest      匹配合法性的正则表达式
             /**
              * @override
              */
-            $ready: function (event) {
-                ui.Text.prototype.$ready.call(this, event);
+            $ready: function () {
+                ui.Text.prototype.$ready.call(this);
                 this._sLastValue = this.getValue();
             },
 
