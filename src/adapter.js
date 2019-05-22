@@ -597,6 +597,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                         }
                     }
 
+                    top -= view.top;
                     if (isMiddle || height > el.clientHeight) {
                         // 高度不够居中显示
                         window.scroll(0, top + (height - el.clientHeight) / 2);
