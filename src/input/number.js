@@ -32,6 +32,15 @@ _oTest      匹配合法性的正则表达式
             this._oTest = new RegExp('^-?\\d*' + (this._nDecimal === 0 ? '' : '(\\.\\d' + (this._nDecimal ? '{0,' + Math.abs(this._nDecimal) + '}' : '*') + ')?') + '$');
         },
         {
+            DEFAULT_OPTIONS: {
+                min: function (value) {
+                    return value === undefined ? undefined : (+value || 0);
+                },
+                max: function (value) {
+                    return value === undefined ? undefined : (+value || 0);
+                }
+            },
+
             /**
              * @override
              */
@@ -69,10 +78,7 @@ _oTest      匹配合法性的正则表达式
                 var value = this.getValue();
 
                 if (this._oTest.test(value)) {
-                    var min = this.$getMinValue(),
-                        max = this.$getMaxValue();
-
-                    if (!value || ((min === undefined || (+value >= 0 && min >= 0)) && (max === undefined || +value <= max))) {
+                    if (!value || ((this.min === undefined || (this.min < 0 && (value === '-' || +value >= this.min)) || +value >= 0) && (this.max === undefined || (this.max < 0 && value === '-') || +value <= this.max))) {
                         this._sLastValue = value;
                         return;
                     }
