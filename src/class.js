@@ -71,7 +71,7 @@
                     delete caller[Class.CLASSID][name];
                 }
                 delete caller[name];
-                if (caches.hasOwnProperty) {
+                if (caches.hasOwnProperty(name)) {
                     caller[name] = caches[name];
                 }
             } else {

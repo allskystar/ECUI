@@ -954,7 +954,7 @@
                 }
 
                 clazz = this.constructor.TYPES[this.constructor.TYPES.length - i].slice();
-                if (this.className !== clazz[0]) {
+                if (this.className && this.className !== clazz[0]) {
                     clazz.push(this.className);
                 }
                 return clazz.join('-' + name + ' ') + '-' + name;
