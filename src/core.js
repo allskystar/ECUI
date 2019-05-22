@@ -2044,7 +2044,7 @@ outer:          for (var caches = [], target = event.target, el; target && targe
         create: function (UIClass, options) {
             var control = core.$create(UIClass, options);
             control.cache();
-            control.init(options);
+            control.init();
             return control;
         },
 
@@ -2662,7 +2662,7 @@ outer:          for (var caches = [], target = event.target, el; target && targe
 //{if 0}//
                         try {
 //{/if}//
-                            controls.push({object: core.$create(item, options), options: options});
+                            controls.push(core.$create(item, options));
 //{if 0}//
                         } catch (e) {
                             console.warn('The type:' + options.type + ' can\'t constructor');
@@ -2673,10 +2673,10 @@ outer:          for (var caches = [], target = event.target, el; target && targe
                 });
 
                 controls.forEach(function (item) {
-                    item.object.cache();
+                    item.cache();
                 });
                 controls.forEach(function (item) {
-                    item.object.init(item.options);
+                    item.init();
                 });
 
                 if (initRecursion === 1) {
