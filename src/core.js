@@ -1418,6 +1418,7 @@ outer:          for (var caches = [], target = event.target, el; target && targe
             flgFixedSize = el.offsetWidth !== 80;
             scrollNarrow = el.offsetWidth - el.clientWidth - 2;
             dom.remove(el);
+            dom.addClass(document.body, scrollNarrow ? 'ui-scrollbar' : 'ui-touchpad');
 
             if (ecuiOptions.load) {
                 for (var text = ecuiOptions.load; /^\s*(\w+)\s*(\([^)]+\))?\s*($|,)/.test(text); ) {
