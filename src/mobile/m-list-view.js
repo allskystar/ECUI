@@ -49,25 +49,25 @@ _nBottomIndex  - 下部隐藏的选项序号
         [
             function (el, options) {
                 var body = this.getBody();
-                this._eHeader = dom.insertBefore(dom.create({className: options.classes.join('-header '), innerHTML: '<div></div>'}), body);
+                this._eHeader = dom.insertBefore(dom.create({className: this.getUnitClass(ui.MListView, 'header'), innerHTML: '<div></div>'}), body);
                 if (this._eTitle) {
                     this._eHeader.appendChild(this._eTitle);
                 }
-                this._eFooter = dom.insertAfter(dom.create({className: options.classes.join('-footer ')}), body);
+                this._eFooter = dom.insertAfter(dom.create({className: this.getUnitClass(ui.MListView, 'footer')}), body);
                 dom.insertAfter(this._eEmpty, body);
                 this._oHandle = util.blank;
             },
             function (el, options) {
                 if (options.customEmpty) {
-                    dom.addClass(this._eEmpty = dom.remove(dom.last(el)), options.classes.join('-empty-body '));
+                    dom.addClass(this._eEmpty = dom.remove(dom.last(el)), this.getUnitClass(ui.MListView, 'empty-body'));
                 } else {
-                    this._eEmpty = dom.create({className: options.classes.join('-empty-body ')});
+                    this._eEmpty = dom.create({className: this.getUnitClass(ui.MListView, 'empty-body')});
                 }
                 var first = dom.first(el);
                 if (first.tagName === 'STRONG') {
                     this._eTitle = first;
                     el.removeChild(first);
-                    dom.addClass(first, options.classes.join('-title '));
+                    dom.addClass(first, this.getUnitClass(ui.MListView, 'title'));
                 }
                 ui.Control.call(this, el, options);
                 this._sStatus = '';
