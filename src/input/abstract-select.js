@@ -9,10 +9,15 @@
     <div ui="value:male">男</div>
     <div ui="value:female">女</div>
 </div>
+或
+<div ui="type:select">
+    <input type="hidden" name="sex" value="male" placeholder="请选择">
+    <div ui="value:male">男</div>
+    <div ui="value:female">女</div>
+</div>
 
 @fields
 _bRequired    - 是否必须选择
-_cSelected    - 当前选中的选项
 _uText        - 下拉框的文本框
 _uOptions     - 下拉选择框
 */
@@ -73,8 +78,8 @@ _uOptions     - 下拉选择框
                 }
             }
 
-            optionsEl.className = options.classes.join('-options ') + 'ui-popup ui-hide';
-            el.innerHTML = '<div class="' + options.classes.join('-text ') + '"></div>';
+            optionsEl.className = this.getUnitClass(ui.$select, 'options') + ' ui-popup ui-hide';
+            el.innerHTML = '<div class="' + this.getUnitClass(ui.$select, 'text') + '"></div>';
             if (input) {
                 el.appendChild(input);
             }
@@ -129,7 +134,7 @@ _uOptions     - 下拉选择框
                         ui.Item.prototype.$click.call(this, event);
                         var parent = this.getParent();
                         parent._uOptions.hide();
-                        if (this._cSelected !== this) {
+                        if (parent.getSelected() !== this) {
                             parent.setSelected(this);
                             core.dispatchEvent(parent, 'change', event);
                         }
@@ -156,7 +161,7 @@ _uOptions     - 下拉选择框
                     setValue: function (value) {
                         var parent = this.getParent();
                         this._sValue = value;
-                        if (parent && this === parent._cSelected) {
+                        if (parent && this === parent.getSelected()) {
                             // 当前被选中项的值发生变更需要同步更新控件的值
                             ui.InputControl.prototype.setValue.call(parent, value);
                         }
