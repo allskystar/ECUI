@@ -1737,13 +1737,7 @@ outer:          for (var caches = [], target = event.target, el; target && targe
                     -1
                 );
             } else {
-                scrollHandler = util.timer(
-                    function () {
-                        scrollHandler = null;
-                        onscroll(event);
-                    },
-                    50
-                );
+                onscroll(event);
             }
         }
     }
