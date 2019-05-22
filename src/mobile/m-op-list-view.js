@@ -125,7 +125,7 @@ _cItem    - 当前处于激活的选项
                      * @override
                      */
                     getX: function () {
-                        return +this.getBody().firstChild.style.transform.replace(/translateX\((-?[0-9.]+)px\)/, '$1');
+                        return +dom.first(this.getBody()).style.transform.replace(/translateX\((-?[0-9.]+)px\)/, '$1');
                     },
 
                     /**
