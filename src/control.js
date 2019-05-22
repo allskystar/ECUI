@@ -1158,22 +1158,12 @@ _aStatus            - 控件当前的状态集合
 
             /**
              * 控件刷新。
-             * repaint 方法不改变控件的内容与大小进行重绘。控件如果生成后不位于文档 DOM 树中，样式无法被正常读取，控件显示后如果不是预期的效果，需要调用 repaint 方法刷新。
              * @public
              */
             repaint: function () {
                 this.$restoreStructure();
                 this.cache(true);
                 this.initStructure();
-            },
-
-            /**
-             * 控件重置大小并刷新。
-             * resize 方法重新计算并设置控件的大小，浏览器可视化区域发生变化时，可能需要改变控件大小，框架会自动调用控件的 resize 方法。
-             */
-            resize: function () {
-                this.$restoreStructure();
-                this.repaint();
             },
 
             /**
