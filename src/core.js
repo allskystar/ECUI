@@ -1465,7 +1465,14 @@ outer:          for (var caches = [], target = event.target, el; target && targe
                 document.body.appendChild(el);
 
                 if (iosVersion === 11.1 || iosVersion === 11.2) {
-                    document.body.appendChild(dom.create('INPUT', {id: 'ECUI-FIXED-INPUT'})).disabled = true;
+                    el = document.body.appendChild(dom.create('INPUT', {id: 'ECUI-FIXED-INPUT'}));
+                    el.disabled = true;
+                    el.onfocusin = el.onfocusout = function (event) {
+                        if (event.type === 'focusout') {
+                            this.disabled = true;
+                        }
+                        event.stopPropagation();
+                    };
                 }
             }
             core.init(document.body);
