@@ -1,12 +1,10 @@
 /*
 @example
-<div ui="type:timer;time:200;immediate"></div>
+<div ui="type:timer;time:200;residual"></div>
 
 @fields
-_bImmediate     - 是否直接开始倒计时
-_nBase          - 倒计时的基础时长，单位毫秒
-_nTime          - 倒计时的剩余时长，单位毫秒
-_sFormat        - 显示格式
+time          - 倒计时的基础时长，单位毫秒
+residual          - 倒计时的剩余时长，单位毫秒
 */
 (function () {
 //{if 0}//
@@ -15,25 +13,9 @@ _sFormat        - 显示格式
         util = core.util;
 //{/if}//
     /**
-     * 格式化时间。
-     * @private
-     *
-     * @param {ecui.ui.Timer} timer 计时器控件
-     */
-    function refresh(timer) {
-        var hours = Math.floor(timer._nTime / 3600000),
-            minutes = Math.floor((timer._nTime % 3600000) / 60000),
-            second = Math.floor((timer._nTime % 60000) / 1000),
-            msecond = timer._nTime % 1000;
-
-        timer.getBody().innerHTML = util.stringFormat(timer._sFormat, ('0' + hours).slice(-2), ('0' + minutes).slice(-2), ('0' + second).slice(-2), ('000' + msecond).slice(-4));
-    }
-
-    /**
      * 计时器控件。
      * options 属性：
      * time        倒计时的时长，默认单位秒，允许使用ms后缀表示毫秒
-     * immediate   是否直接开始倒计时，默认为false
      * format      显示格式，{0}表示时，{1}表示分，{2}表示秒，{3}表示毫秒
      * @control
      */
@@ -41,8 +23,6 @@ _sFormat        - 显示格式
         ui.Control,
         function (el, options) {
             _super(el, options);
-            this._nBase = options.time.endsWith('ms') ? +options.time.slice(0, -2) : +options.time * 1000;
-            this._sFormat = options.format || this.FORMAT;
             this.reset();
 
             if (options.immediate) {
@@ -50,7 +30,30 @@ _sFormat        - 显示格式
             }
         },
         {
-            FORMAT: '{0}:{1}:{2}',
+            DEFAULT_OPTIONS: {
+                format: '{0}:{1}:{2}',
+                time: function (value) {
+                    console.log(value);
+                    return (value.endsWith('ms') ? +value.slice(0, -2) : +value * 1000) || 0;
+                }
+            },
+
+            private: {
+                residual: undefined,
+
+                /**
+                 * 格式化时间。
+                 * @private
+                 */
+                _refresh: function () {
+                    var hours = Math.floor(this.residual / 3600000),
+                        minutes = Math.floor((this.residual % 3600000) / 60000),
+                        second = Math.floor((this.residual % 60000) / 1000),
+                        msecond = this.residual % 1000;
+
+                    this.getBody().innerHTML = util.stringFormat(this.format, ('0' + hours).slice(-2), ('0' + minutes).slice(-2), ('0' + second).slice(-2), ('000' + msecond).slice(-4));
+                }
+            },
 
             /**
              * @override
@@ -66,8 +69,8 @@ _sFormat        - 显示格式
              */
             reset: function () {
                 this.stop();
-                this._nTime = this._nBase;
-                refresh(this);
+                this.residual = this.time;
+                this._refresh();
             },
 
             /**
@@ -77,7 +80,7 @@ _sFormat        - 显示格式
              * @param {number} time 定时器时间，单位毫秒
              */
             setTime: function (time) {
-                this._nTime = time;
+                this.residual = time;
             },
 
             /**
@@ -91,10 +94,10 @@ _sFormat        - 显示格式
                 this.stop = util.timer(
                     function () {
                         var time = Date.now();
-                        this._nTime = Math.max(0, this._nTime + lastTime - time);
+                        this.residual = Math.max(0, this.residual + lastTime - time);
                         lastTime = time;
-                        refresh(this);
-                        if (this._nTime <= 0) {
+                        this._refresh();
+                        if (this.residual <= 0) {
                             this.stop();
                         }
                     },

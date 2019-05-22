@@ -385,7 +385,6 @@
                             dom.addEventListener(this.input, 'focusin', events.focusin);
                         }
                     } else {
-                        var input = this.input;
                         util.timer(
                             function () {
                                 var active = document.activeElement;
@@ -403,9 +402,9 @@
                                             }
                                         }
                                     }
-                                    dom.removeEventListener(input, 'focus', events.focus);
-                                    input.focus();
-                                    dom.addEventListener(input, 'focus', events.focus);
+                                    dom.removeEventListener(this.input, 'focus', events.focus);
+                                    this.input.focus();
+                                    dom.addEventListener(this.input, 'focus', events.focus);
                                 }
                             },
                             0,
