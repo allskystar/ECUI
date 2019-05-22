@@ -834,12 +834,16 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             this.clientY = event.clientY;
             this.which = event.which;
             if (ieVersion <= 10) {
-outer:          for (var caches = [], target = event.target, el; target; target = getElementFromEvent(event)) {
+outer:          for (var caches = [], target = event.target, el; target && target.tagName !== 'BODY'; target = getElementFromEvent(event)) {
                     for (el = target;; el = dom.parent(el)) {
                         if (!el) {
                             break outer;
                         }
                         if (dom.getCustomStyle(el, 'pointer-events') === 'none') {
+                            if (el.tagName === 'TD' || el.tagName === 'TH') {
+                                for (; el.tagName !== 'TABLE'; el = dom.parent(el)) {
+                                }
+                            }
                             caches.push([el, el.style.visibility]);
                             el.style.visibility = 'hidden';
                             break;
