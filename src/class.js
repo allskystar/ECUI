@@ -142,7 +142,7 @@
             window._super = Class.super ? Object.assign(classes[Class.super.CLASSID].Constructor.bind(caller), caller[Class.CLASSID].super) : null;
         }
 
-        if (Class === item[1]) {
+        if (caller === item[0] && Class === item[1]) {
             callStack.push([caller, Class, caches]);
             return;
         }
@@ -170,7 +170,7 @@
             window._super = args[2].super;
         }
 
-        if (Class === item[1]) {
+        if (caller === item[0] && Class === item[1]) {
             return;
         }
 
