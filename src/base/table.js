@@ -39,42 +39,13 @@
      *
      * @return {ecui.ui.Table.Cell} 单元格控件
      */
-    function initCell() {
-        this.getControl = null;
-        return createCell(this);
-    }
-
-    /**
-     * 建立单元格控件。
-     * @private
-     *
-     * @param {HTMLElement} main 单元格控件主元素
-     * @return {ecui.ui.Table.Cell} 单元格控件
-     */
-    function createCell(main) {
+    function getControlIfNeeded() {
         // 获取单元格所属的行控件
-        var row = dom.parent(main).getControl(),
+        var row = dom.parent(this).getControl(),
             table = row.getParent();
 
-        return core.$fastCreate(table.Cell, main, row, Object.assign({}, table.HCell._cast(table.getHCell(table.Row._cast(row).elements.indexOf(main))).options));
+        return core.$fastCreate(table.Cell, this, row, Object.assign({}, table.HCell._cast(table.getHCell(table.Row._cast(row).elements.indexOf(this))).options));
     }
-
-    /**
-     * 在需要时初始化单元格控件。
-     * 表格控件的单元格控件不是在初始阶段生成，而是在单元格控件第一次被调用时生成，参见核心的 getControl 方法。
-     * @private
-     *
-     * @return {Function} 初始化单元格函数
-     */
-    var getControlBuilder = ieVersion === 8 ? function () {
-            // 为了防止写入getControl属性而导致的reflow如此处理
-            var control;
-            return function () {
-                return (control = control || createCell(this));
-            };
-        } : function () {
-            return initCell;
-        };
 
     /**
      * 表格控件。
@@ -205,7 +176,7 @@
                                         Object.assign(options, core.getOptions(el));
                                         cols[j] = core.$fastCreate(this.HCell, el, this);
                                     } else {
-                                        el.getControl = getControlBuilder();
+                                        el.getControl = getControlIfNeeded;
                                     }
                                 }
                             }
@@ -885,7 +856,7 @@
                                         'TD',
                                         {
                                             className: primary,
-                                            getControl: getControlBuilder()
+                                            getControl: getControlIfNeeded
                                         }
                                     ),
                                     o
@@ -955,7 +926,7 @@
                 for (i = 0, el = el.firstChild, col = null; this.hcells[i]; i++) {
                     if (o = rowCols[i]) {
                         rowCols[i] = el;
-                        el.getControl = getControlBuilder();
+                        el.getControl = getControlIfNeeded;
                         el = el.nextSibling;
                     } else if (o === false) {
                         o = this.$getElement(index, i);
@@ -1114,7 +1085,7 @@
                                     cols.splice(index + 1, 1);
                                 } else {
                                     dom.remove(item);
-                                    if (item.getControl !== getControlBuilder()) {
+                                    if (item.getControl !== getControlIfNeeded) {
                                         core.dispose(item.getControl());
                                     }
                                     cols.splice(index, 1);
