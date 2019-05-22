@@ -1,3 +1,28 @@
+//{if 0}//
+if (/(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined < 9) {
+    document.write = function (name) {
+        if (/src="([^"]+)"/.test(name)) {
+            if (window.ActiveXObject) {
+                try {
+                    var xhr = new ActiveXObject('Msxml2.XMLHTTP');
+                } catch (e) {
+                    xhr = new ActiveXObject('Microsoft.XMLHTTP');
+                }
+            } else {
+                xhr = new XMLHttpRequest();
+            }
+
+            xhr.open('GET', RegExp.$1, false);
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4) {
+                        eval(xhr.responseText.replace(/\.(extends|super|this|for)([^A-Za-z0-9_$])/g, '["$1"]$2'));
+                }
+            };
+            xhr.send();
+        }
+    };
+}
+//{/if}//
 var ecui;
 (function () {
     document.write('<script type="text/javascript" src="src/class.js"></script>');
