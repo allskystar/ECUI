@@ -225,8 +225,8 @@ _aStatus            - 控件当前的状态集合
             $dispose: function () {
                 this._eMain.getControl = null;
                 this._eMain = this._eBody = null;
-                // 取消 $ready 的操作，防止控件在 onload 结束前被 dispose，从而引发 $ready 访问的信息错误的问题
-                this.$ready = util.blank;
+                // 取消初始化的操作，防止控件在 onload 结束前被 dispose，从而引发初始化访问的信息错误的问题
+                this.initStructure = util.blank;
             },
 
             /**
@@ -619,12 +619,11 @@ _aStatus            - 控件当前的状态集合
              */
             cache: function (force) {
                 if ((force || !this._bCached) && this.getMain().offsetWidth) {
-                    // 之前未进行过缓存相关操作，强制缓存，否则不执行initStructure
                     force = this._bCached === undefined;
                     this._bCached = true;
                     this.$cache(dom.getStyle(this._eMain));
-                    if (force && this._bReady) {
-                        // 之前缓存过，因为clearCache方法标记为需要重新缓存，不需要再次主动执行initStructure方法
+                    if (force && this.init === util.blank) {
+                        // 已经初始化，但第一次缓存的控件进行结构化
                         this.initStructure();
                     }
                     return true;
@@ -994,46 +993,42 @@ _aStatus            - 控件当前的状态集合
              * 控件初始化。
              * init 方法在控件缓存读取后调用，有关控件生成的完整过程描述请参见 基础控件。
              * @public
-             *
-             * @param {object} options 初始化选项(参见 ECUI 控件)
              */
-            init: function (options) {
-                if (!this._bReady) {
-                    if (this._bDisabled) {
-                        this.alterStatus('+disabled');
-                        dom.addClass(this.getMain(), 'ui-disabled');
-                    }
+            init: function () {
+                if (this._bDisabled) {
+                    this.alterStatus('+disabled');
+                    dom.addClass(this.getMain(), 'ui-disabled');
+                }
 
-                    var el = this.getMain();
-
+                var el = this.getMain();
+                if (el.style.display === 'none') {
+                    this.$hide();
+                    el.style.display = '';
+                } else if (this._bCached) {
+                    // 处于显示状态的控件需要完成初始化
                     if (waitReadyList === null) {
-                        // 页面已经加载完毕，直接运行 $ready 方法
-                        core.dispatchEvent(this, 'ready', {options: options});
+                        // 页面已经加载完毕，直接初始化结构
+                        this.initStructure();
                     } else {
                         if (!waitReadyList) {
-                            // 页面未加载完成，首先将 $ready 方法的调用存放在调用序列中
+                            // 页面未加载完成，将需要初始化的控件存放在调用序列中
                             // 需要这么做的原因是 ie 的 input 回填机制，一定要在 onload 之后才触发
-                            // ECUI 应该避免直接使用 ecui.get(xxx) 导致初始化，所有的代码应该在 onload 之后运行
                             waitReadyList = [];
                             util.timer(
                                 function () {
                                     waitReadyList.forEach(function (item) {
-                                        core.dispatchEvent(item.control, 'ready', {options: item.options});
+                                        item.initStructure();
                                     });
                                     waitReadyList = null;
                                 }
                             );
                         }
-                        waitReadyList.push({control: this, options: options});
+                        waitReadyList.push(this);
                     }
 
-                    if (el.style.display === 'none') {
-                        this.$hide();
-                        el.style.display = '';
-                    } else if (this._bCached) {
-                        this.initStructure();
-                    }
                 }
+
+                this.init = util.blank;
             },
 
             /**
@@ -1042,7 +1037,10 @@ _aStatus            - 控件当前的状态集合
              */
             initStructure: function () {
                 this.$initStructure(this.getClientWidth(), this.getClientHeight());
-                core.dispatchEvent(this, 'repaint');
+                if (!this._bReady) {
+                    // 第一次结构化触发ready执行
+                    core.dispatchEvent(this, 'ready');
+                }
             },
 
             /**

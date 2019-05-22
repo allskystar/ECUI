@@ -2000,8 +2000,6 @@ outer:          for (var caches = [], target = event.target, el; target; target 
             oncreate(control, options);
             allControls.push(control);
 
-            core.dispatchEvent(control, 'ready', {options: options});
-
             return control;
         },
 
