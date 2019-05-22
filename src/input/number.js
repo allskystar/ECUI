@@ -72,7 +72,7 @@ _oTest      匹配合法性的正则表达式
                     var min = this.$getMinValue(),
                         max = this.$getMaxValue();
 
-                    if (!value || ((min === undefined || +value >= min) && (max === undefined || +value <= max))) {
+                    if (!value || ((min === undefined || (+value >= 0 && min >= 0)) && (max === undefined || +value <= max))) {
                         this._sLastValue = value;
                         return;
                     }
