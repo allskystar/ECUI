@@ -1,4 +1,3 @@
-var _super;
 (function () {
     var classIndex = 1,
         NullClass = {CLASSID: 'CLASS-0'},
@@ -139,8 +138,8 @@ var _super;
             caches = {};
 
         if (caller) {
-            caches.super = _super;
-            _super = Class.super ? Object.assign(classes[Class.super.CLASSID].Constructor.bind(caller), caller[Class.CLASSID].super) : null;
+            caches.super = window._super;
+            window._super = Class.super ? Object.assign(classes[Class.super.CLASSID].Constructor.bind(caller), caller[Class.CLASSID].super) : null;
         }
 
         if (Class === item[1]) {
@@ -170,7 +169,7 @@ var _super;
             Class = args[1];
 
         if (caller) {
-            _super = args[2].super;
+            window._super = args[2].super;
         }
 
         if (Class === item[1]) {
@@ -228,7 +227,7 @@ var _super;
         };
     }
 
-    _class = function () {
+    window._class = function () {
         return _class.extends.apply(this, [null].concat(Array.prototype.slice.call(arguments)));
     };
 
@@ -483,7 +482,7 @@ var _super;
         return newClass;
     };
 
-    _interface = function (properties) {
+    window._interface = function (properties) {
         return _interface.extends([], properties);
     };
 
@@ -561,7 +560,7 @@ var _super;
         return newClass;
     };
 
-    _static = function (fn) {
+    window._static = function (fn) {
         return function () {
             onbefore(null, NullClass);
             try {
