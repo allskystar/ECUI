@@ -12,10 +12,6 @@
 
 @fields
 _nOptionSize  - 下接选择框可以用于选择的条目数量
-_cSelected    - 当前选中的选项
-_uText        - 下拉框的文本框
-_uOptions     - 下拉选择框
-_bAlterItems  - 是否延迟到显示时执行alterItems
 */
 (function () {
 //{if 0}//
@@ -32,10 +28,11 @@ _bAlterItems  - 是否延迟到显示时执行alterItems
      * @param {ecui.ui.Select} select 下拉框控件
      */
     function refresh(select) {
-        if (select._cSelected) {
-            core.setFocused(select._cSelected);
+        var item = select.getSelected();
+        if (item) {
+            select.setSelecting(item);
         }
-        select._uOptions.getBody().scrollTop = select.getClientHeight() * select.getItems().indexOf(select._cSelected);
+        select.$getSection('Options').getBody().scrollTop = select.getClientHeight() * select.getItems().indexOf(item);
     }
 
     /**
@@ -94,6 +91,29 @@ _bAlterItems  - 是否延迟到显示时执行alterItems
             ),
 
             /**
+             * 选项部件。
+             * @unit
+             */
+            Item: core.inherits(
+                ui.$select.prototype.Item,
+                'ui-select-item',
+                {
+                    /**
+                     * 光标进入时自动设置为选择状态。
+                     * @override
+                     */
+                    $mouseover: function (event) {
+                        ui.$select.prototype.Item.prototype.$mouseover.call(this, event);
+
+                        var parent = this.getParent();
+                        if (parent) {
+                            parent.setSelecting(this);
+                        }
+                    }
+                }
+            ),
+
+            /**
              * 弹出层初始化。
              * @protected
              */
@@ -135,38 +155,41 @@ _bAlterItems  - 是否延迟到显示时执行alterItems
                 var which = event.which,
                     list = this.getItems(),
                     step = this.getClientHeight(),
-                    focus = core.getFocused();
+                    selecting = this.getSelecting(),
+                    selected = this.getSelected(),
+                    options = this.$getSection('Options');
 
                 if (which === core.getKey()) {
-                    if (this.isFocused()) {
-                        // 当前不能存在鼠标操作，否则屏蔽按键
-                        if (which === 40 || which === 38) {
-                            if (list.length) {
-                                if (this._uOptions.isShow()) {
-                                    core.setFocused(list[which = Math.min(Math.max(0, list.indexOf(focus) + which - 39), list.length - 1)]);
+                    // 当前不能存在鼠标操作，否则屏蔽按键
+                    if (which === 40 || which === 38) {
+                        if (list.length) {
+                            if (options.isShow()) {
+                                if (!selecting.isHovered()) {
+                                    // 鼠标悬停时不允许切换
+                                    this.setSelecting(list[which = Math.min(Math.max(0, list.indexOf(selecting) + which - 39), list.length - 1)]);
                                     which -= this.getBody().scrollTop / step;
                                     this.getBody().scrollTop += (which < 0 ? which : which >= this._nOptionSize ? which - this._nOptionSize + 1 : 0) * step;
-                                } else {
-                                    var oldIndex = list.indexOf(this._cSelected),
-                                        index = Math.min(Math.max(0, oldIndex + which - 39), list.length - 1);
-                                    if (oldIndex !== index) {
-                                        this.setSelectedIndex(index);
-                                        core.dispatchEvent(this, 'change', event);
-                                    }
                                 }
-                            }
-                            event.exit();
-                        } else if (which === 27 || (which === 13 && this._uOptions.isShow())) {
-                            this._uOptions.hide();
-                            // 回车键选中，ESC键取消
-                            if (which === 13) {
-                                if (focus.getParent() === this && this._cSelected !== focus) {
-                                    this.setSelected(focus);
+                            } else {
+                                var oldIndex = list.indexOf(selected),
+                                    index = Math.min(Math.max(0, oldIndex + which - 39), list.length - 1);
+                                if (oldIndex !== index) {
+                                    this.setSelected(index);
                                     core.dispatchEvent(this, 'change', event);
                                 }
                             }
-                            event.exit();
                         }
+                        event.exit();
+                    } else if (which === 27 || (which === 13 && options.isShow())) {
+                        options.hide();
+                        // 回车键选中，ESC键取消
+                        if (which === 13) {
+                            if (selected !== selecting) {
+                                this.setSelected(selecting);
+                                core.dispatchEvent(this, 'change', event);
+                            }
+                        }
+                        event.exit();
                     }
                 }
             },
@@ -194,7 +217,7 @@ _bAlterItems  - 是否延迟到显示时执行alterItems
             setOptionSize: function (value) {
                 this._nOptionSize = value;
                 this.alterItems();
-                if (this._uOptions.isShow()) {
+                if (this.$getSection('Options').isShow()) {
                     refresh(this);
                     this.setPopupPosition();
                 }
@@ -202,4 +225,6 @@ _bAlterItems  - 是否延迟到显示时执行alterItems
         },
         ui.Popup
     );
+
+    ui.Items.defineProperty(ui.Select, 'selecting');
 }());

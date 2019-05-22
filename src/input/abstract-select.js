@@ -202,6 +202,28 @@ _uOptions     - 下拉选择框
             },
 
             /**
+             * 属性改变事件的默认处理。
+             * @event
+             */
+            $propertychange: function (event) {
+                if (event.name === 'selected') {
+                    if (event.item) {
+                        this.setText(event.item.getContent());
+                        this.$setValue(event.item._sValue);
+                        if (this._uOptions.isShow()) {
+                            core.setFocused(event.item);
+                        }
+                    } else {
+                        this.setText('');
+                        this.$setValue('');
+                        if (this.contain(core.getFocused())) {
+                            core.setFocused(this);
+                        }
+                    }
+                }
+            },
+
+            /**
              * @override
              */
             $ready: function (options) {
@@ -220,17 +242,6 @@ _uOptions     - 下拉选择框
             },
 
             /**
-             * 下拉框移除子选项时，如果选项被选中，需要先取消选中。
-             * @override
-             */
-            $remove: function (event) {
-                if (event.child === this._cSelected) {
-                    this.setSelected();
-                }
-                ui.InputControl.prototype.$remove.call(this, event);
-            },
-
-            /**
              * 设置placeholder信息。
              * @protected
              */
@@ -241,16 +252,6 @@ _uOptions     - 下拉选择框
                     this.alterStatus('+placeholder');
                     this.setText(dom.getAttribute(this.getInput(), 'placeholder') || '');
                 }
-            },
-
-            /**
-             * 设置底层的选中项。
-             * @protected
-             *
-             * @param {ecui.ui.Item} item 选项控件
-             */
-            $setSelected: function (item) {
-                this._cSelected = item || null;
             },
 
             /**
@@ -281,16 +282,6 @@ _uOptions     - 下拉选择框
             },
 
             /**
-             * 获取被选中的选项控件。
-             * @public
-             *
-             * @return {ecui.ui.Item} 选项控件
-             */
-            getSelected: function () {
-                return this._cSelected || null;
-            },
-
-            /**
              * 获取控件显示的文本。
              * @public
              *
@@ -298,46 +289,6 @@ _uOptions     - 下拉选择框
              */
             getText: function () {
                 return this._uText.getContent();
-            },
-
-            /**
-             * 改变下拉框当前选中的项。
-             * @private
-             *
-             * @param {ecui.ui.Select.Item} item 新选中的项
-             */
-            setSelected: function (item) {
-                item = item || null;
-                if (item !== this._cSelected) {
-                    if (this._cSelected) {
-                        this._cSelected.alterStatus('-selected');
-                    }
-                    this._cSelected = item;
-                    if (item) {
-                        item.alterStatus('+selected');
-                        this.setText(item.getContent());
-                        ui.InputControl.prototype.setValue.call(this, item._sValue);
-                        if (this._uOptions.isShow()) {
-                            core.setFocused(item);
-                        }
-                    } else {
-                        this.setText('');
-                        ui.InputControl.prototype.setValue.call(this, '');
-                        if (this.contain(core.getFocused())) {
-                            core.setFocused(this);
-                        }
-                    }
-                }
-            },
-
-            /**
-             * 根据序号选中选项。
-             * @public
-             *
-             * @param {number} index 选项的序号
-             */
-            setSelectedIndex: function (index) {
-                this.setSelected(this.getItems()[index]);
             },
 
             /**
@@ -375,4 +326,6 @@ _uOptions     - 下拉选择框
         },
         ui.Items
     );
+
+    ui.Items.defineProperty(ui.$select, 'selected');
 }());
