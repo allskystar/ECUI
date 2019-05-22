@@ -29,7 +29,8 @@ _oTest      匹配合法性的正则表达式
         function (el, options) {
             ui.Text.call(this, el, options);
             this._nDecimal = options.decimal && +options.decimal;
-            this._oTest = new RegExp('^-?\\d*' + (this._nDecimal === 0 ? '' : '(\\.\\d' + (this._nDecimal ? '{0,' + Math.abs(this._nDecimal) + '}' : '*') + ')?') + '$');
+            this._bPositive = !!options.positive;
+            this._oTest = new RegExp('^' + (this._bPositive ? '' : '-?') + '\\d*' + (this._nDecimal === 0 ? '' : '(\\.\\d' + (this._nDecimal ? '{0,' + Math.abs(this._nDecimal) + '}' : '*') + ')?') + '$');
         },
         {
             /**
