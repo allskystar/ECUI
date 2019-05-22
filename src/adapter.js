@@ -395,14 +395,23 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              * @param {string} position 插入 html 的位置信息，取值为 beforeBegin,afterBegin,beforeEnd,afterEnd
              * @param {string} html 要插入的 html 代码
              */
-            insertHTML: firefoxVersion ? function (el, position, html) {
-                var name = __ECUI__HTMLPosition[position.toUpperCase()],
-                    range = document.createRange();
+            insertHTML: firefoxVersion ? (function () {
+                var HTMLPosition = {
+                    AFTERBEGIN: 'selectNodeContents',
+                    BEFOREEND: 'selectNodeContents',
+                    BEFOREBEGIN: 'setStartBefore',
+                    AFTEREND: 'setEndAfter'
+                };
 
-                range[name](el);
-                range.collapse(position.length > 9);
-                range.insertNode(range.createContextualFragment(html));
-            } : ieVersion === 10 ? function (el, position, html) {
+                return function (el, position, html) {
+                    var name = HTMLPosition[position.toUpperCase()],
+                        range = document.createRange();
+
+                    range[name](el);
+                    range.collapse(position.length > 9);
+                    range.insertNode(range.createContextualFragment(html));
+                };
+            }()) : ieVersion === 10 ? function (el, position, html) {
                 var parent = dom.parent(el);
                 if (!parent) {
                     dom.create().appendChild(el);
@@ -1108,12 +1117,19 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              * @return {string} 结果字符串
              */
             decodeHTML: (function () {
+                var EscapeCharacter = {
+                    quot: '"',
+                    lt: '<',
+                    gt: '>',
+                    amp: '&'
+                };
+
                 return function (source) {
                     //处理转义的中文和实体字符
                     return source.replace(
                         /&(quot|lt|gt|amp|#([\d]+));/g,
                         function (match, $1, $2) {
-                            return __ECUI__EscapeCharacter[$1] || String.fromCharCode(+$2);
+                            return EscapeCharacter[$1] || String.fromCharCode(+$2);
                         }
                     );
                 };
@@ -1599,20 +1615,6 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
             transform: iosVersion < 9 ? 'webkitTransform' : undefined,
 
             'float': ieVersion ? 'styleFloat' : 'cssFloat'
-        },
-
-        __ECUI__HTMLPosition = {
-            AFTERBEGIN: 'selectNodeContents',
-            BEFOREEND: 'selectNodeContents',
-            BEFOREBEGIN: 'setStartBefore',
-            AFTEREND: 'setEndAfter'
-        },
-
-        __ECUI__EscapeCharacter = {
-            quot: '"',
-            lt: '<',
-            gt: '>',
-            amp: '&'
         },
 
         __ECUI__ClipboardText;
