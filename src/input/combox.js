@@ -54,7 +54,8 @@
 
             el = this.$getSection('Text').getBody();
 
-            var placeholder = options.placeholder || dom.getAttribute(this.getInput(), 'placeholder');
+            var placeholder = options.placeholder || dom.getAttribute(this.getInput(), 'placeholder') || '';
+            this.getInput().setAttribute('placeholder', placeholder);
             el.innerHTML = ieVersion < 10 ? '<div class="ui-placeholder">' + placeholder + '</div><input>' : '<input placeholder="' + util.encodeHTML(placeholder) + '">';
             this._eTextInput = el.lastChild;
             this.$bindEvent(this._eTextInput);
@@ -66,7 +67,7 @@
              */
             Item: core.inherits(
                 ui.Select.prototype.Item,
-                'ui-combox-item'
+                '*ui-combox-item'
             ),
 
             /**
@@ -124,13 +125,18 @@
                         selected = item;
                     }
                 });
+
                 if (selected) {
                     this.setSelected(selected);
                 } else {
-                    this.setSelected();
-                    this.$setPlaceholder();
-                    refresh(this);
+                    selected = this.getSelected();
+                    if (selected) {
+                        selected.alterStatus('-selected');
+                        this.$setSelected(null);
+                    }
                 }
+                this.$setPlaceholder();
+                refresh(this);
             },
 
             /**
