@@ -40,7 +40,6 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
         ui = core.ui,
         util = core.util,
 
-        firefoxVersion = /firefox\/(\d+\.\d)/i.test(navigator.userAgent) ? +RegExp.$1 : undefined,
         ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined;
 //{/if}//
     /**
@@ -152,25 +151,15 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
             this._nHeadFloat = options.headFloat === undefined ? undefined : options.headFloat === true ? 0 : +options.headFloat;
             this._nHeadMargin = options.headMargin || 0;
 
-            el.appendChild(
-                this._eLayout = dom.create(
-                    {
-                        className: options.classes.join('-layout '),
-                        innerHTML: '<div class="ui-table-layout-body"></div><div class="ui-table-body"></div><div class="ui-table-head"><table cellspacing="0" class="' + table.className + '" style="' + table.style.cssText + '"><tbody></tbody></table></div>'
-                    }
-                )
-            );
-            this._eLayout.lastChild.previousSibling.appendChild(table);
-
             var i = 0,
                 list = dom.children(table),
                 head = list[0],
                 body = list[1],
                 headRowCount = 1,
                 o = head,
-                rowClass = this._sRowClass = ' ' + options.classes.join('-row '),
-                hcellClass = this._sHCellClass = ' ' + options.classes.join('-hcell '),
-                cellClass = this._sCellClass = ' ' + options.classes.join('-cell '),
+                rowClass = this._sRowClass = ' ' + this.getUnitClass(ui.Table, 'row'),
+                hcellClass = this._sHCellClass = ' ' + this.getUnitClass(ui.Table, 'hcell'),
+                cellClass = this._sCellClass = ' ' + this.getUnitClass(ui.Table, 'cell'),
                 rows = this._aRows = [],
                 cols = this._aHCells = [],
                 colspans = [];
@@ -196,16 +185,21 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
 
             ui.Control.call(this, el, options);
 
+            o = '<div class="' + this.getUnitClass(ui.Table, 'body') + '"></div><div class="' + this.getUnitClass(ui.Table, 'head') + '"><table cellspacing="0" class="' + table.className + '" style="' + table.style.cssText + '"><tbody></tbody></table></div>';
+            if (core.getScrollNarrow()) {
+                dom.insertHTML(el, 'beforeEnd', '<div class="' + this.getUnitClass(ui.Table, 'layout') + '"><div class="' + this.getUnitClass(ui.Table, 'layout-body') + '"></div></div>' + o);
+                o = el.lastChild;
+                this._eLayout = o.previousSibling.previousSibling;
+            } else {
+                dom.insertHTML(el, 'beforeEnd', '<div class="' + this.getUnitClass(ui.Table, 'layout') + '">' + o + '</div>');
+                this._eLayout = el.lastChild;
+                o = this._eLayout.lastChild;
+            }
+
+            o.previousSibling.appendChild(table);
             // 初始化表格区域
             this.$setBody(body);
-            (this._uHead = core.$fastCreate(ui.Control, this._eLayout.lastChild, this)).$setBody(head);
-
-            if (core.getScrollNarrow()) {
-                el.appendChild(this._eLayout.lastChild);
-                el.insertBefore(this._eLayout.lastChild, el.lastChild);
-            } else {
-                dom.remove(this._eLayout.firstChild);
-            }
+            (this._uHead = core.$fastCreate(ui.Control, o, this)).$setBody(head);
 
             // 以下初始化所有的行控件
             for (i = 0; o = list[i]; i++) {
@@ -306,6 +300,7 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
              */
             HCell: core.inherits(
                 ui.Control,
+                'ui-table-hcell',
                 {
                     /**
                      * @override
@@ -571,9 +566,9 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
              */
             $beforescroll: function (event) {
                 ui.Control.prototype.$beforescroll.call(this, event);
-                if (firefoxVersion || ieVersion < 7) {
-                    return;
-                }
+                // if (ieVersion < 7) {
+                //     return;
+                // }
 
                 if (!(ieVersion < 9)) {
                     for (var el = this._uHead.getMain(); el !== document.body; el = dom.parent(el)) {
@@ -583,15 +578,16 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
                     }
                 }
 
+                var style = this._uHead.getMain().style,
+                    pos = dom.getPosition(this._eLayout),
+                    view = util.getView(),
+                    top = pos.top - view.top,
+                    main = this.getMain();
+
+                this.$$fixedTop = Math.min(this.getClientHeight() - this.$$paddingTop - this._nHeadMargin + top, Math.max(this._nHeadFloat || 0, top));
+
                 if (this._nHeadFloat !== undefined) {
                     if (event.deltaY) {
-                        var style = this._uHead.getMain().style,
-                            pos = dom.getPosition(this._eLayout),
-                            view = util.getView(),
-                            top = pos.top - view.top,
-                            main = this.getMain();
-
-                        this.$$fixedTop = Math.min(this.getClientHeight() - this.$$paddingTop - this._nHeadMargin + top, Math.max(this._nHeadFloat, top));
                         if (this.isShow() && (this.$$fixedTop <= this._nHeadFloat || (dom.contain(main, event.target) && main.scrollHeight !== main.clientHeight))) {
                             if (this._oScrollHandler) {
                                 this._oScrollHandler();
@@ -687,7 +683,7 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
                 if (this._nHeadFloat !== undefined) {
                     var style = this._uHead.getMain().style;
                     style.position = '';
-                    style.top = (Math.min(this.getClientHeight() - this.$$paddingTop - this._nHeadMargin, Math.max(0, this._nHeadFloat + util.getView().top - dom.getPosition(this.getMain()).top)) + this._eLayout.scrollTop) + 'px';
+                    style.top = (Math.min(this.getClientHeight() - this.$$paddingTop - this._nHeadMargin, Math.max(0, this._nHeadFloat + util.getView().top - dom.getPosition(this.getMain()).top))) + 'px';
                     style.left = '0px';
                     if (!core.getScrollNarrow()) {
                         style.clip = ieVersion < 8 ? 'rect(0,100%,100%,0)' : 'auto';

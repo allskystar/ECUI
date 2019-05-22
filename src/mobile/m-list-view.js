@@ -2,7 +2,7 @@
 @example
 <ul ui="type:m-list-view">
   <li>单条数据内容</li>
-  ...
+  <li>单条数据内容</li>
 </ul>
 
 @fields

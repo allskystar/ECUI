@@ -26,14 +26,14 @@ _eText       - 文本框
         ui.InputControl,
         function (el, options) {
             var popupEl = dom.create({
-                    className: options.classes.join('-popup ') + 'ui-popup ui-hide'
+                    className: this.getUnitClass(ui.MMultiOptions, 'popup') + ' ui-popup ui-hide'
                 }),
                 children = dom.children(el).filter(function (item) {
                     return item.tagName !== 'INPUT';
                 });
 
             el.appendChild(dom.create({
-                className: options.classes.join('-text ')
+                className: this.getUnitClass(ui.MMultiOptions, 'text')
             }));
             this._eText = el.lastChild;
 
@@ -129,7 +129,7 @@ _eText       - 文本框
 
                         this.getBody().innerHTML = values.map(
                             function (item) {
-                                return '<div ui="value:' + (this._sPrefix + item).slice(-this._sPrefix.length) + '" class="' + options.classes.join('-item ') + 'ui-item">' + (options.format ? util.stringFormat(options.format, item) : item) + '</div>';
+                                return '<div ui="value:' + (this._sPrefix + item).slice(-this._sPrefix.length) + '" class="' + this.getUnitClass(ui.MMultiOptions, 'item') + ' ui-item">' + (options.format ? util.stringFormat(options.format, item) : item) + '</div>';
                             },
                             this
                         ).join('');
@@ -266,8 +266,8 @@ _eText       - 文本框
             /**
              * @override
              */
-            $ready: function (event) {
-                ui.InputControl.prototype.$ready.call(this, event);
+            $ready: function () {
+                ui.InputControl.prototype.$ready.call(this);
                 this.setValue(this.getValue());
             },
 

@@ -1,18 +1,14 @@
 /*
 @example
 <div ui="type:tab;selected:1">
-    <!-- 包含容器的选项卡 -->
     <div>
         <strong>标题1</strong>
-        <!-- 这里是容器 -->
-        ...
+        标题1文本内容
     </div>
-    <!-- 仅有标题的选项卡，以下selected定义与控件定义是一致的，可以忽略其中之一 -->
     <strong ui="selected:true">标题2</strong>
 </div>
 
 @fields
-_cSelected       - 当前选中的选项卡
 _eContainer      - 容器 DOM 元素
 */
 (function () {
@@ -52,8 +48,8 @@ _eContainer      - 容器 DOM 元素
         ui.Control,
         'ui-tab',
         function (el, options) {
-            var titleEl = dom.create({className: options.classes.join('-title ')}),
-                containerEl = dom.create({className: options.classes.join('-container ')});
+            var titleEl = dom.create({className: this.getUnitClass(ui.Tab, 'title')}),
+                containerEl = dom.create({className: this.getUnitClass(ui.Tab, 'container')});
 
             for (; el.firstChild; ) {
                 titleEl.appendChild(el.firstChild);
@@ -64,6 +60,8 @@ _eContainer      - 容器 DOM 元素
             ui.Control.call(this, el, options);
 
             this.$setBody(titleEl);
+
+            this._nSelected = +options.selected;
         },
         {
             /**
@@ -80,7 +78,6 @@ _eContainer      - 容器 DOM 元素
                     if (el.tagName !== 'STRONG') {
                         var containerEl = el;
                         el = dom.first(el);
-                        options.primary = el.className.trim().split(' ')[0] || options.parent.Item.TYPES[0];
                     }
 
                     ui.Item.call(this, el, options);
@@ -111,8 +108,8 @@ _eContainer      - 容器 DOM 元素
                         }
                     }
 
-                    if (options.parent && options.selected) {
-                        options.parent._cSelected = this;
+                    if (options.selected && options.parent) {
+                        options.parent._nSelected = options.index;
                     }
                 },
                 {
@@ -163,7 +160,7 @@ _eContainer      - 容器 DOM 元素
                         if (this._eContainer = el) {
                             parent.getMain().appendChild(el);
                             // 如果当前节点被选中需要显示容器元素，否则隐藏
-                            if (parent._cSelected === this) {
+                            if (parent.getSelected() === this) {
                                 dom.addClass(el, this.getType() + '-selected');
                             } else {
                                 dom.removeClass(el, this.getType() + '-selected');
@@ -192,7 +189,7 @@ _eContainer      - 容器 DOM 元素
             $itemclick: function (event) {
                 if (dom.contain(event.item.getBody(), event.target)) {
                     if (core.dispatchEvent(this, 'titleclick', event)) {
-                        if (event.item !== this._cSelected) {
+                        if (event.item !== this.getSelected()) {
                             this.setSelected(event.item);
                             core.dispatchEvent(this, 'change');
                         }
@@ -205,16 +202,17 @@ _eContainer      - 容器 DOM 元素
             /**
              * @override
              */
-            $ready: function (event) {
-                this.setSelected(this._cSelected || +(event.options.selected) || 0);
-                ui.Control.prototype.$ready.call(this, event.options);
+            $ready: function () {
+                ui.Control.prototype.$ready.call(this);
+                this.setSelected(this._nSelected || 0);
+                delete this._nSelected;
             },
 
             /**
              * @override
              */
             $remove: function (event) {
-                if (this._cSelected === event.child) {
+                if (this.getSelected() === event.child) {
                     var list = this.getItems(),
                         index = list.indexOf(event.child);
 

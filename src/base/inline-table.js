@@ -1,29 +1,27 @@
 /*
 @example
 <div ui="type:inline-table">
-  <table>
-    <!-- 表头区域 -->
-    <thead>
-      <tr>
-        <th style="width:200px;">公司名</th>
-        <th style="width:200px;">url</th>
-        <th style="width:250px;">地址</th>
-        <th style="width:100px;">创办时间</th>
-      </tr>
-    </thead>
-    <!-- 内容行区域 -->
-    <tbody>
-      <tr>
-        <td>百度</td>
-        <td>www.baidu.com</td>
-        <td>中国北京中关村</td>
-        <td>1999</td>
-      </tr>
-      <tr>
-        <td>百度（纳斯达克：BIDU），全球最大的中文搜索引擎、最大的中文网站。百度愿景是：成为最懂用户，并能帮助人们成长的全球顶级高科技公司。</td>
-      </tr>
-    </tbody>
-  </table>
+    <table>
+        <thead>
+            <tr>
+                <th style="width:200px;">公司名</th>
+                <th style="width:200px;">url</th>
+                <th style="width:250px;">地址</th>
+                <th style="width:100px;">创办时间</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>百度</td>
+                <td>www.baidu.com</td>
+                <td>中国北京中关村</td>
+                <td>1999</td>
+            </tr>
+            <tr>
+                <td colspan="4">百度（纳斯达克：BIDU），全球最大的中文搜索引擎、最大的中文网站。百度愿景是：成为最懂用户，并能帮助人们成长的全球顶级高科技公司。</td>
+            </tr>
+        </tbody>
+    </table>
 </div>
 */
 (function () {
@@ -33,7 +31,7 @@
         ui = core.ui;
 //{/if}//
     function initExtendRow(row) {
-        dom.addClass(row.getMain(), 'ui-inline-table-extend-row');
+        dom.addClass(row.getMain(), row.getParent().getUnitClass(ui.InlineTable, 'extend-row'));
         row.setMerge(true);
         row.hide();
     }

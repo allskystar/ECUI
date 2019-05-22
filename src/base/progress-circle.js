@@ -1,6 +1,6 @@
 /*
 @example
-<div ui="type:progress-circle;max:100;value:0"></div>
+<div ui="type:progress-circle;max:100;value:35"></div>
 */
 //{if 0}//
 (function () {

@@ -168,7 +168,7 @@
         constructor: function (el, options) {
             var bodyEl = dom.create(
                     {
-                        className: options.classes.join('-body ') + 'ui-mobile-scroll-body'
+                        className: this.getUnitClass(ui.Control, 'body') + ' ui-mobile-scroll-body'
                     }
                 );
 
