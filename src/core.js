@@ -2914,7 +2914,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
          */
         repaint: function () {
             function filter(item) {
-                return item.getParent() === resizeList && item.isShow();
+                return item.getParent() === o && item.isShow();
             }
 
             // 拖拽状态时不进行窗体大小改变
@@ -2927,26 +2927,26 @@ outer:          for (var caches = [], target = event.target, el; target; target 
             core.flexFixed(document.body);
 
             // 按广度优先查找所有正在显示的控件，保证子控件一定在父控件之后
-            for (var i = 0, list = [], resizeList = null, widthList; resizeList !== undefined; resizeList = list[i++]) {
+            for (var i = 0, list = [], o = null; o !== undefined; o = list[i++]) {
                 Array.prototype.push.apply(list, core.query(filter));
             }
 
-            resizeList = list.filter(function (item) {
-                core.dispatchEvent(item, 'resize', widthList = new ECUIEvent('repaint'));
-                // 这里与Control控件的$restoreStructure方法存在强耦合，repaint有值表示在$restoreStructure中没有进行针对ie的width值回填
-                if (widthList.repaint) {
-                    return item;
+            var delayRestoreList = [];
+
+            list.forEach(function (item) {
+                if (o = item.$restoreStructure(true)) {
+                    delayRestoreList.push([o, item]);
                 }
             });
 
-            if (resizeList.length) {
+            if (delayRestoreList.length) {
                 // 由于强制设置了100%，因此改变ie下控件的大小必须从内部向外进行
                 // 为避免多次reflow，增加一次循环
-                widthList = resizeList.map(function (item) {
-                    return item.getMain().offsetWidth;
+                delayRestoreList.forEach(function (item) {
+                    item.push(item[1].getMain().offsetWidth);
                 });
-                resizeList.forEach(function (item, index) {
-                    item.getMain().style.width = widthList[index] - (isStrict ? item.$getBasicWidth() * 2 : 0) + 'px';
+                delayRestoreList.forEach(function (item) {
+                    item[0](item[1], item[2]);
                 });
             }
 

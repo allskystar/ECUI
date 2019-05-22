@@ -35,6 +35,10 @@ _aStatus            - 控件当前的状态集合
 //{/if}//
     var waitReadyList;
 
+    function calcWidth(control, width) {
+        control._eMain.style.width = width - (core.isContentBox(control._eMain) ? control.$getBasicWidth() * 2 : 0) + 'px';
+    }
+
     /**
      * 设置控件的父对象。
      * @private
@@ -435,16 +439,13 @@ _aStatus            - 控件当前的状态集合
             $remove: util.blank,
 
             /**
-             * 重绘事件。
-             * @event
+             * 控件结构恢复。
+             * @protected
+             *
+             * @param {boolean} isBatch 是否为批量处理
+             * @param {Function} 延后处理函数(交给核心处理)
              */
-            $repaint: util.blank,
-
-            /**
-             * 尺寸改变事件。
-             * @event
-             */
-            $restoreStructure: function (event) {
+            $restoreStructure: function (isBatch) {
                 this._eMain.style.width = this._sWidth;
                 this._eMain.style.height = this._sHeight;
                 if (ieVersion < 8) {
@@ -452,11 +453,12 @@ _aStatus            - 控件当前的状态集合
                     var style = dom.getStyle(this._eMain);
                     if (style.width === 'auto' && style.display === 'block') {
                         this._eMain.style.width = '100%';
-                        if (event.type !== 'repaint') {
-                            this._eMain.style.width = this._eMain.offsetWidth - (core.isContentBox(this._eMain) ? this.$getBasicWidth() * 2 : 0) + 'px';
-                        } else {
-                            event.repaint = true;
+                        if (isBatch) {
+                            return function (control, width) {
+                                calcWidth(control, width);
+                            };
                         }
+                        calcWidth(this, this._eMain.offsetWidth);
                     }
                 }
             },
