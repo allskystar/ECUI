@@ -1137,14 +1137,15 @@ outer:          for (var caches = [], target = event.target, el; target; target 
     function disposeControl(control) {
         try {
             var fn = control.ondispose;
+            control.ondispose = util.preventEvent;
             if (fn) {
-                control.ondispose = util.blank;
                 fn.call(control);
             }
         } catch (ignore) {
         }
         util.remove(singletons, control);
         core.dispatchEvent(control, 'dispose');
+        control.$dispose();
     }
 
     /**
