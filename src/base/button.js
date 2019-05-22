@@ -1,16 +1,10 @@
 /*
 @example
-<div ui="type:button">
-    <!-- 这里放按钮的文字 -->
-    ...
-</div>
+<div ui="type:button">按钮</div>
 或
-<button ui="type:button">
-    <!-- 这里放按钮的文字 -->
-    ...
-</button>
+<button ui="type:button">按钮</button>
 或
-<input ui="type:button" value="按钮文字" type="button">
+<input ui="type:button" type="button" value="按钮">
 */
 //{if 0}//
 (function () {
