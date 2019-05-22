@@ -100,13 +100,24 @@ _cSelected  - 当前选择的日历单元格
                     },
 
                     /**
-                     * 获取单元格天的信息。
+                     * 获取单元格的日期信息。
                      * @public
                      *
-                     * @return {number} 一个月中的第几天
+                     * @return {Date} 单元格对应的日期
                      */
                     getDate: function () {
                         return this._oDate;
+                    },
+
+                    /**
+                     * 设置单元格的日期信息。
+                     * @public
+                     *
+                     * @param {Date} date 单元格对应的日期
+                     */
+                    setDate: function (date) {
+                        this._oDate = date;
+                        this.getBody().innerHTML = date.getDate();
                     }
                 }
             ),
@@ -341,8 +352,7 @@ _cSelected  - 当前选择的日历单元格
                         var date = new Date(firstDay.getTime() + (day + index) * 3600000 * 24),
                             el = item.getMain();
 
-                        item._oDate = date;
-                        item.getBody().innerHTML = item._nDay = date.getDate();
+                        item.setDate(date);
 
                         if (date >= begin && date <= end) {
                             if (index && !(index % 7)) {
