@@ -55,44 +55,6 @@ _eRight      - 右侧乐定行的Element元素
     }
 
     /**
-     * 恢复行内的单元格到锁定列或基本列中。
-     * @private
-     *
-     * @param {ecui.ui.LockedTable} table 锁定表格控件
-     * @param {ecui.ui.LockedTable.Row} row 锁定表头控件或者锁定行控件
-     */
-    function restoreRow(table, row) {
-        var elements = row.$getElements(),
-            el = row.getBody();
-
-        row._eLeft.style.height = row._eRight.style.height = row.getMain().style.height = '';
-
-        if (row._bEmpty) {
-            row._eLeft.lastChild.previousSibling.setAttribute('colSpan', row._bEmpty);
-            dom.removeClass(row._eLeft.lastChild, 'ui-hide');
-            delete row._bEmpty;
-            if (ieVersion < 9) {
-                el.removeChild(el.firstChild);
-            } else {
-                el.innerHTML = '';
-            }
-        }
-
-        row = row.getMain();
-        el = row.firstChild;
-
-        table.getHCells().forEach(function (item, index) {
-            if (item = elements[index]) {
-                if (index < table._nLeft) {
-                    row.insertBefore(item, el);
-                } else if (index >= table._nRight) {
-                    row.appendChild(item);
-                }
-            }
-        });
-    }
-
-    /**
      * 锁定式表格控件。
      * 允许锁定左右两列的高级表格控件。
      * options 属性：
@@ -220,6 +182,43 @@ _eRight      - 右侧乐定行的Element元素
                         }
 
                         this._eLeft.style.height = this._eRight.style.height = this.getMain().style.height = this.getHeight() + 'px';
+                    },
+
+                    /**
+                     * @override
+                     */
+                    $restoreStructure: function () {
+                        var table = this.getParent(),
+                            elements = this.$getElements(),
+                            el = this.getBody(),
+                            row = this.getMain();
+
+                        this._eLeft.style.height = this._eRight.style.height = this.getMain().style.height = '';
+
+                        if (this._bEmpty) {
+                            this._eLeft.lastChild.previousSibling.setAttribute('colSpan', this._bEmpty);
+                            dom.removeClass(this._eLeft.lastChild, 'ui-hide');
+                            delete this._bEmpty;
+                            if (ieVersion < 9) {
+                                el.removeChild(el.firstChild);
+                            } else {
+                                el.innerHTML = '';
+                            }
+                        }
+
+                        el = row.firstChild;
+
+                        table.getHCells().forEach(function (item, index) {
+                            if (item = elements[index]) {
+                                if (index < table._nLeft) {
+                                    row.insertBefore(item, el);
+                                } else if (index >= table._nRight) {
+                                    row.appendChild(item);
+                                }
+                            }
+                        });
+
+                        _super.$restoreStructure();
                     }
                 }
             ),
@@ -341,19 +340,6 @@ _eRight      - 右侧乐定行的Element元素
             $restoreStructure: function (event) {
                 _super.$restoreStructure(event);
 
-                this.getHeadRows().forEach(
-                    function (item) {
-                        restoreRow(this, item);
-                    },
-                    this
-                );
-                this.getRows().forEach(
-                    function (item) {
-                        restoreRow(this, item);
-                    },
-                    this
-                );
-
                 var leftHead = this._uLeftHead.getMain(),
                     rightHead = this._uRightHead.getMain(),
                     leftMain = this._uLeftMain.getMain(),
@@ -447,7 +433,7 @@ _eRight      - 右侧乐定行的Element元素
             removeRow: function (index) {
                 var row = this.getRow(index);
                 if (row) {
-                    restoreRow(this, row);
+                    row.$restoreStructure();
 
                     var leftBody = this._uLeftMain.getBody(),
                         rightBody = this._uRightMain.getBody();
