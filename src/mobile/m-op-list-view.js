@@ -112,8 +112,8 @@ _cItem    - 当前处于激活的选项
                     /**
                      * @override
                      */
-                    $resize: function (event) {
-                        ui.MListView.prototype.Item.prototype.$resize.call(this, event);
+                    $restoreStructure: function (event) {
+                        ui.MListView.prototype.Item.prototype.$restoreStructure.call(this, event);
                         dom.children(this.getBody()).forEach(function (item, index) {
                             if (index) {
                                 item.style.height = '';

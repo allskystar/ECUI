@@ -2933,7 +2933,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
 
             resizeList = list.filter(function (item) {
                 core.dispatchEvent(item, 'resize', widthList = new ECUIEvent('repaint'));
-                // 这里与Control控件的$resize方法存在强耦合，repaint有值表示在$resize中没有进行针对ie的width值回填
+                // 这里与Control控件的$restoreStructure方法存在强耦合，repaint有值表示在$restoreStructure中没有进行针对ie的width值回填
                 if (widthList.repaint) {
                     return item;
                 }
