@@ -14,7 +14,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
         fontSizeCache = core.fontSizeCache,
         isToucher = document.ontouchstart !== undefined,
         isPointer = !!window.PointerEvent, // 使用pointer事件序列，请一定在需要滚动的元素上加上touch-action:none
-        isStrict = document.compatMode === 'CSS1Compat',
+        //isStrict = document.compatMode === 'CSS1Compat',
         iosVersion = /(iPhone|iPad).*?OS (\d+(_\d+)?)/i.test(navigator.userAgent) ? +(RegExp.$2.replace('_', '.')) : undefined,
         ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined,
         chromeVersion = /Chrome\/(\d+\.\d)/i.test(navigator.userAgent) ? +RegExp.$1 : undefined,
@@ -152,11 +152,13 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                             tracks.mouse = track;
                         } else {
                             if (isToucher) {
+                                // 同时支持touch事件与pointer事件，转给touch处理
                                 return;
                             }
                             trackId = pointerId;
                             isTouchMoved = false;
                             tracks[pointerId] = track;
+                            currEnv.mouseover(event);
                         }
 
                         checkActived(event);
@@ -189,26 +191,10 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                     event.track = track;
                     currEnv.mousemove(event);
                     if (pointerId === trackId) {
-                        if (hoveredControl !== event.getControl()) {
-                            currEnv.mouseover(event);
-                        }
                         onpressure(event, event.getNative().pressure >= 0.4);
                         ongesture(pointers, event);
                     }
                 }
-            },
-
-            pointerout: function (event) {
-                if (event.pointerType === 'mouse') {
-                    mouseEvents.mouseout(core.wrapEvent(event));
-                } else if (event.pointerId === trackId && !isToucher) {
-                    // pointer结束
-                    bubble(hoveredControl, 'mouseout', core.wrapEvent(event), hoveredControl = null);
-                }
-            },
-
-            pointerover: function (event) {
-                mouseEvents.mouseover(core.wrapEvent(event));
             },
 
             pointerup: function (event) {
@@ -245,6 +231,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                             delete tracks.mouse;
                         }
                     } else {
+                        bubble(hoveredControl, 'mouseout', event, hoveredControl = null);
                         if (event.getNative().type === 'pointerup') {
                             onpressure(event, false);
                             ongesture(pointers, event);
@@ -330,13 +317,10 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                                 }
 
                                 event.track = track;
-                                currEnv.mousemove(event);
 
                                 var target = event.target;
                                 event.target = getElementFromEvent(event);
-                                if (hoveredControl !== event.getControl()) {
-                                    currEnv.mouseover(event);
-                                }
+                                currEnv.mousemove(event);
                                 event.target = target;
                                 onpressure(event, item.force === 1);
                                 ongesture(event.getNative().touches, event);
@@ -503,14 +487,6 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                 currEnv.mousemove(event);
             },
 
-            mouseout: function (event) {
-                currEnv.mouseout(core.wrapEvent(event));
-            },
-
-            mouseover: function (event) {
-                currEnv.mouseover(core.wrapEvent(event));
-            },
-
             mouseup: function (event) {
                 event = core.wrapEvent(event);
 
@@ -580,6 +556,15 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
             mousemove: function (event) {
                 bubble(event.getControl(), 'mousemove', event);
+
+                if (hoveredControl !== event.getControl()) {
+                    currEnv.mouseover(event);
+                }
+
+                if (event.getNative().type === 'touchmove' && currEnv.type !== 'drag') {
+                    onbeforescroll(event);
+                    onscroll(event);
+                }
             },
 
             mouseout: util.blank,
@@ -590,8 +575,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                     parent = getCommonParent(control, hoveredControl);
 
                 bubble(hoveredControl, 'mouseout', event, parent);
-                hoveredControl = control;
-                bubble(control, 'mouseover', event, parent);
+                bubble(hoveredControl = control, 'mouseover', event, parent);
             },
 
             mouseup: function (event) {
@@ -690,7 +674,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             mousedown: util.blank,
 
             mousemove: function (event) {
-                bubble(event.getControl(), 'mousemove', event);
+                envStack[envStack.length - 1].mousemove(event);
 
                 var view = util.getView();
                 dragStopHandler();
