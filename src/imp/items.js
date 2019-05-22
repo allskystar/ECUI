@@ -56,6 +56,13 @@
                             }
                         }
                     }
+                    for (var name in oldParent.$ItemsData.properties) {
+                        if (oldParent.$ItemsData.properties.hasOwnProperty(name)) {
+                            if (oldParent.$ItemsData.properties[name] === this) {
+                                oldParent[name]();
+                            }
+                        }
+                    }
                 }
 
                 ui.Control.prototype.$setParent.call(this, parent);
@@ -92,9 +99,44 @@
     ui.Items = {
         NAME: '$Items',
 
+        defineProperty: function (UIClass, name) {
+            var propertyName = '$set' + name.charAt(0).toUpperCase() + name.slice(1);
+
+            UIClass.prototype[propertyName] = function (item) {
+                item = item || null;
+                var oldItem = this.$ItemsData.properties[propertyName] || null;
+                if (oldItem !== item) {
+                    if (oldItem) {
+                        oldItem.alterStatus('-' + name);
+                    }
+                    if (item) {
+                        item.alterStatus('+' + name);
+                    }
+                    this.$ItemsData.properties[propertyName] = item;
+                    return oldItem;
+                }
+            };
+
+            UIClass.prototype[propertyName.slice(1)] = function (item) {
+                if ('number' === typeof item) {
+                    item = this.getItem(item);
+                }
+
+                var oldItem = this[propertyName](item);
+                if (oldItem !== undefined) {
+                    core.dispatchEvent(this, 'propertychange', {name: name, item: item, history: oldItem});
+                }
+            };
+
+            UIClass.prototype['g' + propertyName.slice(2)] = function () {
+                return this.$ItemsData.properties[propertyName] || null;
+            };
+        },
+
         constructor: function () {
             this.$ItemsData.prevent = 0;
             this.$ItemsData.items = [];
+            this.$ItemsData.properties = {};
 
             this.preventAlterItems();
 
@@ -126,8 +168,8 @@
             /**
              * @override
              */
-            $ready: function (event) {
-                this.$Items.$ready.call(this, event);
+            $ready: function () {
+                this.$Items.$ready.call(this);
                 if (this.isCached()) {
                     this.alterItems();
                 }
@@ -181,9 +223,6 @@
                                     item.setAttribute(core.getAttributeName(), text);
                                     options = {};
                                 }
-                                if (!options.primary) {
-                                    options.primary = item.className.trim().split(' ')[0] || UIClass.TYPES[0];
-                                }
                             } else {
                                 if ('string' === typeof item) {
                                     options = {};
@@ -191,20 +230,17 @@
                                 } else {
                                     options = item;
                                 }
-                                if (!options.primary) {
-                                    options.primary = UIClass.TYPES[0];
-                                }
                                 item = dom.create(
                                     {
-                                        className: options.primary,
                                         innerHTML: options[this.TEXTNAME]
                                     }
                                 );
                             }
 
                             options.parent = this;
+                            options.primary = UIClass.CLASS;
+                            options.index = index || list.length;
                             item = core.$fastCreate(UIClass, item, null, options);
-                            item.getMain().className += UIClass.CLASS;
                         }
 
                         // 选项控件，直接添加
