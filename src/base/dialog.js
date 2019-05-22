@@ -1,10 +1,8 @@
 /*
 @example
 <div ui="type:dialog">
-  <!-- 标题可以省略 -->
-  <strong>标题</strong>
-  <!-- 这里放滚动的内容 -->
-  ...
+    <strong>标题</strong>
+    窗体HTML文本
 </div>
 
 @fields
@@ -29,22 +27,22 @@ _uClose     - 关闭按钮
         ui.Layer,
         'ui-dialog',
         function (el, options) {
-            var bodyEl = dom.create({className: options.classes.join('-body ')}),
+            var bodyEl = dom.create({className: this.getUnitClass(ui.Dialog, 'body')}),
                 titleEl = dom.first(el),
                 closeEl;
 
             if (titleEl && titleEl.tagName === 'STRONG') {
-                titleEl.className += ' ' + options.classes.join('-title ');
+                dom.addClass(titleEl, this.getUnitClass(ui.Dialog, 'title'));
                 dom.remove(titleEl);
             } else {
-                titleEl = dom.create('STRONG', {className: options.classes.join('-title ')});
+                titleEl = dom.create('STRONG', {className: this.getUnitClass(ui.Dialog, 'title')});
             }
 
             for (; el.firstChild; ) {
                 bodyEl.appendChild(el.firstChild);
             }
 
-            el.innerHTML = '<div class="' + options.classes.join('-close ') + '"></div>';
+            el.innerHTML = '<div class="' + this.getUnitClass(ui.Dialog, 'close') + '"></div>';
             closeEl = el.lastChild;
             el.appendChild(titleEl);
             el.appendChild(bodyEl);
