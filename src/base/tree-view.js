@@ -229,7 +229,9 @@ children     - 子控件集合
                     }
 
                     util.remove(ui.TreeView._cast(oldParent).children, this);
-                    ui.TreeView._cast(oldParent)._refresh();
+                    ui.TreeView._cast(oldParent, function () {
+                        this._refresh();
+                    });
                 }
 
                 _super.$setParent(parent);

@@ -473,18 +473,16 @@
          * @public
          *
          * @param {object} caller 需要转换类型的变量
+         * @param {Function} fn 转换后需要调用的函数
          */
-        newClass._cast = function (caller) {
-            onbefore(caller, newClass);
-            var item = callStack.pop();
-            setTimeout(
-                function () {
-                    callStack.push(item);
-                    onafter();
-                },
-                0
-            );
-            return caller;
+        newClass._cast = function (caller, fn) {
+            if (fn) {
+                onbefore(caller, newClass);
+                fn.apply(caller);
+                onafter();
+            } else {
+                return caller[classId];
+            }
         };
 
         /**
