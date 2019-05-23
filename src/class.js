@@ -475,7 +475,9 @@
          * @param {object} caller 需要转换类型的变量
          */
         newClass._cast = function (caller) {
-            return caller[classId];
+            onbefore(caller, newClass);
+            setTimeout(onafter, 0);
+            return caller;
         };
 
         /**
@@ -609,57 +611,57 @@
         window.requestAnimationFrame = function (fn) {
             var item = callStack[callStack.length - 1];
             return item[0] ?
-                requestAnimationFrame(function () {
-                    setPrivate.apply(null, item);
-                    setProtected.apply(null, item);
-                    setFinal.apply(null, item);
-                    callStack.push(item);
-                    fn.apply(this, arguments);
-                    callStack.pop();
-                    resetPrivate.apply(null, item);
-                    resetProtected.apply(null, item);
-                    resetFinal.apply(null, item);
-                }) : requestAnimationFrame(fn);
-        }
+                    requestAnimationFrame(function () {
+                        setPrivate.apply(null, item);
+                        setProtected.apply(null, item);
+                        setFinal.apply(null, item);
+                        callStack.push(item);
+                        fn.apply(this, arguments);
+                        callStack.pop();
+                        resetPrivate.apply(null, item);
+                        resetProtected.apply(null, item);
+                        resetFinal.apply(null, item);
+                    }) : requestAnimationFrame(fn);
+        };
     }
 
     var setTimeout = window.setTimeout;
     window.setTimeout = function (fn, delay) {
         var item = callStack[callStack.length - 1];
         return item[0] ?
-            setTimeout(
-                function () {
-                    setPrivate.apply(null, item);
-                    setProtected.apply(null, item);
-                    setFinal.apply(null, item);
-                    callStack.push(item);
-                    fn.apply(this, arguments);
-                    callStack.pop();
-                    resetPrivate.apply(null, item);
-                    resetProtected.apply(null, item);
-                    resetFinal.apply(null, item);
-                },
-                delay
-            ) : setTimeout(fn, delay);
-    }
+                setTimeout(
+                    function () {
+                        setPrivate.apply(null, item);
+                        setProtected.apply(null, item);
+                        setFinal.apply(null, item);
+                        callStack.push(item);
+                        fn.apply(this, arguments);
+                        callStack.pop();
+                        resetPrivate.apply(null, item);
+                        resetProtected.apply(null, item);
+                        resetFinal.apply(null, item);
+                    },
+                    delay
+                ) : setTimeout(fn, delay);
+    };
 
     var setInterval = window.setInterval;
     window.setInterval = function (fn, delay) {
         var item = callStack[callStack.length - 1];
         return item[0] ?
-            setInterval(
-                function () {
-                    setPrivate.apply(null, item);
-                    setProtected.apply(null, item);
-                    setFinal.apply(null, item);
-                    callStack.push(item);
-                    fn.apply(this, arguments);
-                    callStack.pop();
-                    resetPrivate.apply(null, item);
-                    resetProtected.apply(null, item);
-                    resetFinal.apply(null, item);
-                },
-                delay
-            ) : setInterval(fn, delay);
-    }
+                setInterval(
+                    function () {
+                        setPrivate.apply(null, item);
+                        setProtected.apply(null, item);
+                        setFinal.apply(null, item);
+                        callStack.push(item);
+                        fn.apply(this, arguments);
+                        callStack.pop();
+                        resetPrivate.apply(null, item);
+                        resetProtected.apply(null, item);
+                        resetFinal.apply(null, item);
+                    },
+                    delay
+                ) : setInterval(fn, delay);
+    };
 }());

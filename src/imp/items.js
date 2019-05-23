@@ -21,7 +21,7 @@
              * @override
              */
             $click: function (event) {
-                ui.Control.prototype.$click.call(this, event);
+                _super.$click(event);
                 var parent = this.getParent();
                 if (parent) {
                     event.item = this;
@@ -34,7 +34,7 @@
              * @override
              */
             $hide: function (event) {
-                ui.Control.prototype.$hide.call(this, event);
+                _super.$hide(event);
                 var parent = this.getParent();
                 if (parent) {
                     parent.alterItems();
@@ -45,7 +45,7 @@
              * @override
              */
             $show: function (event) {
-                ui.Control.prototype.$show.call(this, event);
+                _super.$show(event);
                 var parent = this.getParent();
                 if (parent) {
                     parent.alterItems();
@@ -327,61 +327,4 @@
             }
         }
     );
-
-    var definedInterface = {};
-
-    ui.Items.defineProperty = function (name) {
-        if (definedInterface[name]) {
-            return definedInterface[name];
-        }
-
-        var propertyName = '$set' + name.charAt(0).toUpperCase() + name.slice(1),
-            methods = {
-                private: {
-                    value: undefined
-                }
-            };
-
-        // item移除时选项组需要释放状态
-        methods.$remove = function (event) {
-            if (this.value === event.child) {
-                this[propertyName.slice(1)]();
-            }
-        };
-
-        // 底层的$setXXXX方法
-        methods[propertyName] = function (item) {
-            item = item || null;
-            var oldItem = this.value;
-            if (oldItem !== item) {
-                if (oldItem) {
-                    oldItem.alterStatus('-' + name);
-                }
-                if (item) {
-                    item.alterStatus('+' + name);
-                }
-                this.value = item;
-                return oldItem || null;
-            }
-        };
-
-        // setXXXX方法，会发送propertychange事件
-        methods[propertyName.slice(1)] = function (item) {
-            if ('number' === typeof item) {
-                item = this.getItem(item);
-            }
-
-            var oldItem = this[propertyName](item);
-            if (oldItem !== undefined) {
-                core.dispatchEvent(this, 'propertychange', {name: name, item: item, history: oldItem});
-            }
-        };
-
-        // getXXXX方法，获取属性的值
-        methods['g' + propertyName.slice(2)] = function () {
-            return this.value || null;
-        };
-
-        return definedInterface[name] = _interface(methods);
-    };
 }());

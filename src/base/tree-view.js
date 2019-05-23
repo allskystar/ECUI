@@ -55,14 +55,12 @@ children     - 子控件集合
 
             _super(el, options);
 
-            delete options.id;
-
             el = this.getMain();
             if (this.container) {
                 // 初始化子控件
                 this.children = dom.children(this.container).map(
                     function (item) {
-                        return core.$fastCreate(this.constructor, item, this, Object.assign({}, options, core.getOptions(item) || {}));
+                        return core.$fastCreate(this.constructor, item, this, Object.assign({}, options, {id: undefined}, core.getOptions(item) || {}));
                     },
                     this
                 );
@@ -187,8 +185,6 @@ children     - 子控件集合
              * @event
              */
             $nodeclick: function () {
-                var root = this.getRoot();
-
                 if (this.container) {
                     if (this.isCollapsed()) {
                         this.expand();
@@ -199,13 +195,7 @@ children     - 子控件集合
                     }
                 }
 
-                if (root._cSelected !== this) {
-                    if (root._cSelected) {
-                        root._cSelected.alterStatus('-selected');
-                    }
-                    this.alterStatus('+selected');
-                    root._cSelected = this;
-                }
+                this.getRoot().setSelected(this);
             },
 
             /**
@@ -231,13 +221,11 @@ children     - 子控件集合
              * @override
              */
             $setParent: function (parent) {
-                var oldParent = this.getParent();
-
-                if (oldParent) {
-                    var root = this.getRoot();
-                    if (this.contain(root._cSelected)) {
-                        root._cSelected.alterStatus('-selected');
-                        root._cSelected = null;
+                var root = this.getRoot();
+                if (root !== this) {
+                    var oldParent = this.getParent();
+                    if (this.contain(root.getSelected())) {
+                        root.setSelected();
                     }
 
                     util.remove(ui.TreeView._cast(oldParent).children, this);
@@ -394,6 +382,7 @@ children     - 子控件集合
             remove: function (index) {
                 this.children[index].setParent();
             }
-        }
+        },
+        ui.Control.defineProperty('selected')
     );
 }());

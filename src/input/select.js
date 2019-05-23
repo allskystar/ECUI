@@ -228,6 +228,6 @@ _nOptionSize  - 下接选择框可以用于选择的条目数量
             }
         },
         ui.Popup,
-        ui.Items.defineProperty('selecting')
+        ui.Control.defineProperty('selecting')
     );
 }());

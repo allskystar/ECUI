@@ -318,6 +318,6 @@
             }
         },
         ui.Items,
-        ui.Items.defineProperty('selected')
+        ui.Control.defineProperty('selected')
     );
 }());
