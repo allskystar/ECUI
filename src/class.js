@@ -188,9 +188,9 @@
         }
     }
 
-    function checkProtected(Class) {
+    function checkProtected(Class, isField) {
         var item = callStack[callStack.length - 1];
-        if (item[0] !== this || !Class.isAssignableFrom(item[1])) {
+        if (item[0] !== this || (isField && !Class.isAssignableFrom(item[1]))) {
             throw new Error('The property is not visible.');
         }
     }
@@ -207,7 +207,7 @@
     function makeProxy(Class, fn, before) {
         return function () {
             if (before) {
-                before.apply(this, Class);
+                before.call(this, Class);
             }
             onbefore(this, Class);
             try {
@@ -250,11 +250,11 @@
             if (!propertyDescriptors[name]) {
                 propertyDescriptors[name] = {
                     get: function () {
-                        checkProtected.call(this, newClass);
+                        checkProtected.call(this, newClass, true);
                         return this[classId][name];
                     },
                     set: function (value) {
-                        checkProtected.call(this, newClass);
+                        checkProtected.call(this, newClass, true);
                         this[classId][name] = value;
                     }
                 };
