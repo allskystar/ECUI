@@ -1,12 +1,11 @@
 (function () {
-    var classIndex = 1,
-        NullClass = {CLASSID: 'CLASS-0'},
-        classes = {'CLASS-0': {PrivateFields: [], ProtectedFields: [], FinalFields: []}},
-        callStack = [[null, NullClass, {}]],
+    var classes = [{CLASSID: 'CLASS-0'}],
+        defines = {'CLASS-0': {PrivateFields: [], ProtectedFields: [], FinalFields: []}},
+        callStack = [[null, classes[0], {}]],
         superMethods = {};
 
     function setPrivate(caller, Class, caches) {
-        classes[Class.CLASSID].PrivateFields.forEach(function (name) {
+        defines[Class.CLASSID].PrivateFields.forEach(function (name) {
             if (caller.hasOwnProperty(name)) {
                 caches[name] = caller[name];
             }
@@ -45,7 +44,7 @@
 
         if (caller) {
             for (var names = []; Class; Class = Class.super) {
-                classes[Class.CLASSID].ProtectedFields.forEach(set);
+                defines[Class.CLASSID].ProtectedFields.forEach(set);
             }
         }
     }
@@ -59,13 +58,13 @@
 
         if (caller) {
             for (var clazz = caller.constructor; clazz; clazz = clazz.super) {
-                classes[clazz.CLASSID].FinalFields.forEach(set);
+                defines[clazz.CLASSID].FinalFields.forEach(set);
             }
         }
     }
 
     function resetPrivate(caller, Class, caches) {
-        classes[Class.CLASSID].PrivateFields.forEach(function (name) {
+        defines[Class.CLASSID].PrivateFields.forEach(function (name) {
             if (Object.defineProperty) {
                 if (!caller.hasOwnProperty(name)) {
                     delete caller[Class.CLASSID][name];
@@ -75,7 +74,7 @@
                     caller[name] = caches[name];
                 }
             } else {
-                if ('function' !== typeof classes[Class.CLASSID][name]) {
+                if ('function' !== typeof defines[Class.CLASSID][name]) {
                     // 函数不允许回写
                     if (caller.hasOwnProperty(name)) {
                         caller[Class.CLASSID][name] = caller[name];
@@ -95,7 +94,7 @@
     function resetProtected(caller, Class, caches) {
         function reset(name) {
             if (names.indexOf(name) < 0) {
-                if ('function' !== classes[Class.CLASSID][name]) {
+                if ('function' !== defines[Class.CLASSID][name]) {
                     // 函数不允许回写
                     if (caller.hasOwnProperty(name)) {
                         caller[Class.CLASSID][name] = caller[name];
@@ -114,7 +113,7 @@
 
         if (caller) {
             for (var names = []; Class; Class = Class.super) {
-                classes[Class.CLASSID].ProtectedFields.forEach(reset);
+                defines[Class.CLASSID].ProtectedFields.forEach(reset);
             }
         }
     }
@@ -128,18 +127,22 @@
 
         if (caller) {
             for (var clazz = caller.constructor; clazz; clazz = clazz.super) {
-                classes[clazz.CLASSID].FinalFields.forEach(reset);
+                defines[clazz.CLASSID].FinalFields.forEach(reset);
             }
         }
     }
 
     function onbefore(caller, Class) {
+        if (!Object.defineProperty) {
+            Class.CLASSID = 'CLASS-' + classes.indexOf(Class);
+        }
+
         var item = callStack[callStack.length - 1],
             caches = {};
 
         if (caller) {
             caches.super = window._super;
-            window._super = Class.super ? Object.assign(classes[Class.super.CLASSID].Constructor.bind(caller), caller[Class.CLASSID].super) : null;
+            window._super = Class.super ? Object.assign(defines[Class.super.CLASSID].Constructor.bind(caller), caller[Class.CLASSID].super) : null;
         }
 
         if (caller === item[0] && Class === item[1]) {
@@ -238,7 +241,7 @@
      */
     _class.defineMethod = function (Class, name, method) {
         Class.prototype[name] = makeProxy(Class, method);
-        classes[Class.CLASSID].SuperMethods[name] = makeSuperMethod(name);
+        defines[Class.CLASSID].SuperMethods[name] = makeSuperMethod(name);
     };
 
     /**
@@ -253,7 +256,7 @@
     _class.extends = function (superClass) {
         function initInterface(inf) {
             // 填充全部的初始化变量
-            this[inf.CLASSID] = Object.assign({}, classes[inf.CLASSID].InitValues);
+            this[inf.CLASSID] = Object.assign({}, defines[inf.CLASSID].InitValues);
         }
 
         function makeProtectedDescriptor(name) {
@@ -296,19 +299,19 @@
                 // 初始化各层级类的属性域
                 for (var clazz = newClass; clazz; clazz = clazz.super) {
                     // 填充全部的初始化变量
-                    this[clazz.CLASSID] = Object.assign({}, classes[clazz.CLASSID].InitValues);
+                    this[clazz.CLASSID] = Object.assign({}, defines[clazz.CLASSID].InitValues);
 
                     // 初始化所有接口的属性域
-                    classes[clazz.CLASSID].Interfaces.forEach(initInterface, this);
+                    defines[clazz.CLASSID].Interfaces.forEach(initInterface, this);
                 }
 
-                classes[newClass.CLASSID].Constructor.apply(this, arguments);
+                defines[newClass.CLASSID].Constructor.apply(this, arguments);
             },
             privateFields = [],
             protectedFields = [],
             finalFields = [],
             initValues = {},
-            superMethods = superClass ? Object.assign({}, classes[superClass.CLASSID].SuperMethods) : {},
+            superMethods = superClass ? Object.assign({}, defines[superClass.CLASSID].SuperMethods) : {},
             propertyDescriptors = {},
             data,
             name;
@@ -324,7 +327,12 @@
 
         delete properties.constructor;
 
-        newClass.CLASSID = 'CLASS-' + classIndex++;
+        if (Object.defineProperty) {
+            Object.defineProperty(newClass, 'CLASSID', {value: 'CLASS-' + classes.length});
+        } else {
+            newClass.CLASSID = 'CLASS-' + classes.length;
+        }
+        classes.push(newClass);
 
         // 处理私有属性
         if (data = properties.private) {
@@ -396,23 +404,23 @@
 
         // 处理接口的属性
         interfaces.forEach(function (inf) {
-            for (var name in classes[inf.CLASSID].PublicFields) {
+            for (var name in defines[inf.CLASSID].PublicFields) {
                 if (newClass.prototype[name]) {
-                    newClass.prototype[name] = addProxy(newClass.prototype[name], classes[inf.CLASSID].PublicFields[name]);
+                    newClass.prototype[name] = addProxy(newClass.prototype[name], defines[inf.CLASSID].PublicFields[name]);
                 } else {
-                    newClass.prototype[name] = classes[inf.CLASSID].PublicFields[name];
+                    newClass.prototype[name] = defines[inf.CLASSID].PublicFields[name];
                     superMethods[name] = makeSuperMethod(name);
                 }
             }
         });
 
-        classes[newClass.CLASSID] = {
+        defines[newClass.CLASSID] = {
             Constructor: function () {
                 var args = arguments;
 
                 if (superClass) {
                     var clazz = this[newClass.CLASSID].super = {};
-                    Object.assign(clazz, classes[superClass.CLASSID].SuperMethods);
+                    Object.assign(clazz, defines[superClass.CLASSID].SuperMethods);
                     clazz.super = superClass.prototype;
                     clazz.this = this;
                 }
@@ -447,10 +455,10 @@
 
                     interfaces.forEach(
                         function (inf) {
-                            if (classes[inf.CLASSID].PublicFields.constructor) {
+                            if (defines[inf.CLASSID].PublicFields.constructor) {
                                 onbefore(this, inf);
                                 try {
-                                    classes[inf.CLASSID].PublicFields.constructor.apply(this, args);
+                                    defines[inf.CLASSID].PublicFields.constructor.apply(this, args);
                                 } finally {
                                     onafter();
                                 }
@@ -505,18 +513,23 @@
             superInterfaces = [superInterfaces];
         }
 
-        var newClass = {
-                CLASSID: 'CLASS-' + classIndex++
-            },
+        var newClass = {},
             privateFields = [],
             publicFields = {},
             initValues = {},
             data;
 
+        if (Object.defineProperty) {
+            Object.defineProperty(newClass, 'CLASSID', {value: 'CLASS-' + classes.length});
+        } else {
+            newClass.CLASSID = 'CLASS-' + classes.length;
+        }
+        classes.push(newClass);
+
         superInterfaces.forEach(function (inf) {
-            for (var name in classes[inf.CLASSID].PublicFields) {
-                if (classes[inf.CLASSID].PublicFields.hasOwnProperty(name)) {
-                    publicFields[name] = publicFields[name] ? addProxy(publicFields[name], classes[inf.CLASSID].PublicFields[name]) : classes[inf.CLASSID].PublicFields[name];
+            for (var name in defines[inf.CLASSID].PublicFields) {
+                if (defines[inf.CLASSID].PublicFields.hasOwnProperty(name)) {
+                    publicFields[name] = publicFields[name] ? addProxy(publicFields[name], defines[inf.CLASSID].PublicFields[name]) : defines[inf.CLASSID].PublicFields[name];
                 }
             }
         });
@@ -555,7 +568,7 @@
             }
         }
 
-        classes[newClass.CLASSID] = {
+        defines[newClass.CLASSID] = {
             PrivateFields: privateFields,
             ProtectedFields: [],
             FinalFields: [],
@@ -568,7 +581,7 @@
 
     window._static = function (fn) {
         return function () {
-            onbefore(null, NullClass);
+            onbefore(null, classes[0]);
             try {
                 var ret = fn.apply(this, arguments);
             } finally {
