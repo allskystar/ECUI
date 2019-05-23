@@ -240,7 +240,7 @@ children     - 子控件集合
                         root._cSelected = null;
                     }
 
-                    util.remove(oldParent.children, this);
+                    util.remove(ui.TreeView._cast(oldParent).children, this);
                     ui.TreeView._cast(oldParent)._refresh();
                 }
 
