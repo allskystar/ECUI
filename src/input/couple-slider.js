@@ -56,7 +56,7 @@
                      * @override
                      */
                     $activate: function (event) {
-                        ui.Control.prototype.$activate.call(this, event);
+                        _super.$activate(event);
 
                         var parent = this.getParent(),
                             other = parent._aSlider[1 - parent._aSlider.indexOf(this)],
@@ -81,7 +81,7 @@
                      * @override
                      */
                     $dragmove: function (event) {
-                        ui.Control.prototype.$dragmove.call(this, event);
+                        _super.$dragmove(event);
 
                         var parent = this.getParent(),
                             segWidth = parent.getClientWidth() / parent._nSegment,
@@ -101,7 +101,7 @@
              * @override
              */
             $click: function (event) {
-                ui.InputControl.prototype.$click.call(this, event);
+                _super.$click(event);
 
                 var segWidth = this.getClientWidth() / this._nSegment,
                     v1 = this._aSlider[0].getX(),

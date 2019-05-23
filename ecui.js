@@ -65,19 +65,20 @@ var ecui;
 
 //     document.write('<script type="text/javascript" src="src/input/upload.js"></script>');
     document.write('<script type="text/javascript" src="src/input/input-control.js"></script>');
-//     document.write('<script type="text/javascript" src="src/input/input-group.js"></script>');
+    document.write('<script type="text/javascript" src="src/input/abstract-select.js"></script>');
+    document.write('<script type="text/javascript" src="src/input/calendar-input.js"></script>');
+    document.write('<script type="text/javascript" src="src/input/input-group.js"></script>');
+    document.write('<script type="text/javascript" src="src/input/checkbox.js"></script>');
+    document.write('<script type="text/javascript" src="src/input/checkbox-tree.js"></script>');
+    // document.write('<script type="text/javascript" src="src/input/select.js"></script>');
+    // document.write('<script type="text/javascript" src="src/input/listbox.js"></script>');
 //     document.write('<script type="text/javascript" src="src/input/label.js"></script>');
 //     document.write('<script type="text/javascript" src="src/input/text.js"></script>');
 //     document.write('<script type="text/javascript" src="src/input/number.js"></script>');
 //     document.write('<script type="text/javascript" src="src/input/time.js"></script>');
-//     document.write('<script type="text/javascript" src="src/input/checkbox.js"></script>');
 //     document.write('<script type="text/javascript" src="src/input/radio.js"></script>');
-     document.write('<script type="text/javascript" src="src/input/abstract-select.js"></script>');
-     document.write('<script type="text/javascript" src="src/input/select.js"></script>');
 //     document.write('<script type="text/javascript" src="src/input/combox.js"></script>');
 //     document.write('<script type="text/javascript" src="src/input/filter.js"></script>');
-     document.write('<script type="text/javascript" src="src/input/listbox.js"></script>');
-//     document.write('<script type="text/javascript" src="src/input/calendar-input.js"></script>');
 //     document.write('<script type="text/javascript" src="src/input/multilevel-select.js"></script>');
 //     document.write('<script type="text/javascript" src="src/input/multi-select.js"></script>');
 //     document.write('<script type="text/javascript" src="src/input/couple-slider.js"></script>');
@@ -116,8 +117,6 @@ var ecui;
 //     document.write('<script type="text/javascript" src="src/bi/switch.js"></script>');
 //     document.write('<script type="text/javascript" src="src/bi/ext-float.js"></script>');
 //     document.write('<script type="text/javascript" src="src/bi/img-fill.js"></script>');
-
-//     document.write('<script type="text/javascript" src="src/base/checkbox-tree.js"></script>');
 
 //     document.write('<script type="text/javascript" src="src/svg/svg.js"></script>');
 //     document.write('<script type="text/javascript" src="src/svg/y-v-axis.js"></script>');

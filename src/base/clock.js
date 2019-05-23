@@ -32,8 +32,8 @@
             /**
              * @override
              */
-            $ready: function () {
-                _super.$ready();
+            init: function () {
+                _super.init();
                 this.start();
             },
 

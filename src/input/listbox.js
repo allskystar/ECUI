@@ -50,7 +50,7 @@ _eInput - 选项对应的input，form提交时使用
                      * @override
                      */
                     $click: function (event) {
-                        ui.Item.prototype.$click.call(this, event);
+                        _super.$click(event);
                         this.setSelected(!this.isSelected());
                     },
 
@@ -59,14 +59,14 @@ _eInput - 选项对应的input，form提交时使用
                      */
                     $dispose: function () {
                         this._eInput = null;
-                        ui.Item.prototype.$dispose.call(this);
+                        _super.$dispose();
                     },
 
                     /**
                      * @override
                      */
                     $setParent: function (parent) {
-                        ui.Item.prototype.$setParent.call(this, parent);
+                        _super.$setParent(parent);
 
                         if (parent instanceof ui.Listbox) {
                             this._eInput.name = parent._sName;

@@ -31,14 +31,6 @@
             $progress: util.blank,
 
             /**
-             * @override
-             */
-            $ready: function () {
-                _super.$ready();
-                core.dispatchEvent(this, 'progress');
-            },
-
-            /**
              * 获取进度的最大值。
              * @public
              *

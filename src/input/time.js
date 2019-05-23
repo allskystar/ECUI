@@ -43,7 +43,7 @@ _oTest      匹配合法性的正则表达式
              * @override
              */
             $click: function (event) {
-                ui.Text.prototype.$click.call(this, event);
+                _super.$click(event);
                 util.timer(
                     function () {
                         setSelection(this, this.getSelectionStart());
@@ -57,7 +57,7 @@ _oTest      匹配合法性的正则表达式
              * @override
              */
             $keydown: function (event) {
-                ui.Text.prototype.$keydown.call(this, event);
+                _super.$keydown(event);
 
                 switch (event.which) {
                 case 8:
@@ -111,7 +111,7 @@ _oTest      匹配合法性的正则表达式
              * @override
              */
             $ready: function () {
-                ui.Text.prototype.$ready.call(this);
+                _super.$ready();
                 this._sLastValue = this.getValue();
                 if (!this._sLastValue) {
                     this.setValue(this._sFormat);
@@ -122,7 +122,7 @@ _oTest      匹配合法性的正则表达式
              * @override
              */
             $setValue: function (value) {
-                ui.Text.prototype.$setValue.call(this, value);
+                _super.$setValue(value);
                 this._sLastValue = value;
             }
         }

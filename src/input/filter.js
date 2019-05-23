@@ -53,7 +53,7 @@ _oHandler   - 定时器句柄
              * @override
              */
             $blur: function (event) {
-                ui.Combox.prototype.$blur.call(this, event);
+                _super.$blur(event);
                 if (!this._bCustom && !this.getSelected()) {
                     this.$setValue('');
                 }
@@ -70,7 +70,7 @@ _oHandler   - 定时器句柄
              * @override
              */
             $focus: function (event) {
-                ui.Combox.prototype.$focus.call(this, event);
+                _super.$focus(event);
                 if (this.getInput().value) {
                     this.popup();
                 }
@@ -107,7 +107,7 @@ _oHandler   - 定时器句柄
                     }
                 }
 
-                ui.Combox.prototype.$input.call(this, event);
+                _super.$input(event);
 
                 if (this.getInput().value) {
                     this.popup();

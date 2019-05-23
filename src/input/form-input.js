@@ -27,7 +27,7 @@
              * @override
              */
             $disable: function () {
-                ui.Control.prototype.$disable.call(this);
+                _super.$disable();
                 this.getMain().disabled = true;
             },
 
@@ -36,7 +36,7 @@
              * @override
              */
             $enable: function () {
-                ui.Control.prototype.$enable.call(this);
+                _super.$enable();
                 this.getMain().disabled = false;
             },
 

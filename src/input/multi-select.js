@@ -91,7 +91,7 @@ _eInput - 选项对应的input，form提交时使用
              */
             $dispose: function () {
                 this._eText = null;
-                ui.InputControl.prototype.$dispose.call(this);
+                _super.$dispose();
             },
 
             /**

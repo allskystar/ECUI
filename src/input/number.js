@@ -45,7 +45,7 @@ _oTest      匹配合法性的正则表达式
              * @override
              */
             $blur: function (event) {
-                ui.Text.prototype.$blur.call(this, event);
+                _super.$blur(event);
                 if (this._nDecimal > 0) {
                     if (this._sLastValue === '-' || this._sLastValue === '-.' || !this._sLastValue.length) {
                         this._sLastValue = '0';
@@ -73,7 +73,7 @@ _oTest      匹配合法性的正则表达式
              * @override
              */
             $input: function (event) {
-                ui.Text.prototype.$input.call(this, event);
+                _super.$input(event);
 
                 var value = this.getValue();
 
@@ -90,7 +90,7 @@ _oTest      匹配合法性的正则表达式
              * @override
              */
             $ready: function () {
-                ui.Text.prototype.$ready.call(this);
+                _super.$ready();
                 this._sLastValue = this.getValue();
             },
 
@@ -98,7 +98,7 @@ _oTest      匹配合法性的正则表达式
              * @override
              */
             $setValue: function (value) {
-                ui.Text.prototype.$setValue.call(this, value);
+                _super.$setValue(value);
                 this._sLastValue = value;
             }
         }

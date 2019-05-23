@@ -72,7 +72,7 @@ _ePlaceHolder - 为空时的提示信息标签
              * @override
              */
             $cache: function (style) {
-                ui.InputControl.prototype.$cache.call(this, style);
+                _super.$cache(style);
                 if (this._ePlaceHolder) {
                     style = dom.getStyle(this._ePlaceHolder);
                     if (ieVersion < 8) {
@@ -92,7 +92,7 @@ _ePlaceHolder - 为空时的提示信息标签
              * @override
              */
             $disable: function () {
-                ui.InputControl.prototype.$disable.call(this);
+                _super.$disable();
 
                 var body = this.getBody(),
                     input = this.getInput();
@@ -115,7 +115,7 @@ _ePlaceHolder - 为空时的提示信息标签
              */
             $dispose: function () {
                 this._ePlaceHolder = null;
-                ui.InputControl.prototype.$dispose.call(this);
+                _super.$dispose();
             },
 
             /**
@@ -123,7 +123,7 @@ _ePlaceHolder - 为空时的提示信息标签
              * @override
              */
             $enable: function () {
-                ui.InputControl.prototype.$enable.call(this);
+                _super.$enable();
 
                 var body = this.getBody();
                 body.innerHTML = '';
@@ -134,7 +134,7 @@ _ePlaceHolder - 为空时的提示信息标签
              * @override
              */
             $focus: function () {
-                ui.InputControl.prototype.$focus.call(this);
+                _super.$focus();
 
                 var el = this.getInput(),
                     textAlign = dom.getStyle(el, 'textAlign');
@@ -156,7 +156,7 @@ _ePlaceHolder - 为空时的提示信息标签
              * @override
              */
             $initStructure: function (width, height) {
-                ui.InputControl.prototype.$initStructure.call(this, width, height);
+                _super.$initStructure(width, height);
                 var input = this.getInput();
                 if (ieVersion < 9 && input.tagName === 'INPUT') {
                     input.style.lineHeight = height + 'px';
@@ -172,7 +172,7 @@ _ePlaceHolder - 为空时的提示信息标签
              * @protected
              */
             $input: function () {
-                ui.InputControl.prototype.$input.call(this);
+                _super.$input();
                 if (this._ePlaceHolder) {
                     this.alterStatus(this.getValue() ? '-empty' : '+empty');
                 }
@@ -182,7 +182,7 @@ _ePlaceHolder - 为空时的提示信息标签
              * @override
              */
             $ready: function () {
-                ui.InputControl.prototype.$ready.call(this);
+                _super.$ready();
                 if (this._ePlaceHolder) {
                     this.alterStatus(this.getValue() ? '-empty' : '+empty');
                 }
@@ -192,7 +192,7 @@ _ePlaceHolder - 为空时的提示信息标签
              * @override
              */
             $validate: function () {
-                ui.InputControl.prototype.$validate.call(this);
+                _super.$validate();
 
                 var value = this.getValue(),
                     length = value.length,

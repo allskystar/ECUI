@@ -63,7 +63,7 @@ _aSelect - 全部的下拉框控件列表
                      * @override
                      */
                     $change: function (event) {
-                        ui.Select.prototype.$change.call(this, event);
+                        _super.$change(event);
                         core.dispatchEvent(this.getParent(), 'change', event);
                     },
 
@@ -136,7 +136,7 @@ _aSelect - 全部的下拉框控件列表
              * @override
              */
             $ready: function () {
-                ui.InputControl.prototype.$ready.call(this);
+                _super.$ready();
 
                 var el = this.getMain();
                 this._aSelect = [];

@@ -105,7 +105,7 @@ _bRequired       - 是否必须选择
              * @override
              */
             $click: function (event) {
-                ui.InputControl.prototype.$click.call(this, event);
+                _super.$click(event);
                 for (var el = this.getMain(); el; el = dom.parent(el)) {
                     if (el.tagName === 'LABEL') {
                         return;
@@ -123,7 +123,7 @@ _bRequired       - 是否必须选择
                 this._aDependents.forEach(function (item) {
                     item._cSubject = null;
                 });
-                ui.InputControl.prototype.$dispose.call(this);
+                _super.$dispose();
             },
 
             /**
@@ -131,7 +131,7 @@ _bRequired       - 是否必须选择
              * @override
              */
             $keydown: function (event) {
-                ui.InputControl.prototype.$keydown.call(this, event);
+                _super.$keydown(event);
                 if (event.which === 32) {
                     event.exit();
                 }
@@ -142,7 +142,7 @@ _bRequired       - 是否必须选择
              * @override
              */
             $keypress: function (event) {
-                ui.InputControl.prototype.$keypress.call(this, event);
+                _super.$keypress(event);
                 if (event.which === 32) {
                     event.exit();
                 }
@@ -153,7 +153,7 @@ _bRequired       - 是否必须选择
              * @override
              */
             $keyup: function (event) {
-                ui.InputControl.prototype.$keyup.call(this, event);
+                _super.$keyup(event);
                 if (event.which === 32) {
                     if (core.getKey() === 32) {
                         this.setChecked(!!this._nStatus);
@@ -166,28 +166,17 @@ _bRequired       - 是否必须选择
             /**
              * @override
              */
-            $ready: function () {
-                ui.InputControl.prototype.$ready.call(this);
-                if (!this._aDependents.length) {
-                    // 如果控件是主复选框，应该直接根据从属复选框的状态来显示自己的状态
-                    setStatus(this, this.getInput().checked ? 0 : 1);
-                }
-            },
-
-            /**
-             * @override
-             */
             $reset: function () {
                 // 修复IE6/7下移动DOM节点时选中状态发生改变的问题
                 this.getInput().checked = this._bDefault;
-                ui.InputControl.prototype.$reset.call(this);
+                _super.$reset();
             },
 
             /**
              * @override
              */
             $validate: function (event) {
-                ui.InputControl.prototype.$validate.call(this, event);
+                _super.$validate(event);
 
                 if (this._bRequired) {
                     var name = this.getName(),
@@ -236,6 +225,17 @@ _bRequired       - 是否必须选择
              */
             getSubject: function () {
                 return this._cSubject || null;
+            },
+
+            /**
+             * @override
+             */
+            init: function () {
+                _super.init();
+                if (!this._aDependents.length) {
+                    // 如果控件是主复选框，应该直接根据从属复选框的状态来显示自己的状态
+                    setStatus(this, this.getInput().checked ? 0 : 1);
+                }
             },
 
             /**

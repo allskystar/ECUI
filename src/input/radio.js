@@ -82,7 +82,7 @@ _bRequired - 是否必须选择
              * @override
              */
             $click: function (event) {
-                ui.InputControl.prototype.$click.call(this, event);
+                _super.$click(event);
                 this.setChecked(true);
             },
 
@@ -91,7 +91,7 @@ _bRequired - 是否必须选择
              * @override
              */
             $keydown: function (event) {
-                ui.InputControl.prototype.$keydown.call(this, event);
+                _super.$keydown(event);
                 if (event.which === 32) {
                     event.exit();
                 }
@@ -102,7 +102,7 @@ _bRequired - 是否必须选择
              * @override
              */
             $keypress: function (event) {
-                ui.InputControl.prototype.$keypress.call(this, event);
+                _super.$keypress(event);
                 if (event.which === 32) {
                     event.exit();
                 }
@@ -113,7 +113,7 @@ _bRequired - 是否必须选择
              * @override
              */
             $keyup: function (event) {
-                ui.InputControl.prototype.$keyup.call(this, event);
+                _super.$keyup(event);
                 if (event.which === 32) {
                     if (core.getKey() === 32) {
                         this.setChecked(true);
@@ -126,7 +126,7 @@ _bRequired - 是否必须选择
              * @override
              */
             $ready: function (options) {
-                ui.InputControl.prototype.$ready.call(this, options);
+                _super.$ready(options);
                 refresh(this);
             },
 
@@ -136,14 +136,14 @@ _bRequired - 是否必须选择
             $reset: function () {
                 // 修复IE6/7下移动DOM节点时选中状态发生改变的问题
                 this.setChecked(this._bDefault);
-                ui.InputControl.prototype.$reset.call(this);
+                _super.$reset();
             },
 
             /**
              * @override
              */
             $validate: function (event) {
-                ui.InputControl.prototype.$validate.call(this, event);
+                _super.$validate(event);
 
                 if (this._bRequired) {
                     var name = this.getName(),

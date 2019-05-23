@@ -77,7 +77,7 @@
                 if (this.$getSection('Options').isShow()) {
                     this.$Popup.$click.call(this, event);
                 } else {
-                    ui.Select.prototype.$click.call(this, event);
+                    _super.$click(event);
                     this.getItems().forEach(function (item) {
                         dom.removeClass(item.getMain(), 'ui-hide');
                     });
@@ -89,7 +89,7 @@
              * @override
              */
             $disable: function () {
-                ui.Select.prototype.$disable.call(this);
+                _super.$disable();
                 this._eTextInput.disabled = true;
             },
 
@@ -99,14 +99,14 @@
             $dispose: function () {
                 this._eTextInput.getControl = null;
                 this._eTextInput  = null;
-                ui.Select.prototype.$dispose.call(this);
+                _super.$dispose();
             },
 
             /**
              * @override
              */
             $enable: function () {
-                ui.Select.prototype.$enable.call(this);
+                _super.$enable();
                 this._eTextInput.disabled = false;
             },
 
@@ -114,7 +114,7 @@
              * @override
              */
             $input: function (event) {
-                ui.Select.prototype.$input.call(this, event);
+                _super.$input(event);
                 this.popup();
 
                 var text = this._eTextInput.value,
@@ -143,7 +143,7 @@
              * @override
              */
             $keydown: function (event) {
-                ui.Select.prototype.$keydown.call(this, event);
+                _super.$keydown(event);
                 util.timer(
                     function () {
                         this.$setPlaceholder();

@@ -118,7 +118,7 @@ _nOptionSize  - 下接选择框可以用于选择的条目数量
              * @override
              */
             $keydown: function (event) {
-                ui.InputControl.prototype.$keydown.call(this, event);
+                _super.$keydown(event);
 
                 if (event.which === 13 || event.which === 27 || event.which === 38 || event.which === 40) {
                     event.exit();
@@ -130,7 +130,7 @@ _nOptionSize  - 下接选择框可以用于选择的条目数量
              * @override
              */
             $keypress: function (event) {
-                ui.InputControl.prototype.$keypress.call(this, event);
+                _super.$keypress(event);
 
                 if (event.which === 13 || event.which === 27 || event.which === 38 || event.which === 40) {
                     event.exit();
@@ -142,7 +142,7 @@ _nOptionSize  - 下接选择框可以用于选择的条目数量
              * @override
              */
             $keyup: function (event) {
-                ui.InputControl.prototype.$keyup.call(this, event);
+                _super.$keyup(event);
 
                 var which = event.which,
                     list = this.getItems(),
@@ -190,7 +190,7 @@ _nOptionSize  - 下接选择框可以用于选择的条目数量
              * @override
              */
             $mousewheel: function (event) {
-                ui.InputControl.prototype.$mousewheel.call(this, event);
+                _super.$mousewheel(event);
                 var body = this.getBody(),
                     target = event.getTarget();
                 if (ieVersion < 9 || (target && dom.contain(body, target.getMain()) && ((!body.scrollTop && event.deltaY < 0) || (body.scrollTop === body.scrollHeight - body.clientHeight && event.deltaY > 0)))) {

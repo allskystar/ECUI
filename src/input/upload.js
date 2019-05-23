@@ -92,14 +92,14 @@
              */
             $dispose: function () {
                 this._eFile = null;
-                ui.Control.prototype.$dispose.call(this);
+                _super.$dispose();
             },
 
             /**
              * @override
              */
             $ready: function () {
-                ui.Control.prototype.$ready.call(this);
+                _super.$ready();
                 dom.addEventListener(this._eFile, 'change', fileChangeHandler.bind(this));
             },
 

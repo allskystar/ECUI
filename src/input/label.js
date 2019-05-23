@@ -35,7 +35,7 @@ _cFor - 被转发的控件对象
              * @event
              */
             $click: function (event) {
-                ui.Control.prototype.$click.call(this, event);
+                _super.$click(event);
 
                 var target = this._cFor ||
                         core.query(function (item) {

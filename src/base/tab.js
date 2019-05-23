@@ -234,17 +234,6 @@
             /**
              * @override
              */
-            $ready: function () {
-                _super.$ready();
-                var selected = this.getSelected();
-                delete this.setSelected;
-                delete this.getSelected;
-                this.setSelected(selected);
-            },
-
-            /**
-             * @override
-             */
             $remove: function (event) {
                 if (this.getSelected() === event.child) {
                     var list = this.getItems(),
@@ -265,6 +254,17 @@
              */
             getContainer: function () {
                 return this.container;
+            },
+
+            /**
+             * @override
+             */
+            init: function () {
+                _super.init();
+                var selected = this.getSelected();
+                delete this.setSelected;
+                delete this.getSelected;
+                this.setSelected(selected);
             }
         },
         ui.Items,

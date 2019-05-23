@@ -282,7 +282,7 @@
                     core.dispatchEvent(this, 'validate');
                 }
 
-                ui.Control.prototype.$blur.call(this, event);
+                _super.$blur(event);
             },
 
             /**
@@ -308,7 +308,7 @@
              * @override
              */
             $disable: function () {
-                ui.Control.prototype.$disable.call(this);
+                _super.$disable();
                 this.input.disabled = true;
             },
 
@@ -318,7 +318,7 @@
             $dispose: function () {
                 this.input.getControl = null;
                 this.input = null;
-                ui.Control.prototype.$dispose.call(this);
+                _super.$dispose();
             },
 
             /**
@@ -326,7 +326,7 @@
              * @override
              */
             $enable: function () {
-                ui.Control.prototype.$enable.call(this);
+                _super.$enable();
                 this.input.disabled = false;
             },
 
@@ -352,7 +352,7 @@
              * @override
              */
             $focus: function (event) {
-                ui.Control.prototype.$focus.call(this, event);
+                _super.$focus(event);
 
                 if (isToucher) {
                     var active = document.activeElement;
@@ -410,8 +410,8 @@
             /**
              * @override
              */
-            $ready: function () {
-                ui.Control.prototype.$ready.call(this);
+            $ready: function (event) {
+                _super.$ready(event);
                 this.saveToDefault();
             },
 
@@ -427,7 +427,7 @@
              * @override
              */
             $setParent: function (parent) {
-                ui.Control.prototype.$setParent.call(this, parent);
+                _super.$setParent(parent);
                 if (parent = this.input.form) {
                     if (parent.getControl === undefined) {
                         dom.addEventListener(parent, 'submit', submitHandler);

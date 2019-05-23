@@ -48,7 +48,9 @@
             /**
              * @override
              */
-            $progress: function () {
+            $ready: function (event) {
+                _super.$ready(event);
+
                 var x = this.getWidth() / 2,
                     y = this.getHeight() / 2,
                     radius = x + y,

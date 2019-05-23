@@ -93,7 +93,7 @@
                      * @override
                      */
                     $show: function () {
-                        ui.Control.prototype.$show.call(this);
+                        _super.$show();
                         var select = this.getParent();
                         if (select._bAlterItems) {
                             this.$alterItems();
@@ -124,7 +124,7 @@
                      * @override
                      */
                     $click: function (event) {
-                        ui.Item.prototype.$click.call(this, event);
+                        _super.$click(event);
                         var parent = this.getParent();
                         parent.$Options.hide();
                         if (parent.getSelected() !== this) {
@@ -187,7 +187,7 @@
              * @override
              */
             $initStructure: function (width, height) {
-                ui.InputControl.prototype.$initStructure.call(this, width, height);
+                _super.$initStructure(width, height);
                 // 设置文本区域
                 if (this.$Text.isCached()) {
                     this.$Text.$setSize(width, height);
@@ -219,19 +219,10 @@
             /**
              * @override
              */
-            $ready: function () {
-                ui.InputControl.prototype.$ready.call(this);
-                this.setValue(this.getInput().value);
-                this._bAlterItems = true;
-            },
-
-            /**
-             * @override
-             */
             $reset: function () {
                 var el = this.getInput();
                 el.value = el.defaultValue;
-                ui.InputControl.prototype.$reset.call(this);
+                _super.$reset();
             },
 
             /**
@@ -251,7 +242,7 @@
              * @override
              */
             $setValue: function (value) {
-                ui.InputControl.prototype.$setValue.call(this, value);
+                _super.$setValue(value);
                 this.$setPlaceholder();
             },
 
@@ -259,7 +250,7 @@
              * @override
              */
             $validate: function () {
-                ui.InputControl.prototype.$validate.call(this);
+                _super.$validate();
                 if (this.getValue() === '' &&  this.required) {
                     core.dispatchEvent(this, 'error');
                     return false;
@@ -282,6 +273,15 @@
              */
             getText: function () {
                 return this.$Text.getContent();
+            },
+
+            /**
+             * @override
+             */
+            init: function () {
+                _super.init();
+                this.setValue(this.getInput().value);
+                this._bAlterItems = true;
             },
 
             /**

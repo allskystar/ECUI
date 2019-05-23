@@ -40,7 +40,9 @@ mask   - 完成的进度比例内容区域
             /**
              * @override
              */
-            $progress: function () {
+            $ready: function (event) {
+                _super.$ready(event);
+
                 this.mask.style.clip = 'rect(0px,' + Math.round(this.getValue() * this.getWidth() / this.getMax()) + 'px,' + this.getHeight() + 'px,0px)';
             }
         }

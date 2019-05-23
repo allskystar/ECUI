@@ -13,9 +13,6 @@
         <li>孙节点三</li>
     </ul>
 </ul>
-
-@fields
-_uCheckbox - 复选框控件
 */
 //{if 0}//
 (function () {
@@ -35,29 +32,34 @@ _uCheckbox - 复选框控件
     ui.CheckboxTree = core.inherits(
         ui.TreeView,
         'ui-checkbox-tree',
-        [
-            function (el, options) {
-                this._uCheckbox = core.$fastCreate(
-                    this.Checkbox,
-                    el.insertBefore(
-                        dom.create({className: ui.Checkbox.CLASS}),
-                        el.firstChild
-                    ),
-                    this,
-                    options
-                );
+        function (el, options) {
+            _super(el, options);
 
-                if (options.subject) {
-                    this.getChildren().forEach(
-                        function (item) {
-                            item._uCheckbox.setSubject(this._uCheckbox);
-                        },
-                        this
-                    );
-                }
+            el = this.getMain();
+            this.$Checkbox = core.$fastCreate(
+                this.Checkbox,
+                el.insertBefore(
+                    dom.create({className: ui.Checkbox.CLASS}),
+                    el.firstChild
+                ),
+                this,
+                options
+            );
+
+            if (options.subject) {
+                this.getChildren().forEach(
+                    function (item) {
+                        item.$Checkbox.setSubject(this.$Checkbox);
+                    },
+                    this
+                );
             }
-        ],
+        },
         {
+            final: {
+                $Checkbox: undefined
+            },
+
             /**
              * 复选框部件。
              * @unit
@@ -66,7 +68,7 @@ _uCheckbox - 复选框控件
                 ui.Checkbox,
                 {
                     $click: function (event) {
-                        ui.Checkbox.prototype.$click.call(this, event);
+                        _super.$click(event);
                         event.stopPropagation();
                     }
                 }
@@ -93,7 +95,7 @@ _uCheckbox - 复选框控件
              * @return {string} 表单项的值
              */
             getValue: function () {
-                return this._uCheckbox.getValue();
+                return this.$Checkbox.getValue();
             },
 
             /**
@@ -103,7 +105,7 @@ _uCheckbox - 复选框控件
              * @return {boolean} 是否选中
              */
             isChecked: function () {
-                return this._uCheckbox.isChecked();
+                return this.$Checkbox.isChecked();
             },
 
             /**
@@ -113,7 +115,7 @@ _uCheckbox - 复选框控件
              * @param {boolean} 是否选中当前树控件复选框
              */
             setChecked: function (status) {
-                this._uCheckbox.setChecked(status);
+                this.$Checkbox.setChecked(status);
             }
         }
     );

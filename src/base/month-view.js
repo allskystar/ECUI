@@ -171,14 +171,6 @@
             },
 
             /**
-             * @override
-             */
-            $ready: function () {
-                _super.$ready();
-                this.setView(this.date.getFullYear(), this.date.getMonth() + 1);
-            },
-
-            /**
              * 获取有效日期区间的开始。
              * @public
              *
@@ -266,6 +258,14 @@
              */
             getYear: function () {
                 return this.year;
+            },
+
+            /**
+             * @override
+             */
+            init: function () {
+                _super.init();
+                this.setView(this.date.getFullYear(), this.date.getMonth() + 1);
             },
 
             /**

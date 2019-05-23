@@ -20,7 +20,7 @@
                  * @override
                  */
                 $dateclick: function (event) {
-                    ui.Calendar.prototype.$dateclick.call(this, event);
+                    _super.$dateclick(event);
                     var parent = this.getParent();
                     parent.setValue(event.date);
                     core.dispatchEvent(parent, 'input', event);
@@ -31,7 +31,7 @@
                  * @override
                  */
                 $hide: function (event) {
-                    ui.Calendar.prototype.$hide.call(this, event);
+                    _super.$hide(event);
                     this.$setParent();
                 },
 
@@ -39,7 +39,7 @@
                  * @override
                  */
                 $show: function (event) {
-                    ui.Calendar.prototype.$show.call(this, event);
+                    _super.$show(event);
                     this.$setParent(ui.Popup.getOwner());
                     this.setDate(this.getParent().getDate());
                 }
