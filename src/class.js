@@ -232,19 +232,6 @@
     };
 
     /**
-     * 重新定义类的方法，动态为类增加新的方法。
-     * @public
-     *
-     * @param {Function} Class 类对象
-     * @param {string} name 方法名
-     * @param {Function} method 方法函数
-     */
-    _class.defineMethod = function (Class, name, method) {
-        Class.prototype[name] = makeProxy(Class, method);
-        defines[Class.CLASSID].SuperMethods[name] = makeSuperMethod(name);
-    };
-
-    /**
      * 指定继承一个类与相关接口。
      * @public
      *
@@ -264,11 +251,11 @@
                 propertyDescriptors[name] = {
                     get: function () {
                         checkProtected.call(this, newClass);
-                        return this[newClass.CLASSID][name];
+                        return this[classId][name];
                     },
                     set: function (value) {
                         checkProtected.call(this, newClass);
-                        this[newClass.CLASSID][name] = value;
+                        this[classId][name] = value;
                     }
                 };
             }
@@ -279,11 +266,11 @@
             if (!propertyDescriptors[name]) {
                 propertyDescriptors[name] = {
                     get: function () {
-                        return this[newClass.CLASSID][name];
+                        return this[classId][name];
                     },
                     set: function (value) {
-                        if (!this[newClass.CLASSID].hasOwnProperty(name)) {
-                            this[newClass.CLASSID][name] = value;
+                        if (!this[classId].hasOwnProperty(name)) {
+                            this[classId][name] = value;
                         }
                     }
                 };
@@ -305,7 +292,7 @@
                     defines[clazz.CLASSID].Interfaces.forEach(initInterface, this);
                 }
 
-                defines[newClass.CLASSID].Constructor.apply(this, arguments);
+                defines[classId].Constructor.apply(this, arguments);
             },
             privateFields = [],
             protectedFields = [],
@@ -313,6 +300,7 @@
             initValues = {},
             superMethods = superClass ? Object.assign({}, defines[superClass.CLASSID].SuperMethods) : {},
             propertyDescriptors = {},
+            classId = 'CLASS-' + classes.length,
             data,
             name;
 
@@ -328,9 +316,9 @@
         delete properties.constructor;
 
         if (Object.defineProperty) {
-            Object.defineProperty(newClass, 'CLASSID', {value: 'CLASS-' + classes.length});
+            Object.defineProperty(newClass, 'CLASSID', {value: classId});
         } else {
-            newClass.CLASSID = 'CLASS-' + classes.length;
+            newClass.CLASSID = classId;
         }
         classes.push(newClass);
 
@@ -414,12 +402,12 @@
             }
         });
 
-        defines[newClass.CLASSID] = {
+        defines[classId] = {
             Constructor: function () {
                 var args = arguments;
 
                 if (superClass) {
-                    var clazz = this[newClass.CLASSID].super = {};
+                    var clazz = this[classId].super = {};
                     Object.assign(clazz, defines[superClass.CLASSID].SuperMethods);
                     clazz.super = superClass.prototype;
                     clazz.this = this;
@@ -480,10 +468,35 @@
 
         properties = null;
 
+        /**
+         * 类型转换。
+         * @public
+         *
+         * @param {object} caller 需要转换类型的变量
+         */
         newClass._cast = function (caller) {
-            return caller[newClass.CLASSID];
+            return caller[classId];
         };
 
+        /**
+         * 重新定义类的方法，动态为类增加新的方法。
+         * @public
+         *
+         * @param {string} name 方法名
+         * @param {Function} method 方法函数
+         */
+        newClass.defineMethod = function (name, method) {
+            newClass.prototype[name] = makeProxy(newClass, method);
+            defines[classId].SuperMethods[name] = makeSuperMethod(name);
+        };
+
+        /**
+         * 检查类是不是当前类的子类。
+         * @public
+         *
+         * @param {Function} subClass 需要检查的类
+         * @return {boolean} subClass是否为当前类的子类
+         */
         newClass.isAssignableFrom = function (subClass) {
             for (; subClass; subClass = subClass.super) {
                 if (subClass === newClass) {
