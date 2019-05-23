@@ -476,7 +476,14 @@
          */
         newClass._cast = function (caller) {
             onbefore(caller, newClass);
-            setTimeout(onafter, 0);
+            var item = callStack.pop();
+            setTimeout(
+                function () {
+                    callStack.push(item);
+                    onafter();
+                },
+                0
+            );
             return caller;
         };
 
