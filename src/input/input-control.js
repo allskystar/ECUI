@@ -235,7 +235,7 @@
                 }
             }
 
-            ui.Control.call(this, el, options);
+            _super(el, options);
 
             this.input = inputEl;
             this.$bindEvent(inputEl);

@@ -27,7 +27,7 @@ _oTest      匹配合法性的正则表达式
         ui.Text,
         'ui-number',
         function (el, options) {
-            ui.Text.call(this, el, options);
+            _super(el, options);
             this._nDecimal = options.decimal && +options.decimal;
             this._oTest = new RegExp('^-?\\d*' + (this._nDecimal === 0 ? '' : '(\\.\\d' + (this._nDecimal ? '{0,' + Math.abs(this._nDecimal) + '}' : '*') + ')?') + '$');
         },

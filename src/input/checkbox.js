@@ -88,7 +88,7 @@ _bRequired       - 是否必须选择
         ui.InputControl,
         'ui-checkbox',
         function (el, options) {
-            ui.InputControl.call(this, el, Object.assign({inputType: 'checkbox'}, options));
+            _super(el, Object.assign({inputType: 'checkbox'}, options));
 
             // 保存节点选中状态，用于修复IE6/7下移动DOM节点时选中状态发生改变的问题
             this._bDefault = this.getInput().defaultChecked;

@@ -26,7 +26,7 @@ _eInput - 选项对应的input，form提交时使用
         ui.Control,
         'ui-listbox',
         function (el, options) {
-            ui.Control.call(this, el, options);
+            _super(el, options);
             this._sName = options.name || '';
         },
         {
@@ -38,7 +38,7 @@ _eInput - 选项对应的input，form提交时使用
                 ui.Item,
                 'ui-listbox-item',
                 function (el, options) {
-                    ui.Item.call(this, el, options);
+                    _super(el, options);
                     dom.insertHTML(el, 'beforeEnd', '<input type="hidden" name="' + options.parent._sName + '">');
 
                     this._eInput = el.lastChild;

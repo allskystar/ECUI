@@ -37,7 +37,7 @@ _ePlaceHolder - 为空时的提示信息标签
         ui.InputControl,
         'ui-text',
         function (el, options) {
-            ui.InputControl.call(this, el, options);
+            _super(el, options);
 
             this._bTrim = options.trim !== false;
             if (options.len) {
@@ -273,7 +273,7 @@ _ePlaceHolder - 为空时的提示信息标签
              * @override
              */
             getValue: function () {
-                var value = ui.InputControl.prototype.getValue.call(this);
+                var value = _super.getValue();
                 if (this._bTrim) {
                     value = value.trim();
                 }

@@ -34,7 +34,7 @@ _oTest      匹配合法性的正则表达式
         ui.Text,
         'ui-time',
         function (el, options) {
-            ui.Text.call(this, el, options);
+            _super(el, options);
             this._oTest = new RegExp('^[0-2]\\d:[0-5]\\d' + (options.second !== false ? ':[0-5]\\d' : '') + '$');
             this._sFormat = options.second !== false ? '00:00:00' : '00:00';
         },

@@ -44,7 +44,7 @@ _oHandler   - 定时器句柄
         ui.Combox,
         'ui-filter',
         function (el, options) {
-            ui.Combox.call(this, el, options);
+            _super(el, options);
             this._bCustom = options.custom !== false;
             this._sUrl = options.url;
         },

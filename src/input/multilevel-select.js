@@ -30,7 +30,7 @@ _aSelect - 全部的下拉框控件列表
             Select: core.inherits(
                 ui.Select,
                 function (el, options) {
-                    ui.Select.call(this, el, options);
+                    _super(el, options);
                     this._sUrl = options.url;
                 },
                 {
@@ -41,7 +41,7 @@ _aSelect - 全部的下拉框控件列表
                     Item: core.inherits(
                         ui.Select.prototype.Item,
                         function (el, options) {
-                            ui.Select.prototype.Item.call(this, el, options);
+                            _super.Item(el, options);
                             this._aChildren = options.children;
                         },
                         {
@@ -71,7 +71,7 @@ _aSelect - 全部的下拉框控件列表
                      * @override
                      */
                     setSelected: function (item) {
-                        ui.Select.prototype.setSelected.call(this, item);
+                        _super.setSelected(item);
 
                         var parent = this.getParent(),
                             index = parent._aSelect.indexOf(this);

@@ -82,7 +82,7 @@
         ui.Control,
         'ui-upload',
         function (el, options) {
-            ui.Control.call(this, el, options);
+            _super(el, options);
             this._sUrl = options.url;
             this._eFile = el.getElementsByTagName('INPUT')[0];
         },

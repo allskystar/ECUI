@@ -64,19 +64,17 @@
                 el.appendChild(input);
             }
 
-            ui.InputControl.call(this, el, options);
+            _super(el, options);
 
             this.$Text = core.$fastCreate(ui.Item, el.firstChild, this, {capturable: false});
             this.$Options = core.$fastCreate(this.Options, optionsEl, this, {focusable: false});
-
-            this.required = !!options.required;
 
             this.setPopup(this.$Options);
             this.$setBody(this.$Options.getBody());
         },
         {
-            private: {
-                required: undefined
+            DEFAULT_OPTIONS: {
+                required: Boolean(false)
             },
 
             final: {
@@ -114,7 +112,7 @@
             Item: core.inherits(
                 ui.Item,
                 function (el, options) {
-                    ui.Item.call(this, el, options);
+                    _super(el, options);
                     this.value = options.value === undefined ? dom.getText(el) : String(options.value);
                 },
                 {
@@ -273,7 +271,7 @@
              */
             cache: function (force) {
                 this.$Text.cache(force);
-                ui.InputControl.prototype.cache.call(this, force);
+                _super.cache(force);
             },
 
             /**

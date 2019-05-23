@@ -38,7 +38,7 @@
 
             var children = dom.children(el);
 
-            ui.InputControl.call(this, el, options);
+            _super(el, options);
 
             this._nSegment = options.segment;
             this._eMask = children[1];
@@ -134,7 +134,7 @@
                 this._aSlider[1].setPosition(max, this._aSlider[1].getY());
 
                 setMask(this, min, max);
-                ui.InputControl.prototype.setValue.call(this, value.join(','));
+                _super.setValue(value.join(','));
             }
         }
     );

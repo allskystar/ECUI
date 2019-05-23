@@ -13,7 +13,7 @@
             true,
             function (el, options) {
                 dom.addClass(el, 'ui-popup ui-hide');
-                ui.Calendar.call(this, el, options);
+                _super(el, options);
             },
             {
                 /**
@@ -52,16 +52,24 @@
      * @control
      */
     ui.CalendarInput = core.inherits(
-        ui.Text,
+        ui.InputControl,
         'ui-calendar-input',
         function (el, options) {
-            ui.Text.call(this, el, options);
+            _super(el, options);
             this.getInput().readOnly = true;
             this.setPopup(core.getSingleton(Calendar));
             dom.insertHTML(el, 'BEFOREEND', '<span class="ui-calendar-input-clear"></span>');
-            this._uClear = core.$fastCreate(this.Clear, dom.last(el), this);
+            this.$Clear = core.$fastCreate(this.Clear, dom.last(el), this);
         },
         {
+            final: {
+                $Clear: undefined
+            },
+
+            /**
+             * 清除部件。
+             * @unit
+             */
             Clear: core.inherits(
                 ui.Control,
                 {
@@ -72,6 +80,7 @@
                     }
                 }
             ),
+
             /**
              * 获取日期对象。
              * @public
@@ -93,7 +102,7 @@
                 if (value instanceof Date) {
                     value = value.getFullYear() + '-' + ('0' + (value.getMonth() + 1)).slice(-2) + '-' + ('0' + value.getDate()).slice(-2);
                 }
-                ui.Text.prototype.setValue.call(this, value);
+                _super.setValue(value);
             }
         },
         ui.Popup

@@ -18,7 +18,7 @@
     ui.FormInput = core.inherits(
         ui.Control,
         function (el, options) {
-            ui.Control.call(this, el, options);
+            _super(el, options);
             this._sName = options.name;
         },
         {

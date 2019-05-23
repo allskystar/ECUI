@@ -50,7 +50,7 @@
         ui.Select,
         '*ui-combox',
         function (el, options) {
-            ui.Select.call(this, el, Object.assign({readOnly: false}, options));
+            _super(el, Object.assign({readOnly: false}, options));
 
             el = this.$getSection('Text').getBody();
 
