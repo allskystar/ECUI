@@ -9,7 +9,7 @@
         ui.TreeView,
         'ui-select-tree',
         function (el, options) {
-            ui.TreeView.call(this, el, options);
+            _super(el, options);
             this._sValue = options.value;
             this._sText = options.text;
             this._sChildren = JSON.parse(options.children || '[]');
@@ -90,7 +90,7 @@
         function (el, options) {
             var popupEl = dom.remove(dom.first(el));
             dom.addClass(popupEl, 'ui-tree-combox-popup ui-popup ui-hide');
-            ui.InputControl.call(this, el, options);
+            _super(el, options);
             this.setPopup(this._uOptions = core.$fastCreate(ui.Control, popupEl, this));
         },
         {
@@ -121,7 +121,7 @@
                 for (var i = 0, tree = [dom.first(this._uOptions.getMain()).getControl()], node; node = tree[i++]; ) {
                     Array.prototype.push.apply(tree, node.getChildren());
                 }
-                var text = ui.InputControl.prototype.getValue.call(this),
+                var text = _super.getValue(),
                     selected;
 
                 tree.forEach(function (item) {
@@ -150,7 +150,7 @@
         ui.Control,
         'ui-combox-item',
         function (el, options) {
-            ui.Control.call(this, el, options);
+            _super(el, options);
             this._sValue = options.value === undefined ? dom.getText(el) : String(options.value);
             this._sText = options.text;
         },
@@ -159,7 +159,7 @@
              * @override
              */
             $click: function (event) {
-                ui.Control.prototype.$click.call(this, event);
+                _super.$click(event);
                 var parent = this.getParent().getParent();
                 // ui.TreeCombox.prototype.oninput.call(parent, event);
                 console.log(parent);

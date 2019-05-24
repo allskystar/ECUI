@@ -92,7 +92,7 @@ _aLabel    - 标签信息数组
              * @override
              */
             $cache: function (style) {
-                ui.MPanel.prototype.$cache.call(this, style);
+                _super.$cache(style);
                 this._aLabel.forEach(function (item) {
                     item.top = item.el.offsetTop;
                     item.height = item.el.offsetHeight;
@@ -104,14 +104,14 @@ _aLabel    - 标签信息数组
              */
             $dispose: function () {
                 this._aLabel = null;
-                ui.MPanel.prototype.$dispose.call(this);
+                _super.$dispose();
             },
 
             /**
              * @override
              */
             $initStructure: function (width, height) {
-                ui.MPanel.prototype.$initStructure.call(this, width, height);
+                _super.$initStructure(width, height);
                 this.setScrollRange({top: -this._aLabel[this._aLabel.length - 1].top});
             },
 
@@ -119,7 +119,7 @@ _aLabel    - 标签信息数组
              * @override
              */
             $restoreStructure: function (event) {
-                ui.MPanel.prototype.$restoreStructure.call(this, event);
+                _super.$restoreStructure(event);
                 this._aLabel.forEach(function (item) {
                     item.el.style.transform = '';
                 });
@@ -143,7 +143,7 @@ _aLabel    - 标签信息数组
              * @override
              */
             setPosition: function (x, y) {
-                ui.MPanel.prototype.setPosition.call(this, x, y);
+                _super.setPosition(x, y);
                 for (var selected = this._aLabel[0], i = 1, next; next = this._aLabel[i++]; ) {
                     if (next.top > -y) {
                         break;

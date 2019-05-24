@@ -26,7 +26,7 @@
              * @override
              */
             $initStructure: function (width, height) {
-                ui.Control.prototype.$initStructure.call(this, width, height);
+                _super.$initStructure(width, height);
                 this.$setSize(width, height);
                 dom.removeClass(this.getMain(), 'ui-mobile-panel-location');
             },
@@ -35,7 +35,7 @@
              * @override
              */
             $restoreStructure: function (event) {
-                ui.Control.prototype.$restoreStructure.call(this, event);
+                _super.$restoreStructure(event);
                 dom.addClass(this.getMain(), 'ui-mobile-panel-location');
             }
         },

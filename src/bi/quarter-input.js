@@ -32,7 +32,7 @@
                 )
             );
 
-            ui.Control.call(this, el, options);
+            _super(el, options);
 
             this._aCells = Array.apply(null, el.getElementsByTagName('TD')).map(function (item, index) {
                 return core.$fastCreate(index < 2 ? ui.Control : this.Quarter, item, this, { value: (index - 1) * 3 - 1 });
@@ -75,7 +75,7 @@
             Quarter: core.inherits(
                 ui.Control,
                 function (el, options) {
-                    ui.Control.call(this, el, options);
+                    _super(el, options);
                     this._sValue = +options.value;
                 },
                 {
@@ -103,7 +103,7 @@
             Button: core.inherits(
                 ui.Button,
                 function (el, options) {
-                    ui.Button.call(this, el, options);
+                    _super(el, options);
                     this._nMove = options.move;
                 },
                 {
@@ -111,7 +111,7 @@
                      * @override
                      */
                     $click: function (event) {
-                        ui.Button.prototype.$click.call(this, event);
+                        _super.$click(event);
                         this.getParent().move(this._nMove);
                     }
                 }
@@ -150,7 +150,7 @@
              * @override
              */
             $ready: function (event) {
-                ui.Control.prototype.$ready.call(this, event);
+                _super.$ready(event);
                 this.setTitle();
             },
             setTitle: function () {
@@ -215,7 +215,7 @@
              * @override
              */
             $hide: function (event) {
-                ui.Control.prototype.$hide.call(this, event);
+                _super.$hide(event);
                 this.$setParent();
             },
 
@@ -223,7 +223,7 @@
              * @override
              */
             $show: function (event) {
-                ui.Control.prototype.$show.call(this, event);
+                _super.$show(event);
                 this.$setParent(ui.Popup.getOwner());
             }
         }
@@ -237,7 +237,7 @@
         ui.Text,
         'ui-calendar-input',
         function (el, options) {
-            ui.Text.call(this, el, options);
+            _super(el, options);
             this.getInput().readOnly = true;
             this.setPopup(core.getSingleton(ui.BIQuarter));
         },
@@ -246,7 +246,7 @@
              * @override
              */
             $blur: function (event) {
-                ui.Text.prototype.$blur.call(this, event);
+                _super.$blur(event);
                 this.getPopup().hide();
             },
 
@@ -271,7 +271,7 @@
                 if (value instanceof Date) {
                     value = value.getFullYear() + '-' + ('0' + (value.getMonth() + 1)).slice(-2);
                 }
-                ui.Text.prototype.setValue.call(this, value);
+                _super.setValue(value);
             }
         },
         ui.Popup

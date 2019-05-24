@@ -34,7 +34,7 @@ _cItem    - 当前处于激活的选项
             Item: core.inherits(
                 ui.MListView.prototype.Item,
                 function (el, options) {
-                    ui.MListView.prototype.Item.call(this, el, options);
+                    _super.Item(el, options);
                     dom.toArray(this.getBody().childNodes).forEach(function (item) {
                         if (item.nodeType !== 1) {
                             dom.remove(item);
@@ -93,7 +93,7 @@ _cItem    - 当前处于激活的选项
                      */
                     $dispose: function () {
                         this._oHandle();
-                        ui.Control.prototype.$dispose.call(this);
+                        _super.$dispose();
                     },
 
                     /**
@@ -158,7 +158,7 @@ _cItem    - 当前处于激活的选项
              * @override
              */
             $dragmove: function (event) {
-                ui.MListView.prototype.$dragmove.call(this, event);
+                _super.$dragmove(event);
                 if (this._bOperate === undefined) {
                     this._bOperate = (event.track.angle < 45 || (event.track.angle > 135 && event.track.angle < 225) || event.track.angle > 315);
                 }
@@ -168,7 +168,7 @@ _cItem    - 当前处于激活的选项
              * @override
              */
             $dragstart: function (event) {
-                ui.MListView.prototype.$dragstart.call(this, event);
+                _super.$dragstart(event);
                 this._bOperate = this.getStatus() ? false : undefined;
             },
 
@@ -179,14 +179,14 @@ _cItem    - 当前处于激活的选项
                 if (this._cItem) {
                     return this._cItem.getX();
                 }
-                return ui.MListView.prototype.getX.call(this);
+                return _super.getX();
             },
 
             /**
              * @override
              */
             reload: function (data) {
-                ui.MListView.prototype.reload.call(this, data);
+                _super.reload(data);
                 this._cItem = null;
             },
 
@@ -195,7 +195,7 @@ _cItem    - 当前处于激活的选项
              */
             setPosition: function (x, y) {
                 if (this._bOperate === false) {
-                    ui.MListView.prototype.setPosition.call(this, 0, y);
+                    _super.setPosition(0, y);
                 } else if (this._bOperate === true && this._cItem) {
                     this._cItem.setPosition(x);
                 }

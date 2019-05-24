@@ -20,8 +20,6 @@
     ui.$AbstractSelect = core.inherits(
         ui.InputControl,
         function (el, options) {
-            options = Object.assign({readOnly: true}, options);
-
             if (el.tagName === 'SELECT') {
                 options.name = el.name;
                 options.value = el.value;
@@ -73,6 +71,10 @@
             this.$setBody(this.$Options.getBody());
         },
         {
+            SUPER_OPTIONS: {
+                readOnly: true
+            },
+
             DEFAULT_OPTIONS: {
                 required: Boolean(false)
             },

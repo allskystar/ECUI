@@ -60,7 +60,7 @@ _nBottomIndex  - 下部隐藏的选项序号
                 } else {
                     this._eEmpty = dom.create({className: this.getUnitClass(ui.MListView, 'empty-body')});
                 }
-                ui.Control.call(this, el, options);
+                _super(el, options);
                 this._sStatus = '';
             }
         ],
@@ -139,7 +139,7 @@ _nBottomIndex  - 下部隐藏的选项序号
              * @override
              */
             $cache: function (style) {
-                ui.Control.prototype.$cache.call(this, style);
+                _super.$cache(style);
                 var body = this.getBody();
                 style = dom.getStyle(body);
                 if (ieVersion < 8) {
@@ -162,7 +162,7 @@ _nBottomIndex  - 下部隐藏的选项序号
             $dispose: function () {
                 this._oHandle();
                 this._eHeader = this._eFooter = this._eEmpty = null;
-                ui.Control.prototype.$dispose.call(this);
+                _super.$dispose();
             },
 
             /**
@@ -227,7 +227,7 @@ _nBottomIndex  - 下部隐藏的选项序号
              * @override
              */
             $initStructure: function (width, height) {
-                ui.Control.prototype.$initStructure.call(this, width, height);
+                _super.$initStructure(width, height);
                 this.alterStatus(this.getLength() ? '-empty' : '+empty');
                 if (this.isReady()) {
                     this.setPosition(0, 0);
@@ -246,7 +246,7 @@ _nBottomIndex  - 下部隐藏的选项序号
              * @override
              */
             $ready: function () {
-                ui.Control.prototype.$ready.call(this);
+                _super.$ready();
                 this._nTopHidden = this._nBottomHidden = 0;
                 this._nTopIndex = 0;
                 this._nBottomIndex = this.getLength();

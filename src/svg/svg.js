@@ -28,7 +28,7 @@
     ui.SVG = core.inherits(
         ui.Control,
         function (el, options) {
-            ui.Control.call(this, el, options);
+            _super(el, options);
             this._eSVG = dom.first(el);
             if (this._eSVG) {
                 this._eDefs = dom.first(this._eSVG);
@@ -41,7 +41,7 @@
         {
             $dispose: function () {
                 this._eSVG = null;
-                ui.Control.prototype.$dispose.call(this);
+                _super.$dispose();
             },
 
             drawEllipse: function (x, y, rx, ry, className) {

@@ -71,7 +71,7 @@ _eBar            - 下划线 DOM 元素
         ui.Tab,
         'ui-m-tab',
         function (el, options) {
-            ui.Tab.call(this, el, options);
+            _super(el, options);
             if (options.bar) {
                 this._eBar = dom.create({className: this.getUnitClass(ui.MTab, 'bar')});
             }
@@ -88,7 +88,7 @@ _eBar            - 下划线 DOM 元素
              * @override
              */
             $activate: function (event) {
-                ui.Tab.prototype.$activate.call(this, event);
+                _super.$activate(event);
 
                 var clientWidth = this.getClientWidth(),
                     title = this.getBody(),
@@ -114,7 +114,7 @@ _eBar            - 下划线 DOM 元素
             $dispose: function () {
                 this._eBar = null;
                 core.removeGestureListeners(this);
-                ui.Tab.prototype.$dispose.call(this);
+                _super.$dispose();
             },
 
             /**
@@ -129,7 +129,7 @@ _eBar            - 下划线 DOM 元素
                     }
                 }
                 delete this._bIsTitle;
-                ui.Tab.prototype.$dragend.call(this, event);
+                _super.$dragend(event);
             },
 
             /**
@@ -156,7 +156,7 @@ _eBar            - 下划线 DOM 元素
              * @override
              */
             $initStructure: function (width, height) {
-                ui.Tab.prototype.$initStructure.call(this, width, height);
+                _super.$initStructure(width, height);
 
                 var item = this.getSelected();
                 if (item) {
@@ -267,7 +267,7 @@ _eBar            - 下划线 DOM 元素
                     }
                 }
 
-                ui.Tab.prototype.setSelected.call(this, item);
+                _super.setSelected(item);
 
                 if (this.isCached()) {
                     this.move(item ? this.getItems().indexOf(item) : 0);

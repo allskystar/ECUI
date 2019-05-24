@@ -25,7 +25,7 @@ _uDate   - 日部件
         ui.MMultiOptions,
         'ui-mobile-calendar',
         function (el, options) {
-            ui.MMultiOptions.call(this, el, Object.assign({format: this.FORMAT}, options));
+            _super(el, Object.assign({format: this.FORMAT}, options));
 
             this._uYear = this.getOptions(0);
             this._uMonth = this.getOptions(1);
@@ -54,7 +54,7 @@ _uDate   - 日部件
              * @override
              */
             $click: function (event) {
-                ui.MMultiOptions.prototype.$click.call(this, event);
+                _super.$click(event);
                 if (dom.contain(this.getMain(), event.target)) {
                     var date = new Date();
                     if (!this._uYear.getValue()) {

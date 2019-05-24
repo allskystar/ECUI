@@ -37,7 +37,7 @@ _eText       - 文本框
             }));
             this._eText = el.lastChild;
 
-            ui.InputControl.call(this, el, Object.assign({inputType: 'hidden'}, options));
+            _super(el, Object.assign({inputType: 'hidden'}, options));
 
             this.setPopup(core.$fastCreate(this.Popup, popupEl, this));
 
@@ -87,7 +87,7 @@ _eText       - 文本框
                         this.getParent()._aOptions.forEach(function (item) {
                             item.cache(force);
                         });
-                        ui.Control.prototype.cache.call(this, force);
+                        _super.cache(force);
                     }
                 },
                 ui.MConfirm
@@ -108,7 +108,7 @@ _eText       - 文本框
                         }
                     },
                     function (el, options) {
-                        ui.Control.call(this, el, options);
+                        _super(el, options);
 
                         var values = options.values;
                         this._sPrefix = '';
@@ -153,7 +153,7 @@ _eText       - 文本框
                     Item: core.inherits(
                         ui.Control,
                         function (el, options) {
-                            ui.Control.call(this, el, options);
+                            _super(el, options);
                             this._sValue = options.value || this.getContent();
                         }
                     ),
@@ -162,7 +162,7 @@ _eText       - 文本框
                      * @override
                      */
                     $initStructure: function (width, height) {
-                        ui.Control.prototype.$initStructure.call(this, width, height);
+                        _super.$initStructure(width, height);
                         this.setPosition(0, (3 - this._aItems.indexOf(this.getSelected())) * this.$$itemHeight);
                     },
 
@@ -215,14 +215,14 @@ _eText       - 文本框
              */
             $blur: function (event) {
                 this.getPopup().hide();
-                ui.InputControl.prototype.$blur.call(this, event);
+                _super.$blur(event);
             },
 
             /**
              * @override
              */
             $click: function (event) {
-                ui.InputControl.prototype.$click.call(this, event);
+                _super.$click(event);
                 if (dom.contain(this.getMain(), event.target)) {
                     var ret = this._oRegExp.exec(this.getValue());
                     if (ret) {
@@ -260,14 +260,14 @@ _eText       - 文本框
              */
             $dispose: function () {
                 this._eText = null;
-                ui.InputControl.prototype.$dispose.call(this);
+                _super.$dispose();
             },
 
             /**
              * @override
              */
             $ready: function () {
-                ui.InputControl.prototype.$ready.call(this);
+                _super.$ready();
                 this.setValue(this.getValue());
             },
 
@@ -275,7 +275,7 @@ _eText       - 文本框
              * @override
              */
             $setValue: function (value) {
-                ui.InputControl.prototype.$setValue.call(this, value);
+                _super.$setValue(value);
                 if (value) {
                     this.alterStatus('-placeholder');
                 } else {

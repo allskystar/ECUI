@@ -43,7 +43,7 @@
                     el.firstChild
                 ),
                 this,
-                options
+                Object.assign({}, options, {id: undefined})
             );
 
             if (options.subject) {

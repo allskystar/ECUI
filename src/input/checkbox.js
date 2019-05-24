@@ -7,13 +7,6 @@
 <div ui="type:checkbox;subject:china">
     <input name="city" value="beijing" checked="checked" type="checkbox">
 </div>
-
-@fields
-_bDefault        - 缺省的选中状态
-_nStatus         - 复选框当前的状态，0--全选，1--未选，2--半选
-_cSubject        - 主复选框
-_aDependents     - 全部的从属复选框
-_bRequired       - 是否必须选择
 */
 (function () {
 //{if 0}//
@@ -32,51 +25,6 @@ _bRequired       - 是否必须选择
     }
 
     /**
-     * 复选框控件刷新，计算所有从复选框，根据它们的选中状态计算自身的选中状态。
-     * @private
-     *
-     * @param {ecui.ui.Checkbox} checkbox 复选框控件
-     */
-    function refresh(checkbox) {
-        var status;
-        checkbox._aDependents.forEach(function (item) {
-            if (status !== undefined && status !== item._nStatus) {
-                status = 2;
-            } else {
-                status = item._nStatus;
-            }
-        });
-
-        if (status !== undefined) {
-            setStatus(checkbox, status);
-        }
-    }
-
-    /**
-     * 改变复选框状态。
-     * @private
-     *
-     * @param {ecui.ui.Checkbox} checkbox 复选框控件
-     * @param {number} status 新的状态，0--全选，1--未选，2--半选
-     */
-    function setStatus(checkbox, status) {
-        if (status !== checkbox._nStatus) {
-            checkbox.$clearErrorStyle();
-            // 状态发生改变时进行处理
-            checkbox.alterSubType(['checked', '', 'part'][status]);
-
-            checkbox._nStatus = status;
-
-            checkbox.getInput().checked = !status;
-
-            // 如果有主复选框，刷新主复选框的状态
-            if (checkbox._cSubject) {
-                refresh(checkbox._cSubject);
-            }
-        }
-    }
-
-    /**
      * 复选框控件。
      * 实现了对原生 InputElement 复选框的功能扩展，支持复选框之间的主从关系定义。当一个复选框的“从复选框”选中一部分时，“主复选框”将处于半选状态，这种状态逻辑意义上等同于未选择状态，但显示效果不同，复选框的主从关系可以有多级。复选框控件适用所有在一组中允许选择多个目标的交互，并不局限于此分组的表现形式(文本、图片等)。
      * options 属性：
@@ -88,18 +36,77 @@ _bRequired       - 是否必须选择
         ui.InputControl,
         'ui-checkbox',
         function (el, options) {
-            _super(el, Object.assign({inputType: 'checkbox'}, options));
+            _super(el, options);
+
+            var input = this.getInput();
 
             // 保存节点选中状态，用于修复IE6/7下移动DOM节点时选中状态发生改变的问题
-            this._bDefault = this.getInput().defaultChecked;
-            this._aDependents = [];
+            this.defaultChecked = input.defaultChecked;
+            this.dependents = [];
 
             core.delegate(options.subject, this, this.setSubject);
-            dom.addEventListener(this.getInput(), 'change', changeHandler);
-
-            this._bRequired = !!options.required;
+            dom.addEventListener(input, 'change', changeHandler);
         },
         {
+            SUPER_OPTIONS: {
+                inputType: 'checkbox'
+            },
+
+            DEFAULT_OPTIONS: {
+                required: Boolean(false)
+            },
+
+            private: {
+                defaultChecked: undefined,
+                dependents: undefined,
+                subject: undefined,
+                status: undefined,
+
+                /**
+                 * 复选框控件刷新，计算所有从复选框，根据它们的选中状态计算自身的选中状态。
+                 * @private
+                 */
+                _refresh: function () {
+                    var status;
+                    this.dependents.forEach(function (item) {
+                        if (status !== undefined && status !== ui.Checkbox._cast(item).status) {
+                            status = 2;
+                        } else {
+                            status = ui.Checkbox._cast(item).status;
+                        }
+                    });
+
+                    if (status !== undefined) {
+                        this._setStatus(status);
+                    }
+                },
+
+                /**
+                 * 改变复选框状态。
+                 * @private
+                 *
+                 * @param {number} status 新的状态，0--全选，1--未选，2--半选
+                 */
+                _setStatus: function (status) {
+                    if (status !== this.status) {
+                        this.$clearErrorStyle();
+                        // 状态发生改变时进行处理
+                        this.alterSubType(['checked', '', 'part'][status]);
+
+                        this.status = status;
+
+                        this.getInput().checked = !status;
+
+                        // 如果有主复选框，刷新主复选框的状态
+                        if (this.subject) {
+                            ui.Checkbox._cast(this.subject, function () {
+                                this._refresh();
+                            });
+                        }
+                    }
+                }
+            },
+
             /**
              * 控件点击时改变当前的选中状态。
              * @override
@@ -111,7 +118,7 @@ _bRequired       - 是否必须选择
                         return;
                     }
                 }
-                this.setChecked(!!this._nStatus);
+                this.setChecked(!!this.status);
                 core.dispatchEvent(this, 'change');
             },
 
@@ -120,8 +127,8 @@ _bRequired       - 是否必须选择
              */
             $dispose: function () {
                 this.setSubject();
-                this._aDependents.forEach(function (item) {
-                    item._cSubject = null;
+                this.dependents.forEach(function (item) {
+                    item.subject = null;
                 });
                 _super.$dispose();
             },
@@ -156,7 +163,7 @@ _bRequired       - 是否必须选择
                 _super.$keyup(event);
                 if (event.which === 32) {
                     if (core.getKey() === 32) {
-                        this.setChecked(!!this._nStatus);
+                        this.setChecked(!!this.status);
                         core.dispatchEvent(this, 'change');
                     }
                     event.exit();
@@ -168,7 +175,7 @@ _bRequired       - 是否必须选择
              */
             $reset: function () {
                 // 修复IE6/7下移动DOM节点时选中状态发生改变的问题
-                this.getInput().checked = this._bDefault;
+                this.getInput().checked = this.defaultChecked;
                 _super.$reset();
             },
 
@@ -178,7 +185,7 @@ _bRequired       - 是否必须选择
             $validate: function (event) {
                 _super.$validate(event);
 
-                if (this._bRequired) {
+                if (this.required) {
                     var name = this.getName(),
                         form = this.getInput().form,
                         nochecked = true,
@@ -213,7 +220,7 @@ _bRequired       - 是否必须选择
              * @return {Array} 复选框控件数组
              */
             getDependents: function () {
-                return this._aDependents.slice();
+                return this.dependents.slice();
             },
 
             /**
@@ -224,7 +231,7 @@ _bRequired       - 是否必须选择
              * @return {ecui.ui.Checkbox} 复选框控件
              */
             getSubject: function () {
-                return this._cSubject || null;
+                return this.subject || null;
             },
 
             /**
@@ -232,9 +239,9 @@ _bRequired       - 是否必须选择
              */
             init: function () {
                 _super.init();
-                if (!this._aDependents.length) {
+                if (!this.dependents.length) {
                     // 如果控件是主复选框，应该直接根据从属复选框的状态来显示自己的状态
-                    setStatus(this, this.getInput().checked ? 0 : 1);
+                    this._setStatus(this.getInput().checked ? 0 : 1);
                 }
             },
 
@@ -245,7 +252,7 @@ _bRequired       - 是否必须选择
              * @return {boolean} 是否选中
              */
             isChecked: function () {
-                return !this._nStatus;
+                return !this.status;
             },
 
             /**
@@ -262,7 +269,7 @@ _bRequired       - 是否必须选择
              * @override
              */
             saveToDefault: function () {
-                this._bDefault = this.getInput().defaultChecked = this.getInput().checked;
+                this.defaultChecked = this.getInput().defaultChecked = this.getInput().checked;
             },
 
             /**
@@ -272,13 +279,15 @@ _bRequired       - 是否必须选择
              * @param {boolean} checked 是否选中
              */
             setChecked: function (checked) {
-                setStatus(this, checked ? 0 : 1);
+                this._setStatus(checked ? 0 : 1);
                 // 如果有从属复选框，全部改为与当前复选框相同的状态
-                this._aDependents.forEach(
+                this.dependents.forEach(
                     function (item) {
-                        item._cSubject = null;
-                        item.setChecked(checked);
-                        item._cSubject = this;
+                        ui.Checkbox._cast(item).subject = null;
+                        ui.Checkbox._cast(item, function () {
+                            this.setChecked(checked);
+                        });
+                        ui.Checkbox._cast(item).subject = this;
                     },
                     this
                 );
@@ -292,19 +301,23 @@ _bRequired       - 是否必须选择
              * @param {ecui.ui.Checkbox} checkbox 主复选框
              */
             setSubject: function (checkbox) {
-                if (this._cSubject !== checkbox) {
-                    if (this._cSubject) {
+                if (this.subject !== checkbox) {
+                    if (this.subject) {
                         // 已经设置过主复选框，需要先释放引用
-                        util.remove(this._cSubject._aDependents, this);
-                        refresh(this._cSubject);
+                        util.remove(this.subject.dependents, this);
+                        ui.Checkbox._cast(this.subject, function () {
+                            this._refresh();
+                        });
                     }
 
                     if (checkbox) {
-                        checkbox._aDependents.push(this);
-                        refresh(checkbox);
+                        ui.Checkbox._cast(checkbox).dependents.push(this);
+                        ui.Checkbox._cast(checkbox, function () {
+                            this._refresh();
+                        });
                     }
 
-                    this._cSubject = checkbox;
+                    this.subject = checkbox;
                 }
             }
         }

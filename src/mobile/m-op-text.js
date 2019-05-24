@@ -20,7 +20,7 @@
         ui.Text,
         'ui-m-op-text',
         function (el, options) {
-            ui.Text.call(this, el, options);
+            _super(el, options);
             var input = this.getInput();
             Array.prototype.slice.call(el.getElementsByTagName('INPUT')).forEach(
                 function (item) {
@@ -44,7 +44,7 @@
                      * @override
                      */
                     $click: function (event) {
-                        ui.Control.prototype.$click.call(this, event);
+                        _super.$click(event);
                         core.dispatchEvent(this.getParent(), 'buttonclick', event);
                         event.exit();
                     },
@@ -53,7 +53,7 @@
                      * @override
                      */
                     $mousedown: function (event) {
-                        ui.Control.prototype.$mousedown.call(this, event);
+                        _super.$mousedown(event);
                         event.preventDefault();
                     }
                 }

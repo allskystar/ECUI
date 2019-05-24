@@ -92,7 +92,7 @@ _nDelay   - 延迟时间，如果不自动轮播这个值为0
         ui.MPanel,
         'ui-mobile-carousel',
         function (el, options) {
-            ui.MPanel.call(this, el, options);
+            _super(el, options);
 
             el = this.getBody();
 
@@ -117,7 +117,7 @@ _nDelay   - 延迟时间，如果不自动轮播这个值为0
              */
             $activate: function (event) {
                 if (dom.children(this.getBody()).length > 3) {
-                    ui.MPanel.prototype.$activate.call(this, event);
+                    _super.$activate(event);
                     if (this._nDelay) {
                         this.stop();
                     }
@@ -128,7 +128,7 @@ _nDelay   - 延迟时间，如果不自动轮播这个值为0
              * @override
              */
             $cache: function (style) {
-                ui.MPanel.prototype.$cache.call(this, style);
+                _super.$cache(style);
                 this.setRange({
                     stepX: this.getClientWidth()
                 });
@@ -140,14 +140,14 @@ _nDelay   - 延迟时间，如果不自动轮播这个值为0
             $dispose: function () {
                 this.stop();
                 this._eCurrImage = null;
-                ui.MPanel.prototype.$dispose.call(this);
+                _super.$dispose();
             },
 
             /**
              * @override
              */
             $dragend: function (event) {
-                ui.MPanel.prototype.$dragend.call(this, event);
+                _super.$dragend(event);
                 this.start();
                 var el = this.getBody();
                 if (el.firstChild !== el.lastChild) {
@@ -159,7 +159,7 @@ _nDelay   - 延迟时间，如果不自动轮播这个值为0
              * @override
              */
             $initStructure: function (width, height) {
-                ui.MPanel.prototype.$initStructure.call(this, width, height);
+                _super.$initStructure(width, height);
 
                 var el = this.getBody();
                 if (el.firstChild !== el.lastChild) {
@@ -178,7 +178,7 @@ _nDelay   - 延迟时间，如果不自动轮播这个值为0
              * @override
              */
             $restoreStructure: function (event) {
-                ui.MPanel.prototype.$restoreStructure.call(this, event);
+                _super.$restoreStructure(event);
 
                 var el = this.getBody();
                 if (el.firstChild !== el.lastChild) {

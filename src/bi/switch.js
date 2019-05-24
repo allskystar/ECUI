@@ -12,7 +12,7 @@
         ui.Checkbox,
         'ui-switch',
         function (el, options) {
-            ui.Checkbox.call(this, el, options);
+            _super(el, options);
             this._sValue = options.value;
             this._sName = options.name;
         }

@@ -20,7 +20,7 @@
              * @override
              */
             $activate: function (event) {
-                ui.Control.prototype.$activate.call(this, event);
+                _super.$activate(event);
                 var main = this.getMain();
                 core.drag(this, event, {
                     absolute: true,

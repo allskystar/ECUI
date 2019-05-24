@@ -22,7 +22,7 @@
         'ui-double-calendar-input',
         function (el, options) {
             options = Object.assign(options, { 'readOnly': true });
-            ui.Text.call(this, el, options);
+            _super(el, options);
             var names = (options.name || 'startTime,endTime').split(',');
             this._eStartInput = dom.insertAfter(dom.create('input', { name: names[0], readOnly: true, className: ' ui-hide' }), this.getInput());
             this._eEndInput = dom.insertAfter(dom.create('input', { name: names[1], readOnly: true, className: ' ui-hide' }), this.getInput());
@@ -37,7 +37,7 @@
             Options: ecui.inherits(
                 ui.Control,
                 function (el, options) {
-                    ui.Control.call(this, el, options);
+                    _super(el, options);
                     this._uCalendar = ecui.$fastCreate(this.DoubleCalendar, el.appendChild(dom.create('DIV', {className: ui.Calendar.CLASS})), this, { extra: 'disable', date: options.value });
                     this._uTimeCalendar = ecui.$fastCreate(this.TimeCalendar, el.appendChild(dom.create('DIV', {className: ' ui-time-calendar ui-hide'})), this, { value: options.value });
 
@@ -58,8 +58,8 @@
                     DoubleCalendar: ecui.inherits(
                         ui.Calendar,
                         function (el, options) {
-                            ui.Calendar.call(this, el, options);
-                            this._aNextCells = ui.MonthView.prototype.$initView.call(this, options);
+                            _super(el, options);
+                            this._aNextCells = _super.$initView(options);
                         },
                         {
                             /**
@@ -144,7 +144,7 @@
                              * @override
                              */
                             $hide: function (event) {
-                                ui.Calendar.prototype.$hide.call(this, event);
+                                _super.$hide(event);
                                 this.$setParent();
                             },
 
@@ -152,7 +152,7 @@
                              * @override
                              */
                             $show: function (event) {
-                                ui.Calendar.prototype.$show.call(this, event);
+                                _super.$show(event);
                                 this.$setParent(ui.Popup.getOwner());
                                 var start = this.getParent()._eStartInput.value;
                                 this.setDate(start ? new Date(start.replace(' ', 'T')) : new Date());
@@ -163,8 +163,8 @@
                                 this.getTitle().innerHTML = '<span>' + util.stringFormat(this.TITLEFORMAT, year, month) + '</span><span>' + util.stringFormat(this.TITLEFORMAT, next.getFullYear(), next.getMonth() + 1) + '</span>';
                             },
                             setView: function (year, month) {
-                                ui.Calendar.prototype.setView.call(this, year, month + 1, this._aNextCells);
-                                ui.Calendar.prototype.setView.call(this, year, month);
+                                _super.setView(year, month + 1, this._aNextCells);
+                                _super.setView(year, month);
                             }
                         }
                     ),
@@ -172,7 +172,7 @@
                         ui.Control,
                         'ui-time-calendar',
                         function (el, options) {
-                            ui.Control.call(this, el, options);
+                            _super(el, options);
 
                             var houer = [], minute = [], item;
                             for (var i = 0; i < 24; i++) {
@@ -248,7 +248,7 @@
                             Listbox: ecui.inherits(
                                 ui.Listbox,
                                 function (el, options) {
-                                    ui.Listbox.call(this, el, options);
+                                    _super(el, options);
                                     this._sValue = options.value;
                                 },
                                 {
@@ -257,7 +257,7 @@
                                         {
                                             $click: function (event) {
                                                 var parent = this.getParent();
-                                                ui.Item.prototype.$click.call(this, event);
+                                                _super.$click(event);
                                                 parent.setSelected(this);
                                                 core.dispatchEvent(parent, 'change', event);
                                             }
@@ -334,7 +334,7 @@
                     Clear: ecui.inherits(
                         ui.Control,
                         function (el, options) {
-                            ui.Control.call(this, el, options);
+                            _super(el, options);
                         },
                         {
                             onclick: function () {
@@ -353,7 +353,7 @@
                     CalendarSubmit: ecui.inherits(
                         ui.Control,
                         function (el, options) {
-                            ui.Control.call(this, el, options);
+                            _super(el, options);
                         },
                         {
                             onclick: function (event) {
@@ -376,7 +376,7 @@
                         }
                     ),
                     $show: function (event) {
-                        ui.Control.prototype.$show.call(this, event);
+                        _super.$show(event);
                         ecui.dispatchEvent(this._uCalendar, 'show', event);
                         // ecui.dispatchEvent(this._uTime, 'show', event);
                     },
@@ -384,7 +384,7 @@
                      * @override
                      */
                     $hide: function (event) {
-                        ui.Control.prototype.$hide.call(this, event);
+                        _super.$hide(event);
                         this._uTimeCalendar.hide();
                         this._uSwitch.setStatus('date');
                     }
@@ -394,14 +394,14 @@
              * @override
              */
             $blur: function (event) {
-                ui.Text.prototype.$blur.call(this, event);
+                _super.$blur(event);
                 this.getPopup().hide();
             },
             /**
              * @override
              */
             $ready: function (options) {
-                ui.Text.prototype.$ready.call(this, options);
+                _super.$ready(options);
                 if (this._sValue) {
                     this.setValue(this._sValue);
                 }
@@ -410,7 +410,7 @@
              * @override
              */
             $validate: function () {
-                ui.InputControl.prototype.$validate.call(this);
+                _super.$validate();
                 if (!this.getDate() && this._bRequired) {
                     ecui.dispatchEvent(this, 'error');
                     return false;
@@ -459,7 +459,7 @@
              * @override
              */
             setValue: function (value) {
-                ui.Text.prototype.setValue.call(this, value);
+                _super.setValue(value);
                 this._eStartInput.value = value.split(' - ')[0];
                 this._eEndInput.value = value.split(' - ')[1];
             }

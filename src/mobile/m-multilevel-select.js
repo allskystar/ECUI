@@ -23,7 +23,7 @@ _aSelect - 全部的下拉框控件列表
     ui.MMultilevelSelect = core.inherits(
         ui.Control,
         function (el, options) {
-            ui.Control.call(this, el, options);
+            _super(el, options);
 
             this._aSelect = [];
             dom.children(el).forEach(
@@ -42,7 +42,7 @@ _aSelect - 全部的下拉框控件列表
             Select: core.inherits(
                 ui.MPanel,
                 function (el, options) {
-                    ui.MPanel.call(this, el, options);
+                    _super(el, options);
                     this._sUrl =  options.url;
                 },
                 {
@@ -53,7 +53,7 @@ _aSelect - 全部的下拉框控件列表
                     Item: core.inherits(
                         ui.Item,
                         function (el, options) {
-                            ui.Item.call(this, el, options);
+                            _super(el, options);
                             this._sValue = options.value;
                             this._aChildren = options.children;
                         },
@@ -62,7 +62,7 @@ _aSelect - 全部的下拉框控件列表
                              * @override
                              */
                             $click: function (event) {
-                                ui.Item.prototype.$click.call(this, event);
+                                _super.$click(event);
 
                                 var select = this.getParent(),
                                     multi = select.getParent(),
@@ -92,7 +92,7 @@ _aSelect - 全部的下拉框控件列表
                                         item.dispose();
                                     });
                                 }
-                                ui.Item.prototype.$dispose.call(this);
+                                _super.$dispose();
                             },
 
                             /**

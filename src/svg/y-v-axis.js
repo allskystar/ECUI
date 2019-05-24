@@ -154,7 +154,7 @@ YVBarAxisControl.render(options);
                     this
                 );
 
-                ui.SVG.prototype.render.call(this);
+                _super.render();
             }
         }
     );

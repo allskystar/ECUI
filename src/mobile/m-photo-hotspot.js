@@ -175,7 +175,7 @@
             } else {
                 dom.addEventListener(el, 'load', load);
             }
-            ui.Control.call(this, el, options);
+            _super(el, options);
             this._sGroup = options.group;
         },
         {
@@ -188,7 +188,7 @@
                     viewWidth = body.clientWidth,
                     viewHeight = body.clientHeight;
 
-                ui.Control.prototype.$click.call(this, event);
+                _super.$click(event);
                 body.appendChild(currImg);
                 body.appendChild(backupImg);
                 body.appendChild(title);

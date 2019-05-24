@@ -19,11 +19,11 @@
             'ui-messagebox',
             function (el, options) {
                 el.innerHTML = '<div class="ui-messagebox-content"></div><div class="ui-messagebox-buttons"></div>';
-                ui.Dialog.call(this, el, options);
+                _super(el, options);
             },
             {
                 $hide: function (event) {
-                    ui.Dialog.prototype.$hide.call(this, event);
+                    _super.$hide(event);
                     dom.removeClass(this.getMain(), instanceClass);
                 }
             }
@@ -34,7 +34,7 @@
             'ui-tip',
             function (el, options) {
                 el.innerHTML = '<div></div>';
-                ui.Control.call(this, el, options);
+                _super(el, options);
             }
         ),
         Button = core.inherits(
@@ -44,7 +44,7 @@
                  * @override
                  */
                 $click: function (event) {
-                    ui.Button.prototype.$click.call(this, event);
+                    _super.$click(event);
                     core.getSingleton(MessageBox).hide();
                     event.preventDefault();
                 }

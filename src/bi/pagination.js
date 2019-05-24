@@ -42,7 +42,7 @@ _nTotalPage       - 总页数
         ui.Control,
         'ui-pagination',
         function (el, options) {
-            ui.Control.call(this, el, options);
+            _super(el, options);
             // page值的形式: offset,total,pageSize,totalPage
             var page = options.page.split(',');
             // 定义当前页数
@@ -77,7 +77,7 @@ _nTotalPage       - 总页数
              * @override
              */
             $click: function (event) {
-                ui.Control.prototype.$click.call(this, event);
+                _super.$click(event);
                 var target = event.target;
                 // 对处于disalbed的按钮、空白区域、按钮的margin区域以外的分页按钮进行点击事件处理
                 if (target.tagName === 'SPAN') {
@@ -111,7 +111,7 @@ _nTotalPage       - 总页数
              * @override
              */
             $ready: function (options) {
-                ui.Control.prototype.$ready.call(this, options);
+                _super.$ready(options);
                 // 填充数字按钮区域
                 this.setPagination();
 
