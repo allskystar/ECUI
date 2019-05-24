@@ -1331,23 +1331,7 @@
             show: function () {
                 if (dom.hasClass(this.main, 'ui-hide')) {
                     core.dispatchEvent(this, 'show');
-                    core.query(function (item) {
-                        return this.contain(item);
-                    }.bind(this)).sort(function (a, b) {
-                        var ia = 0,
-                            ib = 0,
-                            parent;
-
-                        for (parent = a; parent !== this; parent = parent.getParent()) {
-                            ia++;
-                        }
-                        for (parent = b; parent !== this; parent = parent.getParent()) {
-                            ib++;
-                        }
-                        return ib - ia;
-                    }.bind(this)).forEach(function (item) {
-                        item.cache();
-                    });
+                    core.cacheAtShow();
                     core.flexFixed(this.main);
                     return true;
                 }

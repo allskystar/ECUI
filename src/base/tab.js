@@ -225,7 +225,7 @@
                     if (event.item) {
                         if (event.item.container && (!event.history || event.history.container !== event.item.container)) {
                             dom.addClass(event.item.container, event.item.getType() + '-selected');
-                            core.cacheAtShow(event.item.container);
+                            core.cacheAtShow();
                         }
                     }
                 }

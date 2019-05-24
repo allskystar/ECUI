@@ -127,7 +127,7 @@ children     - 子控件集合
             $expand: function () {
                 this.collapsed = false;
                 dom.removeClass(this.container, 'ui-hide');
-                core.cacheAtShow(this.container);
+                core.cacheAtShow();
                 this._refresh();
             },
 
