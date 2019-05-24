@@ -73,10 +73,12 @@ var ecui;
     document.write('<script type="text/javascript" src="src/extend/anchor.js"></script>');
     document.write('<script type="text/javascript" src="src/extend/link.js"></script>');
     document.write('<script type="text/javascript" src="src/extend/messagebox.js"></script>');
+    document.write('<script type="text/javascript" src="src/extend/ceiling.js"></script>');
 
     document.write('<script type="text/javascript" src="src/bi/cities.js"></script>');
     document.write('<script type="text/javascript" src="src/bi/cropper.js"></script>');
     document.write('<script type="text/javascript" src="src/bi/date-time-input.js"></script>');
+    document.write('<script type="text/javascript" src="src/bi/double-date-time-input.js"></script>');
     document.write('<script type="text/javascript" src="src/bi/drag.js"></script>');
     document.write('<script type="text/javascript" src="src/bi/m-send-text.js"></script>');
     document.write('<script type="text/javascript" src="src/bi/month-input.js"></script>');
