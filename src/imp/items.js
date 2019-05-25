@@ -82,7 +82,9 @@
                 this.preventAlterItems();
 
                 // 初始化选项控件
-                this.add(dom.children(this.getBody()));
+                this.add(dom.children(this.getBody()).filter(function (item) {
+                    return !item.getControl;
+                }));
 
                 this.premitAlterItems();
             },

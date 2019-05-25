@@ -25,10 +25,13 @@ _eInput - 选项对应的input，form提交时使用
     ui.Listbox = core.inherits(
         ui.InputControl,
         'ui-listbox',
+        function (el, options) {
+            _super(el, options);
+            this.getInput().disabled = true;
+        },
         {
             SUPER_OPTIONS: {
-                type: 'hidden',
-                disabled: true
+                inputType: 'hidden'
             },
 
             /**

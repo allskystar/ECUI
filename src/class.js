@@ -394,11 +394,13 @@
         // 处理接口的属性
         interfaces.forEach(function (inf) {
             for (var name in defines[inf.CLASSID].PublicFields) {
-                if (newClass.prototype[name]) {
-                    newClass.prototype[name] = addProxy(newClass.prototype[name], defines[inf.CLASSID].PublicFields[name]);
-                } else {
-                    newClass.prototype[name] = defines[inf.CLASSID].PublicFields[name];
-                    superMethods[name] = makeSuperMethod(name);
+                if (name !== 'constructor') {
+                    if (newClass.prototype[name]) {
+                        newClass.prototype[name] = addProxy(newClass.prototype[name], defines[inf.CLASSID].PublicFields[name]);
+                    } else {
+                        newClass.prototype[name] = defines[inf.CLASSID].PublicFields[name];
+                        superMethods[name] = makeSuperMethod(name);
+                    }
                 }
             }
         });
