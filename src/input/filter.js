@@ -43,7 +43,8 @@
             },
 
             private: {
-                value: undefined
+                value: undefined,
+                handler: undefined
             },
 
             /**

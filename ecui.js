@@ -31,7 +31,6 @@ var ecui;
     document.write('<script type="text/javascript" src="src/etpl.js"></script>');
     document.write('<script type="text/javascript" src="src/core.js"></script>');
     document.write('<script type="text/javascript" src="src/control.js"></script>');
-    document.write('<script type="text/javascript" src="src/input/form-input.js"></script>');
     document.write('<script type="text/javascript" src="src/esr.js"></script>');
 
     document.write('<script type="text/javascript" src="src/extend/ios-fixed.js"></script>');
@@ -64,9 +63,10 @@ var ecui;
     document.write('<script type="text/javascript" src="src/base/tree-view.js"></script>');
 
 //     document.write('<script type="text/javascript" src="src/input/upload.js"></script>');
+    document.write('<script type="text/javascript" src="src/input/form-input.js"></script>');
+    document.write('<script type="text/javascript" src="src/input/input-control.js"></script>');
     document.write('<script type="text/javascript" src="src/input/input-group.js"></script>');
 
-    document.write('<script type="text/javascript" src="src/input/input-control.js"></script>');
     document.write('<script type="text/javascript" src="src/input/abstract-select.js"></script>');
     document.write('<script type="text/javascript" src="src/input/calendar-input.js"></script>');
     document.write('<script type="text/javascript" src="src/input/checkbox.js"></script>');

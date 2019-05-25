@@ -17,11 +17,11 @@
      */
     ui.FormInput = core.inherits(
         ui.Control,
-        function (el, options) {
-            _super(el, options);
-            this._sName = options.name;
-        },
         {
+            DEFAULT_OPTIONS: {
+                name: ''
+            },
+
             /**
              * 控件失效，阻止输入框提交。
              * @override
@@ -47,7 +47,7 @@
              * @return {string} 控件的表单名称
              */
             getFormName: function () {
-                return this._sName || this.getMain().name;
+                return this.name || this.getMain().name;
             },
 
             /**
