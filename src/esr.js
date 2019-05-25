@@ -1030,6 +1030,10 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                                     renders.forEach(function (item) {
                                         item();
                                     });
+
+                                    if (route.ontransited) {
+                                        route.ontransited();
+                                    }
                                 }
                             }
                         );
@@ -1043,6 +1047,9 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                     }
                 } else {
                     currLayer = layer;
+                    if (route.ontransited) {
+                        route.ontransited();
+                    }
                 }
 
                 layerEl.header.style.display = '';
