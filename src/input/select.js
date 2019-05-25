@@ -15,9 +15,6 @@
     <div ui="value:male">男</div>
     <div ui="value:female">女</div>
 </div>
-
-@fields
-_nOptionSize  - 下接选择框可以用于选择的条目数量
 */
 (function () {
 //{if 0}//
@@ -38,13 +35,10 @@ _nOptionSize  - 下接选择框可以用于选择的条目数量
     ui.Select = core.inherits(
         ui.$AbstractSelect,
         'ui-select',
-        function (el, options) {
-            // 初始化下拉区域最多显示的选项数量
-            this._nOptionSize = options.optionSize || this.DEFAULT_OPTION_SIZE;
-            ui.$AbstractSelect.call(this, el, options);
-        },
         {
-            DEFAULT_OPTION_SIZE: 10,
+            DEFAULT_OPTIONS: {
+                optionSize: Number(10) // 初始化下拉区域最多显示的选项数量
+            },
 
             /**
              * 选项框部件。
@@ -69,7 +63,7 @@ _nOptionSize  - 下接选择框可以用于选择的条目数量
                         });
 
                         // 设置options框的大小，如果没有元素，至少有一个单位的高度
-                        this.$setSize(select.getWidth(), (Math.min(size, select._nOptionSize) || 1) * select.getClientHeight() + this.getMinimumHeight());
+                        this.$setSize(select.getWidth(), (Math.min(size, ui.Select._cast(select).optionSize) || 1) * select.getClientHeight() + this.getMinimumHeight());
                     },
 
                     /**
@@ -160,7 +154,7 @@ _nOptionSize  - 下接选择框可以用于选择的条目数量
                                     // 鼠标悬停时不允许切换
                                     this.setSelecting(list[which = Math.min(Math.max(0, list.indexOf(selecting) + which - 39), list.length - 1)]);
                                     which -= this.getBody().scrollTop / step;
-                                    this.getBody().scrollTop += (which < 0 ? which : which >= this._nOptionSize ? which - this._nOptionSize + 1 : 0) * step;
+                                    this.getBody().scrollTop += (which < 0 ? which : which >= this.optionSize ? which - this.optionSize + 1 : 0) * step;
                                 }
                             } else {
                                 var oldIndex = list.indexOf(selected),
@@ -219,7 +213,7 @@ _nOptionSize  - 下接选择框可以用于选择的条目数量
              * @param {number} value 显示的选项数量，必须大于 1
              */
             setOptionSize: function (value) {
-                this._nOptionSize = value;
+                this.optionSize = value;
                 this.alterItems();
                 if (this.$getSection('Options').isShow()) {
                     this.$refresh();

@@ -70,20 +70,21 @@
     );
 
     ui.Items = _interface(
-        function () {
-            this.items = [];
-
-            this.preventAlterItems();
-
-            // 初始化选项控件
-            this.add(dom.children(this.getBody()));
-
-            this.premitAlterItems();
-        },
         {
             private: {
                 items: undefined,
                 prevent: 0
+            },
+
+            constructor: function () {
+                this.items = [];
+
+                this.preventAlterItems();
+
+                // 初始化选项控件
+                this.add(dom.children(this.getBody()));
+
+                this.premitAlterItems();
             },
 
             /**
@@ -228,7 +229,7 @@
                 this.items.forEach(function (item) {
                     item.cache(force);
                 });
-                if (this.isReady()) {
+                if (force && this.isReady()) {
                     this.$alterItems();
                 }
             },
