@@ -127,6 +127,7 @@
 
         if (caller) {
             for (var clazz = caller.constructor; clazz; clazz = clazz.super) {
+                if (!defines[clazz.CLASSID]) debugger;
                 defines[clazz.CLASSID].FinalFields.forEach(reset);
             }
         }
