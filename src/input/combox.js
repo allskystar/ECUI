@@ -28,19 +28,6 @@
 
         ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined;
 //{/if}//
-    function refresh(combox) {
-        var text = combox._eTextInput.value.toUpperCase();
-
-        combox.getItems().forEach(function (item) {
-            if (item.getContent().toUpperCase().indexOf(text) < 0) {
-                dom.addClass(item.getMain(), 'ui-hide');
-            } else {
-                dom.removeClass(item.getMain(), 'ui-hide');
-            }
-        });
-        combox.alterItems();
-    }
-
     /**
      * 组合框控件。
      * 组合框可以在下拉选项中选择，也可以输入内容。
@@ -52,15 +39,33 @@
         function (el, options) {
             _super(el, Object.assign({readOnly: false}, options));
 
-            el = this.$getSection('Text').getBody();
+            el = this.$Text.getBody();
 
             var placeholder = options.placeholder || dom.getAttribute(this.getInput(), 'placeholder') || '';
             this.getInput().setAttribute('placeholder', placeholder);
+            // ie10的placeholder的内容会被当成value
             el.innerHTML = ieVersion < 10 ? '<div class="ui-placeholder">' + placeholder + '</div><input>' : '<input placeholder="' + util.encodeHTML(placeholder) + '">';
-            this._eTextInput = el.lastChild;
-            this.$bindEvent(this._eTextInput);
+            this.textInput = el.lastChild;
+            this.$bindEvent(this.textInput);
         },
         {
+            private: {
+                textInput: undefined,
+
+                _refresh: function () {
+                    var text = this.textInput.value.toUpperCase();
+
+                    this.getItems().forEach(function (item) {
+                        if (item.getContent().toUpperCase().indexOf(text) < 0) {
+                            dom.addClass(item.getMain(), 'ui-hide');
+                        } else {
+                            dom.removeClass(item.getMain(), 'ui-hide');
+                        }
+                    });
+                    this.alterItems();
+                }
+            },
+
             /**
              * 选项部件。
              * @unit
@@ -74,9 +79,7 @@
              * @override
              */
             $click: function (event) {
-                if (this.$getSection('Options').isShow()) {
-                    this.$Popup.$click.call(this, event);
-                } else {
+                if (!this.$Options.isShow()) {
                     _super.$click(event);
                     this.getItems().forEach(function (item) {
                         dom.removeClass(item.getMain(), 'ui-hide');
@@ -90,15 +93,15 @@
              */
             $disable: function () {
                 _super.$disable();
-                this._eTextInput.disabled = true;
+                this.textInput.disabled = true;
             },
 
             /**
              * @override
              */
             $dispose: function () {
-                this._eTextInput.getControl = null;
-                this._eTextInput  = null;
+                this.textInput.getControl = null;
+                this.textInput  = null;
                 _super.$dispose();
             },
 
@@ -107,7 +110,7 @@
              */
             $enable: function () {
                 _super.$enable();
-                this._eTextInput.disabled = false;
+                this.textInput.disabled = false;
             },
 
             /**
@@ -117,7 +120,7 @@
                 _super.$input(event);
                 this.popup();
 
-                var text = this._eTextInput.value,
+                var text = this.textInput.value,
                     selected;
 
                 this.getItems().forEach(function (item) {
@@ -136,7 +139,7 @@
                     }
                 }
                 this.$setPlaceholder();
-                refresh(this);
+                this._refresh();
             },
 
             /**
@@ -166,14 +169,14 @@
              * @override
              */
             getText: function () {
-                return this._eTextInput.value;
+                return this.textInput.value;
             },
 
             /**
              * @override
              */
             setText: function (text) {
-                this._eTextInput.value = util.decodeHTML(text);
+                this.textInput.value = util.decodeHTML(text);
             }
         }
     );
