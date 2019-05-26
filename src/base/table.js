@@ -34,20 +34,6 @@
         ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined;
 //{/if}//
     /**
-     * 初始化单元格。
-     * @private
-     *
-     * @return {ecui.ui.Table.Cell} 单元格控件
-     */
-    function getControlIfNeeded() {
-        // 获取单元格所属的行控件
-        var row = dom.parent(this).getControl(),
-            table = row.getParent();
-
-        return core.$fastCreate(table.Cell, this, row, Object.assign({}, table.getHCell(row.elements.indexOf(this)).options));
-    }
-
-    /**
      * 表格控件。
      * 对基本的 TableElement 功能进行了扩展，表头固定，不会随表格的垂直滚动条滚动而滚动，在行列滚动时，支持整行整列移动，允许直接对表格的数据进行增加/删除/修改操作。表格控件针对有滚动条的鼠标设备和无滚动条的触控设备进行了不同的处理。
      * options 属性：
@@ -205,6 +191,22 @@
 
             final: {
                 $Head: undefined
+            },
+
+            static: {
+                /**
+                 * 初始化单元格。
+                 * @private
+                 *
+                 * @return {ecui.ui.Table.Cell} 单元格控件
+                 */
+                _getControlIfNeeded: function () {
+                    // 获取单元格所属的行控件
+                    var row = dom.parent(this).getControl(),
+                        table = row.getParent();
+
+                    return core.$fastCreate(table.Cell, this, row, Object.assign({}, table.getHCell(row.elements.indexOf(this)).options));
+                }
             },
 
             /**
@@ -1157,4 +1159,7 @@
             }
         }
     );
+
+    var getControlIfNeeded = ui.Table._getControlIfNeeded;
+    delete ui.Table._getControlIfNeeded;
 }());
