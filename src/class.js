@@ -127,7 +127,6 @@
 
         if (caller) {
             for (var clazz = caller.constructor; clazz; clazz = clazz.super) {
-                if (!defines[clazz.CLASSID]) debugger;
                 defines[clazz.CLASSID].FinalFields.forEach(reset);
             }
         }
@@ -673,7 +672,10 @@
                 ) : setInterval(fn, delay);
     };
 
-    __class = {};
+    __class = function () {
+        return __class.extends.apply(this, [null].concat(Array.prototype.slice.call(arguments)));
+    };
+
     __class.extends = function (superClass) {
         var index = 1,
             properties = arguments[index] && !arguments[index].CLASSID ? arguments[index++] : {},
@@ -722,8 +724,11 @@
                                 if (this[item[1].CLASSID] && this[item[1].CLASSID].hasOwnProperty(name)) {
                                     return this[item[1].CLASSID][name];
                                 }
-                                return this[classes[0].CLASSID][name];
-                            }
+                                if (this[classes[0].CLASSID].hasOwnProperty(name)) {
+                                    return this[classes[0].CLASSID][name];
+                                }
+                                return this.constructor.prototype[name];
+                            };
                         }(name)),
 
                         set: (function (name) {
@@ -733,7 +738,7 @@
                                     this[item[1].CLASSID][name] = value;
                                 }
                                 this[classes[0].CLASSID][name] = value;
-                            }
+                            };
                         })
                     };
 
@@ -748,14 +753,7 @@
             for (name in data) {
                 if (data.hasOwnProperty(name)) {
                     if ('function' === typeof data[name] && !data[name].CLASSID) {
-                        newClass.prototype[name] = (function (fn) {
-                            return function () {
-                                callStack.push([this, newClass]);
-                                var ret = fn.apply(this, arguments);
-                                callStack.pop();
-                                return ret;
-                            };
-                        }(data[name]));
+                        properties[name] = data[name];
                     } else {
                         symbols[name] = {
                             get: (function (name) {
@@ -764,8 +762,11 @@
                                     if (newClass.isAssignableFrom(item[1])) {
                                         return this[newClass.CLASSID][name];
                                     }
-                                    return this[classes[0].CLASSID][name];
-                                }
+                                    if (this[classes[0].CLASSID].hasOwnProperty(name)) {
+                                        return this[classes[0].CLASSID][name];
+                                    }
+                                    return this.constructor.prototype[name];
+                                };
                             }(name)),
 
                             set: (function (name) {
@@ -775,19 +776,85 @@
                                         this[newClass.CLASSID][name] = value;
                                     }
                                     this[classes[0].CLASSID][name] = value;
-                                }
+                                };
                             })
                         };
+                        values[name] = data[name];
                     }
-
-                    values[name] = data[name];
                 }
             }
             delete properties.protected;
         }
 
+        // 处理受保护的属性
+        if (data = properties.final) {
+            for (name in data) {
+                if (data.hasOwnProperty(name)) {
+                    if ('function' === typeof data[name] && !data[name].CLASSID) {
+                        properties[name] = data[name];
+                    } else {
+                        symbols[name] = {
+                            get: (function (name) {
+                                return function () {
+                                    return this[newClass.CLASSID][name];
+                                };
+                            }(name)),
+
+                            set: (function (name) {
+                                return function (value) {
+                                    if (!this[newClass.CLASSID].hasOwnProperty(name)) {
+                                        this[newClass.CLASSID][name] = value;
+                                    }
+                                };
+                            })
+                        };
+                        if (data[name] !== undefined) {
+                            values[name] = data[name];
+                        }
+                    }
+                }
+            }
+            delete properties.final;
+        }
+
         // 处理public属性
-        if (data = properties.public || properties) {
+        if (data = properties.static) {
+            for (name in data) {
+                if (data.hasOwnProperty(name)) {
+                    if ('function' === typeof data[name] && !data[name].CLASSID) {
+                        newClass[name] = (function (fn) {
+                            return function () {
+                                callStack.push([null, newClass]);
+                                var ret = fn.apply(this, arguments);
+                                callStack.pop();
+                                return ret;
+                            };
+                        }(data[name]));
+                    } else {
+                        symbols[name] = {
+                            get: (function (name) {
+                                return function () {
+                                    return this[newClass.CLASSID][name];
+                                };
+                            }(name)),
+
+                            set: (function (name) {
+                                return function (value) {
+                                    this[newClass.CLASSID][name] = value;
+                                };
+                            })
+                        };
+
+                        values[name] = data[name];
+                    }
+                }
+            }
+
+            delete properties.static;
+        }
+
+        // 处理public属性
+        if (data = properties) {
             for (name in data) {
                 if (data.hasOwnProperty(name)) {
                     if ('function' === typeof data[name] && !data[name].CLASSID) {
