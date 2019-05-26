@@ -750,7 +750,6 @@
                                 return ret;
                             };
                         }(data[name]));
-                        methods[name] = makeSuperMethod(name);
                     } else {
                         symbols[name] = {
                             get: (function (name) {
@@ -774,11 +773,18 @@
         }
 
         // 处理public属性
-        if (data = properties.public || properties) {
+        if (data = properties) {
             for (name in data) {
                 if (data.hasOwnProperty(name)) {
                     if ('function' === typeof data[name] && !data[name].CLASSID) {
-                        methods[name] = methods[name] ? addProxy(methods[name], data[name]) : data[name];
+                        methods[name] = methods[name] ? addProxy(methods[name], data[name]) : (function (fn) {
+                            return function () {
+                                callStack.push([null, newClass]);
+                                var ret = fn.apply(this, arguments);
+                                callStack.pop();
+                                return ret;
+                            };
+                        }(data[name]));
                     }
                 }
             }
@@ -812,7 +818,7 @@
                     // 初始化所有接口的属性域
                     defines[clazz.CLASSID].Interfaces.forEach(
                         function (inf) {
-                            this[inf.CLASSID] = Object.assign({}, defines[inf.CLASSID].InitValues);
+                            this[inf.CLASSID] = Object.assign({}, defines[inf.CLASSID].Values);
                         },
                         this
                     );
@@ -944,20 +950,22 @@
             delete properties.final;
         }
 
-        // 处理public属性
+        // 处理static属性
         if (data = properties.static) {
             for (name in data) {
                 if (data.hasOwnProperty(name)) {
                     if ('function' === typeof data[name] && !data[name].CLASSID) {
                         newClass[name] = (function (fn) {
                             return function () {
+                                var oldSuper = window._super;
+                                _super = null;
                                 callStack.push([null, newClass]);
                                 var ret = fn.apply(this, arguments);
                                 callStack.pop();
+                                _super = oldSuper;
                                 return ret;
                             };
                         }(data[name]));
-                        methods[name] = makeSuperMethod(name);
                     } else {
                         symbols[name] = {
                             get: (function (name) {
@@ -988,18 +996,36 @@
                     if ('function' === typeof data[name] && !data[name].CLASSID) {
                         newClass.prototype[name] = (function (fn) {
                             return function () {
+                                var oldSuper = window._super;
+                                _super = superClass ? Object.assign(defines[superClass.CLASSID].Constructor.bind(this), this[classId].super) : null;
                                 callStack.push([this, newClass]);
                                 var ret = fn.apply(this, arguments);
                                 callStack.pop();
+                                _super = oldSuper;
                                 return ret;
                             };
                         }(data[name]));
+                        methods[name] = makeSuperMethod(name);
                     } else {
                         newClass.prototype[name] = data[name];
                     }
                 }
             }
         }
+
+        // 处理接口的属性
+        interfaces.forEach(function (inf) {
+            for (var name in defines[inf.CLASSID].Methods) {
+                if (name !== 'constructor') {
+                    if (newClass.prototype[name]) {
+                        newClass.prototype[name] = addProxy(newClass.prototype[name], defines[inf.CLASSID].Methods[name]);
+                    } else {
+                        newClass.prototype[name] = defines[inf.CLASSID].Methods[name];
+                        methods[name] = makeSuperMethod(name);
+                    }
+                }
+            }
+        });
 
         defines[classId] = {
             Constructor: function () {
@@ -1009,7 +1035,7 @@
 
                 if (superClass) {
                     var clazz = this[classId].super = {};
-                    Object.assign(clazz, defines[superClass.CLASSID].SuperMethods);
+                    Object.assign(clazz, defines[superClass.CLASSID].Methods);
                     clazz.super = superClass.prototype;
                     clazz.this = this;
                 }
@@ -1028,10 +1054,10 @@
 
                     interfaces.forEach(
                         function (inf) {
-                            if (defines[inf.CLASSID].PublicFields.constructor) {
+                            if (defines[inf.CLASSID].Methods.constructor) {
                                 callStack.push([this, inf]);
                                 try {
-                                    defines[inf.CLASSID].PublicFields.constructor.apply(this, args);
+                                    defines[inf.CLASSID].Methods.constructor.apply(this, args);
                                 } finally {
                                     callStack.pop();
                                 }
@@ -1043,6 +1069,7 @@
                     callStack.pop();
                 }
             },
+            Interfaces: interfaces,
             Symbols: symbols,
             Values: values,
             Methods: methods

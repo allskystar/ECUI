@@ -12,13 +12,13 @@
     <script type="text/javascript" src="options.js"></script>
     <script type="text/javascript" src="ecui.js"></script>
     <script>
-BaseImp = _interface({
+BaseImp = __interface({
     test: function () {
         console.log('test');
     }
 });
 
-Imp = _interface.extends(BaseImp, {
+Imp = __interface.extends(BaseImp, {
     private: {
         a: 'inf'
     },
@@ -28,7 +28,7 @@ Imp = _interface.extends(BaseImp, {
     }
 });
 
-Base = _class(
+Base = __class(
     {
         private: {
             a: 1
@@ -39,7 +39,7 @@ Base = _class(
         }
     }
 );
-Son = _class.extends(
+Son = __class.extends(
     Base,
     {
         private: {
