@@ -79,10 +79,12 @@
                 required: Boolean(false)
             },
 
-            final: {
+            protected: {
                 $Options: undefined,
                 $Text: undefined
             },
+
+            final: ['$Options', '$Text'],
 
             /**
              * 选项框部件。

@@ -62,9 +62,11 @@
             this.$Clear = core.$fastCreate(this.Clear, dom.last(el), this);
         },
         {
-            final: {
+            protected: {
                 $Clear: undefined
             },
+
+            final: ['$Clear'],
 
             /**
              * 清除部件。

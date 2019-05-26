@@ -56,9 +56,11 @@
             }
         },
         {
-            final: {
+            protected: {
                 $Checkbox: undefined
             },
+
+            final: ['$Checkbox'],
 
             /**
              * 复选框部件。

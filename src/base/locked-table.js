@@ -85,7 +85,7 @@
             right.$setBody(right = right.getMain().firstChild);
 
             for (i = 0, left = dom.children(left), right = dom.children(right); el = left[i]; ) {
-                ui.LockedTable.prototype.Row._cast(headRows[i])._init(el, right[i++]);
+                headRows[i]._init(el, right[i++]);
             }
 
             left = this.$LeftBody = core.$fastCreate(ui.Control, list[1], this);
@@ -106,13 +106,15 @@
                 tableWidth: undefined
             },
 
-            final: {
+            protected: {
                 $LockedHead: undefined,
                 $LeftHead: undefined,
                 $LeftBody: undefined,
                 $RightHead: undefined,
                 $RightBody: undefined
             },
+
+            final: ['$LockedHead', '$LeftHead', '$LeftBody', '$RightHead', '$RightBody'],
 
             /**
              * 行部件。
