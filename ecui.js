@@ -55,6 +55,7 @@ var ecui;
     document.write('<script type="text/javascript" src="src/input/multilevel-select.js"></script>');
     document.write('<script type="text/javascript" src="src/input/multi-select.js"></script>');
     document.write('<script type="text/javascript" src="src/input/couple-slider.js"></script>');
+    document.write('<script type="text/javascript" src="src/input/checkbox-tree.js"></script>');
 
     document.write('<script type="text/javascript" src="src/mobile/m-panel.js"></script>');
     document.write('<script type="text/javascript" src="src/mobile/m-select.js"></script>');
@@ -91,8 +92,6 @@ var ecui;
     document.write('<script type="text/javascript" src="src/bi/switch.js"></script>');
     document.write('<script type="text/javascript" src="src/bi/ext-float.js"></script>');
     document.write('<script type="text/javascript" src="src/bi/img-fill.js"></script>');
-
-    document.write('<script type="text/javascript" src="src/base/checkbox-tree.js"></script>');
 
     document.write('<script type="text/javascript" src="src/svg/svg.js"></script>');
     document.write('<script type="text/javascript" src="src/svg/y-v-axis.js"></script>');
