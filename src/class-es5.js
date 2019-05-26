@@ -235,6 +235,9 @@
             }
         }
 
+        delete newClass.prototype.final;
+        delete newClass.prototype.static;
+
         // 处理static属性
         if (properties.static) {
             properties.static.forEach(function (name) {
@@ -247,9 +250,6 @@
                 }
             });
         }
-
-        delete newClass.prototype.final;
-        delete newClass.prototype.static;
 
         // 处理接口的属性
         interfaces.forEach(function (inf) {
