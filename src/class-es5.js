@@ -1,6 +1,6 @@
 (function () {
     var classes = [{CLASSID: 'CLASS-0'}],
-        defines = {'CLASS-0': {PrivateFields: [], ProtectedFields: [], FinalFields: []}},
+        defines = {'CLASS-0': {InnerClasses: []}},
         callStack = [[null, classes[0], {}]],
         superMethods = {};
 
@@ -13,11 +13,17 @@
         return superMethods[name];
     }
 
-    function makeProxy(Class, fn, superClass) {
-        return function () {
+    function makeProxy(Class, fn, superClass, isProtected) {
+        var proxy = function () {
+            if (isProtected) {
+                var item = callStack[callStack.length - 1];
+                if (!Class.isAssignableFrom(item[1])) {
+                    throw new Error('The property is not visible.');
+                }
+            }
             var oldSuper = window._super;
-            _super = superClass ? Object.assign(defines[superClass.CLASSID].Constructor.bind(this), this[Class.CLASSID].super) : null;
-            callStack.push([this, Class]);
+            _super = proxy.super ? Object.assign(defines[proxy.super.CLASSID].Constructor.bind(this), this[Class.CLASSID].super) : null;
+            callStack.push([proxy.super !== undefined ? this : null, Class]);
             try {
                 var ret = fn.apply(this, arguments);
             } finally {
@@ -26,6 +32,8 @@
             }
             return ret;
         };
+        proxy.super = superClass;
+        return proxy;
     }
 
     function addProxy(oldProxy, newProxy) {
@@ -53,7 +61,7 @@
         var index = 1,
             properties = arguments[index] && !arguments[index].CLASSID ? arguments[index++] : {},
             interfaces = Array.prototype.slice.call(arguments, index),
-            constructor = properties.constructor === Object ? superClass : properties.constructor,
+            constructor = properties.constructor,
             newClass = function () {
                 this[classes[0].CLASSID] = {};
                 // 初始化各层级类的属性域
@@ -88,7 +96,9 @@
             newClass.prototype.constructor = newClass;
             newClass.super = superClass;
 
-            if (constructor && !/_super\s*\(/.test(constructor.toString())) {
+            if (constructor === Object) {
+                constructor = defines[superClass.CLASSID].Constructor;
+            } else if (!/_super\s*\(/.test(constructor.toString())) {
                 var oldConstructor = constructor;
                 constructor = function () {
                     superClass.apply(this, arguments);
@@ -109,10 +119,15 @@
                         get: (function (name) {
                             return function () {
                                 var item = callStack[callStack.length - 1];
+                                if (!item[0]) {
+                                    throw new Error('The property is not visible.');
+                                }
                                 if (this[item[1].CLASSID] && this[item[1].CLASSID].hasOwnProperty(name)) {
+                                    // 与调用的函数生存域相同
                                     return this[item[1].CLASSID][name];
                                 }
                                 if (defines[item[1].CLASSID].InnerClasses.indexOf(newClass) >= 0 || defines[newClass.CLASSID].InnerClasses.indexOf(item[1]) >= 0) {
+                                    // 内部类与外部类之间允许相互调用
                                     return this[newClass.CLASSID][name];
                                 }
                                 if (this[classes[0].CLASSID].hasOwnProperty(name)) {
@@ -125,9 +140,14 @@
                         set: (function (name) {
                             return function (value) {
                                 var item = callStack[callStack.length - 1];
+                                if (!item[0]) {
+                                    throw new Error('The property is not visible.');
+                                }
                                 if (this[item[1].CLASSID] && this[item[1].CLASSID].hasOwnProperty(name)) {
+                                    // 与调用的函数生存域相同
                                     this[item[1].CLASSID][name] = value;
                                 } else if (defines[item[1].CLASSID].InnerClasses.indexOf(newClass) >= 0 || defines[newClass.CLASSID].InnerClasses.indexOf(item[1]) >= 0) {
+                                    // 内部类与外部类之间允许相互调用
                                     this[newClass.CLASSID][name] = value;
                                 } else {
                                     this[classes[0].CLASSID][name] = value;
@@ -135,7 +155,6 @@
                             };
                         }(name))
                     };
-
                     values[name] = data[name];
                 }
             }
@@ -146,48 +165,59 @@
         if (data = properties.protected) {
             for (name in data) {
                 if (data.hasOwnProperty(name)) {
-                    if ('function' === typeof data[name] && !data[name].CLASSID) {
-                        properties[name] = data[name];
-                    } else {
-                        symbols[name] = {
-                            get: (function (name) {
-                                return function () {
-                                    var item = callStack[callStack.length - 1];
-                                    if (newClass.isAssignableFrom(item[1])) {
-                                        return this[newClass.CLASSID][name];
-                                    }
-                                    if (defines[item[1].CLASSID].InnerClasses.indexOf(newClass) >= 0 || defines[newClass.CLASSID].InnerClasses.indexOf(item[1]) >= 0) {
-                                        return this[newClass.CLASSID][name];
-                                    }
-                                    if (this[classes[0].CLASSID].hasOwnProperty(name)) {
-                                        return this[classes[0].CLASSID][name];
-                                    }
-                                    return this.constructor.prototype[name];
-                                };
-                            }(name)),
-
-                            set: (function (name) {
-                                return function (value) {
-                                    var item = callStack[callStack.length - 1];
-                                    if (newClass.isAssignableFrom(item[1])) {
-                                        this[newClass.CLASSID][name] = value;
-                                    } else if (defines[item[1].CLASSID].InnerClasses.indexOf(newClass) >= 0 || defines[newClass.CLASSID].InnerClasses.indexOf(item[1]) >= 0) {
-                                        this[newClass.CLASSID][name] = value;
-                                    } else {
-                                        this[classes[0].CLASSID][name] = value;
-                                    }
-                                };
-                            }(name))
-                        };
-                        values[name] = data[name];
+                    if ('function' === typeof data[name]) {
+                        if (data[name].CLASSID) {
+                            innerClasses.push(data[name]);
+                            Array.prototype.push.apply(innerClasses, defines[data[name].CLASSID].InnerClasses);
+                        } else {
+                            newClass.prototype[name] = makeProxy(newClass, data[name], superClass, true);
+                            methods[name] = makeSuperMethod(name);
+                            continue;
+                        }
                     }
+
+                    symbols[name] = {
+                        get: (function (name) {
+                            return function () {
+                                var item = callStack[callStack.length - 1];
+                                if (newClass.isAssignableFrom(item[1])) {
+                                    // 子类
+                                    return this[newClass.CLASSID][name];
+                                }
+                                if (defines[item[1].CLASSID].InnerClasses.indexOf(newClass) >= 0 || defines[newClass.CLASSID].InnerClasses.indexOf(item[1]) >= 0) {
+                                    // 内部类与外部类之间允许相互调用
+                                    return this[newClass.CLASSID][name];
+                                }
+                                if (this[classes[0].CLASSID].hasOwnProperty(name)) {
+                                    return this[classes[0].CLASSID][name];
+                                }
+                                return this.constructor.prototype[name];
+                            };
+                        }(name)),
+
+                        set: (function (name) {
+                            return function (value) {
+                                var item = callStack[callStack.length - 1];
+                                if (newClass.isAssignableFrom(item[1])) {
+                                    // 子类
+                                    this[newClass.CLASSID][name] = value;
+                                } else if (defines[item[1].CLASSID].InnerClasses.indexOf(newClass) >= 0 || defines[newClass.CLASSID].InnerClasses.indexOf(item[1]) >= 0) {
+                                    // 内部类与外部类之间允许相互调用
+                                    this[newClass.CLASSID][name] = value;
+                                } else {
+                                    this[classes[0].CLASSID][name] = value;
+                                }
+                            };
+                        }(name))
+                    };
+                    values[name] = data[name];
                 }
             }
             delete properties.protected;
         }
 
         // 处理受保护的属性
-        if (data = properties.final) {
+/*        if (data = properties.final) {
             for (name in data) {
                 if (data.hasOwnProperty(name)) {
                     if ('function' === typeof data[name] && !data[name].CLASSID) {
@@ -216,27 +246,7 @@
             }
             delete properties.final;
         }
-
-        // 处理static属性
-        if (data = properties.static) {
-            for (name in data) {
-                if (data.hasOwnProperty(name)) {
-                    if ('function' === typeof data[name]) {
-                        if (data[name].CLASSID) {
-                            innerClasses.push(data[name]);
-                            Array.prototype.push.apply(innerClasses, defines[data[name].CLASSID].InnerClasses);
-                        } else {
-                            newClass[name] = makeProxy(newClass, data[name], null);
-                            continue;
-                        }
-                    }
-                    newClass[name] = data[name];
-                }
-            }
-
-            delete properties.static;
-        }
-
+*/
         // 处理public属性
         if (data = properties) {
             for (name in data) {
@@ -255,6 +265,18 @@
                 }
             }
         }
+
+        // 处理static属性
+        if (properties.static) {
+            properties.static.forEach(function (name) {
+                newClass[name] = newClass.prototype[name];
+                delete newClass.prototype[name];
+                newClass[name].super = undefined;
+            });
+        }
+
+        delete newClass.prototype.final;
+        delete newClass.prototype.static;
 
         // 处理接口的属性
         interfaces.forEach(function (inf) {
@@ -427,7 +449,7 @@
     };
 
     window._static = function (fn) {
-        return makeProxy(classes[0], fn, null);
+        return makeProxy(classes[0], fn);
     };
 
     if (window.requestAnimationFrame) {

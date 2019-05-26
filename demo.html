@@ -10,7 +10,7 @@
     <link rel="stylesheet/less" type="text/css" href="ecui.css" />
     <link rel="stylesheet/less" type="text/css" href="common.css">
     <script type="text/javascript" src="options.js"></script>
-    <script type="text/javascript" src="ecui.js"></script>
+    <script type="text/javascript" src="src/class-es5.js"></script>
     <script>
 BaseImp = _interface({
     constructor: function () {
@@ -46,11 +46,17 @@ Base = _class(
             console.log('base constructor');
         },
 
-        printA: function () {
-            ecui.util.timer(function () {
+        protected: {
+            printA: function () {
                 console.log(this.a);
-            }, 0, this);
-        }
+            }
+        },
+
+        print: function () {
+            son.printA();
+        },
+
+        static: ['print']
     }
 );
 Son = _class.extends(
@@ -61,26 +67,18 @@ Son = _class.extends(
         },
 
         constructor: function () {
-            _super
-            ();
             console.log('son constructor');
         },
 
         printA: function () {
             _super.printA();
             console.log(this.a);
-        },
-
-        static: {
-            print: function () {
-                son.printA();
-            }
         }
     },
     Imp
 );
 son = new Son();
-Son.print();
+Base.print();
 //son2.value = 10;
 //son2.visit();
     </script>
