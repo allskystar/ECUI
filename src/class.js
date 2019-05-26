@@ -311,6 +311,14 @@
             newClass.prototype = new Class();
             newClass.prototype.constructor = newClass;
             newClass.super = superClass;
+
+            if (constructor && !/_super\s*\(/.test(constructor.toString())) {
+                var oldConstructor = constructor;
+                constructor = function () {
+                    superClass.apply(this, arguments);
+                    oldConstructor.apply(this, arguments);
+                };
+            }
         }
 
         delete properties.constructor;
@@ -436,11 +444,6 @@
                 try {
                     if (constructor) {
                         constructor.apply(this, args);
-//{if 0}//
-                        if (superClass && superClass.super && !this[superClass.CLASSID].super) {
-                            console.warn('父类没有初始化');
-                        }
-//{/if}//
                     }
 
                     interfaces.forEach(
@@ -840,6 +843,14 @@
             newClass.prototype = new Class();
             newClass.prototype.constructor = newClass;
             newClass.super = superClass;
+
+            if (constructor && !/_super\s*\(/.test(constructor.toString())) {
+                var oldConstructor = constructor;
+                constructor = function () {
+                    superClass.apply(this, arguments);
+                    oldConstructor.apply(this, arguments);
+                };
+            }
         }
 
         delete properties.constructor;
@@ -1041,32 +1052,25 @@
                 }
 
                 // 调用全部类和接口的构造函数
+                var oldSuper = window._super;
+                _super = superClass ? Object.assign(defines[superClass.CLASSID].Constructor.bind(this), this[classId].super) : null;
                 callStack.push([this, newClass]);
                 try {
                     if (constructor) {
                         constructor.apply(this, args);
-//{if 0}//
-                        if (superClass && superClass.super && !this[superClass.CLASSID].super) {
-                            console.warn('父类没有初始化');
-                        }
-//{/if}//
                     }
 
                     interfaces.forEach(
                         function (inf) {
                             if (defines[inf.CLASSID].Methods.constructor) {
-                                callStack.push([this, inf]);
-                                try {
-                                    defines[inf.CLASSID].Methods.constructor.apply(this, args);
-                                } finally {
-                                    callStack.pop();
-                                }
+                                defines[inf.CLASSID].Methods.constructor.apply(this, args);
                             }
                         },
                         this
                     );
                 } finally {
                     callStack.pop();
+                    _super = oldSuper;
                 }
             },
             Interfaces: interfaces,
