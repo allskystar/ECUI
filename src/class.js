@@ -672,4 +672,161 @@
                     delay
                 ) : setInterval(fn, delay);
     };
+
+    __class = {};
+    __class.extends = function (superClass) {
+        var index = 1,
+            properties = arguments[index] && !arguments[index].CLASSID ? arguments[index++] : {},
+            interfaces = Array.prototype.slice.call(arguments, index),
+            constructor = properties.constructor === Object ? superClass : properties.constructor,
+            newClass = function () {
+                this[classes[0].CLASSID] = {};
+                // 初始化各层级类的属性域
+                for (var clazz = newClass; clazz; clazz = clazz.super) {
+                    // 填充全部的初始化变量
+                    this[clazz.CLASSID] = Object.assign({}, defines[clazz.CLASSID].Values);
+
+                    // 初始化所有接口的属性域
+//                    defines[clazz.CLASSID].Interfaces.forEach(initInterface, this);
+                }
+
+                defines[classId].Constructor.apply(this, arguments);
+            },
+            symbols = {},
+            values = {},
+            classId = 'CLASS-' + classes.length,
+            data,
+            name;
+
+        if (superClass) {
+            var Class = new Function();
+
+            Class.prototype = superClass.prototype;
+            newClass.prototype = new Class();
+            newClass.prototype.constructor = newClass;
+            newClass.super = superClass;
+        }
+
+        delete properties.constructor;
+
+        // 处理私有属性
+        if (data = properties.private) {
+            for (name in data) {
+                if (data.hasOwnProperty(name)) {
+                    symbols[name] = {
+                        configurable: true,
+
+                        get: (function (name) {
+                            return function () {
+                                var item = callStack[callStack.length - 1];
+                                if (this[item[1].CLASSID] && this[item[1].CLASSID].hasOwnProperty(name)) {
+                                    return this[item[1].CLASSID][name];
+                                }
+                                return this[classes[0].CLASSID][name];
+                            }
+                        }(name)),
+
+                        set: (function (name) {
+                            return function (value) {
+                                var item = callStack[callStack.length - 1];
+                                if (this[item[1].CLASSID] && this[item[1].CLASSID].hasOwnProperty(name)) {
+                                    this[item[1].CLASSID][name] = value;
+                                }
+                                this[classes[0].CLASSID][name] = value;
+                            }
+                        })
+                    };
+
+                    values[name] = data[name];
+                }
+            }
+            delete properties.private;
+        }
+
+        // 处理受保护的属性
+        if (data = properties.protected) {
+            for (name in data) {
+                if (data.hasOwnProperty(name)) {
+                    if ('function' === typeof data[name] && !data[name].CLASSID) {
+                        newClass.prototype[name] = (function (fn) {
+                            return function () {
+                                callStack.push([this, newClass]);
+                                var ret = fn.apply(this, arguments);
+                                callStack.pop();
+                                return ret;
+                            };
+                        }(data[name]));
+                    } else {
+                        symbols[name] = {
+                            get: (function (name) {
+                                return function () {
+                                    var item = callStack[callStack.length - 1];
+                                    if (newClass.isAssignableFrom(item[1])) {
+                                        return this[newClass.CLASSID][name];
+                                    }
+                                    return this[classes[0].CLASSID][name];
+                                }
+                            }(name)),
+
+                            set: (function (name) {
+                                return function (value) {
+                                    var item = callStack[callStack.length - 1];
+                                    if (newClass.isAssignableFrom(item[1])) {
+                                        this[newClass.CLASSID][name] = value;
+                                    }
+                                    this[classes[0].CLASSID][name] = value;
+                                }
+                            })
+                        };
+                    }
+
+                    values[name] = data[name];
+                }
+            }
+            delete properties.protected;
+        }
+
+        // 处理public属性
+        if (data = properties.public || properties) {
+            for (name in data) {
+                if (data.hasOwnProperty(name)) {
+                    if ('function' === typeof data[name] && !data[name].CLASSID) {
+                        newClass.prototype[name] = (function (fn) {
+                            return function () {
+                                callStack.push([this, newClass]);
+                                var ret = fn.apply(this, arguments);
+                                callStack.pop();
+                                return ret;
+                            };
+                        }(data[name]));
+                    } else {
+                        newClass.prototype[name] = data[name];
+                    }
+                }
+            }
+        }
+
+        defines[classId] = {
+            Constructor: function () {
+                Object.defineProperties(this, symbols);
+                if (constructor) {
+                    constructor.apply(this, arguments);
+                }
+            },
+            Symbols: symbols,
+            Values: values
+        };
+
+        newClass.CLASSID = classId;
+        classes.push(newClass);
+        newClass.isAssignableFrom = function (subClass) {
+            for (; subClass; subClass = subClass.super) {
+                if (subClass === newClass) {
+                    return true;
+                }
+            }
+            return false;
+        };
+        return newClass;
+    };
 }());
