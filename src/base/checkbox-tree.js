@@ -44,7 +44,7 @@ _uCheckbox - 复选框控件
                         el.firstChild
                     ),
                     this,
-                    options
+                    Object.assign({}, options, {id: undefined})
                 );
 
                 if (options.subject) {
