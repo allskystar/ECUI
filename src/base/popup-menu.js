@@ -34,9 +34,11 @@
                 left: true
             },
 
-            final: {
+            protected: {
                 $Popup: undefined
             },
+
+            final: ['$Popup'],
 
             /**
              * 菜单项部件。

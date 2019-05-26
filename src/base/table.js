@@ -162,7 +162,7 @@
                                         Object.assign(options, core.getOptions(el));
                                         cols[j] = core.$fastCreate(this.HCell, el, this);
                                     } else {
-                                        el.getControl = getControlIfNeeded;
+                                        el.getControl = ui.Table._getControlIfNeeded;
                                     }
                                 }
                             }
@@ -186,14 +186,8 @@
                 row: undefined,
                 hcells: undefined,
                 headRows: undefined,
-                handler: undefined
-            },
+                handler: undefined,
 
-            final: {
-                $Head: undefined
-            },
-
-            static: {
                 /**
                  * 初始化单元格。
                  * @private
@@ -208,6 +202,14 @@
                     return core.$fastCreate(table.Cell, this, row, Object.assign({}, table.getHCell(row.elements.indexOf(this)).options));
                 }
             },
+
+            protected: {
+                $Head: undefined
+            },
+
+            static: ['_getControlIfNeeded'],
+
+            final: ['$Head'],
 
             /**
              * 单元格部件。
@@ -859,7 +861,7 @@
                                         'TD',
                                         {
                                             className: primary,
-                                            getControl: getControlIfNeeded
+                                            getControl: ui.Table._getControlIfNeeded
                                         }
                                     ),
                                     o
@@ -929,7 +931,7 @@
                 for (i = 0, el = el.firstChild, col = null; this.hcells[i]; i++) {
                     if (o = rowCols[i]) {
                         rowCols[i] = el;
-                        el.getControl = getControlIfNeeded;
+                        el.getControl = ui.Table._getControlIfNeeded;
                         el = el.nextSibling;
                     } else if (o === false) {
                         o = this.$getElement(index, i);
@@ -1098,7 +1100,7 @@
                                     cols.splice(index + 1, 1);
                                 } else {
                                     dom.remove(item);
-                                    if (item.getControl !== getControlIfNeeded) {
+                                    if (item.getControl !== ui.Table._getControlIfNeeded) {
                                         core.dispose(item.getControl());
                                     }
                                     cols.splice(index, 1);
@@ -1159,7 +1161,4 @@
             }
         }
     );
-
-    var getControlIfNeeded = ui.Table._getControlIfNeeded;
-    delete ui.Table._getControlIfNeeded;
 }());

@@ -50,10 +50,12 @@
             this.$setBody(bodyEl);
         },
         {
-            final: {
+            protected: {
                 $Close: undefined,
                 $Title: undefined
             },
+
+            final: ['$Close', '$Title'],
 
             /**
              * 关闭按钮部件。
