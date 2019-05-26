@@ -44,7 +44,7 @@
         var row = dom.parent(this).getControl(),
             table = row.getParent();
 
-        return core.$fastCreate(table.Cell, this, row, Object.assign({}, table.HCell._cast(table.getHCell(ui.Table.prototype.Row._cast(row).elements.indexOf(this))).options));
+        return core.$fastCreate(table.Cell, this, row, Object.assign({}, table.getHCell(row.elements.indexOf(this)).options));
     }
 
     /**
@@ -132,7 +132,7 @@
                 // list[i] 保存每一行的当前需要处理的列元素
                 list[i] = dom.first(o);
                 colspans[i] = 0;
-                ui.Table.prototype.Row._cast((rows[i] = core.$fastCreate(this.Row, o, this, core.getOptions(o)))).elements = [];
+                (rows[i] = core.$fastCreate(this.Row, o, this, core.getOptions(o))).elements = [];
             }
 
             for (j = 0;; j++) {
@@ -140,8 +140,8 @@
                     if (colspans[i] > 0) {
                         colspans[i]--;
                     } else if (el = list[i]) {
-                        if (ui.Table.prototype.Row._cast(o).elements[j] === undefined) {
-                            ui.Table.prototype.Row._cast(o).elements[j] = el;
+                        if (o.elements[j] === undefined) {
+                            o.elements[j] = el;
                             // 当前元素处理完成，将list[i]指向下一个列元素
                             list[i] = dom.next(el);
 
@@ -157,7 +157,7 @@
                                     colspan--;
                                 }
                                 for (o = colspan; o--; ) {
-                                    ui.Table.prototype.Row._cast(rows[i + rowspan]).elements.push(rowspan ? false : null);
+                                    rows[i + rowspan].elements.push(rowspan ? false : null);
                                 }
                             }
                         }
@@ -166,7 +166,7 @@
                         for (j = 0;; j++) {
                             options = {};
                             for (i = 0; o = rows[i]; i++) {
-                                el = ui.Table.prototype.Row._cast(o).elements[j];
+                                el = o.elements[j];
                                 if (el === undefined) {
                                     this.headRows = this.rows.splice(0, headRowCount);
                                     return;
@@ -180,7 +180,7 @@
                                     }
                                 }
                             }
-                            this.HCell._cast(cols[j]).options = options;
+                            cols[j].options = options;
                         }
                     }
                 }
@@ -195,6 +195,7 @@
             },
 
             private: {
+                rows: undefined,
                 layout: undefined,
                 row: undefined,
                 hcells: undefined,
@@ -278,7 +279,7 @@
 
                         table.headRows.concat(table.rows).forEach(function (item) {
                             // 以下使用 body 表示列元素列表
-                            body = ui.Table.prototype.Row._cast(item).elements;
+                            body = item.elements;
                             item = body[index];
                             if (item) {
                                 item.style[name] = value;
@@ -418,7 +419,7 @@
                                 // 如果单元格包含rowSpan属性，需要将属性添加到其它行去
                                 o.setAttribute('rowSpan', j - 1);
                                 for (var j = i + 1;; ) {
-                                    cell = ui.Table.prototype.Row._cast(nextRow).elements[j++];
+                                    cell = nextRow.elements[j++];
                                     if (cell || cell === undefined) {
                                         break;
                                     }
@@ -476,7 +477,7 @@
                                     o.setAttribute('rowSpan', +dom.getAttribute(o, 'rowSpan') + 1);
                                     cell = o;
                                 }
-                            } else if (o && nextRow && ui.Table.prototype.Row._cast(nextRow).elements[i] === false) {
+                            } else if (o && nextRow && nextRow.elements[i] === false) {
                                 // 如果单元格包含rowSpan属性，需要从其它行恢复
                                 o.setAttribute('rowSpan', +dom.getAttribute(o, 'rowSpan') + 1);
                                 for (var j = i + 1;; ) {
@@ -638,11 +639,11 @@
                     rows = this.rows;
                 }
 
-                var cols = rows[rowIndex] && ui.Table.prototype.Row._cast(rows[rowIndex]).elements,
+                var cols = rows[rowIndex] && rows[rowIndex].elements,
                     col = cols && cols[colIndex];
 
                 if (!col) {
-                    for (; col === false; col = (cols = ui.Table.prototype.Row._cast(rows[--rowIndex]).elements)[colIndex]) {}
+                    for (; col === false; col = (cols = rows[--rowIndex].elements)[colIndex]) {}
                     for (; !col; col = cols[--colIndex]) {}
                 }
                 return col;
@@ -822,7 +823,7 @@
 
                 primary += ' ' + this.getUnitClass(ui.Table, 'cell');
                 for (var i = 0, o; row = rows[i]; i++) {
-                    o = ui.Table.prototype.Row._cast(row).elements[index];
+                    o = row.elements[index];
                     if ((o === undefined && row.merge) || o === null) {
                         o = null;
                         // 出现跨列的插入列操作，需要修正colspan的属性值
@@ -830,25 +831,25 @@
                             j = +dom.getAttribute(cell, 'rowSpan') || 1;
 
                         cell.setAttribute('colSpan', +dom.getAttribute(cell, 'colSpan') + 1);
-                        ui.Table.prototype.Row._cast(row).elements.splice(index, 0, o);
+                        row.elements.splice(index, 0, o);
                         for (; --j; ) {
-                            ui.Table.prototype.Row._cast(rows[++i]).elements.splice(index, 0, false);
+                            rows[++i].elements.splice(index, 0, false);
                         }
                     } else {
                         // 没有出现跨列的插入列操作
                         for (j = index; !o; ) {
-                            o = ui.Table.prototype.Row._cast(row).elements[++j];
+                            o = row.elements[++j];
                             if (o === undefined) {
                                 break;
                             }
                         }
                         if (i < headRowCount) {
-                            ui.Table.prototype.Row._cast(row).elements.splice(index, 0, row.getBody().insertBefore(el, o));
+                            row.elements.splice(index, 0, row.getBody().insertBefore(el, o));
                             el.setAttribute('rowSpan', headRowCount - i);
                             this.hcells.splice(index, 0, col);
                             i = headRowCount - 1;
                         } else {
-                            ui.Table.prototype.Row._cast(row).elements.splice(
+                            row.elements.splice(
                                 index,
                                 0,
                                 o = row.getBody().insertBefore(
@@ -867,7 +868,7 @@
                 }
 
                 col.setSize(options.width);
-                this.HCell._cast(col).options = Object.assign({}, options);
+                col.options = Object.assign({}, options);
 
                 return col;
             },
@@ -893,7 +894,7 @@
                 }
 
                 for (var i = 0; col = this.hcells[i]; ) {
-                    if ((row && ui.Table.prototype.Row._cast(row).elements[i] === false) || data[i] === false) {
+                    if ((row && row.elements[i] === false) || data[i] === false) {
                         rowCols[i++] = false;
                     } else {
                         // 如果部分列被隐藏，colspan/width 需要动态计算
@@ -937,7 +938,7 @@
                     }
                 }
 
-                ui.Table.prototype.Row._cast(row).elements = rowCols;
+                row.elements = rowCols;
                 return row;
             },
 
@@ -1088,7 +1089,7 @@
 
                     this.rows.forEach(
                         function (item) {
-                            cols = ui.Table.prototype.Row._cast(item).elements;
+                            cols = item.elements;
                             if (item = cols[index]) {
                                 if (cols[index + 1] === null) {
                                     // 如果是被合并的列，需要保留
@@ -1126,11 +1127,11 @@
                 if (row) {
                     row.hide();
                     for (; this.hcells[i]; i++) {
-                        if (o = ui.Table.prototype.Row._cast(row).elements[i]) {
+                        if (o = row.elements[i]) {
                             if (dom.parent(o) !== body) {
-                                ui.Table.prototype.Row._cast(rowNext).elements[i] = o;
-                                for (; ui.Table.prototype.Row._cast(row).elements[++i] === null; ) {
-                                    ui.Table.prototype.Row._cast(rowNext).elements[i] = null;
+                                rowNext.elements[i] = o;
+                                for (; row.elements[++i] === null; ) {
+                                    rowNext.elements[i] = null;
                                 }
                                 i--;
                             }

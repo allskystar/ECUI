@@ -12,15 +12,23 @@
     <script type="text/javascript" src="options.js"></script>
     <script type="text/javascript" src="ecui.js"></script>
     <script>
-BaseImp = __interface({
+BaseImp = _interface({
+    constructor: function () {
+        console.log('baseimp constructor');
+    },
+
     test: function () {
         console.log('test');
     }
 });
 
-Imp = __interface.extends(BaseImp, {
+Imp = _interface.extends(BaseImp, {
     private: {
         a: 'inf'
+    },
+
+    constructor: function () {
+        console.log('imp constructor');
     },
 
     printA: function () {
@@ -28,22 +36,34 @@ Imp = __interface.extends(BaseImp, {
     }
 });
 
-Base = __class(
+Base = _class(
     {
         private: {
             a: 1
         },
 
+        constructor: function () {
+            console.log('base constructor');
+        },
+
         printA: function () {
-            console.log(this.a);
+            ecui.util.timer(function () {
+                console.log(this.a);
+            }, 0, this);
         }
     }
 );
-Son = __class.extends(
+Son = _class.extends(
     Base,
     {
         private: {
             a: 10
+        },
+
+        constructor: function () {
+            _super
+            ();
+            console.log('son constructor');
         },
 
         printA: function () {

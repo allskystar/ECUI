@@ -25,7 +25,7 @@ if (/(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document
 //{/if}//
 var ecui;
 (function () {
-    document.write('<script type="text/javascript" src="src/class.js"></script>');
+    document.write('<script type="text/javascript" src="src/class-es5.js"></script>');
     document.write('<script type="text/javascript" src="src/adapter.js"></script>');
     document.write('<script type="text/javascript" src="src/effect.js"></script>');
     document.write('<script type="text/javascript" src="src/etpl.js"></script>');
