@@ -672,6 +672,127 @@
                 ) : setInterval(fn, delay);
     };
 
+    __interface = function (properties) {
+        return __interface.extends([], properties);
+    };
+
+    __interface.extends = function (superInterfaces, properties) {
+        if (!(superInterfaces instanceof Array)) {
+            superInterfaces = [superInterfaces];
+        }
+
+        var newClass = {},
+            symbols = {},
+            values = {},
+            methods = {},
+            data;
+
+        newClass.CLASSID = 'CLASS-' + classes.length;
+        classes.push(newClass);
+
+        superInterfaces.forEach(function (inf) {
+            Object.assign(symbols, defines[inf.CLASSID].Symbols);
+            Object.assign(values, defines[inf.CLASSID].Values);
+            for (var name in defines[inf.CLASSID].Methods) {
+                if (defines[inf.CLASSID].Methods.hasOwnProperty(name)) {
+                    methods[name] = methods[name] ? addProxy(methods[name], defines[inf.CLASSID].Methods[name]) : defines[inf.CLASSID].Methods[name];
+                }
+            }
+        });
+
+        // 处理私有属性，代码复制自_class.extends
+        if (data = properties.private) {
+            for (var name in data) {
+                if (data.hasOwnProperty(name)) {
+                    symbols[name] = {
+                        configurable: true,
+
+                        get: (function (name) {
+                            return function () {
+                                var item = callStack[callStack.length - 1];
+                                if (this[item[1].CLASSID] && this[item[1].CLASSID].hasOwnProperty(name)) {
+                                    return this[item[1].CLASSID][name];
+                                }
+                                if (this[classes[0].CLASSID].hasOwnProperty(name)) {
+                                    return this[classes[0].CLASSID][name];
+                                }
+                                return this.constructor.prototype[name];
+                            };
+                        }(name)),
+
+                        set: (function (name) {
+                            return function (value) {
+                                var item = callStack[callStack.length - 1];
+                                if (this[item[1].CLASSID] && this[item[1].CLASSID].hasOwnProperty(name)) {
+                                    this[item[1].CLASSID][name] = value;
+                                }
+                                this[classes[0].CLASSID][name] = value;
+                            };
+                        })
+                    };
+
+                    values[name] = data[name];
+                }
+            }
+            delete properties.private;
+        }
+
+        // 处理静态属性，代码复制自_class.extends
+        if (data = properties.static) {
+            for (name in data) {
+                if (data.hasOwnProperty(name)) {
+                    if ('function' === typeof data[name] && !data[name].CLASSID) {
+                        newClass[name] = (function (fn) {
+                            return function () {
+                                callStack.push([null, newClass]);
+                                var ret = fn.apply(this, arguments);
+                                callStack.pop();
+                                return ret;
+                            };
+                        }(data[name]));
+                        methods[name] = makeSuperMethod(name);
+                    } else {
+                        symbols[name] = {
+                            get: (function (name) {
+                                return function () {
+                                    return this[newClass.CLASSID][name];
+                                };
+                            }(name)),
+
+                            set: (function (name) {
+                                return function (value) {
+                                    this[newClass.CLASSID][name] = value;
+                                };
+                            })
+                        };
+
+                        values[name] = data[name];
+                    }
+                }
+            }
+            delete properties.static;
+        }
+
+        // 处理public属性
+        if (data = properties.public || properties) {
+            for (name in data) {
+                if (data.hasOwnProperty(name)) {
+                    if ('function' === typeof data[name] && !data[name].CLASSID) {
+                        methods[name] = methods[name] ? addProxy(methods[name], data[name]) : data[name];
+                    }
+                }
+            }
+        }
+
+        defines[newClass.CLASSID] = {
+            Symbols: symbols,
+            Values: values,
+            Methods: methods
+        };
+
+        return newClass;
+    };
+
     __class = function () {
         return __class.extends.apply(this, [null].concat(Array.prototype.slice.call(arguments)));
     };
@@ -689,13 +810,19 @@
                     this[clazz.CLASSID] = Object.assign({}, defines[clazz.CLASSID].Values);
 
                     // 初始化所有接口的属性域
-//                    defines[clazz.CLASSID].Interfaces.forEach(initInterface, this);
+                    defines[clazz.CLASSID].Interfaces.forEach(
+                        function (inf) {
+                            this[inf.CLASSID] = Object.assign({}, defines[inf.CLASSID].InitValues);
+                        },
+                        this
+                    );
                 }
 
                 defines[classId].Constructor.apply(this, arguments);
             },
             symbols = {},
             values = {},
+            methods = superClass ? Object.assign({}, defines[superClass.CLASSID].Methods) : {},
             classId = 'CLASS-' + classes.length,
             data,
             name;
@@ -830,6 +957,7 @@
                                 return ret;
                             };
                         }(data[name]));
+                        methods[name] = makeSuperMethod(name);
                     } else {
                         symbols[name] = {
                             get: (function (name) {
@@ -876,12 +1004,48 @@
         defines[classId] = {
             Constructor: function () {
                 Object.defineProperties(this, symbols);
-                if (constructor) {
-                    constructor.apply(this, arguments);
+
+                var args = arguments;
+
+                if (superClass) {
+                    var clazz = this[classId].super = {};
+                    Object.assign(clazz, defines[superClass.CLASSID].SuperMethods);
+                    clazz.super = superClass.prototype;
+                    clazz.this = this;
+                }
+
+                // 调用全部类和接口的构造函数
+                callStack.push([this, newClass]);
+                try {
+                    if (constructor) {
+                        constructor.apply(this, args);
+//{if 0}//
+                        if (superClass && superClass.super && !this[superClass.CLASSID].super) {
+                            console.warn('父类没有初始化');
+                        }
+//{/if}//
+                    }
+
+                    interfaces.forEach(
+                        function (inf) {
+                            if (defines[inf.CLASSID].PublicFields.constructor) {
+                                callStack.push([this, inf]);
+                                try {
+                                    defines[inf.CLASSID].PublicFields.constructor.apply(this, args);
+                                } finally {
+                                    callStack.pop();
+                                }
+                            }
+                        },
+                        this
+                    );
+                } finally {
+                    callStack.pop();
                 }
             },
             Symbols: symbols,
-            Values: values
+            Values: values,
+            Methods: methods
         };
 
         newClass.CLASSID = classId;
