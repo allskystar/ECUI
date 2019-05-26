@@ -56,7 +56,9 @@ Base = _class(
             son.printA();
         },
 
-        static: ['print']
+        static: ['print'],
+
+        final: ['print']
     }
 );
 Son = _class.extends(
@@ -73,7 +75,9 @@ Son = _class.extends(
         printA: function () {
             _super.printA();
             console.log(this.a);
-        }
+        },
+
+        final: ['printA']
     },
     Imp
 );

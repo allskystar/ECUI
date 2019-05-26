@@ -216,37 +216,6 @@
             delete properties.protected;
         }
 
-        // 处理受保护的属性
-/*        if (data = properties.final) {
-            for (name in data) {
-                if (data.hasOwnProperty(name)) {
-                    if ('function' === typeof data[name] && !data[name].CLASSID) {
-                        properties[name] = data[name];
-                    } else {
-                        symbols[name] = {
-                            get: (function (name) {
-                                return function () {
-                                    return this[newClass.CLASSID][name];
-                                };
-                            }(name)),
-
-                            set: (function (name) {
-                                return function (value) {
-                                    if (!this[newClass.CLASSID].hasOwnProperty(name)) {
-                                        this[newClass.CLASSID][name] = value;
-                                    }
-                                };
-                            }(name))
-                        };
-                        if (data[name] !== undefined) {
-                            values[name] = data[name];
-                        }
-                    }
-                }
-            }
-            delete properties.final;
-        }
-*/
         // 处理public属性
         if (data = properties) {
             for (name in data) {
@@ -269,9 +238,13 @@
         // 处理static属性
         if (properties.static) {
             properties.static.forEach(function (name) {
-                newClass[name] = newClass.prototype[name];
-                delete newClass.prototype[name];
-                newClass[name].super = undefined;
+                if (newClass.prototype.hasOwnProperty(name)) {
+                    newClass[name] = newClass.prototype[name];
+                    delete newClass.prototype[name];
+                    if ('function' === typeof newClass[name]) {
+                        newClass[name].super = undefined;
+                    }
+                }
             });
         }
 
@@ -291,6 +264,39 @@
                 }
             }
         });
+
+        // 处理受保护的属性
+        if (properties.final) {
+            properties.final.forEach(function (name) {
+                if (symbols.hasOwnProperty(name)) {
+                    symbols[name].set = (function (name, fn) {
+                        return function (value) {
+                            if (!this[classId].hasOwnProperty(name)) {
+                                fn.call(this, value);
+                            }
+                        };
+                    }(name, symbols[name].set));
+                } else if (newClass.prototype.hasOwnProperty(name)) {
+                    Object.defineProperty(
+                        newClass.prototype,
+                        name,
+                        {
+                            writable: false,
+                            value: newClass.prototype[name]
+                        }
+                    );
+                } else if (newClass.hasOwnProperty(name)) {
+                    Object.defineProperty(
+                        newClass,
+                        name,
+                        {
+                            writable: false,
+                            value: newClass[name]
+                        }
+                    );
+                }
+            });
+        }
 
         defines[classId] = {
             Constructor: function () {
