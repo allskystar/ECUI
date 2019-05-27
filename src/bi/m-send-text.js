@@ -26,7 +26,7 @@
         ecui.ui.Text,
         'ui-m-send-text',
         function (el, options) {
-            ecui._super(el, options);
+            ecui.ui.Text.call(this, el, options);
             ecui.$fastCreate(this.Send, dom.last(el), this, options);
         },
         {

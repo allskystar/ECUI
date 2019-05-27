@@ -45,7 +45,7 @@
                 ),
                 el
             );
-            _super(el, options);
+            ui.InputControl.call(this, el, options);
 
             oldEl.className += ' ui-custome-check-box-popup ui-popup ui-hide';
             this._uPopup = core.$fastCreate(ui.Control, oldEl, this);

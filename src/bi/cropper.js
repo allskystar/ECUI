@@ -13,7 +13,7 @@
     ui.Cropper = ecui.inherits(
         ui.Control,
         function (el, options) {
-            _super(el, options);
+            ui.Control.call(this, el, options);
             this._pUpload = core.$fastCreate(this.Upload, dom.first(el), this, options);
             this._pDrag = core.$fastCreate(this.Drag, dom.last(el), this, options);
         },
@@ -21,7 +21,7 @@
             Upload: ecui.inherits(
                 ui.Upload,
                 function (el, options) {
-                    _super(el, options);
+                    ui.Upload.call(this, el, options);
                     this._eImg = el.getElementsByTagName('IMG')[0];
                     this._eFile = el.getElementsByTagName('INPUT')[0];
                     this._eInput = el.getElementsByTagName('INPUT')[1];
@@ -29,7 +29,7 @@
                 {
 
                     $click: function (event) {
-                        _super.$click(event);
+                        ui.Upload.prototype.$click.call(this, event);
                         this._eFile.click();
                     },
                     onupload: function (res) {
@@ -55,7 +55,7 @@
             Drag: ecui.inherits(
                 ui.Control,
                 function (el, options) {
-                    _super(el, options);
+                    ui.Control.call(this, el, options);
                     this._bImg = core.$fastCreate(this.BImg, dom.first(el), this);
                     this._pBox = core.$fastCreate(this.BImg, dom.last(el), this);
                     this._cImg = core.$fastCreate(this.PImg, dom.first(dom.last(el)), this);
@@ -85,7 +85,7 @@
                         ui.Control,
                         function (el, options) {
                             dom.addEventListener(el, 'load', load);
-                            _super(el, options);
+                            ui.Control.call(this, el, options);
                         },
                         {
                             offset: {

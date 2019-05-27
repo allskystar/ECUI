@@ -30,36 +30,72 @@ ceiling - 吸顶插件，使用ext-ceiling的方式引用，指定的吸顶时�
 
         Events: {
             dispose: function () {
-                var el = this.getMain(),
-                    uid = this.getUID(),
-                    holder = configures[uid].holder;
-
-                document.body.removeChild(dom.parent(el));
-                dom.insertBefore(el, holder);
-                dom.remove(holder);
-                delete configures[uid];
+                ext.ceiling.pause(this);
+                delete configures[this.getUID()];
             },
 
             ready: function () {
-                var el = this.getMain(),
-                    width = this.getWidth(),
+                ext.ceiling.resume(this);
+            },
+
+            scroll: function () {
+                var configure = configures[this.getUID()],
+                    layout = dom.parent(this.getMain());
+                if (configure.holder) {
+                    if (isToucher) {
+                        dom.setStyle(layout, 'transform', 'translate3D(0px,' + (Math.max(configure.top, dom.getPosition(configure.holder).top) + util.getView().top - util.toNumber(layout.style.top)) + 'px,0px)');
+                    } else {
+                        layout.style.top = Math.max(configure.top + util.getView().top, dom.getPosition(configure.holder).top) + 'px';
+                    }
+                }
+            }
+        },
+
+        pause: function (control) {
+            var el = control.getMain(),
+                configure = configures[control.getUID()];
+
+            if (configure.holder) {
+                configure.cssText = el.style.cssText;
+                el.style.position = 'relative';
+                el.style.top = '0px';
+                el.style.top = (dom.getPosition(dom.parent(el)).top - dom.getPosition(configure.holder).top) + 'px';
+
+                document.body.removeChild(dom.parent(el));
+                dom.insertBefore(el, configure.holder);
+                dom.remove(configure.holder);
+                delete configure.holder;
+            }
+        },
+
+        resume: function (control) {
+            var el = control.getMain(),
+                configure = configures[control.getUID()];
+
+            if (!configure.holder) {
+                if (configure.hasOwnProperty('cssText')) {
+                    el.style.cssText = configure.cssText;
+                    delete configure.cssText;
+                }
+
+                var width = control.getWidth(),
                     pos = dom.getPosition(el),
                     layout = dom.create(
                         {
                             style: {
                                 position: 'absolute',
-                                top: pos.top + 'px',
+                                top: Math.max(pos.top, configure.top) + 'px',
                                 width: width + 'px'
                             }
                         }
                     );
 
-                configures[this.getUID()].holder = dom.insertBefore(
+                configure.holder = dom.insertBefore(
                     dom.create(
                         {
                             style: {
                                 width: width + 'px',
-                                height: this.getHeight() + 'px'
+                                height: control.getHeight() + 'px'
                             }
                         }
                     ),
@@ -67,16 +103,6 @@ ceiling - 吸顶插件，使用ext-ceiling的方式引用，指定的吸顶时�
                 );
                 layout.appendChild(el);
                 document.body.appendChild(layout);
-            },
-
-            scroll: function () {
-                var data = configures[this.getUID()],
-                    layout = dom.parent(this.getMain());
-                if (isToucher) {
-                    dom.setStyle(layout, 'transform', 'translate3D(0px,' + (Math.max(data.top, dom.getPosition(data.holder).top) + util.getView().top - util.toNumber(layout.style.top)) + 'px,0px)');
-                } else {
-                    layout.style.top = Math.max(data.top + util.getView().top, dom.getPosition(data.holder).top) + 'px';
-                }
             }
         }
     };

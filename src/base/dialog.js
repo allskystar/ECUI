@@ -143,7 +143,7 @@
              * @param {string} text 窗体标题
              */
             setTitle: function (text) {
-                this.$Title.getBody().innerHTML = text || '';
+                this.$Title.setContent(text || '');
             }
         }
     );

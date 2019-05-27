@@ -252,7 +252,7 @@
                         newClass,
                         name,
                         (function (isPrivate, isFinal) {
-                            data = {};
+                            data = values.hasOwnProperty(name) ? {value: values[name]} : {};
                             return {
                                 get: function () {
                                     var item = callStack[callStack.length - 1];

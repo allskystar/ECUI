@@ -17,19 +17,24 @@
         ui.Control,
         'ui-image',
         function (el, options) {
-            // firefox下点击图片会自动进入选中状态
-            options.userSelect = false;
             _super(el, options);
             if (el.width) {
-                this._load();
+                this._load({target: el});
             } else {
                 dom.addEventListener(el, 'load', this._load.bind(this));
             }
         },
         {
+            SUPER_OPTIONS: {
+                // firefox下点击图片会自动进入选中状态
+                userSelect: false
+            },
+
             private: {
-                'cx': undefined,
-                'cy': undefined,
+                cx: undefined,
+                cy: undefined,
+                minWidth: undefined,
+                ratio: undefined,
 
                 /**
                  * 图片加载事件。
@@ -38,7 +43,7 @@
                 _load: function (event) {
                     this.minWidth = event.target.width;
                     this.ratio = event.target.height / event.target.width;
-                    dom.removeEventListener(this, 'load', this._load);
+                    dom.removeEventListener(event.target, 'load', this._load);
                     if (this.isCreated()) {
                         this.cache();
                     }

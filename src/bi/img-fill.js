@@ -18,7 +18,7 @@
         ui.Control,
         'ui-img-fill',
         function (el, options) {
-            _super(el, options);
+            ui.Control.call(this, el, options);
 
             this._eImg = el.getElementsByTagName('img')[0];
             if (!this._eImg) {

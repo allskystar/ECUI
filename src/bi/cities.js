@@ -3645,7 +3645,7 @@ cities - 地区联动下拉框控件。
 
             this._eInput = ecui.dom.last(el);
             this._eInput.value = options.value;
-            _super(el, options);
+            ui.MultilevelSelect.call(this, el, options);
 
         },
         {
@@ -3671,7 +3671,7 @@ cities - 地区联动下拉框控件。
                 return arr;
             },
             init: function (options) {
-                _super.init(options);
+                ui.MultilevelSelect.prototype.init.call(this, options);
                 this.setData(getCITYS.bind(this)(options.multi));
                 var value = String(options.value);
                 if (!options.value || options.value.length !== 6) {

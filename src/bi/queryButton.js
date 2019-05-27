@@ -15,7 +15,7 @@ queryButton - 查询按钮控件。
         ui.Button,
         'ui-query-button',
         function (el, options) {
-            _super(el, options);
+            ui.Button.call(this, el, options);
         },
         {
             /**
@@ -26,7 +26,7 @@ queryButton - 查询按钮控件。
                 event.preventDefault();
             },
             $click: function (event) {
-                _super.$click(event);
+                ui.Button.prototype.$click.call(this, event);
                 var route = ecui.esr.findRoute(this);
                 var children = ecui.esr.getRoute(route.children);
                 children.searchParm = {};

@@ -24,7 +24,7 @@
         function (el, options) {
             options = Object.assign(options, { 'readOnly': true });
 
-            _super(el, options);
+            ui.Text.call(this, el, options);
 
             this._bRequired = !!options.required;
             this._sValue = options.value || this.getInput().value;
@@ -37,7 +37,7 @@
             Options: ecui.inherits(
                 ui.Control,
                 function (el, options) {
-                    _super(el, options);
+                    ui.Control.call(this, el, options);
 
                     this._uCalendar = ecui.$fastCreate(this.Calendar, el.appendChild(dom.create('DIV', {className: ui.Calendar.CLASS})), this, { extra: 'disable', date: options.value.split(' ')[0] });
                     this._uTimeCalendar = ecui.$fastCreate(this.TimeCalendar, el.appendChild(dom.create('DIV', {className: ' ui-time-calendar ui-hide'})), this, { value: options.value });
@@ -55,28 +55,42 @@
                     el.appendChild(calendarHandle);
                 },
                 {
-                    Calendar: ecui.inherits(ui.Calendar),
+                    Calendar: ecui.inherits(
+                        ui.Calendar,
+                        {
+                            /**
+                             * 日期点击事件。
+                             * event 属性
+                             * date  点击的日期
+                             * @event
+                             */
+                            ondateclick: function (event) {
+                                ecui.dispatchEvent(this.getParent()._uSwitch, 'click');
+                            }
+                        }
+                    ),
                     TimeCalendar: ecui.inherits(
                         ui.Control,
                         'ui-time-calendar',
                         function (el, options) {
-                            _super(el, options);
+                            ui.Control.call(this, el, options);
 
                             var houer = [], minute = [], second = [], item;
                             for (var i = 0; i < 24; i++) {
                                 item = ('0' + i).slice(-2);
                                 houer.push({ code: item, value: item });
-                                second.push({ code: item, value: item });
                                 if (i * this.RANGE <= 60) {
                                     item = ('0' + i * this.RANGE).slice(-2);
                                     if (item === '60') {
                                         item = '59';
                                     }
                                     minute.push({ code: item, value: item });
+                                    second.push({ code: item, value: item });
                                 }
                             }
-                            function amend(numStr) {
-                                return +numStr % this.RANGE ? '00' : numStr;
+                            function amend(numStr, RANGE) {
+                                var num = +numStr % RANGE;
+                                return num ? ('0' + (+numStr - num)).slice(-2) : numStr;
                             }
                             // replace(' ', 'T')处理是为了兼容 safari 浏览器上 new Date('2019-04-04 00:00:00') 不生效的问题
                             var date = options.value ? new Date(safariVersion ? options.value.replace(' ', 'T') : options.value) : new Date();
@@ -95,7 +109,7 @@
                                 })),
                                 this,
                                 {
-                                    value: date ? amend(util.formatDate(date, 'HH')) : '00'
+                                    value: date ? util.formatDate(date, 'HH') : '00'
                                 }
                             );
                             this._uMinute = ecui.$fastCreate(
@@ -106,7 +120,7 @@
                                 })),
                                 this,
                                 {
-                                    value: date ? amend(util.formatDate(date, 'mm')) : '00'
+                                    value: date ? amend(util.formatDate(date, 'mm'), this.RANGE) : '00'
                                 }
                             );
                             this._uSecond = ecui.$fastCreate(
@@ -117,7 +131,7 @@
                                 })),
                                 this,
                                 {
-                                    value: date ? amend(util.formatDate(date, 'ss')) : '00'
+                                    value: date ? amend(util.formatDate(date, 'ss'), this.RANGE) : '00'
                                 }
                             );
                         },
@@ -126,7 +140,7 @@
                             Listbox: ecui.inherits(
                                 ui.Listbox,
                                 function (el, options) {
-                                    _super(el, options);
+                                    ui.Listbox.call(this, el, options);
                                     this._sValue = options.value;
                                 },
                                 {
@@ -135,7 +149,7 @@
                                         {
                                             $click: function (event) {
                                                 var parent = this.getParent();
-                                                _super.$click(event);
+                                                ui.Item.prototype.$click.call(this, event);
                                                 parent.setSelected(this);
                                                 core.dispatchEvent(parent, 'change', event);
                                             }
@@ -177,7 +191,17 @@
                                         return this._cSelected;
                                     }
                                 }
-                            )
+                            ),
+                            /**
+                             * @override
+                             */
+                            $ready: function (event) {
+                                ui.Control.prototype.$ready.call(this, event);
+
+                                core.dispatchEvent(this._uHouer, 'ready', event);
+                                core.dispatchEvent(this._uMinute, 'ready', event);
+                                core.dispatchEvent(this._uSecond, 'ready', event);
+                            }
                         }
                     ),
                     Switch: ecui.inherits(
@@ -212,7 +236,7 @@
                     Clear: ecui.inherits(
                         ui.Control,
                         function (el, options) {
-                            _super(el, options);
+                            ui.Control.call(this, el, options);
                         },
                         {
                             onclick: function () {
@@ -228,7 +252,7 @@
                     CalendarSubmit: ecui.inherits(
                         ui.Control,
                         function (el, options) {
-                            _super(el, options);
+                            ui.Control.call(this, el, options);
                         },
                         {
                             onclick: function (event) {
@@ -236,27 +260,36 @@
                                     uCalendar = uParent._uCalendar,
                                     uTimeCalendar = uParent._uTimeCalendar,
                                     uTimePicker = uParent.getParent(),
-                                    date = uCalendar.getDate() || new Date(),
+                                    date = uCalendar.getDate(),
                                     hour = uTimeCalendar._uHouer.getSelected().getValue(),
                                     minute = uTimeCalendar._uMinute.getSelected().getValue(),
                                     second = uTimeCalendar._uSecond.getSelected().getValue();
 
                                 date = new Date(date.setHours(hour, minute, second));
-                                uTimePicker.setValue(util.formatDate(date, uTimePicker.FORMAT));
+                                uTimePicker.setValue(uCalendar.getSelected() ? util.formatDate(date, uTimePicker.FORMAT) : '');
                                 ecui.dispatchEvent(uTimePicker, 'input', event);
                                 this.getParent().hide();
                             }
                         }
                     ),
+                    /**
+                     * @override
+                     */
+                    $ready: function (event) {
+                        ui.Control.prototype.$ready.call(this, event);
+
+                        core.dispatchEvent(this._uCalendar, 'ready', event);
+                        core.dispatchEvent(this._uTimeCalendar, 'ready', event);
+                    },
                     $show: function (event) {
-                        _super.$show(event);
+                        ui.Control.prototype.$show.call(this, event);
                         ecui.dispatchEvent(this._uCalendar, 'show', event);
                     },
                     /**
                      * @override
                      */
                     $hide: function (event) {
-                        _super.$hide(event);
+                        ui.Control.prototype.$hide.call(this, event);
                         this._uTimeCalendar.hide();
                         this._uSwitch.setStatus('date');
                     }
@@ -265,15 +298,23 @@
             /**
              * @override
              */
+            $ready: function (event) {
+                ui.Control.prototype.$ready.call(this, event);
+
+                core.dispatchEvent(this._uOptions, 'ready', event);
+            },
+            /**
+             * @override
+             */
             $blur: function (event) {
-                _super.$blur(event);
+                ui.Text.prototype.$blur.call(this, event);
                 this.getPopup().hide();
             },
             /**
              * @override
              */
             $validate: function () {
-                _super.$validate();
+                ui.Text.prototype.$validate.call(this);
                 if (!this.getDate() && this._bRequired) {
                     ecui.dispatchEvent(this, 'error');
                     return false;
