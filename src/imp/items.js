@@ -197,6 +197,10 @@
              * @return {Array} 子选项控件数组
              */
             add: function (item, index) {
+                if (!index || index > this.$ItemsData.items.length) {
+                    index = this.$ItemsData.items.length;
+                }
+
                 var list = this.$ItemsData.items,
                     items = [],
                     UIClass = this.Item || ui.Item,
@@ -239,7 +243,7 @@
 
                             options.parent = this;
                             options.primary = UIClass.CLASS;
-                            options.index = index || list.length;
+                            options.index = index++;
                             item = core.$fastCreate(UIClass, item, null, options);
                         }
 
