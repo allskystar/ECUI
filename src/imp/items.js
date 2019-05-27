@@ -78,7 +78,7 @@
 
             constructor: function () {
                 this.items = [];
-console.log(this[ui.Items.CLASSID].items === this.items);
+
                 this.preventAlterItems();
 
                 // 初始化选项控件
@@ -228,7 +228,6 @@ console.log(this[ui.Items.CLASSID].items === this.items);
              * @override
              */
             cache: function (force) {
-                console.log('test');
                 this.items.forEach(function (item) {
                     item.cache(force);
                 });

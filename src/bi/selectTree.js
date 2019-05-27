@@ -35,7 +35,6 @@
                 var value = this.getRoot().getParent().getParent().getInput().value;
                 if (value === this._sValue) {
                     this.getRoot().getParent().getParent().setSelected(this);
-                    console.log(event);
                     core.dispatchEvent(this.getRoot().getParent().getParent(), 'change', event);
                 }
             },
@@ -45,7 +44,6 @@
                         var value = this.getRoot().getParent().getParent().getInput().value;
                         if (value === this._sValue) {
                             this.getRoot().getParent().getParent().setSelected(this);
-                            console.log(event);
                             core.dispatchEvent(this.getRoot().getParent().getParent(), 'change', event);
                         }
                     }
@@ -162,7 +160,6 @@
                 ui.Control.prototype.$click.call(this, event);
                 var parent = this.getParent().getParent();
                 // ui.TreeCombox.prototype.oninput.call(parent, event);
-                console.log(parent);
                 if (parent._uOptions) {
                     parent._uOptions.hide();
                 } else {

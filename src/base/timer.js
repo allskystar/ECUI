@@ -33,7 +33,6 @@ residual          - 倒计时的剩余时长，单位毫秒
             DEFAULT_OPTIONS: {
                 format: '{0}:{1}:{2}',
                 time: function (value) {
-                    console.log(value);
                     return (value.endsWith('ms') ? +value.slice(0, -2) : +value * 1000) || 0;
                 }
             },

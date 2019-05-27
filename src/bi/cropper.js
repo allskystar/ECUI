@@ -138,7 +138,6 @@
                         this.crop.y = -this._cImg.getY();
                         this.crop.w = this._pBox.getWidth();
                         this.crop.h = this._pBox.getHeight();
-                        console.log(this.crop);
                     },
                     range: function (x, y, z) {
                         return Math.min(Math.max(x, y), z);

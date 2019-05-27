@@ -1,5 +1,5 @@
 //{if 0}//
-if (/(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined < 9) {
+if (!Object.create) {
     document.write = function (name) {
         if (/src="([^"]+)"/.test(name)) {
             if (window.ActiveXObject) {
@@ -72,16 +72,16 @@ var ecui;
     document.write('<script type="text/javascript" src="src/input/checkbox.js"></script>');
     document.write('<script type="text/javascript" src="src/input/checkbox-tree.js"></script>');
     document.write('<script type="text/javascript" src="src/input/couple-slider.js"></script>');
+    document.write('<script type="text/javascript" src="src/input/listbox.js"></script>');
+    document.write('<script type="text/javascript" src="src/input/multi-select.js"></script>');
     document.write('<script type="text/javascript" src="src/input/select.js"></script>');
     document.write('<script type="text/javascript" src="src/input/combox.js"></script>');
     document.write('<script type="text/javascript" src="src/input/filter.js"></script>');
-    document.write('<script type="text/javascript" src="src/input/listbox.js"></script>');
 //     document.write('<script type="text/javascript" src="src/input/text.js"></script>');
 //     document.write('<script type="text/javascript" src="src/input/number.js"></script>');
 //     document.write('<script type="text/javascript" src="src/input/time.js"></script>');
 //     document.write('<script type="text/javascript" src="src/input/radio.js"></script>');
 //     document.write('<script type="text/javascript" src="src/input/multilevel-select.js"></script>');
-//     document.write('<script type="text/javascript" src="src/input/multi-select.js"></script>');
 
 //     document.write('<script type="text/javascript" src="src/mobile/m-panel.js"></script>');
 //     document.write('<script type="text/javascript" src="src/mobile/m-select.js"></script>');
