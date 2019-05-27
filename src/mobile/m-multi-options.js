@@ -129,7 +129,7 @@ _eText       - 文本框
 
                         this.getBody().innerHTML = values.map(
                             function (item) {
-                                return '<div ui="value:' + (this._sPrefix + item).slice(-this._sPrefix.length) + '" class="' + this.getUnitClass(ui.MMultiOptions, 'item') + ' ui-item">' + (options.format ? util.stringFormat(options.format, item) : item) + '</div>';
+                                return '<div ui="value:' + (this._sPrefix + item).slice(-this._sPrefix.length) + '" class="' + this.getUnitClass(ui.MMultiOptions.prototype.Options, 'item') + ' ui-item">' + (options.format ? util.stringFormat(options.format, item) : item) + '</div>';
                             },
                             this
                         ).join('');
