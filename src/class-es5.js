@@ -22,7 +22,7 @@
                 }
             }
             var oldSuper = window._super;
-            _super = proxy.super ? Object.assign(defines[proxy.super.CLASSID].Constructor.bind(this), this[Class.CLASSID].super) : null;
+            _super = proxy.super && this.constructor.CLASSID ? Object.assign(defines[proxy.super.CLASSID].Constructor.bind(this), this[Class.CLASSID].super) : null;
             callStack.push([proxy.super !== undefined ? this : null, Class]);
             try {
                 var ret = fn.apply(this, arguments);
@@ -156,7 +156,11 @@
                             };
                         }(name))
                     };
-                    values[name] = data[name];
+                    if ('function' === typeof data[name] && !data[name].CLASSID) {
+                        values[name] = makeProxy(newClass, data[name], superClass);
+                    } else {
+                        values[name] = data[name];
+                    }
                 }
             }
             delete properties.private;

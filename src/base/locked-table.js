@@ -62,7 +62,7 @@
                 list[index] = '<tr class="' + item.className + '" style="' + item.style.cssText + '"><td class="ui-locked-table-empty"></td></tr>';
             });
 
-            o = '<table cellspacing="0" class="' + this.getUnitClass(ui.LockedTable, '{0}') + ' ' + this.getUnitClass(ui.LockedTable, 'body') + ' ' + dom.parent(this.getBody()).className + '"><tbody>' + list.splice(headRows.length, rows.length).join('') + '</tbody></table><table cellspacing="0" class="' + this.getUnitClass(ui.LockedTable, '{0}') + ' ' + this.$getSection('Head').getMain().className + '"><thead>' + list.join('') + '</thead></table>';
+            o = '<table cellspacing="0" class="' + this.getUnitClass(ui.LockedTable, '{0}') + ' ' + this.getUnitClass(ui.LockedTable, 'body') + ' ' + dom.parent(this.getBody()).className + '"><tbody>' + list.splice(headRows.length, rows.length).join('') + '</tbody></table><table cellspacing="0" class="' + this.getUnitClass(ui.LockedTable, '{0}') + ' ' + this.$Head.getMain().className + '"><thead>' + list.join('') + '</thead></table>';
             if (core.getScrollNarrow()) {
                 layout = el;
             }
@@ -257,7 +257,7 @@
                     rightMainStyle = this.$RightBody.getMain().style,
                     fixed = dom.contain(this.getMain(), event.target) && event.deltaY;
 
-                if (this.$getSection('Head').getMain().style.position === 'fixed' || fixed) {
+                if (this.$Head.getMain().style.position === 'fixed' || fixed) {
                     leftHeadStyle.position = rightHeadStyle.position = 'fixed';
                     leftHeadStyle.top = rightHeadStyle.top = this.$$fixedTop + 'px';
                     leftHeadStyle.left = left + 'px';
@@ -316,7 +316,7 @@
                     rightMainStyle = this.$RightBody.getMain().style;
 
                 leftHeadStyle.position = rightHeadStyle.position = leftMainStyle.position = rightMainStyle.position = '';
-                leftHeadStyle.top = rightHeadStyle.top = this.$getSection('Head').getMain().style.top;
+                leftHeadStyle.top = rightHeadStyle.top = this.$Head.getMain().style.top;
 
                 if (core.getScrollNarrow()) {
                     leftHeadStyle.left = leftMainStyle.left = '0px';
@@ -325,7 +325,7 @@
                 } else {
                     leftHeadStyle.left = leftMainStyle.left = this.getLayout().scrollLeft + 'px';
                     rightHeadStyle.left = rightMainStyle.left = (Math.min(this.getWidth(), this.$$tableWidth) - this.$$paddingRight + this.getLayout().scrollLeft - this.$$rightTDWidth - this.$$scrollFixed[0]) + 'px';
-                    leftMainStyle.top = rightMainStyle.top = (this.$$paddingTop - this.getLayout().firstChild.scrollTop - dom.parent(this.$getSection('Head').getMain()).scrollTop) + 'px';
+                    leftMainStyle.top = rightMainStyle.top = (this.$$paddingTop - this.getLayout().firstChild.scrollTop - dom.parent(this.$Head.getMain()).scrollTop) + 'px';
                     leftMainStyle.clip = rightMainStyle.clip = ieVersion < 8 ? 'rect(0,100%,100%,0)' : 'auto';
                 }
             },
@@ -337,7 +337,7 @@
                 _super.$initStructure(width, height);
 
                 var table = dom.parent(this.getBody()),
-                    head = this.$getSection('Head').getMain().lastChild,
+                    head = this.$Head.getMain().lastChild,
                     layout = this.getLayout();
 
                 this.fill.style.width = this.$$tableWidth + 'px';
@@ -359,7 +359,7 @@
                     leftMain = this.$LeftBody.getMain(),
                     rightMain = this.$RightBody.getMain(),
                     table = dom.parent(this.getBody()),
-                    head = this.$getSection('Head').getMain();
+                    head = this.$Head.getMain();
 
                 this.fill.style.width = '';
                 leftHead.style.width = leftMain.style.width = '';
