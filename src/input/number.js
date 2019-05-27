@@ -9,6 +9,8 @@
 
 @fields
 _nDecimal   小数位数
+_nMin       最小值
+_nMax       最大值
 _sLastValue 最后一次的合法输入
 _oTest      匹配合法性的正则表达式
 */
@@ -21,6 +23,8 @@ _oTest      匹配合法性的正则表达式
      * 数字输入框控件。
      * options 属性：
      * decimal  小数位数，为正数会自动补齐，为负数有限制但是不自动补齐，为undefined表示不限制
+     * min 最小值
+     * max 最大值
      * @control
      */
     ui.Number = core.inherits(
@@ -29,8 +33,10 @@ _oTest      匹配合法性的正则表达式
         function (el, options) {
             ui.Text.call(this, el, options);
             this._nDecimal = options.decimal && +options.decimal;
-            this._bPositive = !!options.positive;
-            this._oTest = new RegExp('^' + (this._bPositive ? '' : '-?') + '\\d*' + (this._nDecimal === 0 ? '' : '(\\.\\d' + (this._nDecimal ? '{0,' + Math.abs(this._nDecimal) + '}' : '*') + ')?') + '$');
+
+            this._nMin = options.min === undefined ? undefined : (+options.min || 0);
+            this._nMax = options.max === undefined ? undefined : (+options.max || 0);
+            this._oTest = new RegExp('^-?\\d*' + (this._nDecimal === 0 ? '' : '(\\.\\d' + (this._nDecimal ? '{0,' + Math.abs(this._nDecimal) + '}' : '*') + ')?') + '$');
         },
         {
             /**
@@ -68,12 +74,8 @@ _oTest      匹配合法性的正则表达式
                 ui.Text.prototype.$input.call(this, event);
 
                 var value = this.getValue();
-
                 if (this._oTest.test(value)) {
-                    var min = this.$getMinValue(),
-                        max = this.$getMaxValue();
-
-                    if (!value || ((min === undefined || +value >= min) && (max === undefined || +value <= max))) {
+                    if (!value || ((this._nMin === undefined || (this._nMin < 0 && (value === '-' || +value >= this._nMin)) || +value >= 0) && (this._nMax === undefined || (this._nMax < 0 && value === '-') || +value <= this._nMax))) {
                         this._sLastValue = value;
                         return;
                     }
