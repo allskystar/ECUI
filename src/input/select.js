@@ -63,7 +63,7 @@
                         });
 
                         // 设置options框的大小，如果没有元素，至少有一个单位的高度
-                        this.$setSize(select.getWidth(), (Math.min(size, ui.Select._cast(select).optionSize) || 1) * select.getClientHeight() + this.getMinimumHeight());
+                        this.$setSize(select.getWidth(), (Math.min(size, select.optionSize) || 1) * select.getClientHeight() + this.getMinimumHeight());
                     },
 
                     /**

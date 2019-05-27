@@ -69,10 +69,10 @@
                 _refresh: function () {
                     var status;
                     this.dependents.forEach(function (item) {
-                        if (status !== undefined && status !== ui.Checkbox._cast(item).status) {
+                        if (status !== undefined && status !== item.status) {
                             status = 2;
                         } else {
-                            status = ui.Checkbox._cast(item).status;
+                            status = item.status;
                         }
                     });
 
@@ -99,9 +99,7 @@
 
                         // 如果有主复选框，刷新主复选框的状态
                         if (this.subject) {
-                            ui.Checkbox._cast(this.subject, function () {
-                                this._refresh();
-                            });
+                            this.subject._refresh();
                         }
                     }
                 }
@@ -283,11 +281,9 @@
                 // 如果有从属复选框，全部改为与当前复选框相同的状态
                 this.dependents.forEach(
                     function (item) {
-                        ui.Checkbox._cast(item).subject = null;
-                        ui.Checkbox._cast(item, function () {
-                            this.setChecked(checked);
-                        });
-                        ui.Checkbox._cast(item).subject = this;
+                        item.subject = null;
+                        item.setChecked(checked);
+                        item.subject = this;
                     },
                     this
                 );
@@ -305,16 +301,12 @@
                     if (this.subject) {
                         // 已经设置过主复选框，需要先释放引用
                         util.remove(this.subject.dependents, this);
-                        ui.Checkbox._cast(this.subject, function () {
-                            this._refresh();
-                        });
+                        this.subject._refresh();
                     }
 
                     if (checkbox) {
-                        ui.Checkbox._cast(checkbox).dependents.push(this);
-                        ui.Checkbox._cast(checkbox, function () {
-                            this._refresh();
-                        });
+                        checkbox.dependents.push(this);
+                        checkbox._refresh();
                     }
 
                     this.subject = checkbox;

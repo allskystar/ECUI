@@ -2488,7 +2488,7 @@ outer:          for (var caches = [], target = event.target, el; target && targe
             var index = 1,
                 singleton = 'boolean' === typeof arguments[index] ? arguments[index++] : false,
                 type = 'string' === typeof arguments[index] ? arguments[index++] : '',
-                constructor = 'function' === typeof arguments[index] ? arguments[index++] : superClass,
+                constructor = 'function' === typeof arguments[index] ? arguments[index++] : null,
                 properties = arguments[index] && !arguments[index].CLASSID ? arguments[index++] : {},
                 subClass = function (el, options) {
                     if (singleton) {
@@ -2506,6 +2506,7 @@ outer:          for (var caches = [], target = event.target, el; target && targe
                             }
                         }
                     }
+
                     if (defaultOptions) {
                         for (name in defaultOptions) {
                             if (defaultOptions.hasOwnProperty(name)) {
@@ -2517,7 +2518,10 @@ outer:          for (var caches = [], target = event.target, el; target && targe
                             }
                         }
                     }
-                    (subClass.hasOwnProperty('constructor') ? subClass.constructor : constructor).call(this, el, options);
+
+                    if (subClass.hasOwnProperty('constructor') ? subClass.constructor : constructor) {
+                        (subClass.hasOwnProperty('constructor') ? subClass.constructor : constructor).call(this, el, options);
+                    }
 
                     if (singleton) {
                         singletons.push(this);
@@ -2541,6 +2545,9 @@ outer:          for (var caches = [], target = event.target, el; target && targe
             }
 
             properties.constructor = subClass;
+            subClass.toString = function () {
+                return constructor ? constructor.toString() : '';
+            };
             subClass = _class.extends.apply(null, [superClass, properties].concat(Array.prototype.slice.call(arguments, index)));
 
             if (superClass) {

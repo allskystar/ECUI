@@ -67,12 +67,12 @@
                         _super.$activate(event);
 
                         var parent = this.getParent(),
-                            sliders = ui.CoupleSlider._cast(parent).sliders,
+                            sliders = parent.sliders,
                             other = sliders[1 - sliders.indexOf(this)],
                             width = parent.getClientWidth();
 
                         this._nX = other.getX();
-                        this._nSeg = this.getX() * ui.CoupleSlider._cast(parent).segment / width;
+                        this._nSeg = this.getX() * parent.segment / width;
 
                         core.drag(this, event, {
                             absolute: true,
@@ -81,7 +81,7 @@
                             top: 0,
                             bottom: 0,
                             limit: {
-                                stepX: width / ui.CoupleSlider._cast(parent).segment
+                                stepX: width / parent.segment
                             }
                         });
                     },
@@ -93,24 +93,14 @@
                         _super.$dragmove(event);
 
                         var parent = this.getParent(),
-                            segWidth = parent.getClientWidth() / ui.CoupleSlider._cast(parent).segment,
+                            segWidth = parent.getClientWidth() / parent.segment,
                             seg = Math.round(event.x / segWidth);
 
-                        ui.CoupleSlider._cast(
-                            parent,
-                            function () {
-                                parent._setMask(this._nX, event.x);
-                            }.bind(this)
-                        );
+                        parent._setMask(this._nX, event.x);
 
                         if (this._nSeg !== seg) {
                             this._nSeg = seg;
-                            ui.CoupleSlider._cast(
-                                parent,
-                                function () {
-                                    parent._change(Math.min(seg, this._nX / segWidth), Math.max(seg, this._nX / segWidth));
-                                }.bind(this)
-                            );
+                            parent._change(Math.min(seg, this._nX / segWidth), Math.max(seg, this._nX / segWidth));
                         }
                     }
                 }

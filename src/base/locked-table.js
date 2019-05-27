@@ -94,7 +94,7 @@
             right.$setBody(right = right.getMain().lastChild);
 
             for (i = 0, left = dom.children(left), right = dom.children(right); el = left[i]; ) {
-                ui.LockedTable.prototype.Row._cast(rows[i])._init(el, right[i++]);
+                rows[i]._init(el, right[i++]);
             }
         },
         {
@@ -172,7 +172,7 @@
                         table.getHCells().forEach(
                             function (item, index) {
                                 if (item = elements[index]) {
-                                    if (index < ui.LockedTable._cast(table).leftLock) {
+                                    if (index < table.leftLock) {
                                         this.left.insertBefore(item, this.left.lastChild);
                                     } else if (index >= table.rightLock) {
                                         this.right.appendChild(item);
@@ -224,7 +224,7 @@
 
                         table.getHCells().forEach(function (item, index) {
                             if (item = elements[index]) {
-                                if (index < ui.LockedTable._cast(table).leftLock) {
+                                if (index < table.leftLock) {
                                     row.insertBefore(item, el);
                                 } else if (index >= table.rightLock) {
                                     row.appendChild(item);
@@ -403,7 +403,7 @@
                     }
                 ).lastChild.lastChild;
 
-                ui.LockedTable.prototype.Row._cast(row)._init(o.firstChild, o.lastChild);
+                row._init(o.firstChild, o.lastChild);
                 leftBody.insertBefore(o.firstChild, dom.children(leftBody)[index]);
                 rightBody.insertBefore(o.firstChild, dom.children(rightBody)[index]);
                 row.$initStructure();

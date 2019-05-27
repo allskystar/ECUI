@@ -346,6 +346,12 @@
         defines[classId] = {
             Constructor: function () {
                 Object.defineProperties(this, symbols);
+                interfaces.forEach(
+                    function (inf) {
+                        Object.defineProperties(this, defines[inf.CLASSID].Symbols);
+                    },
+                    this
+                );
 
                 var args = arguments;
 
@@ -412,7 +418,7 @@
         var newClass = {},
             symbols = {},
             values = {},
-            methods = {},
+            methods = {constructor: null},
             data;
 
         newClass.CLASSID = 'CLASS-' + classes.length;
@@ -430,7 +436,7 @@
 
         // 处理私有属性，代码复制自_class.extends
         if (data = properties.private) {
-            for (var name in data) {
+            for (name in data) {
                 if (data.hasOwnProperty(name)) {
                     symbols[name] = {
                         configurable: true,
@@ -438,8 +444,16 @@
                         get: (function (name) {
                             return function () {
                                 var item = callStack[callStack.length - 1];
+                                if (!item[0]) {
+                                    throw new Error('The property is not visible.');
+                                }
                                 if (this[item[1].CLASSID] && this[item[1].CLASSID].hasOwnProperty(name)) {
+                                    // 与调用的函数生存域相同
                                     return this[item[1].CLASSID][name];
+                                }
+                                if (defines[item[1].CLASSID].InnerClasses.indexOf(newClass) >= 0 || defines[newClass.CLASSID].InnerClasses.indexOf(item[1]) >= 0) {
+                                    // 内部类与外部类之间允许相互调用
+                                    return this[newClass.CLASSID][name];
                                 }
                                 if (this[classes[0].CLASSID].hasOwnProperty(name)) {
                                     return this[classes[0].CLASSID][name];
@@ -451,14 +465,21 @@
                         set: (function (name) {
                             return function (value) {
                                 var item = callStack[callStack.length - 1];
-                                if (this[item[1].CLASSID] && this[item[1].CLASSID].hasOwnProperty(name)) {
-                                    this[item[1].CLASSID][name] = value;
+                                if (!item[0]) {
+                                    throw new Error('The property is not visible.');
                                 }
-                                this[classes[0].CLASSID][name] = value;
+                                if (this[item[1].CLASSID] && this[item[1].CLASSID].hasOwnProperty(name)) {
+                                    // 与调用的函数生存域相同
+                                    this[item[1].CLASSID][name] = value;
+                                } else if (defines[item[1].CLASSID].InnerClasses.indexOf(newClass) >= 0 || defines[newClass.CLASSID].InnerClasses.indexOf(item[1]) >= 0) {
+                                    // 内部类与外部类之间允许相互调用
+                                    this[newClass.CLASSID][name] = value;
+                                } else {
+                                    this[classes[0].CLASSID][name] = value;
+                                }
                             };
-                        })
+                        }(name))
                     };
-
                     values[name] = data[name];
                 }
             }

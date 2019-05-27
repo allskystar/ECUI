@@ -228,10 +228,8 @@ children     - 子控件集合
                         root.setSelected();
                     }
 
-                    util.remove(ui.TreeView._cast(oldParent).children, this);
-                    ui.TreeView._cast(oldParent, function () {
-                        this._refresh();
-                    });
+                    util.remove(oldParent.children, this);
+                    oldParent._refresh();
                 }
 
                 _super.$setParent(parent);
@@ -361,7 +359,7 @@ children     - 子控件集合
              */
             getRoot: function () {
                 // 这里需要考虑Tree位于上一个Tree的节点内部
-                for (var control = this, parent; (parent = control.getParent()) instanceof ui.TreeView && ui.TreeView._cast(parent).children.indexOf(control) >= 0; control = parent) {}
+                for (var control = this, parent; (parent = control.getParent()) instanceof ui.TreeView && parent.children.indexOf(control) >= 0; control = parent) {}
                 return control;
             },
 
