@@ -64,7 +64,7 @@ _nBottomIndex  - 下部隐藏的选项序号
                     this._eEmpty = dom.create({className: this.getUnitClass(ui.MListView, 'empty-body')});
                 }
                 var first = dom.first(el);
-                if (first.tagName === 'STRONG') {
+                if (first && first.tagName === 'STRONG') {
                     this._eTitle = first;
                     el.removeChild(first);
                     dom.addClass(first, this.getUnitClass(ui.MListView, 'title'));
