@@ -26,6 +26,10 @@ _cItem    - 当前处于激活的选项
     ui.MOpListView = core.inherits(
         ui.MListView,
         'ui-mobile-op-listview',
+        function (el, options) {
+            ui.MListView.call(this, el, options);
+            this._bOperate = false;
+        },
         {
             /**
              * 选项部件
@@ -51,7 +55,8 @@ _cItem    - 当前处于激活的选项
 
                         var parent = this.getParent();
                         parent.setScrollRange({left: -this.$$sumWidth});
-                        parent.setRange({left: 0, right: 0});
+                        Object.assign(this.getParent().getRange(), {left: 0, right: 0});
+                        // parent.setRange({left: 0, right: 0});
                         if (parent._cItem !== this) {
                             if (parent._cItem) {
                                 parent._cItem._oHandle = effect.grade('this.setPosition(#this.getX()->0#)', 400, {$: parent._cItem});
