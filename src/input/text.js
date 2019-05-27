@@ -11,8 +11,6 @@
 _bTrim        - 字符串是否需要过滤两端空白
 _nMinLength   - 允许提将近最小长度
 _nMaxLength   - 允许提交的最大长度
-_nMinValue    - 允许提交的最小值
-_nMaxValue    - 允许提交的最大值
 _oRegExp      - 允许提交的格式正则表达式
 _ePlaceHolder - 为空时的提示信息标签
 */
@@ -50,15 +48,6 @@ _ePlaceHolder - 为空时的提示信息标签
                 }
                 this._nMinLength = +el[0];
                 this._nMaxLength = +el[1];
-            }
-            if (options.num) {
-                el = options.num.split('-');
-                if (el.length === 1) {
-                    el[1] = el[0];
-                    el[0] = 0;
-                }
-                this._nMinValue = +el[0];
-                this._nMaxValue = +el[1];
             }
 
             if (options.regexp) {
@@ -164,26 +153,6 @@ _ePlaceHolder - 为空时的提示信息标签
             },
 
             /**
-             * 获取允许的最大值。
-             * @protected
-             *
-             * @return {number} 允许的最大值，如果没有限制返回undefined
-             */
-            $getMaxValue: function () {
-                return this._nMaxValue;
-            },
-
-            /**
-             * 获取允许的最小值。
-             * @protected
-             *
-             * @return {number} 允许的最大值，如果没有限制返回undefined
-             */
-            $getMinValue: function () {
-                return this._nMinValue;
-            },
-
-            /**
              * @override
              */
             $initStructure: function (width, height) {
@@ -239,13 +208,7 @@ _ePlaceHolder - 为空时的提示信息标签
                 if (this._nMaxLength < length) {
                     result = false;
                 }
-                if (this._nMinValue > +value) {
-                    result = false;
-                }
-                if (this._nMaxValue < +value) {
-                    result = false;
-                }
-                if ((this._oRegExp && !this._oRegExp.test(value)) || (isNaN(+value) && (this._nMinValue !== undefined || this._nMaxValue !== undefined))) {
+                if (this._oRegExp && !this._oRegExp.test(value)) {
                     result = false;
                 }
 
