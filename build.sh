@@ -13,7 +13,9 @@ fi
 
 js_write_repl="sed -e \"s/document.write('<script type=\\\"text\/javascript\\\" src=\([^>]*\)><\/script>');/\/\/{include file=\1}\/\//g\""
 js_merge=$assign_js' java -jar $libpath/smarty4j.jar --left //{ --right }// --charset utf-8'
-js_compress='java -jar $libpath/webpacker.jar --charset utf-8'
+js_compress="uglifyjs -c -m | sed -e \"s/\\.super\([^A-Za-z0-9_\$]\)/['super']\1/g\" | sed -e \"s/\\.this\([^A-Za-z0-9_\$]\)/['this']\1/g\" | sed -e \"s/\\.extends\([^A-Za-z0-9_\$]\)/['extends']\1/g\" | sed -e \"s/\\.for\([^A-Za-z0-9_\$]\)/['for']\1/g\""
+# js_compress='uglifyjs -c -m'
+# js_compress='java -jar $libpath/webpacker.jar --charset utf-8'
 css_merge=$assign_css' java -jar $libpath/smarty4j.jar --left /\*{ --right }\*/ --charset utf-8'
 css_compile='lessc - --plugin=less-plugin-clean-css | python $libpath/less-funcs.py "$3"'
 html_compress="sed -e \"s/stylesheet\/less[^\\\"]*/stylesheet/g\" -e \"s/[[:space:]]/ /g\" -e \"s/^ *//g\" -e \"s/ *$//g\" -e \"/^ *$/d\" -e \"/<script>window.onload=/d\""
@@ -260,7 +262,7 @@ then
     do
         if [ -f $file ]
         then
-            if [ ! $file = "ecui.js" ] && [ ! $file = "ecui.css" ] && [ ! $file = "common.js" ] && [ ! $file = "common.css" ] && [ ! $file = "ie-es5.js" ] && [ ! $file = "options.js" ] && [ ! $file = "ios.js" ] && [ ! $file = "android.js" ]
+            if [ ! $file = "ecui.js" ] && [ ! $file = "ecui.css" ] && [ ! $file = "common.js" ] && [ ! $file = "common.css" ] && [ ! $file = "ie-es5.js" ] && [ ! $file = "options.js" ] && [ ! $file = "ios.js" ] && [ ! $file = "android.js" ] && [ ! "${file%%-*}" = "compatible" ]
             then
                 continue
             fi

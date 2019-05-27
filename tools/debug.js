@@ -222,7 +222,7 @@
                         ecui.io.ajax(url.replace('.html', '.css'), {
                             cache: true,
                             onsuccess: function (text) {
-                                createStyle('#' + moduleName.replace(/[._]/g, '-').replace(/\//, '_') + filename.replace(/[._]/g, '-') + '{' + text + '}');
+                                createStyle('#' + moduleName.replace(/[._]/g, '-').replace(/\//g, '_') + filename.replace(/[._]/g, '-') + '{' + text + '}');
 
                                 window.less.sheets = [];
                                 window.less.refresh(true, undefined, false);

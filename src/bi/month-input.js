@@ -24,11 +24,11 @@
                 '<table><thead>{1}</thead><tbody>{0}{0}{0}</tbody></table>',
                 util.stringFormat(
                     '<tr>{0}{0}{0}{0}</tr>',
-                    '<td class="' + options.classes.join('-date ') + '"></td>'
+                    '<td class="' + this.getUnitClass(ui.BIMonth, 'date ') + '"></td>'
                 ),
                 util.stringFormat(
                     '<tr>{0}{0}{0}{0}</tr>',
-                    '<td class="' + options.classes.join('-title ') + '"></td>'
+                    '<td class="' + this.getUnitClass(ui.BIMonth, 'title ') + '"></td>'
                 )
             );
 
@@ -46,10 +46,10 @@
             dom.insertHTML(
                 el,
                 'AFTERBEGIN',
-                '<div class="' + options.classes.join('-header ') + '"><div class="' +
-                    options.classes.join('-title ') + '"></div><div class="' +
-                    options.classes.join('-prev-year ') + ui.Button.CLASS + '">&lt;&lt;</div><div class="' +
-                    options.classes.join('-next-year ') + ui.Button.CLASS + '">&gt;&gt;</div></div>'
+                '<div class="' + this.getUnitClass(ui.BIMonth, 'header ') + '"><div class="' +
+                    this.getUnitClass(ui.BIMonth, 'title ') + '"></div><div class="' +
+                    this.getUnitClass(ui.BIMonth, 'prev-year ') + ui.Button.CLASS + '">&lt;&lt;</div><div class="' +
+                    this.getUnitClass(ui.BIMonth, 'next-year ') + ui.Button.CLASS + '">&gt;&gt;</div></div>'
             );
             // 获取el所有直属节点
             var headers = dom.children(el.firstChild);

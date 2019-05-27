@@ -34,7 +34,7 @@ queryButton - 查询按钮控件。
                 // ecui.ui.BTableListRoute.prototype.setSearchParam(children.searchParm, this.getForm());
                 // children.searchParm.pageNo = 1;
                 ecui.esr.callRoute(route.children + '~pageNo=1', true);
-            },
+            }
         }
     );
 }());
