@@ -1967,6 +1967,7 @@ outer:          for (var caches = [], target = event.target, el; target && targe
             control.$setParent(parent);
             oncreate(control, options);
             allControls.push(control);
+            control.init();
 
             return control;
         },
