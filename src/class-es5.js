@@ -63,22 +63,57 @@
             interfaces = Array.prototype.slice.call(arguments, index),
             constructor = properties.constructor,
             newClass = function () {
-                this[classes[0].CLASSID] = {};
+                var list = [],
+                    args = arguments,
+                    self = this;
+
+                if (!Object.defineProperties) {
+                    // ie8
+                    self = document.createElement('IFRAME').document;
+                    Object.defineProperty(self, 'constructor', {
+                        get: function () {
+                            return newClass;
+                        },
+                        set: new Function()
+                    });
+                    for (var name in newClass.prototype) {
+                        self[name] = newClass.prototype[name];
+                    }
+                }
+
+                self[classes[0].CLASSID] = {};
                 // 初始化各层级类的属性域
                 for (var clazz = newClass; clazz; clazz = clazz.super) {
+                    list.push(clazz);
                     // 填充全部的初始化变量
-                    this[clazz.CLASSID] = Object.assign({}, defines[clazz.CLASSID].Values);
+                    self[clazz.CLASSID] = Object.assign({}, defines[clazz.CLASSID].Values);
 
                     // 初始化所有接口的属性域
                     defines[clazz.CLASSID].Interfaces.forEach(
                         function (inf) {
-                            this[inf.CLASSID] = Object.assign({}, defines[inf.CLASSID].Values);
+                            self[inf.CLASSID] = Object.assign({}, defines[inf.CLASSID].Values);
                         },
-                        this
+                        self
                     );
                 }
 
-                defines[classId].Constructor.apply(this, arguments);
+                defines[classId].Constructor.apply(self, args);
+
+                list.reverse().forEach(
+                    function (clazz) {
+                        defines[clazz.CLASSID].Interfaces.forEach(
+                            function (inf) {
+                                if (defines[inf.CLASSID].Methods.constructor) {
+                                    defines[inf.CLASSID].Methods.constructor.apply(self, args);
+                                }
+                            },
+                            self
+                        );
+                    },
+                    self
+                );
+
+                return self;
             },
             symbols = {},
             values = {},
@@ -102,7 +137,7 @@
             } else if (!/_super\s*\(/.test(constructor.toString())) {
                 var oldConstructor = constructor;
                 constructor = function () {
-                    superClass.apply(this, arguments);
+                    defines[superClass.CLASSID].Constructor.apply(this, arguments);
                     oldConstructor.apply(this, arguments);
                 };
             }
@@ -349,15 +384,31 @@
 
         defines[classId] = {
             Constructor: function () {
-                Object.defineProperties(this, symbols);
-                interfaces.forEach(
-                    function (inf) {
-                        Object.defineProperties(this, defines[inf.CLASSID].Symbols);
-                    },
-                    this
-                );
-
-                var args = arguments;
+                if (Object.defineProperties) {
+                    Object.defineProperties(this, symbols);
+                    interfaces.forEach(
+                        function (inf) {
+                            Object.defineProperties(this, defines[inf.CLASSID].Symbols);
+                        },
+                        this
+                    );
+                } else {
+                    for (var name in symbols) {
+                        if (symbols.hasOwnProperty(name)) {
+                            Object.defineProperty(this, name, symbols[name]);
+                        }
+                    }
+                    interfaces.forEach(
+                        function (inf) {
+                            for (var name in defines[inf.CLASSID].Symbols) {
+                                if (defines[inf.CLASSID].Symbols.hasOwnProperty(name)) {
+                                    Object.defineProperty(this, name, defines[inf.CLASSID].Symbols[name]);
+                                }
+                            }
+                        },
+                        this
+                    );
+                }
 
                 if (superClass) {
                     var clazz = this[classId].super = {};
@@ -367,20 +418,9 @@
                 }
 
                 // 调用全部类和接口的构造函数
-                makeProxy(newClass, function () {
-                    if (constructor) {
-                        constructor.apply(this, args);
-                    }
-
-                    interfaces.forEach(
-                        function (inf) {
-                            if (defines[inf.CLASSID].Methods.constructor) {
-                                defines[inf.CLASSID].Methods.constructor.apply(this, args);
-                            }
-                        },
-                        this
-                    );
-                }, superClass).apply(this, arguments);
+                if (constructor) {
+                    makeProxy(newClass, constructor, superClass).apply(this, arguments);
+                }
             },
             Interfaces: interfaces,
             Symbols: symbols,
@@ -391,6 +431,9 @@
 
         newClass.CLASSID = classId;
         classes.push(newClass);
+        newClass.isInstance = function (obj) {
+            return !!obj[classId];
+        };
         newClass.isAssignableFrom = function (subClass) {
             for (; subClass; subClass = subClass.super) {
                 if (subClass === newClass) {
@@ -435,6 +478,9 @@
                 if (defines[inf.CLASSID].Methods.hasOwnProperty(name)) {
                     methods[name] = methods[name] ? addProxy(methods[name], defines[inf.CLASSID].Methods[name]) : defines[inf.CLASSID].Methods[name];
                 }
+            }
+            if (!Object.defineProperties && defines[inf.CLASSID].Methods.constructor) {
+                methods.constructor = methods.constructor ? addProxy(methods.constructor, defines[inf.CLASSID].Methods.constructor) : defines[inf.CLASSID].Methods[name];
             }
         });
 
@@ -515,12 +561,19 @@
             }
         }
 
+        if (!Object.defineProperties && properties.constructor) {
+            methods.constructor = methods.constructor ? addProxy(methods.constructor, data.constructor) : makeProxy(newClass, data.constructor, null);
+        }
+
         defines[newClass.CLASSID] = {
             Symbols: symbols,
             Values: values,
             Methods: methods
         };
 
+        newClass.isInstance = function (obj) {
+            return !!obj[classId];
+        };
         return newClass;
     };
 

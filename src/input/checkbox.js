@@ -188,7 +188,7 @@
                         form = this.getInput().form,
                         nochecked = true,
                         group = core.query(function (item) {
-                            if (item instanceof ui.Checkbox && item.getName() === name && item.getInput().form === form) {
+                            if (ui.Checkbox.isInstance(item) && item.getName() === name && item.getInput().form === form) {
                                 if (item.isChecked()) {
                                     nochecked = false;
                                 }
@@ -198,7 +198,7 @@
 
                     if (nochecked) {
                         for (var control = this; control = control.getParent(); ) {
-                            if (control instanceof ui.InputGroup) {
+                            if (ui.InputGroup.isInstance(control)) {
                                 core.dispatchEvent(control, 'error');
                                 return false;
                             }

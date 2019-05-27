@@ -126,11 +126,23 @@ _eInput - 选项对应的input，form提交时使用
             },
 
             /**
+             * 获取所有被选中的选项。
+             * @public
+             *
+             * @return {Array} 被选中的选项数组
+             */
+            getSelected: function () {
+                return this.getItems().filter(function (item) {
+                    return item.isSelected();
+                });
+            },
+
+            /**
              * @override
              */
             getValue: function () {
-                return this.getItems().filter(function (item) {
-                    return item.isSelected();
+                return this.getSelected().map(function (item) {
+                    return item.getValue();
                 });
             },
 

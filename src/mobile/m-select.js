@@ -51,7 +51,7 @@ _uOptions     - 下拉选择框
                      * @override
                      */
                     $show: function () {
-                        ui.$AbstractSelect.prototype.Options.prototype.$show.call(this);
+                        _super.$show();
 
                         var select = this.getParent(),
                             item = select.getSelected();
@@ -78,7 +78,7 @@ _uOptions     - 下拉选择框
                      * @override
                      */
                     $activate: function (event) {
-                        ui.$AbstractSelect.prototype.Item.prototype.$activate.call(this, event);
+                        _super.$activate(event);
                         core.dispatchEvent(this.getParent().$getSection('Options'), 'activate', event);
                     }
                 }

@@ -95,7 +95,7 @@ children     - 子控件集合
                 _super.$click(event);
 
                 for (var control = event.getControl(); control !== this; control = control.getParent()) {
-                    if (control instanceof ui.TreeView) {
+                    if (ui.TreeView.isInstance(control)) {
                         return;
                     }
                 }
@@ -154,7 +154,7 @@ children     - 子控件集合
                         return;
                     }
                     for (var control = event.getControl(); control; control = control.getParent()) {
-                        if (control instanceof ui.TreeView) {
+                        if (ui.TreeView.isInstance(control)) {
                             core.dispatchEvent(control, 'nodeover', event);
                             break;
                         }
@@ -359,7 +359,7 @@ children     - 子控件集合
              */
             getRoot: function () {
                 // 这里需要考虑Tree位于上一个Tree的节点内部
-                for (var control = this, parent; (parent = control.getParent()) instanceof ui.TreeView && parent.children.indexOf(control) >= 0; control = parent) {}
+                for (var control = this, parent; ui.TreeView.isInstance(parent = control.getParent()) && parent.children.indexOf(control) >= 0; control = parent) {}
                 return control;
             },
 

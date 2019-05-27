@@ -1920,7 +1920,7 @@ outer:          for (var caches = [], target = event.target, el; target && targe
             var control = new UIClass(el, options);
 
             if (parent) {
-                if (parent instanceof ui.Control) {
+                if (ui.Control.isInstance(parent)) {
                     control.setParent(parent);
                 } else {
                     control.appendTo(parent);
@@ -2140,7 +2140,7 @@ outer:          for (var caches = [], target = event.target, el; target && targe
                 }
             }
 
-            var isControl = control instanceof ui.Control,
+            var isControl = ui.Control.isInstance(control),
                 namedMap = {},
                 parent;
 

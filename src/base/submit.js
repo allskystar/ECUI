@@ -26,7 +26,7 @@
             $click: function (event) {
                 _super.$click(event);
                 for (var parent = this.getParent(); parent; parent = parent.getParent()) {
-                    if (parent instanceof ui.Dialog) {
+                    if (ui.Dialog.isInstance(parent)) {
                         core.dispatchEvent(parent, 'submit', event);
                         return;
                     }

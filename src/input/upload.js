@@ -51,7 +51,7 @@
             var reader = new FileReader(),
                 file = this._eFile.files[0],
                 progress = core.query(function (item) {
-                    return item instanceof ui.Progress && item.getParent() === this;
+                    return ui.Progress.isInstance(item) && item.getParent() === this;
                 }.bind(this))[0];
 
             reader.readAsDataURL(file);

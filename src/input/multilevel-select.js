@@ -49,12 +49,12 @@ _aSelect - 全部的下拉框控件列表
                              * @override
                              */
                             $dispose: function () {
-                                if (this._aChildren && this._aChildren[0] instanceof ui.Item && !this._aChildren[0].getParent()) {
+                                if (this._aChildren && ui.Item.isInstance(this._aChildren[0]) && !this._aChildren[0].getParent()) {
                                     this._aChildren.forEach(function (item) {
                                         item.dispose();
                                     });
                                 }
-                                ui.Select.prototype.Item.prototype.$dispose.call(this);
+                                _super.$dispose();
                             }
                         }
                     ),
@@ -83,7 +83,7 @@ _aSelect - 全部的下拉框控件列表
                             if (item._aChildren) {
                                 if (select) {
                                     select.removeAll();
-                                    if (item._aChildren[0] instanceof ui.Item) {
+                                    if (ui.Item.isInstance(item._aChildren[0])) {
                                         select.add(item._aChildren);
                                     } else {
                                         core.dispatchEvent(parent, 'request', {data: item._aChildren, owner: select});
@@ -144,7 +144,7 @@ _aSelect - 全部的下拉框控件列表
                     function (item) {
                         if (item.getControl) {
                             item = item.getControl();
-                            if (item instanceof ui.Select && this._aSelect.indexOf(item) < 0) {
+                            if (ui.Select.isInstance(item) && this._aSelect.indexOf(item) < 0) {
                                 this._aSelect.push(item);
                             }
                         } else if (item.tagName === 'SELECT') {

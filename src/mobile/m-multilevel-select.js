@@ -87,7 +87,7 @@ _aSelect - 全部的下拉框控件列表
                              * @override
                              */
                             $dispose: function () {
-                                if (this._aChildren && this._aChildren[0] instanceof ui.Item && !this._aChildren[0].getParent()) {
+                                if (this._aChildren && ui.Item.isInstance(this._aChildren[0]) && !this._aChildren[0].getParent()) {
                                     this._aChildren.forEach(function (item) {
                                         item.dispose();
                                     });
@@ -123,7 +123,7 @@ _aSelect - 全部的下拉框控件列表
                                 if (event.item._aChildren) {
                                     if (select) {
                                         select.removeAll();
-                                        if (event.item._aChildren[0] instanceof ui.Item) {
+                                        if (ui.Item.isInstance(event.item._aChildren[0])) {
                                             select.add(event.item._aChildren);
                                         } else {
                                             core.dispatchEvent(parent, 'request', {data: event.item._aChildren, owner: select});

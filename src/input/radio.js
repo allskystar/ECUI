@@ -150,7 +150,7 @@ _bRequired - 是否必须选择
                         form = this.getInput().form,
                         nochecked = true,
                         group = core.query(function (item) {
-                            if (item instanceof ui.Radio && item.getName() === name && item.getInput().form === form) {
+                            if (ui.Radio.isInstance(item) && item.getName() === name && item.getInput().form === form) {
                                 if (item.isChecked()) {
                                     nochecked = false;
                                 }
@@ -160,7 +160,7 @@ _bRequired - 是否必须选择
 
                     if (nochecked) {
                         for (var control = this; control = control.getParent(); ) {
-                            if (control instanceof ui.InputGroup) {
+                            if (ui.InputGroup.isInstance(control)) {
                                 core.dispatchEvent(control, 'error');
                                 return false;
                             }
@@ -196,7 +196,7 @@ _bRequired - 是否必须选择
                     return result;
                 }
                 return core.query(function (item) {
-                    return item instanceof ui.Radio && !item.getInput().form && item.getName() === inputEl.name;
+                    return ui.Radio.isInstance(item) && !item.getInput().form && item.getName() === inputEl.name;
                 });
             },
 
@@ -251,7 +251,7 @@ _bRequired - 是否必须选择
      */
     ui.Radio.getValue = function (name) {
         var control = core.query(function (item) {
-                return item instanceof ui.Radio && item.getName() === name && item.isChecked();
+                return ui.Radio.isInstance(item) && item.getName() === name && item.isChecked();
             })[0];
         return control ? control.getValue() : null;
     };
@@ -266,7 +266,7 @@ _bRequired - 是否必须选择
     ui.Radio.setValue = function (name, value) {
         value = String(value);
         core.query(function (item) {
-            return item instanceof ui.Radio && item.getName() === name && item.getValue() === value;
+            return ui.Radio.isInstance(item) && item.getName() === name && item.getValue() === value;
         }).forEach(function (item) {
             item.setChecked(true);
         });

@@ -68,7 +68,7 @@
         var data = hotspot._bLoaded ? hotspot : ui.MPhotoHotspot.DEFAULT,
             viewWidth = document.body.clientWidth,
             items = core.query(function (item) {
-                return item instanceof ui.MPhotoHotspot && item._sGroup === currHotspot._sGroup;
+                return ui.MPhotoHotspot.isInstance(item) && item._sGroup === currHotspot._sGroup;
             });
 
         img.style.top = (document.body.clientHeight - data.$$calcHeight) / 2 + 'px';
@@ -103,7 +103,7 @@
             return;
         }
         var items = core.query(function (item) {
-            return item instanceof ui.MPhotoHotspot && item._sGroup === currHotspot._sGroup;
+            return ui.MPhotoHotspot.isInstance(item) && item._sGroup === currHotspot._sGroup;
         });
         var index = items.indexOf(currHotspot),
             nextIndex = index;

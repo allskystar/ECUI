@@ -78,7 +78,7 @@
 
             constructor: function () {
                 this.items = [];
-
+console.log(this[ui.Items.CLASSID].items === this.items);
                 this.preventAlterItems();
 
                 // 初始化选项控件
@@ -145,7 +145,7 @@
 
                 (item instanceof Array ? item : [item]).forEach(
                     function (item) {
-                        if (item instanceof ui.Item) {
+                        if (ui.Item.isInstance(item)) {
                             // 选项控件位于其它items对象中，先进行移除
                             var parent = item.getParent();
                             if (parent && !parent.remove(item)) {
@@ -228,6 +228,7 @@
              * @override
              */
             cache: function (force) {
+                console.log('test');
                 this.items.forEach(function (item) {
                     item.cache(force);
                 });

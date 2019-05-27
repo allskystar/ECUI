@@ -47,7 +47,7 @@ _cItem    - 当前处于激活的选项
                      * @override
                      */
                     $activate: function (event) {
-                        ui.MListView.prototype.Item.prototype.$activate.call(this, event);
+                        _super.$activate(event);
 
                         var parent = this.getParent();
                         parent.setScrollRange({left: -this.$$sumWidth});
@@ -64,7 +64,7 @@ _cItem    - 当前处于激活的选项
                      * @override
                      */
                     $cache: function (style) {
-                        ui.MListView.prototype.Item.prototype.$cache.call(this, style);
+                        _super.$cache(style);
                         this.$$sumWidth = 0;
                         this.$$opWidth = dom.children(this.getBody()).slice(1).map(
                             function (item) {
@@ -79,7 +79,7 @@ _cItem    - 当前处于激活的选项
                      * @override
                      */
                     $click: function (event) {
-                        ui.MListView.prototype.Item.prototype.$click.call(this, event);
+                        _super.$click(event);
 
                         var parent = this.getParent();
                         if (parent && parent._cItem) {
@@ -100,7 +100,7 @@ _cItem    - 当前处于激活的选项
                      * @override
                      */
                     $initStructure: function (width, height) {
-                        ui.MListView.prototype.Item.prototype.$initStructure.call(this, width, height);
+                        _super.$initStructure(width, height);
                         height = this.getClientHeight();
                         dom.children(this.getBody()).forEach(function (item, index) {
                             if (index) {
@@ -113,7 +113,7 @@ _cItem    - 当前处于激活的选项
                      * @override
                      */
                     $restoreStructure: function (event) {
-                        ui.MListView.prototype.Item.prototype.$restoreStructure.call(this, event);
+                        _super.$restoreStructure(event);
                         dom.children(this.getBody()).forEach(function (item, index) {
                             if (index) {
                                 item.style.height = '';

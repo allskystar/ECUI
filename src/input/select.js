@@ -70,7 +70,7 @@
                      * @override
                      */
                     $show: function () {
-                        ui.$AbstractSelect.prototype.Options.prototype.$show.call(this);
+                        _super.$show();
                         this.getParent().$refresh();
                     }
                 }
@@ -89,7 +89,7 @@
                      * @override
                      */
                     $mouseover: function (event) {
-                        ui.$AbstractSelect.prototype.Item.prototype.$mouseover.call(this, event);
+                        _super.$mouseover(event);
 
                         var parent = this.getParent();
                         if (parent) {

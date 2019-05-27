@@ -292,7 +292,7 @@
              */
             $clearErrorStyle: function () {
                 for (var control = this; control = control.getParent(); ) {
-                    if (control instanceof ui.InputGroup) {
+                    if (ui.InputGroup.isInstance(control)) {
                         control.alterSubType('');
                         break;
                     }
@@ -339,7 +339,7 @@
              */
             $error: function () {
                 for (var control = this; control = control.getParent(); ) {
-                    if (control instanceof ui.InputGroup) {
+                    if (ui.InputGroup.isInstance(control)) {
                         core.dispatchEvent(control, 'error');
                         return false;
                     }

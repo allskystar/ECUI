@@ -12,10 +12,6 @@
     <div>选项二</div>
     <div>选项三</div>
 </div>
-
-@fields
-_sName  - 多选框内所有input的名称
-_eInput - 选项对应的input，form提交时使用
 */
 //{if 0}//
 (function () {
@@ -29,46 +25,40 @@ _eInput - 选项对应的input，form提交时使用
      * @control
      */
     ui.MultiSelect = core.inherits(
-        ui.InputControl,
+        ui.Listbox,
         'ui-multi-select',
         function (el, options) {
-            var optionsEl = dom.create({className: this.getUnitClass(ui.MultiSelect, 'options') + this.Options.CLASS + ' ui-popup ui-hide'});
+            var optionsEl = dom.create({className: this.getUnitClass(ui.MultiSelect, 'options') + ' ui-popup ui-hide'});
             for (; el.firstChild; ) {
                 optionsEl.appendChild(el.firstChild);
             }
             _super(el, options);
+            this.$setBody(optionsEl);
             dom.insertBefore(
-                this._eText = dom.create('DIV', { className: this.getUnitClass(ui.MultiSelect, 'text') }),
+                this.text = dom.create('DIV', { className: this.getUnitClass(ui.MultiSelect, 'text') }),
                 dom.last(el)
             );
-            this.setPopup(core.$fastCreate(this.Options, optionsEl, this, {name: options.name}));
-            this._sName = options.name || '';
+            this.setPopup(core.$fastCreate(ui.Control, optionsEl, this, {name: options.name}));
         },
         {
-            TEXT: '已选{0}个',
+            private: {
+                text: undefined
+            },
+
             /**
-             * 选项框部件。
+             * 选项部件。
              * @unit
              */
-            Options: core.inherits(
-                ui.Listbox,
+            Item: core.inherits(
+                ui.Listbox.prototype.Item,
                 {
                     /**
-                     * 选项部件。
-                     * @unit
+                     * @override
                      */
-                    Item: core.inherits(
-                        ui.Listbox.prototype.Item,
-                        {
-                            /**
-                             * @override
-                             */
-                            $click: function (event) {
-                                ui.Listbox.prototype.Item.prototype.$click.call(this, event);
-                                core.dispatchEvent(this.getParent().getParent(), 'change');
-                            }
-                        }
-                    )
+                    $click: function (event) {
+                        _super.$click(event);
+                        core.dispatchEvent(this.getParent(), 'change');
+                    }
                 }
             ),
 
@@ -82,7 +72,7 @@ _eInput - 选项对应的input，form提交时使用
                     text.push(item.getBody().innerText.trim());
                     value.push(item.getValue());
                 });
-                this._eText.innerHTML = text.join(',');
+                this.text.innerHTML = text.join(',');
                 this.$setValue(value.join(','));
             },
 
@@ -90,60 +80,8 @@ _eInput - 选项对应的input，form提交时使用
              * @override
              */
             $dispose: function () {
-                this._eText = null;
+                this.text = null;
                 _super.$dispose();
-            },
-
-            /**
-             * 获取控件的表单项名称。
-             * 多选框控件可以在表单中被提交，getName 方法返回提交时用的表单项名称，表单项名称可以使用 setName 方法改变。
-             * @public
-             *
-             * @return {string} 表单项名称
-             */
-            getName: function () {
-                return this._sName;
-            },
-
-            /**
-             * 获取所有选中的选项。
-             * @public
-             *
-             * @return {Array} 选项数组
-             */
-            getSelected: function () {
-                return this.getPopup().getSelected();
-            },
-
-            /**
-             * 获取所有选中项的value。
-             * @public
-             *
-             * @return {Array} 选项数组
-             */
-            getValue: function () {
-                var value = _super.getValue().trim();
-                return value !== '' ? value.split(',') : [];
-            },
-
-            /**
-             * 选中所有的选项。
-             * 某些场景下，需要多选框控件的内容都可以被提交，可以在表单的 onsubmit 事件中调用 selectAll 方法全部选择。
-             * @public
-             */
-            selectAll: function () {
-                this.getPopup().selectAll();
-            },
-
-            /**
-             * 设置控件的表单项名称。
-             * 多选框控件可以在表单中被提交，setName 方法设置提交时用的表单项名称，表单项名称可以使用 getName 方法获取。
-             * @public
-             *
-             * @param {string} name 提交用的名称
-             */
-            setName: function (name) {
-                this.getPopup().setName(name);
             }
         },
         ui.Popup

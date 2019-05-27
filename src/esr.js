@@ -1265,7 +1265,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
          * @return {Route} 通过 addRoute 定义的路由对象
          */
         findRoute: function (el) {
-            if (el instanceof ui.Control) {
+            if (ui.Control.isInstance(el)) {
                 el = el.getMain();
             }
             for (; el; el = dom.parent(el)) {
@@ -1818,7 +1818,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                     'hide',
                     function () {
                         if (content) {
-                            if (content instanceof ui.Control) {
+                            if (ui.Control.isInstance(content)) {
                                 content.setParent();
                             } else if ('string' === typeof content) {
                                 core.dispose(container, true);
@@ -1837,7 +1837,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                 esr.setData('AppSelectTitle', options.title || '');
 
                 if (content) {
-                    if (content instanceof ui.Control) {
+                    if (ui.Control.isInstance(content)) {
                         content.setParent(layer);
                     } else if ('string' === typeof content) {
                         container.innerHTML = content;
