@@ -10,19 +10,36 @@
                 return this.super[name].apply(this.this, arguments);
             };
         }
+//{if 0}//
+        superMethods[name].toString = function () {
+            return this.super[name].toString();
+        };
+//{/if}//
         return superMethods[name];
     }
 
-    function makeProxy(Class, fn, superClass, isProtected) {
+    function makeProxy(Class, fn, superClass, name) {
         var proxy = function () {
-            if (isProtected) {
+            if (name) {
                 var item = callStack[callStack.length - 1];
-                if (!Class.isAssignableFrom(item[1])) {
+                for (var clazz = Class.super, defineClass; clazz; clazz = clazz.super) {
+                    if (clazz.prototype.hasOwnProperty(name)) {
+                        defineClass = clazz;
+                    }
+                }
+                if (!(defineClass ||  Class).isAssignableFrom(item[1])) {
                     throw new Error('The property is not visible.');
                 }
             }
             var oldSuper = window._super;
             _super = proxy.super && this.constructor.CLASSID ? Object.assign(defines[proxy.super.CLASSID].Constructor.bind(this), this[Class.CLASSID].super) : null;
+//{if 0}//
+            if (proxy.super && this.constructor.CLASSID) {
+                _super.toString = function () {
+                    return proxy.super.toString();
+                };
+            }
+//{/if}//
             callStack.push([proxy.super !== undefined ? this : null, Class]);
             try {
                 var ret = fn.apply(this, arguments);
@@ -32,6 +49,11 @@
             }
             return ret;
         };
+//{if 0}//
+        proxy.toString = function () {
+            return fn.toString();
+        };
+//{/if}//
         proxy.super = superClass;
         return proxy;
     }
@@ -261,7 +283,7 @@
                             innerClasses.push(data[name]);
                             Array.prototype.push.apply(innerClasses, defines[data[name].CLASSID].InnerClasses);
                         } else {
-                            newClass.prototype[name] = makeProxy(newClass, data[name], superClass, protectedNames.indexOf(name) >= 0);
+                            newClass.prototype[name] = makeProxy(newClass, data[name], superClass, protectedNames.indexOf(name) >= 0 ? name : undefined);
                             methods[name] = makeSuperMethod(name);
                             continue;
                         }
@@ -442,6 +464,11 @@
             }
             return false;
         };
+//{if 0}//
+        newClass.toString = function () {
+            return oldConstructor ? oldConstructor.toString() : constructor ? constructor.toString() : null;
+        };
+//{//if}//
         return newClass;
     };
 
