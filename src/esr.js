@@ -1010,7 +1010,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
 
                         effect.grade(
                             fn,
-                            400,
+                            200,
                             {
                                 $: {from: currLayerEl, to: layerEl},
                                 onfinish: function () {
