@@ -358,6 +358,19 @@ ECUI动画效果库，支持对CSS3动画效果的模拟并扩展了相应的功
          */
         grade: function (fn, duration, options, transition) {
             if ('string' === typeof fn) {
+                var elements = [],
+                    css;
+                if (!options.onstep &&
+                        !fn.replace(
+                            /([^;]+\.style\.)[^;]+=[^;]+(;|$)/g,
+                            function (item, name) {
+                                elements.push(name);
+                                return '';
+                            }
+                        )) {
+                    css = true;
+                    elements.push('');
+                }
                 fn = new Function(
                     'p',
                     '$',
@@ -386,6 +399,26 @@ ECUI动画效果库，支持对CSS3动画效果的模拟并扩展了相应的功
                         }
                     )
                 );
+
+                if (css) {
+                    fn.call(options.$, 0, options);
+                    new Function('$', elements.join('transition="all ' + duration + 'ms ' + (transition || 'ease') + '";')).call(options.$, options);
+                    
+                    util.timer(function () {
+                        fn.call(options.$, 1, options);
+                    }, 0);
+                    
+                    util.timer(
+                        function () {
+                            new Function('$', elements.join('transition="";')).call(options.$, options);
+                            if (options.onfinish) {
+                                options.onfinish.call(options.$, options);
+                            }
+                        },
+                        duration
+                    );
+                    return;
+                }
             }
 
             var startTime = Date.now(),
