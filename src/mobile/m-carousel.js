@@ -148,9 +148,9 @@ _nDelay   - 延迟时间，如果不自动轮播这个值为0
              */
             $dragend: function (event) {
                 _super.$dragend(event);
-                this.start();
                 var el = this.getBody();
                 if (el.firstChild !== el.lastChild) {
+                    this.start();
                     refresh(this);
                 }
             },

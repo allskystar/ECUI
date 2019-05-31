@@ -399,7 +399,9 @@ _nBottomIndex  - 下部隐藏的选项序号
             $dragstart: function (event) {
                 ui.MScroll.Methods.$dragstart.call(this, event);
                 this._oHandle();
-                this._sStatus = '';
+                if (!this._bLoading) {
+                    this._sStatus = '';
+                }
             },
 
             /**
