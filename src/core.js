@@ -1998,28 +1998,22 @@ outer:          for (var caches = [], target = event.target, el; target && targe
         },
 
         /**
-         * 在元素显示时进行下级控件的缓存处理。
+         * 在元素显示时处理全部未缓存的控件。
          * @public
-         *
-         * @param {HTMLElement} el 切换为显示状态的 DOM 元素
          */
-        cacheAtShow: function (el) {
-            core.query(function (item) {
-                return dom.contain(el, item.getMain());
-            }).sort(function (a, b) {
-                var ia = 0,
-                    ib = 0,
-                    parent;
-
-                for (parent = a; parent; parent = parent.getParent()) {
-                    ia++;
+        cacheAtShow: function () {
+            var controls = [];
+            independentControls.forEach(function (item) {
+                if (!item.isReady()) {
+                    item.clearCache();
+                    controls.push(item);
                 }
-                for (parent = b; parent; parent = parent.getParent()) {
-                    ib++;
-                }
-                return ib - ia;
-            }).forEach(function (item) {
                 item.cache();
+            });
+            controls.forEach(function (item) {
+                if (item.isCached()) {
+                    item.initStructure();
+                }
             });
         },
 
@@ -2799,13 +2793,17 @@ outer:          for (var caches = [], target = event.target, el; target && targe
 
         /**
          * 查询满足条件的控件列表。
+         * 查询函数允许传入一段语法文本，多个限制条件使用#号分隔，如 instanceof ecui.ui.Item # getParent()===ecui.get('select')
          * @public
          *
-         * @param {Function} fn 查询函数
+         * @param {Function|string} fn 查询函数或语法字符串
          * @param {object} thisArg fn执行过程中的this对象
          * @return {Array} 控件列表
          */
         query: function (fn, thisArg) {
+            if ('string' === typeof fn) {
+                fn = new Function('$', 'return $ ' + fn.split('#').join(' && $'));
+            }
             return independentControls.filter(fn, thisArg);
         },
 
