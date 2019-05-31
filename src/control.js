@@ -1310,26 +1310,10 @@ _aStatus            - 控件当前的状态集合
              * @return {boolean} 显示状态是否改变
              */
             show: function () {
-                if (dom.hasClass(this.getMain(), 'ui-hide')) {
+                if (dom.hasClass(this._eMain, 'ui-hide')) {
                     core.dispatchEvent(this, 'show');
-                    core.query(function (item) {
-                        return this.contain(item);
-                    }.bind(this)).sort(function (a, b) {
-                        var ia = 0,
-                            ib = 0,
-                            parent;
-
-                        for (parent = a; parent !== this; parent = parent.getParent()) {
-                            ia++;
-                        }
-                        for (parent = b; parent !== this; parent = parent.getParent()) {
-                            ib++;
-                        }
-                        return ib - ia;
-                    }.bind(this)).forEach(function (item) {
-                        item.cache();
-                    });
-                    core.flexFixed(this.getMain());
+                    core.cacheAtShow();
+                    core.flexFixed(this._eMain);
                     return true;
                 }
                 return false;
