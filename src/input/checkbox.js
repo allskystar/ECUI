@@ -166,17 +166,6 @@ _bRequired       - 是否必须选择
             /**
              * @override
              */
-            $ready: function () {
-                ui.InputControl.prototype.$ready.call(this);
-                if (!this._aDependents.length) {
-                    // 如果控件是主复选框，应该直接根据从属复选框的状态来显示自己的状态
-                    setStatus(this, this.getInput().checked ? 0 : 1);
-                }
-            },
-
-            /**
-             * @override
-             */
             $reset: function () {
                 // 修复IE6/7下移动DOM节点时选中状态发生改变的问题
                 this.getInput().checked = this._bDefault;
@@ -256,6 +245,17 @@ _bRequired       - 是否必须选择
              */
             isFormChecked: function () {
                 return this.isChecked();
+            },
+
+            /**
+             * @override
+             */
+            init: function () {
+                ui.InputControl.prototype.init.call(this);
+                if (!this._aDependents.length) {
+                    // 如果控件是主复选框，应该直接根据从属复选框的状态来显示自己的状态
+                    setStatus(this, this.getInput().checked ? 0 : 1);
+                }
             },
 
             /**
