@@ -170,7 +170,7 @@
                                 }
                                 item = dom.create(
                                     {
-                                        innerHTML: options[this.TEXTNAME]
+                                        innerHTML: options[this.TEXTNAME || '#text']
                                     }
                                 );
                             }
