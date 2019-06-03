@@ -26,7 +26,7 @@
 
                 var optionsEl = dom.create(
                         {
-                            innerHTML: dom.toArray(el.$Options).map(
+                            innerHTML: dom.toArray(el.options).map(
                                 function (item) {
                                     var optionText = dom.getAttribute(item, core.getAttributeName());
                                     return '<div ' + core.getAttributeName() + '="value:' + util.encodeHTML(item.value) + (optionText ? ';' + util.encodeHTML(optionText) : '') + '">' + util.encodeHTML(item.$Text) + '</div>';
