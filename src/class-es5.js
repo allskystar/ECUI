@@ -454,7 +454,7 @@
         newClass.CLASSID = classId;
         classes.push(newClass);
         newClass.isInstance = function (obj) {
-            return !!obj[classId];
+            return !!(obj && obj[classId]);
         };
         newClass.isAssignableFrom = function (subClass) {
             for (; subClass; subClass = subClass.super) {
