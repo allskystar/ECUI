@@ -19,6 +19,10 @@
     ui.MultilevelSelect = core.inherits(
         ui.InputControl,
         {
+            SUPER_OPTIONS: {
+                inputType: 'hidden'
+            },
+
             private: {
                 selects: undefined
             },
