@@ -4,10 +4,6 @@
     <select name="province"></select>
     <select name="city"></select>
 </div>
-
-@fields
-_sUrl    - 动态请求url的地址
-_aSelect - 全部的下拉框控件列表
 */
 //{if 0}//
 (function () {
@@ -23,6 +19,10 @@ _aSelect - 全部的下拉框控件列表
     ui.MultilevelSelect = core.inherits(
         ui.InputControl,
         {
+            private: {
+                selects: undefined
+            },
+
             /**
              * 下拉框部件。
              * @unit
@@ -31,9 +31,13 @@ _aSelect - 全部的下拉框控件列表
                 ui.Select,
                 function (el, options) {
                     _super(el, options);
-                    this._sUrl = options.url;
+                    this.url = options.url;
                 },
                 {
+                    private: {
+                        children: undefined
+                    },
+
                     /**
                      * 选项部件。
                      * @unit
@@ -41,16 +45,16 @@ _aSelect - 全部的下拉框控件列表
                     Item: core.inherits(
                         ui.Select.prototype.Item,
                         function (el, options) {
-                            _super.Item(el, options);
-                            this._aChildren = options.children;
+                            _super(el, options);
+                            this.children = options.children;
                         },
                         {
                             /**
                              * @override
                              */
                             $dispose: function () {
-                                if (this._aChildren && ui.Item.isInstance(this._aChildren[0]) && !this._aChildren[0].getParent()) {
-                                    this._aChildren.forEach(function (item) {
+                                if (this.children && ui.Item.isInstance(this.children[0]) && !this.children[0].getParent()) {
+                                    this.children.forEach(function (item) {
                                         item.dispose();
                                     });
                                 }
@@ -74,27 +78,27 @@ _aSelect - 全部的下拉框控件列表
                         _super.setSelected(item);
 
                         var parent = this.getParent(),
-                            index = parent._aSelect.indexOf(this);
+                            index = parent.selects.indexOf(this);
 
                         parent.$setValue(this.getValue());
 
                         if (item) {
-                            var select = parent._aSelect[++index];
-                            if (item._aChildren) {
+                            var select = parent.selects[++index];
+                            if (item.children) {
                                 if (select) {
                                     select.removeAll();
-                                    if (ui.Item.isInstance(item._aChildren[0])) {
-                                        select.add(item._aChildren);
+                                    if (ui.Item.isInstance(item.children[0])) {
+                                        select.add(item.children);
                                     } else {
-                                        core.dispatchEvent(parent, 'request', {data: item._aChildren, owner: select});
-                                        select.add(item._aChildren);
-                                        item._aChildren = select.getItems();
+                                        core.dispatchEvent(parent, 'request', {data: item.children, owner: select});
+                                        select.add(item.children);
+                                        item.children = select.getItems();
                                     }
                                 }
                             } else if (select) {
-                                if (select._sUrl) {
-                                    var args = [select._sUrl];
-                                    parent._aSelect.forEach(function (item) {
+                                if (select.url) {
+                                    var args = [select.url];
+                                    parent.selects.forEach(function (item) {
                                         args.push(item.getValue());
                                     });
 
@@ -109,7 +113,7 @@ _aSelect - 全部的下拉框控件列表
                                                 currSelect.removeAll();
                                                 core.dispatchEvent(parent, 'request', {data: data, owner: currSelect});
                                                 currSelect.add(data);
-                                                item._aChildren = currSelect.getItems();
+                                                item.children = currSelect.getItems();
                                                 currSelect.setValue(currSelect.getValue());
                                             }
                                         }.bind(this)
@@ -119,7 +123,7 @@ _aSelect - 全部的下拉框控件列表
                         }
 
                         // 清除后续多级联动项
-                        for (; select = parent._aSelect[++index]; ) {
+                        for (; select = parent.selects[++index]; ) {
                             select.removeAll();
                         }
                     }
@@ -139,18 +143,18 @@ _aSelect - 全部的下拉框控件列表
                 _super.$ready();
 
                 var el = this.getMain();
-                this._aSelect = [];
+                this.selects = [];
                 dom.toArray(el.all || el.getElementsByTagName('*')).forEach(
                     function (item) {
                         if (item.getControl) {
                             item = item.getControl();
-                            if (ui.Select.isInstance(item) && this._aSelect.indexOf(item) < 0) {
-                                this._aSelect.push(item);
+                            if (ui.Select.isInstance(item) && this.selects.indexOf(item) < 0) {
+                                this.selects.push(item);
                             }
                         } else if (item.tagName === 'SELECT') {
                             item.className += this.Select.CLASS;
                             item = core.$fastCreate(this.Select, item, this, core.getOptions(item));
-                            this._aSelect.push(item);
+                            this.selects.push(item);
                         }
                     },
                     this
@@ -171,7 +175,7 @@ _aSelect - 全部的下拉框控件列表
              * @return {ecui.ui.Select} 下拉框对象，如果不存在返回null
              */
             getSelect: function (index) {
-                return this._aSelect[index] || null;
+                return this.selects[index] || null;
             },
 
             /**
@@ -181,11 +185,42 @@ _aSelect - 全部的下拉框控件列表
              * @param {object} data 多级联动数据，是一个数组，每一项都包含code,value属性，children属性可以不包含，如果包含，结构与data相同
              */
             setData: function (data) {
-                this._aSelect.forEach(function (item) {
+                this.selects.forEach(function (item) {
                     item.removeAll(true);
                 });
-                core.dispatchEvent(this, 'request', {data: data, owner: this._aSelect[0]});
-                this._aSelect[0].add(data);
+                core.dispatchEvent(this, 'request', {data: data, owner: this.selects[0]});
+                this.selects[0].add(data);
+            },
+
+            /**
+             * 设置初始值，注意如果是动态获取数据的多级联动组件需要重新实现此方法。
+             * @public
+             *
+             * @param {string} value 多级联动数据
+             */
+            setValue: function (value) {
+                function find(items) {
+                    for (var i = 0, item; item = items[i++]; ) {
+                        if (ui.Select.prototype.Item.isInstance(item) ? item.getValue() === value : item.value === value) {
+                            result.push(value);
+                            return true;
+                        }
+                        if (item.children && find(item.children)) {
+                            result.push(ui.Select.prototype.Item.isInstance(item) ? item.getValue() : item.value);
+                            return true;
+                        }
+                    }
+                }
+
+                var result = [];
+                _super.setValue(value);
+                find(this.selects[0].getItems());
+                result.reverse().forEach(
+                    function (value, index) {
+                        this.selects[index].setValue(value);
+                    },
+                    this
+                );
             }
         }
     );
