@@ -516,7 +516,10 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                     if (isTouchMoved === undefined) { // MouseEvent
                         // 触控设备在mouseup时获得焦点
                         if (!scrollHandler || ieVersion >= 9) {
-                            core.setFocused(target);
+                            if ((event.target.tagName !== 'INPUT' || event.target.type === 'radio' || event.target.type === 'checkbox') && event.target.tagName !== 'TEXTAREA') {
+                                // 如果点击可输入框，由可输入框的focus事件触发setFocused
+                                core.setFocused(target);
+                            }
                         }
                     }
 

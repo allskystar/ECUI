@@ -15,9 +15,9 @@
         ui = core.ui,
         util = core.util,
 
-        isToucher = document.ontouchstart !== undefined,
         iosVersion = /(iPhone|iPad).*?OS (\d+(_\d+)?)/i.test(navigator.userAgent) ? +(RegExp.$2.replace('_', '.')) : undefined,
-        ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined;
+        ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined,
+        firefoxVersion = /firefox\/(\d+\.\d)/i.test(navigator.userAgent) ? +RegExp.$1 : undefined;
 //{/if}//
     var IMEStatus = {},
         timer = util.blank,
@@ -108,9 +108,7 @@
                     }
                     dom.addEventListener(el, 'blur', events.blur);
                 } else {
-                    if (!isToucher || document.activeElement !== el) {
-                        control.focus();
-                    }
+                    control.focus();
                 }
             },
 
@@ -148,6 +146,13 @@
                 }
             }
         };
+
+    if (!firefoxVersion || firefoxVersion >= 52) {
+        dom.addEventListener(document, 'focusin', events.focus);
+        dom.addEventListener(document, 'focusout', events.blur);
+        delete events.focus;
+        delete events.blur;
+    }
 
     /**
      * 表单提交事件处理。
@@ -354,48 +359,20 @@
             $focus: function (event) {
                 _super.$focus(event);
 
-                if (isToucher) {
-                    var active = document.activeElement;
-                    if (!active.getControl || active.getControl() !== this) {
-                        if (active.tagName !== 'BODY') {
-                            if (active.getControl) {
-                                dom.removeEventListener(active, 'blur', events.blur);
-                                active.blur();
-                                dom.addEventListener(active, 'blur', events.blur);
-                            } else {
-                                active.blur();
-                            }
+                var active = document.activeElement;
+                if (!active.getControl || active.getControl() !== this) {
+                    if (active.tagName !== 'BODY') {
+                        if (active.getControl) {
+                            dom.removeEventListener(active, 'blur', events.blur);
+                            active.blur();
+                            dom.addEventListener(active, 'blur', events.blur);
+                        } else {
+                            active.blur();
                         }
-                        dom.removeEventListener(this.input, 'focus', events.focus);
-                        this.input.focus();
-                        dom.addEventListener(this.input, 'focus', events.focus);
                     }
-                } else {
-                    util.timer(
-                        function () {
-                            var active = document.activeElement;
-                            if (!active.getControl || active.getControl() !== this) {
-                                if (active.tagName !== 'BODY') {
-                                    if (active.getControl) {
-                                        dom.removeEventListener(active, 'blur', events.blur);
-                                        if (active.blur) {
-                                            active.blur();
-                                        }
-                                        dom.addEventListener(active, 'blur', events.blur);
-                                    } else {
-                                        if (active.blur) {
-                                            active.blur();
-                                        }
-                                    }
-                                }
-                                dom.removeEventListener(this.input, 'focus', events.focus);
-                                this.input.focus();
-                                dom.addEventListener(this.input, 'focus', events.focus);
-                            }
-                        },
-                        0,
-                        this
-                    );
+                    dom.removeEventListener(this.input, 'focus', events.focus);
+                    this.input.focus();
+                    dom.addEventListener(this.input, 'focus', events.focus);
                 }
             },
 
