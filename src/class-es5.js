@@ -582,14 +582,10 @@
             for (name in data) {
                 if (data.hasOwnProperty(name)) {
                     if ('function' === typeof data[name] && !data[name].CLASSID) {
-                        methods[name] = methods[name] ? addProxy(methods[name], data[name]) : makeProxy(newClass, data[name], null);
+                        methods[name] = methods[name] ? addProxy(methods[name], makeProxy(newClass, data[name], null)) : makeProxy(newClass, data[name], null);
                     }
                 }
             }
-        }
-
-        if (!Object.defineProperties && properties.constructor) {
-            methods.constructor = methods.constructor ? addProxy(methods.constructor, data.constructor) : makeProxy(newClass, data.constructor, null);
         }
 
         defines[newClass.CLASSID] = {
