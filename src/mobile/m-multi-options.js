@@ -101,50 +101,47 @@ _eText       - 文本框
              */
             Options: core.inherits(
                 ui.Control,
-                [
-                    function (el, options) {
-                        if (options.value !== undefined) {
-                            this.setValue(options.value);
-                        }
-                    },
-                    function (el, options) {
-                        _super(el, options);
+                function (el, options) {
+                    _super(el, options);
 
-                        var values = options.values;
-                        this._sPrefix = '';
+                    var values = options.values;
+                    this._sPrefix = '';
 
-                        if ('string' === typeof values) {
-                            if (values.indexOf(',') < 0) {
-                                var ret = /^([0-9]+)-([0-9]+)(:([0-9]+))?(\|(.+))?$/.exec(values);
-                                this._sPrefix = ret[6] || '';
-                                ret = [+ret[1], +ret[2], +ret[4] || 1];
-                                values = [];
-                                for (var i = ret[0]; i <= ret[1]; i += ret[2]) {
-                                    values.push(i);
-                                }
-                            } else {
-                                values = values.split(',');
+                    if ('string' === typeof values) {
+                        if (values.indexOf(',') < 0) {
+                            var ret = /^([0-9]+)-([0-9]+)(:([0-9]+))?(\|(.+))?$/.exec(values);
+                            this._sPrefix = ret[6] || '';
+                            ret = [+ret[1], +ret[2], +ret[4] || 1];
+                            values = [];
+                            for (var i = ret[0]; i <= ret[1]; i += ret[2]) {
+                                values.push(i);
                             }
+                        } else {
+                            values = values.split(',');
                         }
-
-                        this.getBody().innerHTML = values.map(
-                            function (item) {
-                                return '<div ui="value:' + (this._sPrefix + item).slice(-this._sPrefix.length) + '" class="' + this.getUnitClass(ui.MMultiOptions, 'item') + ' ui-item">' + (options.format ? util.stringFormat(options.format, item) : item) + '</div>';
-                            },
-                            this
-                        ).join('');
-
-                        this._aItems = [];
-                        dom.children(el).forEach(
-                            function (item) {
-                                this._aItems.push(core.$fastCreate(this.Item, item, this, core.getOptions(item)));
-                            },
-                            this
-                        );
-
-                        this.setOptionSize(3);
                     }
-                ],
+
+                    this.getBody().innerHTML = values.map(
+                        function (item) {
+                            return '<div ui="value:' + (this._sPrefix + item).slice(-this._sPrefix.length) + '" class="' + this.getUnitClass(ui.MMultiOptions.prototype.Options, 'item') + ' ui-item">' + (options.format ? util.stringFormat(options.format, item) : item) + '</div>';
+                        },
+                        this
+                    ).join('');
+
+                    this._aItems = [];
+                    dom.children(el).forEach(
+                        function (item) {
+                            this._aItems.push(core.$fastCreate(this.Item, item, this, core.getOptions(item)));
+                        },
+                        this
+                    );
+
+                    this.setOptionSize(3);
+
+                    if (options.value !== undefined) {
+                        this.setValue(options.value);
+                    }
+                },
                 {
                     /**
                      * 选项部件。
@@ -157,6 +154,14 @@ _eText       - 文本框
                             this._sValue = options.value || this.getContent();
                         }
                     ),
+
+                    /**
+                     * @override
+                     */
+                    $dragend: function (event) {
+                        _super.$dragend(event);
+                        core.dispatchEvent(this.getParent(), 'change');
+                    },
 
                     /**
                      * @override
@@ -197,19 +202,9 @@ _eText       - 文本框
                         this.setSelected();
                     }
                 },
-                ui.MOptions,
-                {
-                    /**
-                     * @override
-                     */
-                    $dragend: function (event) {
-                        ui.MScroll.Methods.$dragend.call(this, event);
-                        core.dispatchEvent(this.getParent(), 'change');
-                    }
-                }
-            )
-        },
-        {
+                ui.MOptions
+            ),
+
             /**
              * @override
              */

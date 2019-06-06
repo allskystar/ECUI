@@ -22,132 +22,128 @@
         },
         locked;
 
-    ui.MPopup = {
-        NAME: '$MPopup',
-
-        constructor: function (el, options) {
-            this.$MPopupData.enter = (position[options.enter || 'bottom'] || position.right);
-            this.$MPopupData.mask = options.mask;
+    ui.MPopup = _interface({
+        private: {
+            popup: undefined,
+            enter: undefined,
+            mask: undefined
         },
 
-        Methods: {
-            /**
-             * @override
-             */
-            $click: function (event) {
-                if (!locked) {
-                    var view = util.getView(),
-                        data = this.$MPopupData,
-                        popup = this.getPopup(),
-                        el = popup.getMain(),
-                        style = el.style;
+        constructor: function (el, options) {
+            this.enter = (position[options.enter || 'bottom'] || position.right);
+            this.mask = options.mask;
+        },
 
-                    if (!dom.parent(el)) {
-                        document.body.appendChild(el);
-                    }
+        /**
+         * @override
+         */
+        $click: function (event) {
+            if (!locked) {
+                var view = util.getView(),
+                    popup = this.getPopup(),
+                    el = popup.getMain(),
+                    style = el.style;
 
-                    this.$MPopup.$click.call(this, event);
+                if (!dom.parent(el)) {
+                    document.body.appendChild(el);
+                }
 
-                    if (dom.contain(this.getMain(), event.target)) {
-                        popup.show();
-                        if (data.mask) {
-                            core.mask(data.mask);
-                            core.addEventListener(popup, 'hide', hideHandler);
+                if (dom.contain(this.getMain(), event.target)) {
+                    popup.show();
+                    if (this.mask) {
+                        core.mask(this.mask);
+                        core.addEventListener(popup, 'hide', hideHandler);
 
-                            util.timer(
-                                function () {
-                                    core.addGestureListeners(popup, {
-                                        tap: function (event) {
-                                            if (!dom.contain(popup.getMain(), event.target)) {
-                                                popup.hide();
-                                                core.removeGestureListeners(popup);
-                                            }
+                        util.timer(
+                            function () {
+                                core.addGestureListeners(popup, {
+                                    tap: function (event) {
+                                        if (!dom.contain(popup.getMain(), event.target)) {
+                                            popup.hide();
+                                            core.removeGestureListeners(popup);
                                         }
-                                    });
-                                },
-                                100
-                            );
-                        }
-
-                        style.top = style.right = style.bottom = style.left = 'auto';
-                        if (data.enter[1]) {
-                            var width = view.width,
-                                height = popup.getHeight(),
-                                reverseValue = height;
-                        } else {
-                            style.top = view.top + 'px';
-                            width = popup.getWidth();
-                            height = view.height;
-                            reverseValue = width;
-                        }
-                        if (data.enter[2]) {
-                            popup.setSize(width, height);
-                        }
-
-                        locked = true;
-                        effect.grade(
-                            'this.style.' + data.enter[0] + '=#' + (-reverseValue) + '->0px#',
-                            400,
-                            {
-                                $: el,
-                                onfinish: function () {
-                                    locked = false;
-                                }
-                            }
+                                    }
+                                });
+                            },
+                            100
                         );
                     }
-                }
-            },
 
-            /**
-             * @override
-             */
-            $dispose: function () {
-                var el = this.$MPopupData.popup.getMain();
-                if (el) {
-                    dom.remove(el);
-                }
+                    style.top = style.right = style.bottom = style.left = 'auto';
+                    if (this.enter[1]) {
+                        var width = view.width,
+                            height = popup.getHeight(),
+                            reverseValue = height;
+                    } else {
+                        style.top = view.top + 'px';
+                        width = popup.getWidth();
+                        height = view.height;
+                        reverseValue = width;
+                    }
+                    if (this.enter[2]) {
+                        popup.setSize(width, height);
+                    }
 
-                this.setPopup();
-                this.$MPopup.$dispose.call(this);
-            },
-
-            /**
-             * @override
-             */
-            $repaint: function (event) {
-                this.$MPopup.$repaint.call(this, event);
-
-                var popup = this.getPopup();
-                if (popup.isShow()) {
-                    var view = util.getView();
-                    popup.setSize(view.width, view.height);
-                }
-            },
-
-            /**
-             * 获取控件的弹出层。
-             * @public
-             *
-             * @return {ecui.ui.Control} 弹出层控件
-             */
-            getPopup: function () {
-                return this.$MPopupData.popup;
-            },
-
-            /**
-             * 设置控件的弹出层。
-             * @public
-             *
-             * @param {ecui.ui.Control} control 弹出层控件
-             */
-            setPopup: function (control) {
-                if (control) {
-                    this.$MPopupData.popup = control;
-                } else {
-                    delete this.$MPopupData.popup;
+                    locked = true;
+                    effect.grade(
+                        'this.style.' + this.enter[0] + '=#' + (-reverseValue) + '->0px#',
+                        400,
+                        {
+                            $: el,
+                            onfinish: function () {
+                                locked = false;
+                            }
+                        }
+                    );
                 }
             }
+        },
+
+        /**
+         * @override
+         */
+        $dispose: function () {
+            var el = this.popup.getMain();
+            if (el) {
+                dom.remove(el);
+            }
+
+            this.setPopup();
+        },
+
+        /**
+         * @override
+         */
+        $repaint: function () {
+            var popup = this.getPopup();
+            if (popup.isShow()) {
+                var view = util.getView();
+                popup.setSize(view.width, view.height);
+            }
+        },
+
+        /**
+         * 获取控件的弹出层。
+         * @public
+         *
+         * @return {ecui.ui.Control} 弹出层控件
+         */
+        getPopup: function () {
+            return this.popup;
+        },
+
+        /**
+         * 设置控件的弹出层。
+         * @public
+         *
+         * @param {ecui.ui.Control} control 弹出层控件
+         */
+        setPopup: function (control) {
+            if (control) {
+                this.popup = control;
+            } else {
+                delete this.popup;
+            }
         }
-    };
+    });
 }());
