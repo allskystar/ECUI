@@ -16,7 +16,7 @@
         });
     }
 
-    ui.MOptions = _interface.extends(ui.MScroll, {
+    ui.MOptions = _interface.extends([ui.Control.defineProperty('selected'), ui.MScroll], {
         private: {
             mask: undefined
         },
@@ -29,10 +29,10 @@
         },
 
         /**
-         * 选项控件发生变化的处理。
-         * @protected
+         * @override
          */
-        $alterItems: function () {
+        $cache: function (style) {
+            this.$$itemHeight = util.toNumber(dom.getCustomStyle(style, 'item-height'));
             var top = -this.$$itemHeight * (getItems(this).length - this._nOptionSize - 1),
                 bottom = this.$$itemHeight * this._nOptionSize;
 
@@ -49,14 +49,6 @@
                 bottom: bottom,
                 stepY: this.$$itemHeight
             });
-        },
-
-        /**
-         * @override
-         */
-        $cache: function (style) {
-            this.$$itemHeight = util.toNumber(dom.getCustomStyle(style, 'item-height'));
-            this.$alterItems();
         },
 
         /**
@@ -92,6 +84,7 @@
          * @override
          */
         $dragmove: function (event) {
+            _super.$dragmove(event);
             this.setSelected(getItems(this)[Math.round(-event.y / this.$$itemHeight) + this._nOptionSize]);
         },
 
@@ -102,16 +95,6 @@
             var height = this.$$itemHeight * (this._nOptionSize * 2 + 1);
             dom.parent(this.getBody()).style.height = height + 'px';
             this.$$height = height + this.getMinimumHeight();
-        },
-
-        /**
-         * 获取被选中的选项控件。
-         * @public
-         *
-         * @return {ecui.ui.Item} 选项控件
-         */
-        getSelected: function () {
-            return this._cSelected || null;
         },
 
         /**
@@ -127,30 +110,9 @@
         /**
          * @override
          */
-        setPosition: function () {
+        setPosition: function (x, y) {
+            _super.setPosition(x, y);
             this.mask.style.top = this.getMain().scrollTop + 'px';
-        },
-
-        /**
-         * 设置选中控件。
-         * @public
-         *
-         * @param {ecui.ui.MMultiOptions.Options.Item} item 选中的控件
-         */
-        setSelected: function (item) {
-            item = item || null;
-            if (this._cSelected !== item) {
-                if (this._cSelected) {
-                    this._cSelected.alterStatus('-selected');
-                }
-                if (item) {
-                    item.alterStatus('+selected');
-                    core.setFocused(item);
-                } else {
-                    core.setFocused(this);
-                }
-                this._cSelected = item;
-            }
         }
     });
 }());
