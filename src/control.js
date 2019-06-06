@@ -70,7 +70,7 @@
                 cached:     false,
                 created:    false,
                 gesture:    true,
-                readied:    false,
+                ready:    false,
 
                 /**
                  * 设置控件的父对象。
@@ -432,7 +432,7 @@
              * @event
              */
             $ready: function () {
-                this.readied = true;
+                this.ready = true;
             },
 
             /**
@@ -1056,7 +1056,7 @@
              */
             initStructure: function () {
                 this.$initStructure(this.getClientWidth(), this.getClientHeight());
-                if (!this.readied) {
+                if (!this.ready) {
                     // 第一次结构化触发ready执行
                     core.dispatchEvent(this, 'ready');
                 }
@@ -1172,7 +1172,7 @@
              * @return {boolean} 控件是否完全生成
              */
             isReady: function () {
-                return !!this.readied;
+                return !!this.ready;
             },
 
             /**
