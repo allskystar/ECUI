@@ -60,9 +60,8 @@
 
     function addProxy(oldProxy, newProxy) {
         return function () {
-            var ret = oldProxy.apply(this, arguments);
-            newProxy.apply(this, arguments);
-            return ret;
+            this._VALUE = oldProxy.apply(this, arguments);
+            return newProxy.apply(this, arguments);
         };
     }
 
@@ -82,7 +81,7 @@
     _class.extends = function (superClass) {
         var index = 1,
             properties = arguments[index] && !arguments[index].CLASSID ? arguments[index++] : {},
-            interfaces = Array.prototype.slice.call(arguments, index),
+            interfaces = [],
             constructor = properties.constructor,
             newClass = function () {
                 var list = [],
@@ -145,6 +144,11 @@
             classId = 'CLASS-' + classes.length,
             data,
             name;
+
+        Array.prototype.slice.call(arguments, index).forEach(function (inf) {
+            Array.prototype.push.apply(interfaces, defines[inf.CLASSID].Interfaces);
+            interfaces.push(inf);
+        });
 
         if (superClass) {
             var Class = new Function();
@@ -360,12 +364,14 @@
         // 处理接口的属性
         interfaces.forEach(function (inf) {
             for (var name in defines[inf.CLASSID].Methods) {
-                if (name !== 'constructor') {
-                    if (newClass.prototype[name]) {
+                if (defines[inf.CLASSID].Methods.hasOwnProperty(name) && name !== 'constructor') {
+                    if (newClass.prototype.hasOwnProperty(name)) {
                         newClass.prototype[name] = addProxy(newClass.prototype[name], defines[inf.CLASSID].Methods[name]);
                     } else {
+                        if (!newClass.prototype[name]) {
+                            methods[name] = makeSuperMethod(name);
+                        }
                         newClass.prototype[name] = defines[inf.CLASSID].Methods[name];
-                        methods[name] = makeSuperMethod(name);
                     }
                 }
             }
@@ -498,19 +504,6 @@
         newClass.CLASSID = 'CLASS-' + classes.length;
         classes.push(newClass);
 
-        superInterfaces.forEach(function (inf) {
-            Object.assign(symbols, defines[inf.CLASSID].Symbols);
-            Object.assign(values, defines[inf.CLASSID].Values);
-            for (var name in defines[inf.CLASSID].Methods) {
-                if (defines[inf.CLASSID].Methods.hasOwnProperty(name)) {
-                    methods[name] = methods[name] ? addProxy(methods[name], defines[inf.CLASSID].Methods[name]) : defines[inf.CLASSID].Methods[name];
-                }
-            }
-            if (!Object.defineProperties && defines[inf.CLASSID].Methods.constructor) {
-                methods.constructor = methods.constructor ? addProxy(methods.constructor, defines[inf.CLASSID].Methods.constructor) : defines[inf.CLASSID].Methods[name];
-            }
-        });
-
         // 处理私有属性，代码复制自_class.extends
         if (data = properties.private) {
             for (name in data) {
@@ -582,13 +575,14 @@
             for (name in data) {
                 if (data.hasOwnProperty(name)) {
                     if ('function' === typeof data[name] && !data[name].CLASSID) {
-                        methods[name] = methods[name] ? addProxy(methods[name], makeProxy(newClass, data[name], null)) : makeProxy(newClass, data[name], null);
+                        methods[name] = makeProxy(newClass, data[name], null);
                     }
                 }
             }
         }
 
         defines[newClass.CLASSID] = {
+            Interfaces: superInterfaces,
             Symbols: symbols,
             Values: values,
             Methods: methods
