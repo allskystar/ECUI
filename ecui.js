@@ -37,10 +37,10 @@ var ecui;
 
     document.write('<script type="text/javascript" src="src/imp/items.js"></script>');
     document.write('<script type="text/javascript" src="src/imp/popup.js"></script>');
-//     document.write('<script type="text/javascript" src="src/imp/m-confirm.js"></script>');
-//     document.write('<script type="text/javascript" src="src/imp/m-scroll.js"></script>');
-//     document.write('<script type="text/javascript" src="src/imp/m-popup.js"></script>');
-//     document.write('<script type="text/javascript" src="src/imp/m-options.js"></script>');
+    document.write('<script type="text/javascript" src="src/imp/m-confirm.js"></script>');
+    document.write('<script type="text/javascript" src="src/imp/m-scroll.js"></script>');
+    document.write('<script type="text/javascript" src="src/imp/m-popup.js"></script>');
+    document.write('<script type="text/javascript" src="src/imp/m-options.js"></script>');
 
     document.write('<script type="text/javascript" src="src/base/button.js"></script>');
     document.write('<script type="text/javascript" src="src/base/cancel.js"></script>');
@@ -85,8 +85,8 @@ var ecui;
 
 //     document.write('<script type="text/javascript" src="src/mobile/m-panel.js"></script>');
 //     document.write('<script type="text/javascript" src="src/mobile/m-select.js"></script>');
-//     document.write('<script type="text/javascript" src="src/mobile/m-multi-options.js"></script>');
-//     document.write('<script type="text/javascript" src="src/mobile/m-calendar.js"></script>');
+    document.write('<script type="text/javascript" src="src/mobile/m-multi-options.js"></script>');
+    document.write('<script type="text/javascript" src="src/mobile/m-calendar.js"></script>');
 //     document.write('<script type="text/javascript" src="src/mobile/m-list-view.js"></script>');
 //     document.write('<script type="text/javascript" src="src/mobile/m-op-list-view.js"></script>');
 //     document.write('<script type="text/javascript" src="src/mobile/m-op-text.js"></script>');
