@@ -14,6 +14,13 @@
 
         ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined;
 //{/if}//
+    function unitReadyHandler(event) {
+        // ready事件不允许被阻止
+        if (!core.dispatchEvent(this, 'ready', event)) {
+            this.$ready(event);
+        }
+    }
+
     var waitReadyList;
 
     /**
@@ -48,6 +55,9 @@
 
             this.width = el.style.width;
             this.height = el.style.height;
+            if (!options.main) {
+                this.handler = unitReadyHandler.bind(this);
+            }
         },
         {
             DEFAULT_OPTIONS: {
@@ -58,6 +68,7 @@
             },
 
             private: {
+                handler:    undefined,
                 parent:     undefined,
                 main:       undefined,
                 body:       undefined,
@@ -70,7 +81,7 @@
                 cached:     false,
                 created:    false,
                 gesture:    true,
-                ready:    false,
+                ready:      false,
 
                 /**
                  * 设置控件的父对象。
@@ -232,6 +243,7 @@
              * @event
              */
             $dispose: function () {
+                this.$setParent();
                 this.main.getControl = null;
                 this.main = this.body = null;
                 // 取消初始化的操作，防止控件在 onload 结束前被 dispose，从而引发初始化访问的信息错误的问题
@@ -346,11 +358,7 @@
              * 控件隐藏时，控件失去激活、悬停与焦点状态，不检查控件之前的状态，因此不会导致浏览器的刷新操作。
              * @event
              */
-            $hide: function () {
-                dom.addClass(this.main, 'ui-hide');
-                // 控件隐藏时需要清除状态
-                core.$clearState(this);
-            },
+            $hide: util.blank,
 
             /**
              * 初始化控件的结构。
@@ -433,6 +441,7 @@
              */
             $ready: function () {
                 this.ready = true;
+                delete this.handler;
             },
 
             /**
@@ -491,6 +500,23 @@
              * @param {ecui.ui.Control} parent ECUI 控件对象
              */
             $setParent: function (parent) {
+                if (this.handler) {
+                    if (this.parent) {
+                        core.removeEventListener(this.parent, 'ready', this.handler);
+                        core.removeEventListener(this.parent, 'show', this.handler);
+                    }
+                    if (parent) {
+                        if (parent.isReady()) {
+                            if (parent.isShow()) {
+                                this.handler();
+                            } else {
+                                core.addEventListener(parent, 'show', this.handler);
+                            }
+                        } else {
+                            core.addEventListener(parent, 'ready', this.handler);
+                        }
+                    }
+                }
                 this.parent = parent;
             },
 
@@ -525,10 +551,7 @@
              * $show 方法直接显示控件，不检查控件之前的状态，因此不会导致浏览器的刷新操作。
              * @protected
              */
-            $show: function () {
-                dom.removeClass(this.main, 'ui-hide');
-                this.cache();
-            },
+            $show: util.blank,
 
             /**
              * 为控件添加/移除一个状态样式。
@@ -1002,7 +1025,18 @@
              */
             hide: function () {
                 if (!dom.hasClass(this.main, 'ui-hide')) {
-                    core.dispatchEvent(this, 'hide');
+                    var controls = core.query(
+                            function (item) {
+                                return this.contain(item) && item.isShow();
+                            },
+                            this
+                        );
+                    dom.addClass(this.main, 'ui-hide');
+                    // 控件隐藏时需要清除状态
+                    core.$clearState(this);
+                    controls.forEach(function (item) {
+                        core.dispatchEvent(item, 'hide');
+                    });
                     return true;
                 }
                 return false;
@@ -1021,7 +1055,7 @@
 
                 var el = this.main;
                 if (el.style.display === 'none') {
-                    this.$hide();
+                    dom.addClass(this.main, 'ui-hide');
                     el.style.display = '';
                 } else if (this.cached) {
                     // 处于显示状态的控件需要完成初始化
@@ -1057,8 +1091,10 @@
             initStructure: function () {
                 this.$initStructure(this.getClientWidth(), this.getClientHeight());
                 if (!this.ready) {
-                    // 第一次结构化触发ready执行
-                    core.dispatchEvent(this, 'ready');
+                    // 第一次结构化触发ready执行，ready事件默认处理不能被阻止
+                    if (!core.dispatchEvent(this, 'ready')) {
+                        this.$ready(core.wrapEvent('ready'));
+                    }
                 }
             },
 
@@ -1330,8 +1366,19 @@
              */
             show: function () {
                 if (dom.hasClass(this.main, 'ui-hide')) {
-                    core.dispatchEvent(this, 'show');
-                    core.cacheAtShow();
+                    dom.removeClass(this.main, 'ui-hide');
+                    var controls = core.query(
+                            function (item) {
+                                return this.contain(item) && item.isShow();
+                            },
+                            this
+                        );
+                    controls.forEach(function (item) {
+                        item.cache();
+                    });
+                    controls.forEach(function (item) {
+                        core.dispatchEvent(item, 'show');
+                    });
                     core.flexFixed(this.main);
                     return true;
                 }

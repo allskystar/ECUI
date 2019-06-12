@@ -1965,6 +1965,7 @@ outer:          for (var caches = [], target = event.target, el; target && targe
             options = options || {};
 
             options.uid = 'ecui-' + (++uniqueIndex);
+            delete options.main;
 
             var control = new UIClass(el, options);
             control.$setParent(parent);
@@ -2005,18 +2006,10 @@ outer:          for (var caches = [], target = event.target, el; target && targe
          * @public
          */
         cacheAtShow: function () {
-            var controls = [];
-            independentControls.forEach(function (item) {
-                if (!item.isReady()) {
-                    item.clearCache();
-                    controls.push(item);
-                }
+            independentControls.filter(function (item) {
+                return item.isShow();
+            }).forEach(function (item) {
                 item.cache();
-            });
-            controls.forEach(function (item) {
-                if (item.isCached()) {
-                    item.initStructure();
-                }
             });
         },
 
@@ -2975,6 +2968,13 @@ outer:          for (var caches = [], target = event.target, el; target && targe
         wrapEvent: function (event) {
             if (event instanceof ECUIEvent) {
                 // 防止事件对象被多次包装
+                return event;
+            }
+
+            if ('string' === typeof event) {
+                event = new ECUIEvent(event);
+                event.clientX = lastClientX;
+                event.clientY = lastClientY;
                 return event;
             }
 
