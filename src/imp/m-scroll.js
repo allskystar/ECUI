@@ -331,9 +331,12 @@
                 if (this.getX() !== x || this.getY() !== y) {
                     dom.setStyle(this.getBody(), 'transform', keyboardHeight ? 'translate(' + x + 'px,' + y + 'px)' : 'translate3d(' + x + 'px,' + y + 'px,0px)');
                 }
-                core.query(function (item) {
-                    return this.contain(item);
-                }.bind(this)).forEach(function (item) {
+                core.query(
+                    function (item) {
+                        return this.contain(item);
+                    },
+                    this
+                ).forEach(function (item) {
                     core.dispatchEvent(item, 'beforescroll', {deltaX: x, deltaY: y});
                     core.dispatchEvent(item, 'scroll', {deltaX: x, deltaY: y});
                 });
