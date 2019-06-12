@@ -48,7 +48,7 @@ _aStatus            - 控件当前的状态集合
      */
     function alterParent(control, parent, parentElement) {
         var oldParent = control._cParent,
-            el = control.getMain();
+            el = control._eMain;
 
         // 触发原来父控件的移除子控件事件
         if (parent !== oldParent) {
@@ -76,6 +76,10 @@ _aStatus            - 控件当前的状态集合
     }
 
     function unitReadyHandler(event) {
+        if (this._cParent) {
+            // 仅执行一次
+            core.removeEventListener(this._cParent, event.type, this._oUnitReadyHandler);
+        }
         // ready事件不允许被阻止
         if (!core.dispatchEvent(this, 'ready', event)) {
             this.$ready(event);
@@ -218,11 +222,11 @@ _aStatus            - 控件当前的状态集合
              * @event
              */
             $disable: function () {
-                dom.addClass(this.getMain(), 'ui-disabled');
+                dom.addClass(this._eMain, 'ui-disabled');
                 this.alterStatus('+disabled');
                 core.$clearState(this);
 
-                var el = this.getMain();
+                var el = this._eMain;
                 dom.toArray(el.all || el.getElementsByTagName('*')).forEach(function (item) {
                     if (item.disabled === false) {
                         var tabIndex = dom.getAttribute(item, 'tabIndex') || '';
@@ -274,10 +278,10 @@ _aStatus            - 控件当前的状态集合
              * @event
              */
             $enable: function () {
-                dom.removeClass(this.getMain(), 'ui-disabled');
+                dom.removeClass(this._eMain, 'ui-disabled');
                 this.alterStatus('-disabled');
 
-                var el = this.getMain();
+                var el = this._eMain;
                 dom.toArray(el.all || el.getElementsByTagName('*')).forEach(function (item) {
                     if (item.disabled !== undefined) {
                         var tabIndex = dom.getAttribute(item, '_tabIndex');
@@ -505,7 +509,9 @@ _aStatus            - 控件当前的状态集合
                     if (parent) {
                         if (parent.isReady()) {
                             if (parent.isShow()) {
-                                this._oUnitReadyHandler();
+                                if (!core.dispatchEvent(this, 'ready')) {
+                                    this.$ready(core.wrapEvent('ready'));
+                                }
                             } else {
                                 core.addEventListener(parent, 'show', this._oUnitReadyHandler);
                             }
@@ -647,7 +653,7 @@ _aStatus            - 控件当前的状态集合
              * @return {boolean} 是否刷新缓存
              */
             cache: function (force) {
-                if ((force || !this._bCached) && this.getMain().offsetWidth) {
+                if ((force || !this._bCached) && this._eMain.offsetWidth) {
                     force = this._bCached === undefined;
                     this._bCached = true;
                     this.$cache(dom.getStyle(this._eMain));
@@ -670,7 +676,7 @@ _aStatus            - 控件当前的状态集合
              * @param {number} top y轴的坐标，如果不指定水平方向也居中
              */
             center: function (top) {
-                var parent = this.getMain().offsetParent;
+                var parent = this._eMain.offsetParent;
 
                 if (!parent || parent.tagName === 'BODY' || parent.tagName === 'HTML') {
                     var view = util.getView(),
@@ -960,7 +966,7 @@ _aStatus            - 控件当前的状态集合
              * @return {HTMLElement} 控件用于设置 Position 的元素
              */
             getPositionElement: function () {
-                return this.getMain();
+                return this._eMain;
             },
 
             /**
@@ -1003,7 +1009,7 @@ _aStatus            - 控件当前的状态集合
              * @return {number} X轴坐标
              */
             getX: function () {
-                return this.isShow() ? this.getMain().offsetLeft : 0;
+                return this.isShow() ? this._eMain.offsetLeft : 0;
             },
 
             /**
@@ -1014,7 +1020,7 @@ _aStatus            - 控件当前的状态集合
              * @return {number} Y轴坐标
              */
             getY: function () {
-                return this.isShow() ? this.getMain().offsetTop : 0;
+                return this.isShow() ? this._eMain.offsetTop : 0;
             },
 
             /**
@@ -1025,14 +1031,14 @@ _aStatus            - 控件当前的状态集合
              * @return {boolean} 显示状态是否改变
              */
             hide: function () {
-                if (!dom.hasClass(this.getMain(), 'ui-hide')) {
+                if (!dom.hasClass(this._eMain, 'ui-hide')) {
                     var controls = core.query(
                             function (item) {
                                 return this.contain(item) && item.isShow();
                             },
                             this
                         );
-                    dom.addClass(this.getMain(), 'ui-hide');
+                    dom.addClass(this._eMain, 'ui-hide');
                     // 控件隐藏时需要清除状态
                     core.$clearState(this);
                     controls.forEach(function (item) {
@@ -1051,12 +1057,12 @@ _aStatus            - 控件当前的状态集合
             init: function () {
                 if (this._bDisabled) {
                     this.alterStatus('+disabled');
-                    dom.addClass(this.getMain(), 'ui-disabled');
+                    dom.addClass(this._eMain, 'ui-disabled');
                 }
 
-                var el = this.getMain();
+                var el = this._eMain;
                 if (el.style.display === 'none') {
-                    dom.addClass(this.getMain(), 'ui-hide');
+                    dom.addClass(this._eMain, 'ui-hide');
                     el.style.display = '';
                 } else if (this._bCached) {
                     // 处于显示状态的控件需要完成初始化
@@ -1199,7 +1205,7 @@ _aStatus            - 控件当前的状态集合
              * @return {boolean} 控件是否显示
              */
             isShow: function () {
-                return !dom.hasClass(this._eMain, 'ui-hide') && !!this.getMain().offsetWidth;
+                return !dom.hasClass(this._eMain, 'ui-hide') && !!this._eMain.offsetWidth;
             },
 
             /**
@@ -1302,7 +1308,7 @@ _aStatus            - 控件当前的状态集合
              * @param {number} y 控件的Y轴坐标
              */
             setPosition: function (x, y) {
-                var style = this.getMain().style;
+                var style = this._eMain.style;
                 style.left = x + 'px';
                 style.top = y + 'px';
             },
@@ -1347,7 +1353,7 @@ _aStatus            - 控件当前的状态集合
              */
             show: function () {
                 if (dom.hasClass(this._eMain, 'ui-hide')) {
-                    dom.removeClass(this.getMain(), 'ui-hide');
+                    dom.removeClass(this._eMain, 'ui-hide');
                     var controls = core.query(
                             function (item) {
                                 return this.contain(item) && item.isShow();
