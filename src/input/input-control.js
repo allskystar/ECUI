@@ -97,18 +97,19 @@
              * @param {Event} event 事件对象
              */
             focus: function (event) {
-                var el = core.wrapEvent(event).target,
-                    control = el.getControl();
-
-                if (control.isDisabled() || !control.isCapturable()) {
-                    dom.removeEventListener(el, 'blur', events.blur);
-                    try {
-                        el.blur();
-                    } catch (ignore) {
+                var el = core.wrapEvent(event).target;
+                if (el.getControl) {
+                    var control = el.getControl();
+                    if (control.isDisabled() || !control.isCapturable()) {
+                        dom.removeEventListener(el, 'blur', events.blur);
+                        try {
+                            el.blur();
+                        } catch (ignore) {
+                        }
+                        dom.addEventListener(el, 'blur', events.blur);
+                    } else {
+                        control.focus();
                     }
-                    dom.addEventListener(el, 'blur', events.blur);
-                } else {
-                    control.focus();
                 }
             },
 
