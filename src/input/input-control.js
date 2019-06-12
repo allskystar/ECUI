@@ -23,11 +23,29 @@ _eInput        - INPUT对象
 
         isToucher = document.ontouchstart !== undefined,
         iosVersion = /(iPhone|iPad).*?OS (\d+(_\d+)?)/i.test(navigator.userAgent) ? +(RegExp.$2.replace('_', '.')) : undefined,
-        ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined;
+        ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined,
+        firefoxVersion = /firefox\/(\d+\.\d)/i.test(navigator.userAgent) ? +RegExp.$1 : undefined;
 //{/if}//
     var timer = util.blank,
         // INPUT事件集合对象
         events = {
+            /**
+             * INPUT 失去焦点的处理。
+             * @private
+             */
+            blur: function () {
+                util.timer(
+                    function () {
+                        var tagName = document.activeElement.tagName;
+                        if (tagName === 'INPUT' || tagName === 'SELECT' || tagName === 'TEXTAREA' || tagName === 'BUTTON') {
+                            // 键盘操作焦点移向了另一个输入框，重新设置焦点
+                            core.setFocused(core.findControl(document.activeElement));
+                        }
+                    },
+                    10
+                );
+            },
+
             /**
              * 输入结束事件处理。
              * @private
@@ -75,6 +93,28 @@ _eInput        - INPUT对象
             },
 
             /**
+             * INPUT 获得焦点的处理。
+             * @private
+             *
+             * @param {Event} event 事件对象
+             */
+            focus: function (event) {
+                var el = core.wrapEvent(event).target,
+                    control = el.getControl();
+
+                if (control.isDisabled() || !control.isCapturable()) {
+                    dom.removeEventListener(el, 'blur', events.blur);
+                    try {
+                        el.blur();
+                    } catch (ignore) {
+                    }
+                    dom.addEventListener(el, 'blur', events.blur);
+                } else {
+                    control.focus();
+                }
+            },
+
+            /**
              * 输入内容事件处理。
              * @private
              */
@@ -108,53 +148,11 @@ _eInput        - INPUT对象
             }
         };
 
-    if (isToucher) {
-        events.focusin = focus;
-        events.focusout = blur;
-    } else {
-        events.blur = blur;
-        events.focus = focus;
-    }
-
-    /**
-     * INPUT 失去焦点的处理。
-     * @private
-     */
-    function blur() {
-        util.timer(
-            function () {
-                var tagName = document.activeElement.tagName;
-                if (tagName === 'INPUT' || tagName === 'SELECT' || tagName === 'TEXTAREA' || tagName === 'BUTTON') {
-                    // 键盘操作焦点移向了另一个输入框，重新设置焦点
-                    core.setFocused(core.findControl(document.activeElement));
-                }
-            },
-            10
-        );
-    }
-
-    /**
-     * INPUT 获得焦点的处理。
-     * @private
-     *
-     * @param {Event} event 事件对象
-     */
-    function focus(event) {
-        var el = core.wrapEvent(event).target,
-            control = el.getControl();
-
-        if (control.isDisabled() || !control.isCapturable()) {
-            dom.removeEventListener(el, 'blur', events.blur);
-            try {
-                el.blur();
-            } catch (ignore) {
-            }
-            dom.addEventListener(el, 'blur', events.blur);
-        } else {
-            if (!isToucher || document.activeElement !== el) {
-                control.focus();
-            }
-        }
+    if (!firefoxVersion || firefoxVersion >= 52) {
+        dom.addEventListener(document, 'focusin', events.focus);
+        dom.addEventListener(document, 'focusout', events.blur);
+        delete events.focus;
+        delete events.blur;
     }
 
     /**
@@ -366,48 +364,20 @@ _eInput        - INPUT对象
             $focus: function (event) {
                 ui.Control.prototype.$focus.call(this, event);
 
-                if (isToucher) {
-                    var active = document.activeElement;
-                    if (!active.getControl || active.getControl() !== this) {
-                        if (active.tagName !== 'BODY') {
-                            if (active.getControl) {
-                                dom.removeEventListener(active, 'focusout', events.focusout);
-                                active.blur();
-                                dom.addEventListener(active, 'focusout', events.focusout);
-                            } else {
-                                active.blur();
-                            }
+                var active = document.activeElement;
+                if (!active.getControl || active.getControl() !== this) {
+                    if (active.tagName !== 'BODY') {
+                        if (active.getControl) {
+                            dom.removeEventListener(active, 'focusout', events.focusout);
+                            active.blur();
+                            dom.addEventListener(active, 'focusout', events.focusout);
+                        } else {
+                            active.blur();
                         }
-                        dom.removeEventListener(this._eInput, 'focusin', events.focusin);
-                        this._eInput.focus();
-                        dom.addEventListener(this._eInput, 'focusin', events.focusin);
                     }
-                } else {
-                    util.timer(
-                        function () {
-                            var active = document.activeElement;
-                            if (!active.getControl || active.getControl() !== this) {
-                                if (active.tagName !== 'BODY') {
-                                    if (active.getControl) {
-                                        dom.removeEventListener(active, 'blur', events.blur);
-                                        if (active.blur) {
-                                            active.blur();
-                                        }
-                                        dom.addEventListener(active, 'blur', events.blur);
-                                    } else {
-                                        if (active.blur) {
-                                            active.blur();
-                                        }
-                                    }
-                                }
-                                dom.removeEventListener(this._eInput, 'focus', events.focus);
-                                this._eInput.focus();
-                                dom.addEventListener(this._eInput, 'focus', events.focus);
-                            }
-                        },
-                        0,
-                        this
-                    );
+                    dom.removeEventListener(this._eInput, 'focusin', events.focusin);
+                    this._eInput.focus();
+                    dom.addEventListener(this._eInput, 'focusin', events.focusin);
                 }
             },
 

@@ -320,6 +320,9 @@ _cSelected  - 当前选择的日历单元格
              * @param {Array} cells 填充的区域，默认是主区域
              */
             setView: function (year, month, cells) {
+                var date = new Date(year, month - 1, 1);
+                year = date.getFullYear();
+                month = date.getMonth() + 1;
                 var today = new Date(),
                     dateYear = year || today.getFullYear(),
                     dateMonth = month !== undefined ? month - 1 : today.getMonth(),

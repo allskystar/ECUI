@@ -630,9 +630,6 @@
                     keyboardHandle();
 
                     if (keyboardHeight) {
-                        // 焦点控件切换
-                        core.setFocused(core.findControl(event.target));
-
                         keyboardHandle = scrollListener(function () {
                             if (fixedInput) {
                                 window.scrollTo(0, 0);
