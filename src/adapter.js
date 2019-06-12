@@ -1056,14 +1056,23 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              * @param {string} text 被复制到剪切板的内容
              */
             clipboard: function (text) {
+                var result;
                 if (ieVersion < 9) {
-                    window.clipboardData.setData('Text', text);
+                    result = window.clipboardData.setData('Text', text);
                 } else {
                     var textarea = dom.create('TEXTAREA', {className: 'ui-clipboard'});
                     textarea.value = text;
                     document.body.appendChild(textarea);
+                    textarea.setAttribute('readonly', '');
                     textarea.select();
-                    if (document.execCommand('copy')) {
+
+                    if (safariVersion) {
+                        // 兼容ios-safari
+                        // A big number, to cover anything that could be inside the element.
+                        textarea.setSelectionRange(0, 999999999);
+                    }
+                    result = document.execCommand('copy');
+                    if (result) {
                         __ECUI__ClipboardText = undefined;
                         clipboardListener();
                     } else {
@@ -1076,6 +1085,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                     }
                     document.body.removeChild(textarea);
                 }
+                return result;
             },
 
             /**
