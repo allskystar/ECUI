@@ -75,6 +75,13 @@ _aStatus            - 控件当前的状态集合
         control.$setParent(parent);
     }
 
+    function unitReadyHandler(event) {
+        // ready事件不允许被阻止
+        if (!core.dispatchEvent(this, 'ready', event)) {
+            this.$ready(event);
+        }
+    }
+
     /**
      * 基础控件。
      * 基础控件 与 ECUI状态与事件控制器 共同构成 ECUI核心。基础控件扩展了原生 DOM 节点的标准事件，提供对控件基础属性的操作，是所有控件实现的基础。
@@ -114,6 +121,10 @@ _aStatus            - 控件当前的状态集合
 
             this._sWidth = el.style.width;
             this._sHeight = el.style.height;
+
+            if (!options.main) {
+                this._oUnitReadyHandler = unitReadyHandler.bind(this);
+            }
         },
         {
             /**
@@ -229,6 +240,7 @@ _aStatus            - 控件当前的状态集合
              * @event
              */
             $dispose: function () {
+                this.$setParent();
                 this._eMain.getControl = null;
                 this._eMain = this._eBody = null;
                 // 取消初始化的操作，防止控件在 onload 结束前被 dispose，从而引发初始化访问的信息错误的问题
@@ -343,11 +355,7 @@ _aStatus            - 控件当前的状态集合
              * 控件隐藏时，控件失去激活、悬停与焦点状态，不检查控件之前的状态，因此不会导致浏览器的刷新操作。
              * @event
              */
-            $hide: function () {
-                dom.addClass(this.getMain(), 'ui-hide');
-                // 控件隐藏时需要清除状态
-                core.$clearState(this);
-            },
+            $hide: util.blank,
 
             /**
              * 初始化控件的结构。
@@ -430,6 +438,7 @@ _aStatus            - 控件当前的状态集合
              */
             $ready: function () {
                 this._bReady = true;
+                delete this._oUnitReadyHandler;
             },
 
             /**
@@ -488,6 +497,23 @@ _aStatus            - 控件当前的状态集合
              * @param {ecui.ui.Control} parent ECUI 控件对象
              */
             $setParent: function (parent) {
+                if (this._oUnitReadyHandler) {
+                    if (this._cParent) {
+                        core.removeEventListener(this._cParent, 'ready', this._oUnitReadyHandler);
+                        core.removeEventListener(this._cParent, 'show', this._oUnitReadyHandler);
+                    }
+                    if (parent) {
+                        if (parent.isReady()) {
+                            if (parent.isShow()) {
+                                this._oUnitReadyHandler();
+                            } else {
+                                core.addEventListener(parent, 'show', this._oUnitReadyHandler);
+                            }
+                        } else {
+                            core.addEventListener(parent, 'ready', this._oUnitReadyHandler);
+                        }
+                    }
+                }
                 this._cParent = parent;
             },
 
@@ -522,10 +548,7 @@ _aStatus            - 控件当前的状态集合
              * $show 方法直接显示控件，不检查控件之前的状态，因此不会导致浏览器的刷新操作。
              * @protected
              */
-            $show: function () {
-                dom.removeClass(this.getMain(), 'ui-hide');
-                this.cache();
-            },
+            $show: util.blank,
 
             /**
              * 为控件添加/移除一个状态样式。
@@ -1003,7 +1026,18 @@ _aStatus            - 控件当前的状态集合
              */
             hide: function () {
                 if (!dom.hasClass(this.getMain(), 'ui-hide')) {
-                    core.dispatchEvent(this, 'hide');
+                    var controls = core.query(
+                            function (item) {
+                                return this.contain(item) && item.isShow();
+                            },
+                            this
+                        );
+                    dom.addClass(this.getMain(), 'ui-hide');
+                    // 控件隐藏时需要清除状态
+                    core.$clearState(this);
+                    controls.forEach(function (item) {
+                        core.dispatchEvent(item, 'hide');
+                    });
                     return true;
                 }
                 return false;
@@ -1022,7 +1056,7 @@ _aStatus            - 控件当前的状态集合
 
                 var el = this.getMain();
                 if (el.style.display === 'none') {
-                    this.$hide();
+                    dom.addClass(this.getMain(), 'ui-hide');
                     el.style.display = '';
                 } else if (this._bCached) {
                     // 处于显示状态的控件需要完成初始化
@@ -1058,8 +1092,10 @@ _aStatus            - 控件当前的状态集合
             initStructure: function () {
                 this.$initStructure(this.getClientWidth(), this.getClientHeight());
                 if (!this._bReady) {
-                    // 第一次结构化触发ready执行
-                    core.dispatchEvent(this, 'ready');
+                    // 第一次结构化触发ready执行，ready事件默认处理不能被阻止
+                    if (!core.dispatchEvent(this, 'ready')) {
+                        this.$ready(core.wrapEvent('ready'));
+                    }
                 }
             },
 
@@ -1163,7 +1199,7 @@ _aStatus            - 控件当前的状态集合
              * @return {boolean} 控件是否显示
              */
             isShow: function () {
-                return !dom.hasClass(this.getMain(), 'ui-hide') && !!this.getMain().offsetWidth;
+                return !dom.hasClass(this._eMain, 'ui-hide') && !!this.getMain().offsetWidth;
             },
 
             /**
@@ -1311,8 +1347,19 @@ _aStatus            - 控件当前的状态集合
              */
             show: function () {
                 if (dom.hasClass(this._eMain, 'ui-hide')) {
-                    core.dispatchEvent(this, 'show');
-                    core.cacheAtShow();
+                    dom.removeClass(this.getMain(), 'ui-hide');
+                    var controls = core.query(
+                            function (item) {
+                                return this.contain(item) && item.isShow();
+                            },
+                            this
+                        );
+                    controls.forEach(function (item) {
+                        item.cache();
+                    });
+                    controls.forEach(function (item) {
+                        core.dispatchEvent(item, 'show');
+                    });
                     core.flexFixed(this._eMain);
                     return true;
                 }
