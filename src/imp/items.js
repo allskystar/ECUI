@@ -133,10 +133,11 @@
              * @return {Array} 子选项控件数组
              */
             add: function (item, index) {
-                if (!index || index > this.items.length) {
+                if (!(+index <= this.items.length)) {
                     index = this.items.length;
                 }
                 var items = [],
+                    orgIndex = index,
                     UIClass = this.Item || ui.Item,
                     el = this.items[index] ? this.items[index].getMain() : null,
                     body = this.getBody();
@@ -197,7 +198,7 @@
                     items.forEach(function (item) {
                         dom.insertBefore(item.getMain(), el);
                     });
-                    Array.prototype.splice.apply(this.items, [index, 0].concat(items));
+                    Array.prototype.splice.apply(this.items, [orgIndex, 0].concat(items));
                 }
 
                 this.premitAlterItems();
