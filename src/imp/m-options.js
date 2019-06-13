@@ -23,9 +23,10 @@
 
         constructor: function (el) {
             dom.addClass(el, 'ui-mobile-options');
-            this.$MOptionsData.mask = dom.insertBefore(dom.create({
-                className: this.getUnitClass(ui.Control, 'mask') + ' ui-mobile-options-mask'
-            }), this.getBody());
+            var body = this.getBody();
+            dom.insertHTML(body, 'beforeBegin', '<div class="' + this.getUnitClass(ui.Control, 'mask') + ' ui-mobile-options-mask"></div><div class="' + this.getUnitClass(ui.Control, 'view') + ' ui-mobile-options-view"><div></div></div>');
+            this.$MOptionsData.view = body.previousSibling;
+            this.$MOptionsData.mask = this.$MOptionsData.view.previousSibling;
         },
 
         Methods: {
@@ -50,6 +51,10 @@
                     bottom: bottom,
                     stepY: this.$$itemHeight
                 });
+
+                this.$MOptionsData.view.firstChild.innerHTML = this.getBody().innerHTML;
+                this.$MOptionsData.view.style.top = this.$$itemHeight * this._nOptionSize + 'px';
+                this.$MOptionsData.view.style.height = this.$$itemHeight + 'px';
             },
 
             /**
@@ -134,6 +139,8 @@
             setPosition: function (x, y) {
                 this.$MOptions.setPosition.call(this, x, y);
                 this.$MOptionsData.mask.style.top = this.getMain().scrollTop + 'px';
+                this.$MOptionsData.view.firstChild.className = this.getBody().className;
+                this.$MOptionsData.view.firstChild.style.transform = 'translate3d(0px,' + (y - 90) + 'px,0px)';
             },
 
             /**
