@@ -1032,11 +1032,13 @@ _aStatus            - 控件当前的状态集合
              */
             hide: function () {
                 if (!dom.hasClass(this._eMain, 'ui-hide')) {
-                    var controls = core.query(
-                            function (item) {
-                                return this.contain(item) && item.isShow();
-                            },
-                            this
+                    var controls = [this].concat(
+                            core.query(
+                                function (item) {
+                                    return this !== item && this.contain(item) && item.isShow();
+                                },
+                                this
+                            )
                         );
                     dom.addClass(this._eMain, 'ui-hide');
                     // 控件隐藏时需要清除状态
@@ -1354,11 +1356,13 @@ _aStatus            - 控件当前的状态集合
             show: function () {
                 if (dom.hasClass(this._eMain, 'ui-hide')) {
                     dom.removeClass(this._eMain, 'ui-hide');
-                    var controls = core.query(
-                            function (item) {
-                                return this.contain(item) && item.isShow();
-                            },
-                            this
+                    var controls = [this].concat(
+                            core.query(
+                                function (item) {
+                                    return this !== item && this.contain(item) && item.isShow();
+                                },
+                                this
+                            )
                         );
                     controls.forEach(function (item) {
                         item.cache();
