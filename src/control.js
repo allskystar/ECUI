@@ -1029,11 +1029,13 @@
              */
             hide: function () {
                 if (!dom.hasClass(this.main, 'ui-hide')) {
-                    var controls = core.query(
-                            function (item) {
-                                return this.contain(item) && item.isShow();
-                            },
-                            this
+                    var controls = [this].concat(
+                            core.query(
+                                function (item) {
+                                    return this !== item && this.contain(item) && item.isShow();
+                                },
+                                this
+                            )
                         );
                     dom.addClass(this.main, 'ui-hide');
                     // 控件隐藏时需要清除状态
@@ -1371,11 +1373,13 @@
             show: function () {
                 if (dom.hasClass(this.main, 'ui-hide')) {
                     dom.removeClass(this.main, 'ui-hide');
-                    var controls = core.query(
-                            function (item) {
-                                return this.contain(item) && item.isShow();
-                            },
-                            this
+                    var controls = [this].concat(
+                            core.query(
+                                function (item) {
+                                    return this !== item && this.contain(item) && item.isShow();
+                                },
+                                this
+                            )
                         );
                     controls.forEach(function (item) {
                         item.cache();
