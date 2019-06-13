@@ -14,13 +14,6 @@
 
         ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined;
 //{/if}//
-    function unitReadyHandler(event) {
-        // ready事件不允许被阻止
-        if (!core.dispatchEvent(this, 'ready', event)) {
-            this.$ready(event);
-        }
-    }
-
     var waitReadyList;
 
     /**
@@ -56,7 +49,7 @@
             this.width = el.style.width;
             this.height = el.style.height;
             if (!options.main) {
-                this.handler = unitReadyHandler.bind(this);
+                this.handler = this._unitReadyHandler.bind(this);
             }
         },
         {
@@ -78,7 +71,7 @@
                 subType:    '',
                 width:      undefined,
                 height:     undefined,
-                cached:     false,
+                cached:     undefined,
                 created:    false,
                 gesture:    true,
                 ready:      false,
@@ -127,6 +120,17 @@
                  */
                 _setWidth: function (width) {
                     this.main.style.width = width - (core.isContentBox(this.main) ? this.$getBasicWidth() * 2 : 0) + 'px';
+                },
+
+                _unitReadyHandler: function (event) {
+                    if (this.parent) {
+                        // 仅执行一次
+                        core.removeEventListener(this.parent, event.type, this.handler);
+                    }
+                    // ready事件不允许被阻止
+                    if (!core.dispatchEvent(this, 'ready', event)) {
+                        this.$ready(event);
+                    }
                 }
             },
 
@@ -508,7 +512,7 @@
                     if (parent) {
                         if (parent.isReady()) {
                             if (parent.isShow()) {
-                                this.handler();
+                                this.$ready(core.wrapEvent('ready'));
                             } else {
                                 core.addEventListener(parent, 'show', this.handler);
                             }

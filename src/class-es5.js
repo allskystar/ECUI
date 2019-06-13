@@ -172,8 +172,8 @@
             } else if (!/_super\s*\(/.test(constructor.toString())) {
                 var oldConstructor = constructor;
                 constructor = function () {
-                    oldConstructor.apply(this, arguments);
                     defines[superClass.CLASSID].Constructor.apply(this, arguments);
+                    oldConstructor.apply(this, arguments);
                 };
             }
         }
