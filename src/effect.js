@@ -402,9 +402,9 @@ ECUI动画效果库，支持对CSS3动画效果的模拟并扩展了相应的功
 
                 if (css) {
                     fn.call(options.$, 0, options);
-                    new Function('$', elements.join('transition="all ' + duration + 'ms ' + (transition || 'ease') + '";')).call(options.$, options);
                     
                     util.timer(function () {
+                        new Function('$', elements.join('transition="all ' + duration + 'ms ' + (transition || 'ease') + '";')).call(options.$, options);
                         fn.call(options.$, 1, options);
                     }, 0);
                     
