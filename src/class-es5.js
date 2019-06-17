@@ -287,6 +287,31 @@
             delete properties.protected;
         }
 
+        if (data = properties.property) {
+            for (name in data) {
+                if (data.hasOwnProperty(name)) {
+                    symbols[name] = {
+                        get: 'function' === typeof data[name].get ? makeProxy(newClass, data[name].get, superClass) :
+                                (function (name) {
+                                    return makeProxy(
+                                        newClass,
+                                        function () {
+                                            return this[name];
+                                        },
+                                        superClass
+                                    );
+                                }(data[name].get || '_' + name)),
+
+                        set: data[name].set ? makeProxy(newClass, data[name].set, superClass) :
+                                function () {
+                                    throw new Error('The property is readonly.');
+                                }
+                    };
+                }
+            }
+            delete properties.property;
+        }
+
         // 处理public属性
         if (data = properties) {
             for (name in data) {
@@ -622,7 +647,8 @@
             Values: values,
             Super: superMethods,
             Prototype: prototype,
-            Methods: methods
+            Methods: methods,
+            InnerClasses: []
         };
 
         newClass.isInstance = function (obj) {
