@@ -411,11 +411,13 @@ _eInput        - INPUT对象
              */
             $setParent: function (parent) {
                 ui.Control.prototype.$setParent.call(this, parent);
-                if (parent = this._eInput.form) {
-                    if (parent.getControl === undefined) {
-                        dom.addEventListener(parent, 'submit', submitHandler);
-                        dom.addEventListener(parent, 'reset', resetHandler);
-                        parent.getControl = null;
+                if (this._eInput) {
+                    if (parent = this._eInput.form) {
+                        if (parent.getControl === undefined) {
+                            dom.addEventListener(parent, 'submit', submitHandler);
+                            dom.addEventListener(parent, 'reset', resetHandler);
+                            parent.getControl = null;
+                        }
                     }
                 }
             },

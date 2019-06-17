@@ -677,6 +677,12 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             mousedown: util.blank,
 
             mousemove: function (event) {
+                if (!currEnv.dragstart) {
+                    core.dispatchEvent(currEnv.target, 'dragstart', {track: event.track});
+                    dom.addClass(document.body, 'ui-drag');
+                    currEnv.dragstart = true;
+                }
+
                 envStack[envStack.length - 1].mousemove(event);
 
                 var view = util.getView();
@@ -698,74 +704,76 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             mouseup: function (event) {
                 dragStopHandler();
 
-                disableEnv.mouseup(event);
+                if (currEnv.dragstart) {
+                    disableEnv.mouseup(event);
 
-                var track = event.track,
-                    target = currEnv.target,
-                    uid = target.getUID(),
-                    mx = event.clientX,
-                    my = event.clientY,
-                    start = Date.now(),
-                    vx = track.speedX || 0,
-                    vy = track.speedY || 0,
-                    inertia = target.$draginertia ? target.$draginertia({x: vx, y: vy}) : currEnv.decelerate ? Math.sqrt(vx * vx + vy * vy) / currEnv.decelerate : 0,
-                    dragEvent = new ECUIEvent();
+                    var track = event.track,
+                        target = currEnv.target,
+                        uid = target.getUID(),
+                        mx = event.clientX,
+                        my = event.clientY,
+                        start = Date.now(),
+                        vx = track.speedX || 0,
+                        vy = track.speedY || 0,
+                        inertia = target.$draginertia ? target.$draginertia({x: vx, y: vy}) : currEnv.decelerate ? Math.sqrt(vx * vx + vy * vy) / currEnv.decelerate : 0,
+                        dragEvent = new ECUIEvent();
 
-                dragEvent.track = track;
+                    dragEvent.track = track;
 
-                if (inertia) {
-                    var ax = vx / inertia,
-                        ay = vy / inertia,
-//                        sx = vx * inertia - ax * inertia * inertia / 2,
-//                        sy = vy * inertia - ay * inertia * inertia / 2,
-                        env = currEnv;
+                    if (inertia) {
+                        var ax = vx / inertia,
+                            ay = vy / inertia,
+    //                        sx = vx * inertia - ax * inertia * inertia / 2,
+    //                        sy = vy * inertia - ay * inertia * inertia / 2,
+                            env = currEnv;
 
-                    // if (ieVersion < 9) {
-                    var startX = track.x,
-                        startY = track.y;
+                        // if (ieVersion < 9) {
+                        var startX = track.x,
+                            startY = track.y;
 
-                    inertiaHandles[uid] = util.timer(
-                        function () {
-                            var time = (Date.now() - start) / 1000,
-                                t = Math.min(time, inertia),
-                                x = track.x,
-                                y = track.y;
+                        inertiaHandles[uid] = util.timer(
+                            function () {
+                                var time = (Date.now() - start) / 1000,
+                                    t = Math.min(time, inertia),
+                                    x = track.x,
+                                    y = track.y;
 
-                            dragmove(track, env, Math.round(mx + vx * t - ax * t * t / 2), Math.round(my + vy * t - ay * t * t / 2));
-                            if (t >= inertia || (x === track.x && y === track.y)) {
-                                inertiaHandles[uid]();
-                                delete inertiaHandles[uid];
-                                if (env.event && startX === x && startY === y) {
-                                    env.event.inertia = false;
+                                dragmove(track, env, Math.round(mx + vx * t - ax * t * t / 2), Math.round(my + vy * t - ay * t * t / 2));
+                                if (t >= inertia || (x === track.x && y === track.y)) {
+                                    inertiaHandles[uid]();
+                                    delete inertiaHandles[uid];
+                                    if (env.event && startX === x && startY === y) {
+                                        env.event.inertia = false;
+                                    }
+                                    dragend(dragEvent, env, target);
                                 }
-                                dragend(dragEvent, env, target);
-                            }
-                        },
-                        -1
-                    );
-                    // } else {
-                    //     var x = target.getX(),
-                    //         y = target.getY(),
-                    //         result = calcPosition(track, env, Math.round(x + sx), Math.round(y + sy));
+                            },
+                            -1
+                        );
+                        // } else {
+                        //     var x = target.getX(),
+                        //         y = target.getY(),
+                        //         result = calcPosition(track, env, Math.round(x + sx), Math.round(y + sy));
 
-                    //     sx = result.x - x;
-                    //     sy = result.y - y;
-                    //     inertia = Math.max((Math.abs(vx) - Math.sqrt(vx * vx - 2 * ax * sx)) / Math.abs(ax) || 0, (Math.abs(vy) - Math.sqrt(vy * vy - 2 * ay * sy)) / Math.abs(ay) || 0) || inertia;
+                        //     sx = result.x - x;
+                        //     sy = result.y - y;
+                        //     inertia = Math.max((Math.abs(vx) - Math.sqrt(vx * vx - 2 * ax * sx)) / Math.abs(ax) || 0, (Math.abs(vy) - Math.sqrt(vy * vy - 2 * ay * sy)) / Math.abs(ay) || 0) || inertia;
 
-                    //     delete currEnv.event;
-                    //     core.dispatchEvent(target, 'dragmove', {x: result.x, y: result.y, inertia: true});
-                    //     if (result.x !== x || result.y !== y) {
-                    //         createInertiaHandles(target, inertia * 1000, function () {
-                    //             dragend(dragEvent, env, target);
-                    //         });
-                    //         target.getPositionElement().style.transition = 'all ' + inertia + 's ease-out';
-                    //         target.setPosition(result.x, result.y);
-                    //     } else {
-                    //         dragend(dragEvent, currEnv, target);
-                    //     }
-                    // }
-                } else {
-                    dragend(dragEvent, currEnv, target);
+                        //     delete currEnv.event;
+                        //     core.dispatchEvent(target, 'dragmove', {x: result.x, y: result.y, inertia: true});
+                        //     if (result.x !== x || result.y !== y) {
+                        //         createInertiaHandles(target, inertia * 1000, function () {
+                        //             dragend(dragEvent, env, target);
+                        //         });
+                        //         target.getPositionElement().style.transition = 'all ' + inertia + 's ease-out';
+                        //         target.setPosition(result.x, result.y);
+                        //     } else {
+                        //         dragend(dragEvent, currEnv, target);
+                        //     }
+                        // }
+                    } else {
+                        dragend(dragEvent, currEnv, target);
+                    }
                 }
                 restore();
 
@@ -2266,10 +2274,7 @@ outer:          for (var caches = [], target = event.target, el; target && targe
                 event.track.logicY = event.clientY;
                 control.setPosition(x, y);
 
-                if (!force) {
-                    core.dispatchEvent(control, 'dragstart', {track: event.track});
-                    dom.addClass(document.body, 'ui-drag');
-                }
+                currEnv.dragstart = force;
 
                 //这里不能preventDefault事件，否则input的软键盘无法出现
             }

@@ -41,3 +41,15 @@ ecui.ui.Control.prototype.getOuter = function () {
 ecui.ui.Control.prototype.getPrimary = function () {
     return this.getClass();
 };
+
+ecui.ui.Text.prototype.getSelectionEnd = function () {
+    return ecui.dom.getSelectionRange(this.getInput()).end;
+};
+
+ecui.ui.Text.prototype.getSelectionStart = function () {
+    return ecui.dom.getSelectionRange(this.getInput()).start;
+};
+
+ecui.ui.Text.prototype.setSelectionRange = function (start, end) {
+    ecui.dom.setSelectionRange(this.getInput, start, end);
+};

@@ -14,7 +14,8 @@
         safariVersion = !/(chrome|crios|ucbrowser)/i.test(navigator.userAgent) && /(\d+\.\d)(\.\d)?\s+.*safari/i.test(navigator.userAgent) ? +RegExp.$1 : undefined;
 //{/if}//
     var topList = [],
-        bottomList = [];
+        bottomList = [],
+        activeCloneElement;
 
     ext.iosFixed = {
         /**
@@ -130,12 +131,12 @@
             options.bottom += Math.max(0, window.scrollY - mainTop);
 
             topList.forEach(function (control) {
-                if (control.isShow() && !dom.contain(main.offsetParent, control.getMain())) {
+                if (control.isShow() && !dom.contain(main, control.getMain())) {
                     bottom = Math.max(bottom, dom.getPosition(control.getMain()).top + control.getHeight() - Math.max(window.scrollY, mainTop));
                 }
             });
             bottomList.forEach(function (control) {
-                if (control.isShow() && !dom.contain(main.offsetParent, control.getMain())) {
+                if (control.isShow() && !dom.contain(main, control.getMain())) {
                     var controlTop = dom.getPosition(control.getMain()).top;
                     top = Math.min(top, Math.max(Math.min(0, controlTop - mainBottom), controlTop - window.scrollY + keyboardHeight - document.body.clientHeight));
                 }
@@ -187,6 +188,8 @@
                 this.$MScrollData.overflow[2] = list[2] ? +list[2] : this.$MScrollData.overflow[0];
                 this.$MScrollData.overflow[3] = list[3] ? +list[3] : this.$MScrollData.overflow[1];
             }
+
+            this.$MScrollData.fixedTop = this.$MScrollData.fixedBottom = 0;
         },
 
         Methods: {
@@ -196,7 +199,7 @@
             $activate: function (event) {
                 this.$MScroll.$activate.call(this, event);
 
-                if (keyboardHeight && iosVersion < 9) {
+                if ((iosVersion && !keyboardHeight && document.activeElement !== document.body) || (keyboardHeight && iosVersion < 9)) {
                     return;
                 }
 
@@ -220,16 +223,12 @@
                 this.$MScrollData.inertia = false;
 
                 var activeElement = document.activeElement;
-                if (util.hasIOSKeyboard(activeElement) && activeElement.value) {
-                    // 当input有placeholder的时候，会导致光标无法隐藏
-                    this.$MScrollData._oHandler = util.timer(
-                        function () {
-                            dom.setStyle(activeElement, 'userSelect', '');
-                            delete this.$MScrollData._oHandler;
-                        },
-                        50,
-                        this
-                    );
+                if (util.hasIOSKeyboard(activeElement)) {
+                    if (!calcY(this, keyboardHeight)) {
+                        showActiveElement();
+                    }
+
+                    this.getMain().scrollTop = 0;
                 }
             },
 
@@ -249,10 +248,12 @@
                 this.$MScrollData.scrolling = true;
 
                 if (util.hasIOSKeyboard(document.activeElement)) {
-                    if (this.$MScrollData._oHandler) {
-                        this.$MScrollData._oHandler();
-                    } else {
-                        dom.setStyle(document.activeElement, 'userSelect', 'none');
+                    if (!activeCloneElement) {
+                        dom.insertHTML(document.activeElement, 'afterEnd', document.activeElement.outerHTML);
+
+                        activeCloneElement = document.activeElement.nextSibling;
+                        document.activeElement.nextSibling.value = document.activeElement.value;
+                        document.activeElement.style.display = 'none';
                     }
                 }
             },
@@ -324,6 +325,26 @@
             },
 
             /**
+             * 设置滚动区域底部高度调节。
+             * @public
+             *
+             * @param {number} value 底部需要调节的数值
+             */
+            setFixedBottom: function (value) {
+                this.$MScrollData.fixedBottom = value;
+            },
+
+            /**
+             * 设置滚动区域顶部高度调节。
+             * @public
+             *
+             * @param {number} value 顶部需要调节的数值
+             */
+            setFixedTop: function (value) {
+                this.$MScrollData.fixedTop = value;
+            },
+
+            /**
              * @override
              */
             setPosition: function (x, y) {
@@ -375,26 +396,49 @@
         }
     };
 
-    function scrollIntoViewIfNeededHandler(event) {
-        if (event && iosVersion) {
-            dom.setStyle(event.target, 'userSelect', '');
-            if (event.target.value === event.data) {
-                util.timer(function () {
-                    var input = event.target,
-                        type = input.type,
-                        pos = input.value.length;
+    function showActiveElement() {
+        dom.remove(activeCloneElement);
+        activeCloneElement = null;
+        document.activeElement.style.display = '';
+    }
 
-                    if ('number' === typeof input.selectionStart) {
-                        input.setSelectionRange(pos, pos);
-                    } else {
-                        input.type = 'text';
-                        input.setSelectionRange(pos, pos);
-                        input.type = type;
+    function scrollIntoViewIfNeededHandler() {
+        if (iosVersion) {
+            if (document.activeElement.style.display === 'none') {
+                // dom.remove(document.activeElement.nextSibling);
+                // document.activeElement.style.display = '';
+                showActiveElement();
+            }
+            for (var scroll = core.findControl(document.activeElement); scroll; scroll = scroll.getParent()) {
+                if (scroll.$MScroll) {
+                    var main = scroll.getMain(),
+                        scrollTop = main.scrollTop;
+                    if (scrollTop) {
+                        main.scrollTop = 0;
+                        scroll.setPosition(scroll.getX(), scroll.getY() - scrollTop);
                     }
-                });
+
+                    break;
+                }
+            }
+
+            var y = calcY(scroll, keyboardHeight);
+
+            if (scroll) {
+                setSafePosition(scroll, scroll.getY() + y);
+            } else if (y) {
+                core.$('ECUI-FIXED-BODY').scrollTop = y;
+            }
+        } else {
+            dom.scrollIntoViewIfNeeded(document.activeElement, true);
+
+            for (scroll = core.findControl(document.activeElement); scroll; scroll = scroll.getParent()) {
+                if (scroll.$MScroll && scroll.getMain().scrollTop) {
+                    scroll.setPosition(scroll.getX(), scroll.getY() - scroll.getMain().scrollTop);
+                    scroll.getMain().scrollTop = 0;
+                }
             }
         }
-        scrollIntoViewIfNeeded(keyboardHeight);
     }
 
     function fixed() {
@@ -420,31 +464,18 @@
         });
     }
 
-    function scrollIntoViewIfNeeded(height) {
-        for (var scroll = core.findControl(document.activeElement); scroll; scroll = scroll.getParent()) {
-            if (scroll.$MScroll) {
-                var main = scroll.getMain(),
-                    scrollTop = main.scrollTop;
-                if (scrollTop) {
-                    main.scrollTop = 0;
-                    scroll.setPosition(scroll.getX(), scroll.getY() - scrollTop);
-                }
-
-                scrollTop = dom.getPosition(main).top;
-                var scrollHeight = scroll.getHeight() - height,
-                    activeTop = dom.getPosition(document.activeElement).top - window.scrollY;
-
-                break;
-            }
-        }
-
-        if (!scroll) {
+    function calcY(scroll, height) {
+        if (scroll) {
+            var scrollTop = dom.getPosition(scroll.getMain()).top + scroll.$MScrollData.fixedTop,
+                scrollHeight = scroll.getHeight() - height - scroll.$MScrollData.fixedBottom,
+                activeTop = dom.getPosition(activeCloneElement || document.activeElement).top - window.scrollY;
+        } else {
             scrollTop = 0;
             scrollHeight = document.body.clientHeight - height;
-            activeTop = dom.getPosition(document.activeElement).top - window.scrollY;
+            activeTop = dom.getPosition(activeCloneElement || document.activeElement).top - window.scrollY;
         }
 
-        var activeHeight = document.activeElement.offsetHeight,
+        var activeHeight = (activeCloneElement || document.activeElement).offsetHeight,
             infoHeight = /MicroMessanger/.test(navigator.userAgent) ? 30 : 0, // 处理微信提示信息的高度
             y = 0;
 
@@ -459,16 +490,7 @@
                 y = scrollTop + scrollHeight - activeTop - activeHeight;
             }
         }
-
-        if (scroll) {
-            setSafePosition(scroll, scroll.getY() + y);
-        } else if (y) {
-            if (iosVersion) {
-                core.$('ECUI-FIXED-BODY').scrollTop = y;
-            } else {
-                window.scrollTo(0, window.scrollY + y);
-            }
-        }
+        return y;
     }
 
     /**
@@ -592,12 +614,12 @@
                         if (keyboardHeight) {
                             if (util.hasIOSKeyboard(document.activeElement)) {
                                 if (oldHeight) {
-                                    fixed();
                                     scrollIntoViewIfNeededHandler();
+                                    fixed();
                                 } else {
                                     changeHandle = scrollListener(function () {
-                                        fixed();
                                         scrollIntoViewIfNeededHandler();
+                                        fixed();
                                     });
                                 }
                             }
@@ -634,8 +656,8 @@
                             if (fixedInput) {
                                 window.scrollTo(0, 0);
                             }
-                            fixed();
                             scrollIntoViewIfNeededHandler();
+                            fixed();
                         });
                     } else {
                         if (fixedInput) {
@@ -654,8 +676,8 @@
                                 window.scrollTo(0, 0);
                                 keyboardHandle = scrollListener(function () {
                                     dom.addEventListener(window, 'touchmove', util.preventEvent);
-                                    fixed();
                                     scrollIntoViewIfNeededHandler();
+                                    fixed();
                                 });
                             } else {
                                 // 第一次触发，开始测试软键盘高度
@@ -678,8 +700,8 @@
                                     document.body.style.visibility = '';
                                     window.scrollTo(0, Math.min(lastScrollY, keyboardHeight));
 
-                                    fixed();
                                     scrollIntoViewIfNeededHandler();
+                                    fixed();
                                 });
                             }
                         });
@@ -715,9 +737,6 @@
                     var height = event.height;
 
                     if (height) {
-                        // 打开软键盘
-                        document.activeElement.scrollIntoViewIfNeeded();
-
                         if (window.scrollY) {
                             for (var scroll = core.findControl(document.activeElement); scroll; scroll = scroll.getParent()) {
                                 if (scroll.$MScroll) {
@@ -730,7 +749,7 @@
                         }
 
                         keyboardHandle();
-                        keyboardHandle = util.timer(scrollIntoViewIfNeeded, 100, this, height);
+                        keyboardHandle = util.timer(scrollIntoViewIfNeededHandler, 100, this, height);
                     }
                 },
 
