@@ -115,10 +115,9 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
             }
         }
 
-        if (route.NAME) {
-            autoChildRoute(route);
-        } else {
-            autoChildRoute(route);
+        autoChildRoute(route);
+        if (!route.NAME) {
+            // 缺省路由
             init();
         }
     }
@@ -154,6 +153,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
             var el = core.$('AppCommonContainer');
             if (el.route !== route.NAME) {
 //{if 0}//
+                // 避免id重名警告
                 core.dispose(el, true);
 //{/if}//
                 core.$('AppBackupContainer').id = 'AppCommonContainer';
