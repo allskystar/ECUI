@@ -508,7 +508,9 @@
                     if (parent) {
                         if (parent.isReady()) {
                             if (parent.isShow()) {
-                                this.$ready(core.wrapEvent('ready'));
+                                if (!core.dispatchEvent(this, 'ready')) {
+                                    this.$ready(core.wrapEvent('ready'));
+                                }
                             } else {
                                 core.addEventListener(parent, 'show', this._oHandler);
                             }
