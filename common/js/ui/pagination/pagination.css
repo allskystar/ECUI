@@ -5,9 +5,11 @@
 	-ms-user-select: none; /*IE10*/
 	-khtml-user-select: none; /*早期浏览器*/
 	user-select: none;
-	height:24px;
 	font-size:14px;
 	text-align: center;
+	line-height:26px;
+	line-height:26px;
+
 	span,font,strong{
 		display:inline-block;
 		margin-right:6px;
@@ -15,7 +17,7 @@
 		min-width:16px;
 		height:24px;
 		text-align:center;
-		line-height:24px;
+		line-height:26px;
 		color:#495362;
 		border-radius:3px;
 		cursor:pointer
