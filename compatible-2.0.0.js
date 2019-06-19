@@ -34,6 +34,10 @@ ecui.ext.esr = ecui.ext.data;
     };
 }());
 
+ecui.ui.Control.prototype.$getSection = ecui.ui.Control.prototype.$getSection || function (name) {
+    return this['_u' + name] || this['$' + name] || this[name];
+},
+
 ecui.ui.Control.prototype.getOuter = function () {
     return this.getMain();
 };

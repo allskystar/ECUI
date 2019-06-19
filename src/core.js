@@ -2537,12 +2537,21 @@ outer:          for (var caches = [], target = event.target, el; target && targe
             delete properties.DEFAULT_OPTIONS;
 
             if (defaultOptions) {
-                if (!properties['private']) {
-                    properties['private'] = {};
+                if (!properties.private) {
+                    properties.private = {};
                 }
                 for (var name in defaultOptions) {
                     if (defaultOptions.hasOwnProperty(name)) {
-                        properties['private'][name] = undefined;
+                        if ('boolean' === typeof defaultOptions[name]) {
+                            name = '_b' + name.toCamelCase();
+                        } else if ('number' === typeof defaultOptions[name]) {
+                            name = '_n' + name.toCamelCase();
+                        } else if ('string' === typeof defaultOptions[name]) {
+                            name = '_s' + name.toCamelCase();
+                        } else {
+                            name = '_o' + name.toCamelCase();
+                        }
+                        properties.private[name] = undefined;
                     }
                 }
             }

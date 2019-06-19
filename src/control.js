@@ -16,6 +16,86 @@
 //{/if}//
     var waitReadyList;
 
+    var PRIVATE = {
+        _bCached:   undefined,
+        _bCreated:  false,
+        _bGesture:  true,
+        _bReady:    false,
+        _sUID:      undefined,
+        _sClass:    undefined,
+        _sSubType:  '',
+        _sWidth:    undefined,
+        _sHeight:   undefined,
+        _eMain:     undefined,
+        _eBody:     undefined,
+        _cParent:   undefined,
+        _oHandler:  undefined,
+        _aStatus:   undefined,
+
+        /**
+         * 设置控件的父对象。
+         * @private
+         *
+         * @param {ecui.ui.Control} parent 父控件对象
+         * @param {HTMLElement} parentElement 父 Element 对象
+         */
+        _alterParent: function (parent, parentElement) {
+            var oldParent = this._cParent,
+                el = this._eMain;
+
+            // 触发原来父控件的移除子控件事件
+            if (parent !== oldParent) {
+                if (oldParent) {
+                    if (!core.dispatchEvent(oldParent, 'remove', {child: this})) {
+                        return;
+                    }
+                }
+                if (parent) {
+                    if (!core.dispatchEvent(parent, 'append', {child: this})) {
+                        parent = parentElement = null;
+                    }
+                }
+            }
+
+            if (parentElement !== dom.parent(el)) {
+                if (parentElement) {
+                    parentElement.appendChild(el);
+                } else {
+                    dom.remove(el);
+                }
+            }
+
+            this.$setParent(parent);
+        },
+
+        /**
+         * 设置控件的实际宽度。
+         * @private
+         *
+         * @param {number} width 控件的占位宽度
+         */
+        _setWidth: function (width) {
+            this._eMain.style.width = width - (core.isContentBox(this._eMain) ? this.$getBasicWidth() * 2 : 0) + 'px';
+        },
+
+        /**
+         * 部件的ready事件监听器。
+         * @private
+         *
+         * @param {ECUIEvent} event ECUI事件对象
+         */
+        _unitReadyHandler: function (event) {
+            if (this._cParent) {
+                // 仅执行一次
+                core.removeEventListener(this._cParent, event.type, this._oHandler);
+            }
+            // ready事件不允许被阻止
+            if (!core.dispatchEvent(this, 'ready', event)) {
+                this.$ready(event);
+            }
+        }
+    };
+
     /**
      * 基础控件。
      * 基础控件 与 ECUI状态与事件控制器 共同构成 ECUI核心。基础控件扩展了原生 DOM 节点的标准事件，提供对控件基础属性的操作，是所有控件实现的基础。
@@ -34,22 +114,22 @@
         function (el, options) {
             core.$bind(el, this);
 
-            this.main = this.body = el;
+            this._eMain = this._eBody = el;
             if (options.primary) {
                 el.className = (options.id || '') + ' ' + el.className + options.primary;
             }
-            this.UID = options.uid;
+            this._sUID = options.uid;
             // svg classname 是数组 不能做trim操作
             if ('string' === typeof el.className) {
-                this.className = el.className.trim().split(' ')[0];
+                this._sClass = el.className.trim().split(' ')[0];
             }
 
-            this.status = ['', ' '];
+            this._aStatus = ['', ' '];
 
-            this.width = el.style.width;
-            this.height = el.style.height;
+            this._sWidth = el.style.width;
+            this._sHeight = el.style.height;
             if (!options.main) {
-                this.handler = this._unitReadyHandler.bind(this);
+                this._oHandler = this._unitReadyHandler.bind(this);
             }
         },
         {
@@ -60,79 +140,7 @@
                 userSelect: Boolean(true)
             },
 
-            private: {
-                handler:    undefined,
-                parent:     undefined,
-                main:       undefined,
-                body:       undefined,
-                status:     undefined,
-                UID:        undefined,
-                className:  undefined,
-                subType:    '',
-                width:      undefined,
-                height:     undefined,
-                cached:     undefined,
-                created:    false,
-                gesture:    true,
-                ready:      false,
-
-                /**
-                 * 设置控件的父对象。
-                 * @private
-                 *
-                 * @param {ecui.ui.Control} parent 父控件对象
-                 * @param {HTMLElement} parentElement 父 Element 对象
-                 */
-                _alterParent: function (parent, parentElement) {
-                    var oldParent = this.parent,
-                        el = this.main;
-
-                    // 触发原来父控件的移除子控件事件
-                    if (parent !== oldParent) {
-                        if (oldParent) {
-                            if (!core.dispatchEvent(oldParent, 'remove', {child: this})) {
-                                return;
-                            }
-                        }
-                        if (parent) {
-                            if (!core.dispatchEvent(parent, 'append', {child: this})) {
-                                parent = parentElement = null;
-                            }
-                        }
-                    }
-
-                    if (parentElement !== dom.parent(el)) {
-                        if (parentElement) {
-                            parentElement.appendChild(el);
-                        } else {
-                            dom.remove(el);
-                        }
-                    }
-
-                    this.$setParent(parent);
-                },
-
-                /**
-                 * 设置控件的实际宽度。
-                 * @private
-                 *
-                 * @param {number} width 控件的占位宽度
-                 */
-                _setWidth: function (width) {
-                    this.main.style.width = width - (core.isContentBox(this.main) ? this.$getBasicWidth() * 2 : 0) + 'px';
-                },
-
-                _unitReadyHandler: function (event) {
-                    if (this.parent) {
-                        // 仅执行一次
-                        core.removeEventListener(this.parent, event.type, this.handler);
-                    }
-                    // ready事件不允许被阻止
-                    if (!core.dispatchEvent(this, 'ready', event)) {
-                        this.$ready(event);
-                    }
-                }
-            },
+            private: PRIVATE,
 
             /**
              * 激活事件。
@@ -161,7 +169,7 @@
              * @event
              */
             $blur: function () {
-                if (dom.contain(this.body, document.activeElement)) {
+                if (dom.contain(this._eBody, document.activeElement)) {
                     try {
                         document.activeElement.blur();
                     } catch (ignore) {
@@ -194,8 +202,8 @@
                     this.$$padding = [util.toNumber(style.paddingTop), util.toNumber(style.paddingRight), util.toNumber(style.paddingBottom), util.toNumber(style.paddingLeft)];
                 }
 
-                this.$$width = this.main.offsetWidth;
-                this.$$height = this.main.offsetHeight;
+                this.$$width = this._eMain.offsetWidth;
+                this.$$height = this._eMain.offsetHeight;
             },
 
             /**
@@ -225,11 +233,11 @@
              * @event
              */
             $disable: function () {
-                dom.addClass(this.main, 'ui-disabled');
+                dom.addClass(this._eMain, 'ui-disabled');
                 this.alterStatus('+disabled');
                 core.$clearState(this);
 
-                var el = this.main;
+                var el = this._eMain;
                 dom.toArray(el.all || el.getElementsByTagName('*')).forEach(function (item) {
                     if (item.disabled === false) {
                         var tabIndex = dom.getAttribute(item, 'tabIndex') || '';
@@ -248,8 +256,8 @@
              */
             $dispose: function () {
                 this.$setParent();
-                this.main.getControl = null;
-                this.main = this.body = null;
+                this._eMain.getControl = null;
+                this._eMain = this._eBody = null;
                 // 取消初始化的操作，防止控件在 onload 结束前被 dispose，从而引发初始化访问的信息错误的问题
                 this.initStructure = util.blank;
             },
@@ -281,10 +289,10 @@
              * @event
              */
             $enable: function () {
-                dom.removeClass(this.main, 'ui-disabled');
+                dom.removeClass(this._eMain, 'ui-disabled');
                 this.alterStatus('-disabled');
 
-                var el = this.main;
+                var el = this._eMain;
                 dom.toArray(el.all || el.getElementsByTagName('*')).forEach(function (item) {
                     if (item.disabled !== undefined) {
                         var tabIndex = dom.getAttribute(item, '_tabIndex');
@@ -343,18 +351,6 @@
              */
             $getBasicWidth: function () {
                 return this.$$border[1] + this.$$border[3] + this.$$padding[1] + this.$$padding[3];
-            },
-
-            /**
-             * 获取指定的部件。
-             * $getSection 方法返回控件的一个部件对象，部件对象也是 ECUI 控件，是当前控件的组成成份，不可缺少，请不要轻易的对部件对象进行操作。
-             * @protected
-             *
-             * @param {string} name 部件名称
-             * @return {ecui.ui.Control} 部件对象
-             */
-            $getSection: function (name) {
-                return this['_u' + name] || this['$' + name];
             },
 
             /**
@@ -444,8 +440,8 @@
              * @event
              */
             $ready: function () {
-                this.ready = true;
-                delete this.handler;
+                this._bReady = true;
+                delete this._oHandler;
             },
 
             /**
@@ -462,19 +458,19 @@
              * @param {Function} 延后处理函数(交给核心处理)
              */
             $restoreStructure: function (isBatch) {
-                this.main.style.width = this.width;
-                this.main.style.height = this.height;
+                this._eMain.style.width = this._sWidth;
+                this._eMain.style.height = this._sHeight;
                 if (ieVersion < 8) {
                     // 修复ie6/7下宽度自适应错误的问题
-                    var style = dom.getStyle(this.main);
+                    var style = dom.getStyle(this._eMain);
                     if (style.width === 'auto' && style.display === 'block') {
-                        this.main.style.width = '100%';
+                        this._eMain.style.width = '100%';
                         if (isBatch) {
                             return function (control, width) {
                                 control._setWidth(width);
                             };
                         }
-                        this._setWidth(this.main.offsetWidth);
+                        this._setWidth(this._eMain.offsetWidth);
                     }
                 }
             },
@@ -493,7 +489,7 @@
              * @param {HTMLElement} el Element 对象
              */
             $setBody: function (el) {
-                this.body = el;
+                this._eBody = el;
             },
 
             /**
@@ -504,24 +500,24 @@
              * @param {ecui.ui.Control} parent ECUI 控件对象
              */
             $setParent: function (parent) {
-                if (this.handler) {
-                    if (this.parent) {
-                        core.removeEventListener(this.parent, 'ready', this.handler);
-                        core.removeEventListener(this.parent, 'show', this.handler);
+                if (this._oHandler) {
+                    if (this._cParent) {
+                        core.removeEventListener(this._cParent, 'ready', this._oHandler);
+                        core.removeEventListener(this._cParent, 'show', this._oHandler);
                     }
                     if (parent) {
                         if (parent.isReady()) {
                             if (parent.isShow()) {
                                 this.$ready(core.wrapEvent('ready'));
                             } else {
-                                core.addEventListener(parent, 'show', this.handler);
+                                core.addEventListener(parent, 'show', this._oHandler);
                             }
                         } else {
-                            core.addEventListener(parent, 'ready', this.handler);
+                            core.addEventListener(parent, 'ready', this._oHandler);
                         }
                     }
                 }
-                this.parent = parent;
+                this._cParent = parent;
             },
 
             /**
@@ -534,18 +530,18 @@
             $setSize: function (width, height) {
                 this.cache();
 
-                var fixedSize = core.isContentBox(this.main),
+                var fixedSize = core.isContentBox(this._eMain),
                     value;
 
                 // 防止负宽度IE下出错
                 if (width && (value = width - (fixedSize ? this.$getBasicWidth() : 0)) > 0) {
-                    this.main.style.width = value + 'px';
+                    this._eMain.style.width = value + 'px';
                     this.$$width = width;
                 }
 
                 // 防止负高度IE下出错
                 if (height && (value = height - (fixedSize ? this.$getBasicHeight() : 0)) > 0) {
-                    this.main.style.height = value + 'px';
+                    this._eMain.style.height = value + 'px';
                     this.$$height = height;
                 }
             },
@@ -565,21 +561,21 @@
              * @param {string} className 状态样式名，以+号开头表示添加扩展样式，以-号开头表示移除扩展样式
              */
             alterStatus: function (className) {
-                if (this.className) {
+                if (this._sClass) {
                     var classes = this.getClasses();
                     classes.push('');
 
                     if (className.charAt(0) === '+') {
                         className = '-' + className.slice(1) + ' ';
-                        if (this.status.indexOf(className) < 0) {
-                            dom.addClass(this.main, classes.join(className));
-                            this.status.push(className);
+                        if (this._aStatus.indexOf(className) < 0) {
+                            dom.addClass(this._eMain, classes.join(className));
+                            this._aStatus.push(className);
                         }
                     } else {
                         className += ' ';
-                        if (this.status.indexOf(className) >= 0) {
-                            dom.removeClass(this.main, classes.join(className));
-                            util.remove(this.status, className);
+                        if (this._aStatus.indexOf(className) >= 0) {
+                            dom.removeClass(this._eMain, classes.join(className));
+                            util.remove(this._aStatus, className);
                         }
                     }
                 }
@@ -593,18 +589,18 @@
              * @param {string} subtype 子类型名
              */
             alterSubType: function (subtype) {
-                if (this.subType !== subtype) {
+                if (this._sSubType !== subtype) {
                     var classes = this.constructor.TYPES[0].slice();
-                    if (this.className !== classes[0]) {
-                        classes.push(this.className);
+                    if (this._sClass !== classes[0]) {
+                        classes.push(this._sClass);
                     }
 
-                    if (this.subType) {
+                    if (this._sSubType) {
                         dom.removeClass(
-                            this.main,
+                            this._eMain,
                             classes.map(
                                 function (item) {
-                                    return this.status.join(item + '-' + this.subType);
+                                    return this._aStatus.join(item + '-' + this._sSubType);
                                 },
                                 this
                             ).join('')
@@ -612,16 +608,16 @@
                     }
                     if (subtype) {
                         dom.addClass(
-                            this.main,
+                            this._eMain,
                             classes.map(
                                 function (item) {
-                                    return this.status.join(item + '-' + subtype);
+                                    return this._aStatus.join(item + '-' + subtype);
                                 },
                                 this
                             ).join('')
                         );
                     }
-                    this.subType = subtype;
+                    this._sSubType = subtype;
                 }
             },
 
@@ -653,11 +649,11 @@
              * @param {boolean} force 是否需要强制刷新缓存，相当于之前执行了 clearCache 方法，默认不强制刷新
              */
             cache: function (force) {
-                if ((force || !this.cached) && this.main.offsetWidth) {
-                    force = this.cached === undefined;
-                    this.cached = true;
-                    this.$cache(dom.getStyle(this.main));
-                    if (force && this.created) {
+                if ((force || !this._bCached) && this._eMain.offsetWidth) {
+                    force = this._bCached === undefined;
+                    this._bCached = true;
+                    this.$cache(dom.getStyle(this._eMain));
+                    if (force && this._bCreated) {
                         // 已经初始化，但第一次缓存的控件进行结构化
                         this.initStructure();
                     }
@@ -673,7 +669,7 @@
              * @param {number} top y轴的坐标，如果不指定水平方向也居中
              */
             center: function (top) {
-                var parent = this.main.offsetParent;
+                var parent = this._eMain.offsetParent;
 
                 if (!parent || parent.tagName === 'BODY' || parent.tagName === 'HTML') {
                     var view = util.getView(),
@@ -692,7 +688,7 @@
              * @public
              */
             clearCache: function () {
-                this.cached = false;
+                this._bCached = false;
             },
 
             /**
@@ -700,18 +696,18 @@
              * @public
              */
             clearStatus: function () {
-                if (this.className) {
+                if (this._sClass) {
                     var classes = this.getClasses();
                     classes.push('');
 
-                    this.status.slice(2).forEach(
+                    this._aStatus.slice(2).forEach(
                         function (item) {
-                            dom.removeClass(this.main, classes.join(item));
+                            dom.removeClass(this._eMain, classes.join(item));
                         },
                         this
                     );
 
-                    this.status = this.status.slice(0, 2);
+                    this._aStatus = this._aStatus.slice(0, 2);
                 }
             },
 
@@ -724,7 +720,7 @@
              * @return {boolean} 是否包含指定的控件
              */
             contain: function (control) {
-                for (; control; control = control.parent) {
+                for (; control; control = control._cParent) {
                     if (control === this) {
                         return true;
                     }
@@ -740,9 +736,9 @@
              * @return {boolean} 控件失效状态是否改变
              */
             disable: function () {
-                if (!this.disabled) {
+                if (!this._bDisabled) {
                     this.$disable();
-                    this.disabled = true;
+                    this._bDisabled = true;
                     return true;
                 }
                 return false;
@@ -765,9 +761,9 @@
              * @return {boolean} 控件失效状态是否改变
              */
             enable: function () {
-                if (this.disabled) {
+                if (this._bDisabled) {
                     this.$enable();
-                    this.disabled = false;
+                    this._bDisabled = false;
                     return true;
                 }
                 return false;
@@ -808,7 +804,7 @@
              * @return {HTMLElement} Element 对象
              */
             getBody: function () {
-                return this.body;
+                return this._eBody;
             },
 
             /**
@@ -818,7 +814,7 @@
              * @return {string} 控件的当前样式
              */
             getClass: function () {
-                return this.className;
+                return this._sClass;
             },
 
             /**
@@ -829,14 +825,14 @@
              */
             getClasses: function () {
                 var classes = this.constructor.TYPES[0].slice();
-                if (this.className !== classes[0]) {
-                    classes.push(this.className);
+                if (this._sClass !== classes[0]) {
+                    classes.push(this._sClass);
                 }
-                if (this.subType) {
+                if (this._sSubType) {
                     classes = classes.concat(
                         classes.map(
                             function (item) {
-                                return item + '-' + this.subType;
+                                return item + '-' + this._sSubType;
                             },
                             this
                         )
@@ -874,7 +870,7 @@
              * @return {string} HTML 片断
              */
             getContent: function () {
-                return this.body.innerHTML;
+                return this._eBody.innerHTML;
             },
 
             /**
@@ -896,7 +892,7 @@
              * @return {HTMLElement} Element 对象
              */
             getMain: function () {
-                return this.main;
+                return this._eMain;
             },
 
             /**
@@ -930,7 +926,7 @@
              * @return {ecui.ui.Control} 父控件对象
              */
             getParent: function () {
-                return this.parent || null;
+                return this._cParent || null;
             },
 
             /**
@@ -940,7 +936,7 @@
              * @return {HTMLElement} 控件用于设置 Position 的元素
              */
             getPositionElement: function () {
-                return this.main;
+                return this._eMain;
             },
 
             /**
@@ -961,7 +957,7 @@
              * @return {string} 控件 ID
              */
             getUID: function () {
-                return this.UID;
+                return this._sUID;
             },
 
             /**
@@ -981,8 +977,8 @@
                 }
 
                 clazz = this.constructor.TYPES[this.constructor.TYPES.length - i].slice();
-                if (this.className && this.className !== clazz[0]) {
-                    clazz.push(this.className);
+                if (this._sClass && this._sClass !== clazz[0]) {
+                    clazz.push(this._sClass);
                 }
                 return clazz.join('-' + name + ' ') + '-' + name;
             },
@@ -1006,7 +1002,7 @@
              * @return {number} X轴坐标
              */
             getX: function () {
-                return this.isShow() ? this.main.offsetLeft : 0;
+                return this.isShow() ? this._eMain.offsetLeft : 0;
             },
 
             /**
@@ -1017,7 +1013,7 @@
              * @return {number} Y轴坐标
              */
             getY: function () {
-                return this.isShow() ? this.main.offsetTop : 0;
+                return this.isShow() ? this._eMain.offsetTop : 0;
             },
 
             /**
@@ -1028,7 +1024,7 @@
              * @return {boolean} 显示状态是否改变
              */
             hide: function () {
-                if (!dom.hasClass(this.main, 'ui-hide')) {
+                if (!dom.hasClass(this._eMain, 'ui-hide')) {
                     var controls = [this].concat(
                             core.query(
                                 function (item) {
@@ -1037,7 +1033,7 @@
                                 this
                             )
                         );
-                    dom.addClass(this.main, 'ui-hide');
+                    dom.addClass(this._eMain, 'ui-hide');
                     // 控件隐藏时需要清除状态
                     core.$clearState(this);
                     controls.forEach(function (item) {
@@ -1054,16 +1050,16 @@
              * @public
              */
             init: function () {
-                if (this.disabled) {
+                if (this._bDisabled) {
                     this.alterStatus('+disabled');
-                    dom.addClass(this.main, 'ui-disabled');
+                    dom.addClass(this._eMain, 'ui-disabled');
                 }
 
-                var el = this.main;
+                var el = this._eMain;
                 if (el.style.display === 'none') {
-                    dom.addClass(this.main, 'ui-hide');
+                    dom.addClass(this._eMain, 'ui-hide');
                     el.style.display = '';
-                } else if (this.cached) {
+                } else if (this._bCached) {
                     // 处于显示状态的控件需要完成初始化
                     if (waitReadyList === null) {
                         // 页面已经加载完毕，直接初始化结构
@@ -1087,7 +1083,7 @@
 
                 }
 
-                this.created = true;
+                this._bCreated = true;
             },
 
             /**
@@ -1096,7 +1092,7 @@
              */
             initStructure: function () {
                 this.$initStructure(this.getClientWidth(), this.getClientHeight());
-                if (!this.ready) {
+                if (!this._bReady) {
                     // 第一次结构化触发ready执行，ready事件默认处理不能被阻止
                     if (!core.dispatchEvent(this, 'ready')) {
                         this.$ready(core.wrapEvent('ready'));
@@ -1121,7 +1117,7 @@
              * @return {boolean} 控件是否已经缓存
              */
             isCached: function () {
-                return !!this.cached;
+                return !!this._bCached;
             },
 
             /**
@@ -1132,7 +1128,7 @@
              * @return {boolean} 控件是否响应浏览器事件
              */
             isCapturable: function () {
-                return this.capturable;
+                return this._bCapturable;
             },
 
             /**
@@ -1142,7 +1138,7 @@
              * @return {boolean} 控件是否生成
              */
             isCreated: function () {
-                return this.created;
+                return this._bCreated;
             },
 
             /**
@@ -1153,7 +1149,7 @@
              * @return {boolean} 控件是否失效
              */
             isDisabled: function () {
-                return this.disabled || (!!this.parent && this.parent.isDisabled());
+                return this._bDisabled || (!!this._cParent && this._cParent.isDisabled());
             },
 
             /**
@@ -1164,7 +1160,7 @@
              * @return {boolean} 控件是否允许获取焦点
              */
             isFocusable: function () {
-                return this.focusable;
+                return this._bFocusable;
             },
 
             /**
@@ -1184,7 +1180,7 @@
              * @return {boolean} 控件是否允许手势操作
              */
             isGestureStatus: function () {
-                return !this.isDisabled() && this.gesture;
+                return !this.isDisabled() && this._bGesture;
             },
 
             /**
@@ -1198,23 +1194,13 @@
             },
 
             /**
-             * 判断控件是否是实现某个类，或实现某个接口。
-             * @public
-             *
-             * @return {boolean} 控件是否是类或接口的实现
-             */
-            isInstance: function (Class) {
-                return this.hasOwnProperty(Class.CLASSID);
-            },
-
-            /**
              * 判断控件是否完全生成。
              * @public
              *
              * @return {boolean} 控件是否完全生成
              */
             isReady: function () {
-                return !!this.ready;
+                return !!this._bReady;
             },
 
             /**
@@ -1224,7 +1210,7 @@
              * @return {boolean} 控件是否显示
              */
             isShow: function () {
-                return !dom.hasClass(this.main, 'ui-hide') && !!this.main.offsetWidth;
+                return !dom.hasClass(this._eMain, 'ui-hide') && !!this._eMain.offsetWidth;
             },
 
             /**
@@ -1234,7 +1220,7 @@
              * @return {boolean} 控件是否允许选中内容
              */
             isUserSelect: function () {
-                return this.userSelect;
+                return this._bUserSelect;
             },
 
             /**
@@ -1267,18 +1253,18 @@
              */
             setClass: function (currClass) {
                 // 如果基本样式没有改变不需要执行
-                if (currClass !== this.className) {
+                if (currClass !== this._sClass) {
                     var classes = this.getClasses(),
-                        className = this.main.className.split(/\s+/).join('  ').replace(new RegExp('(^| )(' + classes.join('|') + ')(-[^ ]+)?( |$)', 'g'), '');
+                        className = this._eMain.className.split(/\s+/).join('  ').replace(new RegExp('(^| )(' + classes.join('|') + ')(-[^ ]+)?( |$)', 'g'), '');
 
-                    this.className = currClass;
+                    this._sClass = currClass;
 
                     classes = this.getClasses();
 
-                    this.main.className =
+                    this._eMain.className =
                         classes.map(
                             function (item) {
-                                return this.status.join(item);
+                                return this._aStatus.join(item);
                             },
                             this
                         ).join('') + className;
@@ -1292,9 +1278,9 @@
              * @param {string} html HTML 片断
              */
             setContent: function (html) {
-                core.dispose(this.body, true);
-                this.body.innerHTML = html;
-                core.init(this.body);
+                core.dispose(this._eBody, true);
+                this._eBody.innerHTML = html;
+                core.init(this._eBody);
             },
 
             /**
@@ -1304,7 +1290,7 @@
              * @param {boolean} status 当前控件是否允许手势操作
              */
             setGestureStatus: function (status) {
-                this.gesture = status;
+                this._bGesture = status;
             },
 
             /**
@@ -1315,7 +1301,7 @@
              * @param {ecui.ui.Control} parent 父控件对象，忽略参数控件将移出 DOM 树
              */
             setParent: function (parent) {
-                this._alterParent(parent, parent && parent.body);
+                this._alterParent(parent, parent && parent._eBody);
             },
 
             /**
@@ -1327,7 +1313,7 @@
              * @param {number} y 控件的Y轴坐标
              */
             setPosition: function (x, y) {
-                var style = this.main.style;
+                var style = this._eMain.style;
                 style.left = x + 'px';
                 style.top = y + 'px';
             },
@@ -1341,7 +1327,7 @@
              * @param {number} height 控件的高度
              */
             setSize: function (width, height) {
-                if (this.cached) {
+                if (this._bCached) {
                     // 控件新的大小不允许小于最小值
                     if (width < this.getMinimumWidth()) {
                         width = 0;
@@ -1352,10 +1338,10 @@
 
                     this.$setSize(width, height);
                     if (width) {
-                        this.width = this.main.style.width;
+                        this._sWidth = this._eMain.style.width;
                     }
                     if (height) {
-                        this.height = this.main.style.height;
+                        this._sHeight = this._eMain.style.height;
                     }
 
                     this.$restoreStructure();
@@ -1371,8 +1357,8 @@
              * @return {boolean} 显示状态是否改变
              */
             show: function () {
-                if (dom.hasClass(this.main, 'ui-hide')) {
-                    dom.removeClass(this.main, 'ui-hide');
+                if (dom.hasClass(this._eMain, 'ui-hide')) {
+                    dom.removeClass(this._eMain, 'ui-hide');
                     var controls = [this].concat(
                             core.query(
                                 function (item) {
@@ -1387,7 +1373,7 @@
                     controls.forEach(function (item) {
                         core.dispatchEvent(item, 'show');
                     });
-                    core.flexFixed(this.main);
+                    core.flexFixed(this._eMain);
                     return true;
                 }
                 return false;

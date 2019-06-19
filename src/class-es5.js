@@ -236,6 +236,32 @@
             delete properties.private;
         }
 
+        if (data = properties.property) {
+            for (name in data) {
+                if (data.hasOwnProperty(name)) {
+                    var configure = data[name] ? 'object' === typeof data[name] ? data[name] : {get: data[name]} : {};
+                    symbols[name] = {
+                        get: 'function' === typeof configure.get ? makeProxy(newClass, configure.get, superClass) :
+                                (function (name) {
+                                    return makeProxy(
+                                        newClass,
+                                        function () {
+                                            return this[name];
+                                        },
+                                        superClass
+                                    );
+                                }(configure.get || '_' + name)),
+
+                        set: configure.set ? makeProxy(newClass, configure.set, superClass) :
+                                function () {
+                                    throw new Error('The property is readonly.');
+                                }
+                    };
+                }
+            }
+            delete properties.property;
+        }
+
         // 处理受保护的属性
         if (data = properties.protected) {
             for (name in data) {
@@ -285,31 +311,6 @@
                 }
             }
             delete properties.protected;
-        }
-
-        if (data = properties.property) {
-            for (name in data) {
-                if (data.hasOwnProperty(name)) {
-                    symbols[name] = {
-                        get: 'function' === typeof data[name].get ? makeProxy(newClass, data[name].get, superClass) :
-                                (function (name) {
-                                    return makeProxy(
-                                        newClass,
-                                        function () {
-                                            return this[name];
-                                        },
-                                        superClass
-                                    );
-                                }(data[name].get || '_' + name)),
-
-                        set: data[name].set ? makeProxy(newClass, data[name].set, superClass) :
-                                function () {
-                                    throw new Error('The property is readonly.');
-                                }
-                    };
-                }
-            }
-            delete properties.property;
         }
 
         // 处理public属性
