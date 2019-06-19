@@ -2513,10 +2513,10 @@ outer:          for (var caches = [], target = event.target, el; target && targe
                     if (defaultOptions) {
                         for (name in defaultOptions) {
                             if (defaultOptions.hasOwnProperty(name)) {
-                                if ('function' === typeof defaultOptions[name]) {
-                                    this[name] = defaultOptions[name](options[name]);
+                                if ('function' === typeof defaultOptions[name].value) {
+                                    this[defaultOptions[name].alias] = defaultOptions[name].value(options[name]);
                                 } else {
-                                    this[name] = options[name] ? defaultOptions[name].constructor(options[name]) : defaultOptions[name];
+                                    this[defaultOptions[name].alias] = options[name] !== undefined ? defaultOptions[name].value.constructor(options[name]) : defaultOptions[name].value;
                                 }
                             }
                         }
@@ -2543,15 +2543,24 @@ outer:          for (var caches = [], target = event.target, el; target && targe
                 for (var name in defaultOptions) {
                     if (defaultOptions.hasOwnProperty(name)) {
                         if ('boolean' === typeof defaultOptions[name]) {
-                            name = '_b' + name.toCamelCase();
+                            defaultOptions[name] = {
+                                alias: '_b' + name.charAt(0).toUpperCase() + name.slice(1),
+                                value: defaultOptions[name]
+                            };
+                            properties.private[defaultOptions[name].alias] = undefined;
                         } else if ('number' === typeof defaultOptions[name]) {
-                            name = '_n' + name.toCamelCase();
+                            defaultOptions[name] = {
+                                alias: '_n' + name.charAt(0).toUpperCase() + name.slice(1),
+                                value: defaultOptions[name]
+                            };
+                            properties.private[defaultOptions[name].alias] = undefined;
                         } else if ('string' === typeof defaultOptions[name]) {
-                            name = '_s' + name.toCamelCase();
-                        } else {
-                            name = '_o' + name.toCamelCase();
+                            defaultOptions[name] = {
+                                alias: '_s' + name.charAt(0).toUpperCase() + name.slice(1),
+                                value: defaultOptions[name]
+                            };
+                            properties.private[defaultOptions[name].alias] = undefined;
                         }
-                        properties.private[name] = undefined;
                     }
                 }
             }
