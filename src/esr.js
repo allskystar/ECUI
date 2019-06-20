@@ -371,6 +371,11 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                 moduleName + '_define_.js',
                 function () {
                     pauseStatus = false;
+//{if 0}//
+                    if (!routes[name]) {
+                        throw new Error('The route(' + name + ') is not defined.');
+                    }
+//{/if}//
                     callRoute(name, options);
                 },
                 {
