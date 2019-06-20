@@ -23,6 +23,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 //{/if}//
     var HIGH_SPEED = 100,         // 对高速的定义
         scrollHandler,            // DOM滚动事件
+        blurHandler = util.blank, // 失去焦点
         dragStopHandler = util.blank, // ios设备上移出webview区域停止事件
         touchTarget,              // touch点击的目标，用于防止ios下的点击穿透处理
         isTouchMoved,
@@ -50,6 +51,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
         enableGesture = true,     // 手势识别是否有效，在touchend/pointer后会恢复
 
         pauseCount = 0,           // 暂停的次数
+        keys = {codes: []},       // 全部的按键状态
         keyCode = 0,              // 当前键盘按下的键值，解决keypress与keyup中得不到特殊按键的keyCode的问题
         lastClientX,
         lastClientY,
@@ -161,7 +163,6 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                             currEnv.mouseover(event);
                         }
 
-                        checkActived(event);
                         currEnv.mousedown(event);
                         if (trackId) {
                             onpressure(event, event.getNative().pressure >= 0.4);
@@ -434,6 +435,21 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                 }
             },
 
+            blur: function () {
+                // 窗体失去焦点时复位状态信息，IE8以下版本需要区分是进入了下部的input还是真的失去了焦点
+                if (ieVersion < 9) {
+                    blurHandler = util.timer(function () {
+                        keys.codes = [];
+                    }, 100);
+                }
+                keys.codes = [];
+            },
+
+            focusin: function () {
+                // IE才执行focusin
+                blurHandler();
+            },
+
             selectstart: function (event) {
                 // IE下取消对文字的选择不能仅通过阻止 mousedown 事件的默认行为实现，firefox下如果不屏弊选择，图片/链接会直接打开新标签页
                 event = core.wrapEvent(event);
@@ -445,8 +461,13 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             },
 
             keydown: function (event) {
+                keys.ctrl = event.ctrlKey;
+                keys.alt = event.altKey;
+                keys.shift = event.shiftKey;
+                keys.meta = event.metaKey;
                 event = core.wrapEvent(event);
                 keyCode = event.which;
+                keys.codes.push(keyCode);
                 bubble(focusedControl, 'keydown', event);
             },
 
@@ -456,8 +477,13 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             },
 
             keyup: function (event) {
+                keys.ctrl = event.ctrlKey;
+                keys.alt = event.altKey;
+                keys.shift = event.shiftKey;
+                keys.meta = event.metaKey;
                 event = core.wrapEvent(event);
                 bubble(focusedControl, 'keyup', event);
+                util.remove(keys.codes, event.which);
                 if (keyCode === event.which) {
                     // 一次多个键被按下，只有最后一个被按下的键松开时取消键值码
                     keyCode = 0;
@@ -1423,7 +1449,7 @@ outer:          for (var caches = [], target = event.target, el; target && targe
             if (!isToucher && !isPointer) {
                 Object.assign(events, mouseEvents);
             }
-            dom.addEventListeners(document, events);
+            dom.addEventListeners(window, events);
 
             dom.insertHTML(document.body, 'BEFOREEND', '<div class="ui-valid"><div></div></div>');
             // 检测Element宽度与高度的计算方式
