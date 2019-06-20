@@ -406,11 +406,13 @@
              */
             $setParent: function (parent) {
                 _super.$setParent(parent);
-                if (parent = this.input.form) {
-                    if (parent.getControl === undefined) {
-                        dom.addEventListener(parent, 'submit', submitHandler);
-                        dom.addEventListener(parent, 'reset', resetHandler);
-                        parent.getControl = null;
+                if (parent) {
+                    if (parent = this.input.form) {
+                        if (parent.getControl === undefined) {
+                            dom.addEventListener(parent, 'submit', submitHandler);
+                            dom.addEventListener(parent, 'reset', resetHandler);
+                            parent.getControl = null;
+                        }
                     }
                 }
             },

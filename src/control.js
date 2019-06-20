@@ -1053,8 +1053,7 @@
              */
             init: function () {
                 if (this._bDisabled) {
-                    this.alterStatus('+disabled');
-                    dom.addClass(this._eMain, 'ui-disabled');
+                    this.$disable();
                 }
 
                 var el = this._eMain;
