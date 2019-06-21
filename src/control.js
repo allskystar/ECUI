@@ -158,7 +158,7 @@ _aStatus            - 控件当前的状态集合
              * @event
              */
             $blur: function () {
-                if (dom.contain(this.getBody(), document.activeElement)) {
+                if (dom.contain(this._eBody, document.activeElement)) {
                     try {
                         document.activeElement.blur();
                     } catch (ignore) {
@@ -654,7 +654,7 @@ _aStatus            - 控件当前的状态集合
                     force = this._bCached === undefined;
                     this._bCached = true;
                     this.$cache(dom.getStyle(this._eMain));
-                    if (force && this.init === util.blank) {
+                    if (force && this._bCreated) {
                         // 已经初始化，但第一次缓存的控件进行结构化
                         this.initStructure();
                     }
@@ -1086,7 +1086,7 @@ _aStatus            - 控件当前的状态集合
 
                 }
 
-                this.init = util.blank;
+                this._bCreated = true;
             },
 
             /**
@@ -1132,6 +1132,16 @@ _aStatus            - 控件当前的状态集合
              */
             isCapturable: function () {
                 return this._bCapturable;
+            },
+
+            /**
+             * 判断控件是否生成。
+             * @public
+             *
+             * @return {boolean} 控件是否生成
+             */
+            isCreated: function () {
+                return this._bCreated;
             },
 
             /**
