@@ -34,8 +34,8 @@
             /**
              * @override
              */
-            $restoreStructure: function (event) {
-                ui.Control.prototype.$restoreStructure.call(this, event);
+            $restoreStructure: function () {
+                ui.Control.prototype.$restoreStructure.call(this);
                 dom.addClass(this.getMain(), 'ui-mobile-panel-location');
             }
         },

@@ -45,7 +45,7 @@ _uDate   - 日部件
                     this._uDate.setValue(days);
                 }
                 for (var day = 28; day <= 31; day++) {
-                    this._uDate._aItems[day - 1][day <= days ? 'show' : 'hide']();
+                    this._uDate.getItem(day - 1)[day <= days ? 'show' : 'hide']();
                 }
                 this._uDate.$alterItems();
             },

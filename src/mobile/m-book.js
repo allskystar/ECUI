@@ -124,8 +124,8 @@ _aLabel    - 标签信息数组
             /**
              * @override
              */
-            $restoreStructure: function (event) {
-                ui.MPanel.prototype.$restoreStructure.call(this, event);
+            $restoreStructure: function () {
+                ui.MPanel.prototype.$restoreStructure.call(this);
                 this._aLabel.forEach(function (item) {
                     item.el.style.transform = '';
                 });

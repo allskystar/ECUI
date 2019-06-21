@@ -186,8 +186,8 @@ _nDelay   - 延迟时间，如果不自动轮播这个值为0
             /**
              * @override
              */
-            $restoreStructure: function (event) {
-                ui.MPanel.prototype.$restoreStructure.call(this, event);
+            $restoreStructure: function () {
+                ui.MPanel.prototype.$restoreStructure.call(this);
 
                 var el = this.getBody();
                 if (el.firstChild !== el.lastChild) {

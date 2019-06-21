@@ -348,8 +348,8 @@ _eRight      - 右侧乐定行的Element元素
             /**
              * @override
              */
-            $restoreStructure: function (event) {
-                ui.Table.prototype.$restoreStructure.call(this, event);
+            $restoreStructure: function () {
+                ui.Table.prototype.$restoreStructure.call(this);
 
                 this._aHeadRows.forEach(
                     function (item) {

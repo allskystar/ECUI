@@ -454,11 +454,8 @@ _aStatus            - 控件当前的状态集合
             /**
              * 控件结构恢复。
              * @protected
-             *
-             * @param {boolean} isBatch 是否为批量处理
-             * @param {Function} 延后处理函数(交给核心处理)
              */
-            $restoreStructure: function (isBatch) {
+            $restoreStructure: function () {
                 this._eMain.style.width = this._sWidth;
                 this._eMain.style.height = this._sHeight;
                 if (ieVersion < 8) {
@@ -466,7 +463,7 @@ _aStatus            - 控件当前的状态集合
                     var style = dom.getStyle(this._eMain);
                     if (style.width === 'auto' && style.display === 'block') {
                         this._eMain.style.width = '100%';
-                        if (isBatch) {
+                        if (core.isRepainting()) {
                             return function (control, width) {
                                 calcWidth(control, width);
                             };

@@ -27,6 +27,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
         dragStopHandler = util.blank, // ios设备上移出webview区域停止事件
         touchTarget,              // touch点击的目标，用于防止ios下的点击穿透处理
         isTouchMoved,
+        isRepainting,
         ecuiOptions,              // ECUI 参数
 
         viewWidth,                // 浏览器宽高属性
@@ -257,6 +258,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
             // 触屏事件到鼠标事件的转化，与touch相关的事件由于ie浏览器会触发两轮touch与mouse的事件，所以需要屏弊一个
             touchstart: function (event) {
+                // 如果在touch过程中DOM被移除，需要将事件自行冒泡到body
                 if (document.body !== event.target) {
                     dom.addEventListener(event.target, 'touchmove', RemovedDomTouchBubble);
                     dom.addEventListener(event.target, 'touchend', RemovedDomTouchBubble);
@@ -1262,6 +1264,7 @@ outer:          for (var caches = [], target = event.target, el; target && targe
 
             if (x !== expectX || y !== expectY) {
                 // if (ieVersion < 9) {
+                // 如果使用css动画，ios多次快速滑动会卡住
                 inertiaHandles[uid] = effect.grade(
                     function (percent, options) {
                         event.x = Math.round(options.x + percent * (expectX - options.x));
@@ -1448,7 +1451,7 @@ outer:          for (var caches = [], target = event.target, el; target && targe
             if (!isToucher && !isPointer) {
                 Object.assign(events, mouseEvents);
             }
-            dom.addEventListeners(document, events);
+            dom.addEventListeners(window, events);
 
             dom.insertHTML(document.body, 'BEFOREEND', '<div class="ui-valid"><div></div></div>');
             // 检测Element宽度与高度的计算方式
@@ -2739,6 +2742,16 @@ outer:          for (var caches = [], target = event.target, el; target && targe
         },
 
         /**
+         * 是否正在整体重绘
+         * @public
+         *
+         * @return {boolean} 是否正在整体重绘
+         */
+        isRepainting: function () {
+            return isRepainting;
+        },
+
+        /**
          * 使控件失去焦点。
          * loseFocus 方法不完全是 setFocused 方法的逆向行为。如果控件及它的子控件不处于焦点状态，执行 loseFocus 方法不会发生变化。如果控件或它的子控件处于焦点状态，执行 loseFocus 方法将使控件失去焦点状态，如果控件拥有父控件，此时父控件获得焦点状态。
          * @public
@@ -2921,6 +2934,8 @@ outer:          for (var caches = [], target = event.target, el; target && targe
                 return;
             }
 
+            isRepainting = true;
+
             // 隐藏所有遮罩层
             core.mask(false);
             core.flexFixed(document.body);
@@ -2933,7 +2948,7 @@ outer:          for (var caches = [], target = event.target, el; target && targe
             var delayRestoreList = [];
 
             list.forEach(function (item) {
-                if (o = item.$restoreStructure(true)) {
+                if (o = item.$restoreStructure()) {
                     delayRestoreList.push([o, item]);
                 }
             });
@@ -2962,6 +2977,8 @@ outer:          for (var caches = [], target = event.target, el; target && targe
             } else {
                 core.mask(true);
             }
+
+            isRepainting = false;
         },
 
         /**
