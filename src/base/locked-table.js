@@ -243,9 +243,6 @@
             $beforescroll: function (event) {
                 _super.$beforescroll(event);
 
-                // if (ieVersion < 7) {
-                //     return;
-                // }
                 var layout = this.getLayout(),
                     pos = dom.getPosition(layout),
                     view = util.getView(),
@@ -326,7 +323,7 @@
                     leftHeadStyle.left = leftMainStyle.left = this.getLayout().scrollLeft + 'px';
                     rightHeadStyle.left = rightMainStyle.left = (Math.min(this.getWidth(), this.$$tableWidth) - this.$$paddingRight + this.getLayout().scrollLeft - this.$$rightTDWidth - this.$$scrollFixed[0]) + 'px';
                     leftMainStyle.top = rightMainStyle.top = (this.$$paddingTop - this.getLayout().firstChild.scrollTop - dom.parent(this.$Head.getMain()).scrollTop) + 'px';
-                    leftMainStyle.clip = rightMainStyle.clip = ieVersion < 8 ? 'rect(0,100%,100%,0)' : 'auto';
+                    leftMainStyle.clip = rightMainStyle.clip = 'auto';
                 }
             },
 
@@ -351,8 +348,8 @@
             /**
              * @override
              */
-            $restoreStructure: function (event) {
-                _super.$restoreStructure(event);
+            $restoreStructure: function () {
+                _super.$restoreStructure();
 
                 var leftHead = this.$LeftHead.getMain(),
                     rightHead = this.$RightHead.getMain(),

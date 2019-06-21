@@ -33,8 +33,8 @@
             /**
              * @override
              */
-            $restoreStructure: function (event) {
-                _super.$restoreStructure(event);
+            $restoreStructure: function () {
+                _super.$restoreStructure();
                 dom.addClass(this.getMain(), 'ui-mobile-panel-location');
             }
         },

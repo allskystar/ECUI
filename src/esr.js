@@ -56,29 +56,6 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
         historyCache = [];
 
     /**
-     * 增加IE的history信息。
-     * @private
-     *
-     * @param {string} loc 当前地址
-     * @return 如果增加了history信息返回true，否则不返回
-     */
-    function addIEHistory(loc) {
-        if (ieVersion < 8) {
-            var iframeDoc = document.getElementById('ECUI_LOCATOR').contentWindow.document;
-            iframeDoc.open('text/html');
-            iframeDoc.write(
-                '<html><body><script type="text/javascript">' +
-                    'var loc="' + loc.replace(/\\/g, '\\\\').replace(/\"/g, '\\\"') + '";' +
-                    'parent.ecui.esr.setLocation(loc);' +
-                    'parent.ecui.esr.callRoute(loc);' +
-                    '</script></body></html>'
-            );
-            iframeDoc.close();
-            return true;
-        }
-    }
-
-    /**
      * 渲染结束事件的处理。
      * @private
      *
@@ -263,33 +240,13 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                 // 解决A标签下反复修改的问题
                 var loc = esr.getLocation().replace('~DENY_CACHE', '');
 
-                if (ieVersion < 7) {
-                    if (historyIndex > 1) {
-                        // IE第一次进入，不能back，否则会退出框架
-                        pauseStatus = true;
-                        history.back();
-                        var handle = util.timer(
-                            function () {
-                                if (!/~DENY_CACHE/.test(location.href)) {
-                                    esr.setLocation(loc);
-                                    pauseStatus = false;
-                                    handle();
-                                }
-                            },
-                            -10
-                        );
-                    } else {
-                        esr.setLocation(loc);
-                    }
-                } else {
-                    setLocation(loc);
-                    util.timer(
-                        function () {
-                            location.replace('#' + loc);
-                        },
-                        100
-                    );
-                }
+                setLocation(loc);
+                util.timer(
+                    function () {
+                        location.replace('#' + loc);
+                    },
+                    100
+                );
 
                 route.CACHE = undefined;
             }
@@ -555,15 +512,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
      */
     function init() {
         if (!routeRequestCount) {
-            if (ieVersion < 8) {
-                var iframe = document.createElement('iframe');
-
-                iframe.id = 'ECUI_LOCATOR';
-                iframe.src = 'about:blank';
-
-                document.body.appendChild(iframe);
-                setInterval(listener, 100);
-            } else if (window.onhashchange !== undefined) {
+            if (window.onhashchange !== undefined) {
                 dom.addEventListener(window, 'hashchange', listener);
                 listener();
             } else {
@@ -726,49 +675,18 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                     esr.callRoute(loc);
                 } else if (/~HISTORY=(\d+)/.test(loc)) {
                     historyIndex = +RegExp.$1;
-
-                    // ie下使用中间iframe作为中转控制
-                    // 其他浏览器直接调用控制器方法
-                    if (!addIEHistory(loc)) {
-                        setLocation(loc);
-                        esr.callRoute(loc);
-                    }
+                    setLocation(loc);
+                    esr.callRoute(loc);
                 } else {
                     historyCache = historyCache.slice(0, historyIndex - historyOffset - 1);
                     loc += '~HISTORY=' + historyIndex;
-                    if (ieVersion < 7) {
-                        if (historyIndex > 1) {
-                            // IE第一次进入，不能back，否则会退出框架
-                            pauseStatus = true;
-                            history.back();
-                            var handle = util.timer(
-                                function () {
-                                    if (/~HISTORY=(\d+)/.test(location.href)) {
-                                        esr.setLocation(loc);
-                                        esr.callRoute(loc);
-                                        pauseStatus = false;
-                                        handle();
-                                    }
-                                },
-                                -10
-                            );
-                        } else {
-                            esr.setLocation(loc);
-                            esr.callRoute(loc);
-                        }
-                        return;
-                    }
                     pauseStatus = true;
                     util.timer(
                         function () {
                             pauseStatus = false;
                             location.replace('#' + loc);
-                            // ie下使用中间iframe作为中转控制
-                            // 其他浏览器直接调用控制器方法
-                            if (!addIEHistory(loc)) {
-                                setLocation(loc);
-                                esr.callRoute(loc);
-                            }
+                            setLocation(loc);
+                            esr.callRoute(loc);
                         },
                         100
                     );
@@ -1228,9 +1146,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
             esr.setLocation(list.join('~'));
 
             if (name) {
-                if (!addIEHistory(currLocation)) {
-                    callRoute(name, oldOptions);
-                }
+                callRoute(name, oldOptions);
             }
         },
 
@@ -1949,7 +1865,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
 
             esrOptions = JSON.parse('{' + decodeURIComponent(value.replace(/(\w+)\s*=\s*(["A-Za-z0-9_]+)\s*($|,)/g, '"$1":$2$3')) + '}');
 
-            esrOptions.history = esrOptions.history !== false || ieVersion < 7;
+            esrOptions.history = esrOptions.history !== false;
             esrOptions.cache = esrOptions.cache || 1000;
 
             if (esrOptions.meta) {

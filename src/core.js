@@ -31,7 +31,6 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
         viewWidth,                // 浏览器宽高属性
         viewHeight,               // 浏览器宽高属性
-        flgFixedSize,             // 在计算盒子模型时，是否需要修正宽高
         scrollNarrow,             // 浏览器滚动条相对窄的一边的长度
 
         initRecursion = 0,        // init 操作的递归次数
@@ -1442,7 +1441,6 @@ outer:          for (var caches = [], target = event.target, el; target && targe
             dom.insertHTML(document.body, 'BEFOREEND', '<div class="ui-valid"><div></div></div>');
             // 检测Element宽度与高度的计算方式
             var el = document.body.lastChild;
-            flgFixedSize = el.offsetWidth !== 80;
             scrollNarrow = el.offsetWidth - el.clientWidth - 2;
             dom.remove(el);
             dom.addClass(document.body, scrollNarrow ? 'ui-scrollbar' : 'ui-touchpad');
@@ -2702,9 +2700,6 @@ outer:          for (var caches = [], target = event.target, el; target && targe
          * @return {boolean} 是否为CSS2.1默认的盒子模型
          */
         isContentBox: function (el) {
-            if (ieVersion < 8) {
-                return el.tagName === 'INPUT' || el.tagName === 'BUTTON' ? false : flgFixedSize;
-            }
             return dom.getStyle(el, 'boxSizing') === 'content-box';
         },
 
@@ -2930,12 +2925,7 @@ outer:          for (var caches = [], target = event.target, el; target && targe
                 item.initStructure();
             });
 
-            if (ieVersion < 8) {
-                // 解决 ie6/7 下直接显示遮罩层，读到的浏览器大小实际未更新的问题
-                util.timer(core.mask, 0, null, true);
-            } else {
-                core.mask(true);
-            }
+            core.mask(true);
         },
 
         /**

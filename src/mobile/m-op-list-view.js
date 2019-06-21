@@ -112,8 +112,8 @@ _cItem    - 当前处于激活的选项
                     /**
                      * @override
                      */
-                    $restoreStructure: function (event) {
-                        _super.$restoreStructure(event);
+                    $restoreStructure: function () {
+                        _super.$restoreStructure();
                         dom.children(this.getBody()).forEach(function (item, index) {
                             if (index) {
                                 item.style.height = '';

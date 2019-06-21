@@ -43,13 +43,8 @@
             container.style.position = 'relative';
         }
 
-        if (ieVersion < 8) {
-            var style = dom.getStyle(container, 'borderWidth').split(' ');
-            style = {borderTopWidth: style[0], borderLeftWidth: style[3] || style[1] || style[0]};
-        } else {
-            style = dom.getStyle(container);
-        }
-        var elPos = dom.getPosition(el),
+        var style = dom.getStyle(container),
+            elPos = dom.getPosition(el),
             containerPos = dom.getPosition(container),
             top = elPos.top - containerPos.top - util.toNumber(style.borderTopWidth) + container.scrollTop,
             left = elPos.left - containerPos.left - util.toNumber(style.borderLeftWidth) + container.scrollLeft,

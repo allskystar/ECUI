@@ -186,21 +186,8 @@
              * @param {CssStyle} style 主元素的css样式对象
              */
             $cache: function (style) {
-                if (ieVersion < 8) {
-                    var list = style.borderWidth.split(' ');
-                    this.$$border = [util.toNumber(list[0])];
-                    this.$$border[1] = list[1] ? util.toNumber(list[1]) : this.$$border[0];
-                    this.$$border[2] = list[2] ? util.toNumber(list[2]) : this.$$border[0];
-                    this.$$border[3] = list[3] ? util.toNumber(list[3]) : this.$$border[1];
-                    list = style.padding.split(' ');
-                    this.$$padding = [util.toNumber(list[0])];
-                    this.$$padding[1] = list[1] ? util.toNumber(list[1]) : this.$$padding[0];
-                    this.$$padding[2] = list[2] ? util.toNumber(list[2]) : this.$$padding[0];
-                    this.$$padding[3] = list[3] ? util.toNumber(list[3]) : this.$$padding[1];
-                } else {
-                    this.$$border = [util.toNumber(style.borderTopWidth), util.toNumber(style.borderRightWidth), util.toNumber(style.borderBottomWidth), util.toNumber(style.borderLeftWidth)];
-                    this.$$padding = [util.toNumber(style.paddingTop), util.toNumber(style.paddingRight), util.toNumber(style.paddingBottom), util.toNumber(style.paddingLeft)];
-                }
+                this.$$border = [util.toNumber(style.borderTopWidth), util.toNumber(style.borderRightWidth), util.toNumber(style.borderBottomWidth), util.toNumber(style.borderLeftWidth)];
+                this.$$padding = [util.toNumber(style.paddingTop), util.toNumber(style.paddingRight), util.toNumber(style.paddingBottom), util.toNumber(style.paddingLeft)];
 
                 this.$$width = this._eMain.offsetWidth;
                 this.$$height = this._eMain.offsetHeight;
@@ -453,26 +440,10 @@
             /**
              * 控件结构恢复。
              * @protected
-             *
-             * @param {boolean} isBatch 是否为批量处理
-             * @param {Function} 延后处理函数(交给核心处理)
              */
-            $restoreStructure: function (isBatch) {
+            $restoreStructure: function () {
                 this._eMain.style.width = this._sWidth;
                 this._eMain.style.height = this._sHeight;
-                if (ieVersion < 8) {
-                    // 修复ie6/7下宽度自适应错误的问题
-                    var style = dom.getStyle(this._eMain);
-                    if (style.width === 'auto' && style.display === 'block') {
-                        this._eMain.style.width = '100%';
-                        if (isBatch) {
-                            return function (control, width) {
-                                control._setWidth(width);
-                            };
-                        }
-                        this._setWidth(this._eMain.offsetWidth);
-                    }
-                }
             },
 
             /**

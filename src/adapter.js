@@ -215,9 +215,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              * @param {string} name 属性名称
              * @return {string} 属性值
              */
-            getAttribute: ieVersion < 8 ? function (el, name) {
-                return el[name] || '';
-            } : function (el, name) {
+            getAttribute: function (el, name) {
                 return el.getAttribute(name) || '';
             },
 
@@ -261,13 +259,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
 
                 if (el.getBoundingClientRect) {
                     if (ieVersion && !isStrict) {
-                        // 在怪异模式下，IE 将 body 的边框也算在了偏移值中，需要先纠正
-                        if (ieVersion < 8) {
-                            var style = dom.getStyle(body, 'borderWidth').split(' ');
-                            style = {borderTopWidth: style[0], borderLeftWidth: style[3] || style[1] || style[0]};
-                        } else {
-                            style = dom.getStyle(body);
-                        }
+                        var style = dom.getStyle(body);
                         if (isNaN(top = util.toNumber(style.borderTopWidth))) {
                             top = -2;
                         }
@@ -584,7 +576,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                     }
                     for (el = dom.parent(el); el !== document.body; el = dom.parent(el)) {
                         if (el.clientHeight !== el.scrollHeight) {
-                            var clientTop = dom.getPosition(el).top + util.toNumber(ieVersion < 8 ? dom.getStyle(el, 'borderWidth').split(' ')[0] : dom.getStyle(el, 'borderTopWidth')),
+                            var clientTop = dom.getPosition(el).top + util.toNumber(dom.getStyle(el, 'borderTopWidth')),
                                 clientHeight = el.clientHeight,
                                 distance;
 
@@ -1583,26 +1575,6 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
 
     // 读写特殊的 css 属性操作
     var __ECUI__StyleFixer = {
-            clip: ieVersion < 8 ? {
-                set: function (el, value) {
-                    el.style.clip = value === 'auto' ? 'rect(0,100%,100%,0)' : value;
-                }
-            } : undefined,
-
-            display: ieVersion < 8 ? {
-                get: function (el, style) {
-                    return style.display === 'inline' && style.zoom === '1' ? 'inline-block' : style.display;
-                },
-
-                set: function (el, value) {
-                    if (value === 'inline-block') {
-                        value = 'inline';
-                        el.style.zoom = 1;
-                    }
-                    el.style.display = value;
-                }
-            } : undefined,
-
             opacity: ieVersion < 9 ? {
                 get: function (el, style) {
                     if (/\(opacity=(\d+)/.test(style.filter)) {
@@ -1614,8 +1586,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                 set: function (el, value) {
                     el.style.filter =
                         el.style.filter.replace(/(progid:DXImageTransform\.Microsoft\.)?alpha\([^\)]*\)/gi, '') +
-                            (value === '' ? '' : (ieVersion < 8 ? 'alpha' : 'progid:DXImageTransform.Microsoft.Alpha') +
-                            '(opacity=' + value * 100 + ')');
+                            (value === '' ? '' : 'progid:DXImageTransform.Microsoft.Alpha(opacity=' + value * 100 + ')');
                 }
             } : undefined,
 

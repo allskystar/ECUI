@@ -118,8 +118,8 @@ _aLabel    - 标签信息数组
             /**
              * @override
              */
-            $restoreStructure: function (event) {
-                _super.$restoreStructure(event);
+            $restoreStructure: function () {
+                _super.$restoreStructure();
                 this._aLabel.forEach(function (item) {
                     item.el.style.transform = '';
                 });

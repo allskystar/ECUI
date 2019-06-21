@@ -549,9 +549,6 @@
              */
             $beforescroll: function (event) {
                 _super.$beforescroll(event);
-                // if (ieVersion < 7) {
-                //     return;
-                // }
 
                 if (!(ieVersion < 9)) {
                     for (var el = this.$Head.getMain(); el !== document.body; el = dom.parent(el)) {
@@ -669,7 +666,7 @@
                     style.top = (Math.min(this.getClientHeight() - this.$$paddingTop - this.headMargin, Math.max(0, this.headFloat + util.getView().top - dom.getPosition(this.getMain()).top))) + 'px';
                     style.left = '0px';
                     if (!core.getScrollNarrow()) {
-                        style.clip = ieVersion < 8 ? 'rect(0,100%,100%,0)' : 'auto';
+                        style.clip = 'auto';
                     }
                 }
             },
@@ -743,8 +740,8 @@
             /**
              * @override
              */
-            $restoreStructure: function (event) {
-                _super.$restoreStructure(event);
+            $restoreStructure: function () {
+                _super.$restoreStructure();
 
                 this.headRows.forEach(function (item) {
                     item.$restoreStructure();

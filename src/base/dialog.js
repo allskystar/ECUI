@@ -103,21 +103,8 @@
             $cache: function (style) {
                 _super.$cache(style);
                 style = dom.getStyle(this.getBody());
-                if (ieVersion < 8) {
-                    var list = style.borderWidth.split(' ');
-                    this.$$bodyBorder = [util.toNumber(list[0])];
-                    this.$$bodyBorder[1] = list[1] ? util.toNumber(list[1]) : this.$$bodyBorder[0];
-                    this.$$bodyBorder[2] = list[2] ? util.toNumber(list[2]) : this.$$bodyBorder[0];
-                    this.$$bodyBorder[3] = list[3] ? util.toNumber(list[3]) : this.$$bodyBorder[1];
-                    list = style.padding.split(' ');
-                    this.$$bodyPadding = [util.toNumber(list[0])];
-                    this.$$bodyPadding[1] = list[1] ? util.toNumber(list[1]) : this.$$bodyPadding[0];
-                    this.$$bodyPadding[2] = list[2] ? util.toNumber(list[2]) : this.$$bodyPadding[0];
-                    this.$$bodyPadding[3] = list[3] ? util.toNumber(list[3]) : this.$$bodyPadding[1];
-                } else {
-                    this.$$bodyBorder = [util.toNumber(style.borderTopWidth), util.toNumber(style.borderRightWidth), util.toNumber(style.borderBottomWidth), util.toNumber(style.borderLeftWidth)];
-                    this.$$bodyPadding = [util.toNumber(style.paddingTop), util.toNumber(style.paddingRight), util.toNumber(style.paddingBottom), util.toNumber(style.paddingLeft)];
-                }
+                this.$$bodyBorder = [util.toNumber(style.borderTopWidth), util.toNumber(style.borderRightWidth), util.toNumber(style.borderBottomWidth), util.toNumber(style.borderLeftWidth)];
+                this.$$bodyPadding = [util.toNumber(style.paddingTop), util.toNumber(style.paddingRight), util.toNumber(style.paddingBottom), util.toNumber(style.paddingLeft)];
 
                 this.$$titleHeight = this.$Title.getMain().offsetHeight;
             },
