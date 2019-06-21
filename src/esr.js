@@ -1222,6 +1222,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
             for (key in oldOptions) {
                 if (oldOptions.hasOwnProperty(key)) {
                     list.push(key + '=' + encodeURIComponent(oldOptions[key]));
+                    context[name] = oldOptions[name];
                 }
             }
             list.sort().splice(0, 0, url);
@@ -1229,7 +1230,8 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
 
             if (name) {
                 if (!addIEHistory(currLocation)) {
-                    callRoute(name, oldOptions);
+                    // change以子路由的方式调用
+                    callRoute(name, true);
                 }
             }
         },
@@ -1376,6 +1378,17 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
             return routes;
         },
 //{/if}//
+        /**
+         * 跳转到指定的历史索引。
+         * @public
+         *
+         * @param {number} index 历史索引号
+         */
+        go: function (index) {
+            /~HISTORY=(\d+)/.test(currLocation);
+            history.go(index - +RegExp.$1);
+        },
+
         /**
          * 将一个 Form 表单转换成对象。
          * @public
