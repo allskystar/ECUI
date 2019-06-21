@@ -164,7 +164,6 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                             currEnv.mouseover(event);
                         }
 
-                        checkActived(event);
                         currEnv.mousedown(event);
                         if (trackId) {
                             onpressure(event, event.getNative().pressure >= 0.4);
@@ -1334,7 +1333,7 @@ outer:          for (var caches = [], target = event.target, el; target && targe
      */
     function flexElementToArray(el) {
         var style = dom.getStyle(el);
-        if (style.display.indexOf('flex') >= 0 && dom.getCustomStyle(style, 'flex-fixed') && el.offsetWidth) {
+        if (style.display.indexOf('flex') >= 0 && el.offsetWidth) {
             dom.children(el).forEach(function (el) {
                 if (el.offsetWidth && el.offsetHeight) {
                     this.push([el, el.offsetWidth, el.offsetHeight]);
@@ -1350,6 +1349,7 @@ outer:          for (var caches = [], target = event.target, el; target && targe
      * @param {Array} item DOM 元素信息
      */
     function flexElementToBoxing(item) {
+        item[0].style.boxSizing = 'border-box';
         item[0].style.width = item[1] + 'px';
         item[0].style.height = item[2] + 'px';
     }
