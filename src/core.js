@@ -2406,6 +2406,16 @@ outer:          for (var caches = [], target = event.target, el; target && targe
         },
 
         /**
+         * 获取全部按键信息。
+         * @public
+         *
+         * @return {object} 按键信息对象
+         */
+        getKeys: function () {
+            return keys;
+        },
+
+        /**
          * 获取所有被命名的控件。
          * @public
          *
