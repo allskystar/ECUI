@@ -27,6 +27,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
         dragStopHandler = util.blank, // ios设备上移出webview区域停止事件
         touchTarget,              // touch点击的目标，用于防止ios下的点击穿透处理
         isTouchMoved,
+        isRepainting,
         ecuiOptions,              // ECUI 参数
 
         viewWidth,                // 浏览器宽高属性
@@ -1331,7 +1332,7 @@ outer:          for (var caches = [], target = event.target, el; target && targe
      */
     function flexElementToArray(el) {
         var style = dom.getStyle(el);
-        if (style.display.indexOf('flex') >= 0 && dom.getCustomStyle(style, 'flex-fixed') && el.offsetWidth) {
+        if (style.display.indexOf('flex') >= 0 && el.offsetWidth) {
             dom.children(el).forEach(function (el) {
                 if (el.offsetWidth && el.offsetHeight) {
                     this.push([el, el.offsetWidth, el.offsetHeight]);
@@ -1347,6 +1348,7 @@ outer:          for (var caches = [], target = event.target, el; target && targe
      * @param {Array} item DOM 元素信息
      */
     function flexElementToBoxing(item) {
+        item[0].style.boxSizing = 'border-box';
         item[0].style.width = item[1] + 'px';
         item[0].style.height = item[2] + 'px';
     }
@@ -2704,6 +2706,16 @@ outer:          for (var caches = [], target = event.target, el; target && targe
         },
 
         /**
+         * 是否正在整体重绘
+         * @public
+         *
+         * @return {boolean} 是否正在整体重绘
+         */
+        isRepainting: function () {
+            return isRepainting;
+        },
+
+        /**
          * 使控件失去焦点。
          * loseFocus 方法不完全是 setFocused 方法的逆向行为。如果控件及它的子控件不处于焦点状态，执行 loseFocus 方法不会发生变化。如果控件或它的子控件处于焦点状态，执行 loseFocus 方法将使控件失去焦点状态，如果控件拥有父控件，此时父控件获得焦点状态。
          * @public
@@ -2890,6 +2902,8 @@ outer:          for (var caches = [], target = event.target, el; target && targe
                 return;
             }
 
+            isRepainting = true;
+
             // 隐藏所有遮罩层
             core.mask(false);
             core.flexFixed(document.body);
@@ -2926,6 +2940,8 @@ outer:          for (var caches = [], target = event.target, el; target && targe
             });
 
             core.mask(true);
+
+            isRepainting = false;
         },
 
         /**
