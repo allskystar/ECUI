@@ -115,10 +115,9 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
             }
         }
 
-        if (route.NAME) {
-            autoChildRoute(route);
-        } else {
-            autoChildRoute(route);
+        autoChildRoute(route);
+        if (!route.NAME) {
+            // 缺省路由
             init();
         }
     }
@@ -154,6 +153,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
             var el = core.$('AppCommonContainer');
             if (el.route !== route.NAME) {
 //{if 0}//
+                // 避免id重名警告
                 core.dispose(el, true);
 //{/if}//
                 core.$('AppBackupContainer').id = 'AppCommonContainer';
@@ -263,33 +263,33 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                 // 解决A标签下反复修改的问题
                 var loc = esr.getLocation().replace('~DENY_CACHE', '');
 
-                // if (ieVersion < 7) {
-                //     if (historyIndex > 1) {
-                //         // IE第一次进入，不能back，否则会退出框架
-                //         pauseStatus = true;
-                //         history.back();
-                //         var handle = util.timer(
-                //             function () {
-                //                 if (!/~DENY_CACHE/.test(location.href)) {
-                //                     esr.setLocation(loc);
-                //                     pauseStatus = false;
-                //                     handle();
-                //                 }
-                //             },
-                //             -10
-                //         );
-                //     } else {
-                //         esr.setLocation(loc);
-                //     }
-                // } else {
-                setLocation(loc);
-                util.timer(
-                    function () {
-                        location.replace('#' + loc);
-                    },
-                    100
-                );
-                // }
+                if (ieVersion < 7) {
+                    if (historyIndex > 1) {
+                        // IE第一次进入，不能back，否则会退出框架
+                        pauseStatus = true;
+                        history.back();
+                        var handle = util.timer(
+                            function () {
+                                if (!/~DENY_CACHE/.test(location.href)) {
+                                    esr.setLocation(loc);
+                                    pauseStatus = false;
+                                    handle();
+                                }
+                            },
+                            -10
+                        );
+                    } else {
+                        esr.setLocation(loc);
+                    }
+                } else {
+                    setLocation(loc);
+                    util.timer(
+                        function () {
+                            location.replace('#' + loc);
+                        },
+                        100
+                    );
+                }
 
                 route.CACHE = undefined;
             }
@@ -731,28 +731,28 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                 } else {
                     historyCache = historyCache.slice(0, historyIndex - historyOffset - 1);
                     loc += '~HISTORY=' + historyIndex;
-                    // if (ieVersion < 7) {
-                    //     if (historyIndex > 1) {
-                    //         // IE第一次进入，不能back，否则会退出框架
-                    //         pauseStatus = true;
-                    //         history.back();
-                    //         var handle = util.timer(
-                    //             function () {
-                    //                 if (/~HISTORY=(\d+)/.test(location.href)) {
-                    //                     esr.setLocation(loc);
-                    //                     esr.callRoute(loc);
-                    //                     pauseStatus = false;
-                    //                     handle();
-                    //                 }
-                    //             },
-                    //             -10
-                    //         );
-                    //     } else {
-                    //         esr.setLocation(loc);
-                    //         esr.callRoute(loc);
-                    //     }
-                    //     return;
-                    // }
+                    if (ieVersion < 7) {
+                        if (historyIndex > 1) {
+                            // IE第一次进入，不能back，否则会退出框架
+                            pauseStatus = true;
+                            history.back();
+                            var handle = util.timer(
+                                function () {
+                                    if (/~HISTORY=(\d+)/.test(location.href)) {
+                                        esr.setLocation(loc);
+                                        esr.callRoute(loc);
+                                        pauseStatus = false;
+                                        handle();
+                                    }
+                                },
+                                -10
+                            );
+                        } else {
+                            esr.setLocation(loc);
+                            esr.callRoute(loc);
+                        }
+                        return;
+                    }
                     pauseStatus = true;
                     util.timer(
                         function () {
@@ -1944,7 +1944,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
 
             esrOptions = JSON.parse('{' + decodeURIComponent(value.replace(/(\w+)\s*=\s*(["A-Za-z0-9_]+)\s*($|,)/g, '"$1":$2$3')) + '}');
 
-            esrOptions.history = esrOptions.history !== false;// || ieVersion < 7;
+            esrOptions.history = esrOptions.history !== false || ieVersion < 7;
             esrOptions.cache = esrOptions.cache || 1000;
 
             if (esrOptions.meta) {

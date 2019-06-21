@@ -566,9 +566,9 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
              */
             $beforescroll: function (event) {
                 ui.Control.prototype.$beforescroll.call(this, event);
-                // if (ieVersion < 7) {
-                //     return;
-                // }
+                if (ieVersion < 7) {
+                    return;
+                }
 
                 if (!(ieVersion < 9)) {
                     for (var el = this._uHead.getMain(); el !== document.body; el = dom.parent(el)) {
