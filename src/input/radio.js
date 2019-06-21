@@ -22,7 +22,7 @@ _bRequired - 是否必须选择
      * 为控件的 INPUT 节点绑定事件。
      * @private
      */
-    function change(event) {
+    function changeHandler(event) {
         setChecked(core.wrapEvent(event).target.getControl(), true);
     }
 
@@ -74,7 +74,7 @@ _bRequired - 是否必须选择
             // 保存节点选中状态，用于修复IE6/7下移动DOM节点时选中状态发生改变的问题
             this._bDefault = this.getInput().defaultChecked;
             this._bRequired = !!options.required;
-            dom.addEventListener(this.getInput(), 'change', change);
+            dom.addEventListener(this.getInput(), 'change', changeHandler);
         },
         {
             /**
