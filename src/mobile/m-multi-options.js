@@ -134,15 +134,8 @@ _eText       - 文本框
                             this
                         ).join('');
 
-                        this._aItems = [];
-                        dom.children(el).forEach(
-                            function (item) {
-                                this._aItems.push(core.$fastCreate(this.Item, item, this, core.getOptions(item)));
-                            },
-                            this
-                        );
-
                         this.setOptionSize(3);
+                       
                     }
                 ],
                 {
@@ -151,9 +144,9 @@ _eText       - 文本框
                      * @unit
                      */
                     Item: core.inherits(
-                        ui.Control,
+                        ui.Item,
                         function (el, options) {
-                            ui.Control.call(this, el, options);
+                            ui.Item.call(this, el, options);
                             this._sValue = options.value || this.getContent();
                         }
                     ),
@@ -161,9 +154,14 @@ _eText       - 文本框
                     /**
                      * @override
                      */
+                    $alterItems: util.blank,
+
+                    /**
+                     * @override
+                     */
                     $initStructure: function (width, height) {
                         ui.Control.prototype.$initStructure.call(this, width, height);
-                        this.setPosition(0, (3 - this._aItems.indexOf(this.getSelected())) * this.$$itemHeight);
+                        this.setPosition(0, (3 - this.getItems().indexOf(this.getSelected())) * this.$$itemHeight);
                     },
 
                     /**
@@ -185,7 +183,7 @@ _eText       - 文本框
                      */
                     setValue: function (value) {
                         value = (this._sPrefix + value).slice(-this._sPrefix.length);
-                        for (var i = 0, item; item = this._aItems[i]; i++) {
+                        for (var i = 0, item; item = this.getItem(i); i++) {
                             if (item._sValue === value) {
                                 if (this.isCached()) {
                                     this.setPosition(0, (3 - i) * this.$$itemHeight);
@@ -198,6 +196,7 @@ _eText       - 文本框
                     }
                 },
                 ui.MOptions,
+                ui.Items,
                 {
                     /**
                      * @override
