@@ -47,15 +47,6 @@
             $setParent: function (parent) {
                 var oldParent = this.getParent();
                 if (oldParent) {
-                    for (var key in oldParent) {
-                        if (oldParent[key] === this) {
-                            if (key.charAt(0) === '_' && oldParent['set' + key.slice(2)]) {
-                                oldParent['set' + key.slice(2)]();
-                            } else if (oldParent.hasOwnProperty(key)) {
-                                oldParent[key] = null;
-                            }
-                        }
-                    }
                     for (var name in oldParent.$ItemsData.properties) {
                         if (oldParent.$ItemsData.properties.hasOwnProperty(name)) {
                             if (oldParent.$ItemsData.properties[name] === this) {
