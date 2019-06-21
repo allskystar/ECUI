@@ -386,7 +386,6 @@ _aStatus            - 控件当前的状态集合
              * 强制拦截事件。
              * @event
              */
-            $intercept: util.blank,
 
             /**
              * 键盘键按下事件。

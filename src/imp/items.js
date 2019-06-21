@@ -95,7 +95,7 @@
 
             UIClass.prototype[propertyName] = function (item) {
                 item = item || null;
-                var oldItem = this.$ItemsData.properties[propertyName] || null;
+                var oldItem = this.$ItemsData.properties[propertyName];
                 if (oldItem !== item) {
                     if (oldItem) {
                         oldItem.alterStatus('-' + name);
@@ -104,7 +104,7 @@
                         item.alterStatus('+' + name);
                     }
                     this.$ItemsData.properties[propertyName] = item;
-                    return oldItem;
+                    return oldItem || null;
                 }
             };
 

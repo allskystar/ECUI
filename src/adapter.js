@@ -1614,8 +1614,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                 set: function (el, value) {
                     el.style.filter =
                         el.style.filter.replace(/(progid:DXImageTransform\.Microsoft\.)?alpha\([^\)]*\)/gi, '') +
-                            (value === '' ? '' : (ieVersion < 8 ? 'alpha' : 'progid:DXImageTransform.Microsoft.Alpha') +
-                            '(opacity=' + value * 100 + ')');
+                            (value === '' ? '' : (ieVersion < 8 ? 'alpha' : 'progid:DXImageTransform.Microsoft.Alpha') + '(opacity=' + value * 100 + ')');
                 }
             } : undefined,
 
