@@ -402,12 +402,13 @@ ECUI动画效果库，支持对CSS3动画效果的模拟并扩展了相应的功
 
                 if (css) {
                     fn.call(options.$, 0, options);
-                    
-                    util.timer(function () {
-                        new Function('$', elements.join('transition="all ' + duration + 'ms ' + (transition || 'ease') + '";')).call(options.$, options);
-                        fn.call(options.$, 1, options);
-                    }, 0);
-                    
+                    util.timer(
+                        // 延后执行，否则浏览器会进行优化合并0/1的设置
+                        function () {
+                            new Function('$', elements.join('transition="all ' + duration + 'ms ' + (transition || 'ease') + '";')).call(options.$, options);
+                            fn.call(options.$, 1, options);
+                        }
+                    );
                     util.timer(
                         function () {
                             new Function('$', elements.join('transition="";')).call(options.$, options);
