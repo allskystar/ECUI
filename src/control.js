@@ -34,10 +34,6 @@ _aStatus            - 控件当前的状态集合
 //{/if}//
     var waitReadyList;
 
-    function calcWidth(control, width) {
-        control._eMain.style.width = width - (core.isContentBox(control._eMain) ? control.$getBasicWidth() * 2 : 0) + 'px';
-    }
-
     /**
      * 设置控件的父对象。
      * @private
@@ -75,6 +71,22 @@ _aStatus            - 控件当前的状态集合
         control.$setParent(parent);
     }
 
+    /**
+     * 设置控件的实际宽度。
+     * @private
+     *
+     * @param {number} width 控件的占位宽度
+     */
+    function setWidth(control, width) {
+        control._eMain.style.width = width - (core.isContentBox(control._eMain) ? control.$getBasicWidth() * 2 : 0) + 'px';
+    }
+
+    /**
+     * 部件的ready事件监听器。
+     * @private
+     *
+     * @param {ECUIEvent} event ECUI事件对象
+     */
     function unitReadyHandler(event) {
         if (this._cParent) {
             // 仅执行一次
@@ -93,10 +105,10 @@ _aStatus            - 控件当前的状态集合
      * id          名称，指定后可以使用 ecui.get([id]) 的方式获取控件
      * uid         唯一标识符，不可自行定义，系统自动生成
      * primary     主元素需要绑定的样式
-     * disabled    是否失效，如果设置失效，控件忽略所有事件，缺省值为 false
      * capturable  是否接收交互事件，如果设置不接收交互事件，交互事件由控件的父控件处理，缺省值为 true
-     * userSelect  是否允许选中内容，缺省值为 true
+     * disabled    是否失效，如果设置失效，控件忽略所有事件，缺省值为 false
      * focusable   是否允许获取焦点，如果设置不允许获取焦点，控件的交互事件不会改变当前拥有焦点的控件，用于自定义滚动条，缺省值为 true
+     * userSelect  是否允许选中内容，缺省值为 true
      * @control
      */
     ui.Control = core.inherits(
@@ -465,10 +477,10 @@ _aStatus            - 控件当前的状态集合
                         this._eMain.style.width = '100%';
                         if (core.isRepainting()) {
                             return function (control, width) {
-                                calcWidth(control, width);
+                                setWidth(control, width);
                             };
                         }
-                        calcWidth(this, this._eMain.offsetWidth);
+                        setWidth(this, this._eMain.offsetWidth);
                     }
                 }
             },
@@ -647,7 +659,6 @@ _aStatus            - 控件当前的状态集合
              * @public
              *
              * @param {boolean} force 是否需要强制刷新缓存，相当于之前执行了 clearCache 方法，默认不强制刷新
-             * @return {boolean} 是否刷新缓存
              */
             cache: function (force) {
                 if ((force || !this._bCached) && this._eMain.offsetWidth) {
