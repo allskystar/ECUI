@@ -1140,13 +1140,14 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
             for (key in oldOptions) {
                 if (oldOptions.hasOwnProperty(key)) {
                     list.push(key + '=' + encodeURIComponent(oldOptions[key]));
+                    context[name] = oldOptions[name];
                 }
             }
             list.sort().splice(0, 0, url);
             esr.setLocation(list.join('~'));
 
             if (name) {
-                callRoute(name, oldOptions);
+                callRoute(name, true);
             }
         },
 
