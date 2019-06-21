@@ -990,11 +990,11 @@ _aStatus            - 控件当前的状态集合
                     }
                     clazz = clazz['super'];
                 }
+
                 clazz = this.constructor.TYPES[this.constructor.TYPES.length - i].slice();
-                if (this._sClass !== clazz[0]) {
+                if (this._sClass && this._sClass !== clazz[0]) {
                     clazz.push(this._sClass);
                 }
-
                 return clazz.join('-' + name + ' ') + '-' + name;
             },
 
