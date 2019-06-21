@@ -21,7 +21,6 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
 
         JAVASCRIPT = 'javascript',
 
-        ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined,
         firefoxVersion = /firefox\/(\d+\.\d)/i.test(navigator.userAgent) ? +RegExp.$1 : undefined;
 //{/if}//
     var hasReady = false,
