@@ -433,8 +433,23 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                 }
             },
 
+            blur: function () {
+                // 窗体失去焦点时复位状态信息，IE8以下版本需要区分是进入了下部的input还是真的失去了焦点
+                if (ieVersion < 9) {
+                    blurHandler = util.timer(function () {
+                        keys.codes = [];
+                    }, 100);
+                }
+                keys.codes = [];
+            },
+
+            focusin: function () {
+                // IE才执行focusin
+                blurHandler();
+            },
+
             selectstart: function (event) {
-                // IE下取消对文字的选择不能仅通过阻止 mousedown 事件的默认行为实现
+                // IE下取消对文字的选择不能仅通过阻止 mousedown 事件的默认行为实现，firefox下如果不屏弊选择，图片/链接会直接打开新标签页
                 event = core.wrapEvent(event);
                 onselectstart(event.getTarget(), event);
             },
