@@ -2926,7 +2926,7 @@ outer:          for (var caches = [], target = event.target, el; target && targe
             var delayRestoreList = [];
 
             list.forEach(function (item) {
-                if (o = item.$restoreStructure(true)) {
+                if (o = item.$restoreStructure()) {
                     delayRestoreList.push([o, item]);
                 }
             });
