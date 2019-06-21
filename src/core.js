@@ -2757,22 +2757,19 @@ outer:          for (var caches = [], target = event.target, el; target && targe
          * 遮罩层的 z-index 样式默认取值为 32000，请不要将 Element 对象的 z-index 样式设置大于 32000。当框架中至少一个遮罩层工作时，body 标签将增加一个样式 ecui-mask，IE6/7 的原生 select 标签可以使用此样式进行隐藏，解决强制置顶的问题。如果不传入任何参数，将关闭最近打开的一个遮罩层，如果要关闭指定的遮罩层，请直接调用返回的函数。
          * @public
          *
-         * @param {number} opacity 透明度，如 0.5，如果省略参数将关闭遮罩层
+         * @param {boolean|number|object} style 如果是boolean型表示是否需要显示，如果是数值表示透明度，如果是对象表示重新定义的样式，如果省略表示关闭最后一个mask
          * @param {number} zIndex 遮罩层的 zIndex 样式值，如果省略使用 32000
          * @return {Function} 用于关闭当前遮罩层的函数
          */
-        mask: function (opacity, zIndex) {
+        mask: function (style, zIndex) {
             var el = document.body;
 
-            if ('boolean' === typeof opacity) {
-                var view = util.getView(),
-                    text = ';top:' + (view.top - view.height) + 'px;left:' + (view.left - view.width) + 'px;width:' + (view.width * 3) + 'px;height:' + (view.height * 3) + 'px;display:' + (opacity ? 'block' : 'none');
-
+            if ('boolean' === typeof style) {
                 // 仅简单的显示或隐藏当前的屏蔽层，用于resize时的重绘
                 maskElements.forEach(function (item) {
-                    item.style.cssText += text;
+                    item.style.display = style ? '' : 'none';
                 });
-            } else if (opacity === undefined) {
+            } else if (style === undefined) {
                 unmasks.pop()();
                 gestureListeners = gestureStack.pop();
             } else {
@@ -2780,20 +2777,27 @@ outer:          for (var caches = [], target = event.target, el; target && targe
                     dom.addClass(el, 'ui-modal');
                 }
 
-                view = util.getView();
                 maskElements.push(
                     el = el.appendChild(
                         dom.create(
                             {
                                 className: 'ui-mask',
                                 style: {
-                                    cssText: ';top:' + (view.top - view.height) + 'px;left:' + (view.left - view.width) + 'px;width:' + (view.width * 3) + 'px;height:' + (view.height * 3) + 'px;display:block;z-index:' + (zIndex || 32000)
+                                    zIndex: zIndex || 32000
                                 }
                             }
                         )
                     )
                 );
-                dom.setStyle(el, 'opacity', opacity);
+                if ('number' === typeof style) {
+                    dom.setStyle(el, 'opacity', style);
+                } else {
+                    for (var name in style) {
+                        if (style.hasOwnProperty(name)) {
+                            dom.setStyle(el, name, style[name]);
+                        }
+                    }
+                }
 
                 unmasks.push(
 
