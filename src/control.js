@@ -669,12 +669,9 @@ _aStatus            - 控件当前的状态集合
                         // 已经初始化，但第一次缓存的控件进行结构化
                         this.initStructure();
                     }
-                    return true;
-                }
-                if (force) {
+                } else if (force) {
                     this.clearCache();
                 }
-                return false;
             },
 
             /**
