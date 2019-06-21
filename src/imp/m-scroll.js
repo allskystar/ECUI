@@ -163,6 +163,35 @@
         return options;
     }
 
+    function calcY(scroll, height) {
+        if (scroll) {
+            var scrollTop = dom.getPosition(scroll.getMain()).top + scroll.$MScrollData.fixedTop,
+                scrollHeight = scroll.getHeight() - height - scroll.$MScrollData.fixedBottom,
+                activeTop = dom.getPosition(activeCloneElement || document.activeElement).top - window.scrollY;
+        } else {
+            scrollTop = 0;
+            scrollHeight = document.body.clientHeight - height;
+            activeTop = dom.getPosition(activeCloneElement || document.activeElement).top - window.scrollY;
+        }
+
+        var activeHeight = (activeCloneElement || document.activeElement).offsetHeight,
+            infoHeight = /MicroMessanger/.test(navigator.userAgent) ? 30 : 0, // 处理微信提示信息的高度
+            y = 0;
+
+        if (activeTop < scrollTop + infoHeight) {
+            y = scrollTop + infoHeight - activeTop + (activeHeight < 50 ? Math.floor(activeHeight / 2) : 0);
+        } else if (activeTop + activeHeight > scrollTop + scrollHeight) {
+            if (activeHeight < 50) {
+                y = scrollTop + scrollHeight - activeTop - activeHeight - Math.floor(activeHeight / 2);
+            } else if (activeHeight > scrollHeight - infoHeight) {
+                y = scrollTop + infoHeight - activeTop;
+            } else {
+                y = scrollTop + scrollHeight - activeTop - activeHeight;
+            }
+        }
+        return y;
+    }
+
     ui.MScroll = {
         NAME: '$MScroll',
 
@@ -259,6 +288,26 @@
             },
 
             /**
+             * 获取滚动区域底部高度调节。
+             * @public
+             *
+             * @return {number} 底部需要调节的数值
+             */
+            getFixedBottom: function () {
+                return this.$MScrollData.fixedBottom;
+            },
+
+            /**
+             * 获取滚动区域顶部高度调节。
+             * @public
+             *
+             * @return {number} 顶部需要调节的数值
+             */
+            getFixedTop: function () {
+                return this.$MScrollData.fixedTop;
+            },
+
+            /**
              * @override
              */
             getPositionElement: function () {
@@ -322,6 +371,20 @@
              */
             isScrolling: function () {
                 return !!this.$MScrollData.scrolling;
+            },
+
+            /**
+             * 刷新滚动范围。
+             * @public
+             *
+             * @param {number} y 希望滚动的位置
+             */
+            refresh: function (y) {
+                var options = getOptions.call(this),
+                    top = options.limit && options.limit.top !== undefined ? options.limit.top : options.top,
+                    bottom = options.limit && options.limit.bottom !== undefined ? options.limit.bottom : options.bottom;
+
+                this.setPosition(this.getX(), Math.min(bottom, Math.max(top, y)));
             },
 
             /**
@@ -425,7 +488,7 @@
             var y = calcY(scroll, keyboardHeight);
 
             if (scroll) {
-                setSafePosition(scroll, scroll.getY() + y);
+                scroll.refresh(scroll.getY() + y);
             } else if (y) {
                 core.$('ECUI-FIXED-BODY').scrollTop = y;
             }
@@ -460,37 +523,8 @@
         }).forEach(function (control) {
             // 终止之前可能存在的惯性状态，并设置滚动层的位置
             core.drag(control);
-            setSafePosition(control, control.getY());
+            control.refresh(control.getY());
         });
-    }
-
-    function calcY(scroll, height) {
-        if (scroll) {
-            var scrollTop = dom.getPosition(scroll.getMain()).top + scroll.$MScrollData.fixedTop,
-                scrollHeight = scroll.getHeight() - height - scroll.$MScrollData.fixedBottom,
-                activeTop = dom.getPosition(activeCloneElement || document.activeElement).top - window.scrollY;
-        } else {
-            scrollTop = 0;
-            scrollHeight = document.body.clientHeight - height;
-            activeTop = dom.getPosition(activeCloneElement || document.activeElement).top - window.scrollY;
-        }
-
-        var activeHeight = (activeCloneElement || document.activeElement).offsetHeight,
-            infoHeight = /MicroMessanger/.test(navigator.userAgent) ? 30 : 0, // 处理微信提示信息的高度
-            y = 0;
-
-        if (activeTop < scrollTop + infoHeight) {
-            y = scrollTop + infoHeight - activeTop + (activeHeight < 50 ? Math.floor(activeHeight / 2) : 0);
-        } else if (activeTop + activeHeight > scrollTop + scrollHeight) {
-            if (activeHeight < 50) {
-                y = scrollTop + scrollHeight - activeTop - activeHeight - Math.floor(activeHeight / 2);
-            } else if (activeHeight > scrollHeight - infoHeight) {
-                y = scrollTop + infoHeight - activeTop;
-            } else {
-                y = scrollTop + scrollHeight - activeTop - activeHeight;
-            }
-        }
-        return y;
     }
 
     /**
@@ -535,14 +569,6 @@
             checkHandle();
             fn = null;
         };
-    }
-
-    function setSafePosition(scroll, y) {
-        var options = getOptions(scroll),
-            top = options.limit && options.limit.top !== undefined ? options.limit.top : options.top,
-            bottom = options.limit && options.limit.bottom !== undefined ? options.limit.bottom : options.bottom;
-
-        scroll.setPosition(scroll.getX(), Math.min(bottom, Math.max(top, y)));
     }
 
     if (isToucher) {
