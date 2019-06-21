@@ -23,6 +23,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 //{/if}//
     var HIGH_SPEED = 100,         // 对高速的定义
         scrollHandler,            // DOM滚动事件
+        blurHandler = util.blank, // 失去焦点
         dragStopHandler = util.blank, // ios设备上移出webview区域停止事件
         touchTarget,              // touch点击的目标，用于防止ios下的点击穿透处理
         isTouchMoved,
@@ -50,6 +51,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
         enableGesture = true,     // 手势识别是否有效，在touchend/pointer后会恢复
 
         pauseCount = 0,           // 暂停的次数
+        keys = {codes: []},       // 全部的按键状态
         keyCode = 0,              // 当前键盘按下的键值，解决keypress与keyup中得不到特殊按键的keyCode的问题
         lastClientX,
         lastClientY,
@@ -459,8 +461,13 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             },
 
             keydown: function (event) {
+                keys.ctrl = event.ctrlKey;
+                keys.alt = event.altKey;
+                keys.shift = event.shiftKey;
+                keys.meta = event.metaKey;
                 event = core.wrapEvent(event);
                 keyCode = event.which;
+                keys.codes.push(keyCode);
                 bubble(focusedControl, 'keydown', event);
             },
 
@@ -470,8 +477,13 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             },
 
             keyup: function (event) {
+                keys.ctrl = event.ctrlKey;
+                keys.alt = event.altKey;
+                keys.shift = event.shiftKey;
+                keys.meta = event.metaKey;
                 event = core.wrapEvent(event);
                 bubble(focusedControl, 'keyup', event);
+                util.remove(keys.codes, event.which);
                 if (keyCode === event.which) {
                     // 一次多个键被按下，只有最后一个被按下的键松开时取消键值码
                     keyCode = 0;
@@ -2402,6 +2414,16 @@ outer:          for (var caches = [], target = event.target, el; target && targe
          */
         getKey: function () {
             return keyCode;
+        },
+
+        /**
+         * 获取全部按键信息。
+         * @public
+         *
+         * @return {object} 按键信息对象
+         */
+        getKeys: function () {
+            return keys;
         },
 
         /**
