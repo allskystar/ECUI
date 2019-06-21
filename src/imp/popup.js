@@ -6,9 +6,7 @@
     var core = ecui,
         dom = core.dom,
         ui = core.ui,
-        util = core.util,
-
-        ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined;
+        util = core.util;
 //{/if}//
     /**
      * 隐藏弹出层控件。

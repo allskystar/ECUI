@@ -165,8 +165,8 @@
 
     function calcY(scroll, height) {
         if (scroll) {
-            var scrollTop = dom.getPosition(scroll.getMain()).top + scroll.fixedTop,
-                scrollHeight = scroll.getHeight() - height - scroll.fixedBottom,
+            var scrollTop = dom.getPosition(scroll.getMain()).top + scroll.getFixedTop(),
+                scrollHeight = scroll.getHeight() - height - scroll.getFixedBottom(),
                 activeTop = dom.getPosition(activeCloneElement || document.activeElement).top - window.scrollY;
         } else {
             scrollTop = 0;
@@ -208,10 +208,6 @@
                 fixedBottom: 0,
 
                 _getOptions: getOptions
-            },
-
-            static: {
-                _calcY: calcY
             },
 
             constructor: function (el, options) {
@@ -266,7 +262,7 @@
 
                 var activeElement = document.activeElement;
                 if (util.hasIOSKeyboard(activeElement)) {
-                    if (!ui.MScroll._calcY(this, keyboardHeight)) {
+                    if (!calcY(this, keyboardHeight)) {
                         showActiveElement();
                     }
 
@@ -496,7 +492,7 @@
                 }
             }
 
-            var y = ui.MScroll._calcY(scroll, keyboardHeight);
+            var y = calcY(scroll, keyboardHeight);
 
             if (scroll) {
                 scroll.refresh(scroll.getY() + y);
