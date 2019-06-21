@@ -770,4 +770,18 @@
 
         dom.addEventListeners(window, events);
     }
+
+    if (iosVersion) {
+        (function () {
+            var getView = util.getView;
+            util.getView = function () {
+                // 解决软键盘弹起时的高度计算问题，这个值已经被 orientationchange 写入了body的style中
+                var view = getView();
+                view.height -= keyboardHeight;
+                view.pageHeight -= keyboardHeight;
+                view.bottom -= keyboardHeight;
+                return view;
+            };
+        }());
+    }
 }());
