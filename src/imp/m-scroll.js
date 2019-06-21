@@ -14,7 +14,8 @@
         safariVersion = !/(chrome|crios|ucbrowser)/i.test(navigator.userAgent) && /(\d+\.\d)(\.\d)?\s+.*safari/i.test(navigator.userAgent) ? +RegExp.$1 : undefined;
 //{/if}//
     var topList = [],
-        bottomList = [];
+        bottomList = [],
+        activeCloneElement;
 
     ext.iosFixed = {
         /**
@@ -79,336 +80,439 @@
         }
     }
 
-    ui.MScroll = _interface({
-        private: {
-            range: undefined,
-            overflow: undefined,
-            scrolling: undefined,
-            inertia: undefined,
-            _oHandler: undefined,
-            left: undefined,
-            right: undefined,
-            top: undefined,
-            bottom: undefined,
-
-            _getOptions:  function () {
-                var main = this.getMain(),
-                    body = this.getBody(),
-                    options = {
-                        decelerate: 400,
-                        absolute: true
-                    };
-
-                if (keyboardHeight && this.range) {
-                    var data = this.range;
-                    options.limit = {};
-                } else {
-                    data = this;
-                    options.limit = this.range;
-                }
-
-                Object.assign(
-                    options,
-                    {
-                        left: data.left !== undefined ? data.left : main.clientWidth - body.scrollWidth,
-                        right: data.right !== undefined ? data.right : 0,
-                        top: data.top !== undefined ? data.top : main.clientHeight - body.scrollHeight,
-                        bottom: data.bottom !== undefined ? data.bottom : 0
-                    }
-                );
-
-                // 如果内容不够外部区域的宽度，不需要滚动
-                if (options.left > options.right) {
-                    options.left = options.right;
-                    if (options.limit) {
-                        delete options.limit.left;
-                        delete options.limit.right;
-                    }
-                }
-                if (options.top > options.bottom) {
-                    options.top = options.bottom;
-                    if (options.limit) {
-                        delete options.limit.top;
-                        delete options.limit.bottom;
-                    }
-                }
-
-                if (keyboardHeight) {
-                    var mainTop = dom.getPosition(main).top + this.$$border[0],
-                        mainBottom = mainTop + Math.min(body.scrollHeight, main.clientHeight),
-                        top = 0,
-                        bottom = 0;
-                    options.top += Math.min(0, window.scrollY - keyboardHeight + document.body.clientHeight - mainBottom);
-                    options.bottom += Math.max(0, window.scrollY - mainTop);
-
-                    topList.forEach(function (control) {
-                        if (control.isShow() && !dom.contain(main.offsetParent, control.getMain())) {
-                            bottom = Math.max(bottom, dom.getPosition(control.getMain()).top + control.getHeight() - Math.max(window.scrollY, mainTop));
-                        }
-                    });
-                    bottomList.forEach(function (control) {
-                        if (control.isShow() && !dom.contain(main.offsetParent, control.getMain())) {
-                            var controlTop = dom.getPosition(control.getMain()).top;
-                            top = Math.min(top, Math.max(Math.min(0, controlTop - mainBottom), controlTop - window.scrollY + keyboardHeight - document.body.clientHeight));
-                        }
-                    });
-
-                    options.top += top;
-                    options.bottom += bottom;
-                }
-
-                // 增加滚动边界的距离
-                if (!options.limit && data.overflow) {
-                    options.limit = {
-                        top: options.top,
-                        right: options.right,
-                        bottom: options.bottom,
-                        left: options.left
-                    };
-                    options.top -= data.overflow[0];
-                    options.right += data.overflow[1];
-                    options.bottom += data.overflow[2];
-                    options.left -= data.overflow[3];
-                }
-
-                return options;
-            }
-        },
-
-        constructor: function (el, options) {
-            var bodyEl = dom.create(
-                    {
-                        className: this.getUnitClass(ui.Control, 'body') + ' ui-mobile-scroll-body'
-                    }
-                );
-
-            for (; el.firstChild; ) {
-                bodyEl.appendChild(el.firstChild);
-            }
-
-            dom.addClass(el, 'ui-mobile-scroll');
-            el.appendChild(bodyEl);
-            this.$setBody(bodyEl);
-
-            if (options.overflow) {
-                var list = options.overflow.split(',');
-                this.overflow = [+list[0]];
-                this.overflow[1] = list[1] ? +list[1] : this.overflow[0];
-                this.overflow[2] = list[2] ? +list[2] : this.overflow[0];
-                this.overflow[3] = list[3] ? +list[3] : this.overflow[1];
-            }
-        },
-
-        /**
-         * @override
-         */
-        $activate: function (event) {
-            if (keyboardHeight && iosVersion < 9) {
-                return;
-            }
-
-            if (!util.hasIOSKeyboard(event.target)) {
-                this.cache();
-
-                core.drag(
-                    this,
-                    event,
-                    this._getOptions()
-                );
-            }
-        },
-
-        /**
-         * @override
-         */
-        $dragend: function () {
-            this.scrolling = false;
-            this.inertia = false;
-
-            var activeElement = document.activeElement;
-            if (util.hasIOSKeyboard(activeElement) && activeElement.value) {
-                // 当input有placeholder的时候，会导致光标无法隐藏
-                this._oHandler = util.timer(
-                    function () {
-                        dom.setStyle(activeElement, 'userSelect', '');
-                        delete this._oHandler;
-                    },
-                    50,
-                    this
-                );
-            }
-        },
-
-        /**
-         * @override
-         */
-        $dragmove: function (event) {
-            this.inertia = !!event.inertia;
-        },
-
-        /**
-         * @override
-         */
-        $dragstart: function () {
-            this.scrolling = true;
-
-            if (util.hasIOSKeyboard(document.activeElement)) {
-                if (this._oHandler) {
-                    this._oHandler();
-                } else {
-                    dom.setStyle(document.activeElement, 'userSelect', 'none');
-                }
-            }
-        },
-
-        /**
-         * @override
-         */
-        getPositionElement: function () {
-            return this.getBody();
-        },
-
-        /**
-         * 获取正常显示范围，用于拖拽结束后归位设置。
-         * @public
-         *
-         * @return {Array} 正常显示范围
-         */
-        getRange: function () {
-            return this.range;
-        },
-
-        /**
-         * 获取滚动范围。
-         * @public
-         *
-         * @return {Array} 正常显示范围
-         */
-        getScrollRange: function () {
-            return {
-                left: this.left,
-                top: this.top,
-                right: this.right,
-                bottom: this.bottom
+    function getOptions() {
+        var main = this.getMain(),
+            body = this.getBody(),
+            options = {
+                decelerate: 400,
+                absolute: true
             };
-        },
 
-        /**
-         * @override
-         */
-        getX: function () {
-            return util.toNumber(dom.getStyle(this.getBody(), 'transform').split(',')[4]);
-        },
+        if (keyboardHeight && this.range) {
+            var data = this.range;
+            options.limit = {};
+        } else {
+            data = this;
+            options.limit = this.range;
+        }
 
-        /**
-         * @override
-         */
-        getY: function () {
-            return util.toNumber(dom.getStyle(this.getBody(), 'transform').split(',')[5]);
-        },
-
-        /**
-         * 是否处于惯性移动状态。
-         * @public
-         *
-         * @return {boolean} 是否处于惯性移动状态
-         */
-        isInertia: function () {
-            return !!this.inertia;
-        },
-
-        /**
-         * 是否正在滚动。
-         * @public
-         *
-         * @return {boolean} 是否正在滚动
-         */
-        isScrolling: function () {
-            return !!this.scrolling;
-        },
-
-        /**
-         * 刷新滚动范围。
-         * @public
-         *
-         * @param {number} y 希望滚动的位置
-         */
-        refresh: function (y) {
-            var options = this._getOptions(),
-                top = options.limit && options.limit.top !== undefined ? options.limit.top : options.top,
-                bottom = options.limit && options.limit.bottom !== undefined ? options.limit.bottom : options.bottom;
-
-            this.setPosition(this.getX(), Math.min(bottom, Math.max(top, y)));
-        },
-
-        /**
-         * @override
-         */
-        setPosition: function (x, y) {
-            // 解决光标问题
-            if (this.getX() !== x || this.getY() !== y) {
-                dom.setStyle(this.getBody(), 'transform', keyboardHeight ? 'translate(' + x + 'px,' + y + 'px)' : 'translate3d(' + x + 'px,' + y + 'px,0px)');
+        Object.assign(
+            options,
+            {
+                left: data.left !== undefined ? data.left : main.clientWidth - body.scrollWidth,
+                right: data.right !== undefined ? data.right : 0,
+                top: data.top !== undefined ? data.top : main.clientHeight - body.scrollHeight,
+                bottom: data.bottom !== undefined ? data.bottom : 0
             }
-            core.query(function (item) {
-                return this.contain(item);
-            }.bind(this)).forEach(function (item) {
-                core.dispatchEvent(item, 'beforescroll', {deltaX: x, deltaY: y});
-                core.dispatchEvent(item, 'scroll', {deltaX: x, deltaY: y});
+        );
+
+        // 如果内容不够外部区域的宽度，不需要滚动
+        if (options.left > options.right) {
+            options.left = options.right;
+            if (options.limit) {
+                delete options.limit.left;
+                delete options.limit.right;
+            }
+        }
+        if (options.top > options.bottom) {
+            options.top = options.bottom;
+            if (options.limit) {
+                delete options.limit.top;
+                delete options.limit.bottom;
+            }
+        }
+
+        if (keyboardHeight) {
+            var mainTop = dom.getPosition(main).top + this.$$border[0],
+                mainBottom = mainTop + Math.min(body.scrollHeight, main.clientHeight),
+                top = 0,
+                bottom = 0;
+            options.top += Math.min(0, window.scrollY - keyboardHeight + document.body.clientHeight - mainBottom);
+            options.bottom += Math.max(0, window.scrollY - mainTop);
+
+            topList.forEach(function (control) {
+                if (control.isShow() && !dom.contain(main, control.getMain())) {
+                    bottom = Math.max(bottom, dom.getPosition(control.getMain()).top + control.getHeight() - Math.max(window.scrollY, mainTop));
+                }
             });
-        },
+            bottomList.forEach(function (control) {
+                if (control.isShow() && !dom.contain(main, control.getMain())) {
+                    var controlTop = dom.getPosition(control.getMain()).top;
+                    top = Math.min(top, Math.max(Math.min(0, controlTop - mainBottom), controlTop - window.scrollY + keyboardHeight - document.body.clientHeight));
+                }
+            });
 
-        /**
-         * 设置滚动范围。
-         * @public
-         *
-         * @param {object} range 允许滚动的范围
-         */
-        setScrollRange: function (range) {
-            if (range.left !== undefined) {
-                this.left = range.left;
-            }
-            if (range.top !== undefined) {
-                this.top = range.top;
-            }
-            if (range.right !== undefined) {
-                this.right = range.right;
-            }
-            if (range.bottom !== undefined) {
-                this.bottom = range.bottom;
-            }
-        },
-
-        /**
-         * 设置正常显示范围，用于拖拽结束后归位。
-         * @public
-         *
-         * @param {object} range 正常显示范围
-         */
-        setRange: function (range) {
-            this.range = range;
+            options.top += top;
+            options.bottom += bottom;
         }
-    });
 
-    function scrollIntoViewIfNeededHandler(event) {
-        if (event && iosVersion) {
-            dom.setStyle(event.target, 'userSelect', '');
-            if (event.target.value === event.data) {
-                util.timer(function () {
-                    var input = event.target,
-                        type = input.type,
-                        pos = input.value.length;
+        // 增加滚动边界的距离
+        if (!options.limit && data.overflow) {
+            options.limit = {
+                top: options.top,
+                right: options.right,
+                bottom: options.bottom,
+                left: options.left
+            };
+            options.top -= data.overflow[0];
+            options.right += data.overflow[1];
+            options.bottom += data.overflow[2];
+            options.left -= data.overflow[3];
+        }
 
-                    if ('number' === typeof input.selectionStart) {
-                        input.setSelectionRange(pos, pos);
-                    } else {
-                        input.type = 'text';
-                        input.setSelectionRange(pos, pos);
-                        input.type = type;
+        return options;
+    }
+
+    function calcY(scroll, height) {
+        if (scroll) {
+            var scrollTop = dom.getPosition(scroll.getMain()).top + scroll.fixedTop,
+                scrollHeight = scroll.getHeight() - height - scroll.fixedBottom,
+                activeTop = dom.getPosition(activeCloneElement || document.activeElement).top - window.scrollY;
+        } else {
+            scrollTop = 0;
+            scrollHeight = document.body.clientHeight - height;
+            activeTop = dom.getPosition(activeCloneElement || document.activeElement).top - window.scrollY;
+        }
+
+        var activeHeight = (activeCloneElement || document.activeElement).offsetHeight,
+            infoHeight = /MicroMessanger/.test(navigator.userAgent) ? 30 : 0, // 处理微信提示信息的高度
+            y = 0;
+
+        if (activeTop < scrollTop + infoHeight) {
+            y = scrollTop + infoHeight - activeTop + (activeHeight < 50 ? Math.floor(activeHeight / 2) : 0);
+        } else if (activeTop + activeHeight > scrollTop + scrollHeight) {
+            if (activeHeight < 50) {
+                y = scrollTop + scrollHeight - activeTop - activeHeight - Math.floor(activeHeight / 2);
+            } else if (activeHeight > scrollHeight - infoHeight) {
+                y = scrollTop + infoHeight - activeTop;
+            } else {
+                y = scrollTop + scrollHeight - activeTop - activeHeight;
+            }
+        }
+        return y;
+    }
+
+    ui.MScroll = _interface(
+        {
+            private: {
+                range: undefined,
+                overflow: undefined,
+                scrolling: undefined,
+                inertia: undefined,
+                _oHandler: undefined,
+                left: undefined,
+                right: undefined,
+                top: undefined,
+                bottom: undefined,
+                fixedTop: 0,
+                fixedBottom: 0,
+
+                _getOptions: getOptions
+            },
+
+            static: {
+                _calcY: calcY
+            },
+
+            constructor: function (el, options) {
+                var bodyEl = dom.create(
+                        {
+                            className: this.getUnitClass(ui.Control, 'body') + ' ui-mobile-scroll-body'
+                        }
+                    );
+
+                for (; el.firstChild; ) {
+                    bodyEl.appendChild(el.firstChild);
+                }
+
+                dom.addClass(el, 'ui-mobile-scroll');
+                el.appendChild(bodyEl);
+                this.$setBody(bodyEl);
+
+                if (options.overflow) {
+                    var list = options.overflow.split(',');
+                    this.overflow = [+list[0]];
+                    this.overflow[1] = list[1] ? +list[1] : this.overflow[0];
+                    this.overflow[2] = list[2] ? +list[2] : this.overflow[0];
+                    this.overflow[3] = list[3] ? +list[3] : this.overflow[1];
+                }
+            },
+
+            /**
+             * @override
+             */
+            $activate: function (event) {
+                if ((iosVersion && !keyboardHeight && document.activeElement !== document.body) || (keyboardHeight && iosVersion < 9)) {
+                    return;
+                }
+
+                if (!util.hasIOSKeyboard(event.target)) {
+                    this.cache();
+
+                    core.drag(
+                        this,
+                        event,
+                        this._getOptions()
+                    );
+                }
+            },
+
+            /**
+             * @override
+             */
+            $dragend: function () {
+                this.scrolling = false;
+                this.inertia = false;
+
+                var activeElement = document.activeElement;
+                if (util.hasIOSKeyboard(activeElement)) {
+                    if (!ui.MScroll._calcY(this, keyboardHeight)) {
+                        showActiveElement();
                     }
+
+                    this.getMain().scrollTop = 0;
+                }
+            },
+
+            /**
+             * @override
+             */
+            $dragmove: function (event) {
+                this.inertia = !!event.inertia;
+            },
+
+            /**
+             * @override
+             */
+            $dragstart: function () {
+                this.scrolling = true;
+
+                if (util.hasIOSKeyboard(document.activeElement)) {
+                    if (!activeCloneElement) {
+                        dom.insertHTML(document.activeElement, 'afterEnd', document.activeElement.outerHTML);
+
+                        activeCloneElement = document.activeElement.nextSibling;
+                        document.activeElement.nextSibling.value = document.activeElement.value;
+                        document.activeElement.style.display = 'none';
+                    }
+                }
+            },
+
+            /**
+             * 获取滚动区域底部高度调节。
+             * @public
+             *
+             * @return {number} 底部需要调节的数值
+             */
+            getFixedBottom: function () {
+                return this.fixedBottom;
+            },
+
+            /**
+             * 获取滚动区域顶部高度调节。
+             * @public
+             *
+             * @return {number} 顶部需要调节的数值
+             */
+            getFixedTop: function () {
+                return this.fixedTop;
+            },
+
+            /**
+             * @override
+             */
+            getPositionElement: function () {
+                return this.getBody();
+            },
+
+            /**
+             * 获取正常显示范围，用于拖拽结束后归位设置。
+             * @public
+             *
+             * @return {Array} 正常显示范围
+             */
+            getRange: function () {
+                return this.range;
+            },
+
+            /**
+             * 获取滚动范围。
+             * @public
+             *
+             * @return {Array} 正常显示范围
+             */
+            getScrollRange: function () {
+                return {
+                    left: this.left,
+                    top: this.top,
+                    right: this.right,
+                    bottom: this.bottom
+                };
+            },
+
+            /**
+             * @override
+             */
+            getX: function () {
+                return util.toNumber(dom.getStyle(this.getBody(), 'transform').split(',')[4]);
+            },
+
+            /**
+             * @override
+             */
+            getY: function () {
+                return util.toNumber(dom.getStyle(this.getBody(), 'transform').split(',')[5]);
+            },
+
+            /**
+             * 是否处于惯性移动状态。
+             * @public
+             *
+             * @return {boolean} 是否处于惯性移动状态
+             */
+            isInertia: function () {
+                return !!this.inertia;
+            },
+
+            /**
+             * 是否正在滚动。
+             * @public
+             *
+             * @return {boolean} 是否正在滚动
+             */
+            isScrolling: function () {
+                return !!this.scrolling;
+            },
+
+            /**
+             * 刷新滚动范围。
+             * @public
+             *
+             * @param {number} y 希望滚动的位置
+             */
+            refresh: function (y) {
+                var options = this._getOptions(),
+                    top = options.limit && options.limit.top !== undefined ? options.limit.top : options.top,
+                    bottom = options.limit && options.limit.bottom !== undefined ? options.limit.bottom : options.bottom;
+
+                this.setPosition(this.getX(), Math.min(bottom, Math.max(top, y)));
+            },
+
+            /**
+             * 设置滚动区域底部高度调节。
+             * @public
+             *
+             * @param {number} value 底部需要调节的数值
+             */
+            setFixedBottom: function (value) {
+                this.fixedBottom = value;
+            },
+
+            /**
+             * 设置滚动区域顶部高度调节。
+             * @public
+             *
+             * @param {number} value 顶部需要调节的数值
+             */
+            setFixedTop: function (value) {
+                this.fixedTop = value;
+            },
+
+            /**
+             * @override
+             */
+            setPosition: function (x, y) {
+                // 解决光标问题
+                if (this.getX() !== x || this.getY() !== y) {
+                    dom.setStyle(this.getBody(), 'transform', keyboardHeight ? 'translate(' + x + 'px,' + y + 'px)' : 'translate3d(' + x + 'px,' + y + 'px,0px)');
+                }
+                core.query(
+                    function (item) {
+                        return this.contain(item);
+                    },
+                    this
+                ).forEach(function (item) {
+                    core.dispatchEvent(item, 'beforescroll', {deltaX: x, deltaY: y});
+                    core.dispatchEvent(item, 'scroll', {deltaX: x, deltaY: y});
                 });
+            },
+
+            /**
+             * 设置滚动范围。
+             * @public
+             *
+             * @param {object} range 允许滚动的范围
+             */
+            setScrollRange: function (range) {
+                if (range.left !== undefined) {
+                    this.left = range.left;
+                }
+                if (range.top !== undefined) {
+                    this.top = range.top;
+                }
+                if (range.right !== undefined) {
+                    this.right = range.right;
+                }
+                if (range.bottom !== undefined) {
+                    this.bottom = range.bottom;
+                }
+            },
+
+            /**
+             * 设置正常显示范围，用于拖拽结束后归位。
+             * @public
+             *
+             * @param {object} range 正常显示范围
+             */
+            setRange: function (range) {
+                this.range = range;
             }
         }
-        scrollIntoViewIfNeeded(keyboardHeight);
+    );
+
+    function showActiveElement() {
+        dom.remove(activeCloneElement);
+        activeCloneElement = null;
+        document.activeElement.style.display = '';
+    }
+
+    function scrollIntoViewIfNeededHandler() {
+        if (iosVersion) {
+            if (document.activeElement.style.display === 'none') {
+                // dom.remove(document.activeElement.nextSibling);
+                // document.activeElement.style.display = '';
+                showActiveElement();
+            }
+            for (var scroll = core.findControl(document.activeElement); scroll; scroll = scroll.getParent()) {
+                if (ui.MScroll.isInstance(scroll)) {
+                    var main = scroll.getMain(),
+                        scrollTop = main.scrollTop;
+                    if (scrollTop) {
+                        main.scrollTop = 0;
+                        scroll.setPosition(scroll.getX(), scroll.getY() - scrollTop);
+                    }
+
+                    break;
+                }
+            }
+
+            var y = ui.MScroll._calcY(scroll, keyboardHeight);
+
+            if (scroll) {
+                scroll.refresh(scroll.getY() + y);
+            } else if (y) {
+                core.$('ECUI-FIXED-BODY').scrollTop = y;
+            }
+        } else {
+            dom.scrollIntoViewIfNeeded(document.activeElement, true);
+
+            for (scroll = core.findControl(document.activeElement); scroll; scroll = scroll.getParent()) {
+                if (ui.MScroll.isInstance(scroll) && scroll.getMain().scrollTop) {
+                    scroll.setPosition(scroll.getX(), scroll.getY() - scroll.getMain().scrollTop);
+                    scroll.getMain().scrollTop = 0;
+                }
+            }
+        }
     }
 
     function fixed() {
@@ -432,57 +536,6 @@
             core.drag(control);
             control.refresh(control.getY());
         });
-    }
-
-    function scrollIntoViewIfNeeded(height) {
-        for (var scroll = core.findControl(document.activeElement); scroll; scroll = scroll.getParent()) {
-            if (ui.MScroll.isInstance(scroll)) {
-                var main = scroll.getMain(),
-                    scrollTop = main.scrollTop;
-                if (scrollTop) {
-                    main.scrollTop = 0;
-                    scroll.setPosition(scroll.getX(), scroll.getY() - scrollTop);
-                }
-
-                scrollTop = dom.getPosition(main).top;
-                var scrollHeight = scroll.getHeight() - height,
-                    activeTop = dom.getPosition(document.activeElement).top - window.scrollY;
-
-                break;
-            }
-        }
-
-        if (!scroll) {
-            scrollTop = 0;
-            scrollHeight = document.body.clientHeight - height;
-            activeTop = dom.getPosition(document.activeElement).top - window.scrollY;
-        }
-
-        var activeHeight = document.activeElement.offsetHeight,
-            infoHeight = /MicroMessanger/.test(navigator.userAgent) ? 30 : 0, // 处理微信提示信息的高度
-            y = 0;
-
-        if (activeTop < scrollTop + infoHeight) {
-            y = scrollTop + infoHeight - activeTop + (activeHeight < 50 ? Math.floor(activeHeight / 2) : 0);
-        } else if (activeTop + activeHeight > scrollTop + scrollHeight) {
-            if (activeHeight < 50) {
-                y = scrollTop + scrollHeight - activeTop - activeHeight - Math.floor(activeHeight / 2);
-            } else if (activeHeight > scrollHeight - infoHeight) {
-                y = scrollTop + infoHeight - activeTop;
-            } else {
-                y = scrollTop + scrollHeight - activeTop - activeHeight;
-            }
-        }
-
-        if (scroll) {
-            scroll.refresh(scroll.getY() + y);
-        } else if (y) {
-            if (iosVersion) {
-                core.$('ECUI-FIXED-BODY').scrollTop = y;
-            } else {
-                window.scrollTo(0, window.scrollY + y);
-            }
-        }
     }
 
     /**
@@ -598,12 +651,12 @@
                         if (keyboardHeight) {
                             if (util.hasIOSKeyboard(document.activeElement)) {
                                 if (oldHeight) {
-                                    fixed();
                                     scrollIntoViewIfNeededHandler();
+                                    fixed();
                                 } else {
                                     changeHandle = scrollListener(function () {
-                                        fixed();
                                         scrollIntoViewIfNeededHandler();
+                                        fixed();
                                     });
                                 }
                             }
@@ -640,8 +693,8 @@
                             if (fixedInput) {
                                 window.scrollTo(0, 0);
                             }
-                            fixed();
                             scrollIntoViewIfNeededHandler();
+                            fixed();
                         });
                     } else {
                         if (fixedInput) {
@@ -660,8 +713,8 @@
                                 window.scrollTo(0, 0);
                                 keyboardHandle = scrollListener(function () {
                                     dom.addEventListener(window, 'touchmove', util.preventEvent);
-                                    fixed();
                                     scrollIntoViewIfNeededHandler();
+                                    fixed();
                                 });
                             } else {
                                 // 第一次触发，开始测试软键盘高度
@@ -684,8 +737,8 @@
                                     document.body.style.visibility = '';
                                     window.scrollTo(0, Math.min(lastScrollY, keyboardHeight));
 
-                                    fixed();
                                     scrollIntoViewIfNeededHandler();
+                                    fixed();
                                 });
                             }
                         });
@@ -721,9 +774,6 @@
                     var height = event.height;
 
                     if (height) {
-                        // 打开软键盘
-                        document.activeElement.scrollIntoViewIfNeeded();
-
                         if (window.scrollY) {
                             for (var scroll = core.findControl(document.activeElement); scroll; scroll = scroll.getParent()) {
                                 if (ui.MScroll.isInstance(scroll)) {
@@ -736,7 +786,7 @@
                         }
 
                         keyboardHandle();
-                        keyboardHandle = util.timer(scrollIntoViewIfNeeded, 100, this, height);
+                        keyboardHandle = util.timer(scrollIntoViewIfNeededHandler, 100, this, height);
                     }
                 },
 
@@ -756,5 +806,19 @@
             };
 
         dom.addEventListeners(window, events);
+    }
+
+    if (iosVersion) {
+        (function () {
+            var getView = util.getView;
+            util.getView = function () {
+                // 解决软键盘弹起时的高度计算问题，这个值已经被 orientationchange 写入了body的style中
+                var view = getView();
+                view.height -= keyboardHeight;
+                view.pageHeight -= keyboardHeight;
+                view.bottom -= keyboardHeight;
+                return view;
+            };
+        }());
     }
 }());

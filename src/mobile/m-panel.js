@@ -16,11 +16,10 @@
     ui.MPanel = core.inherits(
         ui.Control,
         'ui-mobile-panel',
-        [
-            function (el) {
-                dom.addClass(el, 'ui-mobile-panel-location');
-            }
-        ],
+        function (el, options) {
+            _super(el, options);
+            dom.addClass(this.getMain(), 'ui-mobile-panel-location');
+        },
         {
             /**
              * @override
