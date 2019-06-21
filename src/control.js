@@ -140,385 +140,383 @@
 
             private: PRIVATE,
 
-            protected: {
-                /**
-                 * 激活事件。
-                 * 控件激活时，添加状态样式 active。
-                 * @event
-                 */
-                $activate: function () {
-                    this.alterStatus('+active');
-                },
+            /**
+             * 激活事件。
+             * 控件激活时，添加状态样式 active。
+             * @event
+             */
+            $activate: function () {
+                this.alterStatus('+active');
+            },
 
-                /**
-                 * 添加子控件事件。
-                 * @event
-                 */
-                $append: util.blank,
+            /**
+             * 添加子控件事件。
+             * @event
+             */
+            $append: util.blank,
 
-                /**
-                 * 滚动前事件。
-                 * @event
-                 */
-                $beforescroll: util.blank,
+            /**
+             * 滚动前事件。
+             * @event
+             */
+            $beforescroll: util.blank,
 
-                /**
-                 * 失去焦点事件。
-                 * 控件失去焦点时，移除状态样式 focus。
-                 * @event
-                 */
-                $blur: function () {
-                    if (dom.contain(this._eBody, document.activeElement)) {
-                        try {
-                            document.activeElement.blur();
-                        } catch (ignore) {
+            /**
+             * 失去焦点事件。
+             * 控件失去焦点时，移除状态样式 focus。
+             * @event
+             */
+            $blur: function () {
+                if (dom.contain(this._eBody, document.activeElement)) {
+                    try {
+                        document.activeElement.blur();
+                    } catch (ignore) {
+                    }
+                }
+                this.alterStatus('-focus');
+            },
+
+            /**
+             * 缓存控件的属性。
+             * $cache 方法缓存部分控件属性的值，在初始化时避免频繁的读写交替操作，加快渲染的速度，在子控件或者应用程序开发过程中，如果需要避开控件提供的方法直接操作 DOM 对象，操作完成后必须调用 clearCache 方法清除控件的属性缓存，否则将引发错误。
+             * @protected
+             *
+             * @param {CssStyle} style 主元素的css样式对象
+             */
+            $cache: function (style) {
+                this.$$border = [util.toNumber(style.borderTopWidth), util.toNumber(style.borderRightWidth), util.toNumber(style.borderBottomWidth), util.toNumber(style.borderLeftWidth)];
+                this.$$padding = [util.toNumber(style.paddingTop), util.toNumber(style.paddingRight), util.toNumber(style.paddingBottom), util.toNumber(style.paddingLeft)];
+
+                this.$$width = this._eMain.offsetWidth;
+                this.$$height = this._eMain.offsetHeight;
+            },
+
+            /**
+             * 点击事件。
+             * @event
+             */
+            $click: util.blank,
+
+            /**
+             * 双击事件。
+             * @event
+             */
+            $dblclick: util.blank,
+
+            /**
+             * 失去激活事件。
+             * 控件失去激活时，移除状态样式 active。
+             * @event
+             */
+            $deactivate: function () {
+                this.alterStatus('-active');
+            },
+
+            /**
+             * 失效事件。
+             * 控件失效时，增加样式 ui-disabled 与状态样式 disabled
+             * @event
+             */
+            $disable: function () {
+                dom.addClass(this._eMain, 'ui-disabled');
+                this.alterStatus('+disabled');
+                core.$clearState(this);
+
+                var el = this._eMain;
+                dom.toArray(el.all || el.getElementsByTagName('*')).forEach(function (item) {
+                    if (item.disabled === false) {
+                        var tabIndex = dom.getAttribute(item, 'tabIndex') || '';
+                        if (tabIndex !== '-1') {
+                            item.setAttribute('_tabIndex', tabIndex);
+                            item.setAttribute('tabIndex', '-1');
                         }
                     }
-                    this.alterStatus('-focus');
-                },
+                });
+            },
 
-                /**
-                 * 缓存控件的属性。
-                 * $cache 方法缓存部分控件属性的值，在初始化时避免频繁的读写交替操作，加快渲染的速度，在子控件或者应用程序开发过程中，如果需要避开控件提供的方法直接操作 DOM 对象，操作完成后必须调用 clearCache 方法清除控件的属性缓存，否则将引发错误。
-                 * @protected
-                 *
-                 * @param {CssStyle} style 主元素的css样式对象
-                 */
-                $cache: function (style) {
-                    this.$$border = [util.toNumber(style.borderTopWidth), util.toNumber(style.borderRightWidth), util.toNumber(style.borderBottomWidth), util.toNumber(style.borderLeftWidth)];
-                    this.$$padding = [util.toNumber(style.paddingTop), util.toNumber(style.paddingRight), util.toNumber(style.paddingBottom), util.toNumber(style.paddingLeft)];
+            /**
+             * 销毁事件。
+             * 页面卸载时将销毁所有的控件，释放循环引用，防止在 IE 下发生内存泄漏，$dispose 方法的调用不会受到 ondispose 事件返回值的影响。
+             * @event
+             */
+            $dispose: function () {
+                this.$setParent();
+                this._eMain.getControl = null;
+                this._eMain = this._eBody = null;
+                // 取消初始化的操作，防止控件在 onload 结束前被 dispose，从而引发初始化访问的信息错误的问题
+                this.initStructure = util.blank;
+            },
 
-                    this.$$width = this._eMain.offsetWidth;
-                    this.$$height = this._eMain.offsetHeight;
-                },
+            /**
+             * 拖拽结束事件。
+             * @event
+             */
+            $dragend: util.blank,
 
-                /**
-                 * 点击事件。
-                 * @event
-                 */
-                $click: util.blank,
+            /**
+             * 拖拽事件。
+             * event 属性：
+             * x   x轴坐标
+             * y   y轴坐标
+             * @event
+             */
+            $dragmove: util.blank,
 
-                /**
-                 * 双击事件。
-                 * @event
-                 */
-                $dblclick: util.blank,
+            /**
+             * 拖拽开始事件。
+             * @event
+             */
+            $dragstart: util.blank,
 
-                /**
-                 * 失去激活事件。
-                 * 控件失去激活时，移除状态样式 active。
-                 * @event
-                 */
-                $deactivate: function () {
-                    this.alterStatus('-active');
-                },
+            /**
+             * 启用事件。
+             * 控件启用时，移除样式 ui-disabled 与状态样式 disabled
+             * @event
+             */
+            $enable: function () {
+                dom.removeClass(this._eMain, 'ui-disabled');
+                this.alterStatus('-disabled');
 
-                /**
-                 * 失效事件。
-                 * 控件失效时，增加样式 ui-disabled 与状态样式 disabled
-                 * @event
-                 */
-                $disable: function () {
-                    dom.addClass(this._eMain, 'ui-disabled');
-                    this.alterStatus('+disabled');
-                    core.$clearState(this);
-
-                    var el = this._eMain;
-                    dom.toArray(el.all || el.getElementsByTagName('*')).forEach(function (item) {
-                        if (item.disabled === false) {
-                            var tabIndex = dom.getAttribute(item, 'tabIndex') || '';
-                            if (tabIndex !== '-1') {
-                                item.setAttribute('_tabIndex', tabIndex);
-                                item.setAttribute('tabIndex', '-1');
+                var el = this._eMain;
+                dom.toArray(el.all || el.getElementsByTagName('*')).forEach(function (item) {
+                    if (item.disabled !== undefined) {
+                        var tabIndex = dom.getAttribute(item, '_tabIndex');
+                        if (tabIndex !== null) {
+                            if (tabIndex) {
+                                item.setAttribute('tabIndex', tabIndex);
+                            } else {
+                                item.removeAttribute('tabIndex');
                             }
+                            item.removeAttribute('_tabIndex');
                         }
-                    });
-                },
-
-                /**
-                 * 销毁事件。
-                 * 页面卸载时将销毁所有的控件，释放循环引用，防止在 IE 下发生内存泄漏，$dispose 方法的调用不会受到 ondispose 事件返回值的影响。
-                 * @event
-                 */
-                $dispose: function () {
-                    this.$setParent();
-                    this._eMain.getControl = null;
-                    this._eMain = this._eBody = null;
-                    // 取消初始化的操作，防止控件在 onload 结束前被 dispose，从而引发初始化访问的信息错误的问题
-                    this.initStructure = util.blank;
-                },
-
-                /**
-                 * 拖拽结束事件。
-                 * @event
-                 */
-                $dragend: util.blank,
-
-                /**
-                 * 拖拽事件。
-                 * event 属性：
-                 * x   x轴坐标
-                 * y   y轴坐标
-                 * @event
-                 */
-                $dragmove: util.blank,
-
-                /**
-                 * 拖拽开始事件。
-                 * @event
-                 */
-                $dragstart: util.blank,
-
-                /**
-                 * 启用事件。
-                 * 控件启用时，移除样式 ui-disabled 与状态样式 disabled
-                 * @event
-                 */
-                $enable: function () {
-                    dom.removeClass(this._eMain, 'ui-disabled');
-                    this.alterStatus('-disabled');
-
-                    var el = this._eMain;
-                    dom.toArray(el.all || el.getElementsByTagName('*')).forEach(function (item) {
-                        if (item.disabled !== undefined) {
-                            var tabIndex = dom.getAttribute(item, '_tabIndex');
-                            if (tabIndex !== null) {
-                                if (tabIndex) {
-                                    item.setAttribute('tabIndex', tabIndex);
-                                } else {
-                                    item.removeAttribute('tabIndex');
-                                }
-                                item.removeAttribute('_tabIndex');
-                            }
-                        }
-                    });
-                },
-
-                /**
-                 * 获得焦点事件。
-                 * 控件获得焦点时，添加状态样式 focus。
-                 * @event
-                 */
-                $focus: function () {
-                    if (this.isFocused()) {
-                        this.alterStatus('+focus');
                     }
-                },
+                });
+            },
 
-                /**
-                 * 3D Touch 用力按下事件。
-                 * @event
-                 */
-                $forcedown: util.blank,
+            /**
+             * 获得焦点事件。
+             * 控件获得焦点时，添加状态样式 focus。
+             * @event
+             */
+            $focus: function () {
+                if (this.isFocused()) {
+                    this.alterStatus('+focus');
+                }
+            },
 
-                /**
-                 * 3D Touch 释放弹起事件。
-                 * @event
-                 */
-                $forceup: util.blank,
+            /**
+             * 3D Touch 用力按下事件。
+             * @event
+             */
+            $forcedown: util.blank,
 
-                /**
-                 * 获取控件的基本高度。
-                 * 控件的基本高度指控件基本区域与用户数据存放区域的高度差值，即主元素与内部元素(如果相同则忽略其中之一)的上下边框宽度(border-width)与上下内填充宽度(padding)之和。
-                 * @protected
-                 *
-                 * @return {number} 控件的基本高度
-                 */
-                $getBasicHeight: function () {
-                    return this.$$border[0] + this.$$border[2] + this.$$padding[0] + this.$$padding[2];
-                },
+            /**
+             * 3D Touch 释放弹起事件。
+             * @event
+             */
+            $forceup: util.blank,
 
-                /**
-                 * 获取控件的基本宽度。
-                 * 控件的基本宽度指控件基本区域与用户数据存放区域的宽度差值，即主元素与内部元素(如果相同则忽略其中之一)的左右边框宽度(border-width)与左右内填充宽度(padding)之和。
-                 * @protected
-                 *
-                 * @return {number} 控件的基本宽度
-                 */
-                $getBasicWidth: function () {
-                    return this.$$border[1] + this.$$border[3] + this.$$padding[1] + this.$$padding[3];
-                },
+            /**
+             * 获取控件的基本高度。
+             * 控件的基本高度指控件基本区域与用户数据存放区域的高度差值，即主元素与内部元素(如果相同则忽略其中之一)的上下边框宽度(border-width)与上下内填充宽度(padding)之和。
+             * @protected
+             *
+             * @return {number} 控件的基本高度
+             */
+            $getBasicHeight: function () {
+                return this.$$border[0] + this.$$border[2] + this.$$padding[0] + this.$$padding[2];
+            },
 
-                /**
-                 * 隐藏事件。
-                 * 控件隐藏时，控件失去激活、悬停与焦点状态，不检查控件之前的状态，因此不会导致浏览器的刷新操作。
-                 * @event
-                 */
-                $hide: util.blank,
+            /**
+             * 获取控件的基本宽度。
+             * 控件的基本宽度指控件基本区域与用户数据存放区域的宽度差值，即主元素与内部元素(如果相同则忽略其中之一)的左右边框宽度(border-width)与左右内填充宽度(padding)之和。
+             * @protected
+             *
+             * @return {number} 控件的基本宽度
+             */
+            $getBasicWidth: function () {
+                return this.$$border[1] + this.$$border[3] + this.$$padding[1] + this.$$padding[3];
+            },
 
-                /**
-                 * 初始化控件的结构。
-                 * @protected
-                 *
-                 * @param {number} width 控件的宽度
-                 * @param {number} height 控件的高度
-                 */
-                $initStructure: util.blank,
+            /**
+             * 隐藏事件。
+             * 控件隐藏时，控件失去激活、悬停与焦点状态，不检查控件之前的状态，因此不会导致浏览器的刷新操作。
+             * @event
+             */
+            $hide: util.blank,
 
-                /**
-                 * 键盘键按下事件。
-                 * @event
-                 */
-                $keydown: util.blank,
+            /**
+             * 初始化控件的结构。
+             * @protected
+             *
+             * @param {number} width 控件的宽度
+             * @param {number} height 控件的高度
+             */
+            $initStructure: util.blank,
 
-                /**
-                 * 键盘键持续按压事件。
-                 * @event
-                 */
-                $keypress: util.blank,
+            /**
+             * 键盘键按下事件。
+             * @event
+             */
+            $keydown: util.blank,
 
-                /**
-                 * 键盘键弹起事件。
-                 * @event
-                 */
-                $keyup: util.blank,
+            /**
+             * 键盘键持续按压事件。
+             * @event
+             */
+            $keypress: util.blank,
 
-                /**
-                 * 鼠标键按下事件。
-                 * @event
-                 */
-                $mousedown: util.blank,
+            /**
+             * 键盘键弹起事件。
+             * @event
+             */
+            $keyup: util.blank,
 
-                /**
-                 * 鼠标移动事件。
-                 * @event
-                 */
-                $mousemove: util.blank,
+            /**
+             * 鼠标键按下事件。
+             * @event
+             */
+            $mousedown: util.blank,
 
-                /**
-                 * 鼠标移出事件。
-                 * 鼠标移出控件区域时，控件失去悬停状态，移除状态样式 hover。
-                 * @event
-                 */
-                $mouseout: function () {
-                    this.alterStatus('-hover');
-                },
+            /**
+             * 鼠标移动事件。
+             * @event
+             */
+            $mousemove: util.blank,
 
-                /**
-                 * 鼠标移入事件。
-                 * 鼠标移入控件区域时，控件获得悬停状态，添加状态样式 hover。
-                 * @event
-                 */
-                $mouseover: function () {
-                    this.alterStatus('+hover');
-                },
+            /**
+             * 鼠标移出事件。
+             * 鼠标移出控件区域时，控件失去悬停状态，移除状态样式 hover。
+             * @event
+             */
+            $mouseout: function () {
+                this.alterStatus('-hover');
+            },
 
-                /**
-                 * 鼠标键弹起事件。
-                 * @event
-                 */
-                $mouseup: util.blank,
+            /**
+             * 鼠标移入事件。
+             * 鼠标移入控件区域时，控件获得悬停状态，添加状态样式 hover。
+             * @event
+             */
+            $mouseover: function () {
+                this.alterStatus('+hover');
+            },
 
-                /**
-                 * 鼠标滚轮事件。
-                 * @event
-                 */
-                $mousewheel: util.blank,
+            /**
+             * 鼠标键弹起事件。
+             * @event
+             */
+            $mouseup: util.blank,
 
-                /**
-                 * 初始化完成事件。
-                 * @event
-                 */
-                $ready: function () {
-                    this._bReady = true;
-                    delete this._oHandler;
-                },
+            /**
+             * 鼠标滚轮事件。
+             * @event
+             */
+            $mousewheel: util.blank,
 
-                /**
-                 * 移除子控件事件。
-                 * @event
-                 */
-                $remove: util.blank,
+            /**
+             * 初始化完成事件。
+             * @event
+             */
+            $ready: function () {
+                this._bReady = true;
+                delete this._oHandler;
+            },
 
-                /**
-                 * 控件结构恢复。
-                 * @protected
-                 */
-                $restoreStructure: function () {
-                    this._eMain.style.width = this._sWidth;
-                    this._eMain.style.height = this._sHeight;
-                },
+            /**
+             * 移除子控件事件。
+             * @event
+             */
+            $remove: util.blank,
 
-                /**
-                 * 滚动事件。
-                 * @event
-                 */
-                $scroll: util.blank,
+            /**
+             * 控件结构恢复。
+             * @protected
+             */
+            $restoreStructure: function () {
+                this._eMain.style.width = this._sWidth;
+                this._eMain.style.height = this._sHeight;
+            },
 
-                /**
-                 * 设置控件的内层元素。
-                 * ECUI 控件 逻辑上分为外层元素、主元素与内层元素，外层元素用于控制控件自身布局，主元素是控件生成时捆绑的 Element 对象，而内层元素用于控制控件对象的子控件与文本布局，三者允许是同一个 Element 对象。
-                 * @protected
-                 *
-                 * @param {HTMLElement} el Element 对象
-                 */
-                $setBody: function (el) {
-                    this._eBody = el;
-                },
+            /**
+             * 滚动事件。
+             * @event
+             */
+            $scroll: util.blank,
 
-                /**
-                 * 直接设置父控件。
-                 * 相对于 setParent 方法，$setParent 方法仅设置控件对象逻辑上的父对象，不进行任何逻辑上的检查，用于某些特殊情况下的设定，如下拉框控件中的选项框子控件需要使用 $setParent 方法设置它的逻辑父控件为下拉框控件。
-                 * @protected
-                 *
-                 * @param {ecui.ui.Control} parent ECUI 控件对象
-                 */
-                $setParent: function (parent) {
-                    if (this._oHandler) {
-                        if (this._cParent) {
-                            core.removeEventListener(this._cParent, 'ready', this._oHandler);
-                            core.removeEventListener(this._cParent, 'show', this._oHandler);
-                        }
-                        if (parent) {
-                            if (parent.isReady()) {
-                                if (parent.isShow()) {
-                                    if (!core.dispatchEvent(this, 'ready')) {
-                                        this.$ready(core.wrapEvent('ready'));
-                                    }
-                                } else {
-                                    core.addEventListener(parent, 'show', this._oHandler);
+            /**
+             * 设置控件的内层元素。
+             * ECUI 控件 逻辑上分为外层元素、主元素与内层元素，外层元素用于控制控件自身布局，主元素是控件生成时捆绑的 Element 对象，而内层元素用于控制控件对象的子控件与文本布局，三者允许是同一个 Element 对象。
+             * @protected
+             *
+             * @param {HTMLElement} el Element 对象
+             */
+            $setBody: function (el) {
+                this._eBody = el;
+            },
+
+            /**
+             * 直接设置父控件。
+             * 相对于 setParent 方法，$setParent 方法仅设置控件对象逻辑上的父对象，不进行任何逻辑上的检查，用于某些特殊情况下的设定，如下拉框控件中的选项框子控件需要使用 $setParent 方法设置它的逻辑父控件为下拉框控件。
+             * @protected
+             *
+             * @param {ecui.ui.Control} parent ECUI 控件对象
+             */
+            $setParent: function (parent) {
+                if (this._oHandler) {
+                    if (this._cParent) {
+                        core.removeEventListener(this._cParent, 'ready', this._oHandler);
+                        core.removeEventListener(this._cParent, 'show', this._oHandler);
+                    }
+                    if (parent) {
+                        if (parent.isReady()) {
+                            if (parent.isShow()) {
+                                if (!core.dispatchEvent(this, 'ready')) {
+                                    this.$ready(core.wrapEvent('ready'));
                                 }
                             } else {
-                                core.addEventListener(parent, 'ready', this._oHandler);
+                                core.addEventListener(parent, 'show', this._oHandler);
                             }
+                        } else {
+                            core.addEventListener(parent, 'ready', this._oHandler);
                         }
                     }
-                    this._cParent = parent;
-                },
-
-                /**
-                 * 设置控件的大小。
-                 * @protected
-                 *
-                 * @param {number} width 宽度，如果不需要设置则将参数设置为等价于逻辑非的值
-                 * @param {number} height 高度，如果不需要设置则省略此参数
-                 */
-                $setSize: function (width, height) {
-                    this.cache();
-
-                    var fixedSize = core.isContentBox(this._eMain),
-                        value;
-
-                    // 防止负宽度IE下出错
-                    if (width && (value = width - (fixedSize ? this.$getBasicWidth() : 0)) > 0) {
-                        this._eMain.style.width = value + 'px';
-                        this.$$width = width;
-                    }
-
-                    // 防止负高度IE下出错
-                    if (height && (value = height - (fixedSize ? this.$getBasicHeight() : 0)) > 0) {
-                        this._eMain.style.height = value + 'px';
-                        this.$$height = height;
-                    }
-                },
-
-                /**
-                 * 显示控件。
-                 * $show 方法直接显示控件，不检查控件之前的状态，因此不会导致浏览器的刷新操作。
-                 * @protected
-                 */
-                $show: util.blank
+                }
+                this._cParent = parent;
             },
+
+            /**
+             * 设置控件的大小。
+             * @protected
+             *
+             * @param {number} width 宽度，如果不需要设置则将参数设置为等价于逻辑非的值
+             * @param {number} height 高度，如果不需要设置则省略此参数
+             */
+            $setSize: function (width, height) {
+                this.cache();
+
+                var fixedSize = core.isContentBox(this._eMain),
+                    value;
+
+                // 防止负宽度IE下出错
+                if (width && (value = width - (fixedSize ? this.$getBasicWidth() : 0)) > 0) {
+                    this._eMain.style.width = value + 'px';
+                    this.$$width = width;
+                }
+
+                // 防止负高度IE下出错
+                if (height && (value = height - (fixedSize ? this.$getBasicHeight() : 0)) > 0) {
+                    this._eMain.style.height = value + 'px';
+                    this.$$height = height;
+                }
+            },
+
+            /**
+             * 显示控件。
+             * $show 方法直接显示控件，不检查控件之前的状态，因此不会导致浏览器的刷新操作。
+             * @protected
+             */
+            $show: util.blank,
 
             /**
              * 为控件添加/移除一个状态样式。
@@ -1346,6 +1344,7 @@
             }
         }
     );
+
 
     var definedInterface = {};
 
