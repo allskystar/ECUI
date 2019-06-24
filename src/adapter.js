@@ -215,9 +215,10 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              * @param {string} name 属性名称
              * @return {string} 属性值
              */
-            getAttribute: function (el, name) {
-                return el.getAttribute(name) || '';
-            },
+            getAttribute:
+                function (el, name) {
+                    return el.getAttribute(name) || '';
+                },
 
             /**
              * 获取自定义样式。
@@ -255,11 +256,12 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                 var top = 0,
                     left = 0,
                     body = document.body,
-                    html = dom.parent(body);
+                    html = dom.parent(body),
+                    style;
 
                 if (el.getBoundingClientRect) {
                     if (ieVersion && !isStrict) {
-                        var style = dom.getStyle(body);
+                        style = dom.getStyle(body);
                         if (isNaN(top = util.toNumber(style.borderTopWidth))) {
                             top = -2;
                         }
@@ -576,7 +578,10 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                     }
                     for (el = dom.parent(el); el !== document.body; el = dom.parent(el)) {
                         if (el.clientHeight !== el.scrollHeight) {
-                            var clientTop = dom.getPosition(el).top + util.toNumber(dom.getStyle(el, 'borderTopWidth')),
+                            var clientTop = dom.getPosition(el).top +
+                                    util.toNumber(
+                                        dom.getStyle(el, 'borderTopWidth')
+                                    ),
                                 clientHeight = el.clientHeight,
                                 distance;
 
@@ -1586,7 +1591,10 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                 set: function (el, value) {
                     el.style.filter =
                         el.style.filter.replace(/(progid:DXImageTransform\.Microsoft\.)?alpha\([^\)]*\)/gi, '') +
-                            (value === '' ? '' : 'progid:DXImageTransform.Microsoft.Alpha(opacity=' + value * 100 + ')');
+                            (value === '' ? '' :
+                                'progid:DXImageTransform.Microsoft.Alpha'
+                                    + '(opacity=' + value * 100 + ')'
+                            );
                 }
             } : undefined,
 

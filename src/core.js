@@ -2448,7 +2448,8 @@ outer:          for (var caches = [], target = event.target, el; target && targe
 
                     var info = RegExp.$4,
                         value = RegExp.$5;
-                    (RegExp.$2 ? (options.ext = options.ext || {}) : options)[util.toCamelCase(RegExp.$3)] = info ? value.charAt(0) === '&' ? JSON.parse(decodeURIComponent(value.slice(1))) : decodeURIComponent(value) : true;
+                    (RegExp.$2 ? (options.ext = options.ext || {}) : options)[util.toCamelCase(RegExp.$3)] =
+                        info ? value.charAt(0) === '&' ? JSON.parse(decodeURIComponent(value.slice(1))) : decodeURIComponent(value) : true;
                 }
 
                 if (core.onparseoptions) {
@@ -2511,6 +2512,7 @@ outer:          for (var caches = [], target = event.target, el; target && targe
          * @param {object} ... 控件扩展的方法
          * @return {Function} 新控件的构造函数
          */
+/*ignore*/
         inherits: function (superClass) {
             var index = 1,
                 singleton = 'boolean' === typeof arguments[index] ? arguments[index++] : false,
@@ -2617,7 +2619,7 @@ outer:          for (var caches = [], target = event.target, el; target && targe
 
             return subClass;
         },
-
+/*end*/
         /**
          * 初始化指定的 Element 对象对应的 DOM 节点树。
          * init 方法将初始化指定的 Element 对象及它的子节点，如果这些节点拥有初始化属性(参见 getAttributeName 方法)，将按照规则为它们绑定 ECUI 控件，每一个节点只会被绑定一次，重复的绑定无效。页面加载完成时，将会自动针对 document.body 执行这个方法，相当于自动执行以下的语句：ecui.init(document.body)
