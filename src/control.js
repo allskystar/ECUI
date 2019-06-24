@@ -14,85 +14,58 @@
 //{/if}//
     var waitReadyList;
 
-    var PRIVATE = {
-        _bCached:   undefined,
-        _bCreated:  false,
-        _bGesture:  true,
-        _bReady:    false,
-        _sUID:      undefined,
-        _sClass:    undefined,
-        _sSubType:  '',
-        _sWidth:    undefined,
-        _sHeight:   undefined,
-        _eMain:     undefined,
-        _eBody:     undefined,
-        _cParent:   undefined,
-        _oHandler:  undefined,
-        _aStatus:   undefined,
+    /**
+     * 设置控件的父对象。
+     * @private
+     *
+     * @param {ecui.ui.Control} parent 父控件对象
+     * @param {HTMLElement} parentElement 父 Element 对象
+     */
+    function alterParent(parent, parentElement) {
+        var oldParent = this._cParent,
+            el = this._eMain;
 
-        /**
-         * 设置控件的父对象。
-         * @private
-         *
-         * @param {ecui.ui.Control} parent 父控件对象
-         * @param {HTMLElement} parentElement 父 Element 对象
-         */
-        _alterParent: function (parent, parentElement) {
-            var oldParent = this._cParent,
-                el = this._eMain;
-
-            // 触发原来父控件的移除子控件事件
-            if (parent !== oldParent) {
-                if (oldParent) {
-                    if (!core.dispatchEvent(oldParent, 'remove', {child: this})) {
-                        return;
-                    }
-                }
-                if (parent) {
-                    if (!core.dispatchEvent(parent, 'append', {child: this})) {
-                        parent = parentElement = null;
-                    }
+        // 触发原来父控件的移除子控件事件
+        if (parent !== oldParent) {
+            if (oldParent) {
+                if (!core.dispatchEvent(oldParent, 'remove', {child: this})) {
+                    return;
                 }
             }
-
-            if (parentElement !== dom.parent(el)) {
-                if (parentElement) {
-                    parentElement.appendChild(el);
-                } else {
-                    dom.remove(el);
+            if (parent) {
+                if (!core.dispatchEvent(parent, 'append', {child: this})) {
+                    parent = parentElement = null;
                 }
-            }
-
-            this.$setParent(parent);
-        },
-
-        /**
-         * 设置控件的实际宽度。
-         * @private
-         *
-         * @param {number} width 控件的占位宽度
-         */
-        _setWidth: function (width) {
-            this._eMain.style.width = width - (core.isContentBox(this._eMain) ? this.$getBasicWidth() * 2 : 0) + 'px';
-        },
-
-        /**
-         * 部件的ready事件监听器。
-         * @private
-         *
-         * @param {ECUIEvent} event ECUI事件对象
-         */
-        _unitReadyHandler: function (event) {
-            if (this._cParent) {
-                // 仅执行一次
-                core.removeEventListener(this._cParent, event.type, this._oHandler);
-            }
-            // ready事件不允许被阻止
-            if (!core.dispatchEvent(this, 'ready', event)) {
-                this.$ready(event);
             }
         }
-    };
+
+        if (parentElement !== dom.parent(el)) {
+            if (parentElement) {
+                parentElement.appendChild(el);
+            } else {
+                dom.remove(el);
+            }
+        }
+
+        this.$setParent(parent);
+    }
+
+    /**
+     * 部件的ready事件监听器。
+     * @private
+     *
+     * @param {ECUIEvent} event ECUI事件对象
+     */
+    function unitReadyHandler(event) {
+        if (this._cParent) {
+            // 仅执行一次
+            core.removeEventListener(this._cParent, event.type, this._oHandler);
+        }
+        // ready事件不允许被阻止
+        if (!core.dispatchEvent(this, 'ready', event)) {
+            this.$ready(event);
+        }
+    }
 
     /**
      * 基础控件。
@@ -127,10 +100,10 @@
             this._sWidth = el.style.width;
             this._sHeight = el.style.height;
             if (!options.main) {
-                this._oHandler = this._unitReadyHandler.bind(this);
+                this._oHandler = this.__unitReadyHandler.bind(this);
             }
         },
-        {
+        {/*ignore*/
             DEFAULT_OPTIONS: {
                 capturable: Boolean(true),
                 disabled:   Boolean(false),
@@ -138,8 +111,26 @@
                 userSelect: Boolean(true)
             },
 
-            private: PRIVATE,
+            private: {
+                _bCached:   undefined,
+                _bCreated:  false,
+                _bGesture:  true,
+                _bReady:    false,
+                _sUID:      undefined,
+                _sClass:    undefined,
+                _sSubType:  '',
+                _sWidth:    undefined,
+                _sHeight:   undefined,
+                _eMain:     undefined,
+                _eBody:     undefined,
+                _cParent:   undefined,
+                _oHandler:  undefined,
+                _aStatus:   undefined,
 
+                __alterParent: alterParent,
+                __unitReadyHandler: unitReadyHandler
+            },
+/*end*/
             /**
              * 激活事件。
              * 控件激活时，添加状态样式 active。
@@ -594,7 +585,7 @@
              * @param {HTMLElement} parentElement 父 Element 对象，忽略参数控件将移出 DOM 树
              */
             appendTo: function (parentElement) {
-                this._alterParent(parentElement && core.findControl(parentElement), parentElement);
+                this.__alterParent(parentElement && core.findControl(parentElement), parentElement);
             },
 
             /**
@@ -1265,7 +1256,7 @@
              * @param {ecui.ui.Control} parent 父控件对象，忽略参数控件将移出 DOM 树
              */
             setParent: function (parent) {
-                this._alterParent(parent, parent && parent._eBody);
+                this.__alterParent(parent, parent && parent._eBody);
             },
 
             /**
@@ -1344,8 +1335,7 @@
             }
         }
     );
-
-
+/*ignore*/
     var definedInterface = {};
 
     ui.Control.defineProperty = function (name) {
@@ -1402,4 +1392,5 @@
 
         return definedInterface[name] = _interface(methods);
     };
+/*end*/
 }());
