@@ -1350,7 +1350,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              */
             hasIOSKeyboard: iosVersion ? function (target) {
                 target = target || document.activeElement;
-                return !target.readOnly && ((target.tagName === 'INPUT' && target.type !== 'radio' && target.type !== 'checkbox') || target.tagName === 'TEXTAREA');
+                return target.getAttribute('contenteditable') || (!target.readOnly && ((target.tagName === 'INPUT' && target.type !== 'radio' && target.type !== 'checkbox') || target.tagName === 'TEXTAREA'));
             } : function () {
                 return false;
             },
