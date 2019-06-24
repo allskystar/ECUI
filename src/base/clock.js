@@ -16,11 +16,23 @@
      */
     ui.Clock = core.inherits(
         ui.Control,
+/*ignore*/
+//{if 0}//
+/*end*/
+        function (el, options) {
+            _super(el, options);
+/*ignore*/
+/*end*/
+        },
+/*ignore*/
+//{/if}//
+/*end*/
         {
+/*ignore*/
             DEFAULT_OPTIONS: {
                 format: '{0}:{1}:{2}'
             },
-
+/*end*/
             /**
              * @override
              */
@@ -45,13 +57,12 @@
                 this.stop();
 
                 this.stop = util.timer(
-                    function (format) {
+                    function () {
                         var date = new Date();
-                        this.setContent(util.stringFormat(format, ('0' + date.getHours()).slice(-2), ('0' + date.getMinutes()).slice(-2), ('0' + date.getSeconds()).slice(-2), ('000' + date.getMilliseconds()).slice(-4)));
+                        this.setContent(util.stringFormat(this._sFormat, ('0' + date.getHours()).slice(-2), ('0' + date.getMinutes()).slice(-2), ('0' + date.getSeconds()).slice(-2), ('000' + date.getMilliseconds()).slice(-4)));
                     },
                     -1,
-                    this,
-                    this.format
+                    this
                 );
             },
 

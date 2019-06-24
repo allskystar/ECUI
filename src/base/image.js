@@ -9,6 +9,19 @@
         ui = core.ui;
 //{/if}//
     /**
+     * 图片加载事件。
+     * @private
+     */
+    function load(event) {
+        this._nMinWidth = event.target.width;
+        this._nRatio = event.target.height / event.target.width;
+        dom.removeEventListener(this, 'load', this._oHandler);
+        if (this.isReady()) {
+            this.cache();
+        }
+    }
+
+    /**
      * 图片控件。
      * 图片控件支持使用滚轮直接缩放图片的大小。
      * @control
@@ -17,39 +30,30 @@
         ui.Control,
         'ui-image',
         function (el, options) {
+            // firefox下点击图片会自动进入选中状态
+            options.userSelect = false;
             _super(el, options);
             if (el.width) {
-                this._load({target: el});
+                this.__load({target: el});
             } else {
-                dom.addEventListener(el, 'load', this._load.bind(this));
+                dom.addEventListener(el, 'load', this._oHandler = this.__load.bind(this));
             }
         },
         {
-            SUPER_OPTIONS: {
-                // firefox下点击图片会自动进入选中状态
-                userSelect: false
-            },
-
+/*ignore*/
             private: {
-                cx: undefined,
-                cy: undefined,
-                minWidth: undefined,
-                ratio: undefined,
+                _nCenterX: undefined,
+                _nCenterY: undefined,
+                _nMinWidth: undefined,
+                _nRatio: undefined,
 
                 /**
                  * 图片加载事件。
                  * @private
                  */
-                _load: function (event) {
-                    this.minWidth = event.target.width;
-                    this.ratio = event.target.height / event.target.width;
-                    dom.removeEventListener(event.target, 'load', this._load);
-                    if (this.isCreated()) {
-                        this.cache();
-                    }
-                }
+                __load: load
             },
-
+/*end*/
             /**
              * @override
              */
@@ -69,8 +73,8 @@
              */
             $cache: function (style) {
                 _super.$cache(style);
-                this.cx = _super.getX() + this.getWidth() / 2;
-                this.cy = _super.getY() + this.getHeight() / 2;
+                this._nCenterX = ui.Control.prototype.getX.call(this) + this.getWidth() / 2;
+                this._nCenterY = ui.Control.prototype.getY.call(this) + this.getHeight() / 2;
             },
 
             /**
@@ -79,9 +83,9 @@
             $mousewheel: function (event) {
                 _super.$mousewheel(event);
                 var delta = event.deltaY,
-                    width = Math.max(this.minWidth, this.getWidth() - delta * 2);
+                    width = Math.max(this._nMinWidth, this.getWidth() - delta * 2);
 
-                this.setSize(width, Math.round(width * this.ratio));
+                this.setSize(width, Math.round(width * this._nRatio));
                 this.setPosition(this.getX(), this.getY());
 
                 event.preventDefault();
@@ -91,22 +95,22 @@
              * @override
              */
             getX: function () {
-                return this.cx;
+                return this._nCenterX;
             },
 
             /**
              * @override
              */
             getY: function () {
-                return this.cy;
+                return this._nCenterY;
             },
 
             /**
              * @override
              */
             setPosition: function (x, y) {
-                this.cx = x;
-                this.cy = y;
+                this._nCenterX = x;
+                this._nCenterY = y;
                 _super.setPosition(Math.round(x - this.getWidth() / 2), Math.round(y - this.getHeight() / 2));
             }
         }
