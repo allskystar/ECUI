@@ -103,7 +103,8 @@
                 this._oHandler = this.__unitReadyHandler.bind(this);
             }
         },
-        {/*ignore*/
+        {
+/*ignore*/
             DEFAULT_OPTIONS: {
                 capturable: Boolean(true),
                 disabled:   Boolean(false),

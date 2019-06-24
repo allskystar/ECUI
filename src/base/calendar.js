@@ -34,11 +34,17 @@
              */
             Button: core.inherits(
                 ui.Button,
+//{if 0}//
+                function (el, options) {
+                    _super(el, options);
+                },
+//{/if}//
                 {
+/*ignore*/
                     DEFAULT_OPTIONS: {
                         move: Number(0)
                     },
-
+/*end*/
                     /**
                      * @override
                      */
@@ -48,11 +54,11 @@
                     }
                 }
             ),
-
+/*ignore*/
             private: {
                 _eTitle: undefined
             },
-
+/*end*/
             /**
              * @override
              */

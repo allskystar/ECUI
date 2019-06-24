@@ -2498,7 +2498,7 @@ outer:          for (var caches = [], target = event.target, el; target && targe
         getStatus: function () {
             return currEnv.type;
         },
-
+/*ignore*/
         /**
          * 控件继承。
          * 如果不指定类型样式，表示使用父控件的类型样式，如果指定的类型样式以 * 符号开头，表示移除父控件的类型样式并以之后的类型样式代替。生成的子类构造函数已经使用了 constructor/TYPES/CLASS 三个属性，TYPES 属性是控件的全部类型样式，CLASS 属性是控件的全部类型样式字符串。
@@ -2512,7 +2512,6 @@ outer:          for (var caches = [], target = event.target, el; target && targe
          * @param {object} ... 控件扩展的方法
          * @return {Function} 新控件的构造函数
          */
-/*ignore*/
         inherits: function (superClass) {
             var index = 1,
                 singleton = 'boolean' === typeof arguments[index] ? arguments[index++] : false,
@@ -2528,16 +2527,8 @@ outer:          for (var caches = [], target = event.target, el; target && targe
                         }
                     }
 
-                    if (superOptions) {
-                        for (var name in superOptions) {
-                            if (superOptions.hasOwnProperty(name) && !options.hasOwnProperty(name)) {
-                                options[name] = superOptions[name];
-                            }
-                        }
-                    }
-
                     if (defaultOptions) {
-                        for (name in defaultOptions) {
+                        for (var name in defaultOptions) {
                             if (defaultOptions.hasOwnProperty(name)) {
                                 if ('function' === typeof defaultOptions[name].value) {
                                     this[defaultOptions[name].alias] = defaultOptions[name].value(options[name]);
@@ -2556,10 +2547,8 @@ outer:          for (var caches = [], target = event.target, el; target && targe
                         singletons.push(this);
                     }
                 },
-                superOptions = properties.SUPER_OPTIONS,
                 defaultOptions = properties.DEFAULT_OPTIONS;
 
-            delete properties.SUPER_OPTIONS;
             delete properties.DEFAULT_OPTIONS;
 
             if (defaultOptions) {
