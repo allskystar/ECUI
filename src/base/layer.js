@@ -15,6 +15,21 @@
         modalCount = 0;  // 当前showModal的窗体数
 
     /**
+     * 刷新所有显示的窗体的zIndex属性。
+     * @private
+     */
+    function refresh() {
+        util.remove(layers, this);
+        layers.push(this);
+
+        // 改变当前窗体之后的全部窗体z轴位置，将当前窗体置顶
+        var num = layers.length - modalCount;
+        layers.forEach(function (item, index) {
+            item.getMain().style.zIndex = index >= num ? 32009 + (index - num) * 2 : 4095 + index;
+        });
+    }
+
+    /**
      * 窗体控件。
      * 定义独立于文档布局的内容区域，如果在其中包含 iframe 标签，在当前页面打开一个新的页面，可以仿真浏览器的多窗体效果，避免了使用 window.open 在不同浏览器下的兼容性问题。多个窗体控件同时工作时，当前激活的窗体在最上层。窗体控件的标题栏默认可以拖拽，窗体可以设置置顶方式显示，在置顶模式下，只有当前窗体可以响应操作。窗体控件的 z-index 从4096开始，页面开发请不要使用大于或等于4096的 z-index 值。
      * @control
@@ -22,23 +37,13 @@
     ui.Layer = core.inherits(
         ui.Control,
         {
+/*ignore*/
             private: {
-                /**
-                 * 刷新所有显示的窗体的zIndex属性。
-                 * @private
-                 */
-                _refresh: function () {
-                    util.remove(layers, this);
-                    layers.push(this);
+                _bModal: Boolean(false),
 
-                    // 改变当前窗体之后的全部窗体z轴位置，将当前窗体置顶
-                    var num = layers.length - modalCount;
-                    layers.forEach(function (item, index) {
-                        item.getMain().style.zIndex = index >= num ? 32009 + (index - num) * 2 : 4095 + index;
-                    });
-                }
+                __refresh: refresh
             },
-
+/*end*/
             /**
              * 销毁窗体时需要先关闭窗体，并不再保留窗体的索引。
              * @override
@@ -57,7 +62,7 @@
              */
             $focus: function () {
                 _super.$focus();
-                this._refresh();
+                this.__refresh();
             },
 
             /**
@@ -71,14 +76,14 @@
                     layers.splice(i, 1);
 
                     if (i > layers.length - modalCount) {
-                        if (this.modal) {
+                        if (this._bModal) {
                             if (i === layers.length) {
                                 core.mask();
                             } else {
                                 // 如果不是最后一个，将遮罩层标记后移
-                                layers[i].modal = true;
+                                layers[i]._bModal = true;
                             }
-                            this.modal = false;
+                            this._bModal = false;
                         }
                         modalCount--;
                     }
@@ -104,7 +109,7 @@
              */
             hide: function () {
                 for (var i = layers.indexOf(this), item; item = layers[++i]; ) {
-                    if (item.modal) {
+                    if (item._bModal) {
                         return false;
                     }
                 }
@@ -133,7 +138,7 @@
 
                 var result = _super.show();
                 if (!result) {
-                    this._refresh();
+                    this.__refresh();
                 }
                 return result;
             },
@@ -146,7 +151,7 @@
              * @param {number} opacity 遮罩层透明度，默认为0.5
              */
             showModal: function (opacity) {
-                if (!this.modal) {
+                if (!this._bModal) {
                     if (layers.indexOf(this) < layers.length - modalCount) {
                         modalCount++;
                     }
@@ -154,9 +159,9 @@
                     this.center();
                     core.mask(opacity !== undefined ? opacity : 0.5, 32006 + modalCount * 2);
 
-                    this.modal = true;
+                    this._bModal = true;
                     if (!_super.show()) {
-                        this._refresh();
+                        this.__refresh();
                     }
                 }
             }

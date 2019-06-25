@@ -16,17 +16,11 @@
      */
     ui.Clock = core.inherits(
         ui.Control,
-/*ignore*/
 //{if 0}//
-/*end*/
         function (el, options) {
             _super(el, options);
-/*ignore*/
-/*end*/
         },
-/*ignore*/
 //{/if}//
-/*end*/
         {
 /*ignore*/
             DEFAULT_OPTIONS: {

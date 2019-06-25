@@ -34,15 +34,11 @@
              */
             Button: core.inherits(
                 ui.Button,
-/*ignore*/
 //{if 0}//
-/*end*/
                 function (el, options) {
                     _super(el, options);
                 },
-/*ignore*/
 //{/if}//
-/*end*/
                 {
 /*ignore*/
                     DEFAULT_OPTIONS: {
