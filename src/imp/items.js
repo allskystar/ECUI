@@ -139,7 +139,8 @@
 
             var items = [],
                 UIClass = this.Item || ui.Item,
-                el = this.items[index] ? this.items[index].getMain() : null;
+                el = this.items[index] ? this.items[index].getMain() : null,
+                body = this.getBody();
 
             this.preventAlterItems();
 
@@ -183,7 +184,7 @@
 
                     // 选项控件，直接添加
                     if (core.dispatchEvent(this, 'append', {child: item})) {
-                        dom.insertBefore(item.getMain(), el);
+                        body.insertBefore(item.getMain(), el);
                         item.$setParent(this);
                         items.pop();
                         items.splice(index++, 0, item);
@@ -197,7 +198,7 @@
             this.alterItems();
 
             if (this.isReady()) {
-                core.init(this.getBody());
+                core.init(body);
                 core.init(this.getMain());
             }
             return items;
