@@ -1336,7 +1336,7 @@
             }
         }
     );
-/*ignore*/
+
     var definedInterface = {};
 
     ui.Control.defineProperty = function (name) {
@@ -1344,22 +1344,24 @@
             return definedInterface[name];
         }
 
-        var propertyName = '$set' + name.charAt(0).toUpperCase() + name.slice(1),
+        var propertyName = name.charAt(0).toUpperCase() + name.slice(1),
             methods = {
+/*ignore*/
                 private: {
                     value: undefined
                 }
+/*end*/
             };
 
         // item移除时选项组需要释放状态
         methods.$remove = function (event) {
             if (this.value === event.child) {
-                this[propertyName.slice(1)]();
+                this['set' + propertyName]();
             }
         };
 
         // 底层的$setXXXX方法
-        methods[propertyName] = function (item) {
+        methods['$set' + propertyName] = function (item) {
             item = item || null;
             var oldItem = this.value;
             if (oldItem !== item) {
@@ -1375,23 +1377,22 @@
         };
 
         // setXXXX方法，会发送propertychange事件
-        methods[propertyName.slice(1)] = function (item) {
+        methods['set' + propertyName] = function (item) {
             if ('number' === typeof item) {
                 item = this.getItem(item);
             }
 
-            var oldItem = this[propertyName](item);
+            var oldItem = this['$set' + propertyName](item);
             if (oldItem !== undefined) {
                 core.dispatchEvent(this, 'propertychange', {name: name, item: item, history: oldItem});
             }
         };
 
         // getXXXX方法，获取属性的值
-        methods['g' + propertyName.slice(2)] = function () {
+        methods['get' + propertyName] = function () {
             return this.value || null;
         };
 
         return definedInterface[name] = _interface(methods);
     };
-/*end*/
 }());
