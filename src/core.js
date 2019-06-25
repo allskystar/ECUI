@@ -2558,24 +2558,20 @@ outer:          for (var caches = [], target = event.target, el; target && targe
                 for (var name in defaultOptions) {
                     if (defaultOptions.hasOwnProperty(name)) {
                         if ('boolean' === typeof defaultOptions[name]) {
-                            defaultOptions[name] = {
-                                alias: '_b' + name.charAt(0).toUpperCase() + name.slice(1),
-                                value: defaultOptions[name]
-                            };
-                            properties.private[defaultOptions[name].alias] = undefined;
+                            var alias = '_b';
                         } else if ('number' === typeof defaultOptions[name]) {
-                            defaultOptions[name] = {
-                                alias: '_n' + name.charAt(0).toUpperCase() + name.slice(1),
-                                value: defaultOptions[name]
-                            };
-                            properties.private[defaultOptions[name].alias] = undefined;
+                            alias = '_n';
                         } else if ('string' === typeof defaultOptions[name]) {
-                            defaultOptions[name] = {
-                                alias: '_s' + name.charAt(0).toUpperCase() + name.slice(1),
-                                value: defaultOptions[name]
-                            };
-                            properties.private[defaultOptions[name].alias] = undefined;
+                            alias = '_s';
+                        } else {
+                            alias = '_o';
                         }
+                        alias += name.charAt(0).toUpperCase() + name.slice(1);
+                        defaultOptions[name] = {
+                            alias: alias,
+                            value: defaultOptions[name]
+                        };
+                        properties.private[alias] = undefined;
                     }
                 }
             }

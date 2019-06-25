@@ -17,22 +17,24 @@
     }
 
     ui.MOptions = _interface.extends([ui.Control.defineProperty('selected'), ui.MScroll], {
+/*ignore*/
         private: {
             mask: undefined
         },
-
+/*end*/
         constructor: function (el) {
             dom.addClass(el, 'ui-mobile-options');
-            this.mask = dom.insertBefore(dom.create({
-                className: this.getUnitClass(ui.Control, 'mask') + ' ui-mobile-options-mask'
-            }), this.getBody());
+            var body = this.getBody();
+            dom.insertHTML(body, 'beforeBegin', '<div class="' + this.getUnitClass(ui.Control, 'mask') + ' ui-mobile-options-mask"></div><div class="' + this.getUnitClass(ui.Control, 'view') + ' ui-mobile-options-view"><div></div></div>');
+            this.view = body.previousSibling;
+            this.mask = this.view.previousSibling;
         },
 
         /**
-         * @override
+         * 选项控件发生变化的处理。
+         * @protected
          */
-        $cache: function (style) {
-            this.$$itemHeight = util.toNumber(dom.getCustomStyle(style, 'item-height'));
+        $alterItems: function () {
             var top = -this.$$itemHeight * (getItems(this).length - this._nOptionSize - 1),
                 bottom = this.$$itemHeight * this._nOptionSize;
 
@@ -49,6 +51,18 @@
                 bottom: bottom,
                 stepY: this.$$itemHeight
             });
+
+            this.view.firstChild.innerHTML = this.getBody().innerHTML;
+            this.view.style.top = this.$$itemHeight * this._nOptionSize + 'px';
+            this.view.style.height = this.$$itemHeight + 'px';
+        },
+
+        /**
+         * @override
+         */
+        $cache: function (style) {
+            this.$$itemHeight = util.toNumber(dom.getCustomStyle(style, 'item-height'));
+            // this.$alterItems();
         },
 
         /**
@@ -84,7 +98,6 @@
          * @override
          */
         $dragmove: function (event) {
-            _super.$dragmove(event);
             this.setSelected(getItems(this)[Math.round(-event.y / this.$$itemHeight) + this._nOptionSize]);
         },
 
@@ -111,8 +124,9 @@
          * @override
          */
         setPosition: function (x, y) {
-            _super.setPosition(x, y);
             this.mask.style.top = this.getMain().scrollTop + 'px';
+            this.view.firstChild.className = this.getBody().className;
+            this.view.firstChild.style.transform = 'translate3d(0px,' + (y - 90) + 'px,0px)';
         }
     });
 }());
