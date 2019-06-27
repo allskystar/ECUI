@@ -16,6 +16,23 @@
         util = core.util;
 //{/if}//
     /**
+     * 移除容器 DOM 元素。
+     * @private
+     */
+    function removeContainer() {
+        if (this._eContainer) {
+            var parent = this.getParent();
+            if (parent) {
+                if (parent.getItems().every(function (item) {
+                        return item === this || item._eContainer !== this._eContainer;
+                    })) {
+                    dom.remove(this._eContainer);
+                }
+            }
+        }
+    }
+
+    /**
      * 选项卡控件。
      * 每一个选项卡都包含一个头部区域与容器区域，选项卡控件存在互斥性，只有唯一的一个选项卡能被选中并显示容器区域。
      * options 属性：
@@ -33,7 +50,7 @@
                 titleEl.appendChild(el.firstChild);
             }
             el.appendChild(titleEl);
-            this.container = el.appendChild(containerEl);
+            this._eContainer = el.appendChild(containerEl);
 
             _super(el, options);
 
@@ -48,10 +65,11 @@
             };
         },
         {
+/*ignore*/
             private: {
-                container: undefined
+                _eContainer: undefined
             },
-
+/*end*/
             /**
              * 选项部件。
              * options 属性：
@@ -80,19 +98,19 @@
                         } else {
                             containerEl.removeChild(el);
                         }
-                        this.container = containerEl;
+                        this._eContainer = containerEl;
 
                         core.$bind(containerEl, this);
                     }
 
                     if (options.container) {
-                        this.container = core.$(options.container);
+                        this._eContainer = core.$(options.container);
                     }
 
-                    if (this.container) {
-                        dom.addClass(this.container, this.getType());
+                    if (this._eContainer) {
+                        dom.addClass(this._eContainer, this.getType());
                         if (options.parent) {
-                            options.parent.getContainer().appendChild(this.container);
+                            options.parent._eContainer.appendChild(this._eContainer);
                         }
                     }
 
@@ -101,32 +119,24 @@
                     }
                 },
                 {
+/*ignore*/
                     private: {
+                        _eContainer: undefined,
+
                         /**
                          * 移除容器 DOM 元素。
                          * @private
                          */
-                        _removeContainer: function () {
-                            if (this.container) {
-                                var parent = this.getParent();
-                                if (parent) {
-                                    if (parent.getItems().every(function (item) {
-                                            return item === this || item.container !== this.container;
-                                        })) {
-                                        dom.remove(this.container);
-                                    }
-                                }
-                            }
-                        }
+                        __removeContainer: removeContainer
                     },
-
+/*end*/
                     /**
                      * @override
                      */
                     $dispose: function () {
-                        if (this.container) {
-                            this.container.getControl = null;
-                            this.container = null;
+                        if (this._eContainer) {
+                            this._eContainer.getControl = null;
+                            this._eContainer = null;
                         }
                         _super.$dispose();
                     },
@@ -135,14 +145,13 @@
                      * @override
                      */
                     $setParent: function (parent) {
-
                         if (parent) {
                             var container = parent.getContainer();
-                            if (this.container && dom.parent(this.container) !== container) {
-                                container.appendChild(this.container);
+                            if (this._eContainer && dom.parent(this._eContainer) !== container) {
+                                container.appendChild(this._eContainer);
                             }
                         } else {
-                            this._removeContainer();
+                            this.__removeContainer();
                         }
 
                         _super.$setParent(parent);
@@ -155,7 +164,7 @@
                      * @return {HTMLElement} 选项卡对应的容器元素
                      */
                     getContainer: function () {
-                        return this.container;
+                        return this._eContainer;
                     },
 
                     /**
@@ -167,8 +176,8 @@
                     setContainer: function (el) {
                         var parent = this.getParent();
 
-                        this._removeContainer();
-                        if (this.container = el) {
+                        this.__removeContainer();
+                        if (this._eContainer = el) {
                             parent.getMain().appendChild(el);
                             // 如果当前节点被选中需要显示容器元素，否则隐藏
                             if (parent.getSelected() === this) {
@@ -190,7 +199,7 @@
              * @override
              */
             $dispose: function () {
-                this.container = null;
+                this._eContainer = null;
                 _super.$dispose();
             },
 
@@ -217,14 +226,14 @@
             $propertychange: function (event) {
                 if (event.name === 'selected') {
                     if (event.history) {
-                        if (event.history.container && (!event.item || event.history.container !== event.item.container)) {
-                            dom.removeClass(event.history.container, event.history.getType() + '-selected');
+                        if (event.history._eContainer && (!event.item || event.history._eContainer !== event.item._eContainer)) {
+                            dom.removeClass(event.history._eContainer, event.history.getType() + '-selected');
                         }
                     }
 
                     if (event.item) {
-                        if (event.item.container && (!event.history || event.history.container !== event.item.container)) {
-                            dom.addClass(event.item.container, event.item.getType() + '-selected');
+                        if (event.item._eContainer && (!event.history || event.history._eContainer !== event.item._eContainer)) {
+                            dom.addClass(event.item._eContainer, event.item.getType() + '-selected');
                             core.cacheAtShow();
                         }
                     }
@@ -253,7 +262,7 @@
              * @return {HTMLElement} 选项卡对应的容器元素
              */
             getContainer: function () {
-                return this.container;
+                return this._eContainer;
             },
 
             /**

@@ -2449,7 +2449,7 @@ outer:          for (var caches = [], target = event.target, el; target && targe
                     var info = RegExp.$4,
                         value = RegExp.$5;
                     (RegExp.$2 ? (options.ext = options.ext || {}) : options)[util.toCamelCase(RegExp.$3)] =
-                        info ? value.charAt(0) === '&' ? JSON.parse(decodeURIComponent(value.slice(1))) : decodeURIComponent(value) : true;
+                        info ? value === 'false' ? false : value.charAt(0) === '&' ? JSON.parse(decodeURIComponent(value.slice(1))) : decodeURIComponent(value) : true;
                 }
 
                 if (core.onparseoptions) {

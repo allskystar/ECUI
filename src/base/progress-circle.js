@@ -20,18 +20,19 @@
             _super(el, options);
 
             el.innerHTML = '<svg><path fill="#000"></path></svg>';
-            this.path = el.lastChild.lastChild;
+            this._ePath = el.lastChild.lastChild;
         },
         {
+/*ignore*/
             private: {
-                path: undefined
+                _ePath: undefined
             },
-
+/*end*/
             /**
              * @override
              */
             $dispose: function () {
-                this.path = null;
+                this._ePath = null;
                 _super.$dispose();
             },
 
@@ -40,7 +41,7 @@
              */
             $initStructure: function (width, height) {
                 _super.$initStructure(width, height);
-                var el = dom.parent(this.path);
+                var el = dom.parent(this._ePath);
                 el.style.width = width + 'px';
                 el.style.height = height + 'px';
             },
@@ -48,9 +49,7 @@
             /**
              * @override
              */
-            $ready: function (event) {
-                _super.$ready(event);
-
+            $progress: function () {
                 var x = this.getWidth() / 2,
                     y = this.getHeight() / 2,
                     radius = x + y,
@@ -61,9 +60,9 @@
                     y2 = Math.round(Math.cos(radian) * radius);
 
                 if (value < max && !x2 && y2 > 0) {
-                    this.path.setAttribute('d', 'M 0 0 V ' + (radius * 2) + ' H ' + (radius * 2) + ' V 0');
+                    this._ePath.setAttribute('d', 'M 0 0 V ' + (radius * 2) + ' H ' + (radius * 2) + ' V 0');
                 } else {
-                    this.path.setAttribute('d', 'M ' + x + ' ' + y + ' V ' + (y - radius) + ' A ' + radius + ' ' + radius + ' 0 ' + (x2 > 0 ? '1 0 ' : '0 0 ') + (x + x2) + ' ' + (y - y2));
+                    this._ePath.setAttribute('d', 'M ' + x + ' ' + y + ' V ' + (y - radius) + ' A ' + radius + ' ' + radius + ' 0 ' + (x2 > 0 ? '1 0 ' : '0 0 ') + (x + x2) + ' ' + (y - y2));
                 }
             }
         }

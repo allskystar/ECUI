@@ -29,17 +29,18 @@
     ui.PopupMenu = core.inherits(
         ui.Control,
         'ui-popup-menu',
+//{if 0}//
+        function (el, options) {
+            _super(el, options);
+        },
+//{/if}//
         {
+/*ignore*/
             private: {
-                left: true
+                _bLeft: true,
+                _cChildMenu: undefined
             },
-
-            protected: {
-                $Popup: undefined
-            },
-
-            final: ['$Popup'],
-
+/*end*/
             /**
              * 菜单项部件。
              * @unit
@@ -58,9 +59,7 @@
                     _super(el, options);
 
                     if (popup) {
-                        this.$Popup = core.$fastCreate(ui.PopupMenu, popup, this);
-                        this.$Popup.hide();
-                        this.alterStatus('+group');
+                        this.setChildMenu(core.$fastCreate(ui.PopupMenu, popup, this));
                     }
                 },
                 {
@@ -69,8 +68,8 @@
                      */
                     $mouseout: function (event) {
                         _super.$mouseout(event);
-                        if (this.$Popup) {
-                            this.$Popup.hide();
+                        if (this._cChildMenu) {
+                            this._cChildMenu.hide();
                         }
                     },
 
@@ -79,9 +78,31 @@
                      */
                     $mouseover: function (event) {
                         _super.$mouseover(event);
-                        if (this.$Popup) {
-                            this.$Popup.show();
-                            this.$Popup.assignTo(this);
+                        if (this._cChildMenu) {
+                            this._cChildMenu.show();
+                            this._cChildMenu.assignTo(this);
+                        }
+                    },
+
+                    /**
+                     * 设置子菜单。
+                     * @public
+                     *
+                     * @param {ecui.ui.PopupMenu} popupMenu 弹出菜单控件
+                     */
+                    setChildMenu: function (popupMenu) {
+                        if (this._cChildMenu !== popupMenu) {
+                            if (this._cChildMenu) {
+                                this._cChildMenu.hide();
+                            }
+                            if (!this._cChildMenu ^ !popupMenu) {
+                                if (this._cChildMenu) {
+                                    this.alterStatus('-group');
+                                } else {
+                                    this.alterStatus('+group');
+                                }
+                            }
+                            this._cChildMenu = popupMenu || null;
                         }
                     }
                 }
@@ -106,16 +127,16 @@
                     view = util.getView(),
                     x;
 
-                if (this.left) {
+                if (this._bLeft) {
                     x = pos.left + controlWidth - 4;
                     if (x > view.right - width) {
-                        this.left = false;
+                        this._bLeft = false;
                         x = pos.left - width + 4;
                     }
                 } else {
                     x = pos.left - width + 4;
                     if (x < view.left) {
-                        this.left = true;
+                        this._bLeft = true;
                         x = pos.left + controlWidth - 4;
                     }
                 }

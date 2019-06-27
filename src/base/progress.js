@@ -18,17 +18,25 @@
     ui.Progress = core.inherits(
         ui.Control,
         'ui-progress',
+//{if 0}//
+        function (el, options) {
+            _super(el, options);
+        },
+//{/if}//
         {
+/*ignore*/
             DEFAULT_OPTIONS: {
                 max: Number(100),
                 value: Number(0)
             },
-
+/*end*/
             /**
-             * 进度变化事件。
-             * @event
+             * @override
              */
-            $progress: util.blank,
+            $ready: function () {
+                _super.$ready();
+                core.dispatchEvent(this, 'progress');
+            },
 
             /**
              * 获取进度的最大值。
@@ -37,7 +45,7 @@
              * @return {number} 进度的最大值
              */
             getMax: function () {
-                return this.max;
+                return this._nMax;
             },
 
             /**
@@ -47,7 +55,7 @@
              * @return {number} 进度的当前值
              */
             getValue: function () {
-                return this.value;
+                return this._nValue;
             },
 
             /**
@@ -58,9 +66,9 @@
              */
             setMax: function (max) {
                 max = Math.max(1, max);
-                if (this.max !== max) {
-                    this.max = max;
-                    this.value = Math.min(this.value, this.max);
+                if (this._nMax !== max) {
+                    this._nMax = max;
+                    this._nValue = Math.min(this._nValue, this._nMax);
                     core.dispatchEvent(this, 'progress');
                 }
             },
@@ -72,9 +80,9 @@
              * @param {number} value 进度的当前值
              */
             setValue: function (value) {
-                value = Math.max(Math.min(this.max, value), 0);
-                if (this.value !== value) {
-                    this.value = value;
+                value = Math.max(Math.min(this._nMax, value), 0);
+                if (this._nValue !== value) {
+                    this._nValue = value;
                     core.dispatchEvent(this, 'progress');
                 }
             }
