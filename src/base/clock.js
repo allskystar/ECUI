@@ -1,6 +1,6 @@
 /*
 @example
-<div ui="type:clock"></div>
+<div ui="type:clock;id:demo"></div>
 */
 (function () {
 //{if 0}//
@@ -53,7 +53,7 @@
                 this.stop = util.timer(
                     function () {
                         var date = new Date();
-                        this.setContent(util.stringFormat(this._sFormat, ('0' + date.getHours()).slice(-2), ('0' + date.getMinutes()).slice(-2), ('0' + date.getSeconds()).slice(-2), ('000' + date.getMilliseconds()).slice(-4)));
+                        this.getBody().innerHTML = util.stringFormat(this._sFormat, ('0' + date.getHours()).slice(-2), ('0' + date.getMinutes()).slice(-2), ('0' + date.getSeconds()).slice(-2), ('000' + date.getMilliseconds()).slice(-4));
                     },
                     -1,
                     this
