@@ -50,9 +50,12 @@
         } : function () {
             var reader = new FileReader(),
                 file = this._eFile.files[0],
-                progress = core.query(function (item) {
-                    return ui.Progress.isInstance(item) && item.getParent() === this;
-                }.bind(this))[0];
+                progress = core.query(
+                    function (item) {
+                        return ui.Progress.isInstance(item) && item.getParent() === this;
+                    },
+                    this
+                )[0];
 
             reader.readAsDataURL(file);
             reader.onload = function () {

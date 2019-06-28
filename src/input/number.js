@@ -6,11 +6,6 @@
     <!-- 如果ec中不指定name,value，也可以在input中指定 -->
     <input name="test" value="test" />
 </div>
-
-@fields
-_nDecimal   小数位数
-_sLastValue 最后一次的合法输入
-_oTest      匹配合法性的正则表达式
 */
 //{if 0}//
 (function () {
@@ -21,6 +16,8 @@ _oTest      匹配合法性的正则表达式
      * 数字输入框控件。
      * options 属性：
      * decimal  小数位数，为正数会自动补齐，为负数有限制但是不自动补齐，为undefined表示不限制
+     * min 最小值
+     * max 最大值
      * @control
      */
     ui.Number = core.inherits(
@@ -29,14 +26,16 @@ _oTest      匹配合法性的正则表达式
         function (el, options) {
             _super(el, options);
             this._nDecimal = options.decimal && +options.decimal;
+            this._nMin = options.min === undefined ? undefined : (+options.min || 0);
+            this._nMax = options.max === undefined ? undefined : (+options.max || 0);
             this._oTest = new RegExp('^-?\\d*' + (this._nDecimal === 0 ? '' : '(\\.\\d' + (this._nDecimal ? '{0,' + Math.abs(this._nDecimal) + '}' : '*') + ')?') + '$');
         },
         {
             DEFAULT_OPTIONS: {
-                min: function (value) {
+                _nMin: function (value) {
                     return value === undefined ? undefined : (+value || 0);
                 },
-                max: function (value) {
+                _nMax: function (value) {
                     return value === undefined ? undefined : (+value || 0);
                 }
             },

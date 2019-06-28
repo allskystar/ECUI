@@ -25,6 +25,18 @@
         ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined;
 //{/if}//
     /**
+     * 下拉框刷新。
+     * @private
+     */
+    function refresh() {
+        var item = this.getSelected();
+        if (item) {
+            this.setSelecting(item);
+        }
+        this.$Options.getBody().scrollTop = this.getClientHeight() * this.getItems().indexOf(item);
+    }
+
+    /**
      * 下拉框控件。
      * 扩展了原生 SelectElement 的功能，允许指定下拉选项框的最大选项数量，在屏幕显示不下的时候，会自动显示在下拉框的上方。在没有选项时，下拉选项框有一个选项的高度。下拉框控件允许使用键盘与滚轮操作，在下拉选项框打开时，可以通过回车键或鼠标点击选择，上下键选择选项的当前条目，在关闭下拉选项框后，只要拥有焦点，就可以通过滚轮上下选择选项。
      * options 属性：
@@ -35,11 +47,21 @@
     ui.Select = core.inherits(
         ui.$AbstractSelect,
         'ui-select',
+//{if 0}//
+        function (el, options) {
+            _super(el, options);
+        },
+//{/if}//
         {
+/*ignore*/
             DEFAULT_OPTIONS: {
                 optionSize: Number(10) // 初始化下拉区域最多显示的选项数量
             },
 
+            private: {
+                __refresh: refresh
+            },
+/*end*/
             /**
              * 选项框部件。
              * @unit
@@ -63,7 +85,7 @@
                         });
 
                         // 设置options框的大小，如果没有元素，至少有一个单位的高度
-                        this.$setSize(select.getWidth(), (Math.min(size, select.optionSize) || 1) * select.getClientHeight() + this.getMinimumHeight());
+                        this.$setSize(select.getWidth(), (Math.min(size, select._nOptionSize) || 1) * select.getClientHeight() + this.getMinimumHeight());
                     },
 
                     /**
@@ -71,7 +93,7 @@
                      */
                     $show: function () {
                         _super.$show();
-                        this.getParent().$refresh();
+                        this.getParent().__refresh();
                     }
                 }
             ),
@@ -154,7 +176,7 @@
                                     // 鼠标悬停时不允许切换
                                     this.setSelecting(list[which = Math.min(Math.max(0, list.indexOf(selecting) + which - 39), list.length - 1)]);
                                     which -= this.getBody().scrollTop / step;
-                                    this.getBody().scrollTop += (which < 0 ? which : which >= this.optionSize ? which - this.optionSize + 1 : 0) * step;
+                                    this.getBody().scrollTop += (which < 0 ? which : which >= this._nOptionSize ? which - this._nOptionSize + 1 : 0) * step;
                                 }
                             } else {
                                 var oldIndex = list.indexOf(selected),
@@ -194,18 +216,6 @@
             },
 
             /**
-             * 下拉框刷新。
-             * @protected
-             */
-            $refresh: function () {
-                var item = this.getSelected();
-                if (item) {
-                    this.setSelecting(item);
-                }
-                this.$Options.getBody().scrollTop = this.getClientHeight() * this.getItems().indexOf(item);
-            },
-
-            /**
              * 设置下拉框允许显示的选项数量。
              * 如果实际选项数量小于这个数量，没有影响，否则将出现垂直滚动条，通过滚动条控制其它选项的显示。
              * @public
@@ -213,10 +223,10 @@
              * @param {number} value 显示的选项数量，必须大于 1
              */
             setOptionSize: function (value) {
-                this.optionSize = value;
+                this._nOptionSize = value;
                 this.alterItems();
                 if (this.$getSection('Options').isShow()) {
-                    this.$refresh();
+                    this.__refresh();
                     this.setPopupPosition();
                 }
             }

@@ -581,48 +581,48 @@
         var keyboardHandle = util.blank,
             changeHandle = util.blank,
             // 在一个输入框获取焦点后使其它输入框都处于失效状态，手势触发的时候解除失效状态，如果不是点击行为，重新设置失效状态
-            observer = new MutationObserver(function (mutations) {
-                mutations.forEach(function (item) {
-                    if (item.target.disabled) {
-                        util.remove(disabledInputs, item.target);
-                    } else {
-                        item.target.disabled = true;
-                        disabledInputs.push(item.target);
-                    }
-                });
-                observer.takeRecords();
-            }),
-            disabledInputs = [],
+            // observer = new MutationObserver(function (mutations) {
+            //     mutations.forEach(function (item) {
+            //         if (item.target.disabled) {
+            //             util.remove(disabledInputs, item.target);
+            //         } else {
+            //             item.target.disabled = true;
+            //             disabledInputs.push(item.target);
+            //         }
+            //     });
+            //     observer.takeRecords();
+            // }),
+            // disabledInputs = [],
             events = iosVersion ? {
-                touchstart: function (event) {
-                    if (disabledInputs.indexOf(event.target) >= 0) {
-                        event.target.disabled = false;
-                    } else {
-                        disabledInputs.forEach(function (item) {
-                            item.disabled = false;
-                        });
-                    }
-                    observer.takeRecords();
-                },
+                // touchstart: function (event) {
+                //     if (disabledInputs.indexOf(event.target) >= 0) {
+                //         event.target.disabled = false;
+                //     } else {
+                //         disabledInputs.forEach(function (item) {
+                //             item.disabled = false;
+                //         });
+                //     }
+                //     observer.takeRecords();
+                // },
 
-                touchend: function (event) {
-                    util.timer(
-                        function () {
-                            if (disabledInputs.indexOf(event.target) >= 0) {
-                                if (document.activeElement !== event.target) {
-                                    event.target.disabled = true;
-                                    observer.takeRecords();
-                                }
-                            } else {
-                                disabledInputs.forEach(function (item) {
-                                    item.disabled = true;
-                                });
-                                observer.takeRecords();
-                            }
-                        },
-                        20
-                    );
-                },
+                // touchend: function (event) {
+                //     util.timer(
+                //         function () {
+                //             if (disabledInputs.indexOf(event.target) >= 0) {
+                //                 if (document.activeElement !== event.target) {
+                //                     event.target.disabled = true;
+                //                     observer.takeRecords();
+                //                 }
+                //             } else {
+                //                 disabledInputs.forEach(function (item) {
+                //                     item.disabled = true;
+                //                 });
+                //                 observer.takeRecords();
+                //             }
+                //         },
+                //         20
+                //     );
+                // },
 
                 keyboardchange: function (event) {
                     keyboardHandle();
@@ -671,26 +671,26 @@
                     dom.addEventListener(event.target, 'input', scrollIntoViewIfNeededHandler);
                     dom.addEventListener(event.target, 'keydown', scrollIntoViewIfNeededHandler);
 
-                    Array.prototype.slice.call(document.getElementsByTagName('INPUT')).concat(Array.prototype.slice.call(document.getElementsByTagName('TEXTAREA'))).forEach(function (item) {
-                        if (item !== event.target) {
-                            if (!item.disabled) {
-                                item.disabled = true;
-                                disabledInputs.push(item);
-                            }
-                            observer.observe(item, {attributes: true, attributeFilter: ['disabled']});
-                        }
-                    });
+                    // Array.prototype.slice.call(document.getElementsByTagName('INPUT')).concat(Array.prototype.slice.call(document.getElementsByTagName('TEXTAREA'))).forEach(function (item) {
+                    //     if (item !== event.target) {
+                    //         if (!item.disabled) {
+                    //             item.disabled = true;
+                    //             disabledInputs.push(item);
+                    //         }
+                    //         observer.observe(item, {attributes: true, attributeFilter: ['disabled']});
+                    //     }
+                    // });
 
                     keyboardHandle();
 
                     if (keyboardHeight) {
-                        keyboardHandle = scrollListener(function () {
-                            if (fixedInput) {
-                                window.scrollTo(0, 0);
-                            }
-                            scrollIntoViewIfNeededHandler();
-                            fixed();
-                        });
+                        // keyboardHandle = scrollListener(function () {
+                        //     if (fixedInput) {
+                        //         window.scrollTo(0, 0);
+                        //     }
+                        scrollIntoViewIfNeededHandler();
+                        fixed();
+                        // });
                     } else {
                         if (fixedInput) {
                             realTarget = event.target;
@@ -749,11 +749,11 @@
                     dom.removeEventListener(event.target, 'input', scrollIntoViewIfNeededHandler);
                     dom.removeEventListener(event.target, 'keydown', scrollIntoViewIfNeededHandler);
 
-                    observer.disconnect();
-                    disabledInputs.forEach(function (item) {
-                        item.disabled = false;
-                    });
-                    disabledInputs = [];
+                    // observer.disconnect();
+                    // disabledInputs.forEach(function (item) {
+                    //     item.disabled = false;
+                    // });
+                    // disabledInputs = [];
 
                     keyboardHandle();
 

@@ -99,6 +99,7 @@
 
             this._sWidth = el.style.width;
             this._sHeight = el.style.height;
+
             if (!options.main) {
                 this._oHandler = this.__unitReadyHandler.bind(this);
             }

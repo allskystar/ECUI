@@ -127,7 +127,7 @@
             o.previousSibling.appendChild(table);
             // 初始化表格区域
             this.$setBody(body);
-            (this.Head = core.$fastCreate(ui.Control, o, this)).$setBody(head);
+            (this.$Head = core.$fastCreate(ui.Control, o, this)).$setBody(head);
 
             // 以下初始化所有的行控件
             for (i = 0; o = list[i]; i++) {
@@ -204,10 +204,10 @@
             },
 
             protected: {
-                Head: undefined
+                $Head: undefined
             },
 
-            final: ['Head'],
+            final: ['$Head'],
 /*end*/
             /**
              * 单元格部件。
@@ -568,14 +568,14 @@
                 _super.$beforescroll(event);
 
                 if (!(ieVersion < 9)) {
-                    for (var el = this.Head.getMain(); el !== document.body; el = dom.parent(el)) {
+                    for (var el = this.$Head.getMain(); el !== document.body; el = dom.parent(el)) {
                         if (dom.getStyle(el, 'transform') !== 'none') {
                             return;
                         }
                     }
                 }
 
-                var style = this.Head.getMain().style,
+                var style = this.$Head.getMain().style,
                     pos = dom.getPosition(this._eLayout),
                     view = util.getView(),
                     top = pos.top - view.top,
@@ -613,7 +613,7 @@
             $cache: function (style) {
                 _super.$cache(style);
 
-                this.$$paddingTop = this.Head.getBody().offsetHeight;
+                this.$$paddingTop = this.$Head.getBody().offsetHeight;
 
                 var table = dom.parent(this.getBody());
                 this.$$tableWidth = table.offsetWidth;
@@ -672,13 +672,13 @@
             $headscroll: function () {
                 if (core.getScrollNarrow()) {
                     var el = dom.parent(dom.parent(this.getBody()));
-                    this.Head.getMain().scrollLeft = this._eLayout.scrollLeft;
+                    this.$Head.getMain().scrollLeft = this._eLayout.scrollLeft;
                     el.scrollLeft = this._eLayout.scrollLeft;
                     el.scrollTop = this._eLayout.scrollTop;
                 }
 
                 if (this._nHeadFloat !== undefined) {
-                    var style = this.Head.getMain().style;
+                    var style = this.$Head.getMain().style;
                     style.position = '';
                     style.top = (Math.min(this.getClientHeight() - this.$$paddingTop - this._nHeadMargin, Math.max(0, this._nHeadFloat + util.getView().top - dom.getPosition(this.getMain()).top))) + 'px';
                     style.left = '0px';
@@ -704,7 +704,7 @@
                     item.$initStructure();
                 });
 
-                dom.insertBefore(this.Head.getBody(), this.Head.getMain().lastChild.lastChild);
+                dom.insertBefore(this.$Head.getBody(), this.$Head.getMain().lastChild.lastChild);
 
                 var narrow = core.getScrollNarrow(),
                     style = dom.parent(dom.parent(this.getBody())).style;
@@ -716,7 +716,7 @@
                     this._eLayout.lastChild.style.height = this.$$tableHeight + 'px';
 
                     style.top = this.$$paddingTop + 'px';
-                    style.width = this.Head.getMain().style.width = (width - (this.$$tableHeight > height || (this.$$tableHeight + narrow > height && this.$$tableWidth > width) ? narrow : 0)) + 'px';
+                    style.width = this.$Head.getMain().style.width = (width - (this.$$tableHeight > height || (this.$$tableHeight + narrow > height && this.$$tableWidth > width) ? narrow : 0)) + 'px';
                     style.height = (height - this.$$paddingTop - (this.$$tableWidth > width || (this.$$tableWidth + narrow > width && this.$$tableHeight > height) ? narrow : 0)) + 'px';
                 } else {
                     style.marginTop = this.$$paddingTop + 'px';
@@ -770,7 +770,7 @@
                     item.$restoreStructure();
                 });
 
-                dom.insertBefore(this.Head.getBody(), this.getBody());
+                dom.insertBefore(this.$Head.getBody(), this.getBody());
 
                 var style = dom.parent(dom.parent(this.getBody())).style;
 

@@ -1,6 +1,3 @@
-/*
-@example
-*/
 (function () {
 //{if 0}//
     var core = ecui,
@@ -9,7 +6,7 @@
         util = core.util;
 //{/if}//
     /**
-     * 下拉框控件。
+     * 下拉框控件虚基类。
      * 扩展了原生 SelectElement 的功能，允许指定下拉选项框的最大选项数量，在屏幕显示不下的时候，会自动显示在下拉框的上方。在没有选项时，下拉选项框有一个选项的高度。下拉框控件允许使用键盘与滚轮操作，在下拉选项框打开时，可以通过回车键或鼠标点击选择，上下键选择选项的当前条目，在关闭下拉选项框后，只要拥有焦点，就可以通过滚轮上下选择选项。
      * options 属性：
      * optionSize     下拉框最大允许显示的选项数量，默认为5
@@ -20,6 +17,8 @@
     ui.$AbstractSelect = core.inherits(
         ui.InputControl,
         function (el, options) {
+            options = Object.assign({readOnly: true}, options);
+
             if (el.tagName === 'SELECT') {
                 options.name = el.name;
                 options.value = el.value;
@@ -29,7 +28,7 @@
                             innerHTML: dom.toArray(el.options).map(
                                 function (item) {
                                     var optionText = dom.getAttribute(item, core.getAttributeName());
-                                    return '<div ' + core.getAttributeName() + '="value:' + util.encodeHTML(item.value) + (optionText ? ';' + util.encodeHTML(optionText) : '') + '">' + util.encodeHTML(item.$Text) + '</div>';
+                                    return '<div ' + core.getAttributeName() + '="value:' + util.encodeHTML(item.value) + (optionText ? ';' + util.encodeHTML(optionText) : '') + '">' + util.encodeHTML(item.text) + '</div>';
                                 }
                             ).join('')
                         }
@@ -71,10 +70,7 @@
             this.$setBody(this.$Options.getBody());
         },
         {
-            SUPER_OPTIONS: {
-                readOnly: true
-            },
-
+/*ignore*/
             DEFAULT_OPTIONS: {
                 required: Boolean(false)
             },
@@ -85,7 +81,7 @@
             },
 
             final: ['$Options', '$Text'],
-
+/*end*/
             /**
              * 选项框部件。
              * @unit
@@ -109,21 +105,20 @@
 
             /**
              * 选项部件。
-             * options 属性：
-             * value 选项的值
              * @unit
              */
             Item: core.inherits(
                 ui.Item,
                 function (el, options) {
                     _super(el, options);
-                    this.value = options.value === undefined ? dom.getText(el) : String(options.value);
+                    this._sValue = options.value === undefined ? dom.getText(el) : String(options.value);
                 },
                 {
+/*ignore*/
                     private: {
-                        value: undefined
+                        _sValue: undefined
                     },
-
+/*end*/
                     /**
                      * @override
                      */
@@ -145,7 +140,7 @@
                      * @return {string} 选项的值
                      */
                     getValue: function () {
-                        return this.value;
+                        return this._sValue;
                     },
 
                     /**
@@ -157,7 +152,7 @@
                      */
                     setValue: function (value) {
                         var parent = this.getParent();
-                        this.value = value;
+                        this._sValue = value;
                         if (parent && this === parent.getSelected()) {
                             // 当前被选中项的值发生变更需要同步更新控件的值
                             ui.InputControl.prototype.setValue.call(parent, value);
@@ -206,7 +201,7 @@
                 if (event.name === 'selected') {
                     if (event.item) {
                         this.setText(event.item.getContent());
-                        this.$setValue(event.item.getValue());
+                        this.$setValue(event.item._sValue);
                         if (this.$Options.isShow()) {
                             core.setFocused(event.item);
                         }
@@ -255,7 +250,7 @@
              */
             $validate: function () {
                 _super.$validate();
-                if (this.getValue() === '' &&  this.required) {
+                if (this.getValue() === '' &&  this._bRequired) {
                     core.dispatchEvent(this, 'error');
                     return false;
                 }
@@ -308,7 +303,7 @@
             setValue: function (value) {
                 if (this.getItems().every(
                         function (item) {
-                            if (item.getValue() === value) {
+                            if (item._sValue === value) {
                                 this.setSelected(item);
                                 return false;
                             }

@@ -45,18 +45,18 @@
 
             _super(el, options);
 
-            this.Close = core.$fastCreate(this.Close, closeEl, this);
-            this.Title = core.$fastCreate(this.Title, titleEl, this, {userSelect: false});
+            this.$Close = core.$fastCreate(this.Close, closeEl, this);
+            this.$Title = core.$fastCreate(this.Title, titleEl, this, {userSelect: false});
             this.$setBody(bodyEl);
         },
         {
 /*ignore*/
             protected: {
-                Close: undefined,
-                Title: undefined
+                $Close: undefined,
+                $Title: undefined
             },
 
-            final: ['Close', 'Title'],
+            final: ['$Close', '$Title'],
 /*end*/
             /**
              * 关闭按钮部件。
@@ -103,7 +103,7 @@
                 this.$$bodyBorder = [util.toNumber(style.borderTopWidth), util.toNumber(style.borderRightWidth), util.toNumber(style.borderBottomWidth), util.toNumber(style.borderLeftWidth)];
                 this.$$bodyPadding = [util.toNumber(style.paddingTop), util.toNumber(style.paddingRight), util.toNumber(style.paddingBottom), util.toNumber(style.paddingLeft)];
 
-                this.$$titleHeight = this.Title.getMain().offsetHeight;
+                this.$$titleHeight = this.$Title.getMain().offsetHeight;
             },
 
             /**
@@ -127,7 +127,7 @@
              * @param {string} text 窗体标题
              */
             setTitle: function (text) {
-                this.Title.setContent(text || '');
+                this.$Title.setContent(text || '');
             }
         }
     );

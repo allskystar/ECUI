@@ -24,7 +24,6 @@
             _super(el, Object.assign({userSelect: false}, options));
         },
         {
-
             /**
              * 获取按钮所处于的表单元素。
              * @public

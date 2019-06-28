@@ -20,12 +20,17 @@
     ui.Calendar = core.inherits(
         ui.MonthView,
         'ui-calendar',
+//{if 0}//
+        function (el, options) {
+            _super(el, options);
+        },
+//{/if}//
         {
-            /**
-             * 控件头部展示格式。
-             */
-            TITLEFORMAT: '{0}年{1}月',
-
+/*ignore*/
+            DEFAULT_OPTIONS: {
+                _sFormat: '{0}年{1}月'
+            },
+/*end*/
             /**
              * 日历前进后退部件。
              * options 属性：
@@ -42,7 +47,7 @@
                 {
 /*ignore*/
                     DEFAULT_OPTIONS: {
-                        move: Number(0)
+                        _nMove: Number(0)
                     },
 /*end*/
                     /**
@@ -124,7 +129,7 @@
              * @param {number} month 月(1-12)
              */
             setTitle: function (year, month) {
-                this._eTitle.innerHTML = util.stringFormat(this.TITLEFORMAT, year, month);
+                this._eTitle.innerHTML = util.stringFormat(this._sFormat, year, month);
             }
         }
     );

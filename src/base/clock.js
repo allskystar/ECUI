@@ -24,7 +24,7 @@
         {
 /*ignore*/
             DEFAULT_OPTIONS: {
-                format: '{0}:{1}:{2}'
+                _sFormat: '{0}:{1}:{2}'
             },
 /*end*/
             /**

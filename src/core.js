@@ -2530,10 +2530,11 @@ outer:          for (var caches = [], target = event.target, el; target && targe
                     if (defaultOptions) {
                         for (var name in defaultOptions) {
                             if (defaultOptions.hasOwnProperty(name)) {
+                                var value = options[defaultOptions[name].alias];
                                 if ('function' === typeof defaultOptions[name].value) {
-                                    this[defaultOptions[name].alias] = defaultOptions[name].value(options[name]);
+                                    this[name] = defaultOptions[name].value(value);
                                 } else {
-                                    this[defaultOptions[name].alias] = options[name] !== undefined ? defaultOptions[name].value.constructor(options[name]) : defaultOptions[name].value;
+                                    this[name] = value !== undefined ? defaultOptions[name].value.constructor(value) : defaultOptions[name].value;
                                 }
                             }
                         }
@@ -2557,21 +2558,11 @@ outer:          for (var caches = [], target = event.target, el; target && targe
                 }
                 for (var name in defaultOptions) {
                     if (defaultOptions.hasOwnProperty(name)) {
-                        if ('boolean' === typeof defaultOptions[name]) {
-                            var alias = '_b';
-                        } else if ('number' === typeof defaultOptions[name]) {
-                            alias = '_n';
-                        } else if ('string' === typeof defaultOptions[name]) {
-                            alias = '_s';
-                        } else {
-                            alias = '_o';
-                        }
-                        alias += name.charAt(0).toUpperCase() + name.slice(1);
                         defaultOptions[name] = {
-                            alias: alias,
+                            alias: name.charAt(2).toLowerCase() + name.slice(3),
                             value: defaultOptions[name]
                         };
-                        properties.private[alias] = undefined;
+                        properties.private[name] = undefined;
                     }
                 }
             }

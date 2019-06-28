@@ -94,8 +94,8 @@
             }
             this._eFill = el;
 
-            var left = this.LeftHead = core.$fastCreate(ui.Control, list[0], this),
-                right = this.RightHead = core.$fastCreate(ui.Control, list[2], this);
+            var left = this.$LeftHead = core.$fastCreate(ui.Control, list[0], this),
+                right = this.$RightHead = core.$fastCreate(ui.Control, list[2], this);
 
             left.$setBody(left = left.getMain().firstChild);
             right.$setBody(right = right.getMain().firstChild);
@@ -104,8 +104,8 @@
                 headRows[i].__initRow(el, right[i++]);
             }
 
-            left = this.LeftBody = core.$fastCreate(ui.Control, list[1], this);
-            right = this.RightBody = core.$fastCreate(ui.Control, list[3], this);
+            left = this.$LeftBody = core.$fastCreate(ui.Control, list[1], this);
+            right = this.$RightBody = core.$fastCreate(ui.Control, list[3], this);
             left.$setBody(left = left.getMain().lastChild);
             right.$setBody(right = right.getMain().lastChild);
 
@@ -123,14 +123,13 @@
             },
 
             protected: {
-                LockedHead: undefined,
-                LeftHead: undefined,
-                LeftBody: undefined,
-                RightHead: undefined,
-                RightBody: undefined
+                $LeftHead: undefined,
+                $LeftBody: undefined,
+                $RightHead: undefined,
+                $RightBody: undefined
             },
 
-            final: ['LockedHead', 'LeftHead', 'LeftBody', 'RightHead', 'RightBody'],
+            final: ['$LeftHead', '$LeftBody', '$RightHead', '$RightBody'],
 /*end*/
             /**
              * 行部件。
@@ -253,10 +252,10 @@
                     view = util.getView(),
                     top = pos.top - view.top,
                     left = pos.left - view.left,
-                    leftHeadStyle = this.LeftHead.getMain().style,
-                    rightHeadStyle = this.RightHead.getMain().style,
-                    leftMainStyle = this.LeftBody.getMain().style,
-                    rightMainStyle = this.RightBody.getMain().style,
+                    leftHeadStyle = this.$LeftHead.getMain().style,
+                    rightHeadStyle = this.$RightHead.getMain().style,
+                    leftMainStyle = this.$LeftBody.getMain().style,
+                    rightMainStyle = this.$RightBody.getMain().style,
                     fixed = dom.contain(this.getMain(), event.target) && event.deltaY;
 
                 if (this.Head.getMain().style.position === 'fixed' || fixed) {
@@ -294,8 +293,8 @@
                     this.$$paddingRight += list[i++].getWidth();
                 }
 
-                this.$$leftTDWidth = (safariVersion ? 1 : 0) + this.LeftHead.$$border[1] + this.LeftHead.$$border[3];
-                this.$$rightTDWidth = (safariVersion ? 1 : 0) + this.RightHead.$$border[1] + this.RightHead.$$border[3];
+                this.$$leftTDWidth = (safariVersion ? 1 : 0) + this.$LeftHead.$$border[1] + this.$LeftHead.$$border[3];
+                this.$$rightTDWidth = (safariVersion ? 1 : 0) + this.$RightHead.$$border[1] + this.$RightHead.$$border[3];
             },
 
             /**
@@ -312,10 +311,10 @@
             $headscroll: function () {
                 _super.$headscroll();
 
-                var leftHeadStyle = this.LeftHead.getMain().style,
-                    rightHeadStyle = this.RightHead.getMain().style,
-                    leftMainStyle = this.LeftBody.getMain().style,
-                    rightMainStyle = this.RightBody.getMain().style;
+                var leftHeadStyle = this.$LeftHead.getMain().style,
+                    rightHeadStyle = this.$RightHead.getMain().style,
+                    leftMainStyle = this.$LeftBody.getMain().style,
+                    rightMainStyle = this.$RightBody.getMain().style;
 
                 leftHeadStyle.position = rightHeadStyle.position = leftMainStyle.position = rightMainStyle.position = '';
                 leftHeadStyle.top = rightHeadStyle.top = this.Head.getMain().style.top;
@@ -343,8 +342,8 @@
                     layout = this.getLayout();
 
                 this._eFill.style.width = this.$$tableWidth + 'px';
-                this.LeftHead.getMain().style.width = this.LeftBody.getMain().style.width = (width - (layout.scrollHeight > layout.clientHeight ? core.getScrollNarrow() : 0)) + 'px';
-                this.RightHead.getMain().style.width = this.RightBody.getMain().style.width = (this.$$rightTDWidth + this.$$paddingRight) + 'px';
+                this.$LeftHead.getMain().style.width = this.$LeftBody.getMain().style.width = (width - (layout.scrollHeight > layout.clientHeight ? core.getScrollNarrow() : 0)) + 'px';
+                this.$RightHead.getMain().style.width = this.$RightBody.getMain().style.width = (this.$$rightTDWidth + this.$$paddingRight) + 'px';
                 table.style.marginLeft = head.style.marginLeft = this.$$paddingLeft + 'px';
                 table.style.width = head.style.width = (this.$$tableWidth - this.$$paddingLeft - this.$$paddingRight) + 'px';
                 //dom.parent(head).style.width = this.$$tableWidth + 'px';
@@ -356,10 +355,10 @@
             $restoreStructure: function () {
                 _super.$restoreStructure();
 
-                var leftHead = this.LeftHead.getMain(),
-                    rightHead = this.RightHead.getMain(),
-                    leftMain = this.LeftBody.getMain(),
-                    rightMain = this.RightBody.getMain(),
+                var leftHead = this.$LeftHead.getMain(),
+                    rightHead = this.$RightHead.getMain(),
+                    leftMain = this.$LeftBody.getMain(),
+                    rightMain = this.$RightBody.getMain(),
                     table = dom.parent(this.getBody()),
                     head = this.Head.getMain();
 
@@ -394,8 +393,8 @@
             addRow: function (data, index) {
                 var row = _super.addRow(data, index),
                     el = row.getMain(),
-                    leftBody = this.LeftBody.getBody(),
-                    rightBody = this.RightBody.getBody(),
+                    leftBody = this.$LeftBody.getBody(),
+                    rightBody = this.$RightBody.getBody(),
                     o = '<tr class="' + el.className + '" style="' + el.style.cssText + '"><td class="ui-locked-table-empty"></td></tr>';
 
                 index = this.getRows().indexOf(row);
@@ -417,8 +416,8 @@
              * @override
              */
             cache: function (force) {
-                this.LeftHead.cache(force);
-                this.RightHead.cache(force);
+                this.$LeftHead.cache(force);
+                this.$RightHead.cache(force);
                 this.getHeadRows().forEach(function (item) {
                     item.cache(force);
                 });
@@ -451,8 +450,8 @@
                 if (row) {
                     row.$restoreStructure();
 
-                    var leftBody = this.LeftBody.getBody(),
-                        rightBody = this.RightBody.getBody();
+                    var leftBody = this.$LeftBody.getBody(),
+                        rightBody = this.$RightBody.getBody();
 
                     leftBody.removeChild(dom.children(leftBody)[index]);
                     rightBody.removeChild(dom.children(rightBody)[index]);

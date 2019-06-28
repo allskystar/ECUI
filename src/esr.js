@@ -239,10 +239,12 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                 // 解决A标签下反复修改的问题
                 var loc = esr.getLocation().replace('~DENY_CACHE', '');
 
+                pauseStatus = true;
                 setLocation(loc);
                 util.timer(
                     function () {
                         location.replace('#' + loc);
+                        pauseStatus = false;
                     },
                     100
                 );
@@ -669,8 +671,8 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                 historyIndex++;
 
                 if (!esrOptions.history) {
-                    location.replace('#' + loc);
                     setLocation(loc);
+                    location.replace('#' + loc);
                     esr.callRoute(loc);
                 } else if (/~HISTORY=(\d+)/.test(loc)) {
                     historyIndex = +RegExp.$1;
@@ -682,8 +684,8 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                     pauseStatus = true;
                     util.timer(
                         function () {
-                            pauseStatus = false;
                             location.replace('#' + loc);
+                            pauseStatus = false;
                             setLocation(loc);
                             esr.callRoute(loc);
                         },
