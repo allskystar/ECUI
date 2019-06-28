@@ -43,7 +43,6 @@ var ecui;
     document.write('<script type="text/javascript" src="src/imp/m-options.js"></script>');
 
     document.write('<script type="text/javascript" src="src/base/button.js"></script>');
-    document.write('<script type="text/javascript" src="src/base/cancel.js"></script>');
     document.write('<script type="text/javascript" src="src/base/clock.js"></script>');
     document.write('<script type="text/javascript" src="src/base/image.js"></script>');
     document.write('<script type="text/javascript" src="src/base/layer.js"></script>');
@@ -54,7 +53,6 @@ var ecui;
     document.write('<script type="text/javascript" src="src/base/progress.js"></script>');
     document.write('<script type="text/javascript" src="src/base/progress-bar.js"></script>');
     document.write('<script type="text/javascript" src="src/base/progress-circle.js"></script>');
-    document.write('<script type="text/javascript" src="src/base/submit.js"></script>');
     document.write('<script type="text/javascript" src="src/base/tab.js"></script>');
     document.write('<script type="text/javascript" src="src/base/table.js"></script>');
     document.write('<script type="text/javascript" src="src/base/inline-table.js"></script>');

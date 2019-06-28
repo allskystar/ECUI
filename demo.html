@@ -12,86 +12,20 @@
     <script type="text/javascript" src="options.js"></script>
     <script type="text/javascript" src="ecui.js"></script>
     <script>
-BaseImp = _interface({
-    constructor: function () {
-        console.log('baseimp constructor');
-    },
-
-    test: function () {
-        console.log('test');
-    }
-});
-
-Imp = _interface.extends(BaseImp, {
-    private: {
-        a: 'inf'
-    },
-
-    constructor: function () {
-        console.log('imp constructor');
-    },
-
-    printA: function () {
-        console.log(this.a);
-    }
-});
-
-Base = _class(
-    {
-        private: {
-            a: 1
-        },
-
-        constructor: function () {
-            console.log('base constructor');
-        },
-
-        protected: {
-            printA: function () {
-                console.log(this.a);
-            }
-        },
-
-        print: function () {
-            son.printA();
-        },
-
-        static: ['print'],
-
-        final: ['print']
-    }
-);
-Son = _class.extends(
-    Base,
-    {
-        private: {
-            a: 10
-        },
-
-        constructor: function () {
-            console.log('son constructor');
-        },
-
-        printA: function () {
-            _super.printA();
-            console.log(this.a);
-        },
-
-        final: ['printA']
-    },
-    Imp
-);
-son = new Son();
-Base.print();
-//son2.value = 10;
-//son2.visit();
+        ecui.ready(function () {
+            ecui.get('test').onsubmit = function () {
+                console.log('submit');
+            };
+        });
+        ecui.esr.addRoute('index', {
+            view: function () {}
+        });
     </script>
 </head>
 <body>
-<select ui="type:select;placeholder:请选择" name="sex">
-    <option value="male" selected="selected">男</option>
-    <option value="female">女</option>
-</select>
-    <div ui="type:control;id:test" class="aaa" style="width:100px;height:100px;border:1px solid black"></div>
+<div ui="type:dialog;id:test">
+    <div ui="type:@submit">提交</div>
+    <div ui="type:@cancel">取消</div>
+</div>
 </body>
 </html>

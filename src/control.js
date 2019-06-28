@@ -107,10 +107,10 @@
         {
 /*ignore*/
             DEFAULT_OPTIONS: {
-                capturable: Boolean(true),
-                disabled:   Boolean(false),
-                focusable:  Boolean(true),
-                userSelect: Boolean(true)
+                _bCapturable: Boolean(true),
+                _bDisabled:   Boolean(false),
+                _bFocusable:  Boolean(true),
+                _bUserSelect: Boolean(true)
             },
 
             private: {

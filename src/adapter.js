@@ -478,10 +478,8 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              * @param {HTMLElement} el Element 对象
              * @return {HTMLElement} 父 Element 对象，如果没有，返回 null
              */
-            parent: ieVersion < 10 ? function (el) {
+            parent: function (el) {
                 return el.parentElement;
-            } : function (el) {
-                return el.parentNode;
             },
 
             /**

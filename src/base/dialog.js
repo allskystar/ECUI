@@ -10,9 +10,7 @@
     var core = ecui,
         dom = core.dom,
         ui = core.ui,
-        util = core.util,
-
-        ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined;
+        util = core.util;
 //{/if}//
     /**
      * 窗体控件。
@@ -45,7 +43,7 @@
 
             _super(el, options);
 
-            this.$Close = core.$fastCreate(this.Close, closeEl, this);
+            this.$Close = core.$fastCreate(this.Cancel, closeEl, this);
             this.$Title = core.$fastCreate(this.Title, titleEl, this, {userSelect: false});
             this.$setBody(bodyEl);
         },
@@ -59,19 +57,49 @@
             final: ['$Close', '$Title'],
 /*end*/
             /**
-             * 关闭按钮部件。
-             * @unit
+             * 取消按钮控件。
+             * 取消按钮需要置于 Dialog 对话框控件内，使用type:@cancel引用，用于隐藏 Dialog 对话框。
+             * @control
              */
-            Close: core.inherits(
+            Cancel: core.inherits(
                 ui.Button,
+                'ui-cancel',
                 {
                     /**
-                     * 窗体关闭按钮点击关闭窗体。
                      * @override
                      */
                     $click: function (event) {
                         _super.$click(event);
-                        this.getParent().hide();
+                        for (var parent = this.getParent(); parent; parent = parent.getParent()) {
+                            if (ui.Dialog.isInstance(parent)) {
+                                parent.hide();
+                                return;
+                            }
+                        }
+                    }
+                }
+            ),
+
+            /**
+             * 确认按钮控件。
+             * 确认按钮需要置于 Dialog 对话框控件内，用于触发 Dialog 对话框的 submit 事件。
+             * @control
+             */
+            Submit: core.inherits(
+                ui.Button,
+                'ui-submit',
+                {
+                    /**
+                     * @override
+                     */
+                    $click: function (event) {
+                        _super.$click(event);
+                        for (var parent = this.getParent(); parent; parent = parent.getParent()) {
+                            if (ui.Dialog.isInstance(parent)) {
+                                core.dispatchEvent(parent, 'submit', event);
+                                return;
+                            }
+                        }
                     }
                 }
             ),

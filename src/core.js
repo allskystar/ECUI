@@ -375,15 +375,21 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                                 }
 
                                 var target = event.target;
+                                // 记录touchend时的dom元素，阻止事件穿透
+                                touchTarget = target;
+
                                 if (target.tagName !== 'INPUT' && target.tagName !== 'TEXTAREA') {
+                                    for (; target; target = dom.parent(target)) {
+                                        if (target.getAttribute('contenteditable')) {
+                                            break;
+                                        }
+                                    }
                                     // 点击到非INPUT区域需要失去焦点
-                                    if (isTouchClick(track)) {
+                                    if (!target && isTouchClick(track)) {
                                         document.activeElement.blur();
                                     }
                                 }
 
-                                // 记录touchend时的dom元素，阻止事件穿透
-                                touchTarget = target;
                                 noPrimaryEnd = false;
                             }
                         });
@@ -629,16 +635,6 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                     commonParent;
 
                 if (activedControl !== undefined) {
-                    if (click && ((event.target.tagName !== 'INPUT' || event.target.type === 'radio' || event.target.type === 'checkbox') && event.target.tagName !== 'TEXTAREA')) { // TouchEvent
-                        core.setFocused(activedControl);
-                    }
-
-                    // 如果为 undefined 表示之前没有触发 mousedown 事件就触发了 mouseup，
-                    // 这种情况出现在鼠标在浏览器外按下了 down 然后回浏览器区域 up，
-                    // 或者是 ie 系列浏览器在触发 dblclick 之前会触发一次单独的 mouseup，
-                    // dblclick 在 ie 下的事件触发顺序是 mousedown/mouseup/click/mouseup/dblclick
-                    bubble(control, 'mouseup', event);
-
                     for (var el = event.target; el; el = dom.parent(el)) {
                         // 移动端浏览器可能不触发A标签上的onclick事件，但实际上A标签已经被使用
                         if (el.tagName === 'A') {
@@ -648,7 +644,21 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                                 break;
                             }
                         }
+                        if (el.getAttribute('contenteditable')) {
+                            // 任意父元素处于可编辑状态将不需要直接触发setFocused，而是在元素获得焦点时触发
+                            click = false;
+                        }
                     }
+
+                    if (click && ((event.target.tagName !== 'INPUT' || event.target.type === 'radio' || event.target.type === 'checkbox') && event.target.tagName !== 'TEXTAREA')) { // TouchEvent
+                        core.setFocused(activedControl);
+                    }
+
+                    // 如果为 undefined 表示之前没有触发 mousedown 事件就触发了 mouseup，
+                    // 这种情况出现在鼠标在浏览器外按下了 down 然后回浏览器区域 up，
+                    // 或者是 ie 系列浏览器在触发 dblclick 之前会触发一次单独的 mouseup，
+                    // dblclick 在 ie 下的事件触发顺序是 mousedown/mouseup/click/mouseup/dblclick
+                    bubble(control, 'mouseup', event);
 
                     if (activedControl) {
                         // 点击事件在同时响应鼠标按下与弹起周期的控件上触发(如果之间未产生鼠标移动事件)
@@ -1927,8 +1937,7 @@ outer:          for (var caches = [], target = event.target, el; target && targe
         $create: function (UIClass, options) {
             options = options || {};
 
-            var parent = options.parent,
-                el = options.main;
+            var el = options.main;
 
             options.uid = 'ecui-' + (++uniqueIndex);
 
@@ -1946,14 +1955,14 @@ outer:          for (var caches = [], target = event.target, el; target && targe
 
             var control = new UIClass(el, options);
 
-            if (parent) {
-                if (ui.Control.isInstance(parent)) {
-                    control.setParent(parent);
+            if (options.parent) {
+                if (ui.Control.isInstance(options.parent)) {
+                    control.setParent(options.parent);
                 } else {
-                    control.appendTo(parent);
+                    control.appendTo(options.parent);
                 }
             } else {
-                control.$setParent(core.findControl(dom.parent(control.getMain())));
+                control.$setParent(core.findControl(dom.parent(el)));
             }
 
             oncreate(control, options);
@@ -2639,11 +2648,23 @@ outer:          for (var caches = [], target = event.target, el; target && targe
                             return;
                         }
                         options.main = item;
-                        item = options.type ?
-                                options.type.indexOf('.') < 0 ?
-                                        ui[util.toCamelCase(options.type.charAt(0).toUpperCase() + options.type.slice(1))] :
-                                        util.parseValue(options.type, ui) || util.parseValue(options.type) :
-                                ui.Control;
+                        if (options.type) {
+                            if (options.type.charAt(0) === '@') {
+                                var name = options.type.charAt(1).toUpperCase() + util.toCamelCase(options.type.slice(2));
+                                for (var parent = core.findControl(item); parent; parent = parent.getParent()) {
+                                    if (parent[name] && 'function' === typeof parent[name]) {
+                                        item = parent[name];
+                                        break;
+                                    }
+                                }
+                            } else if (options.type.indexOf('.') < 0) {
+                                item = ui[options.type.charAt(0).toUpperCase() + util.toCamelCase(options.type.slice(1))];
+                            } else {
+                                item = util.parseValue(options.type, ui) || util.parseValue(options.type);
+                            }
+                        } else {
+                            item = ui.Control;
+                        }
 //{if 0}//
                         try {
 //{/if}//
