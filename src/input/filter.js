@@ -80,7 +80,7 @@ _oHandler   - 定时器句柄
              */
             $input: function (event) {
                 function request() {
-                    this._sRequest = this.getInput().value;
+                    this._sRequest = this.getText();
                     var args = [this._sUrl, this._sRequest];
                     core.request(
                         util.stringFormat.apply(null, args),
