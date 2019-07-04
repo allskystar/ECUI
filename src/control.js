@@ -1393,4 +1393,61 @@ _aStatus            - 控件当前的状态集合
             }
         }
     );
+
+    var definedInterface = {};
+
+    ui.Control.defineProperty = function (name) {
+        if (definedInterface[name]) {
+            return definedInterface[name];
+        }
+
+        var propertyName = name.charAt(0).toUpperCase() + name.slice(1),
+            methods = {
+            };
+
+        // item移除时选项组需要释放状态
+        methods.$remove = function (event) {
+            if (this.value === event.child) {
+                this['set' + propertyName]();
+            }
+/*ignore*/
+            return this['$' + propertyName].$remove.call(this, event);
+/*end*/
+        };
+
+        // 底层的$setXXXX方法
+        methods['$set' + propertyName] = function (item) {
+            item = item || null;
+            var oldItem = this['$' + propertyName + 'Data'].value;
+            if (oldItem !== item) {
+                if (oldItem) {
+                    oldItem.alterStatus('-' + name);
+                }
+                if (item) {
+                    item.alterStatus('+' + name);
+                }
+                this['$' + propertyName + 'Data'].value = item;
+                return oldItem || null;
+            }
+        };
+
+        // setXXXX方法，会发送propertychange事件
+        methods['set' + propertyName] = function (item) {
+            if ('number' === typeof item) {
+                item = this.getItem(item);
+            }
+
+            var oldItem = this['$set' + propertyName](item);
+            if (oldItem !== undefined) {
+                core.dispatchEvent(this, 'propertychange', {name: name, item: item, history: oldItem});
+            }
+        };
+
+        // getXXXX方法，获取属性的值
+        methods['get' + propertyName] = function () {
+            return this['$' + propertyName + 'Data'].value || null;
+        };
+
+        return definedInterface[name] = _interface('$' + propertyName, methods);
+    };
 }());
