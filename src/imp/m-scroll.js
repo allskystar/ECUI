@@ -43,39 +43,48 @@
     var keyboardHeight = 0,
         statusHeight = 0,
         fixedHeight = 0,
-//        innerKeyboardHeight,
+        safeAreaHeight = 0,
         realTarget;
 
-    if (iosVersion && safariVersion) {
+    if (iosVersion) {
         switch (screen.height) {
         case 568:
             // iphone 5S/SE
-            statusHeight = 44;
-            fixedHeight = 13;
-//            innerKeyboardHeight = 253;
+            if (safariVersion) {
+                statusHeight = 44;
+                fixedHeight = 13;
+            }
             break;
         case 667:
             // iphone 6/7/8/6S
-            statusHeight = 44;
-            fixedHeight = 13;
-//            innerKeyboardHeight = iosVersion < 12 ? 258 : 260;
+            if (safariVersion) {
+                statusHeight = 44;
+                fixedHeight = 13;
+            }
             break;
         case 736:
             // iphone 6/7/8 Plus
-            statusHeight = 44;
-            fixedHeight = 13;
-//            innerKeyboardHeight = 271;
+            if (safariVersion) {
+                statusHeight = 44;
+                fixedHeight = 13;
+            }
             break;
         case 812:
             // iphone X/XS
-            statusHeight = 83;
-            fixedHeight = 6;
-//            innerKeyboardHeight = iosVersion < 12 ? 294 : 296;
+            if (safariVersion) {
+                statusHeight = 83;
+                fixedHeight = 6;
+            } else {
+                safeAreaHeight = 34;
+            }
             break;
         case 896:
             // iphone XR/XS max
-            statusHeight = 83;
-//            innerKeyboardHeight = 307;
+            if (safariVersion) {
+                statusHeight = 83;
+            } else {
+                safeAreaHeight = 34;
+            }
             break;
         }
     }
@@ -159,7 +168,6 @@
             options.bottom += data.overflow[2];
             options.left -= data.overflow[3];
         }
-
         return options;
     }
 
@@ -380,7 +388,7 @@
              * @param {number} y 希望滚动的位置
              */
             refresh: function (y) {
-                var options = getOptions.call(this),
+                var options = getOptions(this),
                     top = options.limit && options.limit.top !== undefined ? options.limit.top : options.top,
                     bottom = options.limit && options.limit.bottom !== undefined ? options.limit.bottom : options.bottom;
 
@@ -411,8 +419,18 @@
              * @override
              */
             setPosition: function (x, y) {
-                // 解决光标问题
-                if (this.getX() !== x || this.getY() !== y) {
+                var oldY = ui.MScroll.Methods.getY.call(this);
+                if (ui.MScroll.Methods.getX.call(this) !== x || oldY !== y) {
+                    // if (keyboardHeight && iosVersion !== 11.1 && iosVersion !== 11.2) {
+                    //     if (oldY < y) {
+                    //         window.scrollBy(0, -Math.min(window.scrollY, y - oldY));
+                    //         fixed();
+                    //     } else if (oldY > y) {
+                    //         window.scrollBy(0, Math.min(keyboardHeight - window.scrollY, oldY - y));
+                    //         fixed();
+                    //     }
+                    // }
+                    // dom.setStyle(this.getBody(), 'transform', keyboardHeight ? 'translate(' + x + 'px,' + (y + window.scrollY) + 'px)' : 'translate3d(' + x + 'px,' + y + 'px,0px)');
                     dom.setStyle(this.getBody(), 'transform', keyboardHeight ? 'translate(' + x + 'px,' + y + 'px)' : 'translate3d(' + x + 'px,' + y + 'px,0px)');
                 }
                 core.query(
@@ -460,9 +478,10 @@
     };
 
     function showActiveElement() {
+        activeCloneElement.previousSibling.style.display = '';
+
         dom.remove(activeCloneElement);
         activeCloneElement = null;
-        document.activeElement.style.display = '';
     }
 
     function scrollIntoViewIfNeededHandler() {
@@ -509,7 +528,7 @@
             dom.setStyle(control.getMain(), 'transform', 'translateY(' + window.scrollY + 'px)');
         });
         bottomList.forEach(function (control) {
-            dom.setStyle(control.getMain(), 'transform', 'translateY(' + (window.scrollY - keyboardHeight) + 'px)');
+            dom.setStyle(control.getMain(), 'transform', 'translateY(' + (window.scrollY - keyboardHeight - safeAreaHeight) + 'px)');
         });
     }
 
@@ -525,6 +544,8 @@
             core.drag(control);
             control.refresh(control.getY());
         });
+
+        util.dispatchEvent('resize', {});
     }
 
     /**
@@ -737,6 +758,9 @@
                 focusout: function (event) {
                     if (!util.hasIOSKeyboard(event.target) || realTarget === event.target) {
                         return;
+                    }
+                    if (activeCloneElement) {
+                        showActiveElement();
                     }
 
                     dom.setStyle(event.target, 'userSelect', '');

@@ -54,9 +54,6 @@ _cItem    - 当前处于激活的选项
                         ui.MListView.prototype.Item.prototype.$activate.call(this, event);
 
                         var parent = this.getParent();
-                        parent.setScrollRange({left: -this.$$sumWidth});
-                        Object.assign(this.getParent().getRange(), {left: 0, right: 0});
-                        // parent.setRange({left: 0, right: 0});
                         if (parent._cItem !== this) {
                             if (parent._cItem) {
                                 parent._cItem._oHandle = effect.grade('this.setPosition(#this.getX()->0#)', 400, {$: parent._cItem});
@@ -117,8 +114,8 @@ _cItem    - 当前处于激活的选项
                     /**
                      * @override
                      */
-                    $restoreStructure: function () {
-                        ui.MListView.prototype.Item.prototype.$restoreStructure.call(this);
+                    $restoreStructure: function (event) {
+                        ui.MListView.prototype.Item.prototype.$restoreStructure.call(this, event);
                         dom.children(this.getBody()).forEach(function (item, index) {
                             if (index) {
                                 item.style.height = '';
@@ -130,7 +127,7 @@ _cItem    - 当前处于激活的选项
                      * @override
                      */
                     getX: function () {
-                        return +dom.first(this.getBody()).style.transform.replace(/translateX\((-?[0-9.]+)px\)/, '$1');
+                        return this.getBody() ? +dom.first(this.getBody()).style.transform.replace(/translateX\((-?[0-9.]+)px\)/, '$1') : 0;
                     },
 
                     /**
@@ -139,22 +136,33 @@ _cItem    - 当前处于激活的选项
                     setPosition: function (x) {
                         this.cache();
                         var sum = this.$$sumWidth,
-                            offset = 0,
-                            limit = x < -sum * 3 / 4 ? -sum : 0;
-
-                        Object.assign(this.getParent().getRange(), {left: limit, right: limit});
-                        dom.children(this.getBody()).forEach(
-                            function (item, index) {
-                                if (index) {
-                                    item.style.transform = 'translateX(' + (x * sum / this.$$sumWidth - offset) + 'px)';
-                                    sum -= this.$$opWidth[index - 1];
-                                    offset += this.$$opWidth[index - 1];
-                                } else {
-                                    item.style.transform = 'translateX(' + x + 'px)';
+                            offset = 0;
+                            // item被删除之后，这边直接调用会报错
+                        if (this.getParent()) {
+                            if (x < -sum * 3 / 4) {
+                                if (!this._bComplete) {
+                                    this._bComplete = true;
+                                    core.drag(this.getParent(), {limit: {right: -sum}});
                                 }
-                            },
-                            this
-                        );
+                            } else {
+                                if (this._bComplete) {
+                                    this._bComplete = false;
+                                    core.drag(this.getParent(), {limit: {right: sum}});
+                                }
+                            }
+                            dom.children(this.getBody()).forEach(
+                                function (item, index) {
+                                    if (index) {
+                                        item.style.transform = 'translateX(' + (x * sum / this.$$sumWidth - offset) + 'px)';
+                                        sum -= this.$$opWidth[index - 1];
+                                        offset += this.$$opWidth[index - 1];
+                                    } else {
+                                        item.style.transform = 'translateX(' + x + 'px)';
+                                    }
+                                },
+                                this
+                            );
+                        }
                     }
                 }
             ),
@@ -166,6 +174,10 @@ _cItem    - 当前处于激活的选项
                 ui.MListView.prototype.$dragmove.call(this, event);
                 if (this._bOperate === undefined) {
                     this._bOperate = (event.track.angle < 45 || (event.track.angle > 135 && event.track.angle < 225) || event.track.angle > 315);
+                    if (this._bOperate) {
+                        core.drag(this, {left: -this._cItem.$$sumWidth, limit: {ratio: 1}});
+                        this._cItem._bComplete = false;
+                    }
                 }
             },
 

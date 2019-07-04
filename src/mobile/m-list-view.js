@@ -25,18 +25,31 @@ _nBottomIndex  - 下部隐藏的选项序号
         ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined;
 //{/if}//
     function setEnterAndLeave() {
-        var range = this.getRange();
-        if (range && range.bottom) {
-            range.top = Math.min(0, this.getHeight() - this.$$bodyHeight);
-            range.bottom = this.$$titleHeight;
+        if (this._bComplete) {
+            core.drag(
+                this,
+                {
+                    limit: {
+                        top: this.$$footerHeight,
+                        bottom: -this.$$headerHeight
+                    }
+                }
+            );
+            this._bComplete = false;
         }
     }
 
     function setComplete() {
-        var range = this.getRange(),
-            scrollRange = this.getScrollRange();
-        range.top = scrollRange.top;
-        range.bottom = scrollRange.bottom;
+        this._bComplete = true;
+        core.drag(
+            this,
+            {
+                limit: {
+                    top: -this.$$footerHeight,
+                    bottom: this.$$headerHeight
+                }
+            }
+        );
     }
 
     /**
@@ -91,56 +104,60 @@ _nBottomIndex  - 下部隐藏的选项序号
              * @override
              */
             $alterItems: function () {
-                // 第一次进来使用缓存的数据，第二次进来取实际数据
-                if (this.isReady()) {
-                    var items = this.getItems(),
-                        body = this.getBody();
+                if (ieVersion < 9) {
+                    // 第一次进来使用缓存的数据，第二次进来取实际数据
+                    if (this.isReady()) {
+                        var items = this.getItems(),
+                            body = this.getBody();
 
-                    this.alterStatus(items.length ? '-empty' : '+empty');
-                    this.$$bodyHeight = body.offsetHeight + this._nTopHidden + this._nBottomHidden;
-                    items.map(function (item) {
-                        item.cache();
-                        return item.getMain().offsetWidth ? item : null;
-                    }).forEach(
-                        function (item, index) {
-                            if (item) {
-                                if (index < this._nTopIndex) {
-                                    item.hide();
-                                    this._nTopIndex++;
-                                    this._nTopHidden += item.getHeight();
-                                    this._nBottomIndex++;
-                                } else if (index > this._nBottomIndex) {
-                                    item.hide();
-                                    this._nBottomHidden += item.getHeight();
-                                } else if (index === this._nBottomIndex) {
-                                    this._nBottomIndex++;
+                        this.alterStatus(items.length ? '-empty' : '+empty');
+                        this.$$bodyHeight = body.offsetHeight + this._nTopHidden + this._nBottomHidden;
+                        items.map(function (item) {
+                            item.cache();
+                            return item.getMain().offsetWidth ? item : null;
+                        }).forEach(
+                            function (item, index) {
+                                if (item) {
+                                    if (index < this._nTopIndex) {
+                                        item.hide();
+                                        this._nTopIndex++;
+                                        this._nTopHidden += item.getHeight();
+                                        this._nBottomIndex++;
+                                    } else if (index > this._nBottomIndex) {
+                                        item.hide();
+                                        this._nBottomHidden += item.getHeight();
+                                    } else if (index === this._nBottomIndex) {
+                                        this._nBottomIndex++;
+                                    }
                                 }
-                            }
-                        },
-                        this
+                            },
+                            this
+                        );
+                    }
+                    // 解决items不够填充整个listview区域
+                    var top = Math.min(0, this.getHeight() - this.$$bodyHeight);
+                    this.setScrollRange(
+                        {
+                            left: 0,
+                            right: 0,
+                            top: top ? top - this.$$footerHeight : 0,
+                            bottom: this.$$headerHeight
+                        }
                     );
-                }
-                // 解决items不够填充整个listview区域
-                var top = Math.min(0, this.getHeight() - this.$$bodyHeight);
-                this.setScrollRange(
-                    {
-                        left: 0,
-                        right: 0,
-                        top: top ? top - this.$$footerHeight : 0,
-                        bottom: this.$$headerHeight
+                    this.setRange(
+                        {
+                            top: top,
+                            bottom: this.$$titleHeight
+                        }
+                    );
+                    if (this.isReady()) {
+                        var y = this.getY();
+                        if (y <= top || (y > this.$$titleHeight && !top)) {
+                            this.setPosition(0, top);
+                        }
                     }
-                );
-                this.setRange(
-                    {
-                        top: top,
-                        bottom: this.$$titleHeight
-                    }
-                );
-                if (this.isReady()) {
-                    var y = this.getY();
-                    if (y <= top || (y > this.$$titleHeight && !top)) {
-                        this.setPosition(0, top);
-                    }
+                } else {
+                    this.$$bodyHeight = this.getBody().offsetHeight;
                 }
             },
 
@@ -347,6 +364,7 @@ _nBottomIndex  - 下部隐藏的选项序号
                         main = this.getMain(),
                         options = {
                             $: this,
+                            y: this.getY(),
                             onfinish: function () {
                                 if (callback) {
                                     callback();
@@ -355,16 +373,14 @@ _nBottomIndex  - 下部隐藏的选项序号
                         };
 
                     if (status === 'header') {
-                        options.y = this.getY();
                         this._oHandle = effect.grade(
                             'this.setPosition(0,#$.y->' + this.$$titleHeight + '#)',
                             400,
                             options
                         );
                     } else if (status === 'footer') {
-                        options.y = ui.MScroll.Methods.getY.call(this);
                         this._oHandle = effect.grade(
-                            'ecui.ui.MScroll.Methods.setPosition.call(this,0,#$.y->' + (main.clientHeight - main.scrollHeight + this.$$footerHeight) + '#)',
+                            'this.setPosition(0,#$.y->' + (main.clientHeight - main.scrollHeight + this.$$footerHeight - this._nTopHidden + this.$$headerHeight) + '#)',
                             400,
                             options
                         );
@@ -381,6 +397,15 @@ _nBottomIndex  - 下部隐藏的选项序号
             $activate: function (event) {
                 if (!this._bLoading || this._sStatus !== 'headercomplete') {
                     ui.MScroll.Methods.$activate.call(this, event);
+                    if (!(ieVersion < 9)) {
+                        core.drag(
+                            this,
+                            {
+                                top: -this.$$footerHeight,
+                                bottom: this.$$headerHeight
+                            }
+                        );
+                    }
                 }
             },
 
@@ -429,6 +454,7 @@ _nBottomIndex  - 下部隐藏的选项序号
                         this.reset();
                     } else {
                         this._eFooter.innerHTML = this.HTML_LOADED;
+                        this.setPosition(0, this.getY());
                     }
                 }
             },
@@ -454,20 +480,22 @@ _nBottomIndex  - 下部隐藏的选项序号
              * @override
              */
             remove: function (item) {
-                var index = 'number' === typeof item ? item : this.getItems().indexOf(item);
-                item = this.getItem(index);
-                if (item) {
-                    var height = item.getHeight();
-                    if (index < this._nTopIndex) {
-                        this._nTopIndex--;
-                        this._nTopHidden -= height;
-                    } else if (index >= this._nBottomIndex) {
-                        this._nBottomHidden -= height;
+                if (ieVersion < 9) {
+                    var index = 'number' === typeof item ? item : this.getItems().indexOf(item);
+                    item = this.getItem(index);
+                    if (item) {
+                        var height = item.getHeight();
+                        if (index < this._nTopIndex) {
+                            this._nTopIndex--;
+                            this._nTopHidden -= height;
+                        } else if (index >= this._nBottomIndex) {
+                            this._nBottomHidden -= height;
+                        }
+                        this._nBottomIndex--;
+                        this.$$bodyHeight -= height;
+                        ui.Items.Methods.remove.call(this, item);
+                        this.setPosition(0, this.getY());
                     }
-                    this._nBottomIndex--;
-                    this.$$bodyHeight -= height;
-                    ui.Items.Methods.remove.call(this, item);
-                    this.setPosition(0, this.getY());
                 }
             },
 
@@ -524,7 +552,7 @@ _nBottomIndex  - 下部隐藏的选项序号
                 }
 
                 this._eHeader.style.transform = 'translateY(' + (y - this.$$headerHeight) + 'px)';
-                this._eFooter.style.transform = util.hasIOSKeyboard() ? 'translateY(' + (y + this._nTopHidden - this.$$headerHeight) + 'px)' : '';
+                this._eFooter.style.transform = 'translateY(' + (y + this._nTopHidden - this.$$headerHeight) + 'px)';
                 ui.MScroll.Methods.setPosition.call(this, x, y + this._nTopHidden - this.$$headerHeight);
 
                 top = this.getHeight() - this.$$bodyHeight;
