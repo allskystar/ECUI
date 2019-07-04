@@ -150,14 +150,14 @@ _nBottomIndex  - 下部隐藏的选项序号
                             bottom: this.$$titleHeight
                         }
                     );
-                    if (this.isReady()) {
-                        var y = this.getY();
-                        if (y <= top || (y > this.$$titleHeight && !top)) {
-                            this.setPosition(0, top);
-                        }
-                    }
                 } else {
                     this.$$bodyHeight = this.getBody().offsetHeight;
+                }
+                if (this.isReady()) {
+                    var y = this.getY();
+                    if (y <= top || (y > this.$$titleHeight && !top)) {
+                        this.setPosition(0, top);
+                    }
                 }
             },
 
