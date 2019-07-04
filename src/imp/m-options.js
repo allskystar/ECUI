@@ -140,7 +140,7 @@
                 this.$MOptions.setPosition.call(this, x, y);
                 this.$MOptionsData.mask.style.top = this.getMain().scrollTop + 'px';
                 this.$MOptionsData.view.firstChild.className = this.getBody().className;
-                this.$MOptionsData.view.firstChild.style.transform = 'translate3d(0px,' + (y - 90) + 'px,0px)';
+                this.$MOptionsData.view.firstChild.style.transform = 'translate3d(0px,' + (y - util.toNumber(this.$MOptionsData.view.style.top)) + 'px,0px)';
             },
 
             /**

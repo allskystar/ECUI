@@ -286,16 +286,13 @@
              * @override
              */
             cache: function (force) {
-                if (this.$Items.cache.call(this, force)) {
-                    this.$ItemsData.items.forEach(function (item) {
-                        item.cache(force);
-                    });
-                    if (this.isReady()) {
-                        this.$alterItems();
-                    }
-                    return true;
+                this.$Items.cache.call(this, force);
+                this.$ItemsData.items.forEach(function (item) {
+                    item.cache(force);
+                });
+                if (this.isReady()) {
+                    this.$alterItems();
                 }
-                return false;
             },
 
             /**
