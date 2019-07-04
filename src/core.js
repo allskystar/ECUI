@@ -2709,11 +2709,23 @@ outer:          for (var caches = [], target = event.target, el; target && targe
                             return;
                         }
                         options.main = item;
-                        item = options.type ?
-                                options.type.indexOf('.') < 0 ?
-                                        ui[util.toCamelCase(options.type.charAt(0).toUpperCase() + options.type.slice(1))] :
-                                        util.parseValue(options.type, ui) || util.parseValue(options.type) :
-                                ui.Control;
+                        if (options.type) {
+                            if (options.type.charAt(0) === '@') {
+                                var name = options.type.charAt(1).toUpperCase() + util.toCamelCase(options.type.slice(2));
+                                for (var parent = core.findControl(item); parent; parent = parent.getParent()) {
+                                    if (parent[name] && 'function' === typeof parent[name]) {
+                                        item = parent[name];
+                                        break;
+                                    }
+                                }
+                            } else if (options.type.indexOf('.') < 0) {
+                                item = ui[options.type.charAt(0).toUpperCase() + util.toCamelCase(options.type.slice(1))];
+                            } else {
+                                item = util.parseValue(options.type, ui) || util.parseValue(options.type);
+                            }
+                        } else {
+                            item = ui.Control;
+                        }
 //{if 0}//
                         try {
 //{/if}//
