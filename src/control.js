@@ -4,7 +4,9 @@
     <!-- 这里放控件包含的内容 -->
     ...
 </div>
-
+*/
+/*ignore*/
+/*
 @fields
 _bCapturable        - 控件是否响应浏览器事件状态
 _bUserSelect        - 控件是否允许选中内容
@@ -23,14 +25,16 @@ _eBody              - 控件用于承载子控件的载体标签，通过$setBod
 _cParent            - 父控件对象
 _aStatus            - 控件当前的状态集合
 */
+/*end*/
 (function () {
 //{if 0}//
     var core = ecui,
         dom = core.dom,
         ui = core.ui,
-        util = core.util,
-
-        ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined;
+        util = core.util;
+/*ignore*/
+    var ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined;
+/*end*/
 //{/if}//
     var waitReadyList;
 
@@ -38,23 +42,22 @@ _aStatus            - 控件当前的状态集合
      * 设置控件的父对象。
      * @private
      *
-     * @param {ecui.ui.Control} control 需要设置的控件对象
      * @param {ecui.ui.Control} parent 父控件对象
      * @param {HTMLElement} parentElement 父 Element 对象
      */
-    function alterParent(control, parent, parentElement) {
-        var oldParent = control._cParent,
-            el = control._eMain;
+    function alterParent(parent, parentElement) {
+        var oldParent = this._cParent,
+            el = this._eMain;
 
         // 触发原来父控件的移除子控件事件
         if (parent !== oldParent) {
             if (oldParent) {
-                if (!core.dispatchEvent(oldParent, 'remove', {child: control})) {
+                if (!core.dispatchEvent(oldParent, 'remove', {child: this})) {
                     return;
                 }
             }
             if (parent) {
-                if (!core.dispatchEvent(parent, 'append', {child: control})) {
+                if (!core.dispatchEvent(parent, 'append', {child: this})) {
                     parent = parentElement = null;
                 }
             }
@@ -68,19 +71,19 @@ _aStatus            - 控件当前的状态集合
             }
         }
 
-        control.$setParent(parent);
+        this.$setParent(parent);
     }
-
+/*ignore*/
     /**
      * 设置控件的实际宽度。
      * @private
      *
      * @param {number} width 控件的占位宽度
      */
-    function setWidth(control, width) {
-        control._eMain.style.width = width - (core.isContentBox(control._eMain) ? control.$getBasicWidth() * 2 : 0) + 'px';
+    function setWidth(width) {
+        this._eMain.style.width = width - (core.isContentBox(this._eMain) ? this.$getBasicWidth() * 2 : 0) + 'px';
     }
-
+/*end*/
     /**
      * 部件的ready事件监听器。
      * @private
@@ -90,7 +93,7 @@ _aStatus            - 控件当前的状态集合
     function unitReadyHandler(event) {
         if (this._cParent) {
             // 仅执行一次
-            core.removeEventListener(this._cParent, event.type, this._oUnitReadyHandler);
+            core.removeEventListener(this._cParent, event.type, this._UIControl_oHandler);
         }
         // ready事件不允许被阻止
         if (!core.dispatchEvent(this, 'ready', event)) {
@@ -125,21 +128,21 @@ _aStatus            - 控件当前的状态集合
             if ('string' === typeof el.className) {
                 this._sClass = el.className.trim().split(' ')[0];
             }
-
+/*ignore*/
             this._bDisabled = !!options.disabled;
             this._bCapturable = options.capturable !== false;
             this._bUserSelect = options.userSelect !== false;
             this._bFocusable = options.focusable !== false;
             this._bGesture = true;
-
-            this._aStatus = ['', ' '];
             this._sSubType = '';
+/*end*/
+            this._aStatus = ['', ' '];
 
             this._sWidth = el.style.width;
             this._sHeight = el.style.height;
 
             if (!options.main) {
-                this._oUnitReadyHandler = unitReadyHandler.bind(this);
+                this._UIControl_oHandler = unitReadyHandler.bind(this);
             }
         },
         {
@@ -187,6 +190,7 @@ _aStatus            - 控件当前的状态集合
              * @param {CssStyle} style 主元素的css样式对象
              */
             $cache: function (style) {
+/*ignore*/
                 if (ieVersion < 8) {
                     var list = style.borderWidth.split(' ');
                     this.$$border = [util.toNumber(list[0])];
@@ -199,10 +203,12 @@ _aStatus            - 控件当前的状态集合
                     this.$$padding[2] = list[2] ? util.toNumber(list[2]) : this.$$padding[0];
                     this.$$padding[3] = list[3] ? util.toNumber(list[3]) : this.$$padding[1];
                 } else {
+/*end*/
                     this.$$border = [util.toNumber(style.borderTopWidth), util.toNumber(style.borderRightWidth), util.toNumber(style.borderBottomWidth), util.toNumber(style.borderLeftWidth)];
                     this.$$padding = [util.toNumber(style.paddingTop), util.toNumber(style.paddingRight), util.toNumber(style.paddingBottom), util.toNumber(style.paddingLeft)];
+/*ignore*/
                 }
-
+/*end*/
                 this.$$width = this._eMain.offsetWidth;
                 this.$$height = this._eMain.offsetHeight;
             },
@@ -353,7 +359,7 @@ _aStatus            - 控件当前的状态集合
             $getBasicWidth: function () {
                 return this.$$border[1] + this.$$border[3] + this.$$padding[1] + this.$$padding[3];
             },
-
+/*ignore*/
             /**
              * 获取指定的部件。
              * $getSection 方法返回控件的一个部件对象，部件对象也是 ECUI 控件，是当前控件的组成成份，不可缺少，请不要轻易的对部件对象进行操作。
@@ -365,7 +371,7 @@ _aStatus            - 控件当前的状态集合
             $getSection: function (name) {
                 return this['_u' + name];
             },
-
+/*end*/
             /**
              * 隐藏事件。
              * 控件隐藏时，控件失去激活、悬停与焦点状态，不检查控件之前的状态，因此不会导致浏览器的刷新操作。
@@ -448,7 +454,7 @@ _aStatus            - 控件当前的状态集合
              */
             $ready: function () {
                 this._bReady = true;
-                delete this._oUnitReadyHandler;
+                delete this._UIControl_oHandler;
             },
 
             /**
@@ -464,6 +470,7 @@ _aStatus            - 控件当前的状态集合
             $restoreStructure: function () {
                 this._eMain.style.width = this._sWidth;
                 this._eMain.style.height = this._sHeight;
+/*ignore*/
                 if (ieVersion < 8) {
                     // 修复ie6/7下宽度自适应错误的问题
                     var style = dom.getStyle(this._eMain);
@@ -471,12 +478,13 @@ _aStatus            - 控件当前的状态集合
                         this._eMain.style.width = '100%';
                         if (core.isRepainting()) {
                             return function (control, width) {
-                                setWidth(control, width);
+                                setWidth.call(control, width);
                             };
                         }
-                        setWidth(this, this._eMain.offsetWidth);
+                        setWidth.call(this, this._eMain.offsetWidth);
                     }
                 }
+/*end*/
             },
 
             /**
@@ -504,10 +512,10 @@ _aStatus            - 控件当前的状态集合
              * @param {ecui.ui.Control} parent ECUI 控件对象
              */
             $setParent: function (parent) {
-                if (this._oUnitReadyHandler) {
+                if (this._UIControl_oHandler) {
                     if (this._cParent) {
-                        core.removeEventListener(this._cParent, 'ready', this._oUnitReadyHandler);
-                        core.removeEventListener(this._cParent, 'show', this._oUnitReadyHandler);
+                        core.removeEventListener(this._cParent, 'ready', this._UIControl_oHandler);
+                        core.removeEventListener(this._cParent, 'show', this._UIControl_oHandler);
                     }
                     if (parent) {
                         if (parent.isReady()) {
@@ -516,10 +524,10 @@ _aStatus            - 控件当前的状态集合
                                     this.$ready(core.wrapEvent('ready'));
                                 }
                             } else {
-                                core.addEventListener(parent, 'show', this._oUnitReadyHandler);
+                                core.addEventListener(parent, 'show', this._UIControl_oHandler);
                             }
                         } else {
-                            core.addEventListener(parent, 'ready', this._oUnitReadyHandler);
+                            core.addEventListener(parent, 'ready', this._UIControl_oHandler);
                         }
                     }
                 }
@@ -635,7 +643,7 @@ _aStatus            - 控件当前的状态集合
              * @param {HTMLElement} parentElement 父 Element 对象，忽略参数控件将移出 DOM 树
              */
             appendTo: function (parentElement) {
-                alterParent(this, parentElement && core.findControl(parentElement), parentElement);
+                alterParent.call(this, parentElement && core.findControl(parentElement), parentElement);
             },
 
             /**
@@ -1306,7 +1314,7 @@ _aStatus            - 控件当前的状态集合
              * @param {ecui.ui.Control} parent 父控件对象，忽略参数控件将移出 DOM 树
              */
             setParent: function (parent) {
-                alterParent(this, parent, parent && parent._eBody);
+                alterParent.call(this, parent, parent && parent._eBody);
             },
 
             /**

@@ -32,7 +32,9 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
         viewWidth,                // 浏览器宽高属性
         viewHeight,               // 浏览器宽高属性
+/*ignore*/
         flgFixedSize,             // 在计算盒子模型时，是否需要修正宽高
+/*end*/
         scrollNarrow,             // 浏览器滚动条相对窄的一边的长度
 
         initRecursion = 0,        // init 操作的递归次数
@@ -376,22 +378,21 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                                 }
 
                                 var target = event.target;
+                                // 记录touchend时的dom元素，阻止事件穿透
                                 touchTarget = target;
+
                                 if (target.tagName !== 'INPUT' && target.tagName !== 'TEXTAREA') {
                                     for (; target; target = dom.parent(target)) {
                                         if (target.getAttribute('contenteditable')) {
                                             break;
                                         }
                                     }
-
                                     // 点击到非INPUT区域需要失去焦点
                                     if (!target && isTouchClick(track)) {
                                         document.activeElement.blur();
                                     }
                                 }
 
-                                // 记录touchend时的dom元素，阻止事件穿透
-                                touchTarget = target;
                                 noPrimaryEnd = false;
                             }
                         });
@@ -651,6 +652,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                             click = false;
                         }
                     }
+
                     if (click && ((event.target.tagName !== 'INPUT' || event.target.type === 'radio' || event.target.type === 'checkbox') && event.target.tagName !== 'TEXTAREA')) { // TouchEvent
                         core.setFocused(activedControl);
                     }
@@ -1094,6 +1096,7 @@ outer:          for (var caches = [], target = event.target, el; target && targe
             offsetX = event.clientX - track.path[i].x,
             offsetY = event.clientY - track.path[i].y,
             speed = 1000 / (time - track.path[i].time);
+
         track.path.splice(0, i);
 
         track.speedX = delay ? 0 : offsetX * speed;
@@ -1422,7 +1425,9 @@ outer:          for (var caches = [], target = event.target, el; target && targe
             dom.insertHTML(document.body, 'BEFOREEND', '<div class="ui-valid"><div></div></div>');
             // 检测Element宽度与高度的计算方式
             var el = document.body.lastChild;
+/*ignore*/
             flgFixedSize = el.offsetWidth !== 80;
+/*end*/
             scrollNarrow = el.offsetWidth - el.clientWidth - 2;
             dom.remove(el);
             dom.addClass(document.body, scrollNarrow ? 'ui-scrollbar' : 'ui-touchpad');
@@ -1907,8 +1912,7 @@ outer:          for (var caches = [], target = event.target, el; target && targe
         $create: function (UIClass, options) {
             options = options || {};
 
-            var parent = options.parent,
-                el = options.main;
+            var el = options.main;
 
             options.uid = 'ecui-' + (++uniqueIndex);
 
@@ -1926,11 +1930,11 @@ outer:          for (var caches = [], target = event.target, el; target && targe
 
             var control = new UIClass(el, options);
 
-            if (parent) {
-                if (parent instanceof ui.Control) {
-                    control.setParent(parent);
+            if (options.parent) {
+                if (options.parent instanceof ui.Control) {
+                    control.setParent(options.parent);
                 } else {
-                    control.appendTo(parent);
+                    control.appendTo(options.parent);
                 }
             } else {
                 control.$setParent(core.findControl(dom.parent(control.getMain())));
@@ -2239,7 +2243,6 @@ outer:          for (var caches = [], target = event.target, el; target && targe
 
                     // 拖拽范围默认不超出上级元素区域
                     Object.assign(
-                        currEnv,
                         env,
                         parent.tagName === 'BODY' || parent.tagName === 'HTML' ? util.getView() : {
                             top: 0,
@@ -2483,7 +2486,8 @@ outer:          for (var caches = [], target = event.target, el; target && targe
 
                     var info = RegExp.$4,
                         value = RegExp.$5;
-                    (RegExp.$2 ? (options.ext = options.ext || {}) : options)[util.toCamelCase(RegExp.$3)] = info ? value === 'true' ? true : value === 'false' ? false : value.charAt(0) === '&' ? JSON.parse(decodeURIComponent(value.slice(1))) : decodeURIComponent(value) : true;
+                    (RegExp.$2 ? (options.ext = options.ext || {}) : options)[util.toCamelCase(RegExp.$3)] =
+                        info ?/*ignore*/ value === 'true' ? true :/*end*/ value === 'false' ? false : value.charAt(0) === '&' ? JSON.parse(decodeURIComponent(value.slice(1))) : decodeURIComponent(value) : true;
                 }
 
                 if (core.onparseoptions) {
@@ -2532,7 +2536,7 @@ outer:          for (var caches = [], target = event.target, el; target && targe
         getStatus: function () {
             return currEnv.type;
         },
-
+/*ignore*/
         /**
          * 控件继承。
          * 如果不指定类型样式，表示使用父控件的类型样式，如果指定的类型样式以 * 符号开头，表示移除父控件的类型样式并以之后的类型样式代替。生成的子类构造函数已经使用了 constructor/TYPES/CLASS 三个属性，TYPES 属性是控件的全部类型样式，CLASS 属性是控件的全部类型样式字符串。
@@ -2661,7 +2665,7 @@ outer:          for (var caches = [], target = event.target, el; target && targe
             superClass = type = constructor = realConstructor = null;
             return subClass;
         },
-
+/*end*/
         /**
          * 初始化指定的 Element 对象对应的 DOM 节点树。
          * init 方法将初始化指定的 Element 对象及它的子节点，如果这些节点拥有初始化属性(参见 getAttributeName 方法)，将按照规则为它们绑定 ECUI 控件，每一个节点只会被绑定一次，重复的绑定无效。页面加载完成时，将会自动针对 document.body 执行这个方法，相当于自动执行以下的语句：ecui.init(document.body)
@@ -2756,9 +2760,11 @@ outer:          for (var caches = [], target = event.target, el; target && targe
          * @return {boolean} 是否为CSS2.1默认的盒子模型
          */
         isContentBox: function (el) {
+/*ignore*/
             if (ieVersion < 8) {
                 return el.tagName === 'INPUT' || el.tagName === 'BUTTON' ? false : flgFixedSize;
             }
+/*end*/
             return dom.getStyle(el, 'boxSizing') === 'content-box';
         },
 
@@ -2996,13 +3002,16 @@ outer:          for (var caches = [], target = event.target, el; target && targe
                 item.initStructure();
             });
 
+/*ignore*/
             if (ieVersion < 8) {
                 // 解决 ie6/7 下直接显示遮罩层，读到的浏览器大小实际未更新的问题
                 util.timer(core.mask, 0, null, true);
             } else {
+/*end*/
                 core.mask(true);
+/*ignore*/
             }
-
+/*end*/
             isRepainting = false;
         },
 
