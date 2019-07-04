@@ -215,9 +215,9 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              * @param {string} name 属性名称
              * @return {string} 属性值
              */
-            getAttribute: ieVersion < 8 ? function (el, name) {
+            getAttribute:/*ignore*/ ieVersion < 8 ? function (el, name) {
                 return el[name] || '';
-            } : function (el, name) {
+            } :/*end*/ function (el, name) {
                 return el.getAttribute(name) || '';
             },
 
@@ -257,17 +257,22 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                 var top = 0,
                     left = 0,
                     body = document.body,
-                    html = dom.parent(body);
+                    html = dom.parent(body),
+                    style;
 
                 if (el.getBoundingClientRect) {
                     if (ieVersion && !isStrict) {
+/*ignore*/
                         // 在怪异模式下，IE 将 body 的边框也算在了偏移值中，需要先纠正
                         if (ieVersion < 8) {
-                            var style = dom.getStyle(body, 'borderWidth').split(' ');
+                            style = dom.getStyle(body, 'borderWidth').split(' ');
                             style = {borderTopWidth: style[0], borderLeftWidth: style[3] || style[1] || style[0]};
                         } else {
+/*end*/
                             style = dom.getStyle(body);
+/*ignore*/
                         }
+/*end*/
                         if (isNaN(top = util.toNumber(style.borderTopWidth))) {
                             top = -2;
                         }
@@ -582,7 +587,13 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                     }
                     for (el = dom.parent(el); el !== document.body; el = dom.parent(el)) {
                         if (el.clientHeight !== el.scrollHeight) {
-                            var clientTop = dom.getPosition(el).top + util.toNumber(ieVersion < 8 ? dom.getStyle(el, 'borderWidth').split(' ')[0] : dom.getStyle(el, 'borderTopWidth')),
+                            var clientTop = dom.getPosition(el).top +
+                                    util.toNumber(
+/*ignore*/
+                                        ieVersion < 8 ? dom.getStyle(el, 'borderWidth').split(' ')[0] :
+/*end*/
+                                                dom.getStyle(el, 'borderTopWidth')
+                                    ),
                                 clientHeight = el.clientHeight,
                                 distance;
 
@@ -1157,11 +1168,11 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
             },
 
             /**
-             * 自定义事件。
+             * 发送自定义的DOM事件。
              * @public
              *
              * @param {string} eventName 事件名
-             * @param {object} options 事件参数
+             * @param {object|string} options 事件参数，支持json字符串
              */
             dispatchEvent: function (eventName, options) {
                 if ('string' === typeof options) {
@@ -1308,7 +1319,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              * 获取 cookie 值。
              * @public
              *
-             * @param {String} key cookie 名
+             * @param {string} key cookie 名
              * @return {string} cookie字符串
              */
             getCookie: function (key) {
@@ -1439,9 +1450,9 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              * 设置 cookie 值。
              * @public
              *
-             * @param {String} key cookie 名
-             * @param {String} val cookie 值
-             * @param {String} exp cookie 的过期时间
+             * @param {string} key cookie 名
+             * @param {string} val cookie 值
+             * @param {string} exp cookie 的过期时间
              */
             setCookie: function (key, val, exp) {
                 var cookie = key + '=' + val;
@@ -1598,6 +1609,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
 
     // 读写特殊的 css 属性操作
     var __ECUI__StyleFixer = {
+/*ignore*/
             clip: ieVersion < 8 ? {
                 set: function (el, value) {
                     el.style.clip = value === 'auto' ? 'rect(0,100%,100%,0)' : value;
@@ -1617,7 +1629,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                     el.style.display = value;
                 }
             } : undefined,
-
+/*end*/
             opacity: ieVersion < 9 ? {
                 get: function (el, style) {
                     if (/\(opacity=(\d+)/.test(style.filter)) {
@@ -1629,7 +1641,11 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                 set: function (el, value) {
                     el.style.filter =
                         el.style.filter.replace(/(progid:DXImageTransform\.Microsoft\.)?alpha\([^\)]*\)/gi, '') +
-                            (value === '' ? '' : (ieVersion < 8 ? 'alpha' : 'progid:DXImageTransform.Microsoft.Alpha') + '(opacity=' + value * 100 + ')');
+                            (value === '' ? '' :
+/*ignore*/                      (
+                                    ieVersion < 8 ? 'alpha' :/*end*/ 'progid:DXImageTransform.Microsoft.Alpha'
+/*ignore*/                      )/*end*/ + '(opacity=' + value * 100 + ')'
+                            );
                 }
             } : undefined,
 
