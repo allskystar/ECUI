@@ -484,10 +484,8 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              * @param {HTMLElement} el Element 对象
              * @return {HTMLElement} 父 Element 对象，如果没有，返回 null
              */
-            parent: ieVersion < 10 ? function (el) {
+            parent: function (el) {
                 return el.parentElement;
-            } : function (el) {
-                return el.parentNode;
             },
 
             /**
@@ -1149,13 +1147,30 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              * 删除 cookie 值。
              * @public
              *
-             * @param {String} key cookie 名
+             * @param {string} key cookie 名
              */
             delCookie: function (key) {
                 var d = new Date();
                 d.setTime(d.getTime() - 1000000);
                 var cookie = key + '="" ; expires=' + d.toGMTString() + ';path=/';
                 document.cookie = cookie;
+            },
+
+            /**
+             * 自定义事件。
+             * @public
+             *
+             * @param {string} eventName 事件名
+             * @param {object} options 事件参数
+             */
+            dispatchEvent: function (eventName, options) {
+                if ('string' === typeof options) {
+                    options = JSON.parse(options);
+                }
+                var event = document.createEvent('HTMLEvents');
+                event.initEvent(eventName, true, true);
+                Object.assign(event, options);
+                window.dispatchEvent(event);
             },
 
             /**
@@ -1353,7 +1368,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              */
             hasIOSKeyboard: iosVersion ? function (target) {
                 target = target || document.activeElement;
-                return !target.readOnly && ((target.tagName === 'INPUT' && target.type !== 'radio' && target.type !== 'checkbox') || target.tagName === 'TEXTAREA');
+                return target.getAttribute('contenteditable') || (!target.readOnly && ((target.tagName === 'INPUT' && target.type !== 'radio' && target.type !== 'checkbox') || target.tagName === 'TEXTAREA'));
             } : function () {
                 return false;
             },
