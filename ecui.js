@@ -1,3 +1,21 @@
+// 为方便beyond compare比对差异提供的函数，仅在2.x.x版本中使用
+function _interface(name, superClass, methods) {
+    var inf = {
+            NAME: name
+        };
+    if (superClass instanceof Array) {
+        inf.SUPER = superClass;
+        inf.Methods = methods;
+    } else {
+        inf.Methods = superClass;
+    }
+    if (inf.Methods.constructor) {
+        inf.constructor = inf.Methods.constructor;
+        delete inf.Methods.constructor;
+    }
+    return inf;
+}
+
 var ecui;
 (function () {
     document.write('<script type="text/javascript" src="src/adapter.js"></script>');
@@ -27,8 +45,6 @@ var ecui;
     document.write('<script type="text/javascript" src="src/base/tree-view.js"></script>');
     document.write('<script type="text/javascript" src="src/base/layer.js"></script>');
     document.write('<script type="text/javascript" src="src/base/dialog.js"></script>');
-    document.write('<script type="text/javascript" src="src/base/submit.js"></script>');
-    document.write('<script type="text/javascript" src="src/base/cancel.js"></script>');
     document.write('<script type="text/javascript" src="src/base/progress.js"></script>');
     document.write('<script type="text/javascript" src="src/base/progress-bar.js"></script>');
     document.write('<script type="text/javascript" src="src/base/progress-circle.js"></script>');

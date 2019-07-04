@@ -4,19 +4,23 @@
     <strong>标题</strong>
     窗体HTML文本
 </div>
-
+*/
+/*ignore*/
+/*
 @fields
 _uTitle     - 标题栏
 _uClose     - 关闭按钮
 */
+/*end*/
 (function () {
 //{if 0}//
     var core = ecui,
         dom = core.dom,
         ui = core.ui,
-        util = core.util,
-
-        ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined;
+        util = core.util;
+/*ignore*/
+    var ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined;
+/*end*/
 //{/if}//
     /**
      * 窗体控件。
@@ -49,25 +53,55 @@ _uClose     - 关闭按钮
 
             ui.Layer.call(this, el, options);
 
-            this._uClose = core.$fastCreate(this.Close, closeEl, this);
+            this._uClose = core.$fastCreate(this.Cancel, closeEl, this);
             this._uTitle = core.$fastCreate(this.Title, titleEl, this, {userSelect: false});
             this.$setBody(bodyEl);
         },
         {
             /**
-             * 关闭按钮部件。
-             * @unit
+             * 取消按钮控件。
+             * 取消按钮需要置于 Dialog 对话框控件内，使用type:@cancel引用，用于隐藏 Dialog 对话框。
+             * @control
              */
-            Close: core.inherits(
+            Cancel: core.inherits(
                 ui.Button,
+                'ui-cancel',
                 {
                     /**
-                     * 窗体关闭按钮点击关闭窗体。
                      * @override
                      */
                     $click: function (event) {
                         ui.Button.prototype.$click.call(this, event);
-                        this.getParent().hide();
+                        for (var parent = this.getParent(); parent; parent = parent.getParent()) {
+                            if (parent instanceof ui.Dialog) {
+                                parent.hide();
+                                return;
+                            }
+                        }
+                    }
+                }
+            ),
+
+            /**
+             * 确认按钮控件。
+             * 确认按钮需要置于 Dialog 对话框控件内，用于触发 Dialog 对话框的 submit 事件。
+             * @control
+             */
+            Submit: core.inherits(
+                ui.Button,
+                'ui-submit',
+                {
+                    /**
+                     * @override
+                     */
+                    $click: function (event) {
+                        ui.Button.prototype.$click.call(this, event);
+                        for (var parent = this.getParent(); parent; parent = parent.getParent()) {
+                            if (parent instanceof ui.Dialog) {
+                                core.dispatchEvent(parent, 'submit', event);
+                                return;
+                            }
+                        }
                     }
                 }
             ),
@@ -96,6 +130,7 @@ _uClose     - 关闭按钮
             $cache: function (style) {
                 ui.Layer.prototype.$cache.call(this, style);
                 style = dom.getStyle(this.getBody());
+/*ignore*/
                 if (ieVersion < 8) {
                     var list = style.borderWidth.split(' ');
                     this.$$bodyBorder = [util.toNumber(list[0])];
@@ -108,10 +143,12 @@ _uClose     - 关闭按钮
                     this.$$bodyPadding[2] = list[2] ? util.toNumber(list[2]) : this.$$bodyPadding[0];
                     this.$$bodyPadding[3] = list[3] ? util.toNumber(list[3]) : this.$$bodyPadding[1];
                 } else {
+/*end*/
                     this.$$bodyBorder = [util.toNumber(style.borderTopWidth), util.toNumber(style.borderRightWidth), util.toNumber(style.borderBottomWidth), util.toNumber(style.borderLeftWidth)];
                     this.$$bodyPadding = [util.toNumber(style.paddingTop), util.toNumber(style.paddingRight), util.toNumber(style.paddingBottom), util.toNumber(style.paddingLeft)];
+/*ignore*/
                 }
-
+/*end*/
                 this.$$titleHeight = this._uTitle.getMain().offsetHeight;
             },
 
@@ -136,7 +173,7 @@ _uClose     - 关闭按钮
              * @param {string} text 窗体标题
              */
             setTitle: function (text) {
-                this._uTitle.getBody().innerHTML = text || '';
+                this._uTitle.setContent(text || '');
             }
         }
     );
