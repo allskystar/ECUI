@@ -20,8 +20,9 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
         util = core.util,
 
         JAVASCRIPT = 'javascript',
-
+/*ignore*/
         ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined,
+/*end*/
         firefoxVersion = /firefox\/(\d+\.\d)/i.test(navigator.userAgent) ? +RegExp.$1 : undefined;
 //{/if}//
     var hasReady = false,
@@ -54,7 +55,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
 
         historyOffset = 0,
         historyCache = [];
-
+/*ignore*/
     /**
      * 增加IE的history信息。
      * @private
@@ -77,7 +78,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
             return true;
         }
     }
-
+/*end*/
     /**
      * 渲染结束事件的处理。
      * @private
@@ -262,7 +263,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
             } else {
                 // 解决A标签下反复修改的问题
                 var loc = esr.getLocation().replace('~DENY_CACHE', '');
-
+/*ignore*/
                 if (ieVersion < 7) {
                     if (historyIndex > 1) {
                         // IE第一次进入，不能back，否则会退出框架
@@ -282,6 +283,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                         esr.setLocation(loc);
                     }
                 } else {
+/*end*/
                     pauseStatus = true;
                     setLocation(loc);
                     util.timer(
@@ -291,8 +293,9 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                         },
                         100
                     );
+/*ignore*/
                 }
-
+/*end*/
                 route.CACHE = undefined;
             }
 
@@ -557,6 +560,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
      */
     function init() {
         if (!routeRequestCount) {
+/*ignore*/
             if (ieVersion < 8) {
                 var iframe = document.createElement('iframe');
 
@@ -565,12 +569,17 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
 
                 document.body.appendChild(iframe);
                 setInterval(listener, 100);
-            } else if (window.onhashchange !== undefined) {
-                dom.addEventListener(window, 'hashchange', listener);
-                listener();
             } else {
-                setInterval(listener, 100);
+/*end*/
+                if (window.onhashchange !== undefined) {
+                    dom.addEventListener(window, 'hashchange', listener);
+                    listener();
+                } else {
+                    setInterval(listener, 100);
+                }
+/*ignore*/
             }
+/*end*/
             hasReady = true;
         }
     }
@@ -728,16 +737,20 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                     esr.callRoute(loc);
                 } else if (/~HISTORY=(\d+)/.test(loc)) {
                     historyIndex = +RegExp.$1;
-
+/*ignore*/
                     // ie下使用中间iframe作为中转控制
                     // 其他浏览器直接调用控制器方法
                     if (!addIEHistory(loc)) {
+/*end*/
                         setLocation(loc);
                         esr.callRoute(loc);
+/*ignore*/
                     }
+/*end*/
                 } else {
                     historyCache = historyCache.slice(0, historyIndex - historyOffset - 1);
                     loc += '~HISTORY=' + historyIndex;
+/*ignore*/
                     if (ieVersion < 7) {
                         if (historyIndex > 1) {
                             // IE第一次进入，不能back，否则会退出框架
@@ -760,17 +773,22 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                         }
                         return;
                     }
+/*end*/
                     pauseStatus = true;
                     util.timer(
                         function () {
                             location.replace('#' + loc);
                             pauseStatus = false;
+/*ignore*/
                             // ie下使用中间iframe作为中转控制
                             // 其他浏览器直接调用控制器方法
                             if (!addIEHistory(loc)) {
+/*end*/
                                 setLocation(loc);
                                 esr.callRoute(loc);
+/*ignore*/
                             }
+/*end*/
                         },
                         100
                     );
@@ -1231,10 +1249,14 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
             esr.setLocation(list.join('~'));
 
             if (name) {
+/*ignore*/
                 if (!addIEHistory(currLocation)) {
+/*end*/
                     // change以子路由的方式调用
                     callRoute(name, true);
+/*ignore*/
                 }
+/*end*/
             }
         },
 
@@ -1964,7 +1986,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
 
             esrOptions = JSON.parse('{' + decodeURIComponent(value.replace(/(\w+)\s*=\s*(["A-Za-z0-9_]+)\s*($|,)/g, '"$1":$2$3')) + '}');
 
-            esrOptions.history = esrOptions.history !== false || ieVersion < 7;
+            esrOptions.history =/*ignore*/ ieVersion < 7 ||/*end*/ esrOptions.history !== false;
             esrOptions.cache = esrOptions.cache || 1000;
 
             if (esrOptions.meta) {
