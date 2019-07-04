@@ -99,7 +99,7 @@
      */
     function swipe(event) {
         var viewWidth = document.body.clientWidth;
-        if (util.toNumber(currImg.style.width) !== currHotspot.$$calcWidth) {
+        if ((util.toNumber(currImg.style.width) - currHotspot.$$calcWidth) >= 0.01) {
             return;
         }
         var items = core.query(function (item) {
@@ -120,7 +120,7 @@
             var position = event.type === 'swiperight' ? 1 : -1;
             fillImage(backupImg, items[nextIndex], -position);
             effect.grade(
-                'this.from.style.left=#this.from.style.left->' + (position * viewWidth) + 'px#;this.to.style.left=#this.to.style.left->0px#',
+                'this.from.style.left=#this.from.style.left->' + (position * viewWidth + (viewWidth - util.toNumber(currImg.style.width)) / 2) + 'px#;this.to.style.left=#this.to.style.left->' + ((viewWidth - util.toNumber(backupImg.style.width)) / 2) + 'px#',
                 300,
                 {
                     $: {from: currImg, to: backupImg},
@@ -149,7 +149,7 @@
             width = Math.max(util.toNumber(currImg.style.width) + distance, currHotspot.$$calcWidth);
         currImg.style.width = width + 'px';
 
-        if (width === currHotspot.$$calcWidth) {
+        if (Math.abs(width - currHotspot.$$calcWidth) < 0.01) {
             fillImage(currImg, currHotspot, 0);
         } else {
             currImg.style.top = (util.toNumber(currImg.style.top) - distance / currHotspot.$$calcWidth * currHotspot.$$calcHeight * (event.pageY - (document.body.parentNode.scrollTop || document.body.scrollTop)) / viewHeight) + 'px';
@@ -205,8 +205,12 @@
                             if (width === currHotspot.$$calcWidth) {
                                 return;
                             }
-                            currImg.style.left = Math.max(Math.min(util.toNumber(currImg.style.left) - event.fromX + event.toX, Math.max(0, viewWidth - width)), Math.min(0, viewWidth - width)) + 'px';
-                            currImg.style.top = Math.max(Math.min(util.toNumber(currImg.style.top) - event.fromY + event.toY, Math.max(0, viewHeight - height)), Math.min(0, viewHeight - height)) + 'px';
+                            if (currImg.offsetWidth > document.body.clientWidth) {
+                                currImg.style.left = Math.max(Math.min(util.toNumber(currImg.style.left) - event.fromX + event.toX, Math.max(0, viewWidth - width)), Math.min(0, viewWidth - width)) + 'px';
+                            }
+                            if (currImg.offsetHeight > document.body.clientHeight) {
+                                currImg.style.top = Math.max(Math.min(util.toNumber(currImg.style.top) - event.fromY + event.toY, Math.max(0, viewHeight - height)), Math.min(0, viewHeight - height)) + 'px';
+                            }
                         },
                         pinchin: zoom,
                         pinchout: zoom,
@@ -216,7 +220,7 @@
                                 tapHandle = null;
                                 event.type = 'pinch';
                                 event.from = 0;
-                                event.to = util.toNumber(currImg.style.width) === currHotspot.$$calcWidth ? currHotspot.$$calcWidth * 2 : -util.toNumber(currImg.style.width);
+                                event.to = (Math.abs(util.toNumber(currImg.style.width) - currHotspot.$$calcWidth) < 0.01) ? currHotspot.$$calcWidth * 2 : -util.toNumber(currImg.style.width);
                                 zoom(event);
                             } else {
                                 tapHandle = util.timer(ui.MPhotoHotspot.close, 300);
