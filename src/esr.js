@@ -2058,7 +2058,10 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                 } else {
                     renderer = value[3].length < 2 ? engine.compile(this.getContent().replace(/\$([\w.]+)/g, '${$1}')) : engine.getRenderer(value[3].slice(1));
                     setData = function (data) {
-                        this.setContent(renderer(value[2].length > 1 ? context : data));
+//{if 0}//
+                        this.setContent(renderer(value[2].length > 1 ? context : data).replace(/([^A-Za-z0-9_])NS\./g, '$1NS.ui.'));
+//{else}//                        this.setContent(renderer(value[2].length > 1 ? context : data));
+//{/if}//
                     };
                 }
 
