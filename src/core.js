@@ -715,11 +715,13 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             mousedown: util.blank,
 
             mousemove: function (event) {
-                if (!currEnv.dragstart) {
-                    core.dispatchEvent(currEnv.target, 'dragstart', {track: event.track});
-                    dom.addClass(document.body, 'ui-drag');
-                    currEnv.dragstart = true;
-                }
+                currEnv.envs.forEach(function (env) {
+                    if (!env.dragstart) {
+                        core.dispatchEvent(env.target, 'dragstart', {track: event.track});
+                        dom.addClass(document.body, 'ui-drag');
+                        env.dragstart = true;
+                    }
+                });
 
                 envStack[envStack.length - 1].mousemove(event);
 
@@ -734,7 +736,9 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                         500
                     );
                 } else {
-                    dragmove(event.track, currEnv, event.clientX, event.clientY);
+                    currEnv.envs.forEach(function (env) {
+                        dragmove(event.track, env, event.clientX, event.clientY);
+                    });
                 }
                 event.preventDefault();
             },
@@ -742,77 +746,53 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             mouseup: function (event) {
                 dragStopHandler();
 
-                if (currEnv.dragstart) {
-                    disableEnv.mouseup(event);
+                disableEnv.mouseup(event);
+                currEnv.envs.forEach(function (env) {
+                    if (env.dragstart) {
+                        var track = Object.assign({}, event.track),
+                            target = env.target,
+                            uid = target.getUID(),
+                            mx = event.clientX,
+                            my = event.clientY,
+                            start = Date.now(),
+                            vx = track.speedX || 0,
+                            vy = track.speedY || 0,
+                            inertia = target.$draginertia ? target.$draginertia({x: vx, y: vy}) : env.decelerate ? Math.sqrt(vx * vx + vy * vy) / env.decelerate : 0,
+                            dragEvent = new ECUIEvent();
 
-                    var track = event.track,
-                        target = currEnv.target,
-                        uid = target.getUID(),
-                        mx = event.clientX,
-                        my = event.clientY,
-                        start = Date.now(),
-                        vx = track.speedX || 0,
-                        vy = track.speedY || 0,
-                        inertia = target.$draginertia ? target.$draginertia({x: vx, y: vy}) : currEnv.decelerate ? Math.sqrt(vx * vx + vy * vy) / currEnv.decelerate : 0,
-                        dragEvent = new ECUIEvent();
+                        dragEvent.track = track;
 
-                    dragEvent.track = track;
+                        if (inertia) {
+                            var ax = vx / inertia,
+                                ay = vy / inertia;
 
-                    if (inertia) {
-                        var ax = vx / inertia,
-                            ay = vy / inertia,
-    //                        sx = vx * inertia - ax * inertia * inertia / 2,
-    //                        sy = vy * inertia - ay * inertia * inertia / 2,
-                            env = currEnv;
+                            var startX = track.x,
+                                startY = track.y;
 
-                        // if (ieVersion < 9) {
-                        var startX = track.x,
-                            startY = track.y;
+                            inertiaHandles[uid] = util.timer(
+                                function () {
+                                    var time = (Date.now() - start) / 1000,
+                                        t = Math.min(time, inertia),
+                                        x = track.x,
+                                        y = track.y;
 
-                        inertiaHandles[uid] = util.timer(
-                            function () {
-                                var time = (Date.now() - start) / 1000,
-                                    t = Math.min(time, inertia),
-                                    x = track.x,
-                                    y = track.y;
-
-                                dragmove(track, env, Math.round(mx + vx * t - ax * t * t / 2), Math.round(my + vy * t - ay * t * t / 2));
-                                if (t >= inertia || (x === track.x && y === track.y)) {
-                                    inertiaHandles[uid]();
-                                    delete inertiaHandles[uid];
-                                    if (env.event && startX === x && startY === y) {
-                                        env.event.inertia = false;
+                                    dragmove(track, env, Math.round(mx + vx * t - ax * t * t / 2), Math.round(my + vy * t - ay * t * t / 2));
+                                    if (t >= inertia || (x === track.x && y === track.y)) {
+                                        inertiaHandles[uid]();
+                                        delete inertiaHandles[uid];
+                                        if (env.event && startX === x && startY === y) {
+                                            env.event.inertia = false;
+                                        }
+                                        dragend(dragEvent, env, target);
                                     }
-                                    dragend(dragEvent, env, target);
-                                }
-                            },
-                            -1
-                        );
-                        // } else {
-                        //     var x = target.getX(),
-                        //         y = target.getY(),
-                        //         result = calcPosition(track, env, Math.round(x + sx), Math.round(y + sy));
-
-                        //     sx = result.x - x;
-                        //     sy = result.y - y;
-                        //     inertia = Math.max((Math.abs(vx) - Math.sqrt(vx * vx - 2 * ax * sx)) / Math.abs(ax) || 0, (Math.abs(vy) - Math.sqrt(vy * vy - 2 * ay * sy)) / Math.abs(ay) || 0) || inertia;
-
-                        //     delete currEnv.event;
-                        //     core.dispatchEvent(target, 'dragmove', {x: result.x, y: result.y, inertia: true});
-                        //     if (result.x !== x || result.y !== y) {
-                        //         createInertiaHandles(target, inertia * 1000, function () {
-                        //             dragend(dragEvent, env, target);
-                        //         });
-                        //         target.getPositionElement().style.transition = 'all ' + inertia + 's ease-out';
-                        //         target.setPosition(result.x, result.y);
-                        //     } else {
-                        //         dragend(dragEvent, currEnv, target);
-                        //     }
-                        // }
-                    } else {
-                        dragend(dragEvent, currEnv, target);
+                                },
+                                -1
+                            );
+                        } else {
+                            dragend(dragEvent, env, target);
+                        }
                     }
-                }
+                });
                 restore();
 
                 currEnv.mouseup(event);
@@ -1067,21 +1047,20 @@ outer:          for (var caches = [], target = event.target, el; target && targe
         x = Math.min(Math.max(x, env.left), env.right);
         y = Math.min(Math.max(y, env.top), env.bottom);
 
-        if (env.limit) {
-            var scale = 1 - 1 / (env.limitRatio || 3);
+        var scale = 1 - 1 / env.limit.ratio;
 
-            if (x < env.limitLeft) {
-                x -= Math.round((x - env.limitLeft) * scale);
-            } else if (x > env.limitRight) {
-                x -= Math.round((x - env.limitRight) * scale);
-            }
-
-            if (y < env.limitTop) {
-                y -= Math.round((y - env.limitTop) * scale);
-            } else if (y > env.limitBottom) {
-                y -= Math.round((y - env.limitBottom) * scale);
-            }
+        if (x < env.limit.left) {
+            x -= Math.round((x - env.limit.left) * scale);
+        } else if (x > env.limit.right) {
+            x -= Math.round((x - env.limit.right) * scale);
         }
+
+        if (y < env.limit.top) {
+            y -= Math.round((y - env.limit.top) * scale);
+        } else if (y > env.limit.bottom) {
+            y -= Math.round((y - env.limit.bottom) * scale);
+        }
+
         return {
             x: x,
             y: y
@@ -1111,15 +1090,11 @@ outer:          for (var caches = [], target = event.target, el; target && targe
             }
         }
 
-        track.lastMoveTime = track.path[i].time;
-        track.clientX = track.path[i].x;
-        track.clientY = track.path[i].y;
+        var delay = time - track.path[i].time > 500,
+            offsetX = event.clientX - track.path[i].x,
+            offsetY = event.clientY - track.path[i].y,
+            speed = 1000 / (time - track.path[i].time);
         track.path.splice(0, i);
-
-        var delay = time - track.lastMoveTime > 500,
-            offsetX = event.clientX - track.clientX,
-            offsetY = event.clientY - track.clientY,
-            speed = 1000 / (time - track.lastMoveTime);
 
         track.speedX = delay ? 0 : offsetX * speed;
         track.speedY = delay ? 0 : offsetY * speed;
@@ -1257,53 +1232,46 @@ outer:          for (var caches = [], target = event.target, el; target && targe
         }
         var uid = target.getUID();
 
-        if (env.limit) {
-            var range = env.limit,
-                x = target.getX(),
-                y = target.getY(),
-                expectX = Math.min(range.right === undefined ? x : range.right, Math.max(range.left === undefined ? x : range.left, x)),
-                expectY = Math.min(range.bottom === undefined ? y : range.bottom, Math.max(range.top === undefined ? y : range.top, y));
+        var range = env.limit,
+            x = target.getX(),
+            y = target.getY(),
+            expectX = Math.min(range.right === undefined ? x : range.right, Math.max(range.left === undefined ? x : range.left, x)),
+            expectY = Math.min(range.bottom === undefined ? y : range.bottom, Math.max(range.top === undefined ? y : range.top, y));
 
-            if (range.stepX) {
-                expectX = Math.round(expectX / range.stepX) * range.stepX;
-            }
-            if (range.stepY) {
-                expectY = Math.round(expectY / range.stepY) * range.stepY;
-            }
-
-            if (x !== expectX || y !== expectY) {
-                // if (ieVersion < 9) {
-                // 如果使用css动画，ios多次快速滑动会卡住
-                inertiaHandles[uid] = effect.grade(
-                    function (percent, options) {
-                        event.x = Math.round(options.x + percent * (expectX - options.x));
-                        event.y = Math.round(options.y + percent * (expectY - options.y));
-                        event.inertia = true;
-
-                        dragAnimationFrame(env, target, event);
-
-                        if (percent >= 1) {
-                            inertiaHandles[uid]();
-                            delete inertiaHandles[uid];
-                            dragAnimationFrame(env, target);
-                        }
-                    },
-                    300,
-                    {
-                        $: env.el || target.getMain(),
-                        x: x,
-                        y: y
-                    }
-                );
-                // } else {
-                //     delete env.event;
-                //     createInertiaHandles(target, 300, finish);
-                //     target.getPositionElement().style.transition = 'all 0.5s';
-                //     target.setPosition(expectX, expectY);
-                // }
-                return;
-            }
+        if (range.stepX) {
+            expectX = Math.round(expectX / range.stepX) * range.stepX;
         }
+        if (range.stepY) {
+            expectY = Math.round(expectY / range.stepY) * range.stepY;
+        }
+
+        if (x !== expectX || y !== expectY) {
+            // if (ieVersion < 9) {
+            // 如果使用css动画，ios多次快速滑动会卡住
+            inertiaHandles[uid] = effect.grade(
+                function (percent, options) {
+                    event.x = Math.round(options.x + percent * (expectX - options.x));
+                    event.y = Math.round(options.y + percent * (expectY - options.y));
+                    event.inertia = true;
+
+                    dragAnimationFrame(env, target, event);
+
+                    if (percent >= 1) {
+                        inertiaHandles[uid]();
+                        delete inertiaHandles[uid];
+                        dragAnimationFrame(env, target);
+                    }
+                },
+                300,
+                {
+                    $: env.el || target.getMain(),
+                    x: x,
+                    y: y
+                }
+            );
+            return;
+        }
+
         dragAnimationFrame(env, target);
     }
 
@@ -1327,7 +1295,7 @@ outer:          for (var caches = [], target = event.target, el; target && targe
             expectY = Math.round(env.originalY + y - track.logicY);
 
         var result = calcPosition(track, env, expectX, expectY);
-        dragAnimationFrame(env, env.target, {track: track, x: result.x, y: result.y, inertia: env !== currEnv});
+        dragAnimationFrame(env, env.target, {track: track, x: result.x, y: result.y, inertia: currEnv.type !== 'drag'});
 
         track.x = result.x;
         track.y = result.y;
@@ -2256,54 +2224,109 @@ outer:          for (var caches = [], target = event.target, el; target && targe
                 force = true;
             }
 
-            if (event && activedControl !== undefined && currEnv.type !== 'drag') {
-                setEnv(dragEnv);
-
-                // 判断鼠标没有mouseup
-                var parent = control.getMain().offsetParent || document.documentElement,
-                    style = dom.getStyle(parent);
-
-                // 拖拽范围默认不超出上级元素区域
-                Object.assign(
-                    currEnv,
-                    parent.tagName === 'BODY' || parent.tagName === 'HTML' ? util.getView() : {
-                        top: 0,
-                        right: parent.offsetWidth - util.toNumber(style.borderLeftWidth) - util.toNumber(style.borderRightWidth),
-                        bottom: parent.offsetHeight - util.toNumber(style.borderTopWidth) - util.toNumber(style.borderBottomWidth),
-                        left: 0
+            if (activedControl !== undefined) {
+                if (event instanceof ECUIEvent) {
+                    if (currEnv.type !== 'drag') {
+                        setEnv(dragEnv);
+                        currEnv.envs = [];
                     }
-                );
-                Object.assign(currEnv, options);
 
-                var x = currEnv.x !== undefined ? currEnv.x : control.getX(),
-                    y = currEnv.y !== undefined ? currEnv.y : control.getY();
+                    // 判断鼠标没有mouseup
+                    var parent = control.getMain().offsetParent || document.documentElement,
+                        style = dom.getStyle(parent),
+                        env = {};
 
-                if (!currEnv.absolute) {
-                    currEnv.right = Math.max(currEnv.right - control.getWidth(), currEnv.left);
-                    currEnv.bottom = Math.max(currEnv.bottom - control.getHeight(), currEnv.top);
+
+                    // 拖拽范围默认不超出上级元素区域
+                    Object.assign(
+                        currEnv,
+                        env,
+                        parent.tagName === 'BODY' || parent.tagName === 'HTML' ? util.getView() : {
+                            top: 0,
+                            right: parent.offsetWidth - util.toNumber(style.borderLeftWidth) - util.toNumber(style.borderRightWidth),
+                            bottom: parent.offsetHeight - util.toNumber(style.borderTopWidth) - util.toNumber(style.borderBottomWidth),
+                            left: 0
+                        }
+                    );
+                    Object.assign(env, options);
+
+                    var x = env.x !== undefined ? env.x : control.getX(),
+                        y = env.y !== undefined ? env.y : control.getY();
+
+                    if (!env.absolute) {
+                        env.right = Math.max(env.right - control.getWidth(), env.left);
+                        env.bottom = Math.max(env.bottom - control.getHeight(), env.top);
+                    }
+                    env.originalX = x;
+                    env.originalY = y;
+
+                    env.limit = Object.assign(
+                        {
+                            ratio: 3,
+                            left: env.left,
+                            right: env.right,
+                            top: env.top,
+                            bottom: env.bottom
+                        },
+                        env.limit
+                    );
+
+                    env.left += (env.left - env.limit.left) * (env.limit.ratio - 1);
+                    env.right += (env.right - env.limit.right) * (env.limit.ratio - 1);
+                    env.top += (env.top - env.limit.top) * (env.limit.ratio - 1);
+                    env.bottom += (env.bottom - env.limit.bottom) * (env.limit.ratio - 1);
+                    env.target = control;
+
+                    event.track.logicX = event.clientX;
+                    event.track.logicY = event.clientY;
+                    control.setPosition(x, y);
+
+                    env.dragstart = force;
+
+                    currEnv.envs.push(env);
+                } else if (event && currEnv.type === 'drag') {
+                    currEnv.envs.forEach(function (env) {
+                        if (env.target === control) {
+                            env.left -= (env.left - env.limit.left) * (env.limit.ratio - 1) / env.limit.ratio;
+                            env.right -= (env.right - env.limit.right) * (env.limit.ratio - 1) / env.limit.ratio;
+                            env.top -= (env.top - env.limit.top) * (env.limit.ratio - 1) / env.limit.ratio;
+                            env.bottom -= (env.bottom - env.limit.bottom) * (env.limit.ratio - 1) / env.limit.ratio;
+                            if (event.left) {
+                                env.left += event.left;
+                            }
+                            if (event.right) {
+                                env.right += event.right;
+                            }
+                            if (event.top) {
+                                env.top += event.top;
+                            }
+                            if (event.bottom) {
+                                env.bottom += event.bottom;
+                            }
+                            if (event.limit) {
+                                if (event.limit.ratio) {
+                                    env.limit.ratio = event.limit.ratio;
+                                }
+                                if (event.limit.left) {
+                                    env.limit.left += event.limit.left;
+                                }
+                                if (event.limit.right) {
+                                    env.limit.right += event.limit.right;
+                                }
+                                if (event.limit.top) {
+                                    env.limit.top += event.limit.top;
+                                }
+                                if (event.limit.bottom) {
+                                    env.limit.bottom += event.limit.bottom;
+                                }
+                            }
+                            env.left += (env.left - env.limit.left) * (env.limit.ratio - 1);
+                            env.right += (env.right - env.limit.right) * (env.limit.ratio - 1);
+                            env.top += (env.top - env.limit.top) * (env.limit.ratio - 1);
+                            env.bottom += (env.bottom - env.limit.bottom) * (env.limit.ratio - 1);
+                        }
+                    });
                 }
-                currEnv.originalX = x;
-                currEnv.originalY = y;
-
-                if (currEnv.limit) {
-                    currEnv.limitRatio = currEnv.limit.ratio || 3;
-                    currEnv.limitLeft = currEnv.limit.left === undefined ? currEnv.left : currEnv.limit.left;
-                    currEnv.left += (currEnv.left - currEnv.limitLeft) * (currEnv.limitRatio - 1);
-                    currEnv.limitRight = currEnv.limit.right === undefined ? currEnv.right : currEnv.limit.right;
-                    currEnv.right += (currEnv.right - currEnv.limitRight) * (currEnv.limitRatio - 1);
-                    currEnv.limitTop = currEnv.limit.top === undefined ? currEnv.top : currEnv.limit.top;
-                    currEnv.top += (currEnv.top - currEnv.limitTop) * (currEnv.limitRatio - 1);
-                    currEnv.limitBottom = currEnv.limit.bottom === undefined ? currEnv.bottom : currEnv.limit.bottom;
-                    currEnv.bottom += (currEnv.bottom - currEnv.limitBottom) * (currEnv.limitRatio - 1);
-                }
-                currEnv.target = control;
-
-                event.track.logicX = event.clientX;
-                event.track.logicY = event.clientY;
-                control.setPosition(x, y);
-
-                currEnv.dragstart = force;
-
                 //这里不能preventDefault事件，否则input的软键盘无法出现
             }
         },
