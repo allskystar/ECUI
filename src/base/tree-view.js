@@ -237,7 +237,9 @@ _aChildren     - 子控件集合
                         root._cSelected = null;
                     }
 
-                    util.remove(oldParent._aChildren, this);
+                    if (oldParent._aChildren) {
+                        util.remove(oldParent._aChildren, this);
+                    }
                     refresh(oldParent);
                 }
 
