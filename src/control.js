@@ -383,11 +383,6 @@ _aStatus            - 控件当前的状态集合
             $initStructure: util.blank,
 
             /**
-             * 强制拦截事件。
-             * @event
-             */
-
-            /**
              * 键盘键按下事件。
              * @event
              */
