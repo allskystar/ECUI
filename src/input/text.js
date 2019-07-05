@@ -75,15 +75,7 @@ _ePlaceHolder - 为空时的提示信息标签
                 ui.InputControl.prototype.$cache.call(this, style);
                 if (this._ePlaceHolder) {
                     style = dom.getStyle(this._ePlaceHolder);
-                    if (ieVersion < 8) {
-                        var list = style.padding.split(' ');
-                        this.$$placeholder = [util.toNumber(list[0])];
-                        this.$$placeholder[1] = list[1] ? util.toNumber(list[1]) : this.$$placeholder[0];
-                        this.$$placeholder[2] = list[2] ? util.toNumber(list[2]) : this.$$placeholder[0];
-                        this.$$placeholder[3] = list[3] ? util.toNumber(list[3]) : this.$$placeholder[1];
-                    } else {
-                        this.$$placeholder = [util.toNumber(style.paddingTop), util.toNumber(style.paddingRight), util.toNumber(style.paddingBottom), util.toNumber(style.paddingLeft)];
-                    }
+                    this.$$placeholder = [util.toNumber(style.paddingTop), util.toNumber(style.paddingRight), util.toNumber(style.paddingBottom), util.toNumber(style.paddingLeft)];
                 }
             },
 

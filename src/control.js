@@ -190,25 +190,8 @@ _aStatus            - 控件当前的状态集合
              * @param {CssStyle} style 主元素的css样式对象
              */
             $cache: function (style) {
-/*ignore*/
-                if (ieVersion < 8) {
-                    var list = style.borderWidth.split(' ');
-                    this.$$border = [util.toNumber(list[0])];
-                    this.$$border[1] = list[1] ? util.toNumber(list[1]) : this.$$border[0];
-                    this.$$border[2] = list[2] ? util.toNumber(list[2]) : this.$$border[0];
-                    this.$$border[3] = list[3] ? util.toNumber(list[3]) : this.$$border[1];
-                    list = style.padding.split(' ');
-                    this.$$padding = [util.toNumber(list[0])];
-                    this.$$padding[1] = list[1] ? util.toNumber(list[1]) : this.$$padding[0];
-                    this.$$padding[2] = list[2] ? util.toNumber(list[2]) : this.$$padding[0];
-                    this.$$padding[3] = list[3] ? util.toNumber(list[3]) : this.$$padding[1];
-                } else {
-/*end*/
-                    this.$$border = [util.toNumber(style.borderTopWidth), util.toNumber(style.borderRightWidth), util.toNumber(style.borderBottomWidth), util.toNumber(style.borderLeftWidth)];
-                    this.$$padding = [util.toNumber(style.paddingTop), util.toNumber(style.paddingRight), util.toNumber(style.paddingBottom), util.toNumber(style.paddingLeft)];
-/*ignore*/
-                }
-/*end*/
+                this.$$border = [util.toNumber(style.borderTopWidth), util.toNumber(style.borderRightWidth), util.toNumber(style.borderBottomWidth), util.toNumber(style.borderLeftWidth)];
+                this.$$padding = [util.toNumber(style.paddingTop), util.toNumber(style.paddingRight), util.toNumber(style.paddingBottom), util.toNumber(style.paddingLeft)];
                 this.$$width = this._eMain.offsetWidth;
                 this.$$height = this._eMain.offsetHeight;
             },

@@ -150,14 +150,15 @@ _nBottomIndex  - 下部隐藏的选项序号
                             bottom: this.$$titleHeight
                         }
                     );
+                    if (this.isReady()) {
+                        var y = this.getY();
+                        if (y <= top || (y > this.$$titleHeight && !top)) {
+                            this.setPosition(0, top);
+                        }
+                    }
                 } else {
                     this.$$bodyHeight = this.getBody().offsetHeight;
-                }
-                if (this.isReady()) {
-                    var y = this.getY();
-                    if (y <= top || (y > this.$$titleHeight && !top)) {
-                        this.setPosition(0, top);
-                    }
+                    this.refresh();
                 }
             },
 
@@ -168,15 +169,7 @@ _nBottomIndex  - 下部隐藏的选项序号
                 ui.Control.prototype.$cache.call(this, style);
                 var body = this.getBody();
                 style = dom.getStyle(body);
-                if (ieVersion < 8) {
-                    var list = style.padding.split(' ');
-                    this.$$bodyPadding = [util.toNumber(list[0])];
-                    this.$$bodyPadding[1] = list[1] ? util.toNumber(list[1]) : this.$$bodyPadding[0];
-                    this.$$bodyPadding[2] = list[2] ? util.toNumber(list[2]) : this.$$bodyPadding[0];
-                    this.$$bodyPadding[3] = list[3] ? util.toNumber(list[3]) : this.$$bodyPadding[1];
-                } else {
-                    this.$$bodyPadding = [util.toNumber(style.paddingTop), util.toNumber(style.paddingRight), util.toNumber(style.paddingBottom), util.toNumber(style.paddingLeft)];
-                }
+                this.$$bodyPadding = [util.toNumber(style.paddingTop), util.toNumber(style.paddingRight), util.toNumber(style.paddingBottom), util.toNumber(style.paddingLeft)];
                 this.$$headerHeight = this._eHeader.offsetHeight;
                 this.$$titleHeight = this._eTitle ? this._eTitle.offsetHeight : 0;
                 this.$$footerHeight = this._eFooter.offsetHeight;

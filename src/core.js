@@ -2238,19 +2238,14 @@ outer:          for (var caches = [], target = event.target, el; target && targe
                     // 判断鼠标没有mouseup
                     var parent = control.getMain().offsetParent || document.documentElement,
                         style = dom.getStyle(parent),
-                        env = {};
-
-
-                    // 拖拽范围默认不超出上级元素区域
-                    Object.assign(
-                        env,
-                        parent.tagName === 'BODY' || parent.tagName === 'HTML' ? util.getView() : {
+                        // 拖拽范围默认不超出上级元素区域
+                        env = parent.tagName === 'BODY' || parent.tagName === 'HTML' ? util.getView() : {
                             top: 0,
                             right: parent.offsetWidth - util.toNumber(style.borderLeftWidth) - util.toNumber(style.borderRightWidth),
                             bottom: parent.offsetHeight - util.toNumber(style.borderTopWidth) - util.toNumber(style.borderBottomWidth),
                             left: 0
-                        }
-                    );
+                        };
+
                     Object.assign(env, options);
 
                     var x = env.x !== undefined ? env.x : control.getX(),

@@ -334,9 +334,31 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              */
             getStyle: function (el, name) {
                 var fixer = __ECUI__StyleFixer[name],
-                    style = window.getComputedStyle ? getComputedStyle(el, null) : (el.currentStyle || el.style);
+                    style = getComputedStyle(el, null);
 
-                return name ? fixer && fixer.get ? fixer.get(el, style) : style[fixer || name] : style;
+                style = name ? fixer && fixer.get ? fixer.get(el, style) : style[fixer || name] : style;
+
+                if (ieVersion < 8) {
+                    try {
+                        var list = style.borderWidth.split(' ');
+                        style.borderTopWidth = list[0];
+                        style.borderRightWidth = list[1] || list[0];
+                        style.borderBottomWidth = list[2] || list[0];
+                        style.borderLeftWidth = list[3] || list[1] || list[0];
+                        list = style.padding.split(' ');
+                        style.paddingTop = list[0];
+                        style.paddingRight = list[1] || list[0];
+                        style.paddingBottom = list[2] || list[0];
+                        style.paddingLeft = list[3] || list[1] || list[0];
+                        list = style.margin.split(' ');
+                        style.marginTop = list[0];
+                        style.marginRight = list[1] || list[0];
+                        style.marginBottom = list[2] || list[0];
+                        style.marginLeft = list[3] || list[1] || list[0];
+                    } catch (ignore) {
+                    }
+                }
+                return style;
             },
 
             /**
@@ -1719,6 +1741,12 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
 
     if (ieVersion < 9) {
         document.head = document.getElementsByTagName('HEAD')[0];
+    }
+
+    if (!window.getComputedStyle) {
+        window.getComputedStyle = function (el) {
+            return el.currentStyle || el.style;
+        };
     }
 
     try {
