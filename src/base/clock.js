@@ -1,10 +1,13 @@
 /*
 @example
-<div ui="type:clock"></div>
-
+<div ui="type:clock;id:demo"></div>
+*/
+/*ignore*/
+/*
 @fields
 _sFormat        - 显示格式
 */
+/*end*/
 (function () {
 //{if 0}//
     var core = ecui,
@@ -20,19 +23,26 @@ _sFormat        - 显示格式
     ui.Clock = core.inherits(
         ui.Control,
         function (el, options) {
+/*ignore*/
+            this._sFormat = options.format || '{0}:{1}:{2}';
+/*end*/
             ui.Control.call(this, el, options);
-            this._sFormat = options.format || this.FORMAT;
-            this.start();
         },
         {
-            FORMAT: '{0}:{1}:{2}',
-
             /**
              * @override
              */
             $dispose: function () {
                 this.stop();
                 ui.Control.prototype.$dispose.call(this);
+            },
+
+            /**
+             * @override
+             */
+            init: function () {
+                ui.Control.prototype.init.call(this);
+                this.start();
             },
 
             /**
