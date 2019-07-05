@@ -238,7 +238,7 @@
                 this.$ItemsData.items.forEach(function (item) {
                     item.cache(force);
                 });
-                if (this.isReady()) {
+                if (force && this.isReady()) {
                     this.$alterItems();
                 }
             },

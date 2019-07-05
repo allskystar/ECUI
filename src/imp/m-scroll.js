@@ -261,6 +261,21 @@
             this.$MScrollData.scrolling = false;
             this.$MScrollData.inertia = false;
 
+            if (keyboardHeight && iosVersion !== 11.1 && iosVersion !== 11.2) {
+                var options = getOptions.call(this),
+                    height = util.getView().height / 2,
+                    oldScrollY = window.scrollY,
+                    y = this.getY();
+                if (options.bottom - y < height) {
+                    window.scrollTo(0, keyboardHeight);
+                    fixed();
+                } else if (y - options.top < height) {
+                    window.scrollTo(0, 0);
+                    fixed();
+                }
+                dom.setStyle(this.getBody(), 'transform', 'translate(' + ui.MScroll.Methods.getX.call(this) + 'px,' + (y - oldScrollY + window.scrollY) + 'px)');
+            }
+
             var activeElement = document.activeElement;
             if (util.hasIOSKeyboard(activeElement)) {
                 if (!calcY(this, keyboardHeight)) {
@@ -364,7 +379,7 @@
          * @override
          */
         getY: function () {
-            return util.toNumber(dom.getStyle(this.getBody(), 'transform').split(',')[5]) - window.scrollY;
+            return util.toNumber(dom.getStyle(this.getBody(), 'transform').split(',')[5]);
         },
 
         /**
@@ -426,18 +441,7 @@
          */
         setPosition: function (x, y) {
             // 解决光标问题
-            var oldY = ui.MScroll.Methods.getY.call(this);
-            if (ui.MScroll.Methods.getX.call(this) !== x || oldY !== y) {
-                // if (keyboardHeight && iosVersion !== 11.1 && iosVersion !== 11.2) {
-                //     if (oldY < y) {
-                //         window.scrollBy(0, -Math.min(window.scrollY, y - oldY));
-                //         fixed();
-                //     } else if (oldY > y) {
-                //         window.scrollBy(0, Math.min(keyboardHeight - window.scrollY, oldY - y));
-                //         fixed();
-                //     }
-                // }
-                // dom.setStyle(this.getBody(), 'transform', keyboardHeight ? 'translate(' + x + 'px,' + (y + window.scrollY) + 'px)' : 'translate3d(' + x + 'px,' + y + 'px,0px)');
+            if (ui.MScroll.Methods.getX.call(this) !== x || ui.MScroll.Methods.getY.call(this) !== y) {
                 dom.setStyle(this.getBody(), 'transform', keyboardHeight ? 'translate(' + x + 'px,' + y + 'px)' : 'translate3d(' + x + 'px,' + y + 'px,0px)');
             }
             core.query(

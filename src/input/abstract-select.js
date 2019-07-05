@@ -108,6 +108,7 @@ _uOptions     - 下拉选择框
             Item: core.inherits(
                 ui.Item,
                 function (el, options) {
+                    options.focusable = false;
                     ui.Item.call(this, el, options);
                     this._sValue = options.value === undefined ? dom.getText(el) : String(options.value);
                 },
@@ -122,6 +123,17 @@ _uOptions     - 下拉选择框
                         if (parent.getSelected() !== this) {
                             parent.setSelected(this);
                             core.dispatchEvent(parent, 'change', event);
+                        }
+                    },
+
+                    /**
+                     * @override
+                     */
+                    $mouseover: function (event) {
+                        ui.Item.prototype.$mouseover.call(this, event);
+                        var parent = this.getParent();
+                        if (parent) {
+                            parent.setSelecting(this);
                         }
                     },
 
