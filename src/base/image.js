@@ -1,11 +1,14 @@
 /*
 @example
 <img ui="type:image">
-
+*/
+/*ignore*/
+/*
 @fields
 _nMinWidth 原始的宽度
 _nRatio    原始的宽高比例
 */
+/*end*/
 (function () {
 //{if 0}//
     var core = ecui,
@@ -17,12 +20,11 @@ _nRatio    原始的宽高比例
      * @private
      */
     function load(event) {
-        var control = event.target.getControl();
-        control._nMinWidth = event.target.width;
-        control._nRatio = event.target.height / event.target.width;
-        dom.removeEventListener(this, 'load', load);
-        if (control.isReady()) {
-            control.cache();
+        this._nMinWidth = event.target.width;
+        this._nRatio = event.target.height / event.target.width;
+        dom.removeEventListener(this, 'load', this._UIImage_oHandler);
+        if (this.isReady()) {
+            this.cache();
         }
     }
 
@@ -39,9 +41,9 @@ _nRatio    原始的宽高比例
             options.userSelect = false;
             ui.Control.call(this, el, options);
             if (el.width) {
-                load({target: el});
+                load.call(this, {target: el});
             } else {
-                dom.addEventListener(el, 'load', load);
+                dom.addEventListener(el, 'load', this._UIImage_oHandler = load.bind(this));
             }
         },
         {

@@ -254,8 +254,7 @@ _eContainer      - 容器 DOM 元素
                 return this._eContainer;
             }
         },
-        ui.Items
+        ui.Items,
+        ui.Control.defineProperty('selected')
     );
-
-    ui.Items.defineProperty(ui.Tab, 'selected');
 }());

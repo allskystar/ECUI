@@ -44,24 +44,6 @@
             /**
              * @override
              */
-            $setParent: function (parent) {
-                var oldParent = this.getParent();
-                if (oldParent) {
-                    for (var name in oldParent.$ItemsData.properties) {
-                        if (oldParent.$ItemsData.properties.hasOwnProperty(name)) {
-                            if (oldParent.$ItemsData.properties[name] === this) {
-                                oldParent[name]();
-                            }
-                        }
-                    }
-                }
-
-                ui.Control.prototype.$setParent.call(this, parent);
-            },
-
-            /**
-             * @override
-             */
             $show: function (event) {
                 ui.Control.prototype.$show.call(this, event);
                 var parent = this.getParent();
@@ -89,40 +71,6 @@
 
     ui.Items = {
         NAME: '$Items',
-
-        defineProperty: function (UIClass, name) {
-            var propertyName = '$set' + name.charAt(0).toUpperCase() + name.slice(1);
-
-            UIClass.prototype[propertyName] = function (item) {
-                item = item || null;
-                var oldItem = this.$ItemsData.properties[propertyName];
-                if (oldItem !== item) {
-                    if (oldItem) {
-                        oldItem.alterStatus('-' + name);
-                    }
-                    if (item) {
-                        item.alterStatus('+' + name);
-                    }
-                    this.$ItemsData.properties[propertyName] = item;
-                    return oldItem || null;
-                }
-            };
-
-            UIClass.prototype[propertyName.slice(1)] = function (item) {
-                if ('number' === typeof item) {
-                    item = this.getItem(item);
-                }
-
-                var oldItem = this[propertyName](item);
-                if (oldItem !== undefined) {
-                    core.dispatchEvent(this, 'propertychange', {name: name, item: item, history: oldItem});
-                }
-            };
-
-            UIClass.prototype['g' + propertyName.slice(2)] = function () {
-                return this.$ItemsData.properties[propertyName] || null;
-            };
-        },
 
         constructor: function () {
             this.$ItemsData.prevent = 0;

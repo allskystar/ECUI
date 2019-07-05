@@ -324,8 +324,7 @@ _uOptions     - 下拉选择框
                 }
             }
         },
-        ui.Items
+        ui.Items,
+        ui.Control.defineProperty('selected')
     );
-
-    ui.Items.defineProperty(ui.$select, 'selected');
 }());

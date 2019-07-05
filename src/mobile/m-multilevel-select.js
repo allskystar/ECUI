@@ -165,7 +165,8 @@ _aSelect - 全部的下拉框控件列表
                         }
                     }
                 },
-                ui.Items
+                ui.Items,
+                ui.Control.defineProperty('selected')
             ),
 
             /**
@@ -200,8 +201,6 @@ _aSelect - 全部的下拉框控件列表
             }
         }
     );
-
-    ui.Items.defineProperty(ui.MMultilevelSelect.prototype.Select, 'selected');
 //{if 0}//
 }());
 //{/if}//
