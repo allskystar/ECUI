@@ -114,8 +114,8 @@ _cItem    - 当前处于激活的选项
                     /**
                      * @override
                      */
-                    $restoreStructure: function (event) {
-                        ui.MListView.prototype.Item.prototype.$restoreStructure.call(this, event);
+                    $restoreStructure: function () {
+                        ui.MListView.prototype.Item.prototype.$restoreStructure.call(this);
                         dom.children(this.getBody()).forEach(function (item, index) {
                             if (index) {
                                 item.style.height = '';
@@ -127,7 +127,7 @@ _cItem    - 当前处于激活的选项
                      * @override
                      */
                     getX: function () {
-                        return this.getBody() ? +dom.first(this.getBody()).style.transform.replace(/translateX\((-?[0-9.]+)px\)/, '$1') : 0;
+                        return +dom.first(this.getBody()).style.transform.replace(/translateX\((-?[0-9.]+)px\)/, '$1');
                     },
 
                     /**
@@ -187,6 +187,18 @@ _cItem    - 当前处于激活的选项
             $dragstart: function (event) {
                 ui.MListView.prototype.$dragstart.call(this, event);
                 this._bOperate = this.getStatus() ? false : undefined;
+            },
+
+            /**
+             * @override
+             */
+            $remove: function (event) {
+                ui.MListView.prototype.$remove.call(event);
+                if (event.returnValue !== false) {
+                    if (event.child === this._cItem) {
+                        this._cItem = null;
+                    }
+                }
             },
 
             /**
