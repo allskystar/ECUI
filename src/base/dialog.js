@@ -1,6 +1,6 @@
 /*
 @example
-<div ui="type:dialog">
+<div ui="type:dialog;id:demo">
     <strong>标题</strong>
     窗体HTML文本
 </div>

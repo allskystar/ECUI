@@ -1,6 +1,6 @@
 /*
 @example
-<img ui="type:image">
+<img ui="type:image;id:demo">
 */
 /*ignore*/
 /*
