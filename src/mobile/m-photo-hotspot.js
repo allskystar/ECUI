@@ -99,7 +99,7 @@
      */
     function swipe(event) {
         var viewWidth = document.body.clientWidth;
-        if ((util.toNumber(currImg.style.width) - currHotspot.$$calcWidth) >= 0.01) {
+        if (Math.abs(util.toNumber(currImg.style.width) - currHotspot.$$calcWidth) >= 0.01) {
             return;
         }
         var items = core.query(function (item) {
