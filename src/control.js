@@ -1390,12 +1390,11 @@ _aStatus            - 控件当前的状态集合
 
         // item移除时选项组需要释放状态
         methods.$remove = function (event) {
-            if (this.value === event.child) {
+            var ret = this['$' + propertyName].$remove.call(this, event);
+            if (event.returnValue !== false && this['$' + propertyName + 'Data'].value === event.child) {
                 this['set' + propertyName]();
             }
-/*ignore*/
-            return this['$' + propertyName].$remove.call(this, event);
-/*end*/
+            return ret;
         };
 
         // 底层的$setXXXX方法
