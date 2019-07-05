@@ -262,6 +262,7 @@
             this.$MScrollData.inertia = false;
 
             if (keyboardHeight && iosVersion !== 11.1 && iosVersion !== 11.2) {
+                // 解决两端的input导致的跳动问题
                 var options = getOptions.call(this),
                     height = util.getView().height / 2,
                     oldScrollY = window.scrollY,
@@ -440,7 +441,6 @@
          * @override
          */
         setPosition: function (x, y) {
-            // 解决光标问题
             if (ui.MScroll.Methods.getX.call(this) !== x || ui.MScroll.Methods.getY.call(this) !== y) {
                 dom.setStyle(this.getBody(), 'transform', keyboardHeight ? 'translate(' + x + 'px,' + y + 'px)' : 'translate3d(' + x + 'px,' + y + 'px,0px)');
             }
