@@ -2239,16 +2239,18 @@ outer:          for (var caches = [], target = event.target, el; target && targe
                     var parent = control.getMain().offsetParent || document.documentElement,
                         style = dom.getStyle(parent),
                         // 拖拽范围默认不超出上级元素区域
-                        env = parent.tagName === 'BODY' || parent.tagName === 'HTML' ? util.getView() : {
-                            top: 0,
-                            right: parent.offsetWidth - util.toNumber(style.borderLeftWidth) - util.toNumber(style.borderRightWidth),
-                            bottom: parent.offsetHeight - util.toNumber(style.borderTopWidth) - util.toNumber(style.borderBottomWidth),
-                            left: 0
-                        };
-
-                    Object.assign(env, options);
-
-                    var x = env.x !== undefined ? env.x : control.getX(),
+                        env = Object.assign(
+                            parent.tagName === 'BODY' || parent.tagName === 'HTML' ?
+                                    util.getView() :
+                                    {
+                                        top: 0,
+                                        right: parent.offsetWidth - util.toNumber(style.borderLeftWidth) - util.toNumber(style.borderRightWidth),
+                                        bottom: parent.offsetHeight - util.toNumber(style.borderTopWidth) - util.toNumber(style.borderBottomWidth),
+                                        left: 0
+                                    },
+                            options
+                        ),
+                        x = env.x !== undefined ? env.x : control.getX(),
                         y = env.y !== undefined ? env.y : control.getY();
 
                     if (!env.absolute) {
@@ -3008,7 +3010,6 @@ outer:          for (var caches = [], target = event.target, el; target && targe
             list.forEach(function (item) {
                 item.initStructure();
             });
-
 /*ignore*/
             if (ieVersion < 8) {
                 // 解决 ie6/7 下直接显示遮罩层，读到的浏览器大小实际未更新的问题
