@@ -1,10 +1,13 @@
 /*
 @example
 <div ui="type:calendar;year:2009;month:11"></div>
-
+*/
+/*ignore*/
+/*
 @fields
 _eTitle        - 日历头部信息提示区
 */
+/*end*/
 //{if 0}//
 (function () {
     var core = ecui,
@@ -23,12 +26,13 @@ _eTitle        - 日历头部信息提示区
     ui.Calendar = core.inherits(
         ui.MonthView,
         'ui-calendar',
+        function (el, options) {
+/*ignore*/
+            this._sFormat = options.format || '{0}年{1}月';
+/*end*/
+            ui.MonthView.call(this, el, options);
+        },
         {
-            /**
-             * 控件头部展示格式。
-             */
-            TITLEFORMAT: '{0}年{1}月',
-
             /**
              * 日历前进后退部件。
              * options 属性：
@@ -38,8 +42,10 @@ _eTitle        - 日历头部信息提示区
             Button: core.inherits(
                 ui.Button,
                 function (el, options) {
+/*ignore*/
+                    this._nMove = +options.move;
+/*end*/
                     ui.Button.call(this, el, options);
-                    this._nMove = options.move;
                 },
                 {
                     /**
@@ -78,7 +84,7 @@ _eTitle        - 日历头部信息提示区
                 // 生成日历控件结构
                 dom.insertHTML(
                     el,
-                    'AFTERBEGIN',
+                    'afterBegin',
                     '<div class="' + this.getUnitClass(ui.Calendar, 'header') + '"><div class="' +
                         this.getUnitClass(ui.Calendar, 'title') + '"></div><div class="' +
                         this.getUnitClass(ui.Calendar, 'prev-year') + this.Button.CLASS + '">&lt;&lt;</div><div class="' +
@@ -117,7 +123,7 @@ _eTitle        - 日历头部信息提示区
              * @param {number} month 月(1-12)
              */
             setTitle: function (year, month) {
-                this._eTitle.innerHTML = util.stringFormat(this.TITLEFORMAT, year, month);
+                this._eTitle.innerHTML = util.stringFormat(this._sFormat, year, month);
             }
         }
     );

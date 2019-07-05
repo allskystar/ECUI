@@ -1,10 +1,10 @@
 /*
 @example
-<div ui="type:button">按钮</div>
+<div ui="type:button;id:demo">按钮</div>
 或
-<button ui="type:button">按钮</button>
+<button ui="type:button;id:demo">按钮</button>
 或
-<input ui="type:button" type="button" value="按钮">
+<input ui="type:button;id:demo" type="button" value="按钮">
 */
 //{if 0}//
 (function () {

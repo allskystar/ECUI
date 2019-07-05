@@ -19,5 +19,5 @@
     "todo": true,
     "vars": true,
 
-    "predef": ["ecui", "etpl", "FeatureFlags", "less", "NS"]
+    "predef": ["ecui", "etpl", "FeatureFlags", "less", "NS", "_interface"]
 }
