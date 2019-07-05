@@ -1,26 +1,11 @@
+/*ignore*/
 /*
-@example
-<select ui="type:select;placeholder:请选择" name="sex">
-    <option value="male" selected="selected">男</option>
-    <option value="female">女</option>
-</select>
-或
-<div ui="type:select;name:sex;value:male;placeholder:请选择">
-    <div ui="value:male">男</div>
-    <div ui="value:female">女</div>
-</div>
-或
-<div ui="type:select">
-    <input type="hidden" name="sex" value="male" placeholder="请选择">
-    <div ui="value:male">男</div>
-    <div ui="value:female">女</div>
-</div>
-
 @fields
 _bRequired    - 是否必须选择
 _uText        - 下拉框的文本框
 _uOptions     - 下拉选择框
 */
+/*end*/
 (function () {
 //{if 0}//
     var core = ecui,
@@ -29,7 +14,7 @@ _uOptions     - 下拉选择框
         util = core.util;
 //{/if}//
     /**
-     * 下拉框控件。
+     * 下拉框控件虚基类。
      * 扩展了原生 SelectElement 的功能，允许指定下拉选项框的最大选项数量，在屏幕显示不下的时候，会自动显示在下拉框的上方。在没有选项时，下拉选项框有一个选项的高度。下拉框控件允许使用键盘与滚轮操作，在下拉选项框打开时，可以通过回车键或鼠标点击选择，上下键选择选项的当前条目，在关闭下拉选项框后，只要拥有焦点，就可以通过滚轮上下选择选项。
      * options 属性：
      * optionSize     下拉框最大允许显示的选项数量，默认为5
@@ -37,7 +22,7 @@ _uOptions     - 下拉选择框
      * required       是否必须选择
      * @control
      */
-    ui.$select = core.inherits(
+    ui.$AbstractSelect = core.inherits(
         ui.InputControl,
         function (el, options) {
             options = Object.assign({readOnly: true}, options);
@@ -78,8 +63,8 @@ _uOptions     - 下拉选择框
                 }
             }
 
-            optionsEl.className = this.getUnitClass(ui.$select, 'options') + ' ui-popup ui-hide';
-            el.innerHTML = '<div class="' + this.getUnitClass(ui.$select, 'text') + '"></div>';
+            optionsEl.className = this.getUnitClass(ui.$AbstractSelect, 'options') + ' ui-popup ui-hide';
+            el.innerHTML = '<div class="' + this.getUnitClass(ui.$AbstractSelect, 'text') + '"></div>';
             if (input) {
                 el.appendChild(input);
             }
@@ -88,9 +73,9 @@ _uOptions     - 下拉选择框
 
             this._uText = core.$fastCreate(ui.Item, el.firstChild, this, {capturable: false});
             this._uOptions = core.$fastCreate(this.Options, optionsEl, this, {focusable: false});
-
+/*ignore*/
             this._bRequired = !!options.required;
-
+/*end*/
             this.setPopup(this._uOptions);
             this.$setBody(this._uOptions.getBody());
         },
@@ -226,15 +211,6 @@ _uOptions     - 下拉选择框
             /**
              * @override
              */
-            $ready: function (options) {
-                ui.InputControl.prototype.$ready.call(this, options);
-                this.setValue(this.getInput().value);
-                this._bAlterItems = true;
-            },
-
-            /**
-             * @override
-             */
             $reset: function () {
                 var el = this.getInput();
                 el.value = el.defaultValue;
@@ -289,6 +265,15 @@ _uOptions     - 下拉选择框
              */
             getText: function () {
                 return this._uText.getContent();
+            },
+
+            /**
+             * @override
+             */
+            init: function () {
+                ui.InputControl.prototype.init.call(this);
+                this.setValue(this.getInput().value);
+                this._bAlterItems = true;
             },
 
             /**

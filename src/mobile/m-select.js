@@ -29,10 +29,10 @@ _uOptions     - 下拉选择框
      * @control
      */
     ui.MSelect = core.inherits(
-        ui.$select,
+        ui.$AbstractSelect,
         'ui-mobile-select',
         function (el, options) {
-            ui.$select.call(this, el, Object.assign({inputType: 'hidden'}, options));
+            ui.$AbstractSelect.call(this, el, Object.assign({inputType: 'hidden'}, options));
 
             this.$getSection('Options').setOptionSize(options.optionSize || 3);
 
@@ -45,13 +45,13 @@ _uOptions     - 下拉选择框
              * @unit
              */
             Options: core.inherits(
-                ui.$select.prototype.Options,
+                ui.$AbstractSelect.prototype.Options,
                 {
                     /**
                      * @override
                      */
                     $show: function () {
-                        ui.$select.prototype.Options.prototype.$show.call(this);
+                        ui.$AbstractSelect.prototype.Options.prototype.$show.call(this);
 
                         var select = this.getParent(),
                             item = select.getSelected();
@@ -72,13 +72,13 @@ _uOptions     - 下拉选择框
              * @unit
              */
             Item: core.inherits(
-                ui.$select.prototype.Item,
+                ui.$AbstractSelect.prototype.Item,
                 {
                     /**
                      * @override
                      */
                     $activate: function (event) {
-                        ui.$select.prototype.Item.prototype.$activate.call(this, event);
+                        ui.$AbstractSelect.prototype.Item.prototype.$activate.call(this, event);
                         core.dispatchEvent(this.getParent().$getSection('Options'), 'activate', event);
                     }
                 }

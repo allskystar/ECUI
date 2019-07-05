@@ -1,18 +1,27 @@
 /*
 @example
-<select ui="type:select" name="sex">
+<select ui="type:select;placeholder:请选择" name="sex">
     <option value="male" selected="selected">男</option>
     <option value="female">女</option>
 </select>
 或
-<div ui="type:select;name:sex;value:male">
+<div ui="type:select;name:sex;value:male;placeholder:请选择">
     <div ui="value:male">男</div>
     <div ui="value:female">女</div>
 </div>
-
+或
+<div ui="type:select">
+    <input type="hidden" name="sex" value="male" placeholder="请选择">
+    <div ui="value:male">男</div>
+    <div ui="value:female">女</div>
+</div>
+*/
+/*ignore*/
+/*
 @fields
 _nOptionSize  - 下接选择框可以用于选择的条目数量
 */
+/*end*/
 (function () {
 //{if 0}//
     var core = ecui,
@@ -24,15 +33,13 @@ _nOptionSize  - 下接选择框可以用于选择的条目数量
     /**
      * 下拉框刷新。
      * @private
-     *
-     * @param {ecui.ui.Select} select 下拉框控件
      */
-    function refresh(select) {
-        var item = select.getSelected();
+    function refresh() {
+        var item = this.getSelected();
         if (item) {
-            select.setSelecting(item);
+            this.setSelecting(item);
         }
-        select.$getSection('Options').getBody().scrollTop = select.getClientHeight() * select.getItems().indexOf(item);
+        this.$getSection('Options').getBody().scrollTop = this.getClientHeight() * this.getItems().indexOf(item);
     }
 
     /**
@@ -44,22 +51,22 @@ _nOptionSize  - 下接选择框可以用于选择的条目数量
      * @control
      */
     ui.Select = core.inherits(
-        ui.$select,
+        ui.$AbstractSelect,
         'ui-select',
         function (el, options) {
+            ui.$AbstractSelect.call(this, el, options);
+/*ignore*/
             // 初始化下拉区域最多显示的选项数量
-            this._nOptionSize = options.optionSize || this.DEFAULT_OPTION_SIZE;
-            ui.$select.call(this, el, options);
+            this._nOptionSize = options.optionSize || 10;
+/*end*/
         },
         {
-            DEFAULT_OPTION_SIZE: 10,
-
             /**
              * 选项框部件。
              * @unit
              */
             Options: core.inherits(
-                ui.$select.prototype.Options,
+                ui.$AbstractSelect.prototype.Options,
                 {
                     /**
                      * 选项控件发生变化的处理。
@@ -84,8 +91,8 @@ _nOptionSize  - 下接选择框可以用于选择的条目数量
                      * @override
                      */
                     $show: function () {
-                        ui.$select.prototype.Options.prototype.$show.call(this);
-                        refresh(this.getParent());
+                        ui.$AbstractSelect.prototype.Options.prototype.$show.call(this);
+                        refresh.call(this.getParent());
                     }
                 }
             ),
@@ -95,7 +102,7 @@ _nOptionSize  - 下接选择框可以用于选择的条目数量
              * @unit
              */
             Item: core.inherits(
-                ui.$select.prototype.Item,
+                ui.$AbstractSelect.prototype.Item,
                 'ui-select-item',
                 {
                     /**
@@ -103,7 +110,7 @@ _nOptionSize  - 下接选择框可以用于选择的条目数量
                      * @override
                      */
                     $mouseover: function (event) {
-                        ui.$select.prototype.Item.prototype.$mouseover.call(this, event);
+                        ui.$AbstractSelect.prototype.Item.prototype.$mouseover.call(this, event);
 
                         var parent = this.getParent();
                         if (parent) {
@@ -218,7 +225,7 @@ _nOptionSize  - 下接选择框可以用于选择的条目数量
                 this._nOptionSize = value;
                 this.alterItems();
                 if (this.$getSection('Options').isShow()) {
-                    refresh(this);
+                    refresh.call(this);
                     this.setPopupPosition();
                 }
             }
