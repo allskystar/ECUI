@@ -13,12 +13,15 @@
         <li>孙节点三</li>
     </ul>
 </ul>
-
+*/
+/*ignore*/
+/*
 @fields
 _bCollapsed    - 是否收缩子树
 _eChildren     - 子控件区域Element对象
 _aChildren     - 子控件集合
 */
+/*end*/
 (function () {
 //{if 0}//
     var core = ecui,
@@ -35,8 +38,8 @@ _aChildren     - 子控件集合
      * @param {ecui.ui.TreeView} tree 树控件
      */
     function refresh(tree) {
-        if (tree._eChildren) {
-            tree.alterSubType(tree._aChildren.length ? (tree._bCollapsed ? 'collapsed' : 'expanded') : 'empty');
+        if (this._eContainer) {
+            this.alterSubType(this._aChildren.length ? (this._bCollapsed ? 'collapsed' : 'expanded') : 'empty');
         }
     }
 
@@ -50,41 +53,39 @@ _aChildren     - 子控件集合
     ui.TreeView = core.inherits(
         ui.Control,
         'ui-treeview',
-        [
-            function (el, options) {
-                if (this._eChildren) {
-                    // 初始化子控件
-                    this._aChildren = dom.children(this._eChildren).map(
-                        function (item) {
-                            return core.$fastCreate(this.constructor, item, this, Object.assign({}, options, {id: undefined}, core.getOptions(item) || {}));
-                        },
-                        this
-                    );
-                } else {
-                    this._aChildren = [];
+        function (el, options) {
+/*ignore*/
+            this._bCollapsed = !!options.collapsed;
+/*end*/
+            if (el.tagName === 'UL') {
+                dom.addClass(el, this.getUnitClass(ui.TreeView, 'children'));
+
+                if (options.collapsed) {
+                    dom.addClass(el, 'ui-hide');
+                } else if (dom.hasClass(el, 'ui-hide')) {
+                    this._bCollapsed = true;
                 }
 
-                refresh(this);
-            },
-            function (el, options) {
-                this._bCollapsed = !!options.collapsed;
-
-                if (el.tagName === 'UL') {
-                    dom.addClass(el, this.getUnitClass(ui.TreeView, 'children'));
-
-                    if (options.collapsed) {
-                        dom.addClass(el, 'ui-hide');
-                    } else if (dom.hasClass(el, 'ui-hide')) {
-                        this._bCollapsed = true;
-                    }
-
-                    this._eChildren = el;
-                    el = dom.insertBefore(dom.first(el), el);
-                }
-
-                ui.Control.call(this, el, options);
+                this._eContainer = el;
+                el = dom.insertBefore(dom.first(el), el);
             }
-        ],
+
+            ui.Control.call(this, el, options);
+
+            if (this._eContainer) {
+                    // 初始化子控件
+                this._aChildren = dom.children(this._eContainer).map(
+                    function (item) {
+                        return core.$fastCreate(this.constructor, item, this, Object.assign({}, options, {id: undefined}, core.getOptions(item) || {}));
+                    },
+                    this
+                );
+            } else {
+                this._aChildren = [];
+            }
+
+            refresh.call(this);
+        },
         {
             /**
              * 控件点击时改变子树视图控件的显示/隐藏状态。
@@ -107,15 +108,15 @@ _aChildren     - 子控件集合
              */
             $collapse: function () {
                 this._bCollapsed = true;
-                dom.addClass(this._eChildren, 'ui-hide');
-                refresh(this);
+                dom.addClass(this._eContainer, 'ui-hide');
+                refresh.call(this);
             },
 
             /**
              * @override
              */
             $dispose: function () {
-                this._eChildren = null;
+                this._eContainer = null;
                 ui.Control.prototype.$dispose.call(this);
             },
 
@@ -125,9 +126,9 @@ _aChildren     - 子控件集合
              */
             $expand: function () {
                 this._bCollapsed = false;
-                dom.removeClass(this._eChildren, 'ui-hide');
-                core.cacheAtShow(this._eChildren);
-                refresh(this);
+                dom.removeClass(this._eContainer, 'ui-hide');
+                core.cacheAtShow();
+                refresh.call(this);
             },
 
             /**
@@ -137,8 +138,8 @@ _aChildren     - 子控件集合
             $hide: function () {
                 ui.Control.prototype.$hide.call(this);
 
-                if (this._eChildren) {
-                    dom.addClass(this._eChildren, 'ui-hide');
+                if (this._eContainer) {
+                    dom.addClass(this._eContainer, 'ui-hide');
                 }
             },
 
@@ -184,9 +185,7 @@ _aChildren     - 子控件集合
              * @event
              */
             $nodeclick: function () {
-                var root = this.getRoot();
-
-                if (this._eChildren) {
+                if (this._eContainer) {
                     if (this.isCollapsed()) {
                         this.expand();
                         core.dispatchEvent(this, 'expand');
@@ -196,13 +195,7 @@ _aChildren     - 子控件集合
                     }
                 }
 
-                if (root._cSelected !== this) {
-                    if (root._cSelected) {
-                        root._cSelected.alterStatus('-selected');
-                    }
-                    this.alterStatus('+selected');
-                    root._cSelected = this;
-                }
+                this.getRoot().setSelected(this);
             },
 
             /**
@@ -228,26 +221,22 @@ _aChildren     - 子控件集合
              * @override
              */
             $setParent: function (parent) {
-                var oldParent = this.getParent();
-
-                if (oldParent) {
-                    var root = this.getRoot();
-                    if (this.contain(root._cSelected)) {
-                        root._cSelected.alterStatus('-selected');
-                        root._cSelected = null;
+                var root = this.getRoot();
+                if (root !== this) {
+                    if (this.contain(root.getSelected())) {
+                        root.setSelected();
                     }
 
-                    if (oldParent._aChildren) {
-                        util.remove(oldParent._aChildren, this);
-                    }
-                    refresh(oldParent);
+                    var oldParent = this.getParent();
+                    util.remove(oldParent._aChildren, this);
+                    refresh.call(oldParent);
                 }
 
                 ui.Control.prototype.$setParent.call(this, parent);
 
                 // 将子树区域显示在主元素之后
-                if (this._eChildren) {
-                    dom.insertAfter(this._eChildren, this.getMain());
+                if (this._eContainer) {
+                    dom.insertAfter(this._eContainer, this.getMain());
                 }
             },
 
@@ -258,8 +247,8 @@ _aChildren     - 子控件集合
             $show: function () {
                 ui.Control.prototype.$show.call(this);
 
-                if (this._eChildren && !this._bCollapsed) {
-                    dom.removeClass(this._eChildren, 'ui-hide');
+                if (this._eContainer && !this._bCollapsed) {
+                    dom.removeClass(this._eContainer, 'ui-hide');
                 }
             },
 
@@ -282,9 +271,9 @@ _aChildren     - 子控件集合
                 }
 
                 // 这里需要先 setParent，否则 getRoot 的值将不正确
-                if (!this._eChildren) {
-                    this._eChildren = dom.create('UL', {className: this.getPrimary() + '-children ' + this.getType() + '-children'});
-                    dom.insertAfter(this._eChildren, this.getMain());
+                if (!this._eContainer) {
+                    this._eContainer = dom.create('UL', {className: this.getPrimary() + '-children ' + this.getType() + '-children'});
+                    dom.insertAfter(this._eContainer, this.getMain());
                 }
                 item.setParent(this);
 
@@ -295,15 +284,15 @@ _aChildren     - 子控件集合
                         dom.insertBefore(el, list[index].getMain());
                         list.splice(index, 0, item);
                     } else {
-                        this._eChildren.appendChild(el);
+                        this._eContainer.appendChild(el);
                         list.push(item);
                     }
-                    if (item._eChildren) {
-                        dom.insertAfter(item._eChildren, el);
+                    if (item._eContainer) {
+                        dom.insertAfter(item._eContainer, el);
                     }
                 }
 
-                refresh(this);
+                refresh.call(this);
 
                 return item;
             },
@@ -313,7 +302,7 @@ _aChildren     - 子控件集合
              * @public
              */
             collapse: function () {
-                if (this._eChildren && !this._bCollapsed) {
+                if (this._eContainer && !this._bCollapsed) {
                     this.$collapse();
                 }
             },
@@ -323,7 +312,7 @@ _aChildren     - 子控件集合
              * @public
              */
             expand: function () {
-                if (this._eChildren && this._bCollapsed) {
+                if (this._eContainer && this._bCollapsed) {
                     this.$expand();
                 }
             },
@@ -370,7 +359,12 @@ _aChildren     - 子控件集合
              */
             getRoot: function () {
                 // 这里需要考虑Tree位于上一个Tree的节点内部
-                for (var control = this, parent; (parent = control.getParent()) instanceof ui.TreeView && parent._aChildren.indexOf(control) >= 0; control = parent) {}
+                for (var control = this, parent;; control = parent) {
+                    parent = control.getParent();
+                    if (!(parent instanceof ui.TreeView) || parent._aChildren.indexOf(control) < 0) {
+                        break;
+                    }
+                }
                 return control;
             },
 
@@ -381,7 +375,7 @@ _aChildren     - 子控件集合
              * @return {boolean} true 表示子树区域收缩，false 表示子树区域展开
              */
             isCollapsed: function () {
-                return !this._eChildren || this._bCollapsed;
+                return !this._eContainer || this._bCollapsed;
             },
 
             /**
@@ -393,6 +387,7 @@ _aChildren     - 子控件集合
             remove: function (index) {
                 this._aChildren[index].setParent();
             }
-        }
+        },
+        ui.Control.defineProperty('selected')
     );
 }());

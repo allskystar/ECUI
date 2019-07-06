@@ -75,13 +75,6 @@
             /**
              * @override
              */
-            addColumn: function (options, index) {
-                ui.Table.prototype.addColumn.call(this, options, index);
-            },
-
-            /**
-             * @override
-             */
             addRow: function (data, index) {
                 var row = ui.Table.prototype.addRow.call(this, data.slice(1), index * 2);
                 initExtendRow(ui.Table.prototype.addRow.call(this, [data[0]], index * 2 + 1));

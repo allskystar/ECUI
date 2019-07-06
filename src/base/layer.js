@@ -4,10 +4,13 @@
   <!-- 这里放滚动的内容 -->
   ...
 </div>
-
+*/
+/*ignore*/
+/*
 @fields
 _bModal      - 是否使用showModal激活
 */
+/*end*/
 (function () {
 //{if 0}//
     var core = ecui,
@@ -20,12 +23,10 @@ _bModal      - 是否使用showModal激活
     /**
      * 刷新所有显示的窗体的zIndex属性。
      * @private
-     *
-     * @param {ecui.ui.Layer} layer 窗体控件
      */
-    function refresh(layer) {
-        util.remove(layers, layer);
-        layers.push(layer);
+    function refresh() {
+        util.remove(layers, this);
+        layers.push(this);
 
         // 改变当前窗体之后的全部窗体z轴位置，将当前窗体置顶
         var num = layers.length - modalCount;
@@ -60,7 +61,7 @@ _bModal      - 是否使用showModal激活
              */
             $focus: function () {
                 ui.Control.prototype.$focus.call(this);
-                refresh(this);
+                refresh.call(this);
             },
 
             /**
@@ -136,7 +137,7 @@ _bModal      - 是否使用showModal激活
 
                 var result = ui.Control.prototype.show.call(this);
                 if (!result) {
-                    refresh(this);
+                    refresh.call(this);
                 }
                 return result;
             },
@@ -159,7 +160,7 @@ _bModal      - 是否使用showModal激活
 
                     this._bModal = true;
                     if (!ui.Control.prototype.show.call(this)) {
-                        refresh(this);
+                        refresh.call(this);
                     }
                 }
             }

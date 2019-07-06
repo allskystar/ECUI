@@ -1,7 +1,9 @@
 /*
 @example
 <div ui="type:month-view;date:2009/04/17"></div>
-
+*/
+/*ignore*/
+/*
 @fields
 _bExtra     - 扩展的日期是否响应事件
 _bRowExtra  - 当前是否有行扩展
@@ -15,6 +17,7 @@ _oEnd       - 结束日期
 _oDate      - 当前选择日期
 _cSelected  - 当前选择的日历单元格
 */
+/*end*/
 (function () {
 //{if 0}//
     var core = ecui,
@@ -22,26 +25,6 @@ _cSelected  - 当前选择的日历单元格
         ui = core.ui,
         util = core.util;
 //{/if}//
-    /**
-     * 选中某个日期单元格。
-     * @private
-     *
-     * @param {ecui.ui.MonthView} view 日历视图对象
-     * @param {ecui.ui.MonthView.Cell} cell 日期单元格对象
-     */
-    function setSelected(view, cell) {
-        if (view._cSelected !== cell) {
-            if (view._cSelected) {
-                view._cSelected.alterStatus('-selected');
-            }
-
-            if (cell) {
-                cell.alterStatus('+selected');
-            }
-            view._cSelected = cell;
-        }
-    }
-
     /**
      * 月视图控件。
      * 提供指定月份的日历信息。
@@ -57,28 +40,24 @@ _cSelected  - 当前选择的日历单元格
     ui.MonthView = core.inherits(
         ui.Control,
         'ui-monthview',
-        [
-            function () {
-                this._aCells = this.$initView();
-            },
-
-            function (el, options) {
-                ui.Control.call(this, el, options);
-
-                this._bExtra = options.extra === 'disable';
-                if (options.begin) {
-                    this._oBegin = new Date(options.begin);
-                }
-                if (options.end) {
-                    this._oEnd = new Date(options.end);
-                }
-                this._nOffset = +options.offset || 1;
-                this._nWeekday = +options.weekday || 0;
-
-                var date = options.date ? new Date(options.date) : new Date();
-                this._oDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+        function (el, options) {
+            ui.Control.call(this, el, options);
+/*ignore*/
+            this._bExtra = options.extra === 'disable';
+            if (options.begin) {
+                this._oBegin = new Date(options.begin);
             }
-        ],
+            if (options.end) {
+                this._oEnd = new Date(options.end);
+            }
+            this._nOffset = +options.offset || 1;
+            this._nWeekday = +options.weekday || 0;
+
+            var date = options.date ? new Date(options.date) : new Date();
+            this._oDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+/*end*/
+            this._aCells = this.$initView();
+        },
         {
             WEEKNAMES: ['日', '一', '二', '三', '四', '五', '六'],
 
@@ -136,7 +115,7 @@ _cSelected  - 当前选择的日历单元格
              */
             $dateclick: function (event) {
                 this._oDate = event.date;
-                setSelected(this, event.item);
+                this.setSelected(event.item);
             },
 
             /**
@@ -252,16 +231,6 @@ _cSelected  - 当前选择的日历单元格
             },
 
             /**
-             * 获取日历控件当前选中的项。
-             * @public
-             *
-             * @return {ecui.ui.MonthView.Cell} 选中的控件
-             */
-            getSelected: function () {
-                return this._cSelected;
-            },
-
-            /**
              * 获取日历控件当前显示的年份。
              * @public
              *
@@ -348,7 +317,7 @@ _cSelected  - 当前选择的日历单元格
                 this._oFirst = firstDay;
                 this._oLast = lastDay;
 
-                setSelected(this);
+                this.setSelected();
 
                 (cells || this._aCells).slice(7).forEach(
                     function (item, index) {
@@ -360,18 +329,19 @@ _cSelected  - 当前选择的日历单元格
                         if (date >= begin && date <= end) {
                             if (index && !(index % 7)) {
                                 dom.removeClass(dom.parent(el), 'ui-extra');
-                                delete item._bRowExtra;
                             }
                             dom.removeClass(el, 'ui-extra');
                             delete item._bExtra;
                             if (date - this._oDate === 0) {
-                                setSelected(this, item);
+                                this.setSelected(item);
                             }
                             item.enable();
                         } else {
-                            if (index && !(index % 7) && !item._bRowExtra) {
-                                dom.addClass(dom.parent(el), 'ui-extra');
-                                item._bRowExtra = true;
+                            if (index && !(index % 7)) {
+                                var parent = dom.parent(el);
+                                if (!dom.hasClass(parent, 'ui-extra')) {
+                                    dom.addClass(parent, 'ui-extra');
+                                }
                             }
                             if (!item._bExtra) {
                                 dom.addClass(el, 'ui-extra');
@@ -395,6 +365,7 @@ _cSelected  - 当前选择的日历单元格
                     core.dispatchEvent(this, 'change');
                 }
             }
-        }
+        },
+        ui.Control.defineProperty('selected')
     );
 }());

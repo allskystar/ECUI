@@ -7,10 +7,13 @@
     </div>
     <strong ui="selected:true">标题2</strong>
 </div>
-
+*/
+/*ignore*/
+/*
 @fields
 _eContainer      - 容器 DOM 元素
 */
+/*end*/
 (function () {
 //{if 0}//
     var core = ecui,
@@ -21,17 +24,15 @@ _eContainer      - 容器 DOM 元素
     /**
      * 移除容器 DOM 元素。
      * @private
-     *
-     * @param {ecui.ui.Tab} tab 选项卡控件
      */
-    function removeContainer(tab) {
-        if (tab._eContainer) {
-            var parent = tab.getParent();
+    function removeContainer() {
+        if (this._eContainer) {
+            var parent = this.getParent();
             if (parent) {
                 if (parent.getItems().every(function (item) {
-                        return item === tab || item._eContainer !== tab._eContainer;
+                        return item === this || item._eContainer !== this._eContainer;
                     })) {
-                    dom.remove(tab._eContainer);
+                    dom.remove(this._eContainer);
                 }
             }
         }
@@ -61,7 +62,13 @@ _eContainer      - 容器 DOM 元素
 
             this.$setBody(titleEl);
 
-            this._nSelected = +options.selected;
+            var selectedIndex = +options.selected || 0;
+            this.setSelected = function (index) {
+                selectedIndex = 'number' === typeof index ? index : Math.max(0, this.getItems().indexOf(index));
+            };
+            this.getSelected = function () {
+                return this.getItem[selectedIndex] || selectedIndex;
+            };
         },
         {
             /**
@@ -109,7 +116,7 @@ _eContainer      - 容器 DOM 元素
                     }
 
                     if (options.selected && options.parent) {
-                        options.parent._nSelected = options.index;
+                        options.parent.setSelected(options.index);
                     }
                 },
                 {
@@ -128,10 +135,13 @@ _eContainer      - 容器 DOM 元素
                      * @override
                      */
                     $setParent: function (parent) {
-                        if (!parent) {
-                            removeContainer(this);
-                        } else if (this._eContainer && dom.parent(this._eContainer) !== parent._eContainer) {
-                            parent.getMain().appendChild(this._eContainer);
+                        if (parent) {
+                            var container = parent.getContainer();
+                            if (this._eContainer && dom.parent(this._eContainer) !== container) {
+                                container.appendChild(this._eContainer);
+                            }
+                        } else {
+                            removeContainer.call(this);
                         }
 
                         ui.Item.prototype.$setParent.call(this, parent);
@@ -156,7 +166,7 @@ _eContainer      - 容器 DOM 元素
                     setContainer: function (el) {
                         var parent = this.getParent();
 
-                        removeContainer(this);
+                        removeContainer.call(this);
                         if (this._eContainer = el) {
                             parent.getMain().appendChild(el);
                             // 如果当前节点被选中需要显示容器元素，否则隐藏
@@ -214,19 +224,10 @@ _eContainer      - 容器 DOM 元素
                     if (event.item) {
                         if (event.item._eContainer && (!event.history || event.history._eContainer !== event.item._eContainer)) {
                             dom.addClass(event.item._eContainer, event.item.getType() + '-selected');
-                            core.cacheAtShow(event.item._eContainer);
+                            core.cacheAtShow();
                         }
                     }
                 }
-            },
-
-            /**
-             * @override
-             */
-            $ready: function () {
-                ui.Control.prototype.$ready.call(this);
-                this.setSelected(this._nSelected || 0);
-                delete this._nSelected;
             },
 
             /**
@@ -252,6 +253,17 @@ _eContainer      - 容器 DOM 元素
              */
             getContainer: function () {
                 return this._eContainer;
+            },
+
+            /**
+             * @override
+             */
+            init: function () {
+                ui.Control.prototype.init.call(this);
+                var selected = this.getSelected();
+                delete this.setSelected;
+                delete this.getSelected;
+                this.setSelected(selected);
             }
         },
         ui.Items,

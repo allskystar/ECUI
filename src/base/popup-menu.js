@@ -31,7 +31,9 @@
         'ui-popup-menu',
         function (el, options) {
             ui.Control.call(this, el, options);
-            this.left = true;
+/*ignore*/
+            this._bLeft = true;
+/*end*/
         },
         {
             /**
@@ -61,8 +63,8 @@
                      */
                     $mouseout: function (event) {
                         ui.Item.prototype.$mouseout.call(this, event);
-                        if (this._cPopup) {
-                            this._cPopup.hide();
+                        if (this._cChildMenu) {
+                            this._cChildMenu.hide();
                         }
                     },
 
@@ -71,9 +73,9 @@
                      */
                     $mouseover: function (event) {
                         ui.Item.prototype.$mouseover.call(this, event);
-                        if (this._cPopup) {
-                            this._cPopup.show();
-                            this._cPopup.assignTo(this);
+                        if (this._cChildMenu) {
+                            this._cChildMenu.show();
+                            this._cChildMenu.assignTo(this);
                         }
                     },
 
@@ -81,21 +83,21 @@
                      * 设置子菜单。
                      * @public
                      *
-                     * @param {ecui.ui.PopupMenu} popup 弹出菜单控件
+                     * @param {ecui.ui.PopupMenu} popupMenu 弹出菜单控件
                      */
-                    setChildMenu: function (popup) {
-                        if (this._cPopup !== popup) {
-                            if (this._cPopup) {
-                                this._cPopup.hide();
+                    setChildMenu: function (popupMenu) {
+                        if (this._cChildMenu !== popupMenu) {
+                            if (this._cChildMenu) {
+                                this._cChildMenu.hide();
                             }
-                            if (!this._cPopup ^ !popup) {
-                                if (this._cPopup) {
+                            if (!this._cChildMenu ^ !popupMenu) {
+                                if (this._cChildMenu) {
                                     this.alterStatus('-group');
                                 } else {
                                     this.alterStatus('+group');
                                 }
                             }
-                            this._cPopup = popup || null;
+                            this._cChildMenu = popupMenu || null;
                         }
                     }
                 }
@@ -120,16 +122,16 @@
                     view = util.getView(),
                     x;
 
-                if (this.left) {
+                if (this._bLeft) {
                     x = pos.left + controlWidth - 4;
                     if (x > view.right - width) {
-                        this.left = false;
+                        this._bLeft = false;
                         x = pos.left - width + 4;
                     }
                 } else {
                     x = pos.left - width + 4;
                     if (x < view.left) {
-                        this.left = true;
+                        this._bLeft = true;
                         x = pos.left + controlWidth - 4;
                     }
                 }

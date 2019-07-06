@@ -1,11 +1,14 @@
 /*
 @example
 <div ui="type:progress;max:100;value:0"></div>
-
+*/
+/*ignore*/
+/*
 @fields
 _nValue  - 进度值
 _nMax    - 进度最大值
 */
+/*end*/
 //{if 0}//
 (function () {
     var core = ecui,
@@ -24,18 +27,12 @@ _nMax    - 进度最大值
         'ui-progress',
         function (el, options) {
             ui.Control.call(this, el, options);
-
-            this._sFormat = options.format;
+/*ignore*/
             this._nMax = options.max || 100;
             this._nValue = options.value || 0;
+/*end*/
         },
         {
-            /**
-             * 进度变化事件。
-             * @event
-             */
-            $progress: util.blank,
-
             /**
              * @override
              */

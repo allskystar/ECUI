@@ -20,7 +20,9 @@
         </tbody>
     </table>
 </div>
-
+*/
+/*ignore*/
+/*
 @fields
 _nLeft       - 最左部未锁定列的序号
 _nRight      - 最右部未锁定列的后续序号，即未锁定的列序号+1
@@ -29,6 +31,7 @@ _uLockedMain - 锁定的行内容区
 _eLeft       - 左侧锁定行的Element元素
 _eRight      - 右侧乐定行的Element元素
 */
+/*end*/
 (function () {
 //{if 0}//
     var core = ecui,
@@ -47,86 +50,11 @@ _eRight      - 右侧乐定行的Element元素
      * @param {HTMLElement} left 左侧锁定行的 Element 元素
      * @param {HTMLElement} right 右侧锁定行的 Element 元素
      */
-    function initLockedRow(row, left, right) {
-        core.$bind(left, row);
-        core.$bind(right, row);
-        row._eLeft = left;
-        row._eRight = right;
-    }
-
-    /**
-     * 恢复行内的单元格到锁定列或基本列中。
-     * @private
-     *
-     * @param {ecui.ui.LockedTable} table 锁定表格控件
-     * @param {ecui.ui.LockedTable.Row} row 锁定表头控件或者锁定行控件
-     */
-    function restoreRow(table, row) {
-        var elements = row.$getElements(),
-            el = row.getBody();
-
-        row._eLeft.style.height = row._eRight.style.height = row.getMain().style.height = '';
-
-        if (row._bEmpty) {
-            row._eLeft.lastChild.previousSibling.setAttribute('colSpan', row._bEmpty);
-            dom.removeClass(row._eLeft.lastChild, 'ui-hide');
-            delete row._bEmpty;
-            if (ieVersion < 9) {
-                el.removeChild(el.firstChild);
-            } else {
-                el.innerHTML = '';
-            }
-        }
-
-        row = row.getMain();
-        el = row.firstChild;
-
-        table.getHCells().forEach(function (item, index) {
-            if (item = elements[index]) {
-                if (index < table._nLeft) {
-                    row.insertBefore(item, el);
-                } else if (index >= table._nRight) {
-                    row.appendChild(item);
-                }
-            }
-        });
-    }
-
-    /**
-     * 拆分行内的单元格到锁定列或基本列中。
-     * @private
-     *
-     * @param {ecui.ui.LockedTable} table 锁定表格控件
-     * @param {ecui.ui.LockedTable.Row} row 锁定表头控件或者锁定行控件
-     */
-    function splitRow(table, row) {
-        var elements = row.$getElements(),
-            body = row.getBody();
-
-        table.getHCells().forEach(function (item, index) {
-            if (item = elements[index]) {
-                if (index < table._nLeft) {
-                    row._eLeft.insertBefore(item, row._eLeft.lastChild);
-                } else if (index >= table._nRight) {
-                    row._eRight.appendChild(item);
-                }
-            }
-        });
-
-        if (body.innerHTML.trim()) {
-            row._eLeft.lastChild.style.width = (table.getClientWidth() - table.$$leftTDWidth - table.$$paddingLeft) + 'px';
-        } else {
-            row._bEmpty = dom.getAttribute(row._eLeft.lastChild.previousSibling, 'colSpan') || ' ';
-            row._eLeft.lastChild.previousSibling.setAttribute('colSpan', 2);
-            dom.addClass(row._eLeft.lastChild, 'ui-hide');
-            if (ieVersion < 9) {
-                body.appendChild(dom.create('TD', {className: table.getUnitClass(ui.Table, table.getHRows().indexOf(row) < 0 ? 'cell' : 'hcell')}));
-            } else {
-                body.innerHTML = '<td class="' + table.getUnitClass(ui.Table, table.getHRows().indexOf(row) < 0 ? 'cell' : 'hcell') + '"></td>';
-            }
-        }
-
-        row._eLeft.style.height = row._eRight.style.height = row.getMain().style.height = row.getHeight() + 'px';
+    function initRow(left, right) {
+        core.$bind(left, this);
+        core.$bind(right, this);
+        this._eLeft = left;
+        this._eRight = right;
     }
 
     /**
@@ -184,16 +112,16 @@ _eRight      - 右侧乐定行的Element元素
             right.$setBody(right = right.getMain().firstChild);
 
             for (i = 0, left = dom.children(left), right = dom.children(right); el = left[i]; ) {
-                initLockedRow(headRows[i], el, right[i++]);
+                initRow.call(headRows[i], el, right[i++]);
             }
 
-            left = this._uLeftMain = core.$fastCreate(ui.Control, list[1], this);
-            right = this._uRightMain = core.$fastCreate(ui.Control, list[3], this);
+            left = this._uLeftBody = core.$fastCreate(ui.Control, list[1], this);
+            right = this._uRightBody = core.$fastCreate(ui.Control, list[3], this);
             left.$setBody(left = left.getMain().lastChild);
             right.$setBody(right = right.getMain().lastChild);
 
             for (i = 0, left = dom.children(left), right = dom.children(right); el = left[i]; ) {
-                initLockedRow(rows[i], el, right[i++]);
+                initRow.call(rows[i], el, right[i++]);
             }
         },
         {
@@ -218,6 +146,82 @@ _eRight      - 右侧乐定行的Element元素
                     $dispose: function () {
                         this._eLeft = this._eRight = null;
                         ui.Table.prototype.Row.prototype.$dispose.call(this);
+                    },
+
+                    /**
+                     * @override
+                     */
+                    $initStructure: function (width, height) {
+                        _super.$initStructure(width, height);
+
+                        var table = this.getParent(),
+                            elements = this.$getElements(),
+                            body = this.getBody();
+
+                        table.getHCells().forEach(
+                            function (item, index) {
+                                if (item = elements[index]) {
+                                    if (index < table._nLeft) {
+                                        this._eLeft.insertBefore(item, this._eLeft.lastChild);
+                                    } else if (index >= table._nRight) {
+                                        this._eRight.appendChild(item);
+                                    }
+                                }
+                            },
+                            this
+                        );
+
+                        if (body.innerHTML.trim()) {
+                            row._eLeft.lastChild.style.width = (table.getClientWidth() - table.$$leftTDWidth - table.$$paddingLeft) + 'px';
+                        } else {
+                            this._bEmpty = dom.getAttribute(this._eLeft.lastChild.previousSibling, 'colSpan') || ' ';
+                            this._eLeft.lastChild.previousSibling.setAttribute('colSpan', 2);
+                            dom.addClass(this._eLeft.lastChild, 'ui-hide');
+                            if (ieVersion < 9) {
+                                body.appendChild(dom.create('TD', {className: table.getUnitClass(ui.Table, table.getHRows().indexOf(this) < 0 ? 'cell' : 'hcell')}));
+                            } else {
+                                body.innerHTML = '<td class="' + table.getUnitClass(ui.Table, table.getHRows().indexOf(this) < 0 ? 'cell' : 'hcell') + '"></td>';
+                            }
+                        }
+
+                        this._eLeft.style.height = this._eRight.style.height = this.getMain().style.height = this.getHeight() + 'px';
+                    },
+
+                    /**
+                     * @override
+                     */
+                    $restoreStructure: function () {
+                        var table = this.getParent(),
+                            elements = this.$getElements(),
+                            el = this.getBody(),
+                            rowEl = this.getMain();
+
+                        this._eLeft.style.height = this._eRight.style.height = rowEl.style.height = '';
+
+                        if (this._bEmpty) {
+                            this._eLeft.lastChild.previousSibling.setAttribute('colSpan', this._bEmpty);
+                            dom.removeClass(this._eLeft.lastChild, 'ui-hide');
+                            delete this._bEmpty;
+                            if (ieVersion < 9) {
+                                el.removeChild(el.firstChild);
+                            } else {
+                                el.innerHTML = '';
+                            }
+                        }
+
+                        el = rowEl.firstChild;
+
+                        table.getHCells().forEach(function (item, index) {
+                            if (item = elements[index]) {
+                                if (index < table._nLeft) {
+                                    rowEl.insertBefore(item, el);
+                                } else if (index >= table._nRight) {
+                                    rowEl.appendChild(item);
+                                }
+                            }
+                        });
+
+                        _super.$restoreStructure();
                     }
                 }
             ),
@@ -227,10 +231,11 @@ _eRight      - 右侧乐定行的Element元素
              */
             $beforescroll: function (event) {
                 ui.Table.prototype.$beforescroll.call(this, event);
-
+/*ignore*/
                 if (ieVersion < 7) {
                     return;
                 }
+/*end*/
                 var layout = this.getLayout(),
                     pos = dom.getPosition(layout),
                     view = util.getView(),
@@ -238,8 +243,8 @@ _eRight      - 右侧乐定行的Element元素
                     left = pos.left - view.left,
                     leftHeadStyle = this._uLeftHead.getMain().style,
                     rightHeadStyle = this._uRightHead.getMain().style,
-                    leftMainStyle = this._uLeftMain.getMain().style,
-                    rightMainStyle = this._uRightMain.getMain().style,
+                    leftMainStyle = this._uLeftBody.getMain().style,
+                    rightMainStyle = this._uRightBody.getMain().style,
                     fixed = dom.contain(this.getMain(), event.target) && event.deltaY;
 
                 if (this.$getSection('Head').getMain().style.position === 'fixed' || fixed) {
@@ -297,8 +302,8 @@ _eRight      - 右侧乐定行的Element元素
 
                 var leftHeadStyle = this._uLeftHead.getMain().style,
                     rightHeadStyle = this._uRightHead.getMain().style,
-                    leftMainStyle = this._uLeftMain.getMain().style,
-                    rightMainStyle = this._uRightMain.getMain().style;
+                    leftMainStyle = this._uLeftBody.getMain().style,
+                    rightMainStyle = this._uRightBody.getMain().style;
 
                 leftHeadStyle.position = rightHeadStyle.position = leftMainStyle.position = rightMainStyle.position = '';
                 leftHeadStyle.top = rightHeadStyle.top = this.$getSection('Head').getMain().style.top;
@@ -311,7 +316,7 @@ _eRight      - 右侧乐定行的Element元素
                     leftHeadStyle.left = leftMainStyle.left = this.getLayout().scrollLeft + 'px';
                     rightHeadStyle.left = rightMainStyle.left = (Math.min(this.getWidth(), this.$$tableWidth) - this.$$paddingRight + this.getLayout().scrollLeft - this.$$rightTDWidth - this.$$scrollFixed[0]) + 'px';
                     leftMainStyle.top = rightMainStyle.top = (this.$$paddingTop - this.getLayout().firstChild.scrollTop - dom.parent(this.$getSection('Head').getMain()).scrollTop) + 'px';
-                    leftMainStyle.clip = rightMainStyle.clip = ieVersion < 8 ? 'rect(0,100%,100%,0)' : 'auto';
+                    leftMainStyle.clip = rightMainStyle.clip =/*ignore*/ ieVersion < 8 ? 'rect(0,100%,100%,0)' :/*end*/ 'auto';
                 }
             },
 
@@ -321,25 +326,14 @@ _eRight      - 右侧乐定行的Element元素
             $initStructure: function (width, height) {
                 ui.Table.prototype.$initStructure.call(this, width, height);
 
-                this._aHeadRows.forEach(
-                    function (item) {
-                        splitRow(this, item);
-                    },
-                    this
-                );
-                this._aRows.forEach(
-                    function (item) {
-                        splitRow(this, item);
-                    },
-                    this
-                );
 
                 var table = dom.parent(this.getBody()),
-                    head = this.$getSection('Head').getMain().lastChild;
+                    head = this.$getSection('Head').getMain().lastChild,
+                    layout = this.getLayout();
 
                 this._eFill.style.width = this.$$tableWidth + 'px';
-                this._uLeftHead.getMain().style.width = this._uLeftMain.getMain().style.width = (width - (this._eLayout.scrollHeight > this._eLayout.clientHeight ? core.getScrollNarrow() : 0)) + 'px';
-                this._uRightHead.getMain().style.width = this._uRightMain.getMain().style.width = (this.$$rightTDWidth + this.$$paddingRight) + 'px';
+                this._uLeftHead.getMain().style.width = this._uLeftBody.getMain().style.width = (width - (layout.scrollHeight > layout.clientHeight ? core.getScrollNarrow() : 0)) + 'px';
+                this._uRightHead.getMain().style.width = this._uRightBody.getMain().style.width = (this.$$rightTDWidth + this.$$paddingRight) + 'px';
                 table.style.marginLeft = head.style.marginLeft = this.$$paddingLeft + 'px';
                 table.style.width = head.style.width = (this.$$tableWidth - this.$$paddingLeft - this.$$paddingRight) + 'px';
                 //dom.parent(head).style.width = this.$$tableWidth + 'px';
@@ -351,23 +345,11 @@ _eRight      - 右侧乐定行的Element元素
             $restoreStructure: function () {
                 ui.Table.prototype.$restoreStructure.call(this);
 
-                this._aHeadRows.forEach(
-                    function (item) {
-                        restoreRow(this, item);
-                    },
-                    this
-                );
-                this._aRows.forEach(
-                    function (item) {
-                        restoreRow(this, item);
-                    },
-                    this
-                );
 
                 var leftHead = this._uLeftHead.getMain(),
                     rightHead = this._uRightHead.getMain(),
-                    leftMain = this._uLeftMain.getMain(),
-                    rightMain = this._uRightMain.getMain(),
+                    leftMain = this._uLeftBody.getMain(),
+                    rightMain = this._uRightBody.getMain(),
                     table = dom.parent(this.getBody()),
                     head = this.$getSection('Head').getMain();
 
@@ -402,9 +384,9 @@ _eRight      - 右侧乐定行的Element元素
             addRow: function (data, index) {
                 var row = ui.Table.prototype.addRow.call(this, data, index),
                     el = row.getMain(),
-                    leftBody = this._uLeftMain.getBody(),
-                    rightBody = this._uRightMain.getBody(),
-                    o = '<tr class="' + el.className + '" style="' + el.style.cssText + '"><td style="padding:0px;border:0px;width:0px"></td></tr>';
+                    leftBody = this._uLeftBody.getBody(),
+                    rightBody = this._uRightBody.getBody(),
+                    o = '<tr class="' + el.className + '" style="' + el.style.cssText + '"><td class="ui-locked-table-empty"></td></tr>';
 
                 index = this.getRows().indexOf(row);
                 o = dom.create(
@@ -413,10 +395,10 @@ _eRight      - 右侧乐定行的Element元素
                     }
                 ).lastChild.lastChild;
 
-                initLockedRow(row, o.firstChild, o.lastChild);
+                initRow.call(row, o.firstChild, o.lastChild);
                 leftBody.insertBefore(o.firstChild, dom.children(leftBody)[index]);
                 rightBody.insertBefore(o.firstChild, dom.children(rightBody)[index]);
-                splitRow(this, row);
+                row.$initStructure();
 
                 return row;
             },
@@ -427,10 +409,10 @@ _eRight      - 右侧乐定行的Element元素
             cache: function (force) {
                 this._uLeftHead.cache(force);
                 this._uRightHead.cache(force);
-                this._aHeadRows.forEach(function (item) {
+                this.getHeadRows().forEach(function (item) {
                     item.cache(force);
                 });
-                this._aRows.forEach(function (item) {
+                this.getRows().forEach(function (item) {
                     item.cache(force);
                 });
                 ui.Table.prototype.cache.call(this, force);
@@ -457,10 +439,10 @@ _eRight      - 右侧乐定行的Element元素
             removeRow: function (index) {
                 var row = this.getRow(index);
                 if (row) {
-                    restoreRow(this, row);
+                    row.$restoreStructure();
 
-                    var leftBody = this._uLeftMain.getBody(),
-                        rightBody = this._uRightMain.getBody();
+                    var leftBody = this._uLeftBody.getBody(),
+                        rightBody = this._uRightBody.getBody();
 
                     leftBody.removeChild(dom.children(leftBody)[index]);
                     rightBody.removeChild(dom.children(rightBody)[index]);

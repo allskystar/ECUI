@@ -1,10 +1,13 @@
 /*
 @example
 <div ui="type:progress-bar;max:100;value:35"></div>
-
+*/
+/*ignore*/
+/*
 @fields
 _eMask   - 完成的进度比例内容区域
 */
+/*end*/
 //{if 0}//
 (function () {
     var core = ecui,

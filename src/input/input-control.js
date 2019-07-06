@@ -99,9 +99,10 @@ _eInput        - INPUT对象
              * @param {Event} event 事件对象
              */
             focus: function (event) {
-                var el = core.wrapEvent(event).target;
-                if (el.getControl) {
-                    var control = el.getControl();
+                var el = core.wrapEvent(event).target,
+                    control = core.findControl(el);
+
+                if (control) {
                     if (control.isDisabled() || !control.isCapturable()) {
                         dom.removeEventListener(el, 'blur', events.blur);
                         try {
