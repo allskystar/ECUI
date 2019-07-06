@@ -43,48 +43,33 @@
     var keyboardHeight = 0,
         statusHeight = 0,
         fixedHeight = 0,
-        safeAreaHeight = 0,
         realTarget;
 
-    if (iosVersion) {
+    if (iosVersion && safariVersion) {
         switch (screen.height) {
         case 568:
             // iphone 5S/SE
-            if (safariVersion) {
-                statusHeight = 44;
-                fixedHeight = 13;
-            }
+            statusHeight = 44;
+            fixedHeight = 13;
             break;
         case 667:
             // iphone 6/7/8/6S
-            if (safariVersion) {
-                statusHeight = 44;
-                fixedHeight = 13;
-            }
+            statusHeight = 44;
+            fixedHeight = 13;
             break;
         case 736:
             // iphone 6/7/8 Plus
-            if (safariVersion) {
-                statusHeight = 44;
-                fixedHeight = 13;
-            }
+            statusHeight = 44;
+            fixedHeight = 13;
             break;
         case 812:
             // iphone X/XS
-            if (safariVersion) {
-                statusHeight = 83;
-                fixedHeight = 6;
-            } else {
-                safeAreaHeight = 34;
-            }
+            statusHeight = 83;
+            fixedHeight = 6;
             break;
         case 896:
             // iphone XR/XS max
-            if (safariVersion) {
-                statusHeight = 83;
-            } else {
-                safeAreaHeight = 34;
-            }
+            statusHeight = 83;
             break;
         }
     }
@@ -549,7 +534,7 @@
             dom.setStyle(control.getMain(), 'transform', 'translateY(' + window.scrollY + 'px)');
         });
         bottomList.forEach(function (control) {
-            dom.setStyle(control.getMain(), 'transform', 'translateY(' + (window.scrollY - keyboardHeight - safeAreaHeight) + 'px)');
+            dom.setStyle(control.getMain(), 'transform', 'translateY(' + (window.scrollY - keyboardHeight) + 'px)');
         });
     }
 

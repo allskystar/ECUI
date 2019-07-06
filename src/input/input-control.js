@@ -111,7 +111,11 @@ _eInput        - INPUT对象
                         }
                         dom.addEventListener(el, 'blur', events.blur);
                     } else {
-                        control.focus();
+                        util.timer(function () {
+                            if (dom.contain(control.getMain(), document.activeElement)) {
+                                control.focus();
+                            }
+                        });
                     }
                 }
             },
