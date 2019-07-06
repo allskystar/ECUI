@@ -267,14 +267,16 @@
                     height = util.getView().height / 2,
                     oldScrollY = window.scrollY,
                     y = this.getY();
-                if (options.bottom - y < height) {
+
+                if (options.bottom - y > height) {
                     window.scrollTo(0, keyboardHeight);
                     fixed();
                 } else if (y - options.top < height) {
                     window.scrollTo(0, 0);
                     fixed();
                 }
-                dom.setStyle(this.getBody(), 'transform', 'translate(' + ui.MScroll.Methods.getX.call(this) + 'px,' + (y - oldScrollY + window.scrollY) + 'px)');
+
+                this.setPosition(this.getX(), y - oldScrollY + window.scrollY);
             }
 
             var activeElement = document.activeElement;
@@ -486,6 +488,16 @@
             this.$MScrollData.range = range;
         }
     });
+
+    /**
+     * 获取软键盘高度，如果没有弹出高度为0。
+     * @public
+     *
+     * @return {number} 软键盘高度
+     */
+    core.getKeyboardHeight = function () {
+        return keyboardHeight;
+    };
 
     function showActiveElement() {
         activeCloneElement.previousSibling.style.display = '';

@@ -367,13 +367,13 @@ _nBottomIndex  - 下部隐藏的选项序号
 
                     if (status === 'header') {
                         this._oHandle = effect.grade(
-                            'this.setPosition(0,#$.y->' + this.$$titleHeight + '#)',
+                            'this.setPosition(0,#$.y->' + (this.$$titleHeight + window.scrollY) + '#)',
                             400,
                             options
                         );
                     } else if (status === 'footer') {
                         this._oHandle = effect.grade(
-                            'this.setPosition(0,#$.y->' + (main.clientHeight - main.scrollHeight + this.$$footerHeight - this._nTopHidden + this.$$headerHeight) + '#)',
+                            'this.setPosition(0,#$.y->' + (main.clientHeight - core.getKeyboardHeight() - main.scrollHeight + this.$$footerHeight - this._nTopHidden + this.$$headerHeight + window.scrollY) + '#)',
                             400,
                             options
                         );
@@ -548,17 +548,18 @@ _nBottomIndex  - 下部隐藏的选项序号
                 this._eFooter.style.transform = 'translateY(' + (y + this._nTopHidden - this.$$headerHeight) + 'px)';
                 ui.MScroll.Methods.setPosition.call(this, x, y + this._nTopHidden - this.$$headerHeight);
 
-                top = this.getHeight() - this.$$bodyHeight;
-                if (y > 0) {
-                    status = y < this.$$headerHeight || this.isInertia() ? 'headerenter' : 'headercomplete';
-                } else if (y === 0) {
+                top = this.getHeight() - core.getKeyboardHeight() - this.$$bodyHeight;
+                if (y > window.scrollY) {
+                    status = y - window.scrollY < this.$$headerHeight || this.isInertia() ? 'headerenter' : 'headercomplete';
+                } else if (y === window.scrollY) {
                     // 解决items不够填充整个listview区域，导致footercomplete的触发
                     status = '';
                 } else if (y < top && top < 0) {
-                    var status = y > top + this.$$footerHeight ? 'footerenter' : 'footercomplete';
+                    var status = y > top - this.$$footerHeight || this.isInertia() ? 'footerenter' : 'footercomplete';
                 } else {
                     status = '';
                 }
+
                 if (this._sStatus && this._sStatus.charAt(0) !== status.charAt(0)) {
                     core.dispatchEvent(this, this._sStatus.slice(0, 6) + 'leave');
                 }
