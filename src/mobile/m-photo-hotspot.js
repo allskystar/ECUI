@@ -237,7 +237,7 @@
              * @return {string} 高清图的url地址
              */
             getThumbnailUrl: function () {
-                return this.getMain().src + 'png';
+                return this.getMain().src;
             },
 
             /**
@@ -247,7 +247,7 @@
              * @return {string} 高清图的url地址
              */
             getHDImageUrl: function () {
-                return this.getThumbnailUrl();
+                return this.getMain().src;
             }
         }
     );
