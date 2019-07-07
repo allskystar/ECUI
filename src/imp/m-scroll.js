@@ -724,13 +724,6 @@
 
                                 realTarget.focus();
                                 realTarget = null;
-
-                                keyboardHandle = scrollListener(function () {
-                                    dom.addEventListener(window, 'touchmove', util.preventEvent);
-                                    window.scrollTo(0, 0);
-                                    scrollIntoViewIfNeededHandler();
-                                    fixed();
-                                });
                             } else {
                                 // 第一次触发，开始测试软键盘高度
                                 var lastScrollY = window.scrollY;
@@ -744,18 +737,21 @@
                                 );
 
                                 window.scrollTo(0, document.body.scrollHeight);
-                                keyboardHandle = scrollListener(function () {
-                                    // 第二次触发，计算软键盘高度
+                            }
+
+                            keyboardHandle = scrollListener(function () {
+                                if (fixedInput) {
+                                    window.scrollTo(0, 0);
+                                } else {
                                     keyboardHeight = window.scrollY - statusHeight;
-                                    dom.addEventListener(window, 'touchmove', util.preventEvent);
-                                    // 复位
                                     document.body.style.visibility = '';
                                     window.scrollTo(0, Math.min(lastScrollY, keyboardHeight));
+                                }
 
-                                    scrollIntoViewIfNeededHandler();
-                                    fixed();
-                                });
-                            }
+                                dom.addEventListener(window, 'touchmove', util.preventEvent);
+                                scrollIntoViewIfNeededHandler();
+                                fixed();
+                            });
                         });
                     }
                 },
