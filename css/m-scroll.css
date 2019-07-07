@@ -11,6 +11,7 @@
 
 .ui-mobile-scroll-body {
     overflow: visible !important;
+    min-height: 100%;
     transform: translateZ(0px);
     .m-width100rate();
 }

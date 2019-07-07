@@ -725,9 +725,9 @@
                                 realTarget.focus();
                                 realTarget = null;
 
-                                window.scrollTo(0, 0);
                                 keyboardHandle = scrollListener(function () {
                                     dom.addEventListener(window, 'touchmove', util.preventEvent);
+                                    window.scrollTo(0, 0);
                                     scrollIntoViewIfNeededHandler();
                                     fixed();
                                 });
