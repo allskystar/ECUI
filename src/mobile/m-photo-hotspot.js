@@ -83,15 +83,6 @@
     }
 
     /**
-     * 图片加载事件。
-     * @private
-     */
-    function load() {
-        calcSize(this.getControl(), this.width, this.height);
-        dom.removeEventListener(this, 'load', load);
-    }
-
-    /**
      * 滑动事件处理。
      * @private
      *
@@ -167,15 +158,24 @@
     ui.MPhotoHotspot = core.inherits(
         ui.Control,
         function (el, options) {
+            ui.Control.call(this, el, options);
             if (options.size) {
                 var size = options.size.split(',');
                 calcSize(this, +size[0], +size[1]);
-            } else if (el.width) {
-                calcSize(this, el.width, el.height);
             } else {
-                dom.addEventListener(el, 'load', load);
+                var img = new Image();
+                img.src = this.getThumbnailUrl();
+                img.onload = function () {
+                    calcSize(this, img.width, img.height);
+                    if (currHotspot === this) {
+                        fillImage(currImg, this, 0);
+                    }
+                    img.onload = img.onerror = null;
+                }.bind(this);
+                img.onerror = function () {
+                    img.onload = img.onerror = null;
+                }.bind(this);
             }
-            ui.Control.call(this, el, options);
             this._sGroup = options.group;
         },
         {
@@ -231,13 +231,23 @@
             },
 
             /**
+             * 获取缩略图的链接地址。
+             * @public
+             *
+             * @return {string} 高清图的url地址
+             */
+            getThumbnailUrl: function () {
+                return this.getMain().src + 'png';
+            },
+
+            /**
              * 获取高清图的链接地址。
              * @public
              *
              * @return {string} 高清图的url地址
              */
             getHDImageUrl: function () {
-                return this.getMain().src;
+                return this.getThumbnailUrl();
             }
         }
     );
