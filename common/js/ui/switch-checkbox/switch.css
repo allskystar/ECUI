@@ -1,44 +1,52 @@
 /*<script>window.onload=function(){value=document.getElementsByTagName('TEXTAREA')[0].value;parent.postMessage({url:location.href.slice(7),text:value.slice(value.indexOf('\n')+1).replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&')},'*');}</script><textarea>*/
 .ui-switch {
     width: 70px;
-    height:22px;
-    position:relative;   
-    display: block;   
-    padding: 1px;   
-    border-radius: 24px;   
-    background-color: #eee;   
-    cursor: pointer;   
-    vertical-align: top;   
+    height: 26px;
+    position: relative;
+    display: block;
+    border-radius: 26px;
+    background-color: #fff;
+    cursor: pointer;
+    vertical-align: top;
     -webkit-user-select: none;
     background-image: none;
+
+    input {
+        display: none;
+    }
 }
-.ui-switch:before{   
-    content: '';   
-    display: block;   
-    border-radius: 24px;   
-    height: 22px;   
-    background-color: white;   
-    -webkit-transform: scale(1, 1);   
-    -webkit-transition: all 0.3s ease;   
+
+.ui-switch:before {
+    content: '';
+    display: block;
+    border-radius: 26px;
+    height: 26px;
+    background-color: #999;
+    transition: all 0.3s ease;
+    -webkit-transition: all 0.3s ease;
 }
-.ui-switch:after{   
-    content: '';   
-    position: absolute;   
-    top: 50%;     
-    left: 0;     
-    margin-top: -11px;     
-    margin-left: 11px;   
-    width: 22px;   
-    height: 22px;   
-    border-radius: 22px;   
-    background-color: white;   
-    box-shadow: 0 0 1px black;  
-    -webkit-transform: translateX(-9px);   
-    -webkit-transition: all 0.3s ease;   
+
+.ui-switch:after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 2px;
+    margin-top: -11px;
+    width: 22px;
+    height: 22px;
+    border-radius: 22px;
+    background-color: #fff;
+    -webkit-transition: all 0.3s ease;
+    transition: all 0.3s ease;
 }
-.ui-switch-checked:after{   
-    -webkit-transform: translateX(39px);   
-}   
-.ui-switch-checked:before{   
-    background-color:#64bd63;   
-}  
+
+
+.ui-switch-checked:after {
+    -webkit-transform: translateX(0);
+    margin-left: 0;
+    left: 46px;
+}
+
+.ui-switch-checked:before {
+    background-color: #0F83FF;
+}
