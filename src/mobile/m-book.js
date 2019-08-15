@@ -110,7 +110,7 @@ _aLabel    - 标签信息数组
              */
             $initStructure: function (width, height) {
                 ui.MPanel.prototype.$initStructure.call(this, width, height);
-                this.setScrollRange({top: -this._aLabel[this._aLabel.length - 1].top});
+                this.setScrollRange({top: this.getHeight() - this.getBody().offsetHeight});
             },
 
             /**
@@ -158,7 +158,11 @@ _aLabel    - 标签信息数组
                 }
 
                 this._aLabel.forEach(function (item) {
-                    item.el.style.transform = next && item === selected ? 'translate(0px,' + Math.min(-y - item.top, next.top - item.top - selected.height) + 'px)' : '';
+                    if (next) {
+                        item.el.style.transform = item === selected ? 'translate(0px,' + Math.min(-y - item.top, next.top - item.top - selected.height) + 'px)' : '';
+                    } else {
+                        item.el.style.transform = item === selected ? 'translate(0px,' + (-y - item.top) + 'px)' : '';
+                    }
                 });
 
                 setSelected(this, selected);

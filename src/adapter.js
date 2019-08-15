@@ -1405,7 +1405,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                 Clazz.prototype = superClass.prototype;
                 Object.assign(subClass.prototype = new Clazz(), oldPrototype);
                 subClass.prototype.constructor = subClass;
-                subClass.super = superClass;
+                subClass['super'] = superClass;
             },
 
             /**

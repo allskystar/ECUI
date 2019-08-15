@@ -139,7 +139,8 @@
                 if (event.type === 'mousedown') {
                     // ie6/7/8下有可能scroll事件是由mousedown点击滚动条触发的
                     this.$PopupData.control.hide();
-                } else if (ui.Popup.getOwner()) {
+                } else if (ui.Popup.getOwner() && owners.indexOf(this.$PopupData.control) !== -1) {
+                    // 当前的pop弹出的时候，才能进行该操作
                     setPopupPosition(this.$PopupData.control);
                 }
             }
@@ -165,7 +166,7 @@
 
                 var el = this.$PopupData.control.getMain();
 
-                if (!dom.parent(el)) {
+                if (!ecui.dom.contain(document.body, el)) {
                     // 第一次显示时需要进行下拉选项部分的初始化，将其挂载到 DOM 树中
                     document.body.appendChild(el);
                     showPopup(this.$PopupData.control);

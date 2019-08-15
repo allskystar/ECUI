@@ -156,11 +156,11 @@
                                 this.$setParent(ui.Popup.getOwner());
                                 var start = this.getParent()._eStartInput.value;
                                 this.setDate(start ? new Date(start.replace(' ', 'T')) : new Date());
-
+                                this.show();
                             },
                             setTitle: function (year, month) {
                                 var next = new Date(year, month, 1);
-                                this.getTitle().innerHTML = '<span>' + util.stringFormat(this.TITLEFORMAT, year, month) + '</span><span>' + util.stringFormat(this.TITLEFORMAT, next.getFullYear(), next.getMonth() + 1) + '</span>';
+                                this.getTitle().innerHTML = '<span>' + util.stringFormat(this._sFormat, year, month) + '</span><span>' + util.stringFormat(this._sFormat, next.getFullYear(), next.getMonth() + 1) + '</span>';
                             },
                             setView: function (year, month) {
                                 ui.Calendar.prototype.setView.call(this, year, month + 1, this._aNextCells);
@@ -398,7 +398,6 @@
                     $show: function (event) {
                         ui.Control.prototype.$show.call(this, event);
                         ecui.dispatchEvent(this._uCalendar, 'show', event);
-                        // ecui.dispatchEvent(this._uTime, 'show', event);
                     },
                     /**
                      * @override

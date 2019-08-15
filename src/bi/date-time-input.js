@@ -66,6 +66,9 @@
                              */
                             ondateclick: function (event) {
                                 ecui.dispatchEvent(this.getParent()._uSwitch, 'click');
+                            },
+                            onshow: function () {
+                                this.show();
                             }
                         }
                     ),
