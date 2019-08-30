@@ -53,3 +53,6 @@ ecui.ui.Text.prototype.getSelectionStart = function () {
 ecui.ui.Text.prototype.setSelectionRange = function (start, end) {
     ecui.dom.setSelectionRange(this.getInput, start, end);
 };
+ecui.ui.Submit = ecui.ui.Dialog.prototype.Submit;
+ecui.ui.Cancel = ecui.ui.Dialog.prototype.Cancel;
+ecui.ui.$select = ecui.ui.$AbstractSelect;
