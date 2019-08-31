@@ -986,6 +986,7 @@ a {
     -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#E52B2B3B,endColorstr=#E52B2B3B)";
 }
 
+.ui-date-time-input-options,
 .ui-double-calendar-input-options {
     display: inline-block;
 
@@ -1149,6 +1150,13 @@ a {
     }
      
 
+}
+.ui-date-time-input-options {
+    .ui-time-calendar {
+        .ui-listbox {
+            width: 33%;
+        }
+    }
 }
 
 .ui-m-send-text {
