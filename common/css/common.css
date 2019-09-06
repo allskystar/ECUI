@@ -660,9 +660,6 @@ a {
             text-overflow: ellipsis;
         }
 
-        .ui-table-row:nth-child(2n)>td {
-            background: #f7fcff;
-        }
     }
 }
 
@@ -827,6 +824,7 @@ a {
 
         td:hover {
             background: #368cda;
+            color: #fff;
         }
 
         td.ui-calendar-date-selected {

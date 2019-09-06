@@ -154,7 +154,7 @@ _eInput        - INPUT对象
             }
         };
 
-    if (!firefoxVersion || firefoxVersion >= 52) {
+    if (!(firefoxVersion < 52) && !(ieVersion < 9)) {
         dom.addEventListener(document, 'focusin', events.focus);
         dom.addEventListener(document, 'focusout', events.blur);
         delete events.focus;
@@ -370,20 +370,22 @@ _eInput        - INPUT对象
             $focus: function (event) {
                 ui.Control.prototype.$focus.call(this, event);
 
-                var active = document.activeElement;
+                var active = document.activeElement,
+                    focusin = ieVersion < 9 ? 'focus' : 'focusin',
+                    focusout = ieVersion < 9 ? 'blur' : 'focusout';
                 if (!active.getControl || active.getControl() !== this) {
                     if (active.tagName !== 'BODY') {
                         if (active.getControl) {
-                            dom.removeEventListener(active, 'focusout', events.focusout);
+                            dom.removeEventListener(active, focusout, events[focusout]);
                             active.blur();
-                            dom.addEventListener(active, 'focusout', events.focusout);
+                            dom.addEventListener(active, focusout, events[focusout]);
                         } else {
                             active.blur();
                         }
                     }
-                    dom.removeEventListener(this._eInput, 'focusin', events.focusin);
+                    dom.removeEventListener(this._eInput, focusin, events[focusin]);
                     this._eInput.focus();
-                    dom.addEventListener(this._eInput, 'focusin', events.focusin);
+                    dom.addEventListener(this._eInput, focusin, events[focusin]);
                 }
             },
 

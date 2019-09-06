@@ -171,7 +171,13 @@
                                             this.setSelected(this.getItem(0));
                                         }
                                     },
-
+                                    scrolltoShowview:function(){
+                                        this.getItems().forEach(function (item) {
+                                            if (item.getValue() === this._sValue) {
+                                                dom.scrollIntoViewIfNeeded(item.getMain(), true);
+                                            }
+                                        }.bind(this));
+                                    },
                                     /**
                                      * 改变下拉框当前选中的项。
                                      * @private
@@ -204,6 +210,11 @@
                                 core.dispatchEvent(this._uHouer, 'ready', event);
                                 core.dispatchEvent(this._uMinute, 'ready', event);
                                 core.dispatchEvent(this._uSecond, 'ready', event);
+                            },
+                            scrolltoShowview:function(event){
+                                this._uHouer.scrolltoShowview();
+                                this._uMinute.scrolltoShowview();
+                                this._uSecond.scrolltoShowview();
                             }
                         }
                     ),
@@ -217,6 +228,7 @@
                                     this.status = 'time';
                                     parent._uCalendar.hide();
                                     parent._uTimeCalendar.show();
+                                    parent._uTimeCalendar.scrolltoShowview();
                                     this.getMain().innerHTML = '选择日期';
                                 } else {
                                     this.status = 'date';

@@ -1,20 +1,23 @@
 /*<script>window.onload=function(){value=document.getElementsByTagName('TEXTAREA')[0].value;parent.postMessage({url:location.href.slice(7),text:value.slice(value.indexOf('\n')+1).replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&')},'*');}</script><textarea>*/
 .ui-m-tab {
-    overflow: hidden;
 
     .ui-m-tab-title {
         position: relative;
-        box-sizing: border-box;
-        width: 100%;
-        border-bottom: 0px;
+        border-bottom: 0;
+        position: relative;
         white-space: nowrap;
+        display: block !important;
+        width: 100%;
+        box-sizing: border-box;
+        -webkit-transform: translateZ(0px);
+        transform: translateZ(0px);
 
         .ui-tab-item {
-            display: inline-block !important;
-            box-sizing: border-box;
-            width: 100%;
-            vertical-align: top;
             white-space: nowrap;
+            display: inline-block !important;
+            vertical-align: top;
+            width: auto;
+            box-sizing: border-box;
 
             .ui-tab-bar {
                 position: relative !important;

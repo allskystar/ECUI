@@ -1420,7 +1420,7 @@ outer:          for (var caches = [], target = event.target, el; target && targe
             if (!isToucher && !isPointer) {
                 Object.assign(events, mouseEvents);
             }
-            dom.addEventListeners(window, events);
+            dom.addEventListeners(document, events);
 
             dom.insertHTML(document.body, 'BEFOREEND', '<div class="ui-valid"><div></div></div>');
             // 检测Element宽度与高度的计算方式
