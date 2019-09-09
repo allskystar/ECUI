@@ -157,6 +157,9 @@ _nBottomIndex  - 下部隐藏的选项序号
                         }
                     }
                 } else {
+                    var items = this.getItems();
+
+                    this.alterStatus(items.length ? '-empty' : '+empty');
                     this.$$bodyHeight = this.getBody().offsetHeight;
                     this.refresh();
                 }
