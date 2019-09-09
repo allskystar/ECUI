@@ -2636,7 +2636,7 @@ outer:          for (var caches = [], target = event.target, el; target && targe
                 if (item.NAME) {
                     if (item.SUPER) {
                         if (item.SUPER instanceof Array) {
-                            superMethods.push.apply(this, item.SUPER);
+                            superMethods.push.apply(superMethods, item.SUPER);
                         } else {
                             superMethods.push(item.SUPER);
                         }
