@@ -29,7 +29,7 @@ MConfirm - 确认按钮插件。
         constructor: function (el) {
             var title = dom.create({
                     className: 'ui-mobile-confirm-title',
-                    innerHTML: '<div>确定</div>'
+                    innerHTML: '<div class="confirm-cancel">取消</div><div class="confirm-title">title</div><div class="confirm-sure">确定</div>'
                 }),
                 layout = dom.create({
                     className: 'ui-mobile-confirm-layout'
@@ -43,7 +43,11 @@ MConfirm - 确认按钮插件。
             if (el === this.getBody()) {
                 this.$setBody(layout);
             }
+            this._eTitle = title;
             core.$fastCreate(SubmitButton, title.lastChild, this, {focusable: false});
+        },
+        setTitle: function (title) {
+            dom.children(this._eTitle)[1].innerHTML = title;
         }
     });
 }());
