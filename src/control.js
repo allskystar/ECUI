@@ -96,7 +96,7 @@ _aStatus            - 控件当前的状态集合
             core.removeEventListener(this._cParent, event.type, this._UIControl_oHandler);
         }
         // ready事件不允许被阻止
-        if (!core.dispatchEvent(this, 'ready', event)) {
+        if (this.isShow() && !core.dispatchEvent(this, 'ready', event)) {
             this.$ready(event);
         }
     }

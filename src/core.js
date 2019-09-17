@@ -2114,7 +2114,7 @@ outer:          for (var caches = [], target = event.target, el; target && targe
             // 检查事件是否被监听
             if (eventListeners[uid]) {
                 if (listeners = eventListeners[uid][name]) {
-                    listeners.forEach(function (item) {
+                    listeners.slice().forEach(function (item) {
                         if (item) {
                             item.call(control, event);
                         }
