@@ -61,6 +61,13 @@ _uOptions     - 下拉选择框
                         if (item) {
                             core.setFocused(item);
                         }
+                    },
+                    $propertychange: function (event) {
+                        if (event.name === 'selected') {
+                            if (event.item) {
+                                this._cPreSelected = event.item;
+                            }
+                        }
                     }
                 },
                 ui.MOptions,
@@ -89,8 +96,9 @@ _uOptions     - 下拉选择框
              * @event
              */
             $confirm: function (event) {
-                var item = core.getFocused();
+                var item = this.getPopup()._cPreSelected;
                 if ((item === null || item instanceof this.Item) && this.getSelected() !== item) {
+                    this.getPopup().setSelected(item);
                     this.setSelected(item);
                     core.dispatchEvent(this, 'change', event);
                 }
