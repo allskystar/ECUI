@@ -3645,6 +3645,8 @@ cities - 地区联动下拉框控件。
 
             this._eInput = ecui.dom.last(el);
             this._eInput.value = options.value;
+            this._sValue = options.value;
+            this._sMulti = options.multi;
             ui.MultilevelSelect.call(this, el, options);
 
         },
@@ -3670,23 +3672,24 @@ cities - 地区联动下拉框控件。
                 }
                 return arr;
             },
-            init: function (options) {
-                ui.MultilevelSelect.prototype.init.call(this, options);
-                this.setData(getCITYS.bind(this)(options.multi));
-                var value = String(options.value);
-                if (!options.value || options.value.length !== 6) {
-                    value = '000000';
-                }
+            onready: function () {
+                ecui.util.timer(function () {
+                    this.setData(getCITYS.bind(this)(this._sMulti));
+                    var value = String(this._sValue);
+                    if (!this._sValue || this._sValue.length !== 6) {
+                        value = '000000';
+                    }
 
-                this.getSelect(0).setValue(value.slice(0, 2) + '0000');
-                core.dispatchEvent(this.getSelect(0), 'change');
+                    this.getSelect(0).setValue(value.slice(0, 2) + '0000');
+                    core.dispatchEvent(this.getSelect(0), 'change');
 
-                this.getSelect(1).setValue(value.slice(0, 4) + '00');
+                    this.getSelect(1).setValue(value.slice(0, 4) + '00');
 
-                if (options.multi === '3') {
-                    core.dispatchEvent(this.getSelect(1), 'change');
-                    this.getSelect(2).setValue(value.slice(4) !== '00' ? value : '000000');
-                }
+                    if (this._sMulti === '3') {
+                        core.dispatchEvent(this.getSelect(1), 'change');
+                        this.getSelect(2).setValue(value.slice(4) !== '00' ? value : '000000');
+                    }
+                }, 0, this);
             },
             onchange: function (event) {
                 if (!event.target) {
