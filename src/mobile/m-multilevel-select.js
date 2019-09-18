@@ -28,7 +28,7 @@ _aSelect - 全部的下拉框控件列表
             this._aSelect = [];
             dom.children(el).forEach(
                 function (item, index) {
-                    item.className += this.Select.CLASS + (index ? 'ui-hide' : '');
+                    item.className += this.Select.CLASS + (index ? ' ui-hide ' : '');
                     this._aSelect.push(core.$fastCreate(this.Select, item, this));
                 },
                 this
