@@ -956,7 +956,9 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
             if (!(scope[list[i]] instanceof Array)) {
                 scope[list[i]] = [scope[list[i]]];
             }
-            scope[list[i]].push(value);
+            if (value !== '') {
+                scope[list[i]].push(value);
+            }
         } else {
             scope[list[i]] = value;
         }
