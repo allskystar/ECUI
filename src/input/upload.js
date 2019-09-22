@@ -25,6 +25,9 @@
      * @private
      */
     var fileChangeHandler = ieVersion < 9 ? function () {
+            if (this.onbeforeUpload() === false) {
+                return;
+            }
             var name = this.getUID(),
                 iframe = dom.create('IFRAME', {
                     name: name,
@@ -48,6 +51,9 @@
             this._eFile = cloned;
             form.submit();
         } : function () {
+            if (this.onbeforeUpload() === false) {
+                return;
+            }
             var reader = new FileReader(),
                 file = this._eFile.files[0],
                 progress = core.query(
@@ -90,6 +96,7 @@
             this._eFile = el.getElementsByTagName('INPUT')[0];
         },
         {
+            onbeforeUpload: util.blank,
             /**
              * @override
              */
@@ -101,8 +108,8 @@
             /**
              * @override
              */
-            $ready: function () {
-                ui.Control.prototype.$ready.call(this);
+            init: function () {
+                ui.Control.prototype.init.call(this);
                 dom.addEventListener(this._eFile, 'change', fileChangeHandler.bind(this));
             },
 
