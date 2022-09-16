@@ -17,7 +17,7 @@
                 <td>中国北京中关村</td>
                 <td>1999</td>
             </tr>
-            <tr>
+            <tr class="ui-hide">
                 <td colspan="4">百度（纳斯达克：BIDU），全球最大的中文搜索引擎、最大的中文网站。百度愿景是：成为最懂用户，并能帮助人们成长的全球顶级高科技公司。</td>
             </tr>
         </tbody>
@@ -65,8 +65,10 @@
                 if (!(index % 2)) {
                     row = rows[index + 1];
                     if (row.isShow()) {
+                        event.row.alterStatus('-expand');
                         row.hide();
                     } else {
+                        event.row.alterStatus('+expand');
                         row.show();
                     }
                 }

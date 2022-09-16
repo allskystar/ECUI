@@ -1,5 +1,4 @@
-var yiche = {},
-    ui = {};
+var yican = {};
 ecui.dom.getParent = ecui.dom.parent;
 ecui.util.extend = Object.assign;
 ecui.ext.esr = ecui.ext.data;

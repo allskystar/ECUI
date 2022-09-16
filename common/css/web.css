@@ -770,10 +770,7 @@ a {
             pointer-events: none;
         }
 
-        .ui-item-focus {
-            font-size: 20px;
-            font-weight: bold;
-        }
+       
     }
 }
 
@@ -798,7 +795,7 @@ a {
 
         .ui-item-selected,
         .ui-item-focus {
-            font-weight: bold;
+            /*font-weight: bold;*/
         }
     }
 }

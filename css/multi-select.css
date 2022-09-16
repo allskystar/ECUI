@@ -15,13 +15,8 @@
     }
 }
 .ui-multi-select-options {
-    border: 1px solid #D6DBE6;
-    min-width: 200px;
     .ui-item {
         display: inline-block;
-    }
-    .ui-item-selected {
-        color: #368cda;
     }
     .ui-multi-select-options-operate {
         display: block;

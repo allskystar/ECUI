@@ -16,19 +16,6 @@ _nRatio    原始的宽高比例
         ui = core.ui;
 //{/if}//
     /**
-     * 图片加载事件。
-     * @private
-     */
-    function load(event) {
-        this._nMinWidth = event.target.width;
-        this._nRatio = event.target.height / event.target.width;
-        dom.removeEventListener(this, 'load', this._UIImage_oHandler);
-        if (this.isReady()) {
-            this.cache();
-        }
-    }
-
-    /**
      * 图片控件。
      * 图片控件支持使用滚轮直接缩放图片的大小。
      * @control
@@ -40,11 +27,13 @@ _nRatio    原始的宽高比例
             // firefox下点击图片会自动进入选中状态
             options.userSelect = false;
             ui.Control.call(this, el, options);
-            if (el.width) {
-                load.call(this, {target: el});
-            } else {
-                dom.addEventListener(el, 'load', this._UIImage_oHandler = load.bind(this));
-            }
+            dom.imgLoad(el, function (event) {
+                this._nMinWidth = event.target.width;
+                this._nRatio = event.target.height / event.target.width;
+                if (this.isReady()) {
+                    this.cache();
+                }
+            }.bind(this));
         },
         {
             /**
@@ -80,7 +69,6 @@ _nRatio    原始的宽高比例
 
                 this.setSize(width, Math.round(width * this._nRatio));
                 this.setPosition(this.getX(), this.getY());
-
                 event.preventDefault();
             },
 

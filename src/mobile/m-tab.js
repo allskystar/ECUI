@@ -28,6 +28,9 @@ _eBar            - 下划线 DOM 元素
      * @param {ECUIEvent} event ECUI 事件对象
      */
     function swipe(event) {
+        if (!dom.contain(this.getMain(), event.target)) {
+            return;
+        }
         if (this._bIsTitle) {
             // 如果是在title上触发swipe，忽略tab页的切换
             return;
@@ -104,6 +107,7 @@ _eBar            - 下划线 DOM 元素
                     options.left = Math.max(Math.round(0.8 * clientWidth) - this.getContainer().scrollWidth, x - clientWidth);
                     options.right = Math.min(Math.round(0.2 * clientWidth), x + clientWidth);
                     options.limit = {stepX: this.getClientWidth()};
+                    options.decelerate = 1000;
                 }
                 core.drag(this, event, options);
             },

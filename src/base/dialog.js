@@ -74,6 +74,7 @@ _uClose     - 关闭按钮
                         ui.Button.prototype.$click.call(this, event);
                         for (var parent = this.getParent(); parent; parent = parent.getParent()) {
                             if (parent instanceof ui.Dialog) {
+                                core.dispatchEvent(parent, 'cancel', event);
                                 parent.hide();
                                 return;
                             }

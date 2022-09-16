@@ -96,7 +96,7 @@ _eRight      - 右侧乐定行的Element元素
             dom.insertHTML(
                 layout,
                 'beforeEnd',
-                '<div class="' + this.getUnitClass(ui.LockedTable, 'fill') + '"></div>' + util.stringFormat(o, 'right') + util.stringFormat(o, 'left')
+                '<div class="' + this.getUnitClass(ui.LockedTable, 'fill') + '"></div>' + util.formatString(o, 'right') + util.formatString(o, 'left')
             );
             el = layout.lastChild;
             for (i = 0; i < 4; i++) {
@@ -152,7 +152,7 @@ _eRight      - 右侧乐定行的Element元素
                      * @override
                      */
                     $initStructure: function (width, height) {
-                        _super.$initStructure(width, height);
+                        ui.Table.prototype.Row.prototype.$initStructure.call(this, width, height);
 
                         var table = this.getParent(),
                             elements = this.$getElements(),
@@ -172,7 +172,7 @@ _eRight      - 右侧乐定行的Element元素
                         );
 
                         if (body.innerHTML.trim()) {
-                            row._eLeft.lastChild.style.width = (table.getClientWidth() - table.$$leftTDWidth - table.$$paddingLeft) + 'px';
+                            this._eLeft.lastChild.style.width = (table.getClientWidth() - table.$$leftTDWidth - table.$$paddingLeft) + 'px';
                         } else {
                             this._bEmpty = dom.getAttribute(this._eLeft.lastChild.previousSibling, 'colSpan') || ' ';
                             this._eLeft.lastChild.previousSibling.setAttribute('colSpan', 2);
@@ -221,7 +221,7 @@ _eRight      - 右侧乐定行的Element元素
                             }
                         });
 
-                        _super.$restoreStructure();
+                        ui.Table.prototype.Row.prototype.$restoreStructure.call(this);
                     }
                 }
             ),

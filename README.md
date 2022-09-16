@@ -52,7 +52,7 @@ git clone https://github.com/allskystar/ECUI.git
 cd ECUI
 在ECUI项目目录下执行 java -jar ecui-doc.jar
 ### 创建 项目目录
-可以使用 ECUI下的 generator-ecui 脚本创建项目，也可以自己手动按照框架对目录和文件命名的要求一一创建：
+可以使用 ECUI下的 generator-ecui.sh 脚本创建项目，也可以自己手动按照框架对目录和文件命名的要求一一创建：
 #### 使用脚本
 打开终端，在 work目录下执行以下命令：
 ```
@@ -209,6 +209,15 @@ http {
         #配置项目中用到的所有ecui相关文件
         location ~ ^/(ecui\.|options\.|ie-es5\.|common\.|common/|tools/|css/|src/|images/ecui/).*$ {
           proxy_pass http://127.0.0.1:8000;
+        }
+
+        # 访问资源 404 容错处理
+        location ~ /(_layer_\.js|_define_\.css|layer\.[^/]+\.(js|css|html))$ {
+            if ( !-f $document_root$uri ) {
+                # 打包后自然会恢复
+                add_header Content-Type 'text/html; charset=utf-8';
+                return 200 '';
+            }
         }
 
         error_page   500 502 503 504  /50x.html;

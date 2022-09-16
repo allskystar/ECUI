@@ -39,7 +39,7 @@ ECUI动画效果库，支持对CSS3动画效果的模拟并扩展了相应的功
             'ease-in-out': [0.42, 0, 0.58, 1]
         };
 
-    Object.assign(core.effect, {
+    Object.assign(effect, {
 
         /**
          * 三次贝塞尔曲线构造函数。
@@ -407,8 +407,10 @@ ECUI动画效果库，支持对CSS3动画效果的模拟并扩展了相应的功
                         function () {
                             new Function('$', elements.join('transition="all ' + duration + 'ms ' + (transition || 'ease') + '";')).call(options.$, options);
                             fn.call(options.$, 1, options);
-                        }
+                        },
+                        20
                     );
+                    // 延后执行后浏览器还是出现了优化合并0/1的设置，所以暂时往后延迟超过一帧的时间（20ms）保证动画正常执行，问题，稍有20ms的延后
                     util.timer(
                         function () {
                             new Function('$', elements.join('transition="";')).call(options.$, options);
@@ -416,7 +418,7 @@ ECUI动画效果库，支持对CSS3动画效果的模拟并扩展了相应的功
                                 options.onfinish.call(options.$, options);
                             }
                         },
-                        duration
+                        duration + 20
                     );
                     return;
                 }

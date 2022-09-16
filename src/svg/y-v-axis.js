@@ -124,7 +124,7 @@ YVBarAxisControl.render(options);
 
                 for (var i = 0, y = y1, value = min, step = (max - value) / yGrid; i < yGrid + 1; i++) {
                     this.drawLine(x1, height - y, x2, height - y, value || options.yAxis.line === false ? 'align-line' : 'axis-line');
-                    this.drawText(0, height - y, options.yAxis.formatter ? util.stringFormat(options.yAxis.formatter, value) : value, 'axis-text');
+                    this.drawText(0, height - y, options.yAxis.formatter ? util.formatString(options.yAxis.formatter, value) : value, 'axis-text');
                     y += yUnit;
                     value += step;
                 }
@@ -147,7 +147,7 @@ YVBarAxisControl.render(options);
 
                             this.drawText(cx, height - y1, item, 'category-text');
                             this.$drawItem(index, cx, cy, w * options.series.ratio.width, Math.abs(h), options.series);
-                            this.drawText(cx, height - y1 - Math.max(0, h * options.series.ratio.text) - h0, options.yAxis.formatter ? util.stringFormat(options.yAxis.formatter, value) : value, 'item-text');
+                            this.drawText(cx, height - y1 - Math.max(0, h * options.series.ratio.text) - h0, options.yAxis.formatter ? util.formatString(options.yAxis.formatter, value) : value, 'item-text');
                         }
                         x += w;
                     },

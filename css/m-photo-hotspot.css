@@ -9,18 +9,14 @@
     bottom: 0px;
     z-index: 32200 !important;
     .m-width100rate();
-    height: 30px;
-    color: #cccccc;
 }
 
 .ui-mobile-photo-hotspot-text {
     float: left;
     .inline-block();
-    padding-left: 20px;
 }
 
 .ui-mobile-photo-hotspot-count {
     float: right;
     .inline-block();
-    padding-right: 20px;
 }

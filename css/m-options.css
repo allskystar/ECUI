@@ -7,16 +7,12 @@
         .m-width100rate();
         z-index: 2 !important;
         height: 100% !important;
-        background: linear-gradient(rgba(255, 255, 255, 1), rgba(255, 255, 255, 0), rgba(255, 255, 255, 1));
         pointer-events: none !important;
     }
-
     .ui-mobile-options-view {
-        position: absolute !important;
-        .m-width100rate();
-        z-index: 1 !important;
-        box-sizing: border-box;
+        position: absolute;
         overflow: hidden;
-        pointer-events: none !important;
+        z-index: 1;
+        width: 100%;
     }
 }

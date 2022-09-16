@@ -27,6 +27,7 @@ _eInput        - INPUT对象
         firefoxVersion = /firefox\/(\d+\.\d)/i.test(navigator.userAgent) ? +RegExp.$1 : undefined;
 //{/if}//
     var timer = util.blank,
+        insertCompositionTextInput,
         // INPUT事件集合对象
         events = {
             /**
@@ -36,7 +37,7 @@ _eInput        - INPUT对象
             blur: function () {
                 util.timer(
                     function () {
-                        var tagName = document.activeElement.tagName;
+                        var tagName = document.activeElement ? document.activeElement.tagName : '';
                         if (tagName === 'INPUT' || tagName === 'SELECT' || tagName === 'TEXTAREA' || tagName === 'BUTTON') {
                             // 键盘操作焦点移向了另一个输入框，重新设置焦点
                             core.setFocused(core.findControl(document.activeElement));
@@ -50,7 +51,7 @@ _eInput        - INPUT对象
              * 输入结束事件处理。
              * @private
              */
-            compositionend: iosVersion ? util.blank : function (event) {
+            compositionend: function (event) {
                 event = core.wrapEvent(event);
                 var control = event.target.getControl();
                 core.dispatchEvent(control, 'input', event);
@@ -65,7 +66,7 @@ _eInput        - INPUT对象
              * 输入开始事件处理。
              * @private
              */
-            compositionstart: iosVersion ? util.blank : function (event) {
+            compositionstart: function (event) {
                 timer();
                 core.wrapEvent(event).target.getControl()._bIME = true;
             },
@@ -112,7 +113,7 @@ _eInput        - INPUT对象
                         dom.addEventListener(el, 'blur', events.blur);
                     } else {
                         util.timer(function () {
-                            if (dom.contain(control.getMain(), document.activeElement)) {
+                            if (control.getMain() && dom.contain(control.getMain(), document.activeElement)) {
                                 control.focus();
                             }
                         });
@@ -125,9 +126,41 @@ _eInput        - INPUT对象
              * @private
              */
             input: function (event) {
+                var el = document.activeElement;
+                if (iosVersion && event.inputType === 'insertFromComposition' && insertCompositionTextInput !== el) {
+                    // ios下中文输入，没有正常结束时切换input，拼音字母会被填充到两个input里面
+                    var pos = el.selectionStart - event.data.length,
+                        type = el.type;
+                    if (type !== 'text') {
+                        el.type = 'text';                       
+                    }
+                    el.value = el.value.slice(0, pos) + el.value.slice(el.selectionStart);
+                    el.setSelectionRange(pos, pos);
+                    if (type !== 'text') {
+                        el.type = type;
+                    }
+                } else {
+                    insertCompositionTextInput = el;
+                }
+
                 event = core.wrapEvent(event);
                 var control = event.target.getControl();
-                if (!control._bIME) {
+                if (control._bIME) {
+                    if (iosVersion) {
+                        // ios点完成时，软键盘收起，input没有正常失去焦点
+                        if (event.getNative().data === null) {
+                            if (Date.now() - control._nTime > 30) {
+                                control._nTime = -Date.now();
+                            }
+                        } else {
+                            if (Date.now() + control._nTime < 30) {
+                                el.blur();
+                            } else {
+                                control._nTime = Date.now();
+                            }
+                        }
+                    }
+                } else {
                     // 防止ie11修改placeholder引起的input重入
                     control._bIME = true;
                     core.dispatchEvent(control, 'input', event);
@@ -283,6 +316,7 @@ _eInput        - INPUT对象
                         dom.removeEventListener(this._eInput, 'focusout', events.focusout);
                         this._eInput.blur();
                         dom.addEventListener(this._eInput, 'focusout', events.focusout);
+                        this._bIME = false; // ios 输入未走input事件
                     } else {
                         if (events.blur) {
                             dom.removeEventListener(this._eInput, 'blur', events.blur);
@@ -295,7 +329,7 @@ _eInput        - INPUT对象
                 }
 
                 if (this._bBlur) {
-                    core.dispatchEvent(this, 'validate');
+                    this.validate();
                 }
 
                 ui.Control.prototype.$blur.call(this, event);
@@ -304,12 +338,11 @@ _eInput        - INPUT对象
             /**
              * 清除错误样式。
              * @protected
-             *
              */
-            $clearErrorStyle: function () {
+            $correct: function () {
                 for (var control = this; control = control.getParent(); ) {
                     if (control instanceof ui.InputGroup) {
-                        control.alterSubType('');
+                        control.$correct();
                         break;
                     }
                 }
@@ -394,7 +427,7 @@ _eInput        - INPUT对象
              * @event
              */
             $input: function () {
-                this.$clearErrorStyle();
+                this.$correct();
             },
 
             /**
@@ -454,7 +487,7 @@ _eInput        - INPUT对象
              * @event
              */
             $submit: function (event) {
-                if (!core.dispatchEvent(this, 'validate')) {
+                if (!this.validate()) {
                     event.preventDefault();
                 }
             },
@@ -545,6 +578,22 @@ _eInput        - INPUT对象
              */
             setValue: function (value) {
                 this.$setValue(value);
+            },
+
+            /**
+             * 校验控件的值，如果正确调用$correct方法，如果错误向控件发送error事件。
+             * @public
+             *
+             * @return {boolean} 校验是否通过
+             */
+            validate: function () {
+                if (core.dispatchEvent(this, 'validate')) {
+                    this.$correct();
+                    return true;
+                } else {
+                    core.dispatchEvent(this, 'error');
+                    return false;
+                }
             }
         }
     );

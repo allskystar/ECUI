@@ -4,6 +4,9 @@
     <!-- 这里放表单元素 -->
     ...
 </div>
+
+@fields
+_bError  -  是否是错误状态
 */
 //{if 0}//
 (function () {
@@ -19,11 +22,23 @@
         'ui-input-group',
         {
             /**
+             * 控件组格式校验正确的处理。
+             * @protected
+             */
+            $correct: function () {
+                if (this._bError) {
+                    this.alterSubType('');
+                    this._bError = false;
+                }
+            },
+
+            /**
              * 控件组格式校验错误的默认处理。
              * @event
              */
             $error: function () {
                 this.alterSubType('error');
+                this._bError = true;
             }
         }
     );

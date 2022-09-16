@@ -191,7 +191,7 @@ _nOptionSize  - 下接选择框可以用于选择的条目数量
                         options.hide();
                         // 回车键选中，ESC键取消
                         if (which === 13) {
-                            if (selected !== selecting) {
+                            if (selecting && selected !== selecting) {
                                 this.setSelected(selecting);
                                 core.dispatchEvent(this, 'change', event);
                             }

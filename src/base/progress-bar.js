@@ -24,7 +24,8 @@ _eMask   - 完成的进度比例内容区域
         function (el, options) {
             ui.Progress.call(this, el, options);
 
-            el.innerHTML = '<div class="' + this.getUnitClass(ui.ProgressBar, 'mask') + '"></div>';
+            el.innerHTML = '<div class="' + this.getUnitClass(ui.ProgressBar, 'text') + '"></div><div class="' + this.getUnitClass(ui.ProgressBar, 'mask') + '"></div>';
+            this._eText = el.firstChild;
             this._eMask = el.lastChild;
         },
         {
@@ -32,6 +33,7 @@ _eMask   - 完成的进度比例内容区域
              * @override
              */
             $dispose: function () {
+                this._eText = null;
                 this._eMask = null;
                 ui.Progress.prototype.$dispose.call(this);
             },
@@ -41,6 +43,18 @@ _eMask   - 完成的进度比例内容区域
              */
             $progress: function () {
                 this._eMask.style.clip = 'rect(0px,' + Math.round(this.getValue() * this.getWidth() / this.getMax()) + 'px,' + this.getHeight() + 'px,0px)';
+                this.setText((this.getValue() / this.getMax() * 100).toFixed(2) + '%');
+            },
+
+            /**
+             * 设置进度条文本。
+             * @public
+             * 
+             * @param text 进度条显示文本
+             */
+            setText: function (text) {
+                this._eText.innerHTML = text;
+                this._eMask.innerHTML = text;
             }
         }
     );

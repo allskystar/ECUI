@@ -132,7 +132,7 @@
 /*end*/
             this.$MOptionsData.mask.style.top = this.getMain().scrollTop + 'px';
             this.$MOptionsData.view.firstChild.className = this.getBody().className;
-            this.$MOptionsData.view.firstChild.style.transform = 'translate3d(0px,' + (y - 90) + 'px,0px)';
+            this.$MOptionsData.view.firstChild.style.transform = 'translate3d(0px,' + (y - this.$$itemHeight * this._nOptionSize) + 'px,0px)';
         }
     });
 }());

@@ -16,6 +16,15 @@ MConfirm - 确认按钮插件。
                     popup.hide();
                 }
             }
+        ),
+        CancelButton = core.inherits(
+            ui.Control,
+            {
+                onclick: function () {
+                    var popup = this.getParent();
+                    popup.hide();
+                }
+            }
         );
 
     /**
@@ -29,7 +38,7 @@ MConfirm - 确认按钮插件。
         constructor: function (el) {
             var title = dom.create({
                     className: 'ui-mobile-confirm-title',
-                    innerHTML: '<div class="confirm-cancel">取消</div><div class="confirm-title">title</div><div class="confirm-sure">确定</div>'
+                    innerHTML: '<div class="confirm-cancel">取消</div><div class="confirm-title"></div><div class="confirm-sure">确定</div>'
                 }),
                 layout = dom.create({
                     className: 'ui-mobile-confirm-layout'
@@ -44,6 +53,7 @@ MConfirm - 确认按钮插件。
                 this.$setBody(layout);
             }
             this._eTitle = title;
+            core.$fastCreate(CancelButton, title.firstChild, this, {focusable: false});
             core.$fastCreate(SubmitButton, title.lastChild, this, {focusable: false});
         },
         setTitle: function (title) {

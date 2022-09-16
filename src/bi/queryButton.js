@@ -16,6 +16,7 @@ queryButton - 查询按钮控件。
         'ui-query-button',
         function (el, options) {
             ui.Button.call(this, el, options);
+            this._sRoute = options.route;
         },
         {
             /**
@@ -27,13 +28,12 @@ queryButton - 查询按钮控件。
             },
             $click: function (event) {
                 ui.Button.prototype.$click.call(this, event);
-                var route = ecui.esr.findRoute(this);
-                var children = ecui.esr.getRoute(route.children);
-                children.searchParm = {};
-                ecui.esr.parseObject(this.getForm(), children.searchParm);
-                // ecui.ui.BTableListRoute.prototype.setSearchParam(children.searchParm, this.getForm());
-                // children.searchParm.pageNo = 1;
-                ecui.esr.callRoute(route.children + '~pageNo=1', true);
+                var route = ecui.esr.findRoute(this),
+                routeName = this._sRoute || route.children || route.NAME,
+                    children = ecui.esr.getRoute(routeName);
+                children.searchParam = {};
+                ecui.esr.parseObject(this.getForm(), children.searchParam);
+                ecui.esr.callRoute(routeName + '~pageNo=1', true);
             }
         }
     );

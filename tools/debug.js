@@ -54,10 +54,19 @@
      */
     var moduleName,
         moduleCallback,
-        moduleRoute,
+        moduleLoads,
         loc = location.href + '#',
         waits = {},
-        oldLoadScriptFn = ecui.io.loadScript;
+        oldLoadScriptFn = function (url, callback, options) {
+            options.onsuccess = function (text) {
+                eval(text);
+                callback();
+            };
+            options.onerror = function () {
+                callback();
+            };
+            ecui.io.ajax(url, options);
+        };
 
     loc = loc.slice(0, loc.indexOf('#'));
 
@@ -109,7 +118,8 @@
     }
 
     function createStyle(cssText) {
-        var el = document.createElement('STYLE');
+        var el = document.createElement('STYLE'),
+            index = cssText.indexOf('{');
         el.setAttribute('type', 'text/less');
         el.setAttribute('module', '/' + moduleName);
         if (ecui.ie < 10) {
@@ -132,16 +142,29 @@
         if (name.pop() === '_define_.js') {
             moduleName = name.length ? name.join('/') + '/' : '';
             moduleCallback = callback;
-            moduleRoute = [];
+            moduleLoads = [['js', '_layer_.js']];
 
             ecui.io.ajax(moduleName + '_define_.css', {
                 cache: true,
                 onsuccess: function (cssText) {
-                    createStyle('.module-' + moduleName.slice(0, -1).replace(/[._]/g, '-').replace(/\//g, '_') + '{' + cssText + '}');
-                    oldLoadScriptFn.call(this, url, null, options);
+                    var moduleClasses = document.body.className,
+                        newModuleClass = 'module-' +moduleName.slice(0, -1).replace(/[._]/g, '-').replace(/\//g, '_');
+                    
+                    document.body.className = moduleClasses.replace(/module-[^\s]*/g, '') + ' ' + newModuleClass;
+                    createStyle('.' + newModuleClass + '{' + cssText + '}');
+                    ecui.io.ajax(moduleName + '_define_.html', {
+                        cache: true,
+                        onsuccess: function (data) {
+                            ecui.esr.getEngine(moduleName).compile(data.replace(/ui="type:NS\./g, 'ui="type:ecui.ns._' + moduleName.replace(/[._]/g, '-').replace(/\//g, '_') + '.ui.'));
+                            oldLoadScriptFn.call(this, url, load, options);
+                        },
+                        onerror: function () {
+                            oldLoadScriptFn.call(this, url, load, options);
+                        }
+                    });
                 },
                 onerror: function () {
-                    oldLoadScriptFn.call(this, url, null, options);
+                    oldLoadScriptFn.call(this, url, load, options);
                 }
             });
         } else {
@@ -162,49 +185,49 @@
             oldAddRoute.call(this, name, route);
         };
 
-        function loadRouteCss() {
-            ecui.io.ajax(moduleName + filename.slice(0, index + 1).replace(/\./g, '/') + 'route.' + filename.slice(index + 1) + '.css', {
-                cache: true,
-                onsuccess: function (cssText) {
-                    createStyle('.' + moduleName.replace(/[._]/g, '-').replace(/\//g, '_') + filename.replace(/[._]/g, '-') + '{' + cssText + '}');
+        function loadRoute(url) {
+            oldLoadScriptFn(url + '.js', loadRouteCSS, {cache: true});
 
-                    window.less.sheets = [];
-                    window.less.refresh(true, undefined, false);
+            function loadRouteCSS() {
+                ecui.io.ajax(url + '.css', {
+                    cache: true,
+                    onsuccess: function (cssText) {
+                        createStyle('.' + moduleName.replace(/[._]/g, '-').replace(/\//g, '_') + filename.replace(/[._]/g, '-') + '{' + cssText + '}');
 
-                    var stop = ecui.util.timer(function () {
-                        if (document.head.lastChild.getAttribute('type') !== 'text/less') {
-                            stop();
-                            ecui.io.ajax(moduleName + filename.slice(0, index + 1).replace(/\./g, '/') + 'route.' + filename.slice(index + 1) + '.html', {
-                                cache: true,
-                                onsuccess: function (data) {
-                                    if (index >= 0) {
-                                        data = data.replace(/<!--\s*target:\s*([^>]+)-->/g, '<!-- target: ' + filename.slice(0, index + 1) + '$1 -->');
-                                    }
-                                    ecui.esr.getEngine(moduleName).compile(data.replace(/ui="type:NS\./g, 'ui="type:ecui.ns._' + moduleName.replace(/[._]/g, '-').replace(/\//g, '_') + '.ui.'));
-                                    moduleRoute.splice(0, 1);
-                                    if (moduleRoute.length) {
+                        window.less.sheets = [];
+                        window.less.refresh(true, undefined, false);
+
+                        var stop = ecui.util.timer(function () {
+                            if (document.head.lastChild.getAttribute('type') !== 'text/less') {
+                                stop();
+                                ecui.io.ajax(url + '.html', {
+                                    cache: true,
+                                    onsuccess: function (data) {
+                                        if (index >= 0) {
+                                            data = data.replace(/<!--\s*target:\s*([^>]+)-->/g, '<!-- target: ' + filename.slice(0, index + 1) + '$1 -->');
+                                        }
+                                        ecui.esr.getEngine(moduleName).compile(data.replace(/ui="type:NS\./g, 'ui="type:ecui.ns._' + moduleName.replace(/[._]/g, '-').replace(/\//g, '_') + '.ui.'));
                                         load();
-                                    } else {
-                                        ecui.esr.addRoute = oldAddRoute;
-                                        moduleCallback();
-                                    }
-                                }
-                            });
-                        }
-                    }, -1);
-                }
-            });
+                                    },
+                                    onerror: load
+                                });
+                            }
+                        }, -1);
+                    },
+                    onerror: load
+                });
+            }
         }
 
         function loadLayer(url) {
-            oldLoadScriptFn(url.replace('.html', '.js'), loadLayerHTML, {cache: true, onerror: loadLayerHTML});
+            oldLoadScriptFn(url + '.js', loadLayerHTML, {cache: true, onerror: loadLayerHTML});
 
             function loadLayerHTML() {
-                ecui.io.ajax(url, {
+                ecui.io.ajax(url + '.html', {
                     cache: true,
                     onsuccess: function (text) {
                         if (!text) {
-                            loadRouteCss();
+                            load();
                             return;
                         }
                         if (!/^\s*<header(>|\s).*?<\/header>\s*<container(>|\s).*?<\/container>\s*$/.test(text.replace(/\n/g, ''))) {
@@ -219,7 +242,7 @@
                         ecui.dom.previous(el).appendChild(ecui.dom.last(el).header = ecui.dom.previous(ecui.dom.last(el)));
                         ecui.init(el.parentNode);
 
-                        ecui.io.ajax(url.replace('.html', '.css'), {
+                        ecui.io.ajax(url + '.css', {
                             cache: true,
                             onsuccess: function (text) {
                                 createStyle('#' + moduleName.replace(/[._]/g, '-').replace(/\//g, '_') + filename.replace(/[._]/g, '-') + '{' + text + '}');
@@ -230,32 +253,51 @@
                                 var stop = ecui.util.timer(function () {
                                     if (document.head.lastChild.getAttribute('type') !== 'text/less') {
                                         stop();
-                                        loadRouteCss();
+                                        load();
                                     }
                                 }, -1);
                             },
-                            onerror: loadRouteCss
+                            onerror: load
                         });
                     },
-                    onerror: loadRouteCss
+                    onerror: load
                 });
             }
         }
 
-        var filename = moduleRoute[0];
+        if (!moduleLoads.length) {
+            ecui.esr.addRoute = oldAddRoute;
+            moduleCallback();
+            return;
+        }
+
+        var filename = moduleLoads[0][1];
         var index = filename.lastIndexOf('.');
-        oldLoadScriptFn(moduleName + filename.slice(0, index + 1).replace(/\./g, '/') + 'route.' + filename.slice(index + 1) + '.js', null, {cache: true});
-        loadLayer(moduleName + filename.slice(0, index + 1).replace(/\./g, '/') + 'layer.' + filename.slice(index + 1) + '.html');
+
+        switch (moduleLoads[0][0]) {
+            case 'js':
+                oldLoadScriptFn(moduleName + filename, load, {cache: true});
+                break;
+            case 'class':
+                oldLoadScriptFn(moduleName + 'class.' + filename + '.js', load, {cache: true});
+                break;
+            case 'layer':
+                loadLayer(moduleName + filename.slice(0, index + 1).replace(/\./g, '/') + 'layer.' + filename.slice(index + 1));
+                break;
+            case 'route':
+                loadRoute(moduleName + filename.slice(0, index + 1).replace(/\./g, '/') + 'route.' + filename.slice(index + 1));
+                break;
+        }
+
+        moduleLoads.splice(0, 1);
     }
 
     ecui.esr.loadClass = function (filename) {
-        oldLoadScriptFn(moduleName + 'class.' + filename + '.js', null, {cache: true});
+        moduleLoads.push(['class', filename]);
     };
     ecui.esr.loadRoute = function (filename) {
-        moduleRoute.push(filename);
-        if (moduleRoute.length === 1) {
-            load();
-        }
+        moduleLoads.splice(1, 0, ['layer', filename]);
+        moduleLoads.push(['route', filename]);
     };
 
     // var lastUpdate;

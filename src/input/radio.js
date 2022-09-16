@@ -48,7 +48,7 @@ _bRequired - 是否必须选择
      * @param {boolean} checked 新的状态，如果忽略表示不改变当前状态
      */
     function setChecked(radio, checked) {
-        radio.$clearErrorStyle();
+        radio.$correct();
         if (checked) {
             radio.getItems().forEach(function (item) {
                 refresh(item, item === radio);
@@ -125,8 +125,8 @@ _bRequired - 是否必须选择
             /**
              * @override
              */
-            $ready: function (options) {
-                ui.InputControl.prototype.$ready.call(this, options);
+            init: function (options) {
+                ui.InputControl.prototype.init.call(this, options);
                 refresh(this);
             },
 
@@ -143,32 +143,25 @@ _bRequired - 是否必须选择
              * @override
              */
             $validate: function (event) {
-                ui.InputControl.prototype.$validate.call(this, event);
+                if (ui.InputControl.prototype.$validate.call(this, event) === false) {
+                    return false;
+                }
 
                 if (this._bRequired) {
                     var name = this.getName(),
                         form = this.getInput().form,
-                        nochecked = true,
-                        group = core.query(function (item) {
-                            if (item instanceof ui.Radio && item.getName() === name && item.getInput().form === form) {
-                                if (item.isChecked()) {
-                                    nochecked = false;
-                                }
-                                return true;
-                            }
-                        });
+                        ret = false;
 
-                    if (nochecked) {
-                        for (var control = this; control = control.getParent(); ) {
-                            if (control instanceof ui.InputGroup) {
-                                core.dispatchEvent(control, 'error');
-                                return false;
+                    core.query(function (item) {
+                        if (item instanceof ui.Radio && item.getName() === name && item.getInput().form === form) {
+                            if (item.isChecked()) {
+                                ret = true;
                             }
+                            return true;
                         }
-                        group.forEach(function (item) {
-                            core.dispatchEvent(item, 'error');
-                        });
-                    }
+                    });
+
+                    return ret;
                 }
             },
 
@@ -193,7 +186,7 @@ _bRequired - 是否必须选择
                             result.push(item.getControl());
                         }
                     });
-                    return result;
+                    return result.length ? result:[this];
                 }
                 return core.query(function (item) {
                     return item instanceof ui.Radio && !item.getInput().form && item.getName() === inputEl.name;

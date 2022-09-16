@@ -74,13 +74,13 @@ _oTest      匹配合法性的正则表达式
                 ui.Text.prototype.$input.call(this, event);
 
                 var value = this.getValue();
-                if (this._oTest.test(value)) {
-                    if (!value || ((this._nMin === undefined || (this._nMin < 0 && (value === '-' || +value >= this._nMin)) || +value >= 0) && (this._nMax === undefined || (this._nMax < 0 && value === '-') || +value <= this._nMax))) {
+                if (this._oTest && this._oTest.test(value)) {
+                    if (!value || ((this._nMin === undefined || (this._nMin < 0 && (value === '-' )) || +value >= this._nMin) && (this._nMax === undefined || (this._nMax < 0 && value === '-') || +value <= this._nMax))) {
                         this._sLastValue = value;
                         return;
                     }
                 }
-                this.setValue(this._sLastValue);
+                this.setValue(this._sLastValue || '');
             },
 
             /**

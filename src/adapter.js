@@ -3,16 +3,17 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
 */
 //{if 0}//
 (function () {
-//{/if}//
+    //{/if}//
     var //{if 1}//undefined,//{/if}//
-        //{if 1}//JAVASCRIPT = 'javascript',//{/if}//
+    //{if 1}//JAVASCRIPT = 'javascript',//{/if}//
         patch = ecui,
         fontSizeCache = [],
+        //{if 1}//isMac = /Macintosh/i.test(navigator.userAgent),//{/if}//
         isToucher = document.ontouchstart !== undefined,
         //{if 1}//isPointer = !!window.PointerEvent, // 使用pointer事件序列，请一定在需要滚动的元素上加上touch-action:none//{/if}//
         isStrict = document.compatMode === 'CSS1Compat',
         isWebkit = /webkit/i.test(navigator.userAgent),
-        iosVersion = /(iPhone|iPad).*?OS (\d+(_\d+)?)/i.test(navigator.userAgent) ?  +(RegExp.$2.replace('_', '.')) : undefined,
+        iosVersion = /(iPhone|iPad).*?OS (\d+(_\d+)?)/i.test(navigator.userAgent) ? +(RegExp.$2.replace('_', '.')) : undefined,
         isUCBrowser = /ucbrowser/i.test(navigator.userAgent),
         chromeVersion = /(Chrome|CriOS)\/(\d+\.\d)/i.test(navigator.userAgent) ? +RegExp.$2 : undefined,
         ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined,
@@ -22,9 +23,9 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
         isWebview = iosVersion && !chromeVersion && !isUCBrowser ? !/\)\s*Version\//.test(navigator.userAgent) : !safariVersion && /\)\s*Version\//.test(navigator.userAgent);
 
     ecui = {
-//{if 0}//
+        //{if 0}//
         fontSizeCache: fontSizeCache,
-//{/if}//
+        //{/if}//
         /**
          * 返回指定id的 DOM 对象。
          * @public
@@ -47,15 +48,13 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
 
         dom: {
             /**
-             * 为 Element 对象添加新的样式。
+             * 为 Element 对象添加新的样式。为了提高效率，对于可能重复添加的属性，请自行判断是否已经存在，或者先使用 removeClass 方法删除之前的样式。
              * @public
              *
              * @param {HTMLElement} el Element 对象
              * @param {string} className 样式名，可以是多个，中间使用空白符分隔
              */
             addClass: function (el, className) {
-                // 这里直接添加是为了提高效率，因此对于可能重复添加的属性，请使用标志位判断是否已经存在，
-                // 或者先使用 removeClass 方法删除之前的样式
                 el.className += ' ' + className;
             },
 
@@ -70,7 +69,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
             addEventListener: ieVersion < 9 ? function (obj, type, func) {
                 obj.attachEvent('on' + type, func);
             } : function (obj, type, func) {
-                obj.addEventListener(type, func, {passive: false});
+                obj.addEventListener(type, func, { passive: false });
             },
 
             /**
@@ -215,9 +214,9 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              * @param {string} name 属性名称
              * @return {string} 属性值
              */
-            getAttribute:/*ignore*/ ieVersion < 8 ? function (el, name) {
+            getAttribute: /*ignore*/ ieVersion < 8 ? function (el, name) {
                 return el[name] || '';
-            } :/*end*/ function (el, name) {
+            } : /*end*/ function (el, name) {
                 return el.getAttribute(name) || '';
             },
 
@@ -306,11 +305,11 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                             top -= parent.scrollTop;
                         }
                     }
-//                    top -= html.scrollTop;
-//                    left -= html.scrollLeft;
+                    //                    top -= html.scrollTop;
+                    //                    left -= html.scrollLeft;
                 }
 
-                return {top: top, left: left};
+                return { top: top, left: left };
             },
 
             /**
@@ -345,8 +344,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                         style.marginRight = list[1] || list[0];
                         style.marginBottom = list[2] || list[0];
                         style.marginLeft = list[3] || list[1] || list[0];
-                    } catch (ignore) {
-                    }
+                    } catch (ignore) {}
                 }
                 return style;
             },
@@ -372,8 +370,34 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              * @param {string} className 样式名称
              * @return {boolean} true，样式包含在 Element 对象中
              */
-            hasClass: function (el, className) {
+            hasClass: ieVersion < 10 ? function (el, className) {
                 return el.className.split(/\s+/).indexOf(className) >= 0;
+            } : function (el, className) {
+                return el.classList.contains(className);
+            },
+
+            /**
+             * 图片加载成功一定被调用的函数。
+             * @public
+             *
+             * @param {HTMLElement} img 图片DOM元素
+             * @param {Function} fn 加载成功后调用的函数
+             */
+            imgLoad: function (img, fn) {
+                if (img.width) {
+                    fn({target: img});
+                } else {
+                    var onload = function (event) {
+                            fn(event);
+                            onerror(event);
+                        },
+                        onerror = function (event) {
+                            dom.removeEventListener(event.target, 'load', onload);
+                            dom.removeEventListener(event.target, 'error', onerror);
+                        };
+                    dom.addEventListener(img, 'load', onload);
+                    img = null;
+                }
             },
 
             /**
@@ -502,7 +526,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              * @return {HTMLElement} 父 Element 对象，如果没有，返回 null
              */
             parent: function (el) {
-                return el.parentElement;
+                return el.tagName === 'HTML' ? null : el.parentElement;
             },
 
             /**
@@ -544,13 +568,13 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              * @param {HTMLElement} el Element 对象
              * @param {string} className 样式名，可以是多个，中间用空白符分隔
              */
-            removeClass: function (el, className) {
+            removeClass: ieVersion < 10 ? function (el, className) {
                 var oldClasses = el.className.split(/\s+/).sort(),
                     newClasses = className.split(/\s+/).sort(),
                     i = oldClasses.length,
                     j = newClasses.length;
 
-                for (; i && j; ) {
+                for (; i && j;) {
                     if (oldClasses[i - 1] === newClasses[j - 1]) {
                         oldClasses.splice(--i, 1);
                     } else if (oldClasses[i - 1] < newClasses[j - 1]) {
@@ -560,6 +584,12 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                     }
                 }
                 el.className = oldClasses.join(' ');
+            } : function (el, className) {
+                className.split(/\s+/).forEach(function (item) {
+                    if (item) {
+                        el.classList.remove(item);
+                    }
+                });
             },
 
             /**
@@ -573,7 +603,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
             removeEventListener: ieVersion < 9 ? function (obj, type, func) {
                 obj.detachEvent('on' + type, func);
             } : function (obj, type, func) {
-                obj.removeEventListener(type, func, {passive: false});
+                obj.removeEventListener(type, func, { passive: false });
             },
 
             /**
@@ -653,6 +683,21 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
             },
 
             /**
+             * 设置 Element 对象的一组样式值。
+             * @public
+             *
+             * @param {HTMLElement} el Element 对象
+             * @param {object} styles 样式组
+             */
+            setStyles: function (el, styles) {
+                for (var name in styles) {
+                    if (styles.hasOwnProperty(name)) {
+                        dom.setStyle(el, name, styles[name]);
+                    }
+                }
+            },
+
+            /**
              * 将 Element 集合转换成数组。
              * @public
              *
@@ -660,12 +705,12 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              * @return {Array} Element 数组
              */
             toArray: ieVersion < 9 ? function (elements) {
-                for (var i = 0, ret = [], el; el = elements[i++]; ) {
+                for (var i = 0, ret = [], el; el = elements[i++];) {
                     ret.push(el);
                 }
                 return ret;
             } : function (elements) {
-                return Array.prototype.slice.call(elements);
+                return elements && elements.length === undefined ? [elements] : Array.prototype.slice.call(elements);
             }
         },
         effect: {},
@@ -701,7 +746,11 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                         // should be 204, so treat it as success
                         if ((status >= 200 && status < 300) || status === 304 || status === 1223) {
                             if (options.onsuccess) {
-                                options.onsuccess(xhr.responseText, xhr);
+                                if (options.responseType && (options.responseType === 'blob' || options.responseType === 'arraybuffer')) {
+                                    options.onsuccess(xhr.response, xhr);
+                                } else {
+                                    options.onsuccess(xhr.responseText, xhr);
+                                }
                             }
                         } else {
                             onerror(xhr);
@@ -743,6 +792,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                     async = options.async !== false,
                     method = (options.method || 'GET').toUpperCase(),
                     headers = options.headers || {},
+                    xhrFields = options.xhrFields || {},
                     onerror = options.onerror || util.blank,
                     // 基本的逻辑来自lili同学提供的patch
                     stop,
@@ -761,6 +811,10 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
 
                     if (options.onupload && xhr.upload) {
                         xhr.upload.onprogress = options.onupload;
+                    }
+
+                    if (options.responseType) {
+                        xhr.responseType = options.responseType;
                     }
 
                     if (method === 'GET') {
@@ -782,6 +836,13 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                     for (var key in headers) {
                         if (headers.hasOwnProperty(key)) {
                             xhr.setRequestHeader(key, headers[key]);
+                        }
+                    }
+
+                    // Apply custom fields if provided
+                    for (var key in xhrFields ) {
+                        if (xhrFields.hasOwnProperty(key)) {
+                            xhr[key] = xhrFields[key];
                         }
                     }
 
@@ -895,12 +956,13 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
             openSocket: function (url, callback, onerror, options) {
                 var recvbuf = '',
                     sendbuf = '',
-                    heartInterval = util.blank;
+                    heartInterval = util.blank,
+                    EOF = options.EOF || '\n';
 
                 function onrecieve(event) {
                     recvbuf += event.data;
                     for (;;) {
-                        var index = recvbuf.indexOf('\n');
+                        var index = recvbuf.indexOf(EOF);
                         if (index < 0) {
                             return;
                         }
@@ -949,10 +1011,9 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                         heartInterval = util.timer(
                             function () {
                                 if (socket.readyState === 1) {
-                                    socket.send(JSON.stringify({type: 0}));
+                                    socket.send(JSON.stringify({ type: 0 }));
                                 }
-                            },
-                            -15000
+                            }, -15000
                         );
                         socket.onclose = function () {
                             // 连接意外关闭，重新打开连接
@@ -1009,7 +1070,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                 var fontSize = core.fontSize = util.toNumber(dom.getStyle(dom.parent(document.body), 'font-size'));
                 sheets.forEach(function (item) {
                     if (ieVersion) {
-                        for (i = 0, rule = item.rules || item.cssRules, item = []; value = rule[i++]; ) {
+                        for (i = 0, rule = item.rules || item.cssRules, item = []; value = rule[i++];) {
                             item.push(value);
                         }
                     } else {
@@ -1018,7 +1079,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                         }
                         item = Array.prototype.slice.call(item.rules || item.cssRules);
                     }
-                    for (var i = 0, rule; rule = item[i++]; ) {
+                    for (var i = 0, rule; rule = item[i++];) {
                         if (rule.cssRules && rule.cssRules.length) {
                             item = item.concat(Array.prototype.slice.call(rule.cssRules));
                         } else {
@@ -1075,7 +1136,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                 if (ieVersion < 9) {
                     result = window.clipboardData.setData('Text', text);
                 } else {
-                    var textarea = dom.create('TEXTAREA', {className: 'ui-clipboard'});
+                    var textarea = dom.create('TEXTAREA', { className: 'ui-clipboard' });
                     textarea.value = text;
                     document.body.appendChild(textarea);
                     textarea.setAttribute('readonly', '');
@@ -1114,7 +1175,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                 var output = '';
                 var chr1, chr2, chr3, enc1, enc2, enc3, enc4;
                 source = source.replace(/[^A-Za-z0-9\+\/\=]/g, '');
-                for (var i = 0; i < source.length; ) {
+                for (var i = 0; i < source.length;) {
                     enc1 = __ECUI__Base64Table.indexOf(source.charAt(i++));
                     enc2 = __ECUI__Base64Table.indexOf(source.charAt(i++));
                     enc3 = __ECUI__Base64Table.indexOf(source.charAt(i++));
@@ -1201,7 +1262,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                 var output = '';
                 var chr1, chr2, chr3, enc1, enc2, enc3, enc4;
                 source = encodeURIComponent(source);
-                for (var i = 0; i < source.length; ) {
+                for (var i = 0; i < source.length;) {
                     chr1 = source.charCodeAt(i++);
                     if (chr1 === 37) {
                         chr1 = parseInt(source.slice(i, i + 2), 16);
@@ -1322,6 +1383,77 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
             },
 
             /**
+             * 中文大写金融格式化。
+             * @public
+             *
+             * @param {number} num 需要格式化的数字
+             * @return {string} 格式化结果
+             */
+            formatCHNFinance: function (num) {
+                var strs = String(num).split('.'),
+                    chnNumber = '零壹贰叁肆伍陆柒捌玖',
+                    unit = '元拾佰仟万拾佰仟亿拾佰仟兆拾佰仟',
+                    unit2 = '角分厘毫',
+                    len = strs[0].length - 1,
+                    zero = 4 - len % 4 - 1;
+
+                return strs[0].split('').map(function (item, index) {
+                    item = +item;
+                    index = len - index;
+                    if (item) {
+                        if (zero) {
+                            zero = 0;
+                            if (len !== index) {
+                                return '零' + chnNumber.charAt(item) + unit.charAt(index);
+                            }
+                        }
+                        return chnNumber.charAt(item) + unit.charAt(index);
+                    } else {
+                        zero++;
+                        if (index && (index % 4 || zero >= 4)) {
+                            return '';
+                        }
+                    }
+                    return unit.charAt(index);
+                }).join('') + (strs[1] ? strs[1].split('').slice(0, 4).map(function (item, index) {
+                        return +item ? chnNumber.charAt(item) + unit2.charAt(index) : '';
+                    }).join('') : '整');
+            },
+
+            /**
+             * 金融数字格式化。
+             * @public
+             *
+             * @param {number} num 需要格式化的数字
+             * @return {string} 格式化结果
+             */
+             formatFinance: function (num) {
+                return String(num).replace(/\d+/, function (n) { // 先提取整数部分
+                    return n.replace(/(\d)(?=(\d{3})+$)/g, function ($1) { // 对整数部分添加分隔符
+                        return $1 + ",";
+                    });
+                });
+            },
+
+            /**
+             * 字符串格式化，{01}表示第一个参数填充到这个位置，占用两个字符的宽度，不足使用0填充。
+             * @public
+             *
+             * @param {string} source 目标模版字符串
+             * @param {string} ... 字符串替换项集合
+             * @return {string} 格式化结果
+             */
+            formatString: function (source) {
+                var args = arguments;
+                return source.replace(
+                    /\{([0-9]+)\}/g,
+                    function (match, index) {
+                        return args[+index + 1];
+                    }
+                );
+            },
+
+            /**
              * 获取 cookie 值。
              * @public
              *
@@ -1385,7 +1517,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              */
             hasIOSKeyboard: iosVersion ? function (target) {
                 target = target || document.activeElement;
-                return target.getAttribute('contenteditable') || (!target.readOnly && ((target.tagName === 'INPUT' && target.type !== 'radio' && target.type !== 'checkbox') || target.tagName === 'TEXTAREA'));
+                return util.isInputLikeTarget(target);
             } : function () {
                 return false;
             },
@@ -1407,7 +1539,16 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                 subClass.prototype.constructor = subClass;
                 subClass['super'] = superClass;
             },
-
+            /**
+             * 判断目标元素是不是一个可输入或者可获得焦点的元素。
+             * @public
+             *
+             * @param {HTMLElement} target 用于判断的元素对象
+             * @return {boolean} 
+             */
+            isInputLikeTarget: function (target) {
+                return target.getAttribute('contenteditable') || (!target.readOnly && ((target.tagName === 'INPUT' && target.type !== 'radio' && target.type !== 'checkbox') || target.tagName === 'TEXTAREA'));
+            },
             /**
              * 从指定的命名空间中取出值。
              * @public
@@ -1418,7 +1559,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              */
             parseValue: function (name, namespace) {
                 namespace = namespace || window;
-                for (var i = 0, list = name.split('.'); name = list[i++]; ) {
+                for (var i = 0, list = name.split('.'); name = list[i++];) {
                     namespace = namespace[name];
                     if (namespace === undefined || namespace === null) {
                         return undefined;
@@ -1445,7 +1586,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              * @param {object} obj 需要移除的对象
              */
             remove: function (array, obj) {
-                for (var i = array.length; i--; ) {
+                for (var i = array.length; i--;) {
                     if (array[i] === obj) {
                         array.splice(i, 1);
                     }
@@ -1466,24 +1607,6 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                     cookie += ('; expires=' + exp.toGMTString());
                 }
                 document.cookie = cookie;
-            },
-
-            /**
-             * 字符串格式化，{01}表示第一个参数填充到这个位置，占用两个字符的宽度，不足使用0填充。
-             * @public
-             *
-             * @param {string} source 目标模版字符串
-             * @param {string} ... 字符串替换项集合
-             * @return {string} 格式化结果
-             */
-            stringFormat: function (source) {
-                var args = arguments;
-                return source.replace(
-                    /\{([0-9]+)\}/g,
-                    function (match, index) {
-                        return args[+index + 1];
-                    }
-                );
             },
 
             /**
@@ -1527,8 +1650,8 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
 
                 function build() {
                     return delay === -1 ?
-                            window.requestAnimationFrame(callFunc) :
-                            (delay < 0 ? setInterval : setTimeout)(callFunc, Math.abs(delay));
+                        window.requestAnimationFrame(callFunc) :
+                        (delay < 0 ? setInterval : setTimeout)(callFunc, Math.abs(delay));
                 }
 
                 if (delay === -1) {
@@ -1615,7 +1738,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
 
     // 读写特殊的 css 属性操作
     var __ECUI__StyleFixer = {
-/*ignore*/
+            /*ignore*/
             clip: ieVersion < 8 ? {
                 set: function (el, value) {
                     el.style.clip = value === 'auto' ? 'rect(0,100%,100%,0)' : value;
@@ -1635,7 +1758,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                     el.style.display = value;
                 }
             } : undefined,
-/*end*/
+            /*end*/
             opacity: ieVersion < 9 ? {
                 get: function (el, style) {
                     if (/\(opacity=(\d+)/.test(style.filter)) {
@@ -1647,11 +1770,13 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                 set: function (el, value) {
                     el.style.filter =
                         el.style.filter.replace(/(progid:DXImageTransform\.Microsoft\.)?alpha\([^\)]*\)/gi, '') +
-                            (value === '' ? '' :
-/*ignore*/                      (
-                                    ieVersion < 8 ? 'alpha' :/*end*/ 'progid:DXImageTransform.Microsoft.Alpha'
-/*ignore*/                      )/*end*/ + '(opacity=' + value * 100 + ')'
-                            );
+                        (value === '' ? '' :
+                            /*ignore*/
+                            (
+                                ieVersion < 8 ? 'alpha' : /*end*/ 'progid:DXImageTransform.Microsoft.Alpha'
+                                /*ignore*/
+                            ) /*end*/ + '(opacity=' + value * 100 + ')'
+                        );
                 }
             } : undefined,
 
@@ -1685,7 +1810,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
         function loadedHandler() {
             if (!hasReady) {
                 // 在处理的过程中，可能又有新的dom.ready函数被添加，需要添加到最后而不是直接执行
-                for (var i = 0, func; func = list[i++]; ) {
+                for (var i = 0, func; func = list[i++];) {
                     func();
                 }
                 list = [];
@@ -1735,8 +1860,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
 
     try {
         document.execCommand('BackgroundImageCache', false, true);
-    } catch (ignore) {
-    }
+    } catch (ignore) {}
 
     if (!Object.assign) {
         // es6 部分函数兼容
@@ -1761,17 +1885,17 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
             return this.lastIndexOf(s) === this.length - s.length;
         };
     }
-//{if 0}//
+    //{if 0}//
     if (isToucher) {
         dom.addEventListener(document, 'contextmenu', util.preventEvent);
     }
-//{/if}//
+    //{/if}//
     if (window.localStorage) {
         util.getLocalStorage = function (key) {
             return window.localStorage.getItem(location.pathname + '#' + key);
         };
         util.setLocalStorage = function (key, value) {
-            window.localStorage.getItem(location.pathname + '#' + key, value);
+            window.localStorage.setItem(location.pathname + '#' + key, value);
         };
     } else {
         (function () {
@@ -1799,6 +1923,6 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
             patch = null;
         }
     }());
-//{if 0}//
+    //{if 0}//
 }());
 //{/if}//

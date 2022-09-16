@@ -83,7 +83,7 @@ _oHandler   - 定时器句柄
                     this._sRequest = this.getText();
                     var args = [this._sUrl, this._sRequest];
                     core.request(
-                        util.stringFormat.apply(null, args),
+                        util.formatString.apply(null, args),
                         function (data) {
                             var text = this.getInput().value;
                             if (this._sRequest !== text) {

@@ -1,6 +1,6 @@
 /*
 @example
-<img ui="type:photo-hotspot">
+<img ui="type:m-photo-hotspot">
 */
 (function () {
 //{if 0}//
@@ -165,16 +165,12 @@
             } else {
                 var img = new Image();
                 img.src = this.getThumbnailUrl();
-                img.onload = function () {
-                    calcSize(this, img.width, img.height);
+                dom.imgLoad(img, function (event) {
+                    calcSize(this, event.target.width, event.target.height);
                     if (currHotspot === this) {
                         fillImage(currImg, this, 0);
                     }
-                    img.onload = img.onerror = null;
-                }.bind(this);
-                img.onerror = function () {
-                    img.onload = img.onerror = null;
-                }.bind(this);
+                }.bind(this));
             }
             this._sGroup = options.group;
         },
@@ -274,6 +270,8 @@
         core.mask();
         currHotspot = null;
         tapHandle = null;
+        currImg.src = '';
+        backupImg.src = '';
     };
 
     ui.MPhotoHotspot.DEFAULT = {

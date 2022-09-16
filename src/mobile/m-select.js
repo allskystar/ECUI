@@ -59,6 +59,7 @@ _uOptions     - 下拉选择框
                         this.setPosition(0, this.$$itemHeight * (this._nOptionSize - select.getItems().indexOf(item)));
 
                         if (item) {
+                            this.setSelected(item);
                             core.setFocused(item);
                         }
                     },
@@ -69,6 +70,7 @@ _uOptions     - 下拉选择框
                             }
                         }
                     }
+
                 },
                 ui.MOptions,
                 ui.MConfirm

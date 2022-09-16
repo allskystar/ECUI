@@ -96,7 +96,11 @@
                 this.$Items.$append.call(this, event);
 /*end*/
                 if (event.returnValue !== false) {
-                    this.$ItemsData.items.push(event.child);
+                    if (event.index !== undefined) {
+                        this.$ItemsData.items.splice(event.index, 0, event.child);
+                    } else {
+                        this.$ItemsData.items.push(event.child);
+                    }
                     this.alterItems();
                 }
             }
@@ -188,7 +192,7 @@
                     }
 
                     // 选项控件，直接添加
-                    if (core.dispatchEvent(this, 'append', {child: item})) {
+                    if (core.dispatchEvent(this, 'append', {child: item, index: index})) {
                         body.insertBefore(item.getMain(), el);
                         item.$setParent(this);
                         items.pop();

@@ -9,7 +9,6 @@
         .height100rate();
 
         input {
-            position: absolute;
             left: 0;
             top: 0;
             display: block !important;
@@ -23,16 +22,11 @@
         outline: none !important;
     }
 }
-.ui-combox.ui-combox-placeholder {
-     .ui-combox-text {
-        input {
-            .opacity0();
-        }
-    }
-}
 
+/* 为不支持placeholder的浏览器提供兼容样式 */
 .ui-combox-placeholder {
     input {
+        .opacity0();
         background-color: transparent;
     }
 }

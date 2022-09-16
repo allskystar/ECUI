@@ -46,12 +46,17 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
         metaVersion,
         meta,
 
+        language,
+        localData = {'': {}},
+
         currLayer,
         currRouteName,
         currRouteWeight,
+        currHistory,
 
         unloadNames = [],
         waitRender,
+        waitDeleteModule = [],
 
         historyOffset = 0,
         historyCache = [];
@@ -86,15 +91,16 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
      * @param {object} route 路由对象
      */
     function afterrender(route) {
+        //移动端局部刷新不触发动画，主路由切换在路由渲染完成后触发动画
         if (esrOptions.app) {
             if (!context.CHILD) {
                 transition(route);
             }
-            var layer = getLayer(route);
+        }
 
-            if (layer) {
-                layer.location = currLocation;
-            }
+        var layer = getLayer(route);
+        if (layer) {
+            layer.location = currLocation;
         }
 
         if (route.CACHE === undefined) {
@@ -225,12 +231,23 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
         if (route) {
             if (options !== true) {
                 Object.assign(context, options);
+                // 主路由进入页面时，添加请求头里面添加 x-enter-page-sign 字段，提供给后端做防止连点作弊操作。
+                if (!esr.headers) {
+                    esr.headers = {};
+                }
+                esr.headers['x-enter-page-sign'] = Date.now() + '' + Math.round(Math.random() * 10000);
             }
 
             var layer = getLayer(route);
-
             if (context.DENY_CACHE !== true) {
                 if (isCached(route) && layer && layer.location === currLocation) {
+                    // 临时处理一下，等build改了之后需删除
+                    waitDeleteModule.forEach(function (module) {
+                        dom.removeClass(document.body, 'module-' + module.slice(0, -1));
+                    });
+                    waitDeleteModule = [];
+                    // 使用getModuleName,保证增加的是最新的模块样式
+                    dom.addClass(document.body, 'module-' + getModuleName(currLocation).slice(0, -1).replace(/[._]/g, '-').replace(/\//g, '_'));
                     // 数据必须还在才触发缓存
                     // 模块发生变化，缓存状态下同样更换引擎
                     engine = loadStatus[getModuleName(route.NAME)] || etpl;
@@ -249,6 +266,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                             }
                         }
                     }
+                    //当骨架屏缓存，骨架屏的所有子路由也会被缓存
                     if (route.TYPE === 'frame' && route.children.oncached) {
                         try {
                             route.children.oncached(context);
@@ -381,6 +399,17 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                         throw new Error('The route(' + name + ') is not defined.');
                     }
 //{/if}//
+                    if (esr.LANG) {
+                        localData[moduleName] = {};
+                        for (var lang in localData['']) {
+                            if (localData[''].hasOwnProperty(lang)) {
+                                Object.assign(localData[moduleName][lang] = {}, localData[''][lang]);
+                            }
+                        }
+                        translateLanguage(moduleName, esr.LANG);
+                        delete esr.LANG;
+                    }
+
                     callRoute(name, options);
                 },
                 {
@@ -482,7 +511,11 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                         if (control.isFormChecked) {
                             elements.forEach(fillCheckedByArray);
                         } else {
-                            elements.forEach(fillValueByArray);
+                            if (elements.length === 1 && control.getFormValue() instanceof Array) {
+                                control.setValue(value);
+                            } else {
+                                elements.forEach(fillValueByArray);
+                            }
                         }
                     } else {
                         if (el.type === 'radio' || el.type === 'checkbox') {
@@ -504,7 +537,9 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                                 elements.forEach(fillCheckedByValue);
                             }
                         } else {
-                            control.setValue(String(value));
+                            if (control.setValue) {
+                                control.setValue(String(value));
+                            }
                         }
                     } else {
                         if (el.type === 'radio' || el.type === 'checkbox') {
@@ -643,7 +678,8 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
      * @param {string} loc location位置
      */
     function redirect(loc) {
-        if (pauseStatus) {
+        // 软键盘弹出的时候，阻止直接渲染路由，避免h5页面出现gpu计算导致页面滚动到指定位置，有部分白页的问题
+        if (pauseStatus || (core.getKeyboardHeight && core.getKeyboardHeight() > 0)) {
             if (window.onhashchange !== undefined) {
                 setTimeout(listener, 100);
             }
@@ -816,7 +852,15 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
         var el = core.$(route.main);
 
         el.style.visibility = 'hidden';
-
+        waitDeleteModule.forEach(function (module) {
+            dom.removeClass(document.body, 'module-' + module.slice(0, -1));
+        });
+        waitDeleteModule = [];
+        // 使用getModuleName,保证增加的是最新的模块样式
+        var className = 'module-' + getModuleName(currLocation).slice(0, -1).replace(/[._]/g, '-').replace(/\//g, '_');
+        if (!dom.hasClass(document.body, className)) {
+            dom.addClass(document.body, className);
+        }
         if (el.route) {
             var elRoute = routes[el.route];
             dom.removeClass(el, elRoute.NAME.slice(1).replace(/[._]/g, '-').replace(/\//g, '_'));
@@ -856,6 +900,12 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
         });
 
         core.dispose(el, true);
+
+        if (language) {
+            if (route.NAME) {
+                context.LANG = (localData[getModuleName(route.NAME)] || {})[language];
+            }
+        }
 //{if 1}//        el.innerHTML = engine.render(name || route.view, context).replace(/([^A-Za-z0-9_])NS\./g, '$1ecui.ns[\'_' + getModuleName(currLocation).replace(/[._]/g, '-').replace(/\//g, '_') + '\'].');
 //{else}//
         el.innerHTML = engine.render(name || route.view, context);
@@ -956,9 +1006,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
             if (!(scope[list[i]] instanceof Array)) {
                 scope[list[i]] = [scope[list[i]]];
             }
-            if (value !== '') {
-                scope[list[i]].push(value);
-            }
+            scope[list[i]].push(value);
         } else {
             scope[list[i]] = value;
         }
@@ -973,12 +1021,16 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
     function setLocation(loc) {
         var oldModule = getModuleName(currLocation),
             newModule = getModuleName(loc);
-
         if (!currLocation || oldModule !== newModule) {
-            dom.removeClass(document.body, 'module-' + oldModule.slice(0, -1).replace(/[._]/g, '-').replace(/\//g, '_'));
-            dom.addClass(document.body, 'module-' + newModule.slice(0, -1).replace(/[._]/g, '-').replace(/\//g, '_'));
+            // 在切换时候可能会出现样式冲突,PC临时解决方案，后续理一下，移动端和pc统一方案解决
+            if (!esrOptions.app && loadStatus[newModule]) {
+                waitDeleteModule = [];
+                dom.removeClass(document.body, 'module-' + oldModule.slice(0, -1).replace(/[._]/g, '-').replace(/\//g, '_'));
+               // dom.addClass(document.body, 'module-' + newModule.slice(0, -1).replace(/[._]/g, '-').replace(/\//g, '_'));
+            } else {
+                waitDeleteModule.push(oldModule);
+            }
         }
-
         currLocation = loc;
     }
 
@@ -989,6 +1041,16 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
      * @param {object} route 路由对象，新的路由
      */
     function transition(route) {
+        if (route.recursion && currRouteName === route.NAME) {
+            var recursionEl = currLayer.getMain();
+            dom.insertHTML(recursionEl, 'beforeBegin', recursionEl.outerHTML);
+            recursionEl = recursionEl.previousSibling;
+            [recursionEl].concat(dom.toArray(recursionEl.getElementsByTagName('*'))).forEach(function (item) {
+                item.id = '';
+            });
+            currRouteName = '';
+        }
+
         if (route.NAME !== currRouteName) {
             var layer = getLayer(route);
             if (layer) {
@@ -1001,77 +1063,101 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                         document.activeElement.blur();
                     }
 
-                    var currLayerEl = currLayer.getMain();
-                    currLayerEl.header.style.display = 'none';
+                    var currLayerEl = recursionEl || currLayer.getMain(),
+                        nextWeight = route.weight;
 
-                    if (currRouteWeight !== route.weight) {
-                        var position = currRouteWeight < route.weight ? 1 : -1,
-                            fn;
+                    if (currLayerEl.header) {
+                        currLayerEl.header.style.display = 'none';
+                    }
 
-                        if (esrOptions.transition === 'cover') {
-                            if (position > 0) {
-                                currLayerEl.style.zIndex = 5;
-                                layerEl.style.zIndex = 10;
-                                fn = 'this.to.style.left=#' + (position * 100) + '->0%#';
-                            } else {
-                                currLayerEl.style.zIndex = 10;
-                                layerEl.style.zIndex = 5;
-                                fn = 'this.from.style.left=#0->' + (-position * 100) + '%#';
-                            }
-                            layerEl.header.style.zIndex = 10;
-                            core.mask(0.5, 7);
+
+                    if (currRouteWeight === nextWeight) {
+                        currRouteWeight = currHistory;
+                        nextWeight = historyIndex;
+                    }
+
+                    var position = currRouteWeight < nextWeight ? 1 : -1,
+                        fn;
+
+                    if (esrOptions.transition === 'cover') {
+                        if (position > 0) {
+                            currLayerEl.style.zIndex = 5;
+                            layerEl.style.zIndex = 10;
+                            fn = 'this.to.style.left=#' + (position * 100) + '->0%#';
                         } else {
-                            fn = 'this.from.style.left=#0->' + (-position * 100) + '%#;this.to.style.left=#' + (position * 100) + '->0%#';
+                            currLayerEl.style.zIndex = 10;
+                            layerEl.style.zIndex = 5;
+                            fn = 'this.from.style.left=#0->' + (-position * 100) + '%#';
                         }
+                        layerEl.header.style.zIndex = 10;
+                        core.mask(0.5, 7);
+                    } else {
+                        fn = 'this.from.style.left=#0->' + (-position * 100) + '%#;this.to.style.left=#' + (position * 100) + '->0%#';
+                    }
 
-                        pauseStatus = true;
+                    pauseStatus = true;
 
-                        core.disable();
-                        util.timer(function () {
-                            core.enable();
-                        }, 400);
+                    core.disable();
+                    util.timer(function () {
+                        core.enable();
+                    }, 400);
 
-                        if (!route.CACHE) {
-                            dom.addClass(layerEl, 'ui-transition');
-                        }
+                    if (!route.CACHE) {
+                        dom.addClass(layerEl, 'ui-transition');
+                    }
 
-                        effect.grade(
-                            fn,
-                            200,
-                            {
-                                $: {from: currLayerEl, to: layerEl},
-                                onfinish: function () {
+                    // 在动画过程中，恢复上一模块公共样式
+                    // AppCommonContainer、AppBackupContainer、AppCommonContainer 等公共路由的挂载 dom 没有 route 属性
+                    var moduleName = '',
+                        currModuleName = '';
+                    if (currLayerEl.route && layerEl.route) {
+                        currModuleName = 'module-' + getModuleName(currLayerEl.route).slice(0, -1).replace(/[._]/g, '-').replace(/\//g, '_');
+                        moduleName = 'module-' + getModuleName(layerEl.route).slice(0, -1).replace(/[._]/g, '-').replace(/\//g, '_');
+                        dom.addClass(currLayerEl, currModuleName);
+                    }
+                    if (currModuleName !== moduleName) {
+                        dom.removeClass(document.body, currModuleName);
+                    }
+                    effect.grade(
+                        fn,
+                        200,
+                        {
+                            $: {from: currLayerEl, to: layerEl},
+                            onstep: recursionEl ? util.blank : undefined,
+                            onfinish: function () {
+                                if (recursionEl) {
+                                    dom.remove(recursionEl);
+                                } else {
                                     currLayer.hide();
                                     currLayerEl.style.left = '';
-                                    currLayer = layer;
-                                    pauseStatus = false;
-                                    if (esrOptions.transition === 'cover') {
-                                        core.mask();
-                                    }
+                                }
+                                if (currLayerEl.route) {
+                                    dom.removeClass(currLayerEl, currModuleName);
+                                }
+                                currLayer = layer;
+                                pauseStatus = false;
+                                if (esrOptions.transition === 'cover') {
+                                    core.mask();
+                                }
 
-                                    // 在执行结束后，如果不同时common layer则隐藏from layer，并且去掉目标路由中的动画执行函数
-                                    dom.removeClass(layerEl, 'ui-transition');
+                                // 在执行结束后，如果不同时common layer则隐藏from layer，并且去掉目标路由中的动画执行函数
+                                dom.removeClass(layerEl, 'ui-transition');
 
-                                    var renders = waitRender;
-                                    waitRender = null;
-                                    renders.forEach(function (item) {
-                                        item();
-                                    });
+                                var renders = waitRender;
+                                waitRender = null;
+                                renders.forEach(function (item) {
+                                    item();
+                                });
 
-                                    if (route.ontransited) {
-                                        route.ontransited();
-                                    }
+                                if (route.ontransited) {
+                                    route.ontransited();
                                 }
                             }
-                        );
+                        }
+                    );
 
-                        // 动画过程中不进行渲染
-                        waitRender = [];
-                    } else {
-                        // weight相等不触发动画
-                        currLayer.hide();
-                        currLayer = layer;
-                    }
+                    // 动画过程中不进行渲染
+                    waitRender = [];
                 } else {
                     currLayer = layer;
                     if (route.ontransited) {
@@ -1084,6 +1170,31 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
 
                 currRouteName = route.NAME;
                 currRouteWeight = route.weight;
+                currHistory = historyIndex;
+            }
+        }
+    }
+
+    /**
+     * 转化多语言支持的数据格式。
+     * @private
+     * 
+     * @param {string} 模块名，如果为空字符串，表示全局
+     * @param {Object} 语言数据原始格式
+     */
+    function translateLanguage(moduleName, data) {
+        var tmpData = localData[moduleName];
+        for (var varName in data) {
+            if (data.hasOwnProperty(varName)) {
+                for (var localName in data[varName]) {
+                    if (data[varName].hasOwnProperty(localName)) {
+                        var local = tmpData[localName];
+                        if (!local) {
+                            tmpData[localName] = local = {};
+                        }
+                        local[varName] = data[varName][localName];
+                    }
+                }
             }
         }
     }
@@ -1110,6 +1221,20 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
             {
                 getFormValue: function () {
                     return [];
+                }
+            }
+        ),
+
+        // 用于创建空数组(复选框)，参见request方法
+        CreateCheckedArray: core.inherits(
+            ui.FormInput,
+            'ui-hide',
+            {
+                getFormValue: function () {
+                    return [];
+                },
+                isFormChecked: function () {
+                    return true;
                 }
             }
         ),
@@ -1175,12 +1300,14 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                 routes[name] = {
                     NAME: route.NAME,
                     TYPE: 'frame',
+                    recursion: route.recursion,
                     weight: route.weight,
                     main: route.main,
                     view: route.view,
                     children: route,
                     CACHE: null
                 };
+                delete route.recursion;
             } else {
                 routes[name] = route;
             }
@@ -1416,6 +1543,25 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
         },
 
         /**
+         * 加载公共语言数据。
+         * @public
+         *
+         * @param {Object} data 语言数据
+         */
+        loadCommonLanguage: function (data) {
+            translateLanguage('', data);
+            for (var moduleName in localData) {
+                if (moduleName && localData.hasOwnProperty(moduleName)) {
+                    for (var lang in localData[moduleName]) {
+                        if (localData[moduleName].hasOwnProperty(lang)) {
+                            localData[moduleName][lang] = Object.assign({}, localData[''][lang], localData[moduleName][lang]);
+                        }
+                    }
+                }
+            }
+        },
+
+        /**
          * 将一个 Form 表单转换成对象。
          * @public
          *
@@ -1434,7 +1580,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                 }
 
                 if (validate !== false && item.name && control && !control.isDisabled()) {
-                    if (!core.dispatchEvent(control, 'validate')) {
+                    if (control.validate && !control.validate()) {
                         if (!firstUnvalid) {
                             firstUnvalid = item;
                         }
@@ -1538,7 +1684,6 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
             } else {
                 var moduleName = getModuleName(route.NAME);
                 engine = loadStatus[moduleName];
-
                 if (engine instanceof etpl.Engine && engine.getRenderer(route.view)) {
                     // 如果在当前引擎找不到模板，有可能是主路由切换，也可能是主路由不存在
                     render(route);
@@ -1574,10 +1719,14 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
         request: function (urls, onsuccess, onerror) {
             function request(varUrl, varName) {
                 var method = varUrl.split(' '),
-                    headers = {};
+                    headers = {},
+                    xhrFields = {};
 
                 if (esr.headers) {
                     Object.assign(headers, esr.headers);
+                }
+                if (esr.xhrFields) {
+                    Object.assign(xhrFields, esr.xhrFields);
                 }
 
                 if (esrOptions.meta) {
@@ -1623,10 +1772,14 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                     url = replace(method[method.length === 1 ? 0 : 1]);
                     method = 'GET';
                 }
-
+                if (esr.getBodyData) {
+                    esr.getBodyData(data, headers, url);
+                }
                 io.ajax(replace(url, true), {
                     method: method,
                     headers: headers,
+                    xhrFields: xhrFields,
+                    timeout: esr.timeout,
                     data: data,
                     onsuccess: function (text) {
                         count--;
@@ -1797,6 +1950,10 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                     item[1].call(item[0], context[name]);
                 });
             }
+        },
+
+        setLanguage: function (code) {
+            language = code;
         },
 
         /**
@@ -2000,7 +2157,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
 
             for (el = document.body.firstChild; el; el = el.nextSibling) {
                 if (el.nodeType === 8) {
-                    if (/^\s*import:\s*([A-Za-z0-9.-_]+)\s*$/.test(el.textContent || el.nodeValue)) {
+                    if (/^\s*import:\s*([A-Za-z0-9.-_\-]+)\s*$/.test(el.textContent || el.nodeValue)) {
                         tplList.push([el, RegExp.$1]);
                     }
                 }
@@ -2012,11 +2169,11 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                     io.ajax(item[1], {
                         cache: true,
                         onsuccess: function (text) {
-                            dom.insertBefore(
+                            item[0].parentNode.insertBefore(
                                 document.createComment(text.replace(/<!--/g, '<<<').replace(/-->/g, '>>>')),
                                 item[0]
                             );
-                            dom.remove(item[0]);
+                            item[0].parentNode.removeChild(item[0]);
                             loadTpl();
                         },
                         onerror: function () {
@@ -2162,4 +2319,130 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
             }
         );
     };
+
+
+    /**
+     * 清空/重置 表单数据
+     * @param {form}    form         表单元素
+     */
+    function resetFormValue(form) {
+        var elements = form.elements;
+        for (var i = 0, item; item = elements[i++]; ) {
+            var name = item.name;
+            if (name) {
+                var _control = item.getControl && item.getControl();
+                if (_control) {
+                    if (_control instanceof ecui.ui.Radio) {
+                        _control.setChecked(false);
+                    } else if (_control instanceof ecui.ui.Checkbox) {
+                        _control.setChecked(false);
+                    } else if (_control instanceof ecui.esr.CreateArray || _control instanceof ecui.esr.CreateObject) {
+                        // 如果是ecui.esr.CreateArray 和 ecui.esr.CreateObject元素，不做任何处理
+                    } else {
+                        _control.setValue('');
+                    }
+                } else {
+                    if (!ecui.dom.hasClass(item, 'ui-hide')) {
+                        item.value = '';
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * 读取表单数据，补充 searchParam 中的参数，context、search 中没有的的字段，默认给空字符串
+     * @param {form}    form         表单元素
+     * @param {object} searchParam   路由的搜索数据
+     * @param {object}  context      路由的上下文数据
+     * 
+     */
+    function replenishSearchCode(form, searchParam, context) {
+        var data = {};
+        ecui.esr.parseObject(form, data, false);
+        for (var key in data) {
+            if (data.hasOwnProperty(key)) {
+                if (context[key] !== undefined) {
+                    searchParam[key] = context[key];
+                } else if (searchParam[key] === undefined) {
+                    searchParam[key] = '';
+                }
+            }
+        }
+    }
+    /**
+     * 列表路由对象。
+     * @public
+     *
+     * @param {object} route 路由对象
+     */
+    esr.TableListRoute = function (route) {
+        var name = route.NAME.slice(route.NAME.indexOf('/') === 0 ? 1 : 0);
+        var model = route.model || [];
+        model.push(name.slice(0, -5) + '@FORM ' + route.url);
+        this.model = model;
+        this.view = route.view || name;
+        this.main = name.slice(0, -9) + '_table';
+        Object.assign(this, route);
+    };
+    esr.TableListRoute.prototype.onbeforerequest = function (context) {
+        context.pageNo = context.pageNo || +this.searchParam.pageNo;
+        context.pageSize = context.pageSize || +this.searchParam.pageSize;
+        var forms = this.model[this.model.length - 1].split('?')[1].split('&');
+        for (var i = 0, form, item; item = forms[i++]; ) {
+            form = document.forms[item.split('=')[0]];
+            if (item.split('=').length === 1 && form) {
+                replenishSearchCode(form, this.searchParam, context);
+                if (!this.notFillForm) {
+                    esr.fillForm(form, Object.assign({}, this.searchParam, context));
+                }
+            }
+        }
+        context.searchParam = this.searchParam;
+    };
+    esr.TableListRoute.prototype.onbeforerender = function (context) {
+        var data = util.parseValue(this.model[this.model.length - 1].split('@')[0], context);
+        if (!context.offset && context.offset !== 0) {
+            context.offset = (+context.pageNo - 1) * +context.pageSize;
+        } else {
+            context.offset = data.offset;
+        }
+        context.total = data.total;
+        context.totalPage = data.totalPage;
+    };
+    esr.TableListRoute.prototype.resetFormValue = resetFormValue;
+
+    /**
+     * 列表查询按钮。
+     * @public
+     *
+     * @param {object} route 路由对象
+     */
+    ui.QueryButton = core.inherits(
+        ui.Button,
+        'ui-query-button',
+        function (el, options) {
+            ui.Button.call(this, el, options);
+            this._sRoute = options.route;
+        },
+        {
+            /**
+             * 输入提交事件。
+             * @event
+             */
+            $submit: function (event) {
+                event.preventDefault();
+            },
+            $click: function (event) {
+                ui.Button.prototype.$click.call(this, event);
+                var route = ecui.esr.findRoute(this),
+                    routeName = this._sRoute || route.children || route.NAME,
+                    children = ecui.esr.getRoute(routeName);
+                children.searchParam = {};
+                ecui.esr.parseObject(this.getForm(), children.searchParam);
+                ecui.esr.callRoute(routeName + '~pageNo=1', true);
+            }
+        }
+    );
+
 }());

@@ -91,10 +91,6 @@ _aStatus            - 控件当前的状态集合
      * @param {ECUIEvent} event ECUI事件对象
      */
     function unitReadyHandler(event) {
-        if (this._cParent) {
-            // 仅执行一次
-            core.removeEventListener(this._cParent, event.type, this._UIControl_oHandler);
-        }
         // ready事件不允许被阻止
         if (this.isShow() && !core.dispatchEvent(this, 'ready', event)) {
             this.$ready(event);
@@ -132,7 +128,7 @@ _aStatus            - 控件当前的状态集合
             this._bDisabled = !!options.disabled;
             this._bCapturable = options.capturable !== false;
             this._bUserSelect = options.userSelect !== false;
-            this._bFocusable = options.focusable !== false;
+            this._bFocusable = options.focusable;
             this._bGesture = true;
             this._sSubType = '';
 /*end*/
@@ -437,6 +433,10 @@ _aStatus            - 控件当前的状态集合
              */
             $ready: function () {
                 this._bReady = true;
+                if (this._cParent) {
+                    core.removeEventListener(this._cParent, 'ready', this._UIControl_oHandler);
+                    core.removeEventListener(this._cParent, 'show', this._UIControl_oHandler);
+                }
                 delete this._UIControl_oHandler;
             },
 
@@ -588,7 +588,7 @@ _aStatus            - 控件当前的状态集合
             alterSubType: function (subtype) {
                 if (this._sSubType !== subtype) {
                     var classes = this.constructor.TYPES[0].slice();
-                    if (this._sClass !== classes[0]) {
+                    if (this._sClass && this._sClass !== classes[0]) {
                         classes.push(this._sClass);
                     }
 
@@ -1156,7 +1156,11 @@ _aStatus            - 控件当前的状态集合
              * @return {boolean} 控件是否允许获取焦点
              */
             isFocusable: function () {
-                return this._bFocusable;
+                if (this._bFocusable !== undefined) {
+                    return this._bFocusable;
+                }
+                var parent = this.getParent();
+                return parent ? parent.isFocusable() : true;
             },
 
             /**
@@ -1227,6 +1231,16 @@ _aStatus            - 控件当前的状态集合
                 this.$restoreStructure();
                 this.cache(true);
                 this.initStructure();
+            },
+
+            /**
+             * 设置当前控件是否允许捕获事件。
+             * @public
+             *
+             * @param {boolean} status 当前控件是否允许捕获事件
+             */
+            setCapturableStatus: function (status) {
+                this._bCapturable = status;
             },
 
             /**

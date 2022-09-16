@@ -58,9 +58,10 @@ body {
 
 .ui-clipboard {
     position: absolute !important;
-    top: -100px !important;
+    top: -30px !important;
     height: 20px !important;
     padding: 0px !important;
     border-width: 0px !important;
     margin: 0px !important;
+    overflow: hidden !important;
 }

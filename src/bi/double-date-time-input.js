@@ -5,12 +5,12 @@
 <input ui="type:b-double-date-time;name:startTime,endTime;" value="2018-12-04 12:00 - 2018-12-04 16:00" />
 */
 (function () {
-//{if 0}//
+    //{if 0}//
     var core = ecui,
         dom = core.dom,
         util = core.util,
         ui = core.ui;
-//{/if}//
+    //{/if}//
     var safariVersion = !/(chrome|crios|ucbrowser)/i.test(navigator.userAgent) && /(\d+\.\d)(\.\d)?\s+.*safari/i.test(navigator.userAgent) ? +RegExp.$1 : undefined;
     /**
      * 日历输入框控件。
@@ -21,15 +21,15 @@
         ui.Text,
         'ui-double-calendar-input',
         function (el, options) {
-            options = Object.assign(options, { 'readOnly': true });
-            ui.Text.call(this, el, options);
             var names = (options.name || 'startTime,endTime').split(',');
+            options = Object.assign(options, { 'readOnly': true, 'name': '' });
+            ui.Text.call(this, el, options);
             this._eStartInput = dom.insertAfter(dom.create('input', { name: names[0], readOnly: true, className: ' ui-hide' }), this.getInput());
             this._eEndInput = dom.insertAfter(dom.create('input', { name: names[1], readOnly: true, className: ' ui-hide' }), this.getInput());
             this._bRequired = !!options.required;
             this._sValue = options.value || this.getInput().value;
-            var optionsEl = dom.create('DIV', {className: this.getUnitClass(ui.BDoubleDateTime, 'options ') + 'ui-popup ui-hide'});
-            this._uOptions = ecui.$fastCreate(this.Options, optionsEl, this, { focusable: false, value: this._sValue});
+            var optionsEl = dom.create('DIV', { className: this.getUnitClass(ui.BDoubleDateTime, 'options ') + 'ui-popup ui-hide' });
+            this._uOptions = ecui.$fastCreate(this.Options, optionsEl, this, { focusable: false, value: this._sValue });
             this.setPopup(this._uOptions);
         },
         {
@@ -38,18 +38,18 @@
                 ui.Control,
                 function (el, options) {
                     ui.Control.call(this, el, options);
-                    this._uCalendar = ecui.$fastCreate(this.DoubleCalendar, el.appendChild(dom.create('DIV', {className: ui.Calendar.CLASS})), this, { extra: 'disable', date: options.value });
-                    this._uTimeCalendar = ecui.$fastCreate(this.TimeCalendar, el.appendChild(dom.create('DIV', {className: ' ui-time-calendar ui-hide'})), this, { value: options.value });
+                    this._uCalendar = ecui.$fastCreate(this.DoubleCalendar, el.appendChild(dom.create('DIV', { className: ui.Calendar.CLASS })), this, { extra: 'disable', date: options.value });
+                    this._uTimeCalendar = ecui.$fastCreate(this.TimeCalendar, el.appendChild(dom.create('DIV', { className: ' ui-time-calendar ui-hide' })), this, { value: options.value });
 
-                    var calendarHandle = dom.create('DIV', {className: 'options-content'});
+                    var calendarHandle = dom.create('DIV', { className: 'options-content' });
                     calendarHandle.innerHTML = '<div class="time-box">' +
-                                                    '<div class="toggle-btn">选择时间</div>' +
-                                                '</div>' +
-                                                '<div class="handle-box">' +
-                                                    '<div class="clear">清除</div>' +
-                                                    '<div class="submit">确定</div>' +
-                                                '</div>';
-                    this._uSwitch =  ecui.$fastCreate(this.Switch, dom.first(dom.first(calendarHandle)), this, {value: '00:00:00'});
+                        '<div class="toggle-btn">选择时间</div>' +
+                        '</div>' +
+                        '<div class="handle-box">' +
+                        '<div class="clear">清除</div>' +
+                        '<div class="submit">确定</div>' +
+                        '</div>';
+                    this._uSwitch = ecui.$fastCreate(this.Switch, dom.first(dom.first(calendarHandle)), this, { value: '00:00:00' });
                     ecui.$fastCreate(this.Clear, dom.first(dom.last(calendarHandle)), this);
                     ecui.$fastCreate(this.CalendarSubmit, dom.last(dom.last(calendarHandle)), this);
                     el.appendChild(calendarHandle);
@@ -59,6 +59,7 @@
                         ui.Calendar,
                         function (el, options) {
                             ui.Calendar.call(this, el, options);
+                            this._sDate = options.date;
                             this._aNextCells = ui.MonthView.prototype.$initView.call(this, options);
                         },
                         {
@@ -116,10 +117,10 @@
                                         }
                                     } else if (this._cSelected) { // 起始时间存在，结束时间为null
                                         this._eSelected = event.item;
-                                        this._eDate =  event.date;
+                                        this._eDate = event.date;
                                     } else { // 起始时间为null，结束时间为null
                                         this._cSelected = event.item;
-                                        this._oDate =  event.date;
+                                        this._oDate = event.date;
                                     }
                                     // 添加当前时间的选中效果
                                     event.item.alterStatus('+selected');
@@ -160,11 +161,47 @@
                             },
                             setTitle: function (year, month) {
                                 var next = new Date(year, month, 1);
-                                this.getTitle().innerHTML = '<span>' + util.stringFormat(this._sFormat, year, month) + '</span><span>' + util.stringFormat(this._sFormat, next.getFullYear(), next.getMonth() + 1) + '</span>';
+                                this.getTitle().innerHTML = '<span>' + util.formatString(this._sFormat, year, month) + '</span><span>' + util.formatString(this._sFormat, next.getFullYear(), next.getMonth() + 1) + '</span>';
                             },
                             setView: function (year, month) {
                                 ui.Calendar.prototype.setView.call(this, year, month + 1, this._aNextCells);
                                 ui.Calendar.prototype.setView.call(this, year, month);
+
+                                var date = this._sDate.split(' - ');
+                                this._startDate = date[0] ? date[0].split(' ')[0] : '';
+                                this._endDate = date[1] ? date[1].split(' ')[0] : '';
+                                var selecteds = [];
+                                this._aCells.forEach(function (item) {
+                                    item.alterStatus('-selected');
+                                    var dateTime = ecui.util.formatDate(item._oDate, 'yyyy-MM-dd');
+                                    if (!item._bExtra && this._startDate && this._endDate && (this._startDate === dateTime || dateTime === this._endDate)) {
+                                        this.setSelected(item);
+                                        selecteds.push(item);
+                                    }
+                                }.bind(this));
+
+                                this._aNextCells.forEach(function (item) {
+                                    item.alterStatus('-selected');
+                                    var dateTime = ecui.util.formatDate(item._oDate, 'yyyy-MM-dd');
+                                    if (!item._bExtra && this._startDate && this._endDate && (this._startDate === dateTime || dateTime === this._endDate)) {
+                                        this.setSelected(item);
+                                        selecteds.push(item);
+                                    }
+                                }.bind(this));
+                                selecteds.forEach(function (item) {
+                                    item.alterStatus('+selected');
+                                });
+                                this._cSelected = selecteds[0] ? selecteds[0] : null;
+                                this._eSelected = selecteds[1] ? selecteds[1] : null;
+                                this._oDate = selecteds[0] ? selecteds[0].getDate() : null;
+                                this._eDate = selecteds[1] ? selecteds[1].getDate() : null;
+                            },
+                            submitChange: function (_startDate, _endDate) {
+                                this._cSelected = _startDate;
+                                this._eSelected = _endDate;
+                                this._oDate = _startDate.getDate();
+                                this._eDate = _endDate.getDate();
+                                this._sDate = ecui.util.formatDate(_startDate, 'yyyy-MM-dd HH:mm:ss') + ' - ' + ecui.util.formatDate(_endDate, 'yyyy-MM-dd HH:mm:ss');
                             }
                         }
                     ),
@@ -175,9 +212,11 @@
                             ui.Control.call(this, el, options);
 
                             var houer = [], minute = [], item;
-                            for (var i = 0; i < 24; i++) {
-                                item = ('0' + i).slice(-2);
-                                houer.push({ code: item, value: item });
+                            for (var i = 0; i < 60; i++) {
+                                if (i < 24) {
+                                    item = ('0' + i).slice(-2);
+                                    houer.push({ code: item, value: item });
+                                }
                                 if (i * this.RANGE <= 60) {
                                     item = ('0' + i * this.RANGE).slice(-2);
                                     if (item === '60') {
@@ -354,10 +393,22 @@
                                 if (parent._uCalendar._cSelected) {
                                     parent._uCalendar._cSelected.alterStatus('-selected');
                                 }
+                                if (parent._uCalendar._eSelected) {
+                                    parent._uCalendar._eSelected.alterStatus('-selected');
+                                }
                                 parent._uCalendar._oDate = null;
                                 parent._uCalendar._eDate = null;
                                 parent._uCalendar._cSelected = null;
                                 parent._uCalendar._eSelected = null;
+                                // 清除时间
+                                var _StartHouer = parent._uTimeCalendar._uStartHouer;
+                                var _StartMinute = parent._uTimeCalendar._uStartMinute;
+                                var _EndHouer = parent._uTimeCalendar._uEndHouer;
+                                var _EndMinute = parent._uTimeCalendar._uEndMinute;
+                                _StartHouer.setSelected(_StartHouer.getItem(0));
+                                _StartMinute.setSelected(_StartMinute.getItem(0));
+                                _EndHouer.setSelected(_EndHouer.getItem(0));
+                                _EndMinute.setSelected(_EndMinute.getItem(0));
                             }
                         }
                     ),
@@ -380,7 +431,16 @@
                                     eminute = uTimeCalendar._uEndMinute.getSelected().getValue();
                                 date = new Date(date.setHours(hour, minute, 0));
                                 endDate = new Date(endDate.setHours(ehour, eminute, 0));
-                                uTimePicker.setValue(util.formatDate(date, uTimePicker.FORMAT) + ' - ' + util.formatDate(endDate, uTimePicker.FORMAT));
+                                var _startDate, _endDate;
+                                if (new Date(util.formatDate(date, uTimePicker.FORMAT)).getTime() > new Date(util.formatDate(endDate, uTimePicker.FORMAT)).getTime()) {
+                                    _startDate = endDate;
+                                    _endDate = date;
+                                } else {
+                                    _startDate = date;
+                                    _endDate = endDate;
+                                }
+                                uParent._uCalendar.submitChange(_startDate, _endDate);
+                                uTimePicker.setValue((util.formatDate(_startDate, uTimePicker.FORMAT)) + ' - ' + (util.formatDate(_endDate, uTimePicker.FORMAT)));
                                 ecui.dispatchEvent(uTimePicker, 'input', event);
                                 this.getParent().hide();
                             }
@@ -429,12 +489,8 @@
             /**
              * @override
              */
-            $validate: function () {
-                ui.InputControl.prototype.$validate.call(this);
-                if (!this.getDate() && this._bRequired) {
-                    ecui.dispatchEvent(this, 'error');
-                    return false;
-                }
+            $validate: function (event) {
+                return ui.InputControl.prototype.$validate.call(this, event) !== false && (!this._bRequired || !!this.getDate());
             },
             /**
              * 获取日期对象。

@@ -8,7 +8,8 @@
 /*ignore*/
 /*
 @fields
-_bModal      - 是否使用showModal激活
+_bCenter     - 是否居中显示s
+_fModal      - 用于关闭mask层的函数s
 */
 /*end*/
 (function () {
@@ -24,14 +25,17 @@ _bModal      - 是否使用showModal激活
      * 刷新所有显示的窗体的zIndex属性。
      * @private
      */
-    function refresh() {
-        util.remove(layers, this);
-        layers.push(this);
+    function refresh(layer) {
+        util.remove(layers, layer);
+        layers.push(layer);
 
         // 改变当前窗体之后的全部窗体z轴位置，将当前窗体置顶
-        var num = layers.length - modalCount;
         layers.forEach(function (item, index) {
-            item.getMain().style.zIndex = index >= num ? 32009 + (index - num) * 2 : 4095 + index;
+            index = 16384 + index * 2;
+            item.getMain().style.zIndex = index;
+            if (item._fModal) {
+                item._fModal.setZIndex(index - 1);
+            }
         });
     }
 
@@ -61,7 +65,7 @@ _bModal      - 是否使用showModal激活
              */
             $focus: function () {
                 ui.Control.prototype.$focus.call(this);
-                refresh.call(this);
+                refresh(this);
             },
 
             /**
@@ -74,22 +78,36 @@ _bModal      - 是否使用showModal激活
                 if (i >= 0) {
                     layers.splice(i, 1);
 
-                    if (i > layers.length - modalCount) {
-                        if (this._bModal) {
-                            if (i === layers.length) {
-                                core.mask();
-                            } else {
-                                // 如果不是最后一个，将遮罩层标记后移
-                                layers[i]._bModal = true;
-                            }
-                            this._bModal = false;
-                        }
-                        modalCount--;
+                    if (this._fModal) {
+                        this._fModal();
+                        delete this._fModal;
                     }
                     core.loseFocus(this);
                 }
 
+                this._bCenter = false;
                 ui.Control.prototype.$hide.call(this);
+            },
+
+            /**
+             * 窗体显示时将获得焦点状态。
+             * @override
+             */
+            $initStructure: function () {
+                ui.Control.prototype.$initStructure.call(this);
+                if (this._bCenter) {
+                    this.center();
+                }
+            },
+
+            /**
+             * @override
+             */
+            $ready: function () {
+                ui.Control.prototype.$ready.call(this);
+                if (this.isCached()) {
+                    layers.push(this);
+                }
             },
 
             /**
@@ -103,42 +121,20 @@ _bModal      - 是否使用showModal激活
             },
 
             /**
-             * 如果窗体是以 showModal 方式打开的，只有位于最顶层的窗体才允许关闭。
+             * 设置居中时如果窗体大小发生变化，也将触发居中处理。
              * @override
              */
-            hide: function () {
-                for (var i = layers.indexOf(this), item; item = layers[++i]; ) {
-                    if (item._bModal) {
-                        return false;
-                    }
-                }
-                return ui.Control.prototype.hide.call(this);
-            },
-
-            /**
-             * showModal 时如果窗体不置顶都设置为不可用。
-             * @override
-             */
-            isDisabled: function () {
-                if (modalCount > 0) {
-                    return layers[layers.length - 1] !== this;
-                }
-                return ui.Control.prototype.isDisabled.call(this);
+            center: function (top) {
+                ui.Control.prototype.center.call(this, top);
+                this._bCenter = true;
             },
 
             /**
              * @override
              */
             show: function () {
-                if (modalCount && layers.indexOf(this) < layers.length - modalCount) {
-                    // 如果已经使用showModal，对原来不是showModal的窗体进行处理
-                    modalCount++;
-                }
-
                 var result = ui.Control.prototype.show.call(this);
-                if (!result) {
-                    refresh.call(this);
-                }
+                refresh(this);
                 return result;
             },
 
@@ -150,20 +146,13 @@ _bModal      - 是否使用showModal激活
              * @param {number} opacity 遮罩层透明度，默认为0.5
              */
             showModal: function (opacity) {
-                if (!this._bModal) {
-                    if (layers.indexOf(this) < layers.length - modalCount) {
-                        modalCount++;
-                    }
-
+                if (!this._fModal) {
                     this.center();
-                    core.mask(opacity !== undefined ? opacity : 0.5, 32006 + modalCount * 2);
-
-                    this._bModal = true;
-                    if (!ui.Control.prototype.show.call(this)) {
-                        refresh.call(this);
-                    }
+                    this._fModal = core.mask(opacity !== undefined ? opacity : 0.5);
+                    this.show();
                 }
             }
         }
     );
 }());
+    

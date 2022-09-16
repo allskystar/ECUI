@@ -128,15 +128,19 @@
 
                 if (selected) {
                     this.setSelected(selected);
+                    core.dispatchEvent(this, 'change', event);
                 } else {
                     selected = this.getSelected();
                     if (selected) {
                         selected.alterStatus('-selected');
                         this.$setSelected(null);
+                        this.$setValue('');
+                        core.dispatchEvent(this, 'change', event);
                     }
                 }
                 this.$setPlaceholder();
                 refresh(this);
+                this.updatePosition();
             },
 
             /**

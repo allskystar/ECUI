@@ -638,6 +638,12 @@ function loadStyles(modifyVars) {
             var lessText = style.getAttribute('lessText') || style.innerHTML || '';
             style.removeAttribute('lessText');
             instanceOptions.filename = document.location.href.replace(/#.*$/, '');
+            // 解决debug模式下，route样式在根目录下的问题
+            var module = style.getAttribute('module');
+            if (module) {
+                var index = instanceOptions.filename.lastIndexOf('/');
+                instanceOptions.filename = instanceOptions.filename.substring(0, index) + module;
+            }
 
             /*jshint loopfunc:true */
             // use closure to store current style

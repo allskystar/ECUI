@@ -63,13 +63,13 @@ _uOptions     - 下拉选择框
                 }
             }
 
-            optionsEl.className = this.getUnitClass(ui.$AbstractSelect, 'options') + ' ui-popup ui-hide';
             el.innerHTML = '<div class="' + this.getUnitClass(ui.$AbstractSelect, 'text') + '"></div>';
             if (input) {
                 el.appendChild(input);
             }
 
             ui.InputControl.call(this, el, options);
+            optionsEl.className = this.getUnitClass(ui.$AbstractSelect, 'options') + ' ui-popup ui-hide ';
 
             this._uText = core.$fastCreate(ui.Item, el.firstChild, this, {capturable: false});
             this._uOptions = core.$fastCreate(this.Options, optionsEl, this, {focusable: false});
@@ -184,7 +184,7 @@ _uOptions     - 下拉选择框
              * @event
              */
             $change: function () {
-                this.$clearErrorStyle();
+                this.$correct();
             },
 
             /**
@@ -253,12 +253,8 @@ _uOptions     - 下拉选择框
             /**
              * @override
              */
-            $validate: function () {
-                ui.InputControl.prototype.$validate.call(this);
-                if (this.getValue() === '' &&  this._bRequired) {
-                    core.dispatchEvent(this, 'error');
-                    return false;
-                }
+            $validate: function (event) {
+                return ui.InputControl.prototype.$validate.call(this, event) !== false && (!this._bRequired || !!this.getValue());
             },
 
             /**

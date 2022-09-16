@@ -80,33 +80,33 @@
 
     /**
      * 搜索数据回填表单数据
-     * context 数据和 searchParm 数据同时存在时，优先设置 context 数据为搜索数据
+     * context 数据和 searchParam 数据同时存在时，优先设置 context 数据为搜索数据
      * @param {object}  context        路由的上下文数据
      * @param {form}    form        要回填的表格元素
-     * @param {object} searchParm   路由的搜索数据
+     * @param {object} searchParam   路由的搜索数据
      */
-    function setFormValue(context, form, searchParm) {
+    function setFormValue(context, form, searchParam) {
         var elements = form.elements;
         for (var i = 0, item; item = elements[i++]; ) {
             var name = item.name;
             if (name) {
                 if (context[name] !== undefined) {
-                    searchParm[name] = context[name];
+                    searchParam[name] = context[name];
                 }
                 var _control = item.getControl && item.getControl();
                 if (_control) {
                     if (_control instanceof ecui.esr.CreateArray || _control instanceof ecui.esr.CreateObject) {
                         return;
                     } else if (_control instanceof ecui.ui.Radio) {
-                        _control.setChecked(searchParm[name] === _control.getValue());
+                        _control.setChecked(searchParam[name] === _control.getValue());
                     } else if (_control instanceof ecui.ui.Checkbox) {
-                        _control.setChecked(searchParm[name].indexOf(_control.getValue()) !== -1);
+                        _control.setChecked(searchParam[name].indexOf(_control.getValue()) !== -1);
                     } else {
-                        _control.setValue(searchParm[name] !== undefined ? searchParm[name] : '');
+                        _control.setValue(searchParam[name] !== undefined ? searchParam[name] : '');
                     }
 
                 } else {
-                    item.value = searchParm[name] !== undefined ? searchParm[name] : '';
+                    item.value = searchParam[name] !== undefined ? searchParam[name] : '';
                 }
             }
         }
@@ -143,10 +143,10 @@
 
     /**
      * 通过 route.searchParam 缓存搜索 form 的数据
-     * @param {object} searchParm   路由的搜索数据
+     * @param {object} searchParam   路由的搜索数据
      * @param {form}    form        要回填的表格元素
      */
-    function setSearchParam(searchParm, form) {
+    function setSearchParam(searchParam, form) {
         for (var i = 0, item; item = form.elements[i++]; ) {
             if (item.name) {
                 var _control = item.getControl && item.getControl();
@@ -155,37 +155,38 @@
                         // 如果是ecui.esr.CreateArray 和 ecui.esr.CreateObject元素，不做任何处理
                     } else if (_control instanceof ecui.ui.Radio) {
                         if (Array.prototype.indexOf.call(form.elements[item.name], _control.getInput()) === 0) {
-                            searchParm[item.name] = '';
+                            searchParam[item.name] = '';
                         }
                         if (_control.isChecked()) {
-                            searchParm[item.name] = _control.getValue();
+                            searchParam[item.name] = _control.getValue();
                         }
                     } else if (_control instanceof ecui.ui.Checkbox) {
-                        if (!searchParm[item.name]) {
-                            searchParm[item.name] = [];
+                        if (!searchParam[item.name]) {
+                            searchParam[item.name] = [];
                         }
                         if (_control.isChecked()) {
-                            searchParm[item.name].push(_control.getValue());
+                            searchParam[item.name].push(_control.getValue());
                         }
                     } else {
-                        searchParm[item.name] = _control.getValue();
+                        searchParam[item.name] = _control.getValue();
                     }
                 } else {
-                    searchParm[item.name] = item.value;
+                    searchParam[item.name] = item.value;
                 }
             }
         }
     }
 
-    function replenishSearchCode(form, searchParm, context) {
+    // 读取表单数据，补充 searchParam 中的参数，context、search 中没有的的字段，默认给空字符串
+    function replenishSearchCode(form, searchParam, context) {
         var data = {};
         ecui.esr.parseObject(form, data, false);
         for (var key in data) {
             if (data.hasOwnProperty(key)) {
                 if (context[key] !== undefined) {
-                    searchParm[key] = context[key];
-                } else if (searchParm[key] === undefined) {
-                    searchParm[key] = '';
+                    searchParam[key] = context[key];
+                } else if (searchParam[key] === undefined) {
+                    searchParam[key] = '';
                 }
             }
         }
@@ -198,27 +199,35 @@
      */
     ui.BTableListRoute = function (route) {
         var name = route.NAME.slice(route.NAME.indexOf('/') === 0 ? 1 : 0);
+        var model = route.model || [];
+        model.push(name.slice(0, -5) + '@FORM ' + route.url);
+        this.model = model;
         this.view = route.view || name;
-        this.model = [name.slice(0, -5) + '@FORM ' + route.url];
         this.main = name.slice(0, -9) + '_table';
         Object.assign(this, route);
     };
     ui.BTableListRoute.prototype.onbeforerequest = function (context) {
-        context.pageNo = context.pageNo || +this.searchParm.pageNo;
-        context.pageSize = +this.searchParm.pageSize;
-        var forms = this.model[0].split('?')[1].split('&');
+        context.pageNo = context.pageNo || +this.searchParam.pageNo;
+        context.pageSize = context.pageSize || +this.searchParam.pageSize;
+        var forms = this.model[this.model.length - 1].split('?')[1].split('&');
         for (var i = 0, form, item; item = forms[i++]; ) {
             form = document.forms[item.split('=')[0]];
             if (item.split('=').length === 1 && form) {
-                replenishSearchCode(form, this.searchParm, context);
-                // setFormValue(context, form, this.searchParm);
-                ecui.esr.fillForm(form, Object.assign({}, this.searchParm, context));
+                replenishSearchCode(form, this.searchParam, context);
+                if (!this.notFillForm) {
+                    ecui.esr.fillForm(form, Object.assign({}, this.searchParam, context));
+                }
             }
         }
+        context.searchParam = this.searchParam;
     };
     ui.BTableListRoute.prototype.onbeforerender = function (context) {
-        var data = ecui.util.parseValue(this.model[0].split('@')[0], context);
-        context.offset = data.offset;
+        var data = ecui.util.parseValue(this.model[this.model.length - 1].split('@')[0], context);
+        if (!context.offset && context.offset !== 0) {
+            context.offset = (+context.pageNo - 1) * +context.pageSize;
+        } else {
+            context.offset = data.offset;
+        }
         context.total = data.total;
         context.totalPage = data.totalPage;
     };

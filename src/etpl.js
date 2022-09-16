@@ -37,6 +37,16 @@
     }
 
     /**
+     * 判断是否是数字类型
+     *
+     * @inner
+     * @return {boolean}
+     */
+    function isNumber (num) {
+        return typeof num === 'number';
+    }
+
+    /**
      * 默认filter
      *
      * @inner
@@ -50,7 +60,14 @@
          * @param {string} source 源串
          * @return {string} 替换结果串
          */
-        html: util.encodeHTML,
+        // html: util.encodeHTML,
+        html: function (source) {
+            // 敏感词处理
+            if (etpl.SENSITIVE_WORD_REGEXP) {
+                source = source.replace(etpl.SENSITIVE_WORD_REGEXP, etpl.SENSITIVE_WORD);
+            }
+            return util.encodeHTML(source);
+        },
 
         /**
          * URL编码filter
@@ -80,8 +97,70 @@
          */
         raw: function (source) {
             return source;
+        },
+
+        /**
+         * 默认数据filter
+         *
+         * @param {string} source 源串
+         * @return {string} 替换结果串
+         */
+        'default': function (source, defaultValue) {
+            return isNumber(source) || source ? source : (defaultValue || '--');
+        },
+
+        /**
+         * 控件ui参数转义filter
+         *
+         * @param {string} source 源串
+         * @return {string} 替换结果串
+         */
+        options: function (source) {
+            return encodeURIComponent(source).replace(/;/g, '%3B').replace(/"/g, '%22').replace(/&/g, '%26');
+        },
+
+        /**
+         * 金融格式化filter
+         *
+         * @param {string} source 源串
+         * @return {string} 替换结果串
+         */
+        formatFinance: function (source) {
+            var result = '';
+            if (/^-*\d*(\.{0,1})\d*$/.test(source)) {
+                result = util.formatFinance(source);
+            }
+            return result;
+        },
+
+        /**
+         * 金融格式化filter
+         *
+         * @param {string} source 源串
+         * @return {string} 替换结果串
+         */
+        formatDate: function (source, format) {
+            if (/^[0-9]*$/.test(source)) {
+                source = Number(source);
+            } else if (new Date(source).toString() === 'Invalid Date') {
+                source = '';
+            }
+            return source ? util.formatDate(new Date(source), format) : '--';
+        },
+
+        /**
+         * 指定保留小数位数filter
+         *
+         * @param {string|number} source 源串
+         * @param {number} divisor       被除数
+         * @param {string} fixedNum      保留小数位数
+         * @return {string} 替换结果串
+         */
+        toFixed: function (source, divisor, fixedNum) {
+            return (Number(source) / divisor).toFixed(fixedNum);
         }
     };
+
 
     /**
      * 对字符串进行可用于new RegExp的字面化
@@ -161,7 +240,7 @@
             }
         );
 
-        return util.stringFormat(
+        return util.formatString(
             'A({0},[{1}])',
             JSON.stringify(name),
             args.join(',')
@@ -177,8 +256,8 @@
      * @param {string} open 包含块开头
      * @param {string} close 包含块结束
      * @param {boolean} greedy 是否贪婪匹配
-     * @param {function({string})} onInBlock 包含块内文本的处理函数
-     * @param {function({string})} onOutBlock 非包含块内文本的处理函数
+     * @param {function ({string})} onInBlock 包含块内文本的处理函数
+     * @param {function ({string})} onOutBlock 非包含块内文本的处理函数
      */
     function parseTextBlock(source, open, close, greedy, onInBlock, onOutBlock) {
         var closeLen = close.length;
@@ -539,7 +618,7 @@
         'u=u||{};' +
         'var v={},f=e.filters,g="function"==typeof u.get,' +
         //a:name b:properties
-        'A=function(a,b){' +
+        'A=function (a,b){' +
         'var d=v[b[0]];' +
         'if(d==null){' +
         'if(g)return u.get(a);' +
@@ -549,7 +628,7 @@
         'for(var i=1,l=b.length;i<l;i++)if(d!=null)d=d[b[i]];' +
         'return d;' +
         '},' +
-        'B=function(a){' +
+        'B=function (a){' +
         'if("string"===typeof a)return a;' +
         'if(a==null)a="";' +
         'return ""+a;' +
@@ -703,7 +782,7 @@
      */
     function ForCommand(value, engine) {
         var rule = new RegExp(
-            util.stringFormat(
+            util.formatString(
                 '^\\s*({0}[\\s\\S]+{1})\\s+as\\s+{0}([0-9a-z_]+){1}\\s*(,\\s*{0}([0-9a-z_]+){1})?\\s*$',
                 regexpLiteral(engine.options.variableOpen),
                 regexpLiteral(engine.options.variableClose)
@@ -861,7 +940,7 @@
     /**
      * 获取target的renderer函数
      *
-     * @return {function(Object):string} renderer函数
+     * @return {function (Object):string} renderer函数
      */
     TargetCommand.prototype.getRenderer = function () {
         if (this.renderer) {
@@ -1076,7 +1155,7 @@
      */
     UseCommand.prototype.getRendererBody = function () {
         var rule = new RegExp(
-            util.stringFormat(
+            util.formatString(
                 '{0}([^}]+){1}',
                 regexpLiteral(this.engine.options.variableOpen),
                 regexpLiteral(this.engine.options.variableClose)
@@ -1084,7 +1163,7 @@
             'g'
         );
 
-        return util.stringFormat(
+        return util.formatString(
             '{0}e.render({2},{3}){1}',
             RENDER_STRING_ADD_START,
             RENDER_STRING_ADD_END,
@@ -1110,7 +1189,7 @@
      */
     VarCommand.prototype.getRendererBody = function () {
         if (this.expr) {
-            return util.stringFormat(
+            return util.formatString(
                 'v[{0}]={1};',
                 JSON.stringify(this.name),
                 compileVariable(this.expr, this.engine)
@@ -1126,7 +1205,7 @@
      * @return {string} 生成代码
      */
     IfCommand.prototype.getRendererBody = function () {
-        return util.stringFormat(
+        return util.formatString(
             'if({0}){{1}}',
             compileVariable(this.value, this.engine),
             Command.prototype.getRendererBody.call(this)
@@ -1139,7 +1218,7 @@
      * @return {string} 生成代码
      */
     ElseCommand.prototype.getRendererBody = function () {
-        return util.stringFormat(
+        return util.formatString(
             '}else{{0}',
             Command.prototype.getRendererBody.call(this)
         );
@@ -1151,7 +1230,7 @@
      * @return {string} 生成代码
      */
     ForCommand.prototype.getRendererBody = function () {
-        return util.stringFormat(
+        return util.formatString(
             'var {0}={1};' +
                 'if({0} instanceof Array)' +
                 'for(var {4}=0,{5}={0}.length;{4}<{5};{4}++){v[{2}]={4};v[{3}]={0}[{4}];{6}}' +
@@ -1174,8 +1253,8 @@
      */
     FilterCommand.prototype.getRendererBody = function () {
         var args = this.args;
-        return util.stringFormat(
-            '{2}f[{5}]((function(){{0}{4}{1}})(){6}){3}',
+        return util.formatString(
+            '{2}f[{5}]((function (){{0}{4}{1}})(){6}){3}',
             RENDER_STRING_DECLATION,
             RENDER_STRING_RETURN,
             RENDER_STRING_ADD_START,
@@ -1268,7 +1347,7 @@
      * parse该方法的存在为了兼容老模板引擎
      *
      * @param {string} source 模板源代码
-     * @return {function(Object):string} renderer函数
+     * @return {function (Object):string} renderer函数
      */
     Engine.prototype.compile = Engine.prototype.parse = function (source) {
         if (source) {
@@ -1285,7 +1364,7 @@
      * 根据target名称获取编译后的renderer函数
      *
      * @param {string} name target名称
-     * @return {function(Object):string} renderer函数
+     * @return {function (Object):string} renderer函数
      */
     Engine.prototype.getRenderer = function (name) {
         var target = this.targets[name] || etpl.targets[name];

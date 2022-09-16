@@ -193,7 +193,7 @@ _cItem    - 当前处于激活的选项
              * @override
              */
             $remove: function (event) {
-                ui.MListView.prototype.$remove.call(event);
+                ui.MListView.prototype.$remove.call(this, event);
                 if (event.returnValue !== false) {
                     if (event.child === this._cItem) {
                         this._cItem = null;

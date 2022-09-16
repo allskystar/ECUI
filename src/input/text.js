@@ -29,7 +29,6 @@ _ePlaceHolder - 为空时的提示信息标签
      * options 属性：
      * trim     是否进行前后空格过滤，默认为 true (注：粘贴内容也会进行前后空格过滤)
      * len      aaa-bbb表示数字允许的最小(aaa)/最大(bbb)长度
-     * num      aaa-bbb表示数字允许的最小(aaa)/最大(bbb)值
      * regexp   正则表达式，自动在两端添加^与$
      * @control
      */
@@ -89,6 +88,7 @@ _ePlaceHolder - 为空时的提示信息标签
                 var body = this.getBody(),
                     input = this.getInput();
 
+                this._oBodyChildList = dom.children(body);
                 body.removeChild(input);
                 if (input.type === 'password') {
                     // 如果输入框是密码框需要直接隐藏，不允许将密码显示在浏览器中
@@ -119,7 +119,10 @@ _ePlaceHolder - 为空时的提示信息标签
 
                 var body = this.getBody();
                 body.innerHTML = '';
-                body.appendChild(this.getInput());
+                // body.appendChild(this.getInput());
+                (this._oBodyChildList || []).forEach(function (item) {
+                    body.appendChild(item);
+                });
             },
 
             /**
@@ -183,8 +186,8 @@ _ePlaceHolder - 为空时的提示信息标签
             /**
              * @override
              */
-            $validate: function () {
-                ui.InputControl.prototype.$validate.call(this);
+            $validate: function (event) {
+                ui.InputControl.prototype.$validate.call(this, event);
 
                 var value = this.getValue(),
                     length = value.length,
@@ -204,9 +207,6 @@ _ePlaceHolder - 为空时的提示信息标签
                     result = false;
                 }
 
-                if (!result) {
-                    core.dispatchEvent(this, 'error');
-                }
                 return result;
             },
 

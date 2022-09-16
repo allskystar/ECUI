@@ -11,10 +11,6 @@
     var Calendar = core.inherits(
             ui.Calendar,
             true,
-            function (el, options) {
-                dom.addClass(el, 'ui-popup ui-hide');
-                ui.Calendar.call(this, el, options);
-            },
             {
                 /**
                  * @override
@@ -25,23 +21,6 @@
                     parent.setValue(event.date);
                     core.dispatchEvent(parent, 'input', event);
                     this.hide();
-                },
-
-                /**
-                 * @override
-                 */
-                $hide: function (event) {
-                    ui.Calendar.prototype.$hide.call(this, event);
-                    this.$setParent();
-                },
-
-                /**
-                 * @override
-                 */
-                $show: function (event) {
-                    ui.Calendar.prototype.$show.call(this, event);
-                    this.$setParent(ui.Popup.getOwner());
-                    this.setDate(this.getParent().getDate());
                 }
             }
         );
@@ -57,21 +36,28 @@
         function (el, options) {
             ui.Text.call(this, el, options);
             this.getInput().readOnly = true;
-            this.setPopup(core.getSingleton(Calendar));
-            dom.insertHTML(el, 'BEFOREEND', '<span class="ui-calendar-input-clear"></span>');
-            this._uClear = core.$fastCreate(this.Clear, dom.last(el), this);
+
+            options = Object.assign(
+                    {},
+                    {
+                        extra: options.extra !== 'disable',
+                        begin: options.begin ? new Date(options.begin + ' 00:00:00') : undefined,
+                        end: options.end ? new Date(options.end + ' 00:00:00') : undefined,
+                    }
+                );
+
+            this.setPopup(
+                core.getSingleton(Calendar),
+                function () {
+                    this.setExtraCapture(options.extra);
+                    this.setRange(options.begin, options.end);
+                    this.setDate(this.getParent().getDate());
+                }
+            );
+
+            el = null;
         },
         {
-            Clear: core.inherits(
-                ui.Control,
-                {
-                    onclick: function (event) {
-                        this.getParent().setValue('');
-                        event.preventDefault();
-                        event.stopPropagation();
-                    }
-                }
-            ),
             /**
              * 获取日期对象。
              * @public

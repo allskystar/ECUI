@@ -659,7 +659,6 @@ a {
             word-break: break-all;
             text-overflow: ellipsis;
         }
-
     }
 }
 
@@ -686,6 +685,20 @@ a {
     input::placeholder,
     textarea::placeholder {
         color: #c0ccda;
+    }
+}
+
+.ext-clear {
+    position: relative;
+    padding-right: 30px;
+
+    .ext-clear-button {
+        position: absolute;
+        width: 30px;
+        height: 30px;
+        right: 0px;
+        top: 0px;
+        background-color: red;
     }
 }
 
@@ -818,15 +831,15 @@ a {
             color: #8492a6;
         }
 
-        td.ui-today {
+/*        td.ui-today {
             color: #368cda;
         }
-
-        td:hover {
+*/
+/*        td:hover {
             background: #368cda;
             color: #fff;
         }
-
+*/
         td.ui-calendar-date-selected {
             color: #fff;
             background: #368cda;
@@ -850,11 +863,6 @@ a {
             text-align: center;
             line-height: 29px;
             pointer-events: none;
-        }
-
-        .ui-item-focus {
-            font-size: 20px;
-            font-weight: bold;
         }
     }
 }
@@ -882,7 +890,7 @@ a {
 
         .ui-item-selected,
         .ui-item-focus {
-            font-weight: bold;
+            /*font-weight: bold;*/
         }
     }
 }
@@ -1049,6 +1057,7 @@ a {
             }
         }
         .ui-listbox {
+            position: relative;
             display: inline-block;
             vertical-align: middle;
             overflow-y: hidden;
@@ -1149,12 +1158,18 @@ a {
      
 
 }
-.ui-date-time-input-options {
-    .ui-time-calendar {
-        .ui-listbox {
-            width: 33%;
-        }
-    }
+
+.ui-date-time-input-options .ui-time-calendar .ui-listbox {
+    width: 33%;
+}
+.ui-date-time-input-options .ui-time-calendar.ui-listbox-1 .ui-listbox {
+    width: 100%;
+}
+.ui-date-time-input-options .ui-time-calendar.ui-listbox-2 .ui-listbox {
+    width: 50%;
+}
+.ui-date-time-input-options .ui-time-calendar.ui-listbox-3 .ui-listbox {
+    width: 33%;
 }
 
 .ui-m-send-text {
@@ -1206,3 +1221,312 @@ a {
         /*text-align: right;*/
     }
 }
+/*
+ * b-switch 控件样式 begin
+ */
+.ui-switch {
+    width: 70px;
+    height: 26px;
+    position:relative;   
+    display: block;   
+    border-radius: 26px;
+    background-color: #fff;
+    cursor: pointer;   
+    vertical-align: top;   
+    -webkit-user-select: none;
+    background-image: none;
+    input {
+        display: none;
+    }
+}
+.ui-switch:before{   
+    content: '';   
+    display: block;   
+    border-radius: 26px;
+    height: 26px;
+    background-color: #999;
+    transition: all 0.3s ease;
+    -webkit-transition: all 0.3s ease;   
+}
+.ui-switch:after{   
+    content: '';   
+    position: absolute;   
+    top: 50%;     
+    left: 2px;
+    margin-top: -11px;     
+    width: 22px;   
+    height: 22px;   
+    border-radius: 22px;   
+    background-color: #fff;
+    -webkit-transition: all 0.3s ease;   
+    transition: all 0.3s ease;
+}
+.ui-switch-checked:after{   
+    -webkit-transform: translateX(0);
+    margin-left: 0;
+    left: 46px;
+}   
+.ui-switch-checked:before{   
+    background-color: #0F83FF;
+}  
+
+/*
+ * b-switch 控件样式 end
+ */
+
+
+
+/*
+ * b-select-tree 控件样式 begin
+ */
+
+.ui-tree-combox {
+    position: relative;
+    border: 1px solid #acbaca;
+
+    input {
+        display: inline-block;
+        width: 100%;
+        height: 100%;
+        padding-left: 5px;
+    }
+}
+.ui-tree-combox-popup {
+    // width: 100%;
+    border: 1px solid #d7d8d9;
+    background: #fff;
+    min-width: 150px;
+    max-height: 300px;
+    overflow: auto;
+    font-size: 14px !important;
+
+    & > .ui-treeview {
+        display: none;
+    }
+
+    .ui-treeview-children .ui-treeview,
+    .ui-treeview-children .ui-treeview-children,
+    .ui-combox-item {
+        position: relative;
+        cursor: pointer;
+        padding-left: 20px;
+
+        .folder {
+            position: absolute;
+            left: 2px;
+            top: 8px;
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            background: url('images/treeStandard.png') no-repeat no-repeat;
+            background-position: -110px 0;
+        }
+        .file {
+            position: absolute;
+            left: 2px;
+            top: 8px;
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            background: url('images/treeStandard.png') no-repeat no-repeat;
+            background-position: -110px -32px;
+        }
+    }
+    .ui-treeview-children .ui-treeview {
+        padding-left: 20px;
+    }
+}
+
+/*
+ * b-select-tree 控件样式 end
+ */
+
+/*
+ * b-pagination 控件样式 begin
+ */
+.ui-pagination{
+    -moz-user-select: none; /*火狐-禁止文本选中*/
+    -webkit-user-select: none; /*webkit浏览器*/
+    -ms-user-select: none; /*IE10*/
+    -khtml-user-select: none; /*早期浏览器*/
+    user-select: none;
+    height:24px;
+    font-size:14px;
+    text-align: center;
+    span,font,strong{
+        display:inline-block;
+        margin-right:6px;
+        padding:0 4px;
+        min-width:16px;
+        height:24px;
+        text-align:center;
+        line-height:24px;
+        color:#495362;
+        border-radius:3px;
+        cursor:pointer
+    }
+    font{
+        color:#ccc;
+        cursor:default;
+    }
+    span:hover{
+        color:#38abff;
+    }
+    strong{
+        background:#368cda;
+        color:#fff !important;
+    }
+    .pagination,
+    .pagination-msgBox {
+        display: inline-block;
+        vertical-align: middle;
+    }
+    .pagination-msg {
+        display: inline-block;
+        vertical-align: middle;
+        margin-left: 15px;
+    }
+}
+/*
+ * b-pagination 控件样式 end
+ */
+
+/*
+ * b-multi-select 控件样式 end
+ */
+.ui-multi-select {
+    cursor: pointer;
+}
+
+.ui-multi-select-options {
+    border: 1px solid #D6DBE6;
+    min-width: 200px;
+
+    .ui-item {
+        display: inline-block;
+    }
+
+    .ui-multi-select-options-operate {
+        display: block;
+
+        .ui-button {
+            display: inline-block;
+        }
+    }
+}
+
+.ui-custome-check-box-input {
+    cursor: pointer;
+    border: 1px solid #acbaca;
+    border-radius: 2px;
+    color: #495362;
+    font-size: 14px;
+    padding-left: 5px;
+    padding-right: 20px;
+    width: 120px;
+    height: 30px;
+
+    input {
+        display: none;
+    }
+}
+
+.ui-custome-check-box.ui-custome-check-box-popup {
+    border: 1px solid #D6DBE6;
+    min-width: 200px;
+    max-width: 360px;
+    max-height: 260px;
+    overflow-y: auto !important;
+    background-color: #FFF;
+    font-size: 14px;
+
+    label {
+        display: inline-block;
+        vertical-align: middle;
+        min-width: 88px;
+        height: 38px;
+        line-height: 38px;
+        padding-left: 10px;
+    }
+
+    label .ui-checkbox {
+        vertical-align: middle;
+        margin-right: 5px;
+    }
+
+    .no-result {
+        padding: 20px !important;
+        text-align: center;
+    }
+
+    .ui-multi-select-options-operate,
+    .ui-operate {
+        display: block;
+        height: 50px;
+        line-height: 50px;
+        text-align: center;
+        background-color: #eff2f7;
+    }
+
+    .ui-multi-select-options-operate .ui-button,
+    .ui-operate .ui-button {
+        display: inline-block;
+        width: 78px;
+        height: 28px;
+        line-height: 28px;
+    }
+
+    .ui-multi-select-options-operate .ui-button.cancel,
+    .ui-operate .ui-button.cancel {
+        background-color: #E0E6ED;
+        border: 1px solid #C0CCDA;
+        border-radius: 2px;
+    }
+
+    .ui-multi-select-options-operate .ui-button.sure,
+    .ui-operate .ui-button.sure {
+        background-color: #F94964;
+        border: 1px solid #DF2D42;
+        border-radius: 2px;
+        color: #FFF;
+    }
+}
+
+/*
+ * b-multi-select 控件样式 end
+ */
+
+
+
+/*
+ * b-cities 控件样式 end
+ */
+
+.ui-cities {
+    position: relative;
+    font-size: 0px;
+    overflow: visible !important;
+    .ui-select {
+        background:url('images/ecui/arrow.png') no-repeat;
+        background-position: 100px center !important;
+        background-color: #FFF; 
+        position: relative;
+        width: 120px !important;
+        height: 30px !important;
+        line-height: 30px !important;
+        padding-right: 0px;
+        margin: 0px 5px;
+        vertical-align: middle;
+        font-size: 14px;
+        display: inline-block !important;
+        border: 1px solid #acbaca !important;
+        color: #8492a6;
+    }
+    .ui-select-focus {
+        border: 1px solid #368cda !important;
+    }
+}
+
+/*
+ * b-cities 控件样式 end
+ */

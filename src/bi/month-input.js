@@ -20,13 +20,13 @@
         'ui-month-view',
         function (el, options) {
             dom.addClass(el, 'ui-popup ui-calendar ui-hide');
-            el.innerHTML = util.stringFormat(
+            el.innerHTML = util.formatString(
                 '<table><thead>{1}</thead><tbody>{0}{0}{0}</tbody></table>',
-                util.stringFormat(
+                util.formatString(
                     '<tr>{0}{0}{0}{0}</tr>',
                     '<td class="' + this.getUnitClass(ui.BIMonth, 'date ') + '"></td>'
                 ),
-                util.stringFormat(
+                util.formatString(
                     '<tr>{0}{0}{0}{0}</tr>',
                     '<td class="' + this.getUnitClass(ui.BIMonth, 'title ') + '"></td>'
                 )
@@ -154,7 +154,7 @@
                 this.setTitle();
             },
             setTitle: function () {
-                this._eTitle.innerHTML = util.stringFormat(this.TITLEFORMAT, this._nYear);
+                this._eTitle.innerHTML = util.formatString(this.TITLEFORMAT, this._nYear);
             },
 
             /**
@@ -270,6 +270,9 @@
                 }
                 if (value instanceof Date) {
                     value = value.getFullYear() + '-' + ('0' + (value.getMonth() + 1)).slice(-2);
+                }
+                if (value === undefined) {
+                    value = '';
                 }
                 ui.Text.prototype.setValue.call(this, value);
             }

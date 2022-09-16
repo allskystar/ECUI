@@ -33,8 +33,13 @@
         ui.InputControl,
         'ui-couple-slider',
         function (el, options) {
-            var className = this.getUnitClass(ui.CoupleSlider, 'slider');
-            dom.insertHTML(el, 'afterBegin', '<div class="' + this.getUnitClass(ui.CoupleSlider, 'bg') + '"></div><div class="' + this.getUnitClass(ui.CoupleSlider, 'mask') + '"></div><div class="' + className + '"></div><div class="' + className + '"></div>');
+            var html = '<div class="' + this.getUnitClass(ui.CoupleSlider, 'slider') + '"></div>';
+            dom.insertHTML(
+                el,
+                'afterBegin',
+                '<div class="' + this.getUnitClass(ui.CoupleSlider, 'bg') + '"></div>' +
+                    '<div class="' + this.getUnitClass(ui.CoupleSlider, 'mask') + '"></div>' + html + html
+            );
 
             var children = dom.children(el);
 

@@ -7,6 +7,8 @@
 <div ui="type:checkbox;subject:china">
     <input name="city" value="beijing" checked="checked" type="checkbox">
 </div>
+Switch控件(通过样式实现)：
+<div class="ui-switch" ui="type:checkbox;name:custom;value:true;"></div>
 
 @fields
 _bDefault        - 缺省的选中状态
@@ -61,7 +63,7 @@ _bRequired       - 是否必须选择
      */
     function setStatus(checkbox, status) {
         if (status !== checkbox._nStatus) {
-            checkbox.$clearErrorStyle();
+            checkbox.$correct();
             // 状态发生改变时进行处理
             checkbox.alterSubType(['checked', '', 'part'][status]);
 
@@ -176,32 +178,25 @@ _bRequired       - 是否必须选择
              * @override
              */
             $validate: function (event) {
-                ui.InputControl.prototype.$validate.call(this, event);
+                if (ui.InputControl.prototype.$validate.call(this, event) === false) {
+                    return false;
+                }
 
                 if (this._bRequired) {
                     var name = this.getName(),
                         form = this.getInput().form,
-                        nochecked = true,
-                        group = core.query(function (item) {
-                            if (item instanceof ui.Checkbox && item.getName() === name && item.getInput().form === form) {
-                                if (item.isChecked()) {
-                                    nochecked = false;
-                                }
-                                return true;
-                            }
-                        });
+                        ret = false;
 
-                    if (nochecked) {
-                        for (var control = this; control = control.getParent(); ) {
-                            if (control instanceof ui.InputGroup) {
-                                core.dispatchEvent(control, 'error');
-                                return false;
+                    core.query(function (item) {
+                        if (item instanceof ui.Checkbox && item.getName() === name && item.getInput().form === form) {
+                            if (item.isChecked()) {
+                                ret = true;
                             }
+                            return true;
                         }
-                        group.forEach(function (item) {
-                            core.dispatchEvent(item, 'error');
-                        });
-                    }
+                    });
+
+                    return ret;
                 }
             },
 

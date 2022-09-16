@@ -28,6 +28,17 @@
 
             this._bRequired = !!options.required;
             this._sValue = options.value || this.getInput().value;
+            if (this._sValue == '' || this._sValue == undefined) {
+                // 没有值 如果需要默认值下午6点，这边就设置一下
+                if (options.hasDefault6) {
+                    var date =  new Date();;
+                    var day = util.formatDate(date, 'yyyy-MM-dd');
+                     
+                    this._sValue =  day+' 18:00:00';
+                } else {
+                    
+                }
+            } 
             var optionsEl = dom.create('DIV', {className: this.getUnitClass(ui.BDateTime, 'options ') + 'ui-popup ui-hide'});
             this._uOptions = ecui.$fastCreate(this.Options, optionsEl, this, { focusable: false, value: this._sValue});
             this.setPopup(this._uOptions);
@@ -38,7 +49,6 @@
                 ui.Control,
                 function (el, options) {
                     ui.Control.call(this, el, options);
-
                     this._uCalendar = ecui.$fastCreate(this.Calendar, el.appendChild(dom.create('DIV', {className: ui.Calendar.CLASS})), this, { extra: 'disable', date: options.value.split(' ')[0] });
                     this._uTimeCalendar = ecui.$fastCreate(this.TimeCalendar, el.appendChild(dom.create('DIV', {className: ' ui-time-calendar ui-hide'})), this, { value: options.value });
                     var calendarHandle = dom.create('DIV', {className: 'options-content'});
@@ -49,7 +59,7 @@
                                                     '<div class="clear">清除</div>' +
                                                     '<div class="submit">确定</div>' +
                                                 '</div>';
-                    this._uSwitch =  ecui.$fastCreate(this.Switch, dom.first(dom.first(calendarHandle)), this, {value: '00:00:00'});
+                    this._uSwitch =  ecui.$fastCreate(this.Switch, dom.first(dom.first(calendarHandle)), this, {value: '16:00:00'});
                     ecui.$fastCreate(this.Clear, dom.first(dom.last(calendarHandle)), this);
                     ecui.$fastCreate(this.CalendarSubmit, dom.last(dom.last(calendarHandle)), this);
                     el.appendChild(calendarHandle);
@@ -65,7 +75,7 @@
                              * @event
                              */
                             ondateclick: function (event) {
-                                ecui.dispatchEvent(this.getParent()._uSwitch, 'click');
+                                this.getParent()._uSwitch.toggleStatus();
                             },
                             onshow: function () {
                                 this.show();
@@ -79,15 +89,17 @@
                             ui.Control.call(this, el, options);
 
                             var houer = [], minute = [], second = [], item;
-                            for (var i = 0; i < 24; i++) {
-                                item = ('0' + i).slice(-2);
-                                houer.push({ code: item, value: item });
-                                if (i * this.RANGE <= 60) {
-                                    item = ('0' + i * this.RANGE).slice(-2);
-                                    if (item === '60') {
-                                        item = '59';
-                                    }
+                            for (var i = 0; i < 60; i++) {
+                                if (i < 24) {
+                                    item = ('0' + i).slice(-2);
+                                    houer.push({ code: item, value: item });
+                                }
+                                if (i * this.MRANGE < 60) {
+                                    item = ('0' + i * this.MRANGE).slice(-2);
                                     minute.push({ code: item, value: item });
+                                }
+                                if (i * this.SRANGE < 60) {
+                                    item = ('0' + i * this.SRANGE).slice(-2);
                                     second.push({ code: item, value: item });
                                 }
                             }
@@ -103,7 +115,7 @@
                                 'AFTERBEGIN',
                                 '<div class="' + this.getClass() + '-header "><div class="">时间</div></div>'
                             );
-
+                            var num = 1;
                             this._uHouer = ecui.$fastCreate(
                                 this.Listbox,
                                 el.appendChild(dom.create('div', {
@@ -115,31 +127,40 @@
                                     value: date ? util.formatDate(date, 'HH') : '00'
                                 }
                             );
-                            this._uMinute = ecui.$fastCreate(
-                                this.Listbox,
-                                el.appendChild(dom.create('div', {
-                                    className: 'ui-listbox',
-                                    innerHTML: minute.map(function (item) { return '<div ui="value:' + item.value + '">' + item.code + '</div>'; }).join('')
-                                })),
-                                this,
-                                {
-                                    value: date ? amend(util.formatDate(date, 'mm'), this.RANGE) : '00'
-                                }
-                            );
-                            this._uSecond = ecui.$fastCreate(
-                                this.Listbox,
-                                el.appendChild(dom.create('div', {
-                                    className: 'ui-listbox',
-                                    innerHTML: second.map(function (item) { return '<div ui="value:' + item.value + '">' + item.code + '</div>'; }).join('')
-                                })),
-                                this,
-                                {
-                                    value: date ? amend(util.formatDate(date, 'ss'), this.RANGE) : '00'
-                                }
-                            );
+                            if (/mm/.test(this.FORMAT)) {
+                                num++;
+                                this._uMinute = ecui.$fastCreate(
+                                    this.Listbox,
+                                    el.appendChild(dom.create('div', {
+                                        className: 'ui-listbox',
+                                        innerHTML: minute.map(function (item) { return '<div ui="value:' + item.value + '">' + item.code + '</div>'; }).join('')
+                                    })),
+                                    this,
+                                    {
+                                        value: date ? amend(util.formatDate(date, 'mm'), this.MRANGE) : '00'
+                                    }
+                                );
+                            }
+                            if (/ss/.test(this.FORMAT)) {
+                                num++;
+                                this._uSecond = ecui.$fastCreate(
+                                    this.Listbox,
+                                    el.appendChild(dom.create('div', {
+                                        className: 'ui-listbox',
+                                        innerHTML: second.map(function (item) { return '<div ui="value:' + item.value + '">' + item.code + '</div>'; }).join('')
+                                    })),
+                                    this,
+                                    {
+                                        value: date ? amend(util.formatDate(date, 'ss'), this.SRANGE) : '00'
+                                    }
+                                );
+                            }
+                            dom.addClass(el, 'ui-listbox-' + num);
                         },
                         {
-                            RANGE: 5,
+                            FORMAT: 'HH:mm:ss',
+                            MRANGE: 5,
+                            SRANGE: 5,
                             Listbox: ecui.inherits(
                                 ui.Listbox,
                                 function (el, options) {
@@ -171,12 +192,25 @@
                                             this.setSelected(this.getItem(0));
                                         }
                                     },
-                                    scrolltoShowview:function(){
+                                    scrolltoShowview:function (){
                                         this.getItems().forEach(function (item) {
                                             if (item.getValue() === this._sValue) {
-                                                dom.scrollIntoViewIfNeeded(item.getMain(), true);
+                                                this.scrollToItem(item);
                                             }
                                         }.bind(this));
+                                    },
+                                    scrollToItem: function (item) {
+                                        var main = this.getMain(),
+                                            el = item.getMain(),
+                                            scroll = main.scrollHeight,
+                                            scrollTop = el.scrollTop,
+                                            height = main.clientHeight,
+                                            top = el.offsetTop,
+                                            eHeight = el.clientHeight;
+
+                                        if (top + eHeight < scrollTop || top + eHeight > height + el.scrollTop) {
+                                            main.scrollTop = top - (height - eHeight) / 2 ;
+                                        }
                                     },
                                     /**
                                      * 改变下拉框当前选中的项。
@@ -208,13 +242,22 @@
                                 ui.Control.prototype.$ready.call(this, event);
 
                                 core.dispatchEvent(this._uHouer, 'ready', event);
-                                core.dispatchEvent(this._uMinute, 'ready', event);
-                                core.dispatchEvent(this._uSecond, 'ready', event);
+                                if (this._uMinute) {
+                                    core.dispatchEvent(this._uMinute, 'ready', event);
+                                }
+                                if (this._uSecond) {
+                                    core.dispatchEvent(this._uSecond, 'ready', event);
+                                }
                             },
-                            scrolltoShowview:function(event){
+
+                            scrolltoShowview:function (event){
                                 this._uHouer.scrolltoShowview();
-                                this._uMinute.scrolltoShowview();
-                                this._uSecond.scrolltoShowview();
+                                if (this._uMinute) {
+                                    this._uMinute.scrolltoShowview();
+                                }
+                                if (this._uSecond) {
+                                    this._uSecond.scrolltoShowview();
+                                }
                             }
                         }
                     ),
@@ -223,6 +266,9 @@
                         {
                             status: 'date',
                             onclick: function () {
+                                this.toggleStatus();
+                            },
+                            toggleStatus: function () {
                                 var parent = this.getParent();
                                 if (this.status === 'date') {
                                     this.status = 'time';
@@ -277,8 +323,8 @@
                                     uTimePicker = uParent.getParent(),
                                     date = uCalendar.getDate(),
                                     hour = uTimeCalendar._uHouer.getSelected().getValue(),
-                                    minute = uTimeCalendar._uMinute.getSelected().getValue(),
-                                    second = uTimeCalendar._uSecond.getSelected().getValue();
+                                    minute = uTimeCalendar._uMinute ? uTimeCalendar._uMinute.getSelected().getValue() : 0,
+                                    second = uTimeCalendar._uSecond ? uTimeCalendar._uSecond.getSelected().getValue() : 0;
 
                                 date = new Date(date.setHours(hour, minute, second));
                                 uTimePicker.setValue(uCalendar.getSelected() ? util.formatDate(date, uTimePicker.FORMAT) : '');
@@ -328,12 +374,8 @@
             /**
              * @override
              */
-            $validate: function () {
-                ui.Text.prototype.$validate.call(this);
-                if (!this.getDate() && this._bRequired) {
-                    ecui.dispatchEvent(this, 'error');
-                    return false;
-                }
+            $validate: function (event) {
+                return ui.Text.prototype.$validate.call(this, event) !== false && (!this._bRequired || !!this.getDate());
             },
             /**
              * 获取日期对象。
@@ -364,13 +406,13 @@
                     sdate = new Date(sdate);
                 }
                 if (sdate instanceof Date) {
-                    sdate = sdate.pattern(this.FORMAT);
+                    sdate = util.formatDate(sdate, this.FORMAT);
                 }
                 if ('number' === typeof date) {
                     date = new Date(date);
                 }
                 if (date instanceof Date) {
-                    date = date.pattern(this.FORMAT);
+                    date = util.formatDate(date, this.FORMAT);
                 }
                 this.setValue(this, sdate + ' - ' + date);
             }

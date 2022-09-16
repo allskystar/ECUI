@@ -48,18 +48,6 @@ function create_index () {
   <script type="text/javascript" src="index.js"></script>
 </head>
 <body data-ecui="load:esr" id="main">
-<!--
-  <<< target:content >>>
-  <div class="content" id="content">
-  	<div class="wrapper" id="container">
-  	</div>
-  </div>
-  <<< target:homepage >>>
-  <div class="index-container">
-    <div class="index-text">欢迎使用ECUI</div>
-    <div>当前路由：<div>
-  </div>
--->
 <body>
 <html>
 EOF
@@ -67,21 +55,7 @@ EOF
     cat > index.js <<EOF
 (function () {
 ecui.esr.onready = function () {
-    etpl.config({
-        commandOpen: '<<<',
-        commandClose: '>>>'
-    });
-    for (var el = document.getElementById('main').firstChild; el; el = el.nextSibling) {
-        if (el.nodeType === 8) {
-            etpl.compile(el.textContent || el.nodeValue);
-        }
-    }
-    etpl.config({
-        commandOpen: '<!--',
-        commandClose: '-->'
-    });
     return {
-        model: [''],
         main: 'main',
         view: 'content',
         onbeforerequest: function () {

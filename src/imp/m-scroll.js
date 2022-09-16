@@ -43,7 +43,8 @@
     var keyboardHeight = 0,
         statusHeight = 0,
         fixedHeight = 0,
-        realTarget;
+        realTarget,
+        lastKeyboardTime;
 
     if (iosVersion && safariVersion) {
         switch (screen.height) {
@@ -126,7 +127,7 @@
 
             topList.forEach(function (control) {
                 if (control.isShow() && !dom.contain(main, control.getMain())) {
-                    bottom = Math.max(bottom, dom.getPosition(control.getMain()).top + control.getHeight() - Math.max(window.scrollY, mainTop));
+                    bottom = Math.max(bottom, dom.getPosition(control.getMain()).top + control.getMain().offsetHeight - Math.max(window.scrollY, mainTop));
                 }
             });
             bottomList.forEach(function (control) {
@@ -221,11 +222,14 @@
 /*ignore*/
             this.$MScroll.$activate.call(this, event);
 /*end*/
-            if ((iosVersion && !keyboardHeight && document.activeElement !== document.body) || (keyboardHeight && iosVersion < 9)) {
+            if ((iosVersion && !keyboardHeight && document.activeElement !== document.body && document.activeElement.tagName.toLowerCase() !== 'iframe') || (keyboardHeight && iosVersion < 9)) {
                 return;
             }
 
-            if (!util.hasIOSKeyboard(event.target)) {
+            var target = event.target;
+            // 后面的判断的场景是，当软键盘弹起，滑动位置在 input、textarea 时也触发滚动 scroll 的滚动
+            // if (!util.hasIOSKeyboard(target)) {
+                // 保证ios系统下，长按事件正常触发
                 this.cache();
 
                 core.drag(
@@ -233,7 +237,25 @@
                     event,
                     getOptions.call(this)
                 );
-            }
+            // } else if (iosVersion) {
+            //     this.$MScrollData.waitDrag = true;
+            //     this.$MScrollData.waitDragHandle = util.timer(function () {
+            //         delete this.$MScrollData.waitDrag;
+            //     }, 320, this);
+            // }
+        },
+
+        /**
+         * @override
+         */
+        $deactivate: function (event) {
+/*ignore*/
+            this.$MScroll.$deactivate.call(this, event);
+/*end*/
+            // this.$MScrollData.waitDrag = false;
+            // if (this.$MScrollData.waitDragHandle) {
+            //     this.$MScrollData.waitDragHandle();
+            // }
         },
 
         /**
@@ -246,7 +268,7 @@
             this.$MScrollData.scrolling = false;
             this.$MScrollData.inertia = false;
 
-            if (keyboardHeight && iosVersion !== 11.1 && iosVersion !== 11.2) {
+            if (keyboardHeight && iosVersion !== 11.1 && iosVersion !== 11.2 && iosVersion < 13) {
                 // 解决两端的input导致的跳动问题
                 var options = getOptions.call(this),
                     height = util.getView().height / 2,
@@ -282,6 +304,7 @@
             this.$MScroll.$dragmove.call(this, event);
 /*end*/
             this.$MScrollData.inertia = !!event.inertia;
+            this.$MScroll.dragmoveTime = Date.now();
         },
 
         /**
@@ -298,10 +321,30 @@
                     dom.insertHTML(document.activeElement, 'afterEnd', document.activeElement.outerHTML);
 
                     activeCloneElement = document.activeElement.nextSibling;
+                    activeCloneElement.name = '';
                     document.activeElement.nextSibling.value = document.activeElement.value;
                     document.activeElement.style.display = 'none';
                 }
             }
+        },
+
+        /**
+         * @override
+         */
+        $mousemove: function (event) {
+/*ignore*/
+            this.$MScroll.$mousemove.call(this, event);
+/*end*/
+            // if (this.$MScrollData.waitDrag) {
+            //     this.$MScrollData.waitDrag = false;
+            //     this.cache();
+
+            //     core.drag(
+            //         this,
+            //         event,
+            //         getOptions.call(this)
+            //     );
+            // }
         },
 
         /**
@@ -360,14 +403,16 @@
          * @override
          */
         getX: function () {
-            return util.toNumber(dom.getStyle(this.getBody(), 'transform').split(',')[4]);
+            var body = this.getBody();
+            return util.toNumber(this.$MScrollData.fixedIOS13 ? body.style.left : dom.getStyle(this.getBody(), 'transform').split(',')[4]);
         },
 
         /**
          * @override
          */
         getY: function () {
-            return util.toNumber(dom.getStyle(this.getBody(), 'transform').split(',')[5]);
+            var body =  this.getBody();
+            return util.toNumber(this.$MScrollData.fixedIOS13 ? body.style.top : dom.getStyle(this.getBody(), 'transform').split(',')[5]);
         },
 
         /**
@@ -401,7 +446,7 @@
                 top = options.limit && options.limit.top !== undefined ? options.limit.top : options.top,
                 bottom = options.limit && options.limit.bottom !== undefined ? options.limit.bottom : options.bottom;
 
-            this.setPosition(this.getX(), Math.min(bottom, Math.max(top, y)));
+            this.setPosition(this.getX(), Math.min(bottom, Math.max(top, y === undefined ? this.getY() : y)));
         },
 
         /**
@@ -429,8 +474,26 @@
          */
         setPosition: function (x, y) {
             if (ui.MScroll.Methods.getX.call(this) !== x || ui.MScroll.Methods.getY.call(this) !== y) {
-                dom.setStyle(this.getBody(), 'transform', keyboardHeight ? 'translate(' + x + 'px,' + y + 'px)' : 'translate3d(' + x + 'px,' + y + 'px,0px)');
+                var body = this.getBody();
+                if (keyboardHeight) {
+                    if (iosVersion >= 13) {
+                        dom.setStyle(body, 'transform', 'translate(0px, 0px)');
+                        body.style.left = x + 'px';
+                        body.style.top = y + 'px';
+                        this.$MScrollData.fixedIOS13 = true;
+                    } else {
+                        dom.setStyle(this.getBody(), 'transform', 'translate(' + x + 'px,' + y + 'px)');
+                    }
+                } else {
+                    if (this.$MScrollData.fixedIOS13) {
+                        body.style.left = '';
+                        body.style.top = '';
+                        delete this.$MScrollData.fixedIOS13;
+                    } 
+                    dom.setStyle(this.getBody(), 'transform', 'translate3d(' + x + 'px,' + y + 'px,0px)');
+                }
             }
+            
             core.query(
                 function (item) {
                     return this.contain(item);
@@ -510,6 +573,13 @@
                 }
             }
 
+            // ios快速下拉导致页面回弹的bug
+            if(scroll && scroll.$MScroll){
+                if (Date.now() - scroll.$MScroll.dragmoveTime < 300) {
+                    return;
+                }
+            }
+            
             var y = calcY(scroll, keyboardHeight);
 
             if (scroll) {
@@ -613,6 +683,8 @@
                 observer.takeRecords();
             }),
             disabledInputs = [],
+            touchstartTime,
+            oldActiveElement = document.activeElement,
             events = iosVersion ? {
                 touchstart: function (event) {
                     if (disabledInputs.indexOf(event.target) >= 0) {
@@ -623,28 +695,42 @@
                         });
                     }
                     observer.takeRecords();
+                    touchstartTime = Date.now();
                 },
 
                 touchend: function (event) {
-                    util.timer(
-                        function () {
-                            if (disabledInputs.indexOf(event.target) >= 0) {
-                                if (document.activeElement !== event.target) {
-                                    event.target.disabled = true;
+                    if (Date.now() - touchstartTime > 200) {
+                        util.timer(
+                            function () {
+                                if (disabledInputs.indexOf(event.target) >= 0) {
+                                    if (document.activeElement !== event.target) {
+                                        event.target.disabled = true;
+                                        observer.takeRecords();
+                                    }
+                                } else {
+                                    disabledInputs.forEach(function (item) {
+                                        item.disabled = true;
+                                    });
                                     observer.takeRecords();
                                 }
-                            } else {
-                                disabledInputs.forEach(function (item) {
-                                    item.disabled = true;
-                                });
-                                observer.takeRecords();
-                            }
-                        },
-                        20
-                    );
+                            },
+                            20
+                        );
+                    }
+                },
+
+                touchmove: function (event) {
+                    touchstartTime = 0;
                 },
 
                 keyboardchange: function (event) {
+                    // ios14 软键盘弹起时，切换 input 时触发两次 focusin 事件，每次 focusin 事件都会触发 keyboardHeight 时间，导致 fixed 方法没有按照预期执行
+                    // ios14 时短时间内多次触发 keyboardHeight 事件height相同时，忽略事件
+                    if (iosVersion >= 14 && keyboardHeight === event.height && Date.now() - lastKeyboardTime <= 20) {
+                        return;
+                    }
+                    lastKeyboardTime = Date.now();
+
                     keyboardHandle();
 
                     if (realTarget) {
@@ -662,7 +748,6 @@
                         } else if (!oldHeight) {
                             dom.addEventListener(window, 'touchmove', util.preventEvent);
                         }
-
                         if (keyboardHeight) {
                             if (util.hasIOSKeyboard(document.activeElement)) {
                                 if (oldHeight) {
@@ -678,6 +763,19 @@
                         } else {
                             changeHandle = util.timer(onkeyboardclose, 100);
                         }
+                    } else if (iosVersion >= 13 && oldActiveElement !== document.activeElement) {
+                        // ios 13 软键盘弹起后，切换输入框焦点，只触发1次 keyboardchange 事件，其它系统会更多次触发（一般3次，第二次 keyboardHeight 为 0）
+                        // 这种场景下 document.scrollingElement 元素会有不停的滚动，导致页面定位不对，通过失去焦点、再获得焦点，重新触发计算修复位置
+
+                        oldActiveElement = document.activeElement;
+                        util.timer(function () {
+                            oldActiveElement.blur();
+                            oldActiveElement.focus();
+                        }, 0);
+                    }
+                    // 解决 ios13 下，唤起搜狗软键盘后，点击软键盘的收起按钮，input不失去焦点的bug
+                    if (iosVersion >= 13 && event.height === 0) {
+                        document.activeElement.blur();
                     }
                 },
 
@@ -702,7 +800,6 @@
                     });
 
                     keyboardHandle();
-
                     if (keyboardHeight) {
                         keyboardHandle = scrollListener(function () {
                             if (fixedInput) {
@@ -710,6 +807,15 @@
                             }
                             scrollIntoViewIfNeededHandler();
                             fixed();
+                            // ios 13 输入框距离手机屏幕顶部，软键盘弹起的时候，切换到顶部输入框，会出现页面顶部留白的问题
+                            if (iosVersion >= 13) {
+                                for (var scroll = core.findControl(document.activeElement); scroll; scroll = scroll.getParent()) {
+                                    if (scroll.$MScroll) {
+                                        scroll.refresh(scroll.getY());
+                                        break;
+                                    }
+                                }
+                            }
                         });
                     } else {
                         if (fixedInput) {
@@ -753,6 +859,11 @@
                                 fixed();
                             });
                         });
+                        // 修复搜狗软键盘弹起时，iosFixed 控件被软键盘挡住的bug
+                        util.timer(function () {
+                            scrollIntoViewIfNeededHandler();
+                            fixed();
+                        }, 500);
                     }
                 },
 

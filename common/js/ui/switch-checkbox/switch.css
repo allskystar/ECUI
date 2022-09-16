@@ -2,51 +2,45 @@
 .ui-switch {
     width: 70px;
     height: 26px;
-    position: relative;
-    display: block;
+    position:relative;   
+    display: block;   
     border-radius: 26px;
     background-color: #fff;
-    cursor: pointer;
-    vertical-align: top;
+    cursor: pointer;   
+    vertical-align: top;   
     -webkit-user-select: none;
     background-image: none;
-
     input {
         display: none;
     }
 }
-
-.ui-switch:before {
-    content: '';
-    display: block;
+.ui-switch:before{   
+    content: '';   
+    display: block;   
     border-radius: 26px;
     height: 26px;
     background-color: #999;
     transition: all 0.3s ease;
-    -webkit-transition: all 0.3s ease;
+    -webkit-transition: all 0.3s ease;   
 }
-
-.ui-switch:after {
-    content: '';
-    position: absolute;
-    top: 50%;
+.ui-switch:after{   
+    content: '';   
+    position: absolute;   
+    top: 50%;     
     left: 2px;
-    margin-top: -11px;
-    width: 22px;
-    height: 22px;
-    border-radius: 22px;
+    margin-top: -11px;     
+    width: 22px;   
+    height: 22px;   
+    border-radius: 22px;   
     background-color: #fff;
-    -webkit-transition: all 0.3s ease;
+    -webkit-transition: all 0.3s ease;   
     transition: all 0.3s ease;
 }
-
-
-.ui-switch-checked:after {
+.ui-switch-checked:after{   
     -webkit-transform: translateX(0);
     margin-left: 0;
     left: 46px;
-}
-
-.ui-switch-checked:before {
+}   
+.ui-switch-checked:before{   
     background-color: #0F83FF;
-}
+}  

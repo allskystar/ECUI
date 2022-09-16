@@ -56,7 +56,7 @@ yiche.cookie = {
     del: function(key) {
         var d = new Date();
         d.setTime(d.getTime() - 1000000);
-        var cookie = key + '="" ; expires=' + d.toGMTString() + ';path=/';
+        var cookie = key + '="" ; expires=' + d.toGMTString();
         document.cookie = cookie;
     }
 };

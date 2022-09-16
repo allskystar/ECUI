@@ -38,8 +38,8 @@ _aChildren     - 子控件集合
      * @param {ecui.ui.TreeView} tree 树控件
      */
     function refresh(tree) {
-        if (this._eContainer) {
-            this.alterSubType(this._aChildren.length ? (this._bCollapsed ? 'collapsed' : 'expanded') : 'empty');
+        if (tree._eContainer) {
+            tree.alterSubType(tree._aChildren.length ? (tree._bCollapsed ? 'collapsed' : 'expanded') : 'empty');
         }
     }
 
@@ -84,7 +84,7 @@ _aChildren     - 子控件集合
                 this._aChildren = [];
             }
 
-            refresh.call(this);
+            refresh(this);
         },
         {
             /**
@@ -109,7 +109,7 @@ _aChildren     - 子控件集合
             $collapse: function () {
                 this._bCollapsed = true;
                 dom.addClass(this._eContainer, 'ui-hide');
-                refresh.call(this);
+                refresh(this);
             },
 
             /**
@@ -128,7 +128,7 @@ _aChildren     - 子控件集合
                 this._bCollapsed = false;
                 dom.removeClass(this._eContainer, 'ui-hide');
                 core.cacheAtShow();
-                refresh.call(this);
+                refresh(this);
             },
 
             /**
@@ -141,6 +141,13 @@ _aChildren     - 子控件集合
                 if (this._eContainer) {
                     dom.addClass(this._eContainer, 'ui-hide');
                 }
+            },
+
+            /**
+             * 插入子节点区域。
+             */
+            $insertContainer: function () {
+                dom.insertAfter(this._eContainer, this.getMain());
             },
 
             /**
@@ -229,14 +236,14 @@ _aChildren     - 子控件集合
 
                     var oldParent = this.getParent();
                     util.remove(oldParent._aChildren, this);
-                    refresh.call(oldParent);
+                    refresh(oldParent);
                 }
 
                 ui.Control.prototype.$setParent.call(this, parent);
 
                 // 将子树区域显示在主元素之后
                 if (this._eContainer) {
-                    dom.insertAfter(this._eContainer, this.getMain());
+                    this.$insertContainer();
                 }
             },
 
@@ -267,13 +274,14 @@ _aChildren     - 子控件集合
 
                 if ('string' === typeof item) {
                     el = dom.create('LI', {innerHTML: item});
+                    el.title = item;
                     item = core.$fastCreate(this.constructor, el, null, Object.assign({}, options, {id: ''}, core.getOptions(el) || {}));
                 }
 
                 // 这里需要先 setParent，否则 getRoot 的值将不正确
                 if (!this._eContainer) {
                     this._eContainer = dom.create('UL', {className: this.getPrimary() + '-children ' + this.getType() + '-children'});
-                    dom.insertAfter(this._eContainer, this.getMain());
+                    this.$insertContainer();
                 }
                 item.setParent(this);
 
@@ -288,11 +296,11 @@ _aChildren     - 子控件集合
                         list.push(item);
                     }
                     if (item._eContainer) {
-                        dom.insertAfter(item._eContainer, el);
+                        item.$insertContainer();
                     }
                 }
 
-                refresh.call(this);
+                refresh(this);
 
                 return item;
             },
@@ -324,7 +332,7 @@ _aChildren     - 子控件集合
              * @param {Function} fn 遍历时用于节点处理的函数
              */
             forEach: function (fn) {
-                for (var i = 0, nodes = [this.getRoot()], node; node = nodes[i++]; ) {
+                for (var i = 0, nodes = [this], node; node = nodes[i++]; ) {
                     fn(node);
                     nodes = nodes.concat(node._aChildren);
                 }
@@ -352,6 +360,16 @@ _aChildren     - 子控件集合
             },
 
             /**
+             * 获取当前树视图控件的子节点区域DOM。
+             * @public
+             *
+             * @return {HTMLElement} 当前树视图控件的子节点区域DOM
+             */
+            getContainer: function () {
+                return this._eContainer;
+            },
+
+            /**
              * 获取当前树视图控件的根控件。
              * @public
              *
@@ -375,11 +393,11 @@ _aChildren     - 子控件集合
              * @return {boolean} true 表示子树区域收缩，false 表示子树区域展开
              */
             isCollapsed: function () {
-                return !this._eContainer || this._bCollapsed;
+                return !this._eContainer || !this._aChildren.length || this._bCollapsed;
             },
 
             /**
-             * 获取当前树视图控件的所有子树视图控件。
+             * 删除当前树视图控件的所有子树视图控件。
              * @public
              *
              * @param {number} index 需要移除的项的序号

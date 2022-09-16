@@ -40,11 +40,70 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
 //{if 0}//
     var core = ecui,
         dom = core.dom,
+        ext = core.ext,
         ui = core.ui,
         util = core.util,
 
-        ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined;
+        ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined,
+        chromeVersion = /(Chrome|CriOS)\/(\d+\.\d)/i.test(navigator.userAgent) ? +RegExp.$2 : undefined;
 //{/if}//
+    var configures = {};
+
+    ext.tableSort = {
+
+        /**
+         * 表格排序插件初始化。
+         * @public
+         *
+         * @param {string} value 表格列的名称，默认排序方向
+         */
+         constructor: function (value) {
+            value = value.split('-');
+            configures[this.getUID()] = {
+                name: value[0],
+                order: value[1] || 'asc'
+            };
+            dom.addClass(this.getMain(), 'table-sort');
+
+            var table = this.getParent(),
+                id = table.getUID();
+            if (!configures[id]) {
+                // 需要在table控件前后创建一个隐藏的input用于数据提交
+                dom.insertHTML(table.getMain(), 'beforeBegin', '<INPUT type="hidden" name="orderBy">');
+                configures[id] = { input: table.getMain().previousSibling };
+                core.addEventListener(table, 'dispose', function () {
+                    dom.remove(configures[id].input);
+                    delete configures[id];
+                });
+            }
+        },
+
+        Events: {
+            click: function () {
+                var tableConfigure = configures[this.getParent().getUID()],
+                    configure = configures[this.getUID()];
+                if (tableConfigure.selected) {
+                    dom.removeClass(tableConfigure.selected.getMain(), 'table-sort-asc table-sort-desc');
+                }
+                tableConfigure.input.value = configure.name + '-' + configure.order;
+                dom.addClass(this.getMain(), 'table-sort-' + configure.order);
+                configure.order = configure.order === 'asc' ? 'desc' : 'asc';
+                tableConfigure.selected = this;
+            },
+
+            dispose: function () {
+                delete configures[this.getUID()];
+            },
+
+            remove: function () {
+                var configure = configures[this.getParent().getUID()];
+                if (configure && configure.selected === this) {
+                    dom.removeClass(this.getMain(), 'table-sort-asc table-sort-desc');
+                }
+            }
+        }
+    };
+
     /**
      * 在需要时初始化单元格控件。
      * 表格控件的单元格控件不是在初始阶段生成，而是在单元格控件第一次被调用时生成，参见核心的 getControl 方法。
@@ -191,7 +250,7 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
                                 if (el) {
                                     if (i < headRowCount) {
                                         Object.assign(options, core.getOptions(el));
-                                        cols[j] = core.$fastCreate(this.HCell, el, this);
+                                        cols[j] = core.$fastCreate(this.HCell, el, this, options);
                                     } else {
                                         el.getControl = getControlBuilder;
                                     }
@@ -344,6 +403,96 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
                             result[index] = item.getCell(i);
                         });
                         return result;
+                    },
+
+                    /**
+                     * 移动当前列去指定列。
+                     * @public
+                     *
+                     * @param {number} 列的序号s
+                     */
+                    moveTo: function (index) {
+                        var table = this.getParent(),
+                            oldIndex = table._aHeadCells.indexOf(this),
+                            lastData;
+
+                        table._aHeadRows.concat(table._aRows).forEach(function (row) {
+                            var rowEl = row.getMain(),
+                                list = row._aElements,
+                                currIndex = oldIndex,
+                                currItem = list[currIndex],
+                                targetIndex = index,
+                                targetItem = list[targetIndex],
+                                item;
+
+                            if (currItem === false) {
+                                for (; item !== null;) {
+                                    item = list[--currIndex];
+                                    if (item) {
+                                        item.setAttribute('colSpan', +item.getAttribute('colSpan') - 1);
+                                        break;
+                                    }
+                                }
+                            } else if (currItem === null && lastData === false) {
+                                currItem = false;
+                            }
+                            if (currItem === false) {
+                                if (targetItem !== false) {
+                                    // 自身被跨列，目标位置不跨列，创建元素
+                                    currItem = dom.create('TD', {className: this.getUnitClass(ui.Table, 'cell')});
+                                }
+                            }
+
+                            if (targetItem) {
+                                if (currItem) {
+                                    rowEl.insertBefore(currItem, targetItem);
+                                }
+                            } else if (targetItem === null) {
+                                if (currItem) {
+                                    // 后节点跨行，需要找到正常节点
+                                    for (; targetItem !== undefined;) {
+                                        targetItem = list[++targetIndex];
+                                        if (targetItem) {
+                                            if (targetItem !== currItem) {
+                                                rowEl.insertBefore(currItem, targetItem);
+                                            }
+                                            break;
+                                        }
+                                    }
+                                    if (targetItem === undefined) {
+                                        rowEl.appendChild(currItem);
+                                    }
+                                }
+                            } else {
+                                // 后节点跨列，需要修改对应的colspan，等于null表示同时跨行，不是第一行直接忽略
+                                for (; targetItem !== null;) {
+                                    targetItem = list[--targetIndex];
+                                    if (targetItem) {
+                                        if (targetItem !== currItem) {
+                                            targetItem.setAttribute('colSpan', +targetItem.getAttribute('colSpan') + 1);                                                
+                                            currItem = false;
+                                            if (currItem) {
+                                                rowEl.removeChild(currItem);
+                                            }
+                                        }
+                                        break;
+                                    }
+                                }
+                                if (targetItem === null) {
+                                    currItem = false;
+                                    if (currItem) {
+                                        rowEl.removeChild(currItem);
+                                    }
+                                }
+                            }
+
+                            lastData = currItem;
+
+                            list.splice(oldIndex, 1);
+                            list.splice(oldIndex > index ? index : index - 1, 0, currItem);
+                        });
+
+                        table._aHeadCells.splice(oldIndex > index ? index : index - 1, 0, table._aHeadCells.splice(oldIndex, 1)[0]);
                     },
 
                     /**
@@ -790,7 +939,15 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
                     this._UITable_oHandler();
                     this._UITable_oHandler = null;
                 }
-                this.$headscroll();
+                var top = this._nHeadFloat + util.getView().top - dom.getPosition(this.getMain()).top;
+                if (chromeVersion && top > 0 && top < this.getClientHeight() - this.$$paddingTop - this._nHeadMargin) {
+                    this._UITable_oHandler = util.timer(function () {
+                        this.$headscroll();
+                        this._UITable_oHandler = null;
+                    }, 50, this);
+                } else {
+                    this.$headscroll();
+                }
             },
 
             /**
@@ -1058,6 +1215,27 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
              */
             getRows: function () {
                 return this._aRows.slice();
+            },
+
+            /**
+             * 移除一列到指定位置
+             * @public
+             *
+             * @param {number} index 列序号，从0开始计数
+             * @param {number} targetIndex 目标列序号，从0开始计数
+             */
+             moveCol: function (index, targetIndex) {
+                function moveItem (item) {
+                    if (item._aElements) {
+                        dom.insertBefore(item._aElements[index], item._aElements[targetIndex]);
+                        item = item._aElements;
+                    }
+                    var _item = item.splice(index, 1)[0];
+                    item.splice(index > targetIndex ? targetIndex : targetIndex - 1, 0, _item);
+                }
+                this._aHeadRows.forEach(moveItem);
+                this._aRows.forEach(moveItem);
+                moveItem(this._aHeadCells);
             },
 
             /**

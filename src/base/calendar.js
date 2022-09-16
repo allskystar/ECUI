@@ -123,7 +123,7 @@ _eTitle        - 日历头部信息提示区
              * @param {number} month 月(1-12)
              */
             setTitle: function (year, month) {
-                this._eTitle.innerHTML = util.stringFormat(this._sFormat, year, month);
+                this._eTitle.innerHTML = util.formatString(this._sFormat, year, month);
             }
         }
     );

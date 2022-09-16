@@ -129,7 +129,7 @@ _eText       - 文本框
 
                         this.getBody().innerHTML = values.map(
                             function (item) {
-                                return '<div ui="value:' + (this._sPrefix + item).slice(-this._sPrefix.length) + '" class="' + this.getUnitClass(ui.MMultiOptions.prototype.Options, 'item') + ' ui-item">' + (options.format ? util.stringFormat(options.format, item) : item) + '</div>';
+                                return '<div ui="value:' + (this._sPrefix + item).slice(-this._sPrefix.length) + '" class="' + this.getUnitClass(ui.MMultiOptions.prototype.Options, 'item') + ' ui-item">' + (options.format ? util.formatString(options.format, item) : item) + '</div>';
                             },
                             this
                         ).join('');
@@ -241,12 +241,7 @@ _eText       - 文本框
              */
             $confirm: function () {
                 var oldValue = this.getValue(),
-                    value = util.stringFormat.apply(
-                        null,
-                        [this._sFormat].concat(this._aOptions.map(function (options) {
-                            return options.getValue();
-                        }))
-                    );
+                    value = this.getOptionsValue();
 
                 if (oldValue !== value) {
                     this.setValue(value);
@@ -265,9 +260,10 @@ _eText       - 文本框
             /**
              * @override
              */
-            $ready: function () {
-                ui.InputControl.prototype.$ready.call(this);
-                this.setValue(this.getValue());
+            init: function () {
+                ui.InputControl.prototype.init.call(this);
+                var value = this.getOptionsValue();
+                this.setValue(value);
             },
 
             /**
@@ -293,6 +289,21 @@ _eText       - 文本框
              */
             getOptions: function (index) {
                 return this._aOptions[index];
+            },
+
+            /**
+             * 获取选项控件 value。
+             * @public
+             *
+             * @return {string} format格式的value
+             */
+            getOptionsValue: function () {
+                return util.formatString.apply(
+                    null,
+                    [this._sFormat].concat(this._aOptions.map(function (options) {
+                        return options.getValue();
+                    }))
+                );
             }
         },
         ui.MPopup

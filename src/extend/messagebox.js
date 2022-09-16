@@ -12,7 +12,6 @@
         buttonInstances = [],
         instanceClass,
         hideHandle = util.blank,
-        tipClass = { 'success': 'tip-success', 'error': 'tip-error', 'warn': 'tip-warn' },
         MessageBox = core.inherits(
             ui.Dialog,
             true,
@@ -29,12 +28,13 @@
             }
         ),
         Tip = core.inherits(
-            ui.Control,
+            ui.Layer,
             true,
             'ui-tip',
             function (el, options) {
                 el.innerHTML = '<div></div>';
                 ui.Control.call(this, el, options);
+                this.$setBody(el.lastChild);
             }
         ),
         Button = core.inherits(
@@ -61,16 +61,6 @@
      * @param {Function} ... 按钮的点击事件处理函数，顺序与参数中按钮文本定义的顺序一致
      */
     core.$messagebox = function (className, text, buttonTexts) {
-        if (!instance) {
-            dom.addEventListener(
-                window,
-                'resize',
-                function () {
-                    instance.center();
-                }
-            );
-        }
-
         var instance = core.getSingleton(MessageBox),
             outer = instance.getMain(),
             body = instance.getBody(),
@@ -81,6 +71,7 @@
         delete instance.onkeyup;
 
         if (!dom.parent(outer)) {
+            // 单例控件被释放时只是从节点上移除
             document.body.appendChild(outer);
         }
 
@@ -136,7 +127,7 @@
      * 消息框显示提示信息，仅包含确认按钮。
      * @public
      *
-     * @param {string} text 提示信息文本
+     * @param {string|object} text 提示信息文本或信息文件的对象{title: 标题, content: 内容}
      * @param {Function} onok 确认按钮点击事件处理函数
      */
     core.alert = function (text, onok) {
@@ -162,7 +153,7 @@
      * 消息框显示提示信息，包含确认/取消按钮。
      * @public
      *
-     * @param {string} text 提示信息文本
+     * @param {string|object} text 提示信息文本或信息文件的对象{title: 标题, content: 内容}
      * @param {Function} onok 确认按钮点击事件处理函数
      * @param {Function} oncancel 取消按钮点击事件处理函数
      */
@@ -199,6 +190,7 @@
 
     /**
      * 非标准消息提示框框。
+     * 不传参数时，取消提示框
      * @public
      *
      * @param {string} type 提示框类型 success、error、warn
@@ -206,19 +198,25 @@
      * @param {Array} delay 提示框延迟消失时间，默认2000ms
      */
     core.tip = function (type, text, delay) {
-        var className = tipClass[type],
-            instance = core.getSingleton(Tip),
-            elContent = instance.getBody().firstChild,
+        hideHandle();
+
+        var instance = core.getSingleton(Tip);
+        if (type === undefined) {
+            instance.hide();   
+            return;
+        }
+        var className = 'tip-' + type,
+            elContent = instance.getBody(),
             outer = instance.getMain();
 
         if (!dom.parent(outer)) {
+            // 单例控件被释放时只是从节点上移除
             document.body.appendChild(outer);
         }
-
+    
         elContent.className = className;
         elContent.innerHTML = text;
 
-        hideHandle();
         hideHandle = util.timer(instance.hide, delay || 2000, instance);
 
         instance.clearCache();

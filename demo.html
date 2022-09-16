@@ -23,6 +23,24 @@
             document.getElementById('touchend').innerHTML=Date.now();
         };
     };
+    ecui.ui.NSBDateTime = ecui.inherits(
+      ecui.ui.BDateTime,
+      {
+        Options: ecui.inherits(
+          ecui.ui.BDateTime.prototype.Options,
+          {
+            TimeCalendar: ecui.inherits(
+              ecui.ui.BDateTime.prototype.Options.prototype.TimeCalendar,
+              {
+                FORMAT: 'HH:mm',
+                MRANGE: 15,
+                SRANGE: 30
+              }
+            )
+          }
+        )
+      }
+    )
     </script>
     <style>
 
@@ -240,295 +258,8 @@
 </head>
 <body style="overflow: auto">
 
+<div ui="type:BIQuarterInput;value:2018-10;name:time"></div>
 
-<input ui="type:b-date-time;" value="2018-12-04 12:00:00" />
-
-<div ui="type:b-img-fill;src:images/ecui/icons.png" style="width: 100px;height: 100px;"></div>
-<div ui="type:b-img-fill;" style="width: 100px;height: 100px;"><img src="images/ecui/icons.png"></div>
-
-    <div ui="type:m-panel" style="overflow:auto;height:100%">
-    <form name="testForm">
-        <input value="123" style="border:1px solid black;width:120px;height:20px;">
-    </form>
-    <h6 ui="ext-link" href="http://www.baidu.com">事件穿透，红框是遮罩层</h2>
-    <a ui="type:control;id:ttt" href="javascript:void(document.getElementById('href').innerHTML=Date.now())"><div style="position:relative;width:200px;height:200px;border:1px solid black">
-        touchend: <span id="touchend"></span><br>
-        href: <span id="href"></span><br>
-        mousedown: <span id="mousedown"></span><br>
-        click: <span id="click"></span><br>
-    </div></a>
-    <div ui="type:control" style="position:absolute;left:30px;top:30px;width:80px;height:80px;border:1px solid red;pointer-events:none;content:'pointer-events:none';filter:pointer-events:none"></div>
-    <div ui="type:control" style="position:absolute;left:25px;top:25px;width:80px;height:80px;border:1px solid red;pointer-events:none;content:'pointer-events:none';filter:pointer-events:none"></div>
-    <div ui="type:control" style="position:absolute;left:20px;top:20px;width:80px;height:80px;border:1px solid red;pointer-events:none;content:'pointer-events:none';filter:pointer-events:none"></div>
-    <div ui="type:control" style="position:absolute;left:15px;top:15px;width:80px;height:80px;border:1px solid red;pointer-events:none;content:'pointer-events:none';filter:pointer-events:none"></div>
-    <div ui="type:control" style="position:absolute;left:10px;top:10px;width:80px;height:80px;border:1px solid red;pointer-events:none;content:'pointer-events:none';filter:pointer-events:none"></div>
-    <div ui="type:MCalendar">
-        <div ui="values:2000-2040;format:{0}年"></div>
-        <div ui="values:1-12"></div>
-        <div ui="values:1-31"></div>
-    </div>
-    <div ui="type:multi-select;name:index" style="width:200px;height:30px;border:1px solid black">
-        <div style="display:block">1</div>
-        <div style="display:block">2</div>
-        <div style="display:block">3</div>
-        <div style="display:block">4</div>
-        <div style="display:block">5</div>
-        <div style="display:block">6</div>
-        <div style="display:block">7</div>
-    </div>
-    <h2>移动端select与焦点图</h2>
-    <div ui="type:select;name:sex;value:male,female">
-        <div ui="value:male">男</div>
-        <div ui="value:female">女</div>
-        <div>测试选项A</div>
-        <div>测试选项B</div>
-        <div>测试选项C</div>
-        <div>测试选项D</div>
-        <div>测试选项E</div>
-        <div>测试选项F</div>
-    </div>
-    <div ui="type:m-carousel" style="width:100%;height:120px" id="test">
-        <img ui="type:m-photo-hotspot" src="http://www.baidu.com/img/bd_logo1.png" title="百度">
-        <img ui="type:m-photo-hotspot" src="http://img1.yixinfinance.com/taoche/yxgroup/common/images/yxgroup-logo.html.png" title="易鑫">
-    </div>
-    <h2>PC端常用组件</h2>
-    <!--table-->
-    <div ui="type:table;id:test;left-lock:1;head-float:true;right-lock:1">
-      <table style="width:600px">
-        <!-- 表头区域 -->
-        <thead>
-          <tr>
-            <th style="width:25%;">公司名</th>
-            <th style="width:25%;">url</th>
-            <th style="width:25%;">地址</th>
-            <th style="width:25%;">创办时间</th>
-          </tr>
-        </thead>
-        <!-- 内容行区域 -->
-        <tbody>
-          <tr>
-            <td>百度</td>
-            <td>www.baidu.com</td>
-            <td>中国北京中关村</td>
-            <td>1999</td>
-          </tr>
-          <tr>
-            <td>百度</td>
-            <td>www.baidu.com</td>
-            <td>中国北京中关村</td>
-            <td>1999</td>
-          </tr>
-          <tr>
-            <td>百度</td>
-            <td>www.baidu.com</td>
-            <td>中国北京中关村</td>
-            <td>1999</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-    
-    <br>
-    <br>
-   <!--蓝色按钮-->
-   <div ui="type:button;" class="blue-btn">normal</div>
-   <div ui="type:button;capturable:false" class="blue-btn-hover">hover</div>
-   <div ui="type:button;capturable:false" class="blue-btn-active">pressed</div>
-   <div ui="type:button;capturable:false;disabled" class="blue-btn">disabled</div>
-   <br>
-   <br>
-   <!--白色按钮-->
-   <div ui="type:button;" class="white-btn">normal</div>
-   <div ui="type:button;capturable:false" class="white-btn-hover">hover</div>
-   <div ui="type:button;capturable:false" class="white-btn-active">pressed</div>
-   <div ui="type:button;capturable:false;disabled" class="white-btn">disabled</div>
-   <br>
-   <br>
-   <!--checkbox-->
-    <input ui="type:checkbox;" class="ui-checkbox">
-    <input ui="type:checkbox;capturable:false" class="ui-checkbox-checked">
-    <input ui="type:checkbox;capturable:false;disabled">
-    <input ui="type:checkbox;capturable:false;disabled" class="ui-checkbox-checked">
-    <br>
-    <br>
-    <!--select-->
-    <select ui="type:select;" class="ui-select">
-        <option>管理员</option>
-        <option>管理员</option>
-    </select> 
-    <select ui="type:select;capturable:false" class="ui-select-hover">
-        <option>管理员</option>
-    </select>
-    <select ui="type:select;capturable:false" class="ui-select-active">
-        <option>管理员</option>
-    </select>
-    <select ui="type:select;capturable:false;disabled" class="">
-        <option>管理员</option>
-    </select>
-    <div ui="type:select">
-        <div ui="ext-anchor:a">管理员</div>
-        <div ui="ext-anchor:b">管理员</div>
-    </div>
-    <br>
-    <br>  
-    <!--text-->  
-    <input ui="type:text;" class="" placeholder="输入框">  
-    <input ui="type:text;capturable:false" class="ui-text-hover">   
-    <input ui="type:text;capturable:false" class="ui-text-active"> 
-    <input ui="type:text;capturable:false;disabled">
-    <!-- <div ui="disabled:true">  
-        <input ui="type:text;capturable:false">
-    </div>
-    <div>  
-        <input ui="type:text;valid:blur;len:2" value = "11" placeholder="请输入2char">
-    </div> -->
-    <br>
-    <br> 
-    <!--radio-->
-    <input ui="type:radio;" class="ui-radio">
-    <input ui="type:radio;capturable:false" class="ui-radio-checked">
-    <input ui="type:radio;capturable:false;disabled">
-    <input ui="type:radio;capturable:false;disabled" class="ui-radio-checked">
-    <br>
-    <br>
-    <!--dialog-->
-    <div ui="type:dialog;">
-        <strong>
-          样式规范
-        </strong>
-    </div>
-    <br>
-    <br>
-    <!--calender-->
-    <div ui="type:month-view;"></div>
-    <br>
-    <br> 
-    <div ui="type:calendar-input;"></div>
-    <br>
-    <br> 
-    <div ui="type:calendar;"></div>
-    <br>
-    <br>
-    <!--combox-->
-    <div ui="type:combox"></div>
-    <br>
-    <br>
-    <!--tab-->
-    <div ui="type:tab;selected:1;ext-anchor:test">
-        <!-- 包含容器的选项卡 -->
-        <div>
-            <strong>标题1</strong>
-            <!-- 这里是容器 -->
-            content1
-        </div>
-        <div>
-            <strong>标题2</strong>
-            <!-- 这里是容器 -->
-            content2
-        </div>
-        <!-- 仅有标题的选项卡，以下selected定义与控件定义是一致的，可以忽略其中之一 -->
-        <!-- <strong ui="selected:true">标题2</strong> -->
-    </div>
-    <br>
-    <br>
-    </div>
-
-<div ui="type:calendar-input"></div>
-
-
-    <div ui="type:table">
-      <table>
-        <!-- 表头区域 -->
-        <thead ui="ext-floatTop">
-          <tr>
-            <th style="width:200px;">公司名</th>
-            <th style="width:200px;">url</th>
-            <th style="width:250px;">地址</th>
-            <th style="width:100px;">创办时间</th>
-          </tr>
-        </thead>
-        <!-- 内容行区域 -->
-        <tbody>
-          <tr>
-            <td>百度</td>
-            <td>www.baidu.com</td>
-            <td>中国北京中关村</td>
-            <td>1999</td>
-          </tr>
-          <tr>
-            <td>百度</td>
-            <td>www.baidu.com</td>
-            <td>中国北京中关村</td>
-            <td>1999</td>
-          </tr>
-          <tr>
-            <td>百度</td>
-            <td>www.baidu.com</td>
-            <td>中国北京中关村</td>
-            <td>1999</td>
-          </tr>
-          <tr>
-            <td>百度</td>
-            <td>www.baidu.com</td>
-            <td>中国北京中关村</td>
-            <td>1999</td>
-          </tr>
-          <tr>
-            <td>百度</td>
-            <td>www.baidu.com</td>
-            <td>中国北京中关村</td>
-            <td>1999</td>
-          </tr>
-          <tr>
-            <td>百度</td>
-            <td>www.baidu.com</td>
-            <td>中国北京中关村</td>
-            <td>1999</td>
-          </tr>
-          <tr>
-            <td>百度</td>
-            <td>www.baidu.com</td>
-            <td>中国北京中关村</td>
-            <td>1999</td>
-          </tr>
-          <tr>
-            <td>百度</td>
-            <td>www.baidu.com</td>
-            <td>中国北京中关村</td>
-            <td>1999</td>
-          </tr>
-          <tr>
-            <td>百度</td>
-            <td>www.baidu.com</td>
-            <td>中国北京中关村</td>
-            <td>1999</td>
-          </tr>
-          <tr>
-            <td>百度</td>
-            <td>www.baidu.com</td>
-            <td>中国北京中关村</td>
-            <td>1999</td>
-          </tr>
-          <tr>
-            <td>百度</td>
-            <td>www.baidu.com</td>
-            <td>中国北京中关村</td>
-            <td>1999</td>
-          </tr>
-          <tr>
-            <td>百度</td>
-            <td>www.baidu.com</td>
-            <td>中国北京中关村</td>
-            <td>1999</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <script>
-    ecui.esr.onready = function () {
-    };
-    </script>
 </body>
 </html>
 

@@ -20,8 +20,9 @@
              * @override
              */
             $activate: function (event) {
-                ui.Control.prototype.$activate.call(this, event);
                 var main = this.getMain();
+                // 当前激活元素是当前控件，并且内容区域出现滚动时，滚动当前控件内容，阻止父级控件滚动
+                if (main.clientHeight < main.scrollHeight) {
                 core.drag(this, event, {
                     absolute: true,
                     left: main.clientWidth - main.scrollWidth,
@@ -29,6 +30,10 @@
                     right: 0,
                     bottom: 0
                 });
+                    event.stopPropagation();
+                } else {
+                    ui.Control.prototype.$activate.call(this, event);
+                }
             },
 
             /**

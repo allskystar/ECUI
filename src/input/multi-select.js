@@ -21,6 +21,7 @@ _eInput - 选项对应的input，form提交时使用
 (function () {
     var core = ecui,
         dom = core.dom,
+        util = core.util,
         ui = core.ui;
 //{/if}//
     /**
@@ -32,43 +33,85 @@ _eInput - 选项对应的input，form提交时使用
         ui.InputControl,
         'ui-multi-select',
         function (el, options) {
-            var optionsEl = dom.create({className: this.getUnitClass(ui.MultiSelect, 'options') + this.Options.CLASS + ' ui-popup ui-hide'});
+            var optionsEl = dom.create({'className': this.getUnitClass(ui.MultiSelect, 'listbox')});
             for (; el.firstChild; ) {
                 optionsEl.appendChild(el.firstChild);
             }
             ui.InputControl.call(this, el, options);
             dom.insertBefore(
-                this._eText = dom.create('DIV', { className: this.getUnitClass(ui.MultiSelect, 'text') }),
+                this._eText = dom.create('DIV', { 'className': this.getUnitClass(ui.MultiSelect, 'text') }),
                 dom.last(el)
             );
-            this.setPopup(core.$fastCreate(this.Options, optionsEl, this, {name: options.name}));
+
+            var popupEl = dom.create(
+                'DIV',
+                {
+                    'className': this.getUnitClass(ui.MultiSelect, 'options') + this.Popup.CLASS + ' ui-popup ui-hide',
+                    'innerHTML': util.formatString('<input class="{0}" placeholder="{1}">', this.Popup.CLASS + ' ui-multi-select-search-input', options.placeholder || '搜索')
+                }
+            );
+            popupEl.appendChild(optionsEl);
+            this.setPopup(core.$fastCreate(this.Popup, popupEl, this, { name: options.name }));
             this._sName = options.name || '';
+            this._bRequired = !!options.required;
         },
         {
             TEXT: '已选{0}个',
-            /**
-             * 选项框部件。
-             * @unit
-             */
-            Options: core.inherits(
-                ui.Listbox,
+
+            Popup: core.inherits(
+                ui.Control,
+                function (el, options) {
+                    ui.Control.call(this, el, options);
+                    this._uSearchInput = core.$fastCreate(this.SearchInput, dom.first(el), this);
+                    this._uOptions = core.$fastCreate(this.Options, dom.last(el), this);
+                },
                 {
-                    /**
-                     * 选项部件。
-                     * @unit
-                     */
-                    Item: core.inherits(
-                        ui.Listbox.prototype.Item,
+                    SearchInput: core.inherits(
+                        ui.Text,
                         {
-                            /**
-                             * @override
-                             */
-                            $click: function (event) {
-                                ui.Listbox.prototype.Item.prototype.$click.call(this, event);
-                                core.dispatchEvent(this.getParent().getParent(), 'change');
+                            $input: function (event) {
+                                this.searchItems();
+                            },
+                            searchItems: function () {
+                                var value = this.getValue(),
+                                    parent = this.getParent(),
+                                    uOptions = parent._uOptions;
+
+                                uOptions.getItems().forEach(function (item) {
+                                    if (item.getBody().innerText.indexOf(value) >= 0) {
+                                        item.show();
+                                    } else {
+                                        item.hide();
+                                    }
+                                });
                             }
                         }
-                    )
+                    ),
+                    /**
+                     * 选项框部件。
+                     * @unit
+                     */
+                    Options: core.inherits(
+                        ui.Listbox,
+                        {
+                            /**
+                             * 选项部件。
+                             * @unit
+                             */
+                            Item: core.inherits(
+                                ui.Listbox.prototype.Item,
+                                {
+                                    /**
+                                     * @override
+                                     */
+                                    $click: function (event) {
+                                        ui.Listbox.prototype.Item.prototype.$click.call(this, event);
+                                        core.dispatchEvent(this.getParent().getParent().getParent(), 'change');
+                                    }
+                                }
+                            )
+                        }
+                    )  
                 }
             ),
 
@@ -77,13 +120,7 @@ _eInput - 选项对应的input，form提交时使用
              * @event
              */
             $change: function () {
-                var text = [], value = [];
-                this.getSelected().forEach(function (item) {
-                    text.push(item.getBody().innerText.trim());
-                    value.push(item.getValue());
-                });
-                this._eText.innerHTML = text.join(',');
-                this.$setValue(value.join(','));
+                this.changeHandler();
             },
 
             /**
@@ -92,6 +129,54 @@ _eInput - 选项对应的input，form提交时使用
             $dispose: function () {
                 this._eText = null;
                 ui.InputControl.prototype.$dispose.call(this);
+            },
+
+            /**
+             * 设置placeholder信息。
+             * @protected
+             */
+            $setPlaceholder: function () {
+                if (this.getValue().length) {
+                    this.alterStatus('-placeholder');
+                } else {
+                    this.alterStatus('+placeholder');
+                    this._eText.innerHTML = dom.getAttribute(this.getInput(), 'placeholder') || '';
+                }
+            },
+
+            /**
+             * @override
+             */
+            $validate: function (event) {
+                return ui.InputControl.prototype.$validate.call(this, event) !== false && (!this._bRequired || !!this.getValue());
+            },
+
+            getOptions: function () {
+                return this.getPopup()._uOptions;
+            },
+
+            /**
+             * @override
+             */
+            onready: function () {
+                var values = this.getValue();
+                this.getOptions().getItems().forEach(function (item) {
+                    if (values.indexOf(item.getValue()) > -1) {
+                        item.setSelected(true);
+                    }
+                });
+                this.changeHandler();
+            },
+
+            changeHandler: function () {
+                var text = [], value = [];
+                this.getSelected().forEach(function (item) {
+                    text.push(item.getBody().innerText.trim());
+                    value.push(item.getValue());
+                });
+                this._eText.innerHTML = text.join(',');
+                this.$setValue(value.join(','));
+                this.$setPlaceholder();
             },
 
             /**
@@ -112,7 +197,7 @@ _eInput - 选项对应的input，form提交时使用
              * @return {Array} 选项数组
              */
             getSelected: function () {
-                return this.getPopup().getSelected();
+                return this.getOptions().getSelected();
             },
 
             /**
@@ -132,7 +217,7 @@ _eInput - 选项对应的input，form提交时使用
              * @public
              */
             selectAll: function () {
-                this.getPopup().selectAll();
+                this.getOptions().selectAll();
             },
 
             /**
@@ -143,7 +228,7 @@ _eInput - 选项对应的input，form提交时使用
              * @param {string} name 提交用的名称
              */
             setName: function (name) {
-                this.getPopup().setName(name);
+                this.getOptions().setName(name);
             }
         },
         ui.Popup

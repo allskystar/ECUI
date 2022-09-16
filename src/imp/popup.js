@@ -73,7 +73,8 @@
         core.addEventListener(popup, 'hide', hidePopupHandler);
     }
 
-    var owners = [];
+    var owners = [],
+        singletons = {};
 
     ui.Popup = _interface('$Popup', {
         /**
@@ -94,11 +95,15 @@
             this.$Popup.$click.call(this, event);
 /*end*/
             if (dom.contain(this.getMain(), event.target)) {
-                if (this.$PopupData.control.isShow()) {
-                    this.$PopupData.control.hide();
-                } else {
-                    this.popup();
+                // popview可能动态创建，控件使用了ecui.ui.Popup，但是没有创建popcontrol 会报错
+                if(this.$PopupData && this.$PopupData.control){
+                    if (this.$PopupData.control.isShow()) {
+                        this.$PopupData.control.hide();
+                    } else {
+                        this.popup();
+                    }
                 }
+                
             }
         },
 
@@ -135,11 +140,15 @@
 /*ignore*/
             this.$Popup.$scroll.call(this, event);
 /*end*/
+            // pop内容延迟加载，这个地方会报错，做一个容错
+            if(this.$PopupData.control === undefined || this.$PopupData.control === null){
+                return;
+            }
             if (!dom.contain(this.$PopupData.control.getMain(), event.target)) {
                 if (event.type === 'mousedown') {
                     // ie6/7/8下有可能scroll事件是由mousedown点击滚动条触发的
                     this.$PopupData.control.hide();
-                } else if (ui.Popup.getOwner() && owners.indexOf(this.$PopupData.control) !== -1) {
+                } else if (ui.Popup.getOwner() && this.$PopupData.control.isShow()) {
                     // 当前的pop弹出的时候，才能进行该操作
                     setPopupPosition(this.$PopupData.control);
                 }
@@ -184,9 +193,36 @@
          * @public
          *
          * @param {ecui.ui.Control} control 弹出层控件
+         * @param {Function} fn 打开弹出层时的初始化函数(用于单例模式，每次弹出时需要重新初始化参数)
          */
-        setPopup: function (control) {
+        setPopup: function (control, fn) {
             this.$PopupData.control = control;
+            if (control && control.constructor.singleton && !singletons[this.getUID()]) {
+                this.$PopupData.fn = fn;
+                singletons[this.getUID()] = true;
+                dom.addClass(control.getMain(), 'ui-popup ui-hide');
+                core.addEventListener(control, 'dispose', function () {
+                    delete singletons[this.getUID()];
+                });
+                core.addEventListener(control, 'hide', function () {
+                    this.$setParent();
+                });
+                core.addEventListener(control, 'show', function () {
+                    var parent = ui.Popup.getOwner();
+                    this.$setParent(parent);
+                    if (parent.$PopupData.fn) {
+                        parent.$PopupData.fn.call(this);
+                    }
+                });
+            }
+        },
+
+        //TODO，bug fix临时处理
+        setPopupPosition: setPopupPosition,
+        updatePosition: function () {
+            if (this.$PopupData.control.isShow()) {
+                setPopupPosition(this.$PopupData.control);
+            }
         }
     });
 

@@ -60,6 +60,7 @@
 
 @import (less) 'css/locked-table.css';
 
+@import (less) 'css/fullscreen.css';
 @import (less) 'css/messagebox.css';
 @import (less) 'css/esr.css';
 
@@ -79,3 +80,4 @@
 @import (less) 'css/svg.css';
 
 @import (less) 'css/bi-controls.css';
+@import (less) 'css/date-range.css';

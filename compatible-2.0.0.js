@@ -42,6 +42,8 @@ ecui.ui.Control.prototype.getPrimary = function () {
     return this.getClass();
 };
 
+// dom下 getSelectionStart,getSelectionEnd,setSelectionRange 已经迁移
+/*
 ecui.ui.Text.prototype.getSelectionEnd = function () {
     return ecui.dom.getSelectionRange(this.getInput()).end;
 };
@@ -53,6 +55,7 @@ ecui.ui.Text.prototype.getSelectionStart = function () {
 ecui.ui.Text.prototype.setSelectionRange = function (start, end) {
     ecui.dom.setSelectionRange(this.getInput, start, end);
 };
+*/
 ecui.ui.Cancel = ecui.ui.Dialog.prototype.Cancel;
 ecui.ui.Submit = ecui.ui.Dialog.prototype.Submit;
 ecui.ui.$select = ecui.ui.$AbstractSelect;

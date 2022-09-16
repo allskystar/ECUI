@@ -20,15 +20,15 @@
         'ui-quarter-view',
         function (el, options) {
             dom.addClass(el, 'ui-popup ui-calendar ui-hide');
-            el.innerHTML = util.stringFormat(
+            el.innerHTML = util.formatString(
                 '<table><thead>{1}</thead><tbody>{0}{0}</tbody></table>',
-                util.stringFormat(
+                util.formatString(
                     '<tr>{0}{0}</tr>',
-                    '<td class="' + this.getUnitClass(ui.BIMonth, 'date ') + '"></td>'
+                    '<td class="' + this.getUnitClass(ui.Control, 'date ') + '"></td>'
                 ),
-                util.stringFormat(
+                util.formatString(
                     '<tr>{0}{0}</tr>',
-                    '<td class="' + this.getUnitClass(ui.BIMonth, 'title ') + '"></td>'
+                    '<td class="' + this.getUnitClass(ui.Control, 'title ') + '"></td>'
                 )
             );
 
@@ -46,10 +46,10 @@
             dom.insertHTML(
                 el,
                 'AFTERBEGIN',
-                '<div class="' + this.getUnitClass(ui.BIMonth, 'header ') + '"><div class="' +
-                    this.getUnitClass(ui.BIMonth, 'title ') + '"></div><div class="' +
-                    this.getUnitClass(ui.BIMonth, 'prev-year ') + ui.Button.CLASS + '">&lt;&lt;</div><div class="' +
-                    this.getUnitClass(ui.BIMonth, 'next-year ') + ui.Button.CLASS + '">&gt;&gt;</div></div>'
+                '<div class="' + this.getUnitClass(ui.Control, 'header ') + '"><div class="' +
+                    this.getUnitClass(ui.Control, 'title ') + '"></div><div class="' +
+                    this.getUnitClass(ui.Control, 'prev-year ') + ui.Button.CLASS + '">&lt;&lt;</div><div class="' +
+                    this.getUnitClass(ui.Control, 'next-year ') + ui.Button.CLASS + '">&gt;&gt;</div></div>'
             );
             // 获取el所有直属节点
             var headers = dom.children(el.firstChild);
@@ -154,7 +154,7 @@
                 this.setTitle();
             },
             setTitle: function () {
-                this._eTitle.innerHTML = util.stringFormat(this.TITLEFORMAT, this._nYear);
+                this._eTitle.innerHTML = util.formatString(this.TITLEFORMAT, this._nYear);
             },
 
             /**

@@ -157,9 +157,11 @@ _nBottomIndex  - 下部隐藏的选项序号
                         }
                     }
                 } else {
-                    var items = this.getItems();
+                    if (this.isReady()) {
+                        var items = this.getItems();
+                        this.alterStatus(items.length ? '-empty' : '+empty');
+                    }
 
-                    this.alterStatus(items.length ? '-empty' : '+empty');
                     this.$$bodyHeight = this.getBody().offsetHeight;
                     this.refresh();
                 }
@@ -252,6 +254,7 @@ _nBottomIndex  - 下部隐藏的选项序号
             $initStructure: function (width, height) {
                 ui.Control.prototype.$initStructure.call(this, width, height);
                 this.alterStatus(this.getLength() ? '-empty' : '+empty');
+                this.alterStatus(this.getLength() ? '-init' : '+init');
                 if (this.isReady()) {
                     this.setPosition(0, this.$$titleHeight);
                 }
@@ -376,7 +379,9 @@ _nBottomIndex  - 下部隐藏的选项序号
                         );
                     } else if (status === 'footer') {
                         this._oHandle = effect.grade(
-                            'this.setPosition(0,#$.y->' + (main.clientHeight - core.getKeyboardHeight() - main.scrollHeight + this.$$footerHeight - this._nTopHidden + this.$$headerHeight + window.scrollY) + '#)',
+                            // main.scrollHeight 会随着 body 的 translate3d 的值得变化而变化，所以取 body.clientHeight 值做计算，body clientHeight 包含，this.$$footerHeight， this.$$headerHeight 的高度，所以不用加这两个高度
+                            // 'this.setPosition(0,#$.y->' + (main.clientHeight - core.getKeyboardHeight() - main.scrollHeight + this.$$footerHeight - this._nTopHidden + this.$$headerHeight + window.scrollY) + '#)',
+                            'this.setPosition(0,#$.y->' + (main.clientHeight - core.getKeyboardHeight() - this.getBody().clientHeight - this._nTopHidden + window.scrollY) + '#)',
                             400,
                             options
                         );
@@ -553,12 +558,13 @@ _nBottomIndex  - 下部隐藏的选项序号
 
                 top = this.getHeight() - core.getKeyboardHeight() - this.$$bodyHeight;
                 if (y > window.scrollY) {
-                    status = y - window.scrollY < this.$$headerHeight || this.isInertia() ? 'headerenter' : 'headercomplete';
+                    status = y - window.scrollY < this.$$headerHeight || (this.isInertia() && this._sStatus.indexOf('complete') < 0) ? 'headerenter' : 'headercomplete';
                 } else if (y === window.scrollY) {
                     // 解决items不够填充整个listview区域，导致footercomplete的触发
                     status = '';
                 } else if (y < top && top < 0) {
-                    var status = y > top - this.$$footerHeight || this.isInertia() ? 'footerenter' : 'footercomplete';
+                    // 三倍屏浮点数会造成相差1像素，高度实际是xx.72, clientHeight会取整，后续想有没有好办法
+                    var status = y - (top - this.$$footerHeight) > 1 || (this.isInertia() && this._sStatus.indexOf('complete') < 0) ? 'footerenter' : 'footercomplete';
                 } else {
                     status = '';
                 }

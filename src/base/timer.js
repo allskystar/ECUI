@@ -27,7 +27,7 @@ _sFormat        - 显示格式
             second = Math.floor((this._nResidual % 60000) / 1000),
             msecond = this._nResidual % 1000;
 
-        this.getBody().innerHTML = util.stringFormat(this._sFormat, ('0' + hours).slice(-2), ('0' + minutes).slice(-2), ('0' + second).slice(-2), ('000' + msecond).slice(-4));
+        this.getBody().innerHTML = util.formatString(this._sFormat, ('0' + hours).slice(-2), ('0' + minutes).slice(-2), ('0' + second).slice(-2), ('000' + msecond).slice(-4));
     }
 
     /**
@@ -44,7 +44,7 @@ _sFormat        - 显示格式
             ui.Control.call(this, el, options);
             this._nTime = (options.time.endsWith('ms') ? +options.time.slice(0, -2) : +options.time * 1000) || 0;
             this.reset();
-
+            this._sFormat = options.format || '{0}:{1}:{2}';
             if (options.immediate) {
                 this.start();
             }

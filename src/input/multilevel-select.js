@@ -103,7 +103,7 @@ _aSelect - 全部的下拉框控件列表
                                     var selected = this.getSelected(),
                                         currSelect = select;
                                     core.request(
-                                        util.stringFormat.apply(null, args),
+                                        util.formatString.apply(null, args),
                                         function (data) {
                                             if (selected === this.getSelected()) {
                                                 currSelect.removeAll();

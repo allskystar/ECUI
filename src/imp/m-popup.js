@@ -28,6 +28,7 @@
         constructor: function (el, options) {
             this.$MPopupData.enter = (position[options.enter || 'bottom'] || position.right);
             this.$MPopupData.mask = options.mask;
+            this.$MPopupData.zIndex = options.zIndex || '';
         },
 
         Methods: {
@@ -51,7 +52,7 @@
                     if (dom.contain(this.getMain(), event.target)) {
                         popup.show();
                         if (data.mask) {
-                            core.mask(data.mask);
+                            core.mask(data.mask, data.zIndex);
                             core.addEventListener(popup, 'hide', hideHandler);
 
                             util.timer(

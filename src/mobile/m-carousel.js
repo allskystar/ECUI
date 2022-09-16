@@ -176,7 +176,7 @@ _nDelay   - 延迟时间，如果不自动轮播这个值为0
              * @override
              */
             $ready: function (event) {
-                ui.MPanel.prototype.$ready(event);
+                ui.MPanel.prototype.$ready.call(this, event);
                 var el = this.getBody();
                 if (el.firstChild !== el.lastChild) {
                     this.start();

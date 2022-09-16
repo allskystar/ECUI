@@ -80,7 +80,7 @@
                         // 添加选项的value
                         this._cValue = this._cValue.concat(value);
                         // 添加选项的text
-                        this.getMain().firstChild.innerHTML = util.stringFormat(this.VALUEHTML, this._cValue.length || 0);
+                        this.getMain().firstChild.innerHTML = util.formatString(this.VALUEHTML, this._cValue.length || 0);
                         // 将改变的值通过event.value传给回调函数
                         event.changeValue = value;
                         core.triggerEvent(this, 'change', event);

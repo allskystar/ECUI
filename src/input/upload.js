@@ -24,15 +24,13 @@
      * 文件上传回调事件。
      * @private
      */
-    var fileChangeHandler = ieVersion < 9 ? function () {
-            if (this.onbeforeUpload() === false) {
-                return;
-            }
+    var fileChangeHandler = ieVersion < 11 ? function () {
             var name = this.getUID(),
                 iframe = dom.create('IFRAME', {
                     name: name,
                     className: 'ui-hide'
                 });
+
             document.body.appendChild(iframe);
             dom.insertHTML(document.body, 'beforeEnd', '<form action="' + this._sUrl + '" method="POST" enctype="multipart/form-data" target="' + name + '"></form>');
             var form = document.body.lastChild;
@@ -46,14 +44,12 @@
                 }
             }.bind(this);
             var cloned = this._eFile.cloneNode(false);
+            cloned.lastValue = this._eFile.value;
             dom.insertBefore(cloned, this._eFile);
             form.appendChild(this._eFile);
             this._eFile = cloned;
             form.submit();
         } : function () {
-            if (this.onbeforeUpload() === false) {
-                return;
-            }
             var reader = new FileReader(),
                 file = this._eFile.files[0],
                 progress = core.query(
@@ -63,23 +59,29 @@
                     this
                 )[0];
 
-            reader.readAsDataURL(file);
-            reader.onload = function () {
-                var data = new FormData();
-                data.append(this._eFile.name, file);
+            // 取消选择时 file 为空，过滤file不正常的情况
+            if (file) {
+                reader.readAsDataURL(file);
+                reader.onload = function () {
+                    var data = new FormData();
+                    data.append(this._eFile.name, file);
 
-                io.ajax(this._sUrl, {
-                    method: 'POST',
-                    headers: this._oHeaders,
-                    data: data,
-                    onupload: progress ? function (event) {
-                        progress.setMax(event.total);
-                        progress.setValue(event.loaded);
-                    } : undefined,
-                    onsuccess: this.onupload.bind(this),
-                    onerror: this.onerror ? this.onerror.bind(this) : util.blank
-                });
-            }.bind(this);
+                    io.ajax(this._sUrl, {
+                        method: 'POST',
+                        headers: this._oHeaders,
+                        xhrFields: this._oXhrFields,
+                        data: data,
+                        onupload: progress ? function (event) {
+                            progress.setMax(event.total);
+                            progress.setValue(event.loaded);
+                        } : undefined,
+                        onsuccess: this.onupload ? this.onupload.bind(this) : util.blank,
+                        onerror: this.onerror ? this.onerror.bind(this) : util.blank
+                    });
+                }.bind(this);
+            } else {
+                this.onerror();
+            }
         };
 
     /**
@@ -96,7 +98,6 @@
             this._eFile = el.getElementsByTagName('INPUT')[0];
         },
         {
-            onbeforeUpload: util.blank,
             /**
              * @override
              */
@@ -108,8 +109,8 @@
             /**
              * @override
              */
-            init: function () {
-                ui.Control.prototype.init.call(this);
+            $ready: function () {
+                ui.Control.prototype.$ready.call(this);
                 dom.addEventListener(this._eFile, 'change', fileChangeHandler.bind(this));
             },
 
@@ -121,6 +122,16 @@
              */
             setHeaders: function (headers) {
                 this._oHeaders = headers;
+            },
+
+            /**
+             * 设置上传文件请求的 xhr 自定义配置。
+             * @public
+             *
+             * @param {object} xhrFields 文件上传请求的 xhr 自定义配置
+             */
+            setXhrFields: function (xhrFields) {
+                this._oXhrFields = xhrFields;
             },
 
             /**

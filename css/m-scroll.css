@@ -10,6 +10,7 @@
 }
 
 .ui-mobile-scroll-body {
+    position: relative;
     overflow: visible !important;
     min-height: 100%;
     transform: translateZ(0px);
