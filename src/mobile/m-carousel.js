@@ -1,3 +1,16 @@
+//{if $css}//
+__ControlStyle__('\
+.ui-mobile-carousel {\
+    white-space: nowrap !important;\
+\
+    img {\
+        display: inline;\
+        width: 100% !important;\
+        height: 100% !important;\
+    }\
+}\
+');
+//{/if}//
 /*
 @example
 <div ui="type:m-carousel;delay:5">
@@ -171,7 +184,7 @@ _nDelay   - 延迟时间，如果不自动轮播这个值为0
                     show(this, 0);
                 }
             },
-            
+
             /**
              * @override
              */
@@ -213,4 +226,4 @@ _nDelay   - 延迟时间，如果不自动轮播这个值为0
             stop: util.blank
         }
     );
-}());
+})();

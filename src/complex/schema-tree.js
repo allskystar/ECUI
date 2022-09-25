@@ -6,8 +6,8 @@
         util = core.util;
 //{/if}//
     function refresh(control) {
-        var upLeft = parseInt(dom.first(control._uUp._aFloors[0]).style.marginLeft),
-            downLeft = parseInt(dom.first(control._uDown._aFloors[0]).style.marginLeft);
+        var upLeft = window.parseInt(dom.first(control._uUp._aFloors[0]).style.marginLeft),
+            downLeft = window.parseInt(dom.first(control._uDown._aFloors[0]).style.marginLeft);
         if (upLeft < downLeft) {
             control._uUp.getMain().style.left = downLeft - upLeft + 'px';
             control._uDown.getMain().style.left = '';
@@ -52,5 +52,5 @@
                 refresh(this);
             }
         }
-    )
-}());
+    );
+})();

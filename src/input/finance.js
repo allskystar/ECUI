@@ -12,7 +12,7 @@ _nDecimal   小数位数
 */
 (function () {
 //{if 0}//
-var core = ecui,
+    var core = ecui,
         ui = core.ui,
         util = core.util;
 //{/if}//
@@ -87,9 +87,10 @@ var core = ecui,
                     event.preventDefault();
                     break;
                 case 190:
-                    if (value.indexOf('.') < 0) {
-                        this.setValue(value.substring(0, start) + '.' + value.substring(end));
-                        setSelection(this, el.value.length - value.length + end);
+                    var s = value.substring(end);
+                    if (s.indexOf('.') >= 0) {
+                        this.setValue(value.substring(0, start) + '.' + s.replace(/[.,]/g, '').substring(0, this._nDecimal));
+                        setSelection(this, el.value.length + 1 - this._nDecimal);
                     }
                     event.preventDefault();
                     break;
@@ -101,8 +102,7 @@ var core = ecui,
                     event.preventDefault();
                 }
 
-                var natived = event.getNative();
-                if (!natived.metaKey && !natived.ctrlKey && !natived.altKey) {
+                if (!event.ctrlKey && !event.altKey) {
                     event.preventDefault();
                 }
             },
@@ -118,8 +118,8 @@ var core = ecui,
             /**
              * @override
              */
-            getFormValue: function () {
-                return this.getValue().replace(/,/g, '');
+            getFormValue: function (useDefault) {
+                return this[useDefault ? 'getDefaultValue' : 'getValue']().replace(/,/g, '');
             },
 
             /**
@@ -130,4 +130,4 @@ var core = ecui,
             }
         }
     );
-}());
+})();

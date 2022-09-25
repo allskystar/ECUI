@@ -1,13 +1,10 @@
 /*
 @example
 <div ui="type:calendar;year:2009;month:11"></div>
-*/
-/*ignore*/
-/*
+
 @fields
 _eTitle        - 日历头部信息提示区
 */
-/*end*/
 //{if 0}//
 (function () {
     var core = ecui,
@@ -27,12 +24,12 @@ _eTitle        - 日历头部信息提示区
         ui.MonthView,
         'ui-calendar',
         function (el, options) {
-/*ignore*/
-            this._sFormat = options.format || '{0}年{1}月';
-/*end*/
+            this._sFormat = options.format || this.FORMAT;
             ui.MonthView.call(this, el, options);
         },
         {
+            FORMAT: '{0}年{1}月',
+
             /**
              * 日历前进后退部件。
              * options 属性：
@@ -42,9 +39,7 @@ _eTitle        - 日历头部信息提示区
             Button: core.inherits(
                 ui.Button,
                 function (el, options) {
-/*ignore*/
                     this._nMove = +options.move;
-/*end*/
                     ui.Button.call(this, el, options);
                 },
                 {
@@ -128,5 +123,5 @@ _eTitle        - 日历头部信息提示区
         }
     );
 //{if 0}//
-}());
+})();
 //{/if}//

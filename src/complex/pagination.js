@@ -34,13 +34,13 @@ _nTotalPage       - 总页数
             // 定义总页数
             this._nTotalPage = +page[3];
 
-            el.innerHTML = '<div class="pagination"></div>'
-                            + '<div class="pagination-msgBox clearfix">'
-                            + (options.hasPageSize ? this.pageSizes : '')
-                            + (options.skipInput ? '<div class="pagination-msg">跳至<input class="ui-text ui-input" value="' + this._nCurrentPage + '" />页</div>' : '')
-                            + '<div class="pagination-msg">共' + this._nTotalPage + '页</div>'
-                            + '<div class="pagination-msg">共' + page[1] + '条</div>'
-                            + '</div>';
+            el.innerHTML = '<div class="pagination"></div>' +
+                            '<div class="pagination-msgBox clearfix">' +
+                            (options.hasPageSize ? this.pageSizes : '') +
+                            (options.skipInput ? '<div class="pagination-msg">跳至<input class="ui-text ui-input" value="' + this._nCurrentPage + '" />页</div>' : '') +
+                            '<div class="pagination-msg">共' + this._nTotalPage + '页</div>' +
+                            '<div class="pagination-msg">共' + page[1] + '条</div>' +
+                            '</div>';
 
             this.$setBody(dom.first(el));
             var childrens = dom.children(el);
@@ -194,4 +194,4 @@ _nTotalPage       - 总页数
             }
         }
     );
-}());
+})();

@@ -1,3 +1,22 @@
+//{if $css}//
+__ControlStyle__('\
+.ui-mobile-op-listview {\
+    .ui-item {\
+        width: 100% !important;\
+        white-space: nowrap !important;\
+\
+        > * {\
+            display: inline-block !important;\
+            vertical-align: top;\
+        }\
+\
+        > *:first-child {\
+            width: 100% !important;\
+        }\
+    }\
+}\
+');
+//{/if}//
 /*
 @example
 <ul ui="type:m-op-list-view">
@@ -145,6 +164,7 @@ _cItem    - 当前处于激活的选项
                                     core.drag(this.getParent(), {limit: {right: -sum}});
                                 }
                             } else {
+                                // eslint-disable-next-line no-lonely-if
                                 if (this._bComplete) {
                                     this._bComplete = false;
                                     core.drag(this.getParent(), {limit: {right: sum}});
@@ -232,5 +252,5 @@ _cItem    - 当前处于激活的选项
         }
     );
 //{if 0}//
-}());
+})();
 //{/if}//

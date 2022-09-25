@@ -1,13 +1,24 @@
+//{if $css}//
+__ControlStyle__('\
+.ui-progress-bar {\
+    .ui-progress-bar-text,\
+    .ui-progress-bar-mask {\
+        position: absolute !important;\
+        top: 0px !important;\
+        left: 0px !important;\
+        .width100rate();\
+        .height100rate();\
+    }\
+}\
+');
+//{/if}//
 /*
 @example
 <div ui="type:progress-bar;max:100;value:35"></div>
-*/
-/*ignore*/
-/*
+
 @fields
 _eMask   - 完成的进度比例内容区域
 */
-/*end*/
 //{if 0}//
 (function () {
     var core = ecui,
@@ -49,7 +60,7 @@ _eMask   - 完成的进度比例内容区域
             /**
              * 设置进度条文本。
              * @public
-             * 
+             *
              * @param text 进度条显示文本
              */
             setText: function (text) {
@@ -59,5 +70,5 @@ _eMask   - 完成的进度比例内容区域
         }
     );
 //{if 0}//
-}());
+})();
 //{/if}//

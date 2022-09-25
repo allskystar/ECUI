@@ -1,3 +1,30 @@
+//{if $css}//
+__ControlStyle__('\
+.ui-mobile-confirm {\
+    position: relative;\
+    .m-width100rate();\
+\
+    .ui-mobile-confirm-title {\
+        position: absolute !important;\
+        top: 0px;\
+        left: 0px;\
+        .m-width100rate();\
+        z-index: 1 !important;\
+\
+        div {\
+            position: absolute;\
+        }\
+    }\
+\
+    .ui-mobile-confirm-layout {\
+        position: relative;\
+        .m-width100rate();\
+        /*解决数据多的时候确定会跟着拖动的workaround*/\
+        overflow: hidden; \
+    }\
+}\
+');
+//{/if}//
 /*
 MConfirm - 确认按钮插件。
 */
@@ -60,4 +87,4 @@ MConfirm - 确认按钮插件。
             dom.children(this._eTitle)[1].innerHTML = title;
         }
     });
-}());
+})();

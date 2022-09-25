@@ -1,3 +1,18 @@
+//{if $css}//
+__ControlStyle__('\
+.ui-input {\
+    .inline-block();\
+    overflow: hidden !important;\
+\
+    input,\
+    textarea {\
+        padding: 0px !important;\
+        border: 0px !important;\
+        margin: 0px !important;\
+    }\
+}\
+');
+//{/if}//
 /*
 @example
 <input ui="type:input-control" type="password" name="passwd" value="1111" placeholder="请输入">
@@ -132,7 +147,7 @@ _eInput        - INPUT对象
                     var pos = el.selectionStart - event.data.length,
                         type = el.type;
                     if (type !== 'text') {
-                        el.type = 'text';                       
+                        el.type = 'text';
                     }
                     el.value = el.value.slice(0, pos) + el.value.slice(el.selectionStart);
                     el.setSelectionRange(pos, pos);
@@ -153,6 +168,7 @@ _eInput        - INPUT对象
                                 control._nTime = -Date.now();
                             }
                         } else {
+                            // eslint-disable-next-line no-lonely-if
                             if (Date.now() + control._nTime < 30) {
                                 el.blur();
                             } else {
@@ -192,40 +208,6 @@ _eInput        - INPUT对象
         dom.addEventListener(document, 'focusout', events.blur);
         delete events.focus;
         delete events.blur;
-    }
-
-    /**
-     * 表单提交事件处理。
-     * @private
-     *
-     * @param {Event} event 事件对象
-     */
-    function submitHandler(event) {
-        event = core.wrapEvent(event);
-
-        var elements = dom.toArray(this.elements);
-
-        elements.forEach(function (item) {
-            if (item.getControl) {
-                core.dispatchEvent(item.getControl(), 'submit', event);
-            }
-        });
-
-        if (event.returnValue !== false) {
-            ui.InputControl.saveToDefault(elements);
-        }
-    }
-
-    /**
-     * 表单复位事件处理。
-     * @private
-     */
-    function resetHandler() {
-        dom.toArray(this.elements).forEach(function (item) {
-            if (item.getControl) {
-                core.dispatchEvent(item.getControl(), 'reset');
-            }
-        });
     }
 
     /**
@@ -340,7 +322,7 @@ _eInput        - INPUT对象
              * @protected
              */
             $correct: function () {
-                for (var control = this; control = control.getParent(); ) {
+                for (var control = this; (control = control.getParent());) {
                     if (control instanceof ui.InputGroup) {
                         control.$correct();
                         break;
@@ -387,7 +369,7 @@ _eInput        - INPUT对象
              * @return {boolean} 是否由控件自身处理错误
              */
             $error: function () {
-                for (var control = this; control = control.getParent(); ) {
+                for (var control = this; (control = control.getParent());) {
                     if (control instanceof ui.InputGroup) {
                         core.dispatchEvent(control, 'error');
                         return false;
@@ -442,25 +424,7 @@ _eInput        - INPUT对象
              * 重置事件。
              * @event
              */
-            $reset: function (event) {
-                this.$ready(event);
-            },
-
-            /**
-             * @override
-             */
-            $setParent: function (parent) {
-                ui.Control.prototype.$setParent.call(this, parent);
-                if (this._eInput) {
-                    if (parent = this._eInput.form) {
-                        if (parent.getControl === undefined) {
-                            dom.addEventListener(parent, 'submit', submitHandler);
-                            dom.addEventListener(parent, 'reset', resetHandler);
-                            parent.getControl = null;
-                        }
-                    }
-                }
-            },
+            $reset: util.blank,
 
             /**
              * 设置控件的值。
@@ -499,6 +463,16 @@ _eInput        - INPUT对象
             $validate: util.blank,
 
             /**
+             * 获取控件的缺省值(用于reset)。
+             * @public
+             *
+             * @return {string} 控件的缺省值
+             */
+            getDefaultValue: function () {
+                return this._eInput.defaultValue;
+            },
+
+            /**
              * 获取控件进行提交的名称，默认使用 getName 的返回值。
              * @public
              *
@@ -512,10 +486,11 @@ _eInput        - INPUT对象
              * 获取控件进行提交的值，默认使用 getValue 的返回值。
              * @public
              *
+             * @param {boolean} useDefault 是否使用缺省值
              * @return {string} 控件的表单值
              */
-            getFormValue: function () {
-                return this.getValue();
+            getFormValue: function (useDefault) {
+                return this[useDefault ? 'getDefaultValue' : 'getValue']();
             },
 
             /**
@@ -590,6 +565,7 @@ _eInput        - INPUT对象
                 if (core.dispatchEvent(this, 'validate')) {
                     this.$correct();
                     return true;
+                // eslint-disable-next-line no-else-return
                 } else {
                     core.dispatchEvent(this, 'error');
                     return false;
@@ -613,10 +589,10 @@ _eInput        - INPUT对象
                     control.saveToDefault();
                 }
             } else if (item.type === 'radio' || item.type === 'checkbox') {
-                item.defaultChecked = item.checked;
-            } else {
+                item.__ECUI__default = item.defaultChecked = item.checked;
+            } else if (item.type !== 'button' && item.type !== 'submit' && item.type !== 'reset' && item.tagName !== 'BUTTON') {
                 item.defaultValue = item.value;
             }
         });
     };
-}());
+})();

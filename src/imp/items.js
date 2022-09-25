@@ -1,3 +1,11 @@
+//{if $css}//
+__ControlStyle__('\
+.ui-item {\
+    overflow: hidden !important;\
+    margin: 0px !important;\
+}\
+');
+//{/if}//
 /*
 选项组接口，是对选项进行操作的方法的集合，提供了基本的增/删操作，通过将 ecui.ui.Items 对象下的方法复制到类的 prototype 属性下继承接口。
 */
@@ -72,9 +80,7 @@
     ui.Items = _interface('$Items', {
         constructor: function () {
             this.$ItemsData.items = [];
-/*ignore*/
             this.$ItemsData.prevent = 0;
-/*end*/
             this.preventAlterItems();
 
             // 初始化选项控件
@@ -92,9 +98,7 @@
         $append: function (event) {
             // 检查待新增的控件是否为选项控件
             if (event.child instanceof (this.Item || ui.Item)) {
-/*ignore*/
                 this.$Items.$append.call(this, event);
-/*end*/
                 if (event.returnValue !== false) {
                     if (event.index !== undefined) {
                         this.$ItemsData.items.splice(event.index, 0, event.child);
@@ -110,9 +114,7 @@
          * @override
          */
         $ready: function () {
-/*ignore*/
             this.$Items.$ready.call(this);
-/*end*/
             if (this.isCached()) {
                 this.alterItems();
             }
@@ -124,9 +126,7 @@
          */
         $remove: function (event) {
             core.$clearState(event.child);
-/*ignore*/
             this.$Items.$remove.call(this, event);
-/*end*/
             if (event.returnValue !== false) {
                 util.remove(this.$ItemsData.items, event.child);
             }
@@ -168,8 +168,10 @@
                             var text = dom.getAttribute(item, core.getAttributeName()),
                                 options = core.getOptions(item) || {};
                             if (options.type) {
+                                // TODO: 指定了初始化的类型，直接不处理跳过
                                 item.setAttribute(core.getAttributeName(), text);
                                 options = {};
+                                return;
                             }
                         } else {
                             if ('string' === typeof item) {
@@ -205,10 +207,6 @@
             this.premitAlterItems();
             this.alterItems();
 
-            if (this.isReady()) {
-                core.init(body);
-                core.init(this.getMain());
-            }
             return items;
         },
 
@@ -334,4 +332,4 @@
             this.alterItems();
         }
     });
-}());
+})();

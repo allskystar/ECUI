@@ -1,11 +1,9 @@
-/*ignore*/
 /*
 @fields
 _bRequired    - 是否必须选择
 _uText        - 下拉框的文本框
 _uOptions     - 下拉选择框
 */
-/*end*/
 (function () {
 //{if 0}//
     var core = ecui,
@@ -32,15 +30,15 @@ _uOptions     - 下拉选择框
                 options.value = el.value;
 
                 var optionsEl = dom.create(
-                        {
-                            innerHTML: dom.toArray(el.options).map(
-                                function (item) {
-                                    var optionText = dom.getAttribute(item, core.getAttributeName());
-                                    return '<div ' + core.getAttributeName() + '="value:' + util.encodeHTML(item.value) + (optionText ? ';' + util.encodeHTML(optionText) : '') + '">' + util.encodeHTML(item.text) + '</div>';
-                                }
-                            ).join('')
-                        }
-                    );
+                    {
+                        innerHTML: dom.toArray(el.options).map(
+                            function (item) {
+                                var optionText = dom.getAttribute(item, core.getAttributeName());
+                                return '<div ' + core.getAttributeName() + '="value:' + util.encodeHTML(item.value) + (optionText ? ';' + util.encodeHTML(optionText) : '') + '">' + util.encodeHTML(item.text) + '</div>';
+                            }
+                        ).join('')
+                    }
+                );
 
                 el = dom.insertBefore(
                     dom.create(
@@ -106,10 +104,10 @@ _uOptions     - 下拉选择框
              * @unit
              */
             Item: core.inherits(
-                ui.Item,
+                ui.Options.prototype.Item,
                 function (el, options) {
                     options.focusable = false;
-                    ui.Item.call(this, el, options);
+                    ui.Options.prototype.Item.call(this, el, options);
                     this._sValue = options.value === undefined ? dom.getText(el) : String(options.value);
                 },
                 {
@@ -117,20 +115,15 @@ _uOptions     - 下拉选择框
                      * @override
                      */
                     $click: function (event) {
-                        ui.Item.prototype.$click.call(this, event);
-                        var parent = this.getParent();
-                        parent._uOptions.hide();
-                        if (parent.getSelected() !== this) {
-                            parent.setSelected(this);
-                            core.dispatchEvent(parent, 'change', event);
-                        }
+                        ui.Options.prototype.Item.prototype.$click.call(this, event);
+                        this.getParent()._uOptions.hide();
                     },
 
                     /**
                      * @override
                      */
                     $mouseover: function (event) {
-                        ui.Item.prototype.$mouseover.call(this, event);
+                        ui.Options.prototype.Item.prototype.$mouseover.call(this, event);
                         var parent = this.getParent();
                         if (parent) {
                             parent.setSelecting(this);
@@ -303,15 +296,15 @@ _uOptions     - 下拉选择框
              */
             setValue: function (value) {
                 if (this.getItems().every(
-                        function (item) {
-                            if (item._sValue === value) {
-                                this.setSelected(item);
-                                return false;
-                            }
-                            return true;
-                        },
-                        this
-                    )) {
+                    function (item) {
+                        if (item._sValue === value) {
+                            this.setSelected(item);
+                            return false;
+                        }
+                        return true;
+                    },
+                    this
+                )) {
                     // 找不到满足条件的项，将选中的值清除
                     this.setSelected();
                 }
@@ -320,4 +313,4 @@ _uOptions     - 下拉选择框
         ui.Items,
         ui.Control.defineProperty('selected')
     );
-}());
+})();

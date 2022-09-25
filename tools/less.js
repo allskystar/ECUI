@@ -242,7 +242,7 @@ ecui.pause();
             document.currentScript || (function () {
                 var scripts = document.getElementsByTagName('script');
                 return scripts[scripts.length - 1];
-            }())
+            })()
         );
 
         if (options.isFileProtocol === undefined) {
@@ -8404,4 +8404,4 @@ module.exports = Visitor;
     modules = {};
 
     window.less = getModule(2);
-}());
+})();

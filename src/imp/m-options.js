@@ -1,3 +1,25 @@
+//{if $css}//
+__ControlStyle__('\
+.ui-mobile-options {\
+    .m-width100rate();\
+\
+    .ui-mobile-options-mask {\
+        position: absolute !important;\
+        .m-width100rate();\
+        z-index: 2 !important;\
+        height: 100% !important;\
+        pointer-events: none !important;\
+    }\
+\
+    .ui-mobile-options-view {\
+        position: absolute;\
+        overflow: hidden;\
+        z-index: 1;\
+        width: 100%;\
+    }\
+}\
+');
+//{/if}//
 /*
 选项框操作集合。
 */
@@ -59,7 +81,7 @@
 /*ignore*/
             this.$MOptions.$cache.call(this, style);
 /*end*/
-            this.$$itemHeight = util.toNumber(dom.getCustomStyle(style, 'item-height'));
+            this.$$itemHeight = util.toNumber(dom.getStyle(style, 'item-height'));
         },
 
         /**
@@ -135,4 +157,4 @@
             this.$MOptionsData.view.firstChild.style.transform = 'translate3d(0px,' + (y - this.$$itemHeight * this._nOptionSize) + 'px,0px)';
         }
     });
-}());
+})();

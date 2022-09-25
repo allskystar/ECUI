@@ -1,3 +1,34 @@
+//{if $css}//
+__ControlStyle__('\
+.ui-multi-select {\
+    cursor: pointer;\
+    position: relative;\
+\
+    .ui-multi-select-text {\
+        position: absolute !important;\
+        overflow: hidden !important;\
+    }\
+\
+    input {\
+        position: absolute !important;\
+        z-index: -1 !important;\
+        opacity: 0 !important;\
+    }\
+}\
+\
+.ui-multi-select-options {\
+    .ui-item {\
+        .inline-block();\
+    }\
+    .ui-multi-select-options-operate {\
+        display: block;\
+        .ui-button {\
+            display: inline-block;\
+        }\
+    }\
+}\
+');
+//{/if}//
 /*
 @example
 <div ui="type:multi-select;name:test">
@@ -34,7 +65,7 @@ _eInput - 选项对应的input，form提交时使用
         'ui-multi-select',
         function (el, options) {
             var optionsEl = dom.create({'className': this.getUnitClass(ui.MultiSelect, 'listbox')});
-            for (; el.firstChild; ) {
+            for (; el.firstChild;) {
                 optionsEl.appendChild(el.firstChild);
             }
             ui.InputControl.call(this, el, options);
@@ -69,7 +100,7 @@ _eInput - 选项对应的input，form提交时使用
                     SearchInput: core.inherits(
                         ui.Text,
                         {
-                            $input: function (event) {
+                            $input: function () {
                                 this.searchItems();
                             },
                             searchItems: function () {
@@ -111,7 +142,7 @@ _eInput - 选项对应的input，form提交时使用
                                 }
                             )
                         }
-                    )  
+                    )
                 }
             ),
 
@@ -120,7 +151,14 @@ _eInput - 选项对应的input，form提交时使用
              * @event
              */
             $change: function () {
-                this.changeHandler();
+                var text = [], value = [];
+                this.getSelected().forEach(function (item) {
+                    text.push(item.getBody().innerText.trim());
+                    value.push(item.getValue());
+                });
+                this._eText.innerHTML = text.join(',');
+                this.$setValue(value.join(','));
+                this.$setPlaceholder();
             },
 
             /**
@@ -129,6 +167,20 @@ _eInput - 选项对应的input，form提交时使用
             $dispose: function () {
                 this._eText = null;
                 ui.InputControl.prototype.$dispose.call(this);
+            },
+
+            /**
+             * @override
+             */
+            $ready: function (event) {
+                ui.InputControl.prototype.$ready.call(this, event);
+                var values = this.getValue();
+                this.getOptions().getItems().forEach(function (item) {
+                    if (values.indexOf(item.getValue()) > -1) {
+                        item.setSelected(true);
+                    }
+                });
+                this.$change();
             },
 
             /**
@@ -153,30 +205,6 @@ _eInput - 选项对应的input，form提交时使用
 
             getOptions: function () {
                 return this.getPopup()._uOptions;
-            },
-
-            /**
-             * @override
-             */
-            onready: function () {
-                var values = this.getValue();
-                this.getOptions().getItems().forEach(function (item) {
-                    if (values.indexOf(item.getValue()) > -1) {
-                        item.setSelected(true);
-                    }
-                });
-                this.changeHandler();
-            },
-
-            changeHandler: function () {
-                var text = [], value = [];
-                this.getSelected().forEach(function (item) {
-                    text.push(item.getBody().innerText.trim());
-                    value.push(item.getValue());
-                });
-                this._eText.innerHTML = text.join(',');
-                this.$setValue(value.join(','));
-                this.$setPlaceholder();
             },
 
             /**
@@ -234,5 +262,5 @@ _eInput - 选项对应的input，form提交时使用
         ui.Popup
     );
 //{if 0}//
-}());
+})();
 //{/if}//

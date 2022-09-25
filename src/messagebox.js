@@ -1,3 +1,22 @@
+//{if $css}//
+__ControlStyle__('\
+.ui-messagebox-origin {\
+    visibility: hidden !important;\
+    .width100rate();\
+    .height100rate();\
+}\
+\
+.ui-messagebox {\
+    .ui-messagebox-content {\
+        .width100rate();\
+    }\
+\
+    .ui-messagebox-block {\
+        width: auto !important;\
+    }\
+}\
+');
+//{/if}//
 /*
 模拟系统消息框。
 */
@@ -75,11 +94,11 @@
             document.body.appendChild(outer);
         }
 
-        for (; buttonTexts.length > buttonInstances.length; ) {
+        for (; buttonTexts.length > buttonInstances.length;) {
             buttonInstances.push(core.create(Button, {element: dom.create(), parent: elButton}));
         }
 
-        if ('string' === typeof text) {
+        if (typeof text === 'string') {
             instance.setTitle(defaultTitle || location.host);
         } else {
             instance.setTitle(text.title);
@@ -202,7 +221,7 @@
 
         var instance = core.getSingleton(Tip);
         if (type === undefined) {
-            instance.hide();   
+            instance.hide();
             return;
         }
         var className = 'tip-' + type,
@@ -213,7 +232,7 @@
             // 单例控件被释放时只是从节点上移除
             document.body.appendChild(outer);
         }
-    
+
         elContent.className = className;
         elContent.innerHTML = text;
 
@@ -223,4 +242,4 @@
         instance.show();
         instance.center();
     };
-}());
+})();

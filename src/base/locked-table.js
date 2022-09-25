@@ -1,3 +1,38 @@
+//{if $css}//
+__ControlStyle__('\
+.ui-locked-table {\
+    .ui-locked-table-fill {\
+        position: absolute !important;\
+        top: 0px;\
+        z-index: -1 !important;\
+        height: 1px !important;\
+    }\
+\
+    .ui-locked-table-left {\
+        pointer-events: none;\
+\
+        td,th {\
+            pointer-events: auto;\
+        }\
+\
+        .ui-locked-table-empty {\
+            pointer-events: none;\
+        }\
+    }\
+\
+    .ui-locked-table-empty {\
+        padding: 0px !important;\
+        border: 0px !important;\
+        background: transparent !important;\
+        .pointer-events-none();\
+    }\
+\
+    .ui-locked-table-body {\
+        position: absolute;\
+    }\
+}\
+');
+//{/if}//
 /*
 @example
 <div ui="type:locked-table;left-lock:1" style="width:600px">
@@ -20,9 +55,7 @@
         </tbody>
     </table>
 </div>
-*/
-/*ignore*/
-/*
+
 @fields
 _nLeft       - 最左部未锁定列的序号
 _nRight      - 最右部未锁定列的后续序号，即未锁定的列序号+1
@@ -31,7 +64,6 @@ _uLockedMain - 锁定的行内容区
 _eLeft       - 左侧锁定行的Element元素
 _eRight      - 右侧乐定行的Element元素
 */
-/*end*/
 (function () {
 //{if 0}//
     var core = ecui,
@@ -111,7 +143,7 @@ _eRight      - 右侧乐定行的Element元素
             left.$setBody(left = left.getMain().firstChild);
             right.$setBody(right = right.getMain().firstChild);
 
-            for (i = 0, left = dom.children(left), right = dom.children(right); el = left[i]; ) {
+            for (i = 0, left = dom.children(left), right = dom.children(right); (el = left[i]);) {
                 initRow.call(headRows[i], el, right[i++]);
             }
 
@@ -120,7 +152,7 @@ _eRight      - 右侧乐定行的Element元素
             left.$setBody(left = left.getMain().lastChild);
             right.$setBody(right = right.getMain().lastChild);
 
-            for (i = 0, left = dom.children(left), right = dom.children(right); el = left[i]; ) {
+            for (i = 0, left = dom.children(left), right = dom.children(right); (el = left[i]);) {
                 initRow.call(rows[i], el, right[i++]);
             }
         },
@@ -160,7 +192,7 @@ _eRight      - 右侧乐定行的Element元素
 
                         table.getHCells().forEach(
                             function (item, index) {
-                                if (item = elements[index]) {
+                                if ((item = elements[index])) {
                                     if (index < table._nLeft) {
                                         this._eLeft.insertBefore(item, this._eLeft.lastChild);
                                     } else if (index >= table._nRight) {
@@ -212,7 +244,7 @@ _eRight      - 右侧乐定行的Element元素
                         el = rowEl.firstChild;
 
                         table.getHCells().forEach(function (item, index) {
-                            if (item = elements[index]) {
+                            if ((item = elements[index])) {
                                 if (index < table._nLeft) {
                                     rowEl.insertBefore(item, el);
                                 } else if (index >= table._nRight) {
@@ -229,13 +261,37 @@ _eRight      - 右侧乐定行的Element元素
             /**
              * @override
              */
+            $addRow: function (data, index) {
+                var row = ui.Table.prototype.$addRow.call(this, data, index),
+                    el = row.getMain(),
+                    leftBody = this._uLeftBody.getBody(),
+                    rightBody = this._uRightBody.getBody(),
+                    o = '<tr class="' + el.className + '" style="' + el.style.cssText + '"><td class="ui-locked-table-empty"></td></tr>';
+
+                index = this.getRows().indexOf(row);
+                o = dom.create(
+                    {
+                        innerHTML: '<table cellspacing="0"><tbody>' + o + o + '</tbody></table>'
+                    }
+                ).lastChild.lastChild;
+
+                initRow.call(row, o.firstChild, o.lastChild);
+                leftBody.insertBefore(o.firstChild, dom.children(leftBody)[index]);
+                rightBody.insertBefore(o.firstChild, dom.children(rightBody)[index]);
+
+                return row;
+            },
+
+            /**
+             * @override
+             */
             $beforescroll: function (event) {
                 ui.Table.prototype.$beforescroll.call(this, event);
-/*ignore*/
+
                 if (ieVersion < 7) {
                     return;
                 }
-/*end*/
+
                 var layout = this.getLayout(),
                     pos = dom.getPosition(layout),
                     view = util.getView(),
@@ -273,12 +329,12 @@ _eRight      - 右侧乐定行的Element元素
 
                 this.$$paddingLeft = 0;
 
-                for (var i = 0, list = this.getHCells(); i < this._nLeft; ) {
+                for (var i = 0, list = this.getHCells(); i < this._nLeft;) {
                     this.$$paddingLeft += list[i++].getWidth();
                 }
 
                 this.$$paddingRight = 0;
-                for (i = this._nRight; i < list.length; ) {
+                for (i = this._nRight; i < list.length;) {
                     this.$$paddingRight += list[i++].getWidth();
                 }
 
@@ -316,7 +372,7 @@ _eRight      - 右侧乐定行的Element元素
                     leftHeadStyle.left = leftMainStyle.left = this.getLayout().scrollLeft + 'px';
                     rightHeadStyle.left = rightMainStyle.left = (Math.min(this.getWidth(), this.$$tableWidth) - this.$$paddingRight + this.getLayout().scrollLeft - this.$$rightTDWidth - this.$$scrollFixed[0]) + 'px';
                     leftMainStyle.top = rightMainStyle.top = (this.$$paddingTop - this.getLayout().firstChild.scrollTop - dom.parent(this.$getSection('Head').getMain()).scrollTop) + 'px';
-                    leftMainStyle.clip = rightMainStyle.clip =/*ignore*/ ieVersion < 8 ? 'rect(0,100%,100%,0)' :/*end*/ 'auto';
+                    leftMainStyle.clip = rightMainStyle.clip = ieVersion < 8 ? 'rect(0,100%,100%,0)' : 'auto';
                 }
             },
 
@@ -381,31 +437,6 @@ _eRight      - 右侧乐定行的Element元素
             /**
              * @override
              */
-            addRow: function (data, index) {
-                var row = ui.Table.prototype.addRow.call(this, data, index),
-                    el = row.getMain(),
-                    leftBody = this._uLeftBody.getBody(),
-                    rightBody = this._uRightBody.getBody(),
-                    o = '<tr class="' + el.className + '" style="' + el.style.cssText + '"><td class="ui-locked-table-empty"></td></tr>';
-
-                index = this.getRows().indexOf(row);
-                o = dom.create(
-                    {
-                        innerHTML: '<table cellspacing="0"><tbody>' + o + o + '</tbody></table>'
-                    }
-                ).lastChild.lastChild;
-
-                initRow.call(row, o.firstChild, o.lastChild);
-                leftBody.insertBefore(o.firstChild, dom.children(leftBody)[index]);
-                rightBody.insertBefore(o.firstChild, dom.children(rightBody)[index]);
-                row.$initStructure();
-
-                return row;
-            },
-
-            /**
-             * @override
-             */
             cache: function (force) {
                 this._uLeftHead.cache(force);
                 this._uRightHead.cache(force);
@@ -452,4 +483,4 @@ _eRight      - 右侧乐定行的Element元素
             }
         }
     );
-}());
+})();

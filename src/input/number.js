@@ -75,7 +75,7 @@ _oTest      匹配合法性的正则表达式
 
                 var value = this.getValue();
                 if (this._oTest && this._oTest.test(value)) {
-                    if (!value || ((this._nMin === undefined || (this._nMin < 0 && (value === '-' )) || +value >= this._nMin) && (this._nMax === undefined || (this._nMax < 0 && value === '-') || +value <= this._nMax))) {
+                    if (!value || ((this._nMin === undefined || (this._nMin < 0 && (value === '-')) || +value >= this._nMin) && (this._nMax === undefined || (this._nMax < 0 && value === '-') || +value <= this._nMax))) {
                         this._sLastValue = value;
                         return;
                     }
@@ -101,5 +101,5 @@ _oTest      匹配合法性的正则表达式
         }
     );
 //{if 0}//
-}());
+})();
 //{/if}//

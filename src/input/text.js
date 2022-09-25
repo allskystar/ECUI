@@ -1,3 +1,27 @@
+//{if $css}//
+__ControlStyle__('\
+.ui-text {\
+    .ui-placeholder {\
+        position: absolute !important;\
+        display: none !important;\
+        .width100rate();\
+    }\
+\
+    input {\
+        .width100rate();\
+        .height100rate();\
+    }\
+}\
+\
+.ui-text-empty,\
+.ui-text-error {\
+    .ui-placeholder {\
+        display: block !important;\
+        z-index: 1 !important;\
+    }\
+}\
+');
+//{/if}//
 /*
 @example
 <input ui="type:text" name="test" />
@@ -93,7 +117,7 @@ _ePlaceHolder - 为空时的提示信息标签
                 if (input.type === 'password') {
                     // 如果输入框是密码框需要直接隐藏，不允许将密码显示在浏览器中
                     var value = '';
-                    for (var i = this.getValue().length; i--; ) {
+                    for (var i = this.getValue().length; i--;) {
                         value += '*';
                     }
                     body.innerHTML = value;
@@ -226,7 +250,7 @@ _ePlaceHolder - 为空时的提示信息标签
                     type = input.type,
                     ret;
 
-                if ('number' === typeof input.selectionEnd) {
+                if (typeof input.selectionEnd === 'number') {
                     return input.selectionEnd;
                 }
                 input.type = 'text';
@@ -252,7 +276,7 @@ _ePlaceHolder - 为空时的提示信息标签
                     type = input.type,
                     ret;
 
-                if ('number' === typeof input.selectionStart) {
+                if (typeof input.selectionStart === 'number') {
                     return input.selectionStart;
                 }
                 input.type = 'text';
@@ -294,7 +318,7 @@ _ePlaceHolder - 为空时的提示信息标签
                 } else {
                     var type = input.type;
 
-                    if ('number' === typeof input.selectionStart) {
+                    if (typeof input.selectionStart === 'number') {
                         input.setSelectionRange(startPos, endPos);
                     } else {
                         input.type = 'text';
@@ -305,4 +329,4 @@ _ePlaceHolder - 为空时的提示信息标签
             }
         }
     );
-}());
+})();

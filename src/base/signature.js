@@ -1,25 +1,19 @@
 /*
 @example
-*/
-/*ignore*/
-/*
+<svg ui="type:signature"></svg>
+
 @fields
-_eContainer      - 容器 DOM 元素
+_bDraw - 是否开始跟踪绘制
+_oCtx  - 画布对象
 */
-/*end*/
 (function () {
-    //{if 0}//
+//{if 0}//
     var core = ecui,
         dom = core.dom,
-        ui = core.ui,
-        util = core.util;
-    //{/if}//
-
+        ui = core.ui;
+//{/if}//
     /**
-     * 选项卡控件。
-     * 每一个选项卡都包含一个头部区域与容器区域，选项卡控件存在互斥性，只有唯一的一个选项卡能被选中并显示容器区域。
-     * options 属性：
-     * selected    选中的选项序号，默认为0
+     * 签名控件。
      * @control
      */
     ui.Signature = core.inherits(
@@ -45,7 +39,7 @@ _eContainer      - 容器 DOM 元素
             /**
              * @override
              */
-             $deactivate: function (event) {
+            $deactivate: function (event) {
                 ui.Control.prototype.$deactivate.call(this, event);
                 this._bDraw = false;
             },
@@ -69,7 +63,7 @@ _eContainer      - 容器 DOM 元素
                 var el = this.getMain();
                 this._oCtx.fillStyle = dom.getStyle(el, 'backgroundColor');
                 this._oCtx.fillRect(0, 0, el.width, el.height);
-                this._oCtx.fillStyle = '#000000'
+                this._oCtx.fillStyle = '#000000';
             },
 
             /**
@@ -84,7 +78,7 @@ _eContainer      - 容器 DOM 元素
 
             /**
              * 生成基于URL处理的图片数据
-             * 
+             *
              * @return {String} 图片的URL字符串
              */
             toDataURL: function () {
@@ -92,6 +86,4 @@ _eContainer      - 容器 DOM 元素
             }
         }
     );
-}());
-    
-
+})();

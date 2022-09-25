@@ -1,3 +1,17 @@
+//{if $css}//
+__ControlStyle__('\
+#ECUI_LOCATOR {\
+    position: absolute !important;\
+    visibility: hidden !important;\
+}\
+\
+.ui-transition {\
+    img {\
+        display: none;\
+    }\
+}\
+');
+//{/if}//
 /*
 ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由不同的模板引擎处理，因此不同模块可以有同名的模板，可以将模块理解成一个命名空间。
 使用示例：
@@ -34,8 +48,6 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
         routes = {},
         autoRender = {},        // 模拟MVVM双向绑定
         context = {},
-        global = {},
-        globalListeners = {},
 
         currLocation = '',
         pauseStatus,
@@ -45,9 +57,6 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
 
         metaVersion,
         meta,
-
-        language,
-        localData = {'': {}},
 
         currLayer,
         currRouteName,
@@ -138,7 +147,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
     function autoChildRoute(route) {
         if (route.children) {
             (route.children instanceof Array ? route.children : [route.children]).forEach(function (item) {
-                if ('string' === typeof item) {
+                if (typeof item === 'string') {
                     esr.callRoute(replace(item), true);
                 } else {
                     callRoute(item, true);
@@ -208,21 +217,13 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
      */
     function callRoute(name, options) {
         // 供onready时使用，此时name为route
-        if ('string' === typeof name) {
+        if (typeof name === 'string') {
             name = calcUrl(name);
 
             var route = routes[name],
                 moduleName = getModuleName(name);
-//{if 1}//            var NS = core.ns['_' + moduleName.replace(/\//g, '_')];
-//{else}//
-            NS = core.ns['_' + moduleName.replace(/\//g, '_')];
-//{/if}//
             if (options !== true) {
-                context = {
-                    NS: (NS || {}).data,
-                    Global: Object.assign({}, global)
-                };
-                Object.assign(context, global);
+                context = {};
             }
         } else {
             route = name;
@@ -325,7 +326,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
             if (!route.onrender || route.onrender() !== false) {
                 if (!route.model) {
                     esr.render(route);
-                } else if ('function' === typeof route.model) {
+                } else if (typeof route.model === 'function') {
                     if (route.onbeforerequest) {
                         try {
                             route.onbeforerequest(context);
@@ -370,7 +371,10 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                                 route.CACHE = undefined;
                             }
 
-                            callRouteComplete();
+                            if (err === false) {
+                                // err 为 false 阻止后续的渲染操作
+                                callRouteComplete();
+                            }
 
                             return err;
                         }
@@ -378,42 +382,32 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                 }
             }
         } else {
-            pauseStatus = true;
-            if (NS) {
-                NS.data = NS.data || {};
-                NS.ui = NS.ui || {};
+            var namespace = '_' + moduleName.replace(/[._]/g, '-').replace(/\//g, '_');
+            if (core.ns[namespace]) {
+                if (!core.ns[namespace].ui) {
+                    core.ns[namespace].ui = {};
+                }
+                if (!core.ns[namespace].data) {
+                    core.ns[namespace].data = {};
+                }
             } else {
-                NS = core.ns['_' + moduleName.replace(/\//g, '_')] = {
-                    data: {},
-                    ui: {}
-                };
+                core.ns[namespace] = {ui: {}, data: {}};
             }
-            context.NS = NS.data;
 
+            pauseStatus = true;
             io.loadScript(
                 moduleName + '_define_.js',
-                function () {
-                    pauseStatus = false;
-//{if 0}//
-                    if (!routes[name]) {
-                        throw new Error('The route(' + name + ') is not defined.');
-                    }
-//{/if}//
-                    if (esr.LANG) {
-                        localData[moduleName] = {};
-                        for (var lang in localData['']) {
-                            if (localData[''].hasOwnProperty(lang)) {
-                                Object.assign(localData[moduleName][lang] = {}, localData[''][lang]);
-                            }
-                        }
-                        translateLanguage(moduleName, esr.LANG);
-                        delete esr.LANG;
-                    }
-
-                    callRoute(name, options);
-                },
                 {
                     cache: true,
+                    onsuccess: function () {
+                        pauseStatus = false;
+//{if 0}//
+                        if (!routes[name]) {
+                            throw new Error('The route(' + name + ') is not defined.');
+                        }
+//{/if}//
+                        callRoute(name, options);
+                    },
                     onerror: function () {
                         // 其他浏览器失败
                         pauseStatus = false;
@@ -511,6 +505,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                         if (control.isFormChecked) {
                             elements.forEach(fillCheckedByArray);
                         } else {
+                            // eslint-disable-next-line no-lonely-if
                             if (elements.length === 1 && control.getFormValue() instanceof Array) {
                                 control.setValue(value);
                             } else {
@@ -518,6 +513,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                             }
                         }
                     } else {
+                        // eslint-disable-next-line no-lonely-if
                         if (el.type === 'radio' || el.type === 'checkbox') {
                             elements.forEach(fillCheckedElByArray);
                         } else {
@@ -531,17 +527,20 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                         fillForm(form, value, key + '.');
                     }
                 } else {
+                    // eslint-disable-next-line no-lonely-if
                     if (control) {
                         if (control.isFormChecked) {
                             if (elements && elements.length > 0) {
                                 elements.forEach(fillCheckedByValue);
                             }
                         } else {
+                            // eslint-disable-next-line no-lonely-if
                             if (control.setValue) {
                                 control.setValue(String(value));
                             }
                         }
                     } else {
+                        // eslint-disable-next-line no-lonely-if
                         if (el.type === 'radio' || el.type === 'checkbox') {
                             elements.forEach(fillCheckedElByValue);
                         } else {
@@ -595,7 +594,6 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
      */
     function init() {
         if (!routeRequestCount) {
-/*ignore*/
             if (ieVersion < 8) {
                 var iframe = document.createElement('iframe');
 
@@ -605,16 +603,15 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                 document.body.appendChild(iframe);
                 setInterval(listener, 100);
             } else {
-/*end*/
+                // eslint-disable-next-line no-lonely-if
                 if (window.onhashchange !== undefined) {
                     dom.addEventListener(window, 'hashchange', listener);
                     listener();
                 } else {
                     setInterval(listener, 100);
                 }
-/*ignore*/
             }
-/*end*/
+
             hasReady = true;
         }
     }
@@ -722,7 +719,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                                     }
                                 );
 
-                                if ('boolean' === typeof ret) {
+                                if (typeof ret === 'boolean') {
                                     if (!ret) {
                                         leaveUrl = loc;
                                     }
@@ -883,6 +880,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                     });
                 }
             } else {
+                // eslint-disable-next-line no-lonely-if
                 if (index >= 0 && index < historyCache.length) {
                     historyCache[index] = {};
                 }
@@ -901,12 +899,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
 
         core.dispose(el, true);
 
-        if (language) {
-            if (route.NAME) {
-                context.LANG = (localData[getModuleName(route.NAME)] || {})[language];
-            }
-        }
-//{if 1}//        el.innerHTML = engine.render(name || route.view, context).replace(/([^A-Za-z0-9_])NS\./g, '$1ecui.ns[\'_' + getModuleName(currLocation).replace(/[._]/g, '-').replace(/\//g, '_') + '\'].');
+//{if 1}//        el.innerHTML = engine.render(name || route.view, context).replace(/([^A-Za-z0-9_])NS\./g, '$1ecui.ns._' + getModuleName(currLocation).replace(/[._]/g, '-').replace(/\//g, '_') + '.');
 //{else}//
         el.innerHTML = engine.render(name || route.view, context);
 //{/if}//
@@ -1175,30 +1168,6 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
         }
     }
 
-    /**
-     * 转化多语言支持的数据格式。
-     * @private
-     * 
-     * @param {string} 模块名，如果为空字符串，表示全局
-     * @param {Object} 语言数据原始格式
-     */
-    function translateLanguage(moduleName, data) {
-        var tmpData = localData[moduleName];
-        for (var varName in data) {
-            if (data.hasOwnProperty(varName)) {
-                for (var localName in data[varName]) {
-                    if (data[varName].hasOwnProperty(localName)) {
-                        var local = tmpData[localName];
-                        if (!local) {
-                            tmpData[localName] = local = {};
-                        }
-                        local[varName] = data[varName][localName];
-                    }
-                }
-            }
-        }
-    }
-
     var esr = core.esr = {
         DEFAULT_PAGE: '/index',
         DEFAULT_MAIN: 'main',
@@ -1241,21 +1210,6 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
 
         // 布局层，用于加载结构
         AppLayer: core.inherits(ui.Control),
-
-        /**
-         * 监听全局变量变化。
-         * @public
-         *
-         * @param {string} name 全局变量名称
-         * @param {Function} listener 监听函数
-         */
-        addGlobalListener: function (name, listener) {
-            globalListeners[name] = globalListeners[name] || [];
-            globalListeners[name].push(listener);
-            if (global[name]) {
-                listener(global[name]);
-            }
-        },
 
         /**
          * 添加路由信息。
@@ -1476,16 +1430,6 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
         },
 
         /**
-         * 获取常量数据。
-         * @public
-         *
-         * @return {object} 常量数据
-         */
-        getGlobal: function () {
-            return Object.assign({}, global);
-        },
-
-        /**
          * 获取当前地址。
          * @public
          *
@@ -1500,9 +1444,11 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
             //   但是读取location.hash的值相当于decodeURIComponent
             // 所以需要从location.href里取出hash值
             if (firefoxVersion) {
+                // eslint-disable-next-line no-cond-assign
                 if (hash = location.href.match(/#(.*)$/)) {
                     return hash[1];
                 }
+            // eslint-disable-next-line no-cond-assign
             } else if (hash = location.hash) {
                 return hash.replace(/^#/, '');
             }
@@ -1543,34 +1489,16 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
         },
 
         /**
-         * 加载公共语言数据。
-         * @public
-         *
-         * @param {Object} data 语言数据
-         */
-        loadCommonLanguage: function (data) {
-            translateLanguage('', data);
-            for (var moduleName in localData) {
-                if (moduleName && localData.hasOwnProperty(moduleName)) {
-                    for (var lang in localData[moduleName]) {
-                        if (localData[moduleName].hasOwnProperty(lang)) {
-                            localData[moduleName][lang] = Object.assign({}, localData[''][lang], localData[moduleName][lang]);
-                        }
-                    }
-                }
-            }
-        },
-
-        /**
          * 将一个 Form 表单转换成对象。
          * @public
          *
          * @param {Form} form Form元素
          * @param {object} data 数据对象
-         * @param {boolean} validate 是否需要校验，默认不校验
+         * @param {boolean} validate 是否需要校验，默认校验
+         * @param {boolean} useDefault 是否读取默认值而不是当前值，默认读取当前值
          * @return {boolean} 校验是否通过
          */
-        parseObject: function (form, data, validate) {
+        parseObject: function (form, data, validate, useDefault) {
             var elements = dom.toArray(form.elements),
                 firstUnvalid;
 
@@ -1588,9 +1516,9 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                 }
                 if (item.name) {
                     if (control) {
-                        if (control.getFormName && control.getFormValue && !control.isDisabled() && (!control.isFormChecked || control.isFormChecked())) {
+                        if (control.getFormName && control.getFormValue && !control.isDisabled() && (!control.isFormChecked || control.isFormChecked(useDefault))) {
                             var formName = control.getFormName(),
-                                formValue = control.getFormValue();
+                                formValue = control.getFormValue(useDefault);
 
                             if (formName) {
                                 setCacheData(data, formName, formValue);
@@ -1602,8 +1530,8 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                                 }
                             }
                         }
-                    } else if (!item.disabled && ((item.type !== 'radio' && item.type !== 'checkbox') || item.checked)) {
-                        setCacheData(data, item.name, item.value);
+                    } else if (!item.disabled && ((item.type !== 'radio' && item.type !== 'checkbox') || (useDefault ? item.defaultChecked : item.checked))) {
+                        setCacheData(data, item.name, useDefault ? item.defaultValue : item.value);
                     }
                 }
             });
@@ -1612,7 +1540,9 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                 dom.scrollIntoViewIfNeeded(firstUnvalid);
                 return false;
             }
-            ui.InputControl.saveToDefault(elements);
+            if (!useDefault && validate !== false) {
+                ui.InputControl.saveToDefault(elements);
+            }
             return true;
         },
 
@@ -1651,6 +1581,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                     onsuccess: function (data) {
                         pauseStatus = false;
                         engine = loadStatus[moduleName] = new etpl.Engine();
+                        engine.setNamespace(core.ns['_' + moduleName.replace(/[._]/g, '-').replace(/\//g, '_')].data);
                         engine.compile(data);
                         render(route);
                     },
@@ -1663,7 +1594,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
             if (route.view === undefined) {
                 beforerender(route);
                 afterrender(route);
-            } else if ('function' === typeof route.view) {
+            } else if (typeof route.view === 'function') {
                 beforerender(route);
                 if (
                     route.view(
@@ -1688,6 +1619,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                     // 如果在当前引擎找不到模板，有可能是主路由切换，也可能是主路由不存在
                     render(route);
                 } else {
+                    // eslint-disable-next-line no-lonely-if
                     if (engine === true) {
                         loadTPL();
                     } else if (!engine) {
@@ -1784,6 +1716,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                     onsuccess: function (text) {
                         count--;
                         try {
+                            // eslint-disable-next-line no-shadow
                             var data = JSON.parse(text),
                                 key;
 
@@ -1838,7 +1771,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                 });
             }
 
-            if ('string' === typeof urls) {
+            if (typeof urls === 'string') {
                 urls = [urls];
             }
 
@@ -1870,7 +1803,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                                     for (var key in data.meta.record) {
                                         if (data.meta.record.hasOwnProperty(key)) {
                                             meta[key] = meta[key] || {};
-                                            for (var i = 0, items = data.meta.record[key], item; item = items[i++]; ) {
+                                            for (var i = 0, items = data.meta.record[key], item; (item = items[i++]);) {
                                                 meta[key][item.id] = item;
                                             }
                                         }
@@ -1916,27 +1849,6 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
         },
 
         /**
-         * 设置常量数据。
-         * @public
-         *
-         * @param {string} name 数据名
-         * @param {object} value 数据值
-         */
-        setGlobal: function (name, value) {
-//{if 0}//
-            if (global[name]) {
-                console.warn('The name("' + name + '") has existed.');
-            }
-//{/if}//
-            global[name] = value;
-            if (globalListeners[name]) {
-                globalListeners[name].forEach(function (item) {
-                    item(value);
-                });
-            }
-        },
-
-        /**
          * 设置数据。
          * @public
          *
@@ -1950,10 +1862,6 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                     item[1].call(item[0], context[name]);
                 });
             }
-        },
-
-        setLanguage: function (code) {
-            language = code;
         },
 
         /**
@@ -1990,7 +1898,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
          */
         showSelect: function (content, onconfirm, options) {
             if (esrOptions.app) {
-                if ('string' === typeof options) {
+                if (typeof options === 'string') {
                     options = {
                         title: options
                     };
@@ -2021,10 +1929,11 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                         if (content) {
                             if (content instanceof ui.Control) {
                                 content.setParent();
-                            } else if ('string' === typeof content) {
+                            } else if (typeof content === 'string') {
                                 core.dispose(container, true);
                                 container.innerHTML = '';
                             } else {
+                                // eslint-disable-next-line no-lonely-if
                                 if (parentElement) {
                                     parentElement.insertBefore(content, nextSibling);
                                 }
@@ -2040,7 +1949,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                 if (content) {
                     if (content instanceof ui.Control) {
                         content.setParent(layer);
-                    } else if ('string' === typeof content) {
+                    } else if (typeof content === 'string') {
                         container.innerHTML = content;
                         core.init(container);
                     } else {
@@ -2088,34 +1997,21 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
          */
         load: function (value) {
             function loadInit(body) {
-                etpl.config({
-                    commandOpen: '<<<',
-                    commandClose: '>>>'
-                });
-
-                for (var el = body.firstChild; el; el = nextSibling) {
-                    var nextSibling = el.nextSibling;
-                    if (el.nodeType === 8) {
-                        etpl.compile(el.textContent || el.nodeValue);
-                        dom.remove(el);
-                    }
-                }
-
                 if (esrOptions.app) {
-                    el = core.$('AppCommonContainer');
+                    var el = core.$('AppCommonContainer');
                     el.id = 'AppBackupContainer';
                     dom.insertHTML(el, 'afterEnd', dom.previous(el).outerHTML + el.outerHTML);
                     el.id = 'AppCommonContainer';
                     var content = dom.last(dom.first(body)),
                         header = dom.previous(content),
                         children = dom.children(el.parentNode).slice(0, -2);
-                    for (var i = 1, item; item = children[i]; i += 2) {
+                    for (var i = 1, item; (item = children[i]); i += 2) {
                         header.appendChild(item.header = children[i - 1]);
                         content.appendChild(item);
                         var first = item.firstChild;
                         if (first && first === item.lastChild && first.nodeType === 8) {
                             var moduleName = '_' + item.id.slice(0, item.id.lastIndexOf('_') + 1);
-                            item.innerHTML = etpl.compile(first.textContent || first.nodeValue)({NS: (core.ns[moduleName] || {}).data}).replace(/([^A-Za-z0-9_])NS\./g, '$1ecui.ns[\'' + moduleName + '\'].');
+                            item.innerHTML = etpl.compile(first.textContent || first.nodeValue)({NS: (core.ns[moduleName] || {}).data}).replace(/([^A-Za-z0-9_])NS\./g, '$1ecui.ns.' + moduleName + '.');
                         }
                     }
 
@@ -2125,11 +2021,6 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                         el.header.style.display = '';
                     }
                 }
-
-                etpl.config({
-                    commandOpen: '<!--',
-                    commandClose: '-->'
-                });
 
                 core.ready(function () {
                     if (esr.onready) {
@@ -2153,40 +2044,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                 meta = JSON.parse(util.getLocalStorage('esr_meta')) || {};
             }
 //{if 0}//
-            var tplList = [];
-
-            for (el = document.body.firstChild; el; el = el.nextSibling) {
-                if (el.nodeType === 8) {
-                    if (/^\s*import:\s*([A-Za-z0-9.-_\-]+)\s*$/.test(el.textContent || el.nodeValue)) {
-                        tplList.push([el, RegExp.$1]);
-                    }
-                }
-            }
-
-            (function loadTpl() {
-                if (tplList.length) {
-                    var item = tplList.splice(0, 1)[0];
-                    io.ajax(item[1], {
-                        cache: true,
-                        onsuccess: function (text) {
-                            item[0].parentNode.insertBefore(
-                                document.createComment(text.replace(/<!--/g, '<<<').replace(/-->/g, '>>>')),
-                                item[0]
-                            );
-                            item[0].parentNode.removeChild(item[0]);
-                            loadTpl();
-                        },
-                        onerror: function () {
-                            console.warn('找不到文件' + item[1]);
-                            loadTpl();
-                        }
-                    });
-                } else {
-                    loadApp();
-                }
-            }());
-
-            function loadApp() {
+            etpl.ready(function () {
                 if (esrOptions.app) {
                     io.ajax('.app-container.html', {
                         cache: true,
@@ -2197,19 +2055,20 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                             core.init(document.body);
                         },
                         onerror: function () {
-                            console.warn('找不到APP的布局文件，请确认.app-container.html文件是否存在');
+                            console.warn('No such file for APP\'s layout: .app-container.html');
                             esrOptions.app = false;
                             loadInit(core.$('ECUI-FIXED-BODY') || document.body);
                             core.init(document.body);
                         }
                     });
                 } else {
-                    loadInit(core.$('ECUI-FIXED-BODY') || document.body);
-                }
-            }
-//{else}//            loadInit(document.body);
 //{/if}//
-            for (var i = 0, links = document.getElementsByTagName('A'), el; el = links[i++]; i++) {
+                    loadInit(core.$('ECUI-FIXED-BODY') || document.body);
+//{if 0}//
+                }
+            });
+//{/if}//
+            for (var i = 0, links = document.getElementsByTagName('A'), el; (el = links[i++]); i++) {
                 if (el.href.slice(-1) === '#') {
                     el.href = JAVASCRIPT + ':void(0)';
                 }
@@ -2223,27 +2082,44 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
          * @public
          *
          * @param {string} value 插件的参数，格式为 变量名@#模板名 或 变量名@js函数名 ，表示指定的变量变化时，需要刷新控件内部HTML
+         * @param {object} options 初始化参数
          */
-        constructor: function (value) {
-            if (value = /^([\w,]+)(\*?@)(#[\w\.]*|[\w\.]*\(\))$/.exec(value)) {
-                if (value[3].charAt(0) !== '#') {
-                    if (value[3].length === 2) {
-                        var setData = util.decodeHTML(this.getContent().trim()),
-                            renderer = new Function('$', setData.charAt(0) === '=' ? 'this.setContent(' + setData.slice(1) + ')' : setData);
+        constructor: function (value, options) {
+            // eslint-disable-next-line no-cond-assign
+            if (value = /^([\w,]+)((\*?@)(#[\w\.]*|[\w\.]*\(\)))?$/.exec(value)) {
+                if (value[2]) {
+                    if (value[4].charAt(0) !== '#') {
+                        if (value[4].length === 2) {
+                            var setData = util.decodeHTML(this.getContent().trim()),
+                                renderer = new Function('$', setData.charAt(0) === '=' ? 'this.setContent(' + setData.slice(1) + ')' : setData);
+                            this.setContent('');
+                        } else {
+                            renderer = util.parseValue(value[4].slice(0, -2));
+                        }
+                        setData = function (data) {
+                            renderer.call(this, value[3].length > 1 ? context : data);
+                        };
                     } else {
-                        renderer = util.parseValue(value[3].slice(0, -2));
-                    }
-                    setData = function (data) {
-                        renderer.call(this, value[2].length > 1 ? context : data);
-                    };
-                } else {
-                    renderer = value[3].length < 2 ? engine.compile(this.getContent().replace(/\$([\w.]+)/g, '${$1}')) : engine.getRenderer(value[3].slice(1));
-                    setData = function (data) {
+                        renderer = value[4].length < 2 ? engine.compile(this.getContent().replace(/\$([\w.]+)/g, '${$1}')) : engine.getRenderer(value[4].slice(1));
+                        this.setContent('');
+                        setData = function (data) {
 //{if 0}//
-                        this.setContent(renderer(value[2].length > 1 ? context : data).replace(/([^A-Za-z0-9_])NS\./g, '$1NS.ui.'));
-//{else}//                        this.setContent(renderer(value[2].length > 1 ? context : data));
+                            this.setContent(renderer(value[3].length > 1 ? context : data).replace(/([^A-Za-z0-9_])NS\./g, '$1NS.ui.'));
+//{else}//                            this.setContent(renderer(value[3].length > 1 ? context : data));
 //{/if}//
-                    };
+                        };
+                    }
+                } else {
+                    for (var i = 0, o; (o = ext.data.Custom[i++]);) {
+                        if (this instanceof o.Class) {
+                            renderer = o.init.call(this, options);
+                            // eslint-disable-next-line no-loop-func
+                            setData = function (data) {
+                                o.setData.call(this, data, renderer);
+                            };
+                            break;
+                        }
+                    }
                 }
 
                 value[1] = value[1].split(',');
@@ -2254,23 +2130,15 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                         } else {
                             autoRender[item] = [[this, setData]];
                         }
-                    },
-                    this
-                );
-
-                var nodata = true;
-                value[1].forEach(
-                    function (item) {
                         if (context[item] !== undefined) {
                             setData.call(this, context[item]);
-                            nodata = false;
                         }
                     },
                     this
                 );
-                if (nodata) {
-                    this.getBody().innerHTML = '';
-                }
+
+                options = null;
+                value = null;
             }
         },
 
@@ -2278,7 +2146,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
             dispose: function () {
                 for (var key in autoRender) {
                     if (autoRender.hasOwnProperty(key)) {
-                        for (var i = 0, data; data = autoRender[key][i]; i++) {
+                        for (var i = 0, data; (data = autoRender[key][i]); i++) {
                             if (data[0] === this) {
                                 autoRender[key].splice(i, 1);
                                 break;
@@ -2327,7 +2195,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
      */
     function resetFormValue(form) {
         var elements = form.elements;
-        for (var i = 0, item; item = elements[i++]; ) {
+        for (var i = 0, item; (item = elements[i++]);) {
             var name = item.name;
             if (name) {
                 var _control = item.getControl && item.getControl();
@@ -2342,6 +2210,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                         _control.setValue('');
                     }
                 } else {
+                    // eslint-disable-next-line no-lonely-if
                     if (!ecui.dom.hasClass(item, 'ui-hide')) {
                         item.value = '';
                     }
@@ -2355,8 +2224,9 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
      * @param {form}    form         表单元素
      * @param {object} searchParam   路由的搜索数据
      * @param {object}  context      路由的上下文数据
-     * 
+     *
      */
+    // eslint-disable-next-line no-shadow
     function replenishSearchCode(form, searchParam, context) {
         var data = {};
         ecui.esr.parseObject(form, data, false);
@@ -2385,11 +2255,12 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
         this.main = name.slice(0, -9) + '_table';
         Object.assign(this, route);
     };
+    // eslint-disable-next-line no-shadow
     esr.TableListRoute.prototype.onbeforerequest = function (context) {
         context.pageNo = context.pageNo || +this.searchParam.pageNo;
         context.pageSize = context.pageSize || +this.searchParam.pageSize;
         var forms = this.model[this.model.length - 1].split('?')[1].split('&');
-        for (var i = 0, form, item; item = forms[i++]; ) {
+        for (var i = 0, form, item; (item = forms[i++]);) {
             form = document.forms[item.split('=')[0]];
             if (item.split('=').length === 1 && form) {
                 replenishSearchCode(form, this.searchParam, context);
@@ -2400,6 +2271,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
         }
         context.searchParam = this.searchParam;
     };
+    // eslint-disable-next-line no-shadow
     esr.TableListRoute.prototype.onbeforerender = function (context) {
         var data = util.parseValue(this.model[this.model.length - 1].split('@')[0], context);
         if (!context.offset && context.offset !== 0) {
@@ -2445,4 +2317,4 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
         }
     );
 
-}());
+})();

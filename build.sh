@@ -33,7 +33,13 @@ then
         echo "build ecui-2.0.0"
         libpath="."
         cat ecui.css | eval $css_compile > release/ecui-2.0.0.css
-        cat ecui.js | eval $js_write_repl | eval $js_merge | eval $js_compress > release/ecui-2.0.0.js
+        echo "//{assign var=css value=true}//
+__ControlStyle__('
+@import (less) 'ecui.css';
+');
+" | cat - ecui.js | eval $js_write_repl | eval $js_merge | sed -n -e "/__ControlStyle__('/,/');/p" | sed -n -e 'H;${x;s/\\\n//g;p;}' | sed -e "s/__ControlStyle__('//g" -e "s/');//g" | eval $css_compile >> release/ecui-2.0.0.css
+        cat ecui.js | eval $js_write_repl | eval $js_merge > release/ecui-2.0.0-all.js
+	cat release/ecui-2.0.0-all.js | eval $js_compress > release/ecui-2.0.0.js
         exit 0
     fi
 
@@ -182,7 +188,7 @@ do
     text=`echo "$text" | awk '{gsub(/ecui\.esr\.loadRoute\("([^"]*)"\)([,;])?/,"&\n");print}' | grep "ecui.esr.loadRoute("`
     if [ -f "_define_.css" ]
     then
-        prefix=`echo ".module-${ns%_*}{"`
+        prefix=".module-"${ns%_*}"{"
         cont=`cat _define_.css | eval $css_compile`
         echo "${prefix}${cont}}" | eval $css_compile >> "$outpath/${module}_define_.css"
     fi
@@ -277,14 +283,27 @@ then
 
     for file in `ls`
     do
-        if [ -f $file ]
+        if [ -d $file ]
         then
+            cd $file
+            if [ -f ".buildcopy" ]
+            then
+                if [ ! -d "../$output/$file/" ]
+                then
+                    mkdir "../$output/$file/"
+                fi
+                echo "copy $file/"
+                cp -R * "../$output/$file/"
+            fi
+            cd ..
+        else
             if [ ! $file = "ecui.js" ] && [ ! $file = "ecui.css" ] && [ ! $file = "common.js" ] && [ ! $file = "common.css" ] && [ ! $file = "ie-es5.js" ] && [ ! $file = "options.js" ] && [ ! $file = "ios.js" ] && [ ! $file = "android.js" ] && [ ! "${file%%-*}" = "compatible" ]
             then
                 continue
             fi
 
             path=""
+
             if [ "${file##*.}" = "js" ]
             then
                 echo "process file-$file"
@@ -294,6 +313,14 @@ then
                 then
                     echo "process file-$file"
                     cat $file | eval $css_compile > "$output/$file"
+                    if [ $file = "ecui.css" ]
+                    then
+                        echo "//{assign var=css value=true}//
+__ControlStyle__('
+@import (less) 'ecui.css';
+');
+" | cat - ecui.js | eval $js_write_repl | eval $js_merge | sed -n -e "/__ControlStyle__('/,/');/p" | sed -n -e 'H;${x;s/\\\n//g;p;}' | sed -e "s/__ControlStyle__('//g" -e "s/');//g" | eval $css_compile >> "$output/$file"
+                    fi
                 fi
             fi
         fi

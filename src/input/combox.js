@@ -1,3 +1,43 @@
+//{if $css}//
+__ControlStyle__('\
+.ui-combox {\
+    position: relative;\
+\
+    .ui-combox-text {\
+        position: absolute !important;\
+        overflow: hidden !important;\
+        .width100rate();\
+        .height100rate();\
+\
+        input {\
+            left: 0;\
+            top: 0;\
+            display: block !important;\
+        }\
+    }\
+\
+    input {\
+        position: absolute !important;\
+        display: none !important;\
+        .width100rate();\
+        outline: none !important;\
+    }\
+}\
+\
+/* 为不支持placeholder的浏览器提供兼容样式 */\
+.ui-combox-placeholder {\
+    input {\
+        .opacity0();\
+        background-color: transparent;\
+    }\
+}\
+\
+.ui-combox-options {\
+    overflow: auto !important;\
+    overflow-x: hidden !important;\
+}\
+');
+//{/if}//
 /*
 @example
 <select ui="type:combox;placeholder:请输入" name="age">
@@ -181,4 +221,4 @@
             }
         }
     );
-}());
+})();

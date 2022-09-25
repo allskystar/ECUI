@@ -1,9 +1,7 @@
 /*
 @example
 <div ui="type:month-view;date:2009/04/17"></div>
-*/
-/*ignore*/
-/*
+
 @fields
 _bExtra     - 扩展的日期是否响应事件
 _bRowExtra  - 当前是否有行扩展
@@ -17,7 +15,6 @@ _oEnd       - 结束日期
 _oDate      - 当前选择日期
 _cSelected  - 当前选择的日历单元格
 */
-/*end*/
 (function () {
 //{if 0}//
     var core = ecui,
@@ -42,7 +39,7 @@ _cSelected  - 当前选择的日历单元格
         'ui-monthview',
         function (el, options) {
             ui.Control.call(this, el, options);
-/*ignore*/
+
             this._bExtra = options.extra !== 'disable';
             if (options.begin) {
                 this._oBegin = new Date(options.begin);
@@ -56,7 +53,7 @@ _cSelected  - 当前选择的日历单元格
             if (options.date) {
                 this._oDate = new Date(options.date + ' 00:00:00');
             }
-/*end*/
+
             this._aCells = this.$initView();
         },
         {
@@ -393,4 +390,4 @@ _cSelected  - 当前选择的日历单元格
         },
         ui.Control.defineProperty('selected')
     );
-}());
+})();

@@ -1,3 +1,14 @@
+//{if $css}//
+__ControlStyle__('\
+.ui-full-screen {\
+    position: fixed !important;\
+    top: 0px !important;\
+    left: 0px !important;\
+    .width100rate();\
+    .height100rate();\
+}\
+');
+//{/if}//
 /*
 模拟系统消息框。
 */
@@ -5,13 +16,12 @@
 //{if 0}//
     var core = ecui,
         dom = core.dom,
-        ui = core.ui,
         util = core.util,
 
         ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined;
 //{/if}//
     var fullScreen;
-   
+
     function requestFullScreen() {
         if (document.body.requestFullscreen) {
             document.body.requestFullscreen();
@@ -22,7 +32,7 @@
         } else if (document.body.msRequestFullScreen) {
             document.body.msRequestFullScreen();
         } else {
-            console.warn('浏览器暂不支持全屏');
+            console.warn('The browser doesn\'t support fullscreen');
         }
     }
 
@@ -85,4 +95,4 @@
             core.repaint();
         }
     };
-}());
+})();

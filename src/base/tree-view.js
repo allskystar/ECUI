@@ -13,15 +13,12 @@
         <li>孙节点三</li>
     </ul>
 </ul>
-*/
-/*ignore*/
-/*
+
 @fields
 _bCollapsed    - 是否收缩子树
 _eChildren     - 子控件区域Element对象
 _aChildren     - 子控件集合
 */
-/*end*/
 (function () {
 //{if 0}//
     var core = ecui,
@@ -31,6 +28,16 @@ _aChildren     - 子控件集合
 //{/if}//
     var hovered;
 
+    function initChildren(tree) {
+        if (tree._aChildren[0] && !(tree._aChildren[0] instanceof ui.TreeView)) {
+            var children = tree._aChildren;
+            tree._aChildren = [];
+            children.forEach(function (item) {
+                tree.add(item);
+            });
+        }
+    }
+
     /**
      * 树视图控件刷新，根据子树视图控件的数量及显示的状态设置样式。
      * @private
@@ -38,8 +45,12 @@ _aChildren     - 子控件集合
      * @param {ecui.ui.TreeView} tree 树控件
      */
     function refresh(tree) {
-        if (tree._eContainer) {
-            tree.alterSubType(tree._aChildren.length ? (tree._bCollapsed ? 'collapsed' : 'expanded') : 'empty');
+        if (tree._eContainer !== null) {
+            if (tree._aChildren instanceof Array) {
+                tree.alterSubType(tree._aChildren.length ? (tree._bCollapsed ? 'collapsed' : 'expanded') : 'empty');
+            } else {
+                tree.alterSubType(tree._aChildren ? 'collapsed' : 'empty');
+            }
         }
     }
 
@@ -54,9 +65,7 @@ _aChildren     - 子控件集合
         ui.Control,
         'ui-treeview',
         function (el, options) {
-/*ignore*/
             this._bCollapsed = !!options.collapsed;
-/*end*/
             if (el.tagName === 'UL') {
                 dom.addClass(el, this.getUnitClass(ui.TreeView, 'children'));
 
@@ -81,7 +90,11 @@ _aChildren     - 子控件集合
                     this
                 );
             } else {
-                this._aChildren = [];
+                this._aChildren = options.children ? options.children instanceof Array ? options.children : +options.children : [];
+                if (this._aChildren > 0 || this._aChildren[0]) {
+                    this._eContainer = dom.create('UL', {className: this.getUnitClass(ui.TreeView, 'children')});
+                    this._bCollapsed = true;
+                }
             }
 
             refresh(this);
@@ -116,6 +129,9 @@ _aChildren     - 子控件集合
              * @override
              */
             $dispose: function () {
+                if (this._eContainer && !dom.contain(document.body, this._eContainer)) {
+                    core.dispose(this._eContainer);
+                }
                 this._eContainer = null;
                 ui.Control.prototype.$dispose.call(this);
             },
@@ -125,10 +141,15 @@ _aChildren     - 子控件集合
              * @protected
              */
             $expand: function () {
-                this._bCollapsed = false;
-                dom.removeClass(this._eContainer, 'ui-hide');
-                core.cacheAtShow();
-                refresh(this);
+                if (this._aChildren instanceof Array) {
+                    initChildren(this);
+                    this._bCollapsed = false;
+                    dom.removeClass(this._eContainer, 'ui-hide');
+                    core.cacheAtShow();
+                    refresh(this);
+                } else {
+                    // TODO: 动态取子树信息
+                }
             },
 
             /**
@@ -263,46 +284,49 @@ _aChildren     - 子控件集合
              * 添加子树视图控件。
              * @public
              *
-             * @param {string|ecui.ui.TreeView} item 子树视图控件的 html 内容/树视图控件
+             * @param {object|ecui.ui.TreeView} item 控件的初始化选项/树视图控件
              * @param {number} index 子树视图控件需要添加的位置序号，不指定将添加在最后
-             * @param {object} options 子树视图控件初始化选项
              * @return {ecui.ui.TreeView} 添加的树视图控件
              */
-            add: function (item, index, options) {
-                var list = this._aChildren,
-                    el;
+            add: function (item, index) {
+                if (this._aChildren instanceof Array) {
+                    // 动态树没有展开前不允许添加子节点
+                    initChildren(this);
 
-                if ('string' === typeof item) {
-                    el = dom.create('LI', {innerHTML: item});
-                    el.title = item;
-                    item = core.$fastCreate(this.constructor, el, null, Object.assign({}, options, {id: ''}, core.getOptions(el) || {}));
-                }
-
-                // 这里需要先 setParent，否则 getRoot 的值将不正确
-                if (!this._eContainer) {
-                    this._eContainer = dom.create('UL', {className: this.getPrimary() + '-children ' + this.getType() + '-children'});
-                    this.$insertContainer();
-                }
-                item.setParent(this);
-
-                if (item.getParent()) {
-                    el = item.getMain();
-                    util.remove(list, item);
-                    if (list[index]) {
-                        dom.insertBefore(el, list[index].getMain());
-                        list.splice(index, 0, item);
-                    } else {
-                        this._eContainer.appendChild(el);
-                        list.push(item);
+                    if (!(item instanceof ui.TreeView)) {
+                        if (!item.main) {
+                            item.main = dom.create('LI', {innerHTML: item[this.TEXTNAME || '#text']});
+                            item.main.title = item[this.TEXTNAME || '#text'];
+                        }
+                        item = core.$fastCreate(this.constructor, item.main, null, Object.assign({}, item, {id: ''}));
                     }
-                    if (item._eContainer) {
-                        item.$insertContainer();
+
+                    // 这里需要先 setParent，否则 getRoot 的值将不正确
+                    if (!this._eContainer) {
+                        this._eContainer = dom.create('UL', {className: this.getUnitClass(ui.TreeView, 'children')});
+                        this.$insertContainer();
                     }
+                    item.setParent(this);
+
+                    if (item.getParent()) {
+                        var el = item.getMain();
+                        util.remove(this._aChildren, item);
+                        if (this._aChildren[index]) {
+                            dom.insertBefore(el, this._aChildren[index].getMain());
+                            this._aChildren.splice(index, 0, item);
+                        } else {
+                            this._eContainer.appendChild(el);
+                            this._aChildren.push(item);
+                        }
+                        if (item._eContainer) {
+                            item.$insertContainer();
+                        }
+                    }
+
+                    refresh(this);
+
+                    return item;
                 }
-
-                refresh(this);
-
-                return item;
             },
 
             /**
@@ -311,7 +335,7 @@ _aChildren     - 子控件集合
              */
             collapse: function () {
                 if (this._eContainer && !this._bCollapsed) {
-                    this.$collapse();
+                    core.dispatchEvent(this, 'collapse');
                 }
             },
 
@@ -321,7 +345,7 @@ _aChildren     - 子控件集合
              */
             expand: function () {
                 if (this._eContainer && this._bCollapsed) {
-                    this.$expand();
+                    core.dispatchEvent(this, 'expand');
                 }
             },
 
@@ -330,11 +354,19 @@ _aChildren     - 子控件集合
              * @public
              *
              * @param {Function} fn 遍历时用于节点处理的函数
+             * @param {object} thisArg this指针
              */
-            forEach: function (fn) {
-                for (var i = 0, nodes = [this], node; node = nodes[i++]; ) {
-                    fn(node);
-                    nodes = nodes.concat(node._aChildren);
+            forEach: function (fn, thisArg) {
+                for (var i = 0, nodes = [this], floor = 0, len = 1, node; (node = nodes[i++]);) {
+                    fn.call(thisArg, node, floor);
+                    if (node._aChildren instanceof Array) {
+                        initChildren(node);
+                        Array.prototype.push.apply(nodes, node._aChildren);
+                    }
+                    if (i === len) {
+                        len = nodes.length;
+                        floor++;
+                    }
                 }
             },
 
@@ -346,6 +378,9 @@ _aChildren     - 子控件集合
              * @return {ecui.ui.TreeView} 树视图控件列表
              */
             getChild: function (index) {
+                if (this._aChildren instanceof Array) {
+                    initChildren(this);
+                }
                 return this._aChildren[index] || null;
             },
 
@@ -356,7 +391,11 @@ _aChildren     - 子控件集合
              * @return {Array} 树视图控件列表
              */
             getChildren: function () {
-                return this._aChildren.slice();
+                if (this._aChildren instanceof Array) {
+                    initChildren(this);
+                    return this._aChildren.slice();
+                }
+                return [];
             },
 
             /**
@@ -393,19 +432,49 @@ _aChildren     - 子控件集合
              * @return {boolean} true 表示子树区域收缩，false 表示子树区域展开
              */
             isCollapsed: function () {
-                return !this._eContainer || !this._aChildren.length || this._bCollapsed;
+                return !this._eContainer || !this._aChildren || !this._aChildren.length || this._bCollapsed;
             },
 
             /**
-             * 删除当前树视图控件的所有子树视图控件。
+             * 移除一个子选项。
              * @public
              *
-             * @param {number} index 需要移除的项的序号
+             * @param {number} index 需要移除的选项序号
+             * @return {ecui.ui.TreeView|object} 子树控件或数据项
              */
             remove: function (index) {
-                this._aChildren[index].setParent();
+                if (this._aChildren instanceof Array) {
+                    var item = this._aChildren[index];
+                    if (item) {
+                        if (item instanceof ui.TreeView) {
+                            item.setParent();
+                        } else {
+                            this._aChildren.splice(index, 1);
+                        }
+                    }
+                    return item;
+                }
+                return null;
+            },
+
+            /**
+             * 移除所有子选项控件。
+             * @public
+             *
+             * @param {boolean} dispose 选项控件是否在移除过程中自动释放
+             */
+            removeAll: function (dispose) {
+                if (this._aChildren[0] instanceof ui.TreeView) {
+                    this._aChildren.forEach(function (item) {
+                        item.setParent();
+                        if (dispose) {
+                            item.dispose();
+                        }
+                    });
+                }
+                this._aChildren = [];
             }
         },
         ui.Control.defineProperty('selected')
     );
-}());
+})();

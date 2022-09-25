@@ -9,21 +9,21 @@
         ui = core.ui;
 //{/if}//
     var Calendar = core.inherits(
-            ui.Calendar,
-            true,
-            {
-                /**
-                 * @override
-                 */
-                $dateclick: function (event) {
-                    ui.Calendar.prototype.$dateclick.call(this, event);
-                    var parent = this.getParent();
-                    parent.setValue(event.date);
-                    core.dispatchEvent(parent, 'input', event);
-                    this.hide();
-                }
+        ui.Calendar,
+        true,
+        {
+            /**
+             * @override
+             */
+            $dateclick: function (event) {
+                ui.Calendar.prototype.$dateclick.call(this, event);
+                var parent = this.getParent();
+                parent.setValue(event.date);
+                core.dispatchEvent(parent, 'input', event);
+                this.hide();
             }
-        );
+        }
+    );
 
     /**
      * 日历输入框控件。
@@ -38,13 +38,13 @@
             this.getInput().readOnly = true;
 
             options = Object.assign(
-                    {},
-                    {
-                        extra: options.extra !== 'disable',
-                        begin: options.begin ? new Date(options.begin + ' 00:00:00') : undefined,
-                        end: options.end ? new Date(options.end + ' 00:00:00') : undefined,
-                    }
-                );
+                {},
+                {
+                    extra: options.extra !== 'disable',
+                    begin: options.begin ? new Date(options.begin + ' 00:00:00') : undefined,
+                    end: options.end ? new Date(options.end + ' 00:00:00') : undefined,
+                }
+            );
 
             this.setPopup(
                 core.getSingleton(Calendar),
@@ -73,7 +73,7 @@
              * @override
              */
             setValue: function (value) {
-                if ('number' === typeof value) {
+                if (typeof value === 'number') {
                     value = new Date(value);
                 }
                 if (value instanceof Date) {
@@ -84,4 +84,4 @@
         },
         ui.Popup
     );
-}());
+})();

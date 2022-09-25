@@ -1,3 +1,25 @@
+//{if $css}//
+__ControlStyle__('\
+.ui-mobile-listview {\
+    touch-action: none !important;\
+\
+    .ui-mobile-listview-header {\
+    	position: relative;\
+        .m-width100rate();\
+\
+        .ui-mobile-listview-title {\
+        	position: absolute;\
+        	width: 100%;\
+        	bottom: 0px;\
+        }\
+    }\
+\
+    .ui-mobile-listview-footer {\
+        .m-width100rate();\
+    }\
+}\
+');
+//{/if}//
 /*
 @example
 <ul ui="type:m-list-view">
@@ -482,7 +504,7 @@ _nBottomIndex  - 下部隐藏的选项序号
              */
             remove: function (item) {
                 if (ieVersion < 9) {
-                    var index = 'number' === typeof item ? item : this.getItems().indexOf(item);
+                    var index = typeof item === 'number' ? item : this.getItems().indexOf(item);
                     item = this.getItem(index);
                     if (item) {
                         var height = item.getHeight();
@@ -510,7 +532,7 @@ _nBottomIndex  - 下部隐藏的选项序号
                     var top = ui.MScroll.Methods.getY.call(this);
 
                     if (top < -screen.availHeight * 1.5) {
-                        for (; top < -screen.availHeight * 1.5; ) {
+                        for (; top < -screen.availHeight * 1.5;) {
                             var item = this.getItem(this._nTopIndex++),
                                 height = item.getHeight();
 
@@ -519,7 +541,7 @@ _nBottomIndex  - 下部隐藏的选项序号
                             top += height;
                         }
                     } else if (top > -screen.availHeight) {
-                        for (; top > -screen.availHeight && this._nTopIndex; ) {
+                        for (; top > -screen.availHeight && this._nTopIndex;) {
                             item = this.getItem(--this._nTopIndex);
                             height = item.getHeight();
 
@@ -531,7 +553,7 @@ _nBottomIndex  - 下部隐藏的选项序号
 
                     top = this.getHeight() - this.$$bodyHeight - y + this._nBottomHidden;
                     if (top < -screen.availHeight * 1.5) {
-                        for (; top < -screen.availHeight * 1.5; ) {
+                        for (; top < -screen.availHeight * 1.5;) {
                             item = this.getItem(--this._nBottomIndex);
                             height = item.getHeight();
 
@@ -541,7 +563,7 @@ _nBottomIndex  - 下部隐藏的选项序号
                         }
                     } else if (top > -screen.availHeight) {
                         var length = this.getLength();
-                        for (; top > -screen.availHeight && this._nBottomIndex < length; ) {
+                        for (; top > -screen.availHeight && this._nBottomIndex < length;) {
                             item = this.getItem(this._nBottomIndex++);
                             height = item.getHeight();
 
@@ -583,4 +605,4 @@ _nBottomIndex  - 下部隐藏的选项序号
             }
         }
     );
-}());
+})();

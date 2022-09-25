@@ -137,7 +137,7 @@ _aLabel    - 标签信息数组
              * @param {string} name 书签名称
              */
             moveTo: function (name) {
-                for (var i = 0, item; item = this._aLabel[i++]; ) {
+                for (var i = 0, item; (item = this._aLabel[i++]);) {
                     if (item.el.innerHTML === name) {
                         this.setPosition(0, -item.top);
                         break;
@@ -150,7 +150,7 @@ _aLabel    - 标签信息数组
              */
             setPosition: function (x, y) {
                 ui.MPanel.prototype.setPosition.call(this, x, y);
-                for (var selected = this._aLabel[0], i = 1, next; next = this._aLabel[i++]; ) {
+                for (var selected = this._aLabel[0], i = 1, next; (next = this._aLabel[i++]);) {
                     if (next.top > -y) {
                         break;
                     }
@@ -169,4 +169,4 @@ _aLabel    - 标签信息数组
             }
         }
     );
-}());
+})();

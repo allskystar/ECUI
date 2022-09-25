@@ -1,13 +1,10 @@
 /*
 @example
 <div ui="type:clock;id:demo"></div>
-*/
-/*ignore*/
-/*
+
 @fields
 _sFormat        - 显示格式
 */
-/*end*/
 (function () {
 //{if 0}//
     var core = ecui,
@@ -23,12 +20,12 @@ _sFormat        - 显示格式
     ui.Clock = core.inherits(
         ui.Control,
         function (el, options) {
-/*ignore*/
-            this._sFormat = options.format || '{0}:{1}:{2}';
-/*end*/
+            this._sFormat = options.format || this.FORMAT;
             ui.Control.call(this, el, options);
         },
         {
+            FORMAT: 'HH:mm:ss',
+
             /**
              * @override
              */
@@ -54,8 +51,7 @@ _sFormat        - 显示格式
 
                 this.stop = util.timer(
                     function () {
-                        var date = new Date();
-                        this.getBody().innerHTML = util.formatString(this._sFormat, ('0' + date.getHours()).slice(-2), ('0' + date.getMinutes()).slice(-2), ('0' + date.getSeconds()).slice(-2), ('000' + date.getMilliseconds()).slice(-4));
+                        this.setContent(util.formatDate(new Date(), this._sFormat));
                     },
                     -1,
                     this
@@ -69,4 +65,4 @@ _sFormat        - 显示格式
             stop: util.blank
         }
     );
-}());
+})();

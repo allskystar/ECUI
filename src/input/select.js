@@ -1,3 +1,26 @@
+//{if $css}//
+__ControlStyle__('\
+.ui-select {\
+    position: relative;\
+\
+    .ui-select-text {\
+        position: absolute !important;\
+        overflow: hidden !important;\
+    }\
+\
+    input {\
+        position: absolute !important;\
+        z-index: -1 !important;\
+        opacity: 0 !important;\
+    }\
+}\
+\
+.ui-select-options {\
+    overflow: auto !important;\
+    overflow-x: hidden !important;\
+}\
+');
+//{/if}//
 /*
 @example
 <select ui="type:select;placeholder:请选择" name="sex">
@@ -233,4 +256,4 @@ _nOptionSize  - 下接选择框可以用于选择的条目数量
         ui.Popup,
         ui.Control.defineProperty('selecting')
     );
-}());
+})();

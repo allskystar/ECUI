@@ -1,3 +1,10 @@
+//{if $css}//
+__ControlStyle__('\
+.ui-button {\
+    .inline-block();\
+}\
+');
+//{/if}//
 /*
 @example
 <div ui="type:button;id:demo">按钮</div>
@@ -45,5 +52,5 @@
         }
     );
 //{if 0}//
-}());
+})();
 //{/if}//

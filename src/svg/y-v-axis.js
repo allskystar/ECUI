@@ -194,5 +194,5 @@ YVBarAxisControl.render(options);
         }
     );
 //{if 0}//
-}());
+})();
 //{/if}//

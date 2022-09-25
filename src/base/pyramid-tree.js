@@ -1,3 +1,94 @@
+//{if $css}//
+__ControlStyle__('\
+.ui-pyramid-tree {\
+    position: relative;\
+    text-align: left;\
+    font-size: 0;\
+    white-space: nowrap;\
+\
+    ul,\
+    li {\
+        position: relative;\
+        display: inline-block;\
+        vertical-align: top;\
+        white-space: nowrap;\
+    }\
+    ul {\
+        padding: 30px 0px;\
+    }\
+    ul:before {\
+        content: " ";\
+        position: absolute;\
+        top: 0;\
+        left: 0;\
+        height: 1px;\
+        width: 100%;\
+    }\
+    li:first-child:last-child:after,\
+    li:before {\
+        content: " ";\
+        position: absolute;\
+        top: -30px;\
+        left: 0;\
+        width: 100%;\
+        height: 1px;\
+        z-index: 1;\
+    }\
+    li:first-child:before {\
+        width: 50%;\
+        z-index: 2;\
+    }\
+    li:last-child:before {\
+        width: calc(~"50% - 1px");\
+        right: 0;\
+        left: unset;\
+        z-index: 2;\
+    }\
+    li:first-child:last-child:after {\
+        width: calc(~"50% - 1px");\
+        right: 0;\
+        z-index: 2;\
+    }\
+}\
+.ui-pyramid-tree-reverse {\
+\
+    ul,\
+    li {\
+        vertical-align: bottom;\
+    }\
+    li:before {\
+        bottom: -30px;\
+        top: unset;\
+    }\
+\
+    li:first-child:last-child:after {\
+        bottom: -30px;\
+        top: unset;\
+    }\
+    .ui-pyramid-tree-floor-0 {\
+        .tree-item:before {\
+            display: block;\
+        }\
+        .tree-item:after {\
+            display: none;\
+        }\
+    }\
+    .tree-item:before {\
+        top: -31px;\
+    }\
+    .tree-item:after {\
+        bottom: -31px;\
+    }\
+\
+    ul:before {\
+        top: unset;\
+        bottom: 0;\
+    }\
+}\
+');
+//{/if}//
+
+
 /*
 @example
 <div ui="type:pyramid-tree">
@@ -15,18 +106,15 @@
         </ul>
     </ul>
 </div>
-*/
-/*ignore*/
-/*
+
 @fields
-_aFloors - 层元素的数组
-_nPos    - 节点临时的位置，以根节点为0
+_bReverse - 金字塔是否翻转
+_nPos     - 节点临时的位置，以根节点为0
+_aFloors  - 层元素的数组
 */
-/*end*/
 (function () {
 //{if 0}//
     var core = ecui,
-        util = core.util,
         ui = ecui.ui,
         dom = ecui.dom;
 //{/if}//
@@ -83,6 +171,7 @@ _nPos    - 节点临时的位置，以根节点为0
         for (var maxFloor = floor; floor; floor--) {
             lastNode = null;
 
+            // eslint-disable-next-line no-loop-func
             nodes[floor].forEach(function (currNode) {
                 if (!currNode.isCollapsed()) {
                     var children = currNode.getChildren(),
@@ -106,8 +195,10 @@ _nPos    - 节点临时的位置，以根节点为0
         }
 
         for (; floor <= maxFloor; floor++) {
+            // eslint-disable-next-line no-redeclare
             var lastNode = null;
 
+            // eslint-disable-next-line no-loop-func
             nodes[floor].forEach(function (currNode) {
                 var el = currNode.getMain(),
                     parent = dom.parent(el);
@@ -121,22 +212,30 @@ _nPos    - 节点临时的位置，以根节点为0
         }
     }
 
+    function initFloor(pyramid, floor) {
+        if (!pyramid._aFloors[floor]) {
+            pyramid._aFloors[floor] = dom.create({className: 'ui-pyramid-tree-floor ui-pyramid-tree-floor-' + floor});
+            dom[pyramid._bReverse ? 'insertBefore' : 'insertAfter'](pyramid._aFloors[floor], pyramid._aFloors[floor - 1]);
+        }
+    }
+
     /**
      * 金字塔控件。
      * options 属性：
      * reverse      是否为倒金字塔s
      * @control
      */
-     ui.PyramidTree = core.inherits(
+    ui.PyramidTree = core.inherits(
         ui.Control,
         'ui-pyramid-tree',
         function (el, options) {
             ui.Control.call(this, el, options);
+            this._bReverse = !!options.reverse;
             if (options.reverse) {
                 dom.addClass(el, 'ui-pyramid-tree-reverse');
             }
             el = dom.first(el);
-            this._uTree = core.$fastCreate(this.TreeView, el, this, Object.assign({}, core.getOptions(el), {reverse: options.reverse}));
+            this._uTree = core.$fastCreate(this.TreeView, el, this, Object.assign({}, core.getOptions(el)));
         },
         {
             /**
@@ -150,14 +249,13 @@ _nPos    - 节点临时的位置，以根节点为0
                         options.floor++;
                     } else {
                         options.root = core.findControl(dom.parent(el));
-                        dom.insertHTML(el, 'afterEnd', '<div class="ui-pyramid-tree-floor ui-pyramid-tree-floor-0"><ul></ul></div>')
+                        dom.insertHTML(el, 'afterEnd', '<div class="ui-pyramid-tree-floor ui-pyramid-tree-floor-0"><ul></ul></div>');
                         options.root._aFloors = [el.nextSibling];
                         options.floor = 1;
                     }
 
-                    if (!options.root._aFloors[options.floor] && el.tagName === 'UL') {
-                        options.root._aFloors[options.floor] = dom.create({className: 'ui-pyramid-tree-floor ui-pyramid-tree-floor-' + options.floor});
-                        dom[options.reverse ? 'insertBefore' : 'insertAfter'](options.root._aFloors[options.floor], options.root._aFloors[options.floor - 1]);
+                    if (el.tagName === 'UL') {
+                        initFloor(options.root, options.floor);
                     }
 
                     ui.TreeView.call(this, el, options);
@@ -204,31 +302,55 @@ _nPos    - 节点临时的位置，以根节点为0
                     $hide: function () {
                         this.forEach(function (item) {
                             ui.TreeView.prototype.$hide.call(item);
-                        })
+                        });
                     },
 
                     /**
                      * @override
                      */
                     $insertContainer: function () {
-                        if (this.isReady()) {
-                            for (var control = this, floor = 0, parent;; control = parent) {
-                                parent = control.getParent();
-                                if (parent instanceof ui.PyramidTree) {
-                                    break;
+                        function clear(node) {
+                            var parent = pyramid._aFloors[list.splice(0, 1)[0] + 1];
+                            list.forEach(function (item) {
+                                if ((item = item.getContainer())) {
+                                    parent.insertBefore(item, node);
                                 }
-                                floor++;
-                            }
-                            if (floor > 1) {
-                                parent = this.getParent();
-                                var index = 0;
-                                parent.getChildren().forEach(function (item) {
-                                    if (this === item) {
-                                        control._aFloors[floor].insertBefore(this.getContainer(), dom.children(control._aFloors[floor])[index]);
-                                    } else if (item.getContainer()) {
-                                        index++;
+                            });
+                            list = undefined;
+                        }
+
+                        if (this.isReady()) {
+                            var root = this.getRoot(),
+                                pyramid = root.getParent(),
+                                list;
+                            if (pyramid && pyramid instanceof ui.PyramidTree) {
+                                // 不在金字塔树节点上的节点不处理
+                                root.forEach(function (node, floor) {
+                                    if (list === undefined) {
+                                        // 找到当前层的第一个节点
+                                        if (this.contain(node)) {
+                                            list = [floor, node];
+                                        }
+                                    } else if (list[0] === floor) {
+                                        if (this.contain(node)) {
+                                            // 找到当前层的所有节点
+                                            list.push(node);
+                                        } else if ((node = node.getContainer())) {
+                                            // 将当前层的所有节点插入指定的位置
+                                            clear(node);
+                                        }
+                                    } else {
+                                        // 当前层到末尾也没有找到合适的位置，直接插入尾部
+                                        initFloor(pyramid, floor);
+                                        clear(null);
                                     }
                                 }, this);
+
+                                if (list) {
+                                    // 当前层到末尾也没有找到合适的位置，直接插入尾部
+                                    initFloor(pyramid, list[0] + 1);
+                                    clear(null);
+                                }
                             }
                         }
                     }
@@ -244,4 +366,4 @@ _nPos    - 节点临时的位置，以根节点为0
             }
         }
     );
-}());
+})();

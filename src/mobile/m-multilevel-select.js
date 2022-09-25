@@ -159,7 +159,7 @@ _aSelect - 全部的下拉框控件列表
                             }
 
                             // 清除后续多级联动项
-                            for (; select = parent._aSelect[++index]; ) {
+                            for (; (select = parent._aSelect[++index]);) {
                                 select.hide();
                             }
                         }
@@ -202,5 +202,5 @@ _aSelect - 全部的下拉框控件列表
         }
     );
 //{if 0}//
-}());
+})();
 //{/if}//

@@ -1,14 +1,18 @@
+//{if $css}//
+__ControlStyle__('\
+.ui-image {\
+    position: absolute;\
+}\
+');
+//{/if}//
 /*
 @example
 <img ui="type:image;id:demo">
-*/
-/*ignore*/
-/*
+
 @fields
 _nMinWidth 原始的宽度
 _nRatio    原始的宽高比例
 */
-/*end*/
 (function () {
 //{if 0}//
     var core = ecui,
@@ -96,4 +100,4 @@ _nRatio    原始的宽高比例
             }
         }
     );
-}());
+})();

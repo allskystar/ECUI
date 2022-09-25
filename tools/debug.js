@@ -43,7 +43,7 @@
         }
         oldReadyFn.call(this, options);
     };
-}());*/
+})();*/
 
 (function () {
     /**
@@ -59,7 +59,7 @@
         waits = {},
         oldLoadScriptFn = function (url, callback, options) {
             options.onsuccess = function (text) {
-                eval(text);
+                eval('(function(NS){' + text + '}(ecui.ns._' + moduleName.replace(/[._]/g, '-').replace(/\//g, '_') + '));');
                 callback();
             };
             options.onerror = function () {
@@ -136,12 +136,12 @@
         document.head.appendChild(el);
     }
 
-    ecui.io.loadScript = function (url, callback, options) {
+    ecui.io.loadScript = function (url, options) {
         var name = url.split('/');
 
         if (name.pop() === '_define_.js') {
             moduleName = name.length ? name.join('/') + '/' : '';
-            moduleCallback = callback;
+            moduleCallback = options.onsuccess;
             moduleLoads = [['js', '_layer_.js']];
 
             ecui.io.ajax(moduleName + '_define_.css', {
@@ -149,16 +149,18 @@
                 onsuccess: function (cssText) {
                     var moduleClasses = document.body.className,
                         newModuleClass = 'module-' +moduleName.slice(0, -1).replace(/[._]/g, '-').replace(/\//g, '_');
-                    
+
                     document.body.className = moduleClasses.replace(/module-[^\s]*/g, '') + ' ' + newModuleClass;
                     createStyle('.' + newModuleClass + '{' + cssText + '}');
                     ecui.io.ajax(moduleName + '_define_.html', {
                         cache: true,
                         onsuccess: function (data) {
+                            ecui.esr.getEngine(moduleName).setNamespace(ecui.ns['_' + moduleName.replace(/[._]/g, '-').replace(/\//g, '_')].data);
                             ecui.esr.getEngine(moduleName).compile(data.replace(/ui="type:NS\./g, 'ui="type:ecui.ns._' + moduleName.replace(/[._]/g, '-').replace(/\//g, '_') + '.ui.'));
                             oldLoadScriptFn.call(this, url, load, options);
                         },
                         onerror: function () {
+                            ecui.esr.getEngine(moduleName).setNamespace(ecui.ns['_' + moduleName.replace(/[._]/g, '-').replace(/\//g, '_')].data);
                             oldLoadScriptFn.call(this, url, load, options);
                         }
                     });
@@ -244,6 +246,7 @@
 
                         ecui.io.ajax(url + '.css', {
                             cache: true,
+                            // eslint-disable-next-line no-shadow
                             onsuccess: function (text) {
                                 createStyle('#' + moduleName.replace(/[._]/g, '-').replace(/\//g, '_') + filename.replace(/[._]/g, '-') + '{' + text + '}');
 
@@ -274,19 +277,20 @@
         var filename = moduleLoads[0][1];
         var index = filename.lastIndexOf('.');
 
+        // eslint-disable-next-line default-case
         switch (moduleLoads[0][0]) {
-            case 'js':
-                oldLoadScriptFn(moduleName + filename, load, {cache: true});
-                break;
-            case 'class':
-                oldLoadScriptFn(moduleName + 'class.' + filename + '.js', load, {cache: true});
-                break;
-            case 'layer':
-                loadLayer(moduleName + filename.slice(0, index + 1).replace(/\./g, '/') + 'layer.' + filename.slice(index + 1));
-                break;
-            case 'route':
-                loadRoute(moduleName + filename.slice(0, index + 1).replace(/\./g, '/') + 'route.' + filename.slice(index + 1));
-                break;
+        case 'js':
+            oldLoadScriptFn(moduleName + filename, load, {cache: true});
+            break;
+        case 'class':
+            oldLoadScriptFn(moduleName + 'class.' + filename + '.js', load, {cache: true});
+            break;
+        case 'layer':
+            loadLayer(moduleName + filename.slice(0, index + 1).replace(/\./g, '/') + 'layer.' + filename.slice(index + 1));
+            break;
+        case 'route':
+            loadRoute(moduleName + filename.slice(0, index + 1).replace(/\./g, '/') + 'route.' + filename.slice(index + 1));
+            break;
         }
 
         moduleLoads.splice(0, 1);
@@ -314,4 +318,4 @@
     //         }
     //     });
     // }, -3000);
-}());
+})();

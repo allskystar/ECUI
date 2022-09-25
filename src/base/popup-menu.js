@@ -1,3 +1,10 @@
+//{if $css}//
+__ControlStyle__('\
+.ui-popup-menu {\
+    position: absolute;\
+}\
+');
+//{/if}//
 /*
 @example
 <ul ui="type:popup-menu">
@@ -31,9 +38,7 @@
         'ui-popup-menu',
         function (el, options) {
             ui.Control.call(this, el, options);
-/*ignore*/
             this._bLeft = true;
-/*end*/
         },
         {
             /**
@@ -142,5 +147,5 @@
         ui.Items
     );
 //{if 0}//
-}());
+})();
 //{/if}//

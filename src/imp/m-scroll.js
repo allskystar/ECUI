@@ -1,3 +1,24 @@
+//{if $css}//
+__ControlStyle__('\
+#ECUI-KEYBOARD {\
+    position: absolute;\
+    bottom: 0px;\
+}\
+\
+.ui-mobile-scroll {\
+    position: relative;\
+    overflow: hidden !important;\
+}\
+\
+.ui-mobile-scroll-body {\
+    position: relative;\
+    overflow: visible !important;\
+    min-height: 100%;\
+    transform: translateZ(0px);\
+    .m-width100rate();\
+}\
+');
+//{/if}//
 /*
 滚动操作集合。
 */
@@ -944,6 +965,6 @@
                 view.bottom -= keyboardHeight;
                 return view;
             };
-        }());
+        })();
     }
-}());
+})();

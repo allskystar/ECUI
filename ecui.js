@@ -1,8 +1,8 @@
 // 为方便beyond compare比对差异提供的函数，仅在2.x.x版本中使用
 function _interface(name, superClass, methods) {
     var inf = {
-            NAME: name
-        };
+        NAME: name
+    };
     if (superClass instanceof Array) {
         inf.SUPER = superClass;
         inf.Methods = methods;
@@ -13,15 +13,43 @@ function _interface(name, superClass, methods) {
         inf.constructor = inf.Methods.constructor;
         delete inf.Methods.constructor;
     }
+    if (inf.Methods.$dispose) {
+        var $dispose = inf.Methods.$dispose;
+    }
+    inf.Methods.$dispose = function () {
+        if ($dispose) {
+            $dispose.call(this);
+        }
+        delete this[inf.NAME];
+        delete this[inf.NAME + 'Data'];
+    };
     return inf;
 }
+//{if 0}//
+function __ControlStyle__(cssText) {
+    cssText = "@import (less) 'ecui.css';\n" + cssText;
 
+    var el = document.createElement('STYLE');
+    el.setAttribute('type', 'text/less');
+    if (ecui.ie < 10) {
+        var reg = ecui.ie > 6 ? new RegExp('[_' + (ecui.ie > 7 ? '\\*\\+' : '') + ']\\w+:[^;}]+[;}]', 'g') : null;
+        if (reg) {
+            cssText = cssText.replace(reg, function (match) {
+                return match.slice(-1) === '}' ? '}' : '';
+            });
+        }
+        el.setAttribute('lessText', cssText);
+    } else {
+        el.innerHTML = cssText;
+    }
+    document.head.appendChild(el);
+}
+//{/if}//
 var ecui;
 (function () {
     document.write('<script type="text/javascript" src="src/adapter.js"></script>');
-    document.write('<script type="text/javascript" src="src/effect.js"></script>');
-    document.write('<script type="text/javascript" src="src/etpl.js"></script>');
     document.write('<script type="text/javascript" src="src/core.js"></script>');
+    document.write('<script type="text/javascript" src="src/etpl.js"></script>');
     document.write('<script type="text/javascript" src="src/control.js"></script>');
     document.write('<script type="text/javascript" src="src/input/form-input.js"></script>');
     document.write('<script type="text/javascript" src="src/esr.js"></script>');
@@ -34,8 +62,10 @@ var ecui;
     document.write('<script type="text/javascript" src="src/imp/m-scroll.js"></script>');
     document.write('<script type="text/javascript" src="src/imp/m-popup.js"></script>');
     document.write('<script type="text/javascript" src="src/imp/m-options.js"></script>');
+    document.write('<script type="text/javascript" src="src/imp/resource.js"></script>');
 
     document.write('<script type="text/javascript" src="src/base/button.js"></script>');
+    document.write('<script type="text/javascript" src="src/base/options.js"></script>');
     document.write('<script type="text/javascript" src="src/base/popup-menu.js"></script>');
     document.write('<script type="text/javascript" src="src/base/image.js"></script>');
     document.write('<script type="text/javascript" src="src/base/signature.js"></script>');
@@ -65,6 +95,8 @@ var ecui;
     document.write('<script type="text/javascript" src="src/input/label.js"></script>');
     document.write('<script type="text/javascript" src="src/input/text.js"></script>');
     document.write('<script type="text/javascript" src="src/input/number.js"></script>');
+    document.write('<script type="text/javascript" src="src/input/phone.js"></script>');
+    document.write('<script type="text/javascript" src="src/input/email.js"></script>');
     document.write('<script type="text/javascript" src="src/input/finance.js"></script>');
     document.write('<script type="text/javascript" src="src/input/time.js"></script>');
     document.write('<script type="text/javascript" src="src/input/checkbox.js"></script>');
@@ -76,13 +108,16 @@ var ecui;
     document.write('<script type="text/javascript" src="src/input/listbox.js"></script>');
     document.write('<script type="text/javascript" src="src/input/calendar-input.js"></script>');
     document.write('<script type="text/javascript" src="src/input/date-range.js"></script>');
-    document.write('<script type="text/javascript" src="src/input/multilevel-select.js"></script>');
     document.write('<script type="text/javascript" src="src/input/multi-select.js"></script>');
     document.write('<script type="text/javascript" src="src/input/couple-slider.js"></script>');
     document.write('<script type="text/javascript" src="src/input/checkbox-tree.js"></script>');
 
     document.write('<script type="text/javascript" src="src/complex/pagination.js"></script>');
     document.write('<script type="text/javascript" src="src/complex/schema-tree.js"></script>');
+    document.write('<script type="text/javascript" src="src/complex/multilevel.js"></script>');
+    document.write('<script type="text/javascript" src="src/complex/cascader.js"></script>');
+    document.write('<script type="text/javascript" src="src/complex/wang-editor.js"></script>');
+    document.write('<script type="text/javascript" src="src/complex/cities.js"></script>');
 
     document.write('<script type="text/javascript" src="src/mobile/m-panel.js"></script>');
     document.write('<script type="text/javascript" src="src/mobile/m-select.js"></script>');
@@ -101,11 +136,12 @@ var ecui;
     document.write('<script type="text/javascript" src="src/extend/anchor.js"></script>');
     document.write('<script type="text/javascript" src="src/extend/clear.js"></script>');
     document.write('<script type="text/javascript" src="src/extend/link.js"></script>');
-    document.write('<script type="text/javascript" src="src/extend/messagebox.js"></script>');
     document.write('<script type="text/javascript" src="src/extend/ceiling.js"></script>');
-    document.write('<script type="text/javascript" src="src/extend/fullscreen.js"></script>');
+    document.write('<script type="text/javascript" src="src/extend/data.js"></script>');
 
-    document.write('<script type="text/javascript" src="src/bi/cities.js"></script>');
+    document.write('<script type="text/javascript" src="src/messagebox.js"></script>');
+    document.write('<script type="text/javascript" src="src/fullscreen.js"></script>');
+//{if 0}//
     document.write('<script type="text/javascript" src="src/bi/cropper.js"></script>');
     document.write('<script type="text/javascript" src="src/bi/date-time-input.js"></script>');
     document.write('<script type="text/javascript" src="src/bi/double-date-time-input.js"></script>');
@@ -119,7 +155,7 @@ var ecui;
 
     document.write('<script type="text/javascript" src="src/svg/svg.js"></script>');
     document.write('<script type="text/javascript" src="src/svg/y-v-axis.js"></script>');
-//{if 0}//
+
     var ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined;
     document.write('<script type="text/javascript" src="tools/debug.js"></script>');
     if (ieVersion < 9) {
@@ -128,4 +164,4 @@ var ecui;
     document.write('<script type="text/javascript" src="tools/less.js"></script>');
     document.write('<script type="text/javascript" src="tools/less-funcs.js"></script>');
 //{/if}//
-}());
+})();

@@ -1,3 +1,28 @@
+//{if $css}//
+__ControlStyle__('\
+.ui-mobile-photo-hotspot-image {\
+    position: fixed !important;\
+    z-index: 32100 !important;\
+}\
+\
+.ui-mobile-photo-hotspot-title {\
+    position: fixed !important;\
+    bottom: 0px;\
+    z-index: 32200 !important;\
+    .m-width100rate();\
+}\
+\
+.ui-mobile-photo-hotspot-text {\
+    float: left;\
+    .inline-block();\
+}\
+\
+.ui-mobile-photo-hotspot-count {\
+    float: right;\
+    .inline-block();\
+}\
+');
+//{/if}//
 /*
 @example
 <img ui="type:m-photo-hotspot">
@@ -285,4 +310,4 @@
     core.ready(function () {
         calcSize(ui.MPhotoHotspot.DEFAULT, ui.MPhotoHotspot.DEFAULT.width, ui.MPhotoHotspot.DEFAULT.height);
     });
-}());
+})();

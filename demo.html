@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-	<meta charset="UTF-8">
-	<title>样式规范</title>
+	<meta charset="utf-8">
+	<title>Demo</title>
     <!--[if lte IE 8]>
         <script type="text/javascript" src="ie-es5.js"></script>
     <![endif]-->
@@ -11,255 +11,72 @@
     <link rel="stylesheet/less" type="text/css" href="common.css">
     <script type="text/javascript" src="options.js"></script>
     <script type="text/javascript" src="ecui.js"></script>
-    <script>
-    ecui.onready = function () {
-        ecui.get('ttt').onclick = function () {
-            document.getElementById('click').innerHTML=Date.now();
-        };
-        ecui.get('ttt').onmousedown = function () {
-            document.getElementById('mousedown').innerHTML=Date.now();
-        };
-        ecui.get('ttt').onmouseup = function () {
-            document.getElementById('touchend').innerHTML=Date.now();
-        };
-    };
-    ecui.ui.NSBDateTime = ecui.inherits(
-      ecui.ui.BDateTime,
-      {
-        Options: ecui.inherits(
-          ecui.ui.BDateTime.prototype.Options,
-          {
-            TimeCalendar: ecui.inherits(
-              ecui.ui.BDateTime.prototype.Options.prototype.TimeCalendar,
-              {
-                FORMAT: 'HH:mm',
-                MRANGE: 15,
-                SRANGE: 30
-              }
-            )
-          }
-        )
-      }
-    )
-    </script>
     <style>
-
-.ui-calendar-input-options {
-    display: inline-block;
-    
-
-    .ui-calendar-header {
-        position: relative;
-        width: auto;
-        height: 45px;
-        line-height: 45px;
-        font-size: 0px;
-        border: 1px solid #cccccc;
-        text-align: center;
-        background: #ffffff;
-        margin-left: -12px;
-
-        .ui-button {
-            width: 60px;
-        }
-        .ui-button.ui-calendar-title {
-            width: 80px;
-        }
-    }
-    .ui-calendar {
-        width: auto;
-        font-size: 0;
-        padding: 0 12px;
-        background: #ffffff;
-        padding: 0;
-        .ui-monthview {
-            width: 234px;
-            display: inline-block;
-            vertical-align: middle;
-        }
-        .ui-listbox {
-            display: inline-block;
-            vertical-align: middle;
-            font-size: 14px;
-            width: 25%;
-            height: 240px;
-            overflow-y: auto;
-
-            .ui-item {
-                text-align: center;
-                height: 30px;
-                line-height: 30px;
-                cursor: pointer;
+        @keyframes test {
+            from {
+                top: 0px;
             }
-            .ui-item-hover {
-                color: #ffffff;
-                background-color: #368cda;
-            }
-
-            .ui-item-focus,
-            .ui-item-selected {
-                color: #368cda;
-                background-color: #ffffff;
+            to {
+                top: 200px;
             }
         }
-    }   
 
-    .options-content{
-        position: relative;
-        height:50px;
-        line-height:50px;
-        background:#fff;
-        border: 1px solid #cccccc;
-        border-top:none;
-
-        .time-title{
-            display: inline-block;
-            vertical-align: middle;
-            width:100px;
-            height:22px;
-            line-height:22px;
-            text-align: center;
-            border: 1px solid #acbaca;
-            border-right:none;
-            font-size:14px;
+        .test {
+            animation: test 1000ms;
         }
-        .clear{
-            position: absolute;
-            right: 100px;
-            display: inline-block;
-            vertical-align: middle;
-            font-size:14px;
-            color:rgba(81, 163, 81, 1);
-            cursor: pointer;
-            &:hover{
-                color:rgba(81,189, 81, 1);
-            }
+        .ui-wang-editor-editor {
+            height: 500px;
         }
-        .submit{
-            position: absolute;
-            right: 50px;
-            position: absolute;
-            display: inline-block;
-            vertical-align: middle;
-            padding-left:15px;
-            font-size:14px;
-            cursor: pointer;
-            color:rgba(81, 163, 81, 1);
-            &:hover{
-                color:rgba(81,189, 81, 1);
-            }
+        cite.var {
+            color: black;
+            background: #eee;
+            margin-left: 2px;
         }
-    }
-}
-
-
-.ui-calendar-input-options {
-  display: inline-block;
-}
-.ui-calendar-input-options .ui-calendar-header {
-  position: relative;
-  width: auto;
-  height: 45px;
-  line-height: 45px;
-  font-size: 0px;
-  border: 1px solid #cccccc;
-  text-align: center;
-  background: #ffffff;
-  margin-left: -12px;
-}
-.ui-calendar-input-options .ui-calendar-header .ui-button {
-  width: 60px;
-}
-.ui-calendar-input-options .ui-calendar-header .ui-button.ui-calendar-title {
-  width: 80px;
-}
-.ui-calendar-input-options .ui-calendar {
-  width: auto;
-  font-size: 0;
-  padding: 0 12px;
-  background: #ffffff;
-  padding: 0;
-}
-.ui-calendar-input-options .ui-calendar .ui-monthview {
-  width: 234px;
-  display: inline-block;
-  vertical-align: middle;
-}
-.ui-calendar-input-options .ui-calendar .ui-listbox {
-  display: inline-block;
-  vertical-align: middle;
-  font-size: 14px;
-  width: 25%;
-  height: 240px;
-  overflow-y: auto;
-}
-.ui-calendar-input-options .ui-calendar .ui-listbox .ui-item {
-  text-align: center;
-  height: 30px;
-  line-height: 30px;
-  cursor: pointer;
-}
-.ui-calendar-input-options .ui-calendar .ui-listbox .ui-item-hover {
-  color: #ffffff;
-  background-color: #368cda;
-}
-.ui-calendar-input-options .ui-calendar .ui-listbox .ui-item-focus,
-.ui-calendar-input-options .ui-calendar .ui-listbox .ui-item-selected {
-  color: #368cda;
-  background-color: #ffffff;
-}
-.ui-calendar-input-options .options-content {
-  position: relative;
-  height: 50px;
-  line-height: 50px;
-  background: #fff;
-  border: 1px solid #cccccc;
-  border-top: none;
-}
-.ui-calendar-input-options .options-content .time-title {
-  display: inline-block;
-  vertical-align: middle;
-  width: 100px;
-  height: 22px;
-  line-height: 22px;
-  text-align: center;
-  border: 1px solid #acbaca;
-  border-right: none;
-  font-size: 14px;
-}
-.ui-calendar-input-options .options-content .clear {
-  position: absolute;
-  right: 100px;
-  display: inline-block;
-  vertical-align: middle;
-  font-size: 14px;
-  color: #51a351;
-  cursor: pointer;
-}
-.ui-calendar-input-options .options-content .clear:hover {
-  color: #51bd51;
-}
-.ui-calendar-input-options .options-content .submit {
-  right: 50px;
-  position: absolute;
-  display: inline-block;
-  vertical-align: middle;
-  padding-left: 15px;
-  font-size: 14px;
-  cursor: pointer;
-  color: #51a351;
-}
-.ui-calendar-input-options .options-content .submit:hover {
-  color: #51bd51;
-}
-
-
+        cite.arch {
+            color: red;
+            background: yellow;
+            margin-left: 2px;
+        }
     </style>
 </head>
-<body style="overflow: auto">
-
-<div ui="type:BIQuarterInput;value:2018-10;name:time"></div>
-
+<body style="overflow: auto;content:'pointer-events:none'">
+    <!-- ecui.esr.setData('list',[{name:'百度',url:'www.baidu.com',address:'中关村',year:1999},{name:'新浪',url:'www.sina.com.cn',address:'中关村',year:1990}]); -->
+    <div style="position:absolute;top:0px;left:0px;width:100px;height:100px;background:red" id="ttt"></div>
+    <div ui="type:table;ext-data:list">
+        <table>
+        <!-- 表头区域 -->
+        <thead>
+            <tr>
+                <th class="name" style="width:200px;">公司名</th>
+                <th style="width:200px;" ui="text:&lt;a href='http://${url}'&gt;${url}(${name})&lt;/a&gt;">url</th>
+                <th class="address" style="width:250px;">地址</th>
+                <th class="year" style="width:100px;">创办时间</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+        </table>
+    </div>
+    <!-- ecui.esr.setData('list2',[{name:'百度',url:'www.baidu.com',address:'中关村',year:1999},{name:'新浪',url:'www.sina.com.cn',address:'中关村',year:1990}]); -->
+    <div ui="type:select;ext-data:list2;text:${name}-${year}"></div>
+    <!-- ecui.esr.setData('list3',[{name:'百度',url:'www.baidu.com',address:'中关村',year:1999},{name:'新浪',url:'www.sina.com.cn',address:'中关村',year:1990}]); -->
+    <div ui="type:tree-view;ext-data:list3;text:${name}-${year}">根节点</div>
+    <!-- ecui.esr.setData('list4',[{'text':1,value:1,children:[{'text':11,value:11,children:[{'text':111,value:111,children:[]},{'text':112,value:112,children:[]}]},{'text':12,value:12,children:[{'text':121,value:121},{'text':122,value:122}]}]},{'text':2,value:2,children:[{'text':21,value:21,children:[{'text':211,value:211},{'text':212,value:212}]},{'text':22,value:22,children:[{'text':221,value:221},{'text':222,value:222}]}]}]); -->
+    <div ui="type:multilevel;ext-data:list4;text:${text}-${text};id:test">
+        <div ui="type:select"></div>
+        <div ui="type:select"></div>
+        <div ui="type:select"></div>
+    </div>
+    <div ui="type:cities">
+        <div name="province" ui="type:select"></div>
+        <div name="city" ui="type:select"></div>
+        <div name="area" ui="type:select"></div>
+    </div>
+    <div ui="type:WangEditor;id:test2">
+        <div ui="type:@cite;name:var1;group:var">变量1</div><div ui="type:@cite;name:arch1;group:arch">公式1</div>
+        <div ui="type:@toolbar;mode:simple"></div>
+        <div ui="type:@editor;mode:simple" style="height:500px">请输入</div>
+    </div>
 </body>
 </html>
 

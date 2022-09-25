@@ -1,15 +1,12 @@
-/*ignore*/
 /*
 @fields
 _eContainer      - 容器 DOM 元素
 */
-/*end*/
 (function () {
 //{if 0}//
     var core = ecui,
         dom = core.dom,
-        ui = core.ui,
-        util = core.util;
+        ui = core.ui;
 //{/if}//
     /**
      * 移除容器 DOM 元素。
@@ -20,8 +17,8 @@ _eContainer      - 容器 DOM 元素
             var parent = this.getParent();
             if (parent) {
                 if (parent.getItems().every(function (item) {
-                        return item === this || item._eContainer !== this._eContainer;
-                    })) {
+                    return item === this || item._eContainer !== this._eContainer;
+                })) {
                     dom.remove(this._eContainer);
                 }
             }
@@ -39,7 +36,7 @@ _eContainer      - 容器 DOM 元素
             var titleEl = dom.create({className: this.getUnitClass(ui.$AbstractTab, 'title')}),
                 containerEl = dom.create({className: this.getUnitClass(ui.$AbstractTab, 'container')});
 
-            for (; el.firstChild; ) {
+            for (; el.firstChild;) {
                 titleEl.appendChild(el.firstChild);
             }
             el.appendChild(titleEl);
@@ -139,7 +136,7 @@ _eContainer      - 容器 DOM 元素
                         var parent = this.getParent();
 
                         removeContainer.call(this);
-                        if (this._eContainer = el) {
+                        if ((this._eContainer = el)) {
                             parent.getMain().appendChild(el);
                             // 如果当前节点被选中需要显示容器元素，否则隐藏
                             if (parent.getSelected() === this) {
@@ -172,4 +169,4 @@ _eContainer      - 容器 DOM 元素
         },
         ui.Items
     );
-}());
+})();

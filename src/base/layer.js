@@ -4,22 +4,18 @@
   <!-- 这里放滚动的内容 -->
   ...
 </div>
-*/
-/*ignore*/
-/*
+
 @fields
 _bCenter     - 是否居中显示s
 _fModal      - 用于关闭mask层的函数s
 */
-/*end*/
 (function () {
 //{if 0}//
     var core = ecui,
         ui = core.ui,
         util = core.util;
 //{/if}//
-    var layers = [],    // 当前显示的全部窗体
-        modalCount = 0;  // 当前showModal的窗体数
+    var layers = [];    // 当前显示的全部窗体
 
     /**
      * 刷新所有显示的窗体的zIndex属性。
@@ -34,7 +30,7 @@ _fModal      - 用于关闭mask层的函数s
             index = 16384 + index * 2;
             item.getMain().style.zIndex = index;
             if (item._fModal) {
-                item._fModal.setZIndex(index - 1);
+                item._fModal(index - 1);
             }
         });
     }
@@ -90,7 +86,7 @@ _fModal      - 用于关闭mask层的函数s
             },
 
             /**
-             * 窗体显示时将获得焦点状态。
+             * 浮层初始化，如果是居中显示的，当屏幕大小变化时，继续居中显示。
              * @override
              */
             $initStructure: function () {
@@ -130,6 +126,15 @@ _fModal      - 用于关闭mask层的函数s
             },
 
             /**
+             * 重新设置位置后，居中状态失效。
+             * @override
+             */
+            setPosition: function (x, y) {
+                ui.Control.prototype.setPosition.call(this, x, y);
+                this._bCenter = false;
+            },
+
+            /**
              * @override
              */
             show: function () {
@@ -154,5 +159,4 @@ _fModal      - 用于关闭mask层的函数s
             }
         }
     );
-}());
-    
+})();

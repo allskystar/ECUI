@@ -1,3 +1,10 @@
+//{if $css}//
+__ControlStyle__('\
+.ui-input-group {\
+    position: relative;\
+}\
+');
+//{/if}//
 /*
 @example
 <div ui="type:input-group">
@@ -43,5 +50,5 @@ _bError  -  是否是错误状态
         }
     );
 //{if 0}//
-}());
+})();
 //{/if}//

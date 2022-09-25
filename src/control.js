@@ -1,3 +1,10 @@
+//{if $css}//
+__ControlStyle__('\
+.ui-hide {\
+    display: none !important;\
+}\
+');
+//{/if}//
 /*
 @example
 <div ui="type:control">
@@ -32,9 +39,7 @@ _aStatus            - 控件当前的状态集合
         dom = core.dom,
         ui = core.ui,
         util = core.util;
-/*ignore*/
     var ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined;
-/*end*/
 //{/if}//
     var waitReadyList;
 
@@ -113,16 +118,14 @@ _aStatus            - 控件当前的状态集合
     ui.Control = core.inherits(
         null,
         function (el, options) {
-            core.$bind(el, this);
-
             this._eMain = this._eBody = el;
             if (options.primary) {
                 el.className = (options.id || '') + ' ' + el.className + options.primary;
             }
             this._sUID = options.uid;
             // svg classname 是数组 不能做trim操作
-            if ('string' === typeof el.className) {
-                this._sClass = el.className.trim().split(' ')[0];
+            if (typeof el.className === 'string') {
+                this._sClass = ieVersion < 10 ? el.className.trim().split(' ')[0] : document.body.classList[0];
             }
 /*ignore*/
             this._bDisabled = !!options.disabled;
@@ -197,6 +200,14 @@ _aStatus            - 控件当前的状态集合
              * @event
              */
             $click: util.blank,
+
+            /**
+             * 控件创建事件。
+             * @event
+             */
+            $create: function () {
+                core.$bind(this.getMain(), this);
+            },
 
             /**
              * 双击事件。
@@ -500,6 +511,7 @@ _aStatus            - 控件当前的状态集合
                         core.removeEventListener(this._cParent, 'ready', this._UIControl_oHandler);
                         core.removeEventListener(this._cParent, 'show', this._UIControl_oHandler);
                     }
+                    this._cParent = parent;
                     if (parent) {
                         if (parent.isReady()) {
                             if (parent.isShow()) {
@@ -513,8 +525,9 @@ _aStatus            - 控件当前的状态集合
                             core.addEventListener(parent, 'ready', this._UIControl_oHandler);
                         }
                     }
+                } else {
+                    this._cParent = parent;
                 }
-                this._cParent = parent;
             },
 
             /**
@@ -1023,13 +1036,13 @@ _aStatus            - 控件当前的状态集合
             hide: function () {
                 if (!dom.hasClass(this._eMain, 'ui-hide')) {
                     var controls = [this].concat(
-                            core.query(
-                                function (item) {
-                                    return this !== item && this.contain(item) && item.isShow();
-                                },
-                                this
-                            )
-                        );
+                        core.query(
+                            function (item) {
+                                return this !== item && this.contain(item) && item.isShow();
+                            },
+                            this
+                        )
+                    );
                     dom.addClass(this._eMain, 'ui-hide');
                     // 控件隐藏时需要清除状态
                     core.$clearState(this);
@@ -1053,7 +1066,7 @@ _aStatus            - 控件当前的状态集合
 
                 var el = this._eMain;
                 if (el.style.display === 'none') {
-                    dom.addClass(this._eMain, 'ui-hide');
+                    dom.addClass(el, 'ui-hide');
                     el.style.display = '';
                 } else if (this._bCached) {
                     // 处于显示状态的控件需要完成初始化
@@ -1370,13 +1383,13 @@ _aStatus            - 控件当前的状态集合
                 if (dom.hasClass(this._eMain, 'ui-hide')) {
                     dom.removeClass(this._eMain, 'ui-hide');
                     var controls = [this].concat(
-                            core.query(
-                                function (item) {
-                                    return this !== item && this.contain(item) && item.isShow();
-                                },
-                                this
-                            )
-                        );
+                        core.query(
+                            function (item) {
+                                return this !== item && this.contain(item) && item.isShow();
+                            },
+                            this
+                        )
+                    );
                     controls.forEach(function (item) {
                         item.cache();
                     });
@@ -1428,7 +1441,7 @@ _aStatus            - 控件当前的状态集合
 
         // setXXXX方法，会发送propertychange事件
         methods['set' + propertyName] = function (item) {
-            if ('number' === typeof item) {
+            if (typeof item === 'number') {
                 item = this.getItem(item);
             }
 
@@ -1443,6 +1456,6 @@ _aStatus            - 控件当前的状态集合
             return this['$' + propertyName + 'Data'].value || null;
         };
 
-        return definedInterface[name] = _interface('$' + propertyName, methods);
+        return (definedInterface[name] = _interface('$' + propertyName, methods));
     };
-}());
+})();

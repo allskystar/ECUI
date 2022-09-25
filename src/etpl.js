@@ -14,6 +14,8 @@
 (function () {
 //{if 0}//
     var core = ecui,
+        dom = core.dom,
+        io = core.io,
         util = core.util,
 
         ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined;
@@ -25,7 +27,6 @@
      * @type {number}
      */
     var guidIndex = 0;
-
     /**
      * 获取唯一id，用于匿名target或编译代码的变量名生成
      *
@@ -34,16 +35,6 @@
      */
     function generateGUID() {
         return '_' + (guidIndex++);
-    }
-
-    /**
-     * 判断是否是数字类型
-     *
-     * @inner
-     * @return {boolean}
-     */
-    function isNumber (num) {
-        return typeof num === 'number';
     }
 
     /**
@@ -106,17 +97,7 @@
          * @return {string} 替换结果串
          */
         'default': function (source, defaultValue) {
-            return isNumber(source) || source ? source : (defaultValue || '--');
-        },
-
-        /**
-         * 控件ui参数转义filter
-         *
-         * @param {string} source 源串
-         * @return {string} 替换结果串
-         */
-        options: function (source) {
-            return encodeURIComponent(source).replace(/;/g, '%3B').replace(/"/g, '%22').replace(/&/g, '%26');
+            return source !== undefined && source !== null ? source : (defaultValue !== undefined ? defaultValue : '--');
         },
 
         /**
@@ -125,58 +106,31 @@
          * @param {string} source 源串
          * @return {string} 替换结果串
          */
-        formatFinance: function (source) {
-            var result = '';
-            if (/^-*\d*(\.{0,1})\d*$/.test(source)) {
-                result = util.formatFinance(source);
-            }
-            return result;
-        },
+        finance: util.formatFinance,
 
         /**
-         * 金融格式化filter
+         * 日期格式化filter
          *
          * @param {string} source 源串
          * @return {string} 替换结果串
          */
-        formatDate: function (source, format) {
-            if (/^[0-9]*$/.test(source)) {
-                source = Number(source);
-            } else if (new Date(source).toString() === 'Invalid Date') {
-                source = '';
-            }
-            return source ? util.formatDate(new Date(source), format) : '--';
+        date: function (source, format) {
+            return util.formatDate(new Date(source), format);
         },
 
         /**
          * 指定保留小数位数filter
          *
          * @param {string|number} source 源串
-         * @param {number} divisor       被除数
          * @param {string} fixedNum      保留小数位数
+         * @param {number} divisor       被除数
          * @return {string} 替换结果串
          */
-        toFixed: function (source, divisor, fixedNum) {
-            return (Number(source) / divisor).toFixed(fixedNum);
+        fixed: function (source, fixedNum, divisor) {
+            return (+source / (divisor || 1)).toFixed(fixedNum);
         }
     };
 
-
-    /**
-     * 对字符串进行可用于new RegExp的字面化
-     *
-     * @inner
-     * @param {string} source 需要字面化的字符串
-     * @return {string} 字符串字面化结果
-     */
-    function regexpLiteral(source) {
-        return source.replace(
-            /[\^\[\]\$\(\)\{\}\?\*\.\+]/g,
-            function (c) {
-                return '\\' + c;
-            }
-        );
-    }
 
     /**
      * 用于render的字符串变量声明语句
@@ -234,6 +188,7 @@
 
         name.replace(/^\s*\*/, '').replace(
             /(\[('([^']+)'|"([^"]+)"|[^\]]+)\]|(\.|^)([^.\[]+))/g,
+            // eslint-disable-next-line no-shadow
             function (match, all, name, sing, doub, flag, normal) {
                 all = sing || doub || normal;
                 args.push(all ? '"' + all + '"' : toGetVariableLiteral(name));
@@ -440,8 +395,34 @@
             var code = [];
 
             this.value.replace(
-                new RegExp(engine.options.refRegExp, 'g'),
-                '&' + engine.options.variableOpen + '*$1|json|url' + engine.options.variableClose
+                engine.options.replaceSyntax,
+                function ($$, $1) {
+                    if ($$.charAt(0) === '#') {
+//{if 0}//
+                        var name = $1.split(':');
+                        if (!multiLanguage) {
+                            console.warn('Multiple languages haven\'t been defined, please call etpl.defineLanguages() first.');
+                        } else if (name.length !== multiLanguage.length) {
+                            console.warn('All the translations don\'t match:\n' + multiLanguage.join(':') + '\n' + $1);
+                        }
+                        name = name[0];
+                        if (checkList[name]) {
+                            if (checkList[name].indexOf($1) < 0) {
+                                console.warn('All the translations don\'t match:\n' + checkList[name].join('\n') + '\n' + $1);
+                                checkList[name].push($1);
+                            }
+                        } else {
+                            checkList[name] = [$1];
+                        }
+//{/if}//
+                        return engine.options.assignOpen + 'etpl.lang([' + $1.split(':').map(function (item) {
+                            return '"' + util.encodeJS(util.decodeHTML(item)) + '"';
+                        }).join(',') + '])' + engine.options.variableClose;
+                    // eslint-disable-next-line no-else-return
+                    } else {
+                        return '&' + engine.options.variableOpen + '*' + $1 + '|json|url' + engine.options.variableClose;
+                    }
+                }
             ).split(engine.options.assignOpen).forEach(function (text, i) {
                 if (i) {
                     var firstOutput = true;
@@ -582,15 +563,15 @@
      */
     function autoCloseCommand(context, CommandType) {
         var closeEnd = CommandType ? context.stack.find(
-                function (item) {
-                    return item instanceof CommandType;
-                }
-            ) : context.stack[0];
+            function (item) {
+                return item instanceof CommandType;
+            }
+        ) : context.stack[0];
 
         if (closeEnd) {
             var node;
 
-            for (; (node = context.stack.top()) !== closeEnd; ) {
+            for (; (node = context.stack.top()) !== closeEnd;) {
                 // 如果节点对象不包含autoClose方法
                 // 则认为该节点不支持自动闭合，需要抛出错误
                 // for等节点不支持自动闭合
@@ -616,7 +597,7 @@
      */
     var RENDERER_BODY_START =
         'u=u||{};' +
-        'var v={},f=e.filters,g="function"==typeof u.get,' +
+        'var f=e.filters,g="function"==typeof u.get,' +
         //a:name b:properties
         'A=function (a,b){' +
         'var d=v[b[0]];' +
@@ -784,8 +765,8 @@
         var rule = new RegExp(
             util.formatString(
                 '^\\s*({0}[\\s\\S]+{1})\\s+as\\s+{0}([0-9a-z_]+){1}\\s*(,\\s*{0}([0-9a-z_]+){1})?\\s*$',
-                regexpLiteral(engine.options.variableOpen),
-                regexpLiteral(engine.options.variableClose)
+                util.encodeRegExp(engine.options.variableOpen),
+                util.encodeRegExp(engine.options.variableClose)
             ),
             'i'
         );
@@ -956,6 +937,7 @@
             var realRenderer = new Function(
                 'u',
                 'e',
+                'v',
                 [
                     RENDERER_BODY_START,
                     RENDER_STRING_DECLATION,
@@ -966,7 +948,7 @@
 
             var engine = this.engine;
             this.renderer = function (data) {
-                return realRenderer(data, engine);
+                return realRenderer(data, engine, Object.assign({NS: engine.ns}, globals));
             };
 
             return this.renderer;
@@ -1157,8 +1139,8 @@
         var rule = new RegExp(
             util.formatString(
                 '{0}([^}]+){1}',
-                regexpLiteral(this.engine.options.variableOpen),
-                regexpLiteral(this.engine.options.variableClose)
+                util.encodeRegExp(this.engine.options.variableOpen),
+                util.encodeRegExp(this.engine.options.variableClose)
             ),
             'g'
         );
@@ -1339,7 +1321,7 @@
     Engine.prototype.config = function (options) {
         Object.assign(this.options, options);
         this.options.assignOpen = this.options.variableOpen.replace(/\$/g, '=');
-        this.options.refRegExp = this.options.variableOpen.replace(/\$/g, '&').replace(/([\{\}\[\]\(\)\|\.])/g, '\\$1') + '([\\w|\\.]+)' + this.options.variableClose.replace(/([\{\}\[\]\(\)\|\.])/g, '\\$1');
+        this.options.replaceSyntax = new RegExp('[&#]' + util.encodeRegExp(this.options.variableOpen.replace(/\$/g, '')) + '(.+?)' + util.encodeRegExp(this.options.variableClose), 'g');
     };
 
    /**
@@ -1433,7 +1415,7 @@
         };
 
         stack.find = function (condition) {
-            for (var index = this.length; index--; ) {
+            for (var index = this.length; index--;) {
                 var item = this[index];
                 if (condition(item)) {
                     return item;
@@ -1515,5 +1497,132 @@
     }
 
     etpl = new Engine();
+
+    /**
+     * 设置只属于引擎的命名空间，每次renderer时数据容器自动添加，命名为NS。
+     * @public
+     *
+     * @param {object} data 数据对象
+     */
+    Engine.prototype.setNamespace = function (data) {
+        this.ns = data;
+    };
+
+//{if 0}//
+    var checkList = {};
+//{/if}//
+    var multiLanguage, lang;
+
+    etpl.lang = function (data) {
+        return data[lang] || data[0];
+    };
+    etpl.defineLanguages = function (value) {
+        multiLanguage = value.split(':');
+        navigator.languages.forEach(function (item) {
+            if (lang === undefined) {
+                item = multiLanguage.indexOf(item);
+                if (item >= 0) {
+                    lang = item;
+                }
+            }
+        });
+    };
+    etpl.setLanguage = function (language) {
+        lang = Math.max(0, multiLanguage.indexOf(language));
+    };
+
+    var globals = {};
+
+    /**
+     * 增加一个全局变量，每次renderer时自动添加到数据容器中。
+     * @public
+     *
+     * @param {string} name 数据名
+     * @param {object} value 数据值
+     */
+    etpl.addGlobal = function (name, value) {
+//{if 0}//
+        if (globals[name]) {
+            console.warn('The name("' + name + '") has existed.');
+        }
+//{/if}//
+        globals[name] = value;
+    };
     etpl.Engine = Engine;
-}());
+
+//{if 0}//
+    var readyList = [];
+
+    function loadInit() {
+//{/if}//
+//{if 1}//core.ready(function () {//{/if}//
+        etpl.config({
+            commandOpen: '<<<',
+            commandClose: '>>>'
+        });
+
+        for (var el = document.body.firstChild; el; el = nextSibling) {
+            var nextSibling = el.nextSibling;
+            if (el.nodeType === 8) {
+                etpl.compile(el.textContent || el.nodeValue);
+                dom.remove(el);
+            }
+        }
+
+        etpl.config({
+            commandOpen: '<!--',
+            commandClose: '-->'
+        });
+//{if 1}//});//{/if}//
+//{if 0}//
+        readyList.forEach(function (fn) {
+            fn();
+        });
+
+        readyList = undefined;
+    }
+
+    core.ready(function () {
+        var tplList = [];
+
+        for (var el = document.body.firstChild; el; el = el.nextSibling) {
+            if (el.nodeType === 8) {
+                if (/^\s*import:\s*([A-Za-z0-9.-_\-]+)\s*$/.test(el.textContent || el.nodeValue)) {
+                    tplList.push([el, RegExp.$1]);
+                }
+            }
+        }
+
+        (function loadTpl() {
+            if (tplList.length) {
+                var item = tplList.splice(0, 1)[0];
+                io.ajax(item[1], {
+                    cache: true,
+                    onsuccess: function (text) {
+                        item[0].parentNode.insertBefore(
+                            document.createComment(text.replace(/<!--/g, '<<<').replace(/-->/g, '>>>')),
+                            item[0]
+                        );
+                        item[0].parentNode.removeChild(item[0]);
+                        loadTpl();
+                    },
+                    onerror: function () {
+                        console.warn('No such file: ' + item[1]);
+                        loadTpl();
+                    }
+                });
+            } else {
+                loadInit();
+            }
+        })();
+    });
+
+    etpl.ready = function (fn) {
+        if (readyList) {
+            readyList.push(fn);
+        } else {
+            fn();
+        }
+    };
+//{/if}//
+})();

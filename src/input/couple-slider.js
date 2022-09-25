@@ -1,3 +1,28 @@
+//{if $css}//
+__ControlStyle__('\
+.ui-couple-slider {\
+    position: relative;\
+    overflow: visible !important;\
+\
+    input {\
+        display: none !important;\
+    }\
+\
+    .ui-couple-slider-bg {\
+        .width100rate();\
+        .height100rate();\
+    }\
+\
+    .ui-couple-slider-slider {\
+        position: absolute !important;\
+    }\
+\
+    .ui-couple-slider-mask {\
+        position: absolute !important;\
+    }\
+}\
+');
+//{/if}//
 /*
 @example
 <div ui="type:couple-slider;segment:5"></div>
@@ -131,7 +156,7 @@
              */
             setValue: function (min, max) {
                 var segWidth = this.getClientWidth() / this._nSegment,
-                    value = 'string' === typeof min ? min.split(',') : 'number' === typeof min ? [min, max] : min;
+                    value = typeof min === 'string' ? min.split(',') : typeof min === 'number' ? [min, max] : min;
 
                 min = +value[0] * segWidth;
                 max = +value[1] * segWidth;
@@ -144,5 +169,5 @@
         }
     );
 //{if 0}//
-}());
+})();
 //{/if}//

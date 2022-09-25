@@ -101,8 +101,7 @@ _oTest      匹配合法性的正则表达式
                     }
                 }
 
-                var natived = event.getNative();
-                if (!natived.metaKey && !natived.ctrlKey && !natived.altKey) {
+                if (!event.ctrlKey && !event.altKey) {
                     event.preventDefault();
                 }
             },
@@ -127,4 +126,4 @@ _oTest      匹配合法性的正则表达式
             }
         }
     );
-}());
+})();

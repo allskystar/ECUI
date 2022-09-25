@@ -25,9 +25,9 @@ clear - 输入框的清除插件，使用ext-clear使用。
             }
         }
     );
-    
+
     ext.clear = {
-    
+
         /**
          * 清除按钮插件初始化。
          * @public
@@ -39,4 +39,4 @@ clear - 输入框的清除插件，使用ext-clear使用。
             core.$fastCreate(Button, el, this);
         }
     };
-}());
+})();

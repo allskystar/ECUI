@@ -113,7 +113,7 @@ _eText       - 文本框
                         var values = options.values;
                         this._sPrefix = '';
 
-                        if ('string' === typeof values) {
+                        if (typeof values === 'string') {
                             if (values.indexOf(',') < 0) {
                                 var ret = /^([0-9]+)-([0-9]+)(:([0-9]+))?(\|(.+))?$/.exec(values);
                                 this._sPrefix = ret[6] || '';
@@ -135,7 +135,7 @@ _eText       - 文本框
                         ).join('');
 
                         this.setOptionSize(3);
-                       
+
                     }
                 ],
                 {
@@ -183,7 +183,7 @@ _eText       - 文本框
                      */
                     setValue: function (value) {
                         value = (this._sPrefix + value).slice(-this._sPrefix.length);
-                        for (var i = 0, item; item = this.getItem(i); i++) {
+                        for (var i = 0, item; (item = this.getItem(i)); i++) {
                             if (item._sValue === value) {
                                 if (this.isCached()) {
                                     this.setPosition(0, (3 - i) * this.$$itemHeight);
@@ -309,5 +309,5 @@ _eText       - 文本框
         ui.MPopup
     );
 //{if 0}//
-}());
+})();
 //{/if}//

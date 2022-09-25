@@ -1,26 +1,36 @@
+//{if $css}//
+__ControlStyle__('\
+.ui-dialog {\
+    position: absolute !important;\
+\
+    .ui-dialog-title {\
+        display: block;\
+    }\
+\
+    .ui-dialog-body {\
+        position: relative !important;\
+        margin: 0px !important;\
+    }\
+}\
+');
+//{/if}//
 /*
 @example
 <div ui="type:dialog;id:demo">
     <strong>标题</strong>
     窗体HTML文本
 </div>
-*/
-/*ignore*/
-/*
+
 @fields
 _uTitle     - 标题栏
 _uClose     - 关闭按钮
 */
-/*end*/
 (function () {
 //{if 0}//
     var core = ecui,
         dom = core.dom,
         ui = core.ui,
         util = core.util;
-/*ignore*/
-    var ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined;
-/*end*/
 //{/if}//
     /**
      * 窗体控件。
@@ -42,7 +52,7 @@ _uClose     - 关闭按钮
                 titleEl = dom.create('STRONG', {className: this.getUnitClass(ui.Dialog, 'title')});
             }
 
-            for (; el.firstChild; ) {
+            for (; el.firstChild;) {
                 bodyEl.appendChild(el.firstChild);
             }
 
@@ -161,4 +171,4 @@ _uClose     - 关闭按钮
             }
         }
     );
-}());
+})();

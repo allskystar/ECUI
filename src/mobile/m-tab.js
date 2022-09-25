@@ -1,3 +1,53 @@
+//{if $css}//
+__ControlStyle__('\
+.ui-m-tab {\
+\
+    .ui-m-tab-title {\
+        position: relative;\
+        border-bottom: 0;\
+\
+        position: relative;\
+        white-space: nowrap;\
+        display: block !important;\
+        width: 100%;\
+        box-sizing: border-box;\
+        -webkit-transform: translateZ(0px);\
+        transform: translateZ(0px);\
+\
+        .ui-tab-item {\
+            white-space: nowrap;\
+            display: inline-block!important;\
+            vertical-align: top;\
+            width: auto;\
+            box-sizing: border-box;\
+\
+            .ui-tab-bar {\
+                position: relative !important;\
+            }\
+        }\
+        .ui-tab-bar {\
+            position: absolute !important;\
+        }\
+    }\
+\
+    .ui-m-tab-container {\
+        position: relative;\
+        white-space: nowrap;\
+        width: 100%;\
+        box-sizing: border-box;\
+        -webkit-transform: translateZ(0px);\
+        transform: translateZ(0px);\
+\
+        .ui-tab-item {\
+            display: inline-block !important;\
+            vertical-align: top;\
+            width: 100%;\
+            box-sizing: border-box;\
+        }\
+    }\
+}\
+');
+//{/if}//
 /*
 @example
 <div ui="type:m-tab;selected:1">
@@ -238,7 +288,7 @@ _eBar            - 下划线 DOM 元素
              * @override
              */
             setSelected: function (item) {
-                if ('number' === typeof item) {
+                if (typeof item === 'number') {
                     item = this.getItem(item);
                 }
 
@@ -279,4 +329,4 @@ _eBar            - 下划线 DOM 元素
             }
         }
     );
-}());
+})();

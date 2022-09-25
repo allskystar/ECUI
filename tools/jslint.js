@@ -1344,7 +1344,7 @@ klass:              do {
                 }
             }
         };
-    }());
+    })();
 
     function define(kind, token) {
 
@@ -2536,7 +2536,7 @@ klass:              do {
             return this;
         };
         x.identifier = true;
-    }());
+    })();
 
 
 // Build the syntax table by declaring the syntactic elements.
@@ -4473,4 +4473,4 @@ klass:              do {
     itself.edition = '2013-08-26';
 
     return itself;
-}());
+})();

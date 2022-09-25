@@ -12,31 +12,31 @@ _uText  - 时间区域表示的文本
         util = core.util;
 //{/if}//
     var RangeCalendar = core.inherits(
-            ui.RangeCalendar,
-            true,
-            {
-                MonthView: core.inherits(
-                    ui.RangeCalendar.prototype.MonthView,
-                    {
-                        /**
-                         * @override
-                         */
-                        $dateclick: function (event) {
-                            ui.RangeCalendar.prototype.MonthView.prototype.$dateclick.call(this, event);
-                            if (!event.item.isExtra()) {
-                                var calendar = this.getParent();
-                                if (calendar._oStart && calendar._oEnd) {
-                                    calendar.getParent().setValue(
-                                        util.formatDate(calendar._oStart, 'yyyy-MM-dd') + ',' + util.formatDate(calendar._oEnd, 'yyyy-MM-dd')
-                                    );
-                                    calendar.hide();
-                                }
+        ui.RangeCalendar,
+        true,
+        {
+            MonthView: core.inherits(
+                ui.RangeCalendar.prototype.MonthView,
+                {
+                    /**
+                     * @override
+                     */
+                    $dateclick: function (event) {
+                        ui.RangeCalendar.prototype.MonthView.prototype.$dateclick.call(this, event);
+                        if (!event.item.isExtra()) {
+                            var calendar = this.getParent();
+                            if (calendar._oStart && calendar._oEnd) {
+                                calendar.getParent().setValue(
+                                    util.formatDate(calendar._oStart, 'yyyy-MM-dd') + ',' + util.formatDate(calendar._oEnd, 'yyyy-MM-dd')
+                                );
+                                calendar.hide();
                             }
                         }
                     }
-                )
-            }
-        );
+                }
+            )
+        }
+    );
 
     /**
      * 范围日期选择控件。控件的值是开始时间与结束时间，中间使用,号分隔，时间格式为yyyy-MM-dd。
@@ -53,13 +53,13 @@ _uText  - 时间区域表示的文本
             ui.InputControl.call(this, el, options);
 
             el = this.getMain();
-            dom.insertHTML(el, 'beforeEnd', '<div class="' + this.getUnitClass(ui.DateRange, 'text') + '"></div>')
+            dom.insertHTML(el, 'beforeEnd', '<div class="' + this.getUnitClass(ui.DateRange, 'text') + '"></div>');
 
             this._uText = core.$fastCreate(ui.Control, el.lastChild, this);
 
             this.setPopup(
                 core.getSingleton(RangeCalendar),
-                function ()  {
+                function () {
                     this._uFrom.setDate();
                     this._uTo.setDate();
                     this.setDateRange.apply(this, this.getParent().getDate());
@@ -112,5 +112,5 @@ _uText  - 时间区域表示的文本
         ui.Popup
     );
 //{if 0}//
-}());
+})();
 //{/if}//

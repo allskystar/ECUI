@@ -1,3 +1,22 @@
+//{if $css}//
+__ControlStyle__('\
+.ui-mobile-select {\
+    position: relative;\
+\
+    input {\
+        position: absolute !important;\
+        display: none !important;\
+        top: 0px !important;\
+        z-index: -1 !important;\
+        opacity: 0 !important;\
+    }\
+\
+    .ui-mobile-select-text {\
+        overflow: hidden !important;\
+    }\
+}\
+');
+//{/if}//
 /*
 @example
 <select ui="type:m-select" name="sex">
@@ -108,4 +127,4 @@ _uOptions     - 下拉选择框
         },
         ui.MPopup
     );
-}());
+})();

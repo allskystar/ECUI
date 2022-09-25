@@ -8,11 +8,10 @@
     <strong>标题2</strong>
     <strong>标题3</strong>
 </div>
-*/
-/*ignore*/
-/*
+
 @fields
-_eContainer      - 容器 DOM 元素
+_nStep        - 当前的步数
+_eContainer   - 容器 DOM 元素
 */
 /*end*/
 (function () {
@@ -32,8 +31,7 @@ _eContainer      - 容器 DOM 元素
     }
 
     /**
-     * 选项卡控件。
-     * 每一个选项卡都包含一个头部区域与容器区域，选项卡控件存在互斥性，只有唯一的一个选项卡能被选中并显示容器区域。
+     * 步骤条控件。
      * options 属性：
      * step    当前到达了第几步，第一步取值0
      * @control
@@ -104,4 +102,4 @@ _eContainer      - 容器 DOM 元素
             }
         }
     );
-}());
+})();

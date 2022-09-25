@@ -1,3 +1,15 @@
+//{if $css}//
+__ControlStyle__('\
+.ui-mobile-panel {\
+    overflow: hidden !important;\
+}\
+\
+.ui-mobile-panel-location .ui-mobile-panel-body {\
+    overflow: hidden !important;\
+    height: 100%;\
+}\
+');
+//{/if}//
 /*
 @example
 <div ui="type:m-panel"><!-- 这里放任意内容 --></div>
@@ -41,4 +53,4 @@
         },
         ui.MScroll
     );
-}());
+})();

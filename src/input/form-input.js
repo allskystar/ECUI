@@ -54,10 +54,11 @@
              * 获取控件进行提交的值。
              * @public
              *
+             * @param {boolean} useDefault 是否使用缺省值
              * @return {string} 控件的表单值
              */
-            getFormValue: function () {
-                return this.getMain().value;
+            getFormValue: function (useDefault) {
+                return this.getMain()[useDefault ? 'defaultValue' : 'value'];
             },
 
             /**
@@ -68,5 +69,5 @@
         }
     );
 //{if 0}//
-}());
+})();
 //{/if}//

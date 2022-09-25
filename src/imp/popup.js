@@ -1,3 +1,11 @@
+//{if $css}//
+__ControlStyle__('\
+.ui-popup {\
+    position: absolute !important;\
+    z-index: 32700;\
+}\
+');
+//{/if}//
 /*
 弹出操作集合，提供了基本的点击显示/关闭操作，通过将 ecui.ui.Popup 对象下的方法复制到类的 prototype 属性下继承接口，最终对象要正常使用需要通过 setPopup 方法设置自己关联的弹出层。
 */
@@ -7,9 +15,6 @@
         dom = core.dom,
         ui = core.ui,
         util = core.util;
-/*ignore*/
-    var ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined;
-/*end*/
 //{/if}//
     /**
      * 隐藏弹出层控件。
@@ -91,19 +96,16 @@
          * @override
          */
         $click: function (event) {
-/*ignore*/
             this.$Popup.$click.call(this, event);
-/*end*/
             if (dom.contain(this.getMain(), event.target)) {
                 // popview可能动态创建，控件使用了ecui.ui.Popup，但是没有创建popcontrol 会报错
-                if(this.$PopupData && this.$PopupData.control){
+                if (this.$PopupData && this.$PopupData.control){
                     if (this.$PopupData.control.isShow()) {
                         this.$PopupData.control.hide();
                     } else {
                         this.popup();
                     }
                 }
-                
             }
         },
 
@@ -113,21 +115,21 @@
         $dispose: function () {
             var el = this.$PopupData.control.getMain();
             if (el) {
-                dom.remove(el);
+                if (dom.contain(document.body, el)) {
+                    util.timer(dom.remove, 0, null, el);
+                } else {
+                    core.dispose(el);
+                }
             }
             this.setPopup();
-/*ignore*/
             this.$Popup.$dispose.call(this);
-/*end*/
         },
 
         /**
          * @override
          */
         $repaint: function (event) {
-/*ignore*/
             this.$Popup.$repaint.call(this, event);
-/*end*/
             if (this.$PopupData.control.isShow()) {
                 setPopupPosition(this.$PopupData.control);
             }
@@ -175,7 +177,7 @@
 
                 var el = this.$PopupData.control.getMain();
 
-                if (!ecui.dom.contain(document.body, el)) {
+                if (!dom.contain(document.body, el)) {
                     // 第一次显示时需要进行下拉选项部分的初始化，将其挂载到 DOM 树中
                     document.body.appendChild(el);
                     showPopup(this.$PopupData.control);
@@ -229,4 +231,4 @@
     ui.Popup.getOwner = function () {
         return owners[owners.length - 1];
     };
-}());
+})();

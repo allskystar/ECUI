@@ -1,3 +1,12 @@
+//{if $css}//
+__ControlStyle__('\
+.ui-mobile-popup {\
+    position: fixed !important;\
+    .m-width100rate();\
+    height: 100% !important;\
+}\
+');
+//{/if}//
 /*
 移动端弹出操作集合，提供了从4个不同的方向飞入界面指定位置的操作，弹出层控件支持 enter 与 scale 初始化选项。
 */
@@ -151,4 +160,4 @@
             }
         }
     };
-}());
+})();

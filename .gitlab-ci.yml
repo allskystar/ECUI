@@ -1,0 +1,12 @@
+stages:
+  - deploy_yms
+
+# 测试环境192.168.200.161发布配置
+deploy_yms:
+  stage: deploy_yms
+  only: 
+    - master
+  script:
+    - ls -l
+  tags:
+    - yms,test

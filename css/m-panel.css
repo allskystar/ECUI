@@ -1,9 +1,0 @@
-/*<script>window.onload=function(){value=document.getElementsByTagName('TEXTAREA')[0].value;parent.postMessage({url:location.href.slice(7),text:value.slice(value.indexOf('\n')+1).replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&')},'*');}</script><textarea>*/
-.ui-mobile-panel {
-    overflow: hidden !important;
-}
-
-.ui-mobile-panel-location .ui-mobile-panel-body {
-    overflow: hidden !important;
-    height: 100%;
-}

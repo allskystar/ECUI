@@ -167,5 +167,5 @@ _eInput - 选项对应的input，form提交时使用
         ui.Items
     );
 //{if 0}//
-}());
+})();
 //{/if}//

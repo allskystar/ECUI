@@ -235,4 +235,4 @@
     ui.BTableListRoute.prototype.setFormValue = setFormValue;
     ui.BTableListRoute.prototype.resetFormValue = resetFormValue;
     ui.BTableListRoute.prototype.setSearchParam = setSearchParam;
-}());
+})();

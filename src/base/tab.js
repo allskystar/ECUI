@@ -1,3 +1,20 @@
+//{if $css}//
+__ControlStyle__('\
+.ui-tab {\
+    position: relative;\
+\
+    .ui-tab-container {\
+        .ui-tab-item {\
+            display: none !important;\
+        }\
+\
+        .ui-tab-item-selected {\
+            display: block !important;\
+        }\
+    }\
+}\
+');
+//{/if}//
 /*
 @example
 <div ui="type:tab;selected:1">
@@ -125,4 +142,4 @@
         },
         ui.Control.defineProperty('selected')
     );
-}());
+})();

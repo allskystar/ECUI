@@ -1,16 +1,13 @@
 /*
 @example
 <div ui="type:timer;time:200;immediate"></div>
-*/
-/*ignore*/
-/*
+
 @fields
 _bImmediate     - 是否直接开始倒计时
 _nTime          - 倒计时的基础时长，单位毫秒
 _nResidual      - 倒计时的剩余时长，单位毫秒
 _sFormat        - 显示格式
 */
-/*end*/
 (function () {
 //{if 0}//
     var core = ecui,
@@ -43,8 +40,8 @@ _sFormat        - 显示格式
         function (el, options) {
             ui.Control.call(this, el, options);
             this._nTime = (options.time.endsWith('ms') ? +options.time.slice(0, -2) : +options.time * 1000) || 0;
-            this.reset();
             this._sFormat = options.format || '{0}:{1}:{2}';
+            this.reset();
             if (options.immediate) {
                 this.start();
             }
@@ -108,4 +105,4 @@ _sFormat        - 显示格式
             stop: util.blank
         }
     );
-}());
+})();

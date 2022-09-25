@@ -8,8 +8,13 @@
     opacity: 0;
     filter: alpha(opacity=00);
 }
+.pointer-events-none() {
+    pointer-events: none;
+    content: 'pointer-events:none';
+    filter: pointer-events(none);
+}
 .width100rate() {
-    width: 100% !important;
+    width: 100%;
     padding-right: 0px !important;
     padding-left: 0px !important;
     border-right-width: 0px !important;
@@ -19,7 +24,7 @@
 }
 
 .height100rate() {
-    height: 100% !important;
+    height: 100%;
     padding-top: 0px !important;
     padding-bottom: 0px !important;
     border-top-width: 0px !important;
@@ -30,54 +35,5 @@
 
 .m-width100rate() {
     box-sizing: border-box !important;
-    width: 100% !important;
+    width: 100%;
 }
-
-@import (less) 'css/core.css';
-@import (less) 'css/control.css';
-@import (less) 'css/input-control.css';
-@import (less) 'css/input-group.css';
-
-@import (less) 'css/items.css';
-@import (less) 'css/popup.css';
-
-@import (less) 'css/button.css';
-@import (less) 'css/popup-menu.css';
-@import (less) 'css/image.css';
-@import (less) 'css/dialog.css';
-@import (less) 'css/progress.css';
-@import (less) 'css/progress-bar.css';
-@import (less) 'css/table.css';
-@import (less) 'css/tab.css';
-
-@import (less) 'css/text.css';
-@import (less) 'css/checkbox.css';
-@import (less) 'css/radio.css';
-@import (less) 'css/select.css';
-@import (less) 'css/combox.css';
-@import (less) 'css/couple-slider.css';
-@import (less) 'css/multi-select.css';
-
-@import (less) 'css/locked-table.css';
-
-@import (less) 'css/fullscreen.css';
-@import (less) 'css/messagebox.css';
-@import (less) 'css/esr.css';
-
-@import (less) 'css/m-scroll.css';
-@import (less) 'css/m-confirm.css';
-@import (less) 'css/m-panel.css';
-@import (less) 'css/m-popup.css';
-@import (less) 'css/m-options.css';
-@import (less) 'css/m-photo-hotspot.css';
-@import (less) 'css/m-select.css';
-@import (less) 'css/m-list-view.css';
-@import (less) 'css/m-op-list-view.css';
-@import (less) 'css/m-carousel.css';
-@import (less) 'css/m-book.css';
-@import (less) 'css/m-tab.css';
-
-@import (less) 'css/svg.css';
-
-@import (less) 'css/bi-controls.css';
-@import (less) 'css/date-range.css';

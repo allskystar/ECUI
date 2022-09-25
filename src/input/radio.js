@@ -1,3 +1,16 @@
+//{if $css}//
+__ControlStyle__('\
+.ui-radio {\
+    input {\
+        position: relative !important;\
+        left: -12px !important;\
+        width: 10px !important;\
+        border-radius: 0px;\
+        opacity: 0 !important;\
+    }\
+}\
+');
+//{/if}//
 /*
 @example
 <input ui="type:radio" name="city" value="beijing" checked="checked" type="radio">
@@ -204,13 +217,24 @@ _bRequired - 是否必须选择
             },
 
             /**
-             * 判断控件在提交时是否选中，默认返回 isChecked 的值。
+             * 判断控件在默认时是否选中。
              * @public
              *
              * @return {boolean} 是否选中
              */
-            isFormChecked: function () {
-                return this.isChecked();
+            isDefaultChecked: function () {
+                return this._bDefault;
+            },
+
+            /**
+             * 判断控件在提交时是否选中，默认返回 isChecked 的值。
+             * @public
+             *
+             * @param {boolean} useDefault 是否使用缺省值
+             * @return {boolean} 是否选中
+             */
+            isFormChecked: function (useDefault) {
+                return this[useDefault ? 'isDefaultChecked' : 'isChecked']();
             },
 
             /**
@@ -244,8 +268,8 @@ _bRequired - 是否必须选择
      */
     ui.Radio.getValue = function (name) {
         var control = core.query(function (item) {
-                return item instanceof ui.Radio && item.getName() === name && item.isChecked();
-            })[0];
+            return item instanceof ui.Radio && item.getName() === name && item.isChecked();
+        })[0];
         return control ? control.getValue() : null;
     };
 
@@ -264,4 +288,4 @@ _bRequired - 是否必须选择
             item.setChecked(true);
         });
     };
-}());
+})();

@@ -1,3 +1,12 @@
+//{if $css}//
+__ControlStyle__('\
+svg {\
+    width: 100%;\
+    height: 100%;\
+    pointer-events: none;\
+}\
+');
+//{/if}//
 /*
 @example
 <!-- 以下***表示具体的展现类型 -->
@@ -89,5 +98,5 @@
         }
     );
 //{if 0}//
-}());
+})();
 //{/if}//
