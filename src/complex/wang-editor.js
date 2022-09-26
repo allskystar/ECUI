@@ -449,6 +449,9 @@ __ControlStyle__('\
                                     editor.select({anchor: editor.selection.anchor, focus: {path: point.path, offset: 0}});
                                     return false;
                                 }
+                            } else if (direction(editor.selection)) {
+                                editor.select({anchor: editor.selection.focus, focus: editor.selection.focus});
+                                return false;
                             }
                             break;
                         case 39:
@@ -463,6 +466,9 @@ __ControlStyle__('\
                                     editor.select({anchor: editor.selection.anchor, focus: {path: point.path, offset: node.text.length}});
                                     return false;
                                 }
+                            } else if (direction(editor.selection)) {
+                                editor.select({anchor: editor.selection.anchor, focus: editor.selection.anchor});
+                                return false;
                             }
                             break;
                         // no default
