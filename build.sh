@@ -280,53 +280,22 @@ cp -R $lib/images/* "$output/images/"
 if [ $1 ]
 then
     cd $lib
-
-    for file in `ls`
+    mkdir "../$output/js"
+    for file in `ls ecui.js js/ | grep js$ | awk '{if(NR>1){printf "ls/"}print}'`
     do
-        if [ -d $file ]
-        then
-            cd $file
-            if [ -f ".buildcopy" ]
-            then
-                if [ ! -d "../$output/$file/" ]
-                then
-                    mkdir "../$output/$file/"
-                fi
-                echo "copy $file/"
-                cp -R * "../$output/$file/"
-            fi
-            cd ..
-        else
-            if [ ! $file = "ecui.js" ] && [ ! $file = "ecui.css" ] && [ ! $file = "common.js" ] && [ ! $file = "common.css" ] && [ ! $file = "ie-es5.js" ] && [ ! $file = "options.js" ] && [ ! $file = "ios.js" ] && [ ! $file = "android.js" ] && [ ! "${file%%-*}" = "compatible" ]
-            then
-                continue
-            fi
-
-            path=""
-
-            if [ "${file##*.}" = "js" ]
-            then
-                echo "process file-$file"
-                cat $file | eval $js_write_repl | eval $js_merge | eval $js_compress > "$output/$file"
-            else
-                if [ "${file##*.}" = "css" ]
-                then
-                    echo "process file-$file"
-                    cat $file | eval $css_compile > "$output/$file"
-                    if [ $file = "ecui.css" ]
-                    then
-                        echo "//{assign var=css value=true}//
+        echo "process file-$file"
+        cat $file | eval $js_write_repl | eval $js_merge | eval $js_compress > "$output/$file"
+    done
+    file=ecui.css
+    echo "process file-$file"
+    cat $file | eval $css_compile > "$output/$file"
+    echo "//{assign var=css value=true}//
 __ControlStyle__('
 @import (less) 'ecui.css';
 ');
 " | cat - ecui.js | eval $js_write_repl | eval $js_merge | sed -n -e "/__ControlStyle__('/,/');/p" | sed -n -e 'H;${x;s/\\\n//g;p;}' | sed -e "s/__ControlStyle__('//g" -e "s/');//g" | eval $css_compile >> "$output/$file"
-                    fi
-                fi
-            fi
-        fi
-    done
-    cd ..
 
+    cd ..
     cd $1
     rm "common"
 

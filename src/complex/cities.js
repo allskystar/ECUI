@@ -47,7 +47,7 @@ cities - 地区联动下拉框控件。
         ui.Resource.declare('ecui/cities-data.js'),
         {
             $loadResource: function (text, url) {
-                var cities = ui.Resource.Methods.$loadResource(text, url),
+                var cities = ui.Resource.prototype.$loadResource(text, url),
                     data = [{value: '000000', '#text': '全部省', children: [{value: '000000', '#text': '全部市', children: [{value: '000000', '#text': '全部区'}]}]}];
 
                 for (var value in cities) {

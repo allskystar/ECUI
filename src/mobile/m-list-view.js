@@ -361,7 +361,7 @@ _nBottomIndex  - 下部隐藏的选项序号
                 this.preventAlterItems();
                 this.getItems().forEach(
                     function (item) {
-                        ui.Items.Methods.remove.call(this, item);
+                        ui.Items.remove.call(this, item);
                         item.dispose();
                     },
                     this
@@ -419,7 +419,7 @@ _nBottomIndex  - 下部隐藏的选项序号
              */
             $activate: function (event) {
                 if (!this._bLoading || this._sStatus !== 'headercomplete') {
-                    ui.MScroll.Methods.$activate.call(this, event);
+                    ui.MScroll.$activate.call(this, event);
                     if (!(ieVersion < 9)) {
                         core.drag(
                             this,
@@ -436,7 +436,7 @@ _nBottomIndex  - 下部隐藏的选项序号
              * @override
              */
             $dragend: function (event) {
-                ui.MScroll.Methods.$dragend.call(this, event);
+                ui.MScroll.$dragend.call(this, event);
                 if (!this._bLoading) {
                     if (this._sStatus === 'headercomplete') {
                         // 可以选择是否需要防止重复提交
@@ -455,7 +455,7 @@ _nBottomIndex  - 下部隐藏的选项序号
              * @override
              */
             $dragstart: function (event) {
-                ui.MScroll.Methods.$dragstart.call(this, event);
+                ui.MScroll.$dragstart.call(this, event);
                 this._oHandle();
                 if (!this._bLoading) {
                     this._sStatus = '';
@@ -469,7 +469,7 @@ _nBottomIndex  - 下部隐藏的选项序号
             add: function (item, index) {
                 this._bLoading = false;
                 var oldLength = this.getLength();
-                ui.Items.Methods.add.call(this, item, index);
+                ui.Items.add.call(this, item, index);
                 setEnterAndLeave.call(this);
                 if (this.isReady()) {
                     if (oldLength === this.getLength()) {
@@ -486,7 +486,7 @@ _nBottomIndex  - 下部隐藏的选项序号
              * @override
              */
             getY: function () {
-                return ui.MScroll.Methods.getY.call(this) - this._nTopHidden + this.$$headerHeight;
+                return ui.MScroll.getY.call(this) - this._nTopHidden + this.$$headerHeight;
             },
 
             /**
@@ -516,7 +516,7 @@ _nBottomIndex  - 下部隐藏的选项序号
                         }
                         this._nBottomIndex--;
                         this.$$bodyHeight -= height;
-                        ui.Items.Methods.remove.call(this, item);
+                        ui.Items.remove.call(this, item);
                         this.setPosition(0, this.getY());
                     }
                 }
@@ -529,7 +529,7 @@ _nBottomIndex  - 下部隐藏的选项序号
                 this.preventAlterItems();
 
                 if (ieVersion < 9 && (!this.$MScrollData.scrolling || this.$MScrollData.inertia)) {
-                    var top = ui.MScroll.Methods.getY.call(this);
+                    var top = ui.MScroll.getY.call(this);
 
                     if (top < -screen.availHeight * 1.5) {
                         for (; top < -screen.availHeight * 1.5;) {
@@ -576,7 +576,7 @@ _nBottomIndex  - 下部隐藏的选项序号
 
                 this._eHeader.style.transform = 'translateY(' + (y - this.$$headerHeight) + 'px)';
                 this._eFooter.style.transform = 'translateY(' + (y + this._nTopHidden - this.$$headerHeight) + 'px)';
-                ui.MScroll.Methods.setPosition.call(this, x, y + this._nTopHidden - this.$$headerHeight);
+                ui.MScroll.setPosition.call(this, x, y + this._nTopHidden - this.$$headerHeight);
 
                 top = this.getHeight() - core.getKeyboardHeight() - this.$$bodyHeight;
                 if (y > window.scrollY) {

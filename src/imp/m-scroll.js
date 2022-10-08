@@ -208,7 +208,7 @@ __ControlStyle__('\
         return y;
     }
 
-    ui.MScroll = _interface('$MScroll', {
+    ui.MScroll = core['interface']('MScroll', {
         constructor: function (el, options) {
             var bodyEl = dom.create(
                     {
@@ -494,7 +494,7 @@ __ControlStyle__('\
          * @override
          */
         setPosition: function (x, y) {
-            if (ui.MScroll.Methods.getX.call(this) !== x || ui.MScroll.Methods.getY.call(this) !== y) {
+            if (ui.MScroll.getX.call(this) !== x || ui.MScroll.getY.call(this) !== y) {
                 var body = this.getBody();
                 if (keyboardHeight) {
                     if (iosVersion >= 13) {

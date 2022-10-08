@@ -486,7 +486,7 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
                                 for (; item !== null;) {
                                     item = list[--currIndex];
                                     if (item) {
-                                        item.setAttribute('colSpan', +item.getAttribute('colSpan') - 1);
+                                        item.setAttribute('colSpan', +dom.getAttribute(item, 'colSpan') - 1);
                                         break;
                                     }
                                 }
@@ -526,7 +526,7 @@ _bMerge      - 行控件属性，是否在表格最后一列添加新列时自�
                                     targetItem = list[--targetIndex];
                                     if (targetItem) {
                                         if (targetItem !== currItem) {
-                                            targetItem.setAttribute('colSpan', +targetItem.getAttribute('colSpan') + 1);
+                                            targetItem.setAttribute('colSpan', +dom.getAttribute(targetItem, 'colSpan') + 1);
                                             currItem = false;
                                             if (currItem) {
                                                 rowEl.removeChild(currItem);

@@ -461,6 +461,25 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
             },
 
             /**
+             * 判断目标元素是不是一个可输入或者可获得焦点的元素。
+             * @public
+             *
+             * @param {HTMLElement} target 用于判断的元素对象
+             * @return {boolean} true / false
+             */
+            isEditable: function (target) {
+                if ((target.tagName === 'INPUT' && target.type !== 'radio' && target.type !== 'checkbox') || target.tagName === 'TEXTAREA') {
+                    return true;
+                }
+                for (; target; target = dom.parent(target)) {
+                    if (target.getAttribute && dom.getAttribute(target, 'contenteditable')) {
+                        return true;
+                    }
+                }
+                return false;
+            },
+
+            /**
              * 判断一个对象是否为 DOM 对象。
              * @public
              *
@@ -1980,7 +1999,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              */
             hasIOSKeyboard: iosVersion ? function (target) {
                 target = target || document.activeElement;
-                return util.isInputLikeTarget(target);
+                return !target.readOnly && dom.isEditable(target);
             } : function () {
                 return false;
             },
@@ -2001,17 +2020,6 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                 Object.assign(subClass.prototype = new Clazz(), oldPrototype);
                 subClass.prototype.constructor = subClass;
                 subClass['super'] = superClass;
-            },
-
-            /**
-             * 判断目标元素是不是一个可输入或者可获得焦点的元素。
-             * @public
-             *
-             * @param {HTMLElement} target 用于判断的元素对象
-             * @return {boolean} true / false
-             */
-            isInputLikeTarget: function (target) {
-                return target.getAttribute('contenteditable') || (!target.readOnly && ((target.tagName === 'INPUT' && target.type !== 'radio' && target.type !== 'checkbox') || target.tagName === 'TEXTAREA'));
             },
 
             /**

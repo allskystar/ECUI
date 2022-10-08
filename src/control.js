@@ -125,7 +125,7 @@ _aStatus            - 控件当前的状态集合
             this._sUID = options.uid;
             // svg classname 是数组 不能做trim操作
             if (typeof el.className === 'string') {
-                this._sClass = ieVersion < 10 ? el.className.trim().split(' ')[0] : document.body.classList[0];
+                this._sClass = ieVersion < 10 ? el.className.trim().split(' ')[0] : el.classList[0];
             }
 /*ignore*/
             this._bDisabled = !!options.disabled;
@@ -1456,6 +1456,6 @@ _aStatus            - 控件当前的状态集合
             return this['$' + propertyName + 'Data'].value || null;
         };
 
-        return (definedInterface[name] = _interface('$' + propertyName, methods));
+        return (definedInterface[name] = core['interface'](propertyName, methods));
     };
 })();

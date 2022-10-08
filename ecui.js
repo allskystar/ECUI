@@ -1,30 +1,4 @@
 // 为方便beyond compare比对差异提供的函数，仅在2.x.x版本中使用
-function _interface(name, superClass, methods) {
-    var inf = {
-        NAME: name
-    };
-    if (superClass instanceof Array) {
-        inf.SUPER = superClass;
-        inf.Methods = methods;
-    } else {
-        inf.Methods = superClass;
-    }
-    if (inf.Methods.constructor) {
-        inf.constructor = inf.Methods.constructor;
-        delete inf.Methods.constructor;
-    }
-    if (inf.Methods.$dispose) {
-        var $dispose = inf.Methods.$dispose;
-    }
-    inf.Methods.$dispose = function () {
-        if ($dispose) {
-            $dispose.call(this);
-        }
-        delete this[inf.NAME];
-        delete this[inf.NAME + 'Data'];
-    };
-    return inf;
-}
 //{if 0}//
 function __ControlStyle__(cssText) {
     cssText = "@import (less) 'ecui.css';\n" + cssText;

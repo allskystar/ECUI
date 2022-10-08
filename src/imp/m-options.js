@@ -38,7 +38,7 @@ __ControlStyle__('\
         });
     }
 
-    ui.MOptions = _interface('$MOptions', [ui.Control.defineProperty('selected'), ui.MScroll], {
+    ui.MOptions = core['interface']('MOptions', [ui.Control.defineProperty('selected'), ui.MScroll], {
         constructor: function (el) {
             dom.addClass(el, 'ui-mobile-options');
             var body = this.getBody();

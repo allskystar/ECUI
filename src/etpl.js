@@ -115,7 +115,7 @@
          * @return {string} 替换结果串
          */
         date: function (source, format) {
-            return util.formatDate(new Date(source), format);
+            return (new Date(source).toString() === 'Invalid Date') ? source : util.formatDate(new Date(source), format);
         },
 
         /**

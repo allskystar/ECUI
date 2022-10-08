@@ -77,7 +77,7 @@ __ControlStyle__('\
         }
     );
 
-    ui.Items = _interface('$Items', {
+    ui.Items = core['interface']('Items', {
         constructor: function () {
             this.$ItemsData.items = [];
             this.$ItemsData.prevent = 0;

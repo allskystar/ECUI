@@ -31,16 +31,15 @@ __ControlStyle__('\
         },
         locked;
 
-    ui.MPopup = {
-        NAME: '$MPopup',
+    ui.MPopup = core['interface'](
+        'MPopup',
+        {
+            constructor: function (el, options) {
+                this.$MPopupData.enter = (position[options.enter || 'bottom'] || position.right);
+                this.$MPopupData.mask = options.mask;
+                this.$MPopupData.zIndex = options.zIndex || '';
+            },
 
-        constructor: function (el, options) {
-            this.$MPopupData.enter = (position[options.enter || 'bottom'] || position.right);
-            this.$MPopupData.mask = options.mask;
-            this.$MPopupData.zIndex = options.zIndex || '';
-        },
-
-        Methods: {
             /**
              * @override
              */
@@ -159,5 +158,5 @@ __ControlStyle__('\
                 }
             }
         }
-    };
+    );
 })();

@@ -81,7 +81,7 @@ __ControlStyle__('\
     var owners = [],
         singletons = {};
 
-    ui.Popup = _interface('$Popup', {
+    ui.Popup = core['interface']('Popup', {
         /**
          * @override
          */

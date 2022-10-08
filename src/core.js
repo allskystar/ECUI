@@ -97,7 +97,6 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
         dragStopHandler = util.blank, // ios设备上移出webview区域停止事件
         touchTarget,              // touch点击的目标，用于防止ios下的点击穿透处理
         isTouchMoved,
-        isDragging,
         isRepainting,
         ecuiOptions,              // ECUI 参数
 
@@ -335,9 +334,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             },
 
             pointercancel: function (event) {
-                if (!isDragging) {
-                    events.pointerup(event, true);
-                }
+                events.pointerup(event, true);
             },
 
             // 触屏事件到鼠标事件的转化，与touch相关的事件由于ie浏览器会触发两轮touch与mouse的事件，所以需要屏弊一个
@@ -464,16 +461,9 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                                 // 记录touchend时的dom元素，阻止事件穿透
                                 touchTarget = target;
 
-                                if (target.tagName !== 'INPUT' && target.tagName !== 'TEXTAREA') {
-                                    for (; target; target = dom.parent(target)) {
-                                        if (target.getAttribute('contenteditable')) {
-                                            break;
-                                        }
-                                    }
-                                    // 点击到非INPUT区域需要失去焦点
-                                    if (!target && isTouchClick(track)) {
-                                        document.activeElement.blur();
-                                    }
+                                // 点击到非INPUT区域需要失去焦点
+                                if (!dom.isEditable(target) && isTouchClick(track)) {
+                                    document.activeElement.blur();
                                 }
 
                                 noPrimaryEnd = false;
@@ -554,13 +544,10 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             },
 
             dragstart: function (event) {
-                isDragging = true;
-                util.timer(function () {
-                    // 防止pointercancelr
-                    isDragging = false;
-                }, 100);
-                event = core.wrapEvent(event);
-                bubble(event.getControl(), 'dragstart', event);
+                var control = core.findControl(event.target);
+                if (control.$dataTransfer) {
+                    control.$dataTransfer(event.dataTransfer, event.target);
+                }
             },
 
             drop: function (event) {
@@ -576,8 +563,6 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                     }
                 }
                 bubble(core.findControl(event.target), 'drop', event);
-                event.which = 1;
-                mouseEvents.mouseup(event);
             },
 
             keydown: function (event) {
@@ -653,8 +638,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             // 鼠标左键按下需要改变框架中拥有焦点的控件
             mousedown: function (event) {
                 var control = event.getControl(),
-                    target = control,
-                    click = true;
+                    target = control;
 
                 if (control) {
                     // IE8以下的版本，如果为控件添加激活样式，原生滚动条的操作会失效
@@ -663,16 +647,8 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                     if (isTouchMoved === undefined) { // MouseEvent
                         // 触控设备在mouseup时获得焦点
                         if (!scrollHandler || ieVersion >= 9) {
-                            for (var el = document.activeElement; el; el = dom.parent(el)) {
-                                if (el.getAttribute && dom.getAttribute(el, 'contenteditable')) {
-                                    // 任意父元素处于可编辑状态将不需要直接触发setFocused，而是在元素获得焦点时触发
-                                    click = false;
-                                }
-                            }
-                            if (click && (event.target.tagName !== 'INPUT' || event.target.type === 'radio' || event.target.type === 'checkbox') && event.target.tagName !== 'TEXTAREA') {
-                                // 如果点击可输入框，由可输入框的focus事件触发setFocused
-                                core.setFocused(target);
-                            }
+                            // 如果点击可输入框，由可输入框的focus事件触发setFocused
+                            core.setFocused(target);
                         }
                     }
 
@@ -764,13 +740,10 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                                 break;
                             }
                         }
-                        if (el.getAttribute && dom.getAttribute(el, 'contenteditable')) {
-                            // 任意父元素处于可编辑状态将不需要直接触发setFocused，而是在元素获得焦点时触发
-                            click = false;
-                        }
                     }
 
-                    if (click && (event.target.tagName !== 'INPUT' || event.target.type === 'radio' || event.target.type === 'checkbox') && event.target.tagName !== 'TEXTAREA') { // TouchEvent
+                    if (click && !dom.isEditable(event.target)) { // TouchEvent
+                        // 任意父元素处于可编辑状态将不需要直接触发setFocused，而是在元素获得焦点时触发
                         core.setFocused(activedControl);
                     }
 
@@ -2005,17 +1978,11 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
      * @param {ECUIEvent} event 事件对象
      */
     function onselectstart(control, event) {
-        if (isTouchMoved === undefined) { // MouseEvent
+        if (isTouchMoved === undefined && !dom.isEditable(event.target)) { // MouseEvent
             for (; control; control = control.getParent()) {
                 if (!control.isUserSelect()) {
                     event.preventDefault();
-                    if (document.activeElement !== event.target) {
-                        if (util.isInputLikeTarget(event.target)) {
-                            event.target.focus();
-                        } else {
-                            document.activeElement.blur();
-                        }
-                    }
+                    document.activeElement.blur();
                     return;
                 }
             }
@@ -2822,7 +2789,6 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                             }
                         }
                     }
-
                     subClass.interfaces.forEach(
                         function (imp) {
                             this[imp.NAME + 'Data'] = {};
@@ -2900,28 +2866,26 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             subClass.CLASS = subClass.TYPES[0].length ? ' ' + subClass.TYPES[0].join(' ') : '';
 
             for (var superMethods = [], item; (item = arguments[index++]);) {
-                if (item.NAME) {
-                    if (item.SUPER) {
-                        if (item.SUPER instanceof Array) {
-                            superMethods.push.apply(superMethods, item.SUPER);
+                if (typeof item === 'function') {
+                    if (item['super']) {
+                        if (item['super'] instanceof Array) {
+                            superMethods.push.apply(superMethods, item['super']);
                         } else {
-                            superMethods.push(item.SUPER);
+                            superMethods.push(item['super']);
                         }
                     }
                 }
                 superMethods.push(item);
             }
             superMethods.forEach(function (methods) {
-                if (methods.NAME) {
+                if (typeof methods === 'function') {
                     subClass.interfaces.push(methods);
                     // 对接口的处理
                     var Clazz = new Function();
                     Clazz.prototype = superClass.prototype;
                     subClass.prototype[methods.NAME] = Object.assign(new Clazz(), subClass.prototype);
-                    if (methods.interceptor) {
-                        methods.interceptor(subClass);
-                    }
-                    methods = methods.Methods;
+                    methods(subClass);
+                    methods = methods.prototype;
                 }
                 Object.assign(subClass.prototype, methods);
             });
@@ -3000,8 +2964,8 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                                 for (var parent = core.findControl(item); parent; parent = parent.getParent()) {
                                     if (parent[name] && typeof parent[name] === 'function') {
                                         clazz = parent[name];
+                                        options.parent = parent;
                                         if (parent.$createChild) {
-                                            options.parent = parent;
                                             clazz = parent.$createChild(parent[name], options);
                                             if (clazz === false) {
                                                 return;
@@ -3060,6 +3024,49 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                 // 防止循环引用
                 list = el = null;
             }
+        },
+
+        /**
+         * 接口声明。
+         * @public
+         *
+         * @param {string} name 接口名称
+         * @param {Array} superClass 接口的基类的数组
+         * @param {object} methods 接口的方法集合
+         * @param {function} interceptor 拦截器
+         * @return {Interface} 接口定义
+         */
+        'interface': function (name, superClass, methods, interceptor) {
+            name = '$' + name;
+
+            if (!(superClass instanceof Array)) {
+                interceptor = methods;
+                methods = superClass;
+                superClass = null;
+            }
+
+            var inf = interceptor || new Function();
+            inf['super'] = superClass;
+            inf.NAME = name;
+            Object.assign(inf.prototype, methods);
+            if (inf.prototype.constructor) {
+                inf.constructor = inf.prototype.constructor;
+                delete inf.prototype.constructor;
+            }
+
+            if (inf.prototype.$dispose) {
+                var $dispose = inf.prototype.$dispose;
+            }
+            inf.prototype.$dispose = function () {
+                if ($dispose) {
+                    $dispose.call(this);
+                } else {
+                    this[name].$dispose.call(this);
+                }
+                delete this[name];
+                delete this[name + 'Data'];
+            };
+            return inf;
         },
 
         /**

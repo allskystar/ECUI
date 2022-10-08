@@ -136,7 +136,12 @@
         document.head.appendChild(el);
     }
 
-    ecui.io.loadScript = function (url, options) {
+    var loadScript = ecui.io.loadScript;
+    ecui.io.loadScript = function (url, options, flag) {
+        if (flag) {
+            return loadScript(url, options);
+        }
+
         var name = url.split('/');
 
         if (name.pop() === '_define_.js') {
@@ -170,7 +175,7 @@
                 }
             });
         } else {
-            oldLoadScriptFn.call(this, url, callback, options);
+            oldLoadScriptFn.call(this, url, options.onsuccess, options);
         }
     };
 

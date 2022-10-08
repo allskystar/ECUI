@@ -61,7 +61,7 @@ MConfirm - 确认按钮插件。
      * @param {ecui.ui.Control} control 需要应用插件的控件
      * @param {string} value 插件的参数
      */
-    ui.MConfirm = _interface('$MConfirm', {
+    ui.MConfirm = core['interface']('MConfirm', {
         constructor: function (el) {
             var title = dom.create({
                     className: 'ui-mobile-confirm-title',

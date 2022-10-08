@@ -202,7 +202,7 @@ _eText       - 文本框
                      * @override
                      */
                     $dragend: function (event) {
-                        ui.MScroll.Methods.$dragend.call(this, event);
+                        ui.MScroll.$dragend.call(this, event);
                         core.dispatchEvent(this.getParent(), 'change');
                     }
                 }
