@@ -1,5 +1,5 @@
 //{if $css}//
-__ControlStyle__('\
+ecui.__ControlStyle__('\
 .ui-full-screen {\
     position: fixed !important;\
     top: 0px !important;\
@@ -48,16 +48,25 @@ __ControlStyle__('\
         }
     }
 
+    /**
+     * 退出全屏操作。
+     * @public
+     *
+     */
+    core.cancleFullScreen = function () {
+        if (document.fullscreenElement) {
+            cancleFullScreen();
+        } else {
+            core.repaint();
+        }
+        restore();
+    };
+
     function cancelAction(event) {
         event = core.wrapEvent(event);
         if (event.which === 27) {
             // ESC
-            if (document.fullscreenElement) {
-                cancleFullScreen();
-            } else {
-                core.repaint();
-            }
-            restore();
+            core.cancleFullScreen();
         }
     }
 

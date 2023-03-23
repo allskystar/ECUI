@@ -32,7 +32,7 @@
                     });
                     event.stopPropagation();
                 } else {
-                    ui.Control.prototype.$activate.call(this, event);
+                    _super.$activate(event);
                 }
             },
 

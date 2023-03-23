@@ -1,7 +1,7 @@
 (function () {
     var CACHE_NAME = location.host;
 
-    this.addEventListener('fetch', function (event) {
+    dom.addEventListener(this, 'fetch', function (event) {
         var cloneRequest = event.request.clone();
 
         event.respondWith(

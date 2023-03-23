@@ -1,5 +1,5 @@
 //{if $css}//
-__ControlStyle__('\
+ecui.__ControlStyle__('\
 .ui-mobile-op-listview {\
     .ui-item {\
         width: 100% !important;\
@@ -46,7 +46,7 @@ _cItem    - 当前处于激活的选项
         ui.MListView,
         'ui-mobile-op-listview',
         function (el, options) {
-            ui.MListView.call(this, el, options);
+            _super(el, options);
             this._bOperate = false;
         },
         {
@@ -57,7 +57,7 @@ _cItem    - 当前处于激活的选项
             Item: core.inherits(
                 ui.MListView.prototype.Item,
                 function (el, options) {
-                    ui.MListView.prototype.Item.call(this, el, options);
+                    _super(el, options);
                     dom.toArray(this.getBody().childNodes).forEach(function (item) {
                         if (item.nodeType !== 1) {
                             dom.remove(item);
@@ -70,7 +70,7 @@ _cItem    - 当前处于激活的选项
                      * @override
                      */
                     $activate: function (event) {
-                        ui.MListView.prototype.Item.prototype.$activate.call(this, event);
+                        _super.$activate(event);
 
                         var parent = this.getParent();
                         if (parent._cItem !== this) {
@@ -85,7 +85,7 @@ _cItem    - 当前处于激活的选项
                      * @override
                      */
                     $cache: function (style) {
-                        ui.MListView.prototype.Item.prototype.$cache.call(this, style);
+                        _super.$cache(style);
                         this.$$sumWidth = 0;
                         this.$$opWidth = dom.children(this.getBody()).slice(1).map(
                             function (item) {
@@ -100,7 +100,7 @@ _cItem    - 当前处于激活的选项
                      * @override
                      */
                     $click: function (event) {
-                        ui.MListView.prototype.Item.prototype.$click.call(this, event);
+                        _super.$click(event);
 
                         var parent = this.getParent();
                         if (parent && parent._cItem) {
@@ -114,14 +114,14 @@ _cItem    - 当前处于激活的选项
                      */
                     $dispose: function () {
                         this._oHandle();
-                        ui.Control.prototype.$dispose.call(this);
+                        _super.$dispose();
                     },
 
                     /**
                      * @override
                      */
                     $initStructure: function (width, height) {
-                        ui.MListView.prototype.Item.prototype.$initStructure.call(this, width, height);
+                        _super.$initStructure(width, height);
                         height = this.getClientHeight();
                         dom.children(this.getBody()).forEach(function (item, index) {
                             if (index) {
@@ -134,7 +134,7 @@ _cItem    - 当前处于激活的选项
                      * @override
                      */
                     $restoreStructure: function () {
-                        ui.MListView.prototype.Item.prototype.$restoreStructure.call(this);
+                        _super.$restoreStructure();
                         dom.children(this.getBody()).forEach(function (item, index) {
                             if (index) {
                                 item.style.height = '';
@@ -146,7 +146,7 @@ _cItem    - 当前处于激活的选项
                      * @override
                      */
                     getX: function () {
-                        return +dom.first(this.getBody()).style.transform.replace(/translateX\((-?[0-9.]+)px\)/, '$1');
+                        return +this.getBody().firstElementChild.style.transform.replace(/translateX\((-?[0-9.]+)px\)/, '$1');
                     },
 
                     /**
@@ -191,7 +191,7 @@ _cItem    - 当前处于激活的选项
              * @override
              */
             $dragmove: function (event) {
-                ui.MListView.prototype.$dragmove.call(this, event);
+                _super.$dragmove(event);
                 if (this._bOperate === undefined) {
                     this._bOperate = (event.track.angle < 45 || (event.track.angle > 135 && event.track.angle < 225) || event.track.angle > 315);
                     if (this._bOperate) {
@@ -205,7 +205,7 @@ _cItem    - 当前处于激活的选项
              * @override
              */
             $dragstart: function (event) {
-                ui.MListView.prototype.$dragstart.call(this, event);
+                _super.$dragstart(event);
                 this._bOperate = this.getStatus() ? false : undefined;
             },
 
@@ -213,7 +213,7 @@ _cItem    - 当前处于激活的选项
              * @override
              */
             $remove: function (event) {
-                ui.MListView.prototype.$remove.call(this, event);
+                _super.$remove(event);
                 if (event.returnValue !== false) {
                     if (event.child === this._cItem) {
                         this._cItem = null;
@@ -228,14 +228,14 @@ _cItem    - 当前处于激活的选项
                 if (this._cItem) {
                     return this._cItem.getX();
                 }
-                return ui.MListView.prototype.getX.call(this);
+                return _super.getX();
             },
 
             /**
              * @override
              */
             reload: function (data) {
-                ui.MListView.prototype.reload.call(this, data);
+                _super.reload(data);
                 this._cItem = null;
             },
 
@@ -244,7 +244,7 @@ _cItem    - 当前处于激活的选项
              */
             setPosition: function (x, y) {
                 if (this._bOperate === false) {
-                    ui.MListView.prototype.setPosition.call(this, 0, y);
+                    _super.setPosition(0, y);
                 } else if (this._bOperate === true && this._cItem) {
                     this._cItem.setPosition(x);
                 }

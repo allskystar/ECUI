@@ -1,3 +1,9 @@
-var FeatureFlags = {
-    PAGEON_1: true         // 分页组件耦合分页处理
-};
+(function () {
+    if (/[?&]validate=off(&|$)/.test(location.href)) {
+        for (var name in ecui.ui) {
+            if (ecui.ui[name].prototype.hasOwnProperty('$validate')) {
+                ecui.ui[name].prototype.$validate = ecui.util.blank;
+            }
+        }
+    }
+})();

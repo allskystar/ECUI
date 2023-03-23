@@ -50,19 +50,12 @@
 _cSelected - 当前被选中的标签
 _aLabel    - 标签信息数组
 */
-(function () {
 //{if 0}//
+(function () {
     var core = ecui,
         dom = core.dom,
         ui = core.ui;
 //{/if}//
-    function setSelected(book, item) {
-        if (book._cSelected !== item) {
-            book._cSelected = item;
-            core.dispatchEvent(book, 'change', {item: item});
-        }
-    }
-
     /**
      * 移动端书册控件。
      * @control
@@ -70,65 +63,33 @@ _aLabel    - 标签信息数组
     ui.MBook = core.inherits(
         ui.MPanel,
         'ui-mobile-book',
-        [
-            function () {
-                this._aLabel = [];
-                dom.children(this.getBody()).forEach(
-                    function (item) {
-                        if (item.tagName === 'STRONG') {
-                            this._aLabel.push({
-                                el: item
-                            });
-                        }
-                    },
-                    this
-                );
-            }
-        ],
         {
             /**
              * @override
              */
             $cache: function (style) {
-                ui.MPanel.prototype.$cache.call(this, style);
-                this._aLabel.forEach(function (item) {
-                    item.top = item.el.offsetTop;
-                    item.height = item.el.offsetHeight;
-                });
+                _super.$cache(style);
+                this._aLabel = [];
+                dom.children(this.getBody()).forEach(
+                    function (item) {
+                        if (item.tagName === 'STRONG') {
+                            this._aLabel.push({
+                                el: item,
+                                top: item.offsetTop,
+                                height: item.offsetHeight
+                            });
+                        }
+                    },
+                    this
+                );
             },
 
             /**
              * @override
              */
             $dispose: function () {
-                this._aLabel = null;
-                ui.MPanel.prototype.$dispose.call(this);
-            },
-
-            /**
-             * @override
-             */
-            $initStructure: function (width, height) {
-                ui.MPanel.prototype.$initStructure.call(this, width, height);
-                this.setScrollRange({top: this.getHeight() - this.getBody().offsetHeight});
-            },
-
-            /**
-             * @override
-             */
-            $ready: function (options) {
-                ui.MPanel.prototype.$ready.call(this, options);
-                setSelected(this, this._aLabel[0]);
-            },
-
-            /**
-             * @override
-             */
-            $restoreStructure: function () {
-                ui.MPanel.prototype.$restoreStructure.call(this);
-                this._aLabel.forEach(function (item) {
-                    item.el.style.transform = '';
-                });
+                _super.$dispose();
+                this._aLabel = this._cSelected = null;
             },
 
             /**
@@ -149,24 +110,26 @@ _aLabel    - 标签信息数组
              * @override
              */
             setPosition: function (x, y) {
-                ui.MPanel.prototype.setPosition.call(this, x, y);
-                for (var selected = this._aLabel[0], i = 1, next; (next = this._aLabel[i++]);) {
+                _super.setPosition(x, y);
+                for (var top = this.getBody().scrollHeight, selected = this._aLabel[0], i = 1, next; (next = this._aLabel[i++]);) {
                     if (next.top > -y) {
+                        top = next.top;
                         break;
                     }
                     selected = next;
                 }
+                selected.el.style.transform = 'translate(0px,' + Math.min(-y - selected.top, top - selected.top - selected.height) + 'px)';
 
-                this._aLabel.forEach(function (item) {
-                    if (next) {
-                        item.el.style.transform = item === selected ? 'translate(0px,' + Math.min(-y - item.top, next.top - item.top - selected.height) + 'px)' : '';
-                    } else {
-                        item.el.style.transform = item === selected ? 'translate(0px,' + (-y - item.top) + 'px)' : '';
+                if (this._cSelected !== selected) {
+                    if (this._cSelected) {
+                        this._cSelected.el.style.transform = '';
                     }
-                });
-
-                setSelected(this, selected);
+                    this._cSelected = selected;
+                    core.dispatchEvent(this, 'change', {item: selected});
+                }
             }
         }
     );
+//{if 0}//
 })();
+//{/if}//

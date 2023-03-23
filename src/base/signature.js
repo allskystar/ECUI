@@ -1,6 +1,6 @@
 /*
 @example
-<svg ui="type:signature"></svg>
+<canvas ui="type:signature"></canvas>
 
 @fields
 _bDraw - 是否开始跟踪绘制
@@ -12,6 +12,11 @@ _oCtx  - 画布对象
         dom = core.dom,
         ui = core.ui;
 //{/if}//
+    function toPointer(signature, method, event) {
+        var el = signature.getMain();
+        signature._oCtx[method]((event.pageX - signature.getX()) / (signature.getClientWidth() / el.width), (event.pageY - signature.getY()) / (signature.getClientHeight() / el.height));
+    }
+
     /**
      * 签名控件。
      * @control
@@ -20,7 +25,7 @@ _oCtx  - 画布对象
         ui.Control,
         'ui-signature',
         function (el, options) {
-            ui.Control.call(this, el, options);
+            _super(el, options);
             this._oCtx = el.getContext('2d');
         },
         {
@@ -28,32 +33,63 @@ _oCtx  - 画布对象
              * @override
              */
             $activate: function (event) {
-                ui.Control.prototype.$activate.call(this, event);
+                _super.$activate(event);
                 this._bDraw = true;
                 this._oCtx.beginPath();
-
-                var el = this.getMain();
-                this._oCtx.moveTo((event.pageX - this.getX()) / (this.getClientWidth() / el.width), (event.pageY - this.getY()) / (this.getClientHeight() / el.height));
+                toPointer(this, 'moveTo', event);
             },
 
             /**
              * @override
              */
             $deactivate: function (event) {
-                ui.Control.prototype.$deactivate.call(this, event);
-                this._bDraw = false;
+                _super.$deactivate(event);
+                delete this._bDraw;
             },
 
             /**
              * @override
              */
             $mousemove: function (event) {
-                ui.Control.prototype.$mousemove.call(this, event);
+                _super.$mousemove(event);
                 if (this._bDraw) {
-                    var el = this.getMain();
-                    this._oCtx.lineTo((event.pageX - this.getX()) / (this.getClientWidth() / el.width), (event.pageY - this.getY()) / (this.getClientHeight() / el.height));
+                    toPointer(this, 'lineTo', event);
                     this._oCtx.stroke();
                 }
+            },
+
+            /**
+             * 移出时需要结束绘制，否则从另一面移入会导致额外的连线。
+             * @override
+             */
+            $mouseout: function (event) {
+                _super.$mouseout(event);
+                if (this._bDraw) {
+                    this._bDraw = false;
+                }
+            },
+
+            /**
+             * 移入时重新设置绘制起始位置。
+             * @override
+             */
+            $mouseover: function (event) {
+                _super.$mouseover(event);
+                if (this._bDraw === false) {
+                    this._bDraw = true;
+                    toPointer(this, 'moveTo', event);
+                }
+            },
+
+            /**
+             * @override
+             */
+            $ready: function () {
+                _super.$ready();
+                var el = this.getMain();
+                el.width = this.getClientWidth();
+                el.height = this.getClientHeight();
+                this.clear();
             },
 
             /**
@@ -61,19 +97,10 @@ _oCtx  - 画布对象
              */
             clear: function () {
                 var el = this.getMain();
+                this._oCtx.clearRect(0, 0, el.width, el.height);
                 this._oCtx.fillStyle = dom.getStyle(el, 'backgroundColor');
                 this._oCtx.fillRect(0, 0, el.width, el.height);
-                this._oCtx.fillStyle = '#000000';
-            },
-
-            /**
-             * @override
-             */
-            init: function () {
-                var el = this.getMain();
-                el.width = this.getClientWidth();
-                el.height = this.getClientHeight();
-                this.clear();
+                this._oCtx.fillStyle = dom.getStyle(el, 'color');
             },
 
             /**

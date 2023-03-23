@@ -1,5 +1,5 @@
 //{if $css}//
-__ControlStyle__('\
+ecui.__ControlStyle__('\
 .ui-mobile-select {\
     position: relative;\
 \
@@ -48,13 +48,11 @@ _uOptions     - 下拉选择框
      * @control
      */
     ui.MSelect = core.inherits(
-        ui.$AbstractSelect,
+        ui.abstractSelect,
         'ui-mobile-select',
         function (el, options) {
-            ui.$AbstractSelect.call(this, el, Object.assign({inputType: 'hidden'}, options));
-
-            this.$getSection('Options').setOptionSize(options.optionSize || 3);
-
+            _super(el, Object.assign({}, options));
+            this.getPopup().setOptionSize(+options.optionSize || 3);
             options.enter = 'bottom';
             options.mask = 0.5;
         },
@@ -64,67 +62,30 @@ _uOptions     - 下拉选择框
              * @unit
              */
             Options: core.inherits(
-                ui.$AbstractSelect.prototype.Options,
+                ui.abstractSelect.prototype.Options,
                 {
                     /**
-                     * @override
+                     * 选项部件。
+                     * @unit
                      */
-                    $show: function () {
-                        ui.$AbstractSelect.prototype.Options.prototype.$show.call(this);
-
-                        var select = this.getParent(),
-                            item = select.getSelected();
-
-                        this.setPosition(0, this.$$itemHeight * (this._nOptionSize - select.getItems().indexOf(item)));
-
-                        if (item) {
-                            this.setSelected(item);
-                            core.setFocused(item);
-                        }
-                    },
-                    $propertychange: function (event) {
-                        if (event.name === 'selected') {
-                            if (event.item) {
-                                this._cPreSelected = event.item;
-                            }
-                        }
-                    }
-
+                    Item: core.inherits(
+                        ui.abstractSelect.prototype.Options.prototype.Item,
+                        'ui-mobile-select-item'
+                    )
                 },
-                ui.MOptions,
-                ui.MConfirm
-            ),
-
-            /**
-             * 选项部件。
-             * @unit
-             */
-            Item: core.inherits(
-                ui.$AbstractSelect.prototype.Item,
-                {
-                    /**
-                     * @override
-                     */
-                    $activate: function (event) {
-                        ui.$AbstractSelect.prototype.Item.prototype.$activate.call(this, event);
-                        core.dispatchEvent(this.getParent().$getSection('Options'), 'activate', event);
-                    }
-                }
+                ui.iMOptions,
+                ui.iMConfirm
             ),
 
             /**
              * 确认事件的默认处理。
              * @event
              */
-            $confirm: function (event) {
-                var item = this.getPopup()._cPreSelected;
-                if ((item === null || item instanceof this.Item) && this.getSelected() !== item) {
-                    this.getPopup().setSelected(item);
-                    this.setSelected(item);
-                    core.dispatchEvent(this, 'change', event);
-                }
+            $confirm: function () {
+                var options = this.getPopup();
+                options.setSelected(options.getSelecting());
             }
         },
-        ui.MPopup
+        ui.iMPopup
     );
 })();

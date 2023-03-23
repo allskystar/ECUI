@@ -14,13 +14,13 @@ clear - 输入框的清除插件，使用ext-clear使用。
         ui.Control,
         {
             $click: function (event) {
-                ui.Control.prototype.$click.call(this, event);
+                _super.$click(event);
                 var parent = this.getParent();
-                if (parent.getValue()) {
+                if (parent && parent.getValue && parent.getValue()) {
                     parent.setValue('');
                     core.dispatchEvent(parent, 'input', event);
-                    core.dispatchEvent(parent, 'clear', event);
                 }
+                core.dispatchEvent(parent, 'clear', event);
                 event.stopPropagation();
             }
         }

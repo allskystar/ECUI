@@ -16,7 +16,7 @@ link - 链接插件，使用ext-link使用，具体的跳转地址写在DOM元�
             click: function (event) {
                 // link嵌套只处理最内层
                 if (!event.__ECUI_Link__) {
-                    var href = dom.getAttribute(this.getMain(), 'href');
+                    var href = this.getMain().getAttribute('href');
                     if (href) {
                         if (href.charAt(0) === '#') {
                             core.esr.redirect(href.slice(1));

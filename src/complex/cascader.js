@@ -19,12 +19,11 @@
         ui.Multilevel,
         'ui-cascader',
         function (el, options) {
+            _super(el, options);
             dom.children(el).forEach(function (el) {
                 dom.addClass(el, this.getUnitClass(ui.Cascader, 'options'));
                 core.$fastCreate(this.Options, el, this);
             }, this);
-
-            ui.Multilevel.call(this, el, options);
         },
         {
             /**
@@ -38,7 +37,7 @@
                      * @override
                      */
                     add: function (item, index) {
-                        ui.Options.prototype.add.call(this, item, index);
+                        _super.add(item, index);
                         dom.removeClass(this.getMain(), 'ui-hide');
                     },
 
@@ -46,13 +45,12 @@
                      * @override
                      */
                     removeAll: function (dispose) {
-                        ui.Options.prototype.removeAll.call(this, dispose);
+                        _super.removeAll(dispose);
                         dom.addClass(this.getMain(), 'ui-hide');
                     }
                 }
             )
-        },
-        ui.Popup
+        }
     );
 //{if 0}//
 })();

@@ -1,11 +1,25 @@
+//{if $css}//
+ecui.__ControlStyle__('\
+.ui-progress-circle {\
+    position: relative;\
+    svg {\
+        position: absolute !important;\
+        top: 0 !important;\
+        left: 0 !important;\
+        width: 100% !important;\
+        height: 100% !important;\
+        opacity: 0.5;\
+    }\
+}\
+');
+//{/if}//
 /*
 @example
-<div ui="type:progress-circle;max:100;value:35"></div>
+<div ui="type:progress-circle;id:test" style="width:100px;height:100px"><img width="100%" height="100%" src="images/ecui/fail.png"></div>
 */
 //{if 0}//
 (function () {
     var core = ecui,
-        dom = core.dom,
         ui = core.ui;
 //{/if}//
     /**
@@ -17,9 +31,9 @@
         ui.Progress,
         'ui-progress-circle',
         function (el, options) {
-            ui.Progress.call(this, el, options);
+            _super(el, options);
 
-            el.innerHTML = '<svg><path fill="#000"></path></svg>';
+            el.insertAdjacentHTML('beforeEnd', '<svg><path fill="#000"></path></svg>');
             this._ePath = el.lastChild.lastChild;
         },
         {
@@ -27,16 +41,16 @@
              * @override
              */
             $dispose: function () {
+                _super.$dispose();
                 this._ePath = null;
-                ui.Progress.prototype.$dispose.call(this);
             },
 
             /**
              * @override
              */
             $initStructure: function (width, height) {
-                ui.Progress.prototype.$initStructure.call(this, width, height);
-                var el = dom.parent(this._ePath);
+                _super.$initStructure(width, height);
+                var el = this._ePath.parentElement;
                 el.style.width = width + 'px';
                 el.style.height = height + 'px';
             },

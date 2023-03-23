@@ -45,8 +45,8 @@
         ui.Table,
         'ui-inline-table',
         function (el, options) {
-            ui.Table.call(this, el, options);
-            ui.Table.prototype.getRows.call(this).forEach(function (item, index) {
+            _super(el, options);
+            _super.getRows().forEach(function (item, index) {
                 if (index % 2) {
                     initExtendRow(item);
                 }
@@ -57,8 +57,8 @@
              * @override
              */
             $rowclick: function (event) {
-                ui.Table.prototype.$rowclick.call(this, event);
-                var rows = ui.Table.prototype.getRows.call(this),
+                _super.$rowclick(event);
+                var rows = _super.getRows(),
                     index = rows.indexOf(event.row),
                     row;
 
@@ -78,8 +78,17 @@
              * @override
              */
             addRow: function (data, index) {
-                var row = ui.Table.prototype.addRow.call(this, data.slice(1), index * 2);
-                initExtendRow(ui.Table.prototype.addRow.call(this, [data[0]], index * 2 + 1));
+                if (data instanceof HTMLElement || (!(data[0] instanceof HTMLElement) && !(data[0] instanceof ui.Control))) {
+                    var row = data,
+                        extend = dom.create({ innerHTML: '<table><tbody><tr><td colspan="' + this.getHCells().filter(function (hcell) {
+                            return hcell.isShow();
+                        }).length + '"></td></tr></tbody></table>' }).lastChild.lastChild.lastChild;
+                } else {
+                    row = data[0];
+                    extend = data[1];
+                }
+                row = _super.addRow(row, index * 2);
+                initExtendRow(_super.addRow(extend, index * 2 + 1));
                 return row;
             },
 
@@ -90,30 +99,37 @@
              * @return {ecui.ui.Table.Row} 扩展的行控件
              */
             getExtendRow: function (index) {
-                return ui.Table.prototype.getRow.call(this, index * 2 + 1);
+                return _super.getRow(index * 2 + 1);
             },
 
             /**
              * @override
              */
             getRow: function (index) {
-                return ui.Table.prototype.getRow.call(this, index * 2);
+                return _super.getRow(index * 2);
             },
 
             /**
              * @override
              */
             getRowCount: function () {
-                return ui.Table.prototype.getRowCount.call(this) / 2;
+                return _super.getRowCount() / 2;
             },
 
             /**
              * @override
              */
             getRows: function () {
-                return ui.Table.prototype.getRows.call(this).filter(function (item, index) {
+                return _super.getRows().filter(function (item, index) {
                     return index % 2;
                 });
+            },
+
+            /**
+             * @override
+             */
+            removeRow: function (index) {
+                return [_super.removeRow(index * 2), _super.removeRow(index * 2)];
             }
         }
     );

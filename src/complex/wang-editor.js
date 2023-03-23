@@ -1,5 +1,5 @@
 //{if $css}//
-__ControlStyle__('\
+ecui.__ControlStyle__('\
 .ui-wang-editor {\
     cite {\
         display: inline-block;\
@@ -126,141 +126,11 @@ __ControlStyle__('\
      */
     ui.WangEditorArea = core.inherits(
         ui.Control,
+        function (el, options) {
+            _super(el, options);
+            this._aEditors = [];
+        },
         {
-            /**
-             * @override
-             */
-            $ready: function () {
-                ui.Control.prototype.$ready.call(this);
-                this._aEditors = [];
-
-                var wangEditor = this.getResource(0).wangEditor;
-                wangEditor.Boot.registerModule({
-                    renderStyle: function (node, vnode) {
-                        if (node.cite && vnode.data['data-slate-length'] !== 0) {
-                            for (var elem = vnode; elem.children; elem = elem.children[0]) {
-                                // empty
-                            }
-                            elem.sel = 'cite';
-                            if (node.group) {
-                                elem.data.className = node.group;
-                                elem.data.draggable = true;
-                            }
-                        }
-                        return vnode;
-                    },
-                    styleToHtml: function (node, html) {
-                        if (node.cite) {
-                            return '<cite' + (node.group ? ' class="' + node.group + '"' : '') + (node.name ? ' data-name="' + node.name + '"' : '') + '>' + node.text.trim() + '</cite>';
-                        }
-                        return html;
-                    },
-                    preParseHtml: [{
-                        selector: 'cite',
-                        preParseHtml: function (elem) {
-                            var name = dom.getAttribute(elem, 'data-name'),
-                                ret = dom.create('span');
-                            ret.className = elem.className;
-                            ret.innerText = elem.innerText.trim();
-                            ret.setAttribute('data-type', 'cite');
-                            if (name) {
-                                ret.setAttribute('data-name', name);
-                            }
-                            return ret;
-                        }
-                    }],
-                    parseStyleHtml: function (elem, node) {
-                        if (elem.tagName === 'SPAN' && dom.getAttribute(elem, 'data-type') === 'cite') {
-                            var name = dom.getAttribute(elem, 'data-name'),
-                                ret = {
-                                    cite: true,
-                                    group: elem.className.trim(),
-                                    text: formatText(elem.innerText),
-                                    id: uid++
-                                };
-                            if (name) {
-                                ret.name = name;
-                            }
-                            return ret;
-                        }
-                        return node;
-                    },
-                    editorPlugin: function (editor) {
-                        var methods = Object.assign({}, editor);
-                        editor.deleteBackward = function (unit) {
-                            var point = wangEditor.SlateEditor.before(this, this.selection.focus);
-                            if (unit && point && this.selection.focus.path[0] === point.path[0] && wangEditor.SlateEditor.node(this, point)[0].cite) {
-                                wangEditor.SlateTransforms.removeNodes(this, {at: point.path});
-                            } else {
-                                methods.deleteBackward(unit);
-                            }
-                        };
-                        editor.deleteForward = function (unit) {
-                            var point = wangEditor.SlateEditor.after(this, this.selection.focus);
-                            if (point && wangEditor.SlateEditor.node(this, point)[0].cite) {
-                                wangEditor.SlateTransforms.removeNodes(this, {at: point.path});
-                            } else {
-                                methods.deleteForward(unit);
-                            }
-                        };
-                        editor.insertNode = function (nodes) {
-                            (nodes instanceof Array ? nodes : [nodes]).forEach(function (node) {
-                                if (node.cite) {
-                                    node.id = uid++;
-                                    node.text = node.text.trim();
-                                    node.text = formatText(node.text);
-                                }
-                            });
-                            methods.insertNode(nodes);
-                        };
-                        editor.insertText = function (text) {
-                            var node = wangEditor.SlateEditor.node(this, this.selection.focus)[0];
-                            if (node.cite && text !== '\0') {
-                                node = Object.assign({}, node);
-                                node.text = text;
-                                delete node.cite;
-                                delete node.group;
-                                delete node.name;
-                                delete node.id;
-                                methods.insertNode(node);
-                            } else {
-                                methods.insertText(text);
-                            }
-                        };
-                        editor.insertData = function (data) {
-                            var node = wangEditor.SlateEditor.node(this, this.selection.focus)[0],
-                                offset = this.selection.focus.offset,
-                                text = data.getData('application/x-slate-node');
-
-                            if (node.cite) {
-                                if (offset > node.text.length - offset) {
-                                    offset = node.text.length;
-                                } else {
-                                    offset = 0;
-                                }
-                                this.select({
-                                    anchor: {path: this.selection.focus.path, offset: offset},
-                                    focus: {path: this.selection.focus.path, offset: offset}
-                                });
-                            }
-
-                            if (text) {
-                                this.insertNode(JSON.parse(text));
-                            } else {
-                                methods.insertData(data);
-                                methods.insertText(' ');
-                                methods.deleteBackward();
-                            }
-                            text = JSON.parse(JSON.stringify(this.selection));
-                            util.timer(function () {
-                                this.select(text);
-                            }, 0, this);
-                        };
-                        return editor;
-                    }
-                });
-            },
-
             /**
              * 引用部件。
              * @unit
@@ -269,8 +139,8 @@ __ControlStyle__('\
                 ui.Control,
                 'ui-wang-editor-cite',
                 function (el, options) {
-                    ui.Control.call(this, el, options);
-                    el.setAttribute('draggable', 'true');
+                    _super(el, options);
+                    el.setAttribute('draggable', 'draggable');
                     this._sText = options.text === undefined ? el.innerText.trim() : '';
                     this._sGroup = options.group || '';
                     this._sName = options.name;
@@ -287,7 +157,7 @@ __ControlStyle__('\
                      * @override
                      */
                     $click: function (event) {
-                        ui.Control.prototype.$click.call(this, event);
+                        _super.$click(event);
                         var editor = this.getParent()._oActiveEditor;
                         if (editor) {
                             editor.insertCite(this._sText, this._sGroup, this._sName ? {name: this._sName} : undefined);
@@ -321,9 +191,10 @@ __ControlStyle__('\
                 ui.Control,
                 'ui-wang-editor-toolbar',
                 function (el, options) {
-                    ui.Control.call(this, el, options);
+                    _super(el, options);
                     this._sMode = options.mode || 'default';
                     this._nIndex = +options.index;
+                    this._oConfig = options.config || {};
                 },
                 {
                     /**
@@ -340,10 +211,10 @@ __ControlStyle__('\
                             parent.getResource(0).wangEditor.createToolbar({
                                 editor: parent._aEditors[this._nIndex || 0]._oEditor,
                                 selector: this.getMain(),
-                                config: {},
+                                config: this._oConfig,
                                 mode: this._sMode
                             });
-                            ui.Control.prototype.$ready.call(this);
+                            _super.$ready();
 //{if 0}//
                         } else {
                             console.warn('没有创建编辑器不能创建工具条');
@@ -361,7 +232,7 @@ __ControlStyle__('\
                 ui.Control,
                 'ui-wang-editor',
                 function (el, options) {
-                    ui.Control.call(this, el, options);
+                    _super(el, options);
                     this._sMode = options.mode || 'default';
                     this._UIWangEditor_oHandler = util.blank;
                 },
@@ -376,7 +247,13 @@ __ControlStyle__('\
                         var editor = this._oEditor;
 
                         if (editor.selection) {
-                            if (event || !core.getActived()) {
+                            if (editor.isEmpty()) {
+                                if (editor.children[0].children[0].cite) {
+                                    util.timer(function () {
+                                        editor.setHtml('');
+                                    });
+                                }
+                            } else if (event || !core.getActived()) {
                                 var SlateEditor = this.getParent().getResource(0).wangEditor.SlateEditor,
                                     selection = JSON.parse(JSON.stringify(editor.selection));
 
@@ -399,8 +276,8 @@ __ControlStyle__('\
                                 }
 
                                 editor.select(selection);
-                                this.getParent()._oActiveEditor = this;
                             }
+                            this.getParent()._oActiveEditor = this;
                         }
                     },
 
@@ -409,7 +286,7 @@ __ControlStyle__('\
                      * @override
                      */
                     $click: function (event) {
-                        ui.Control.prototype.$click.call(this, event);
+                        _super.$click(event);
                         if (event.target.tagName === 'CITE') {
                             var pos = dom.getPosition(event.target),
                                 style = window.getComputedStyle(event.target, ':after'),
@@ -430,11 +307,49 @@ __ControlStyle__('\
                     },
 
                     /**
+                     * @override
+                     */
+                    $create: function (options) {
+                        _super.$create(options);
+                        var el = this.getMain(),
+                            parent = options.parent,
+                            text = el.innerText,
+                            activeElement = document.activeElement;
+                        if (activeElement.tagName !== 'BODY') {
+                            var start = dom.getSelectionStart(activeElement),
+                                end = dom.getSelectionEnd(activeElement);
+                        }
+                        el.innerText = '';
+                        parent._aEditors.push(this);
+                        this._oEditor = parent.getResource(0).wangEditor.createEditor({
+                            selector: el,
+                            html: '<p><br></p>',
+                            config: {
+                                placeholder: text,
+                                onChange: function () {
+                                    return this.$change();
+                                }.bind(this),
+                                customPaste: function (editor, event) {
+                                    return this.$paste(event);
+                                }.bind(this)
+                            },
+                            mode: this._sMode || 'default'
+                        });
+                        if (activeElement.tagName === 'BODY') {
+                            document.activeElement.blur();
+                        } else {
+                            activeElement.focus();
+                            dom.setSelection(activeElement, start, end);
+                        }
+                        el = activeElement = null;
+                    },
+
+                    /**
                      * 双击引用块需要回调引用块对象的操作事件。
                      * @override
                      */
                     $dblclick: function (event) {
-                        ui.Control.prototype.$dblclick.call(this, event);
+                        _super.$dblclick(event);
                         if (event.target.tagName === 'CITE') {
                             var editor = this._oEditor,
                                 ret = this.forEach(function (node) {
@@ -458,10 +373,8 @@ __ControlStyle__('\
                      * @override
                      */
                     $deactivate: function (event) {
-                        ui.Control.prototype.$deactivate.call(this, event);
-                        if (event.getNative().type !== 'drop') {
-                            this.$change(event);
-                        }
+                        _super.$deactivate(event);
+                        this.$change(event);
                     },
 
                     /**
@@ -469,31 +382,50 @@ __ControlStyle__('\
                      */
                     $dispose: function () {
                         this._oEditor.destroy();
-                        ui.Control.prototype.$dispose.call(this);
+                        _super.$dispose();
                     },
 
                     /**
                      * @override
                      */
                     $focus: function (event) {
-                        ui.Control.prototype.$focus.call(this, event);
-                        // 调用focus后光标定位会出问题需要重新设置，原因不明
+                        _super.$focus(event);
+                        // 初始化时会获得focusin，需要屏蔽
+                        // if (this._oEditor) {
+                            // 调用focus后光标定位会出问题需要重新设置，原因不明
                         var selection = this._oEditor.selection;
                         this._oEditor.focus();
                         this._oEditor.select(selection);
+                        // }
                     },
 
                     /**
                      * @override
                      */
                     $keydown: function (event) {
-                        ui.Control.prototype.$keydown.call(this, event);
+                        _super.$keydown(event);
 
                         var editor = this._oEditor,
                             SlateEditor = this.getParent().getResource(0).wangEditor.SlateEditor,
                             point;
 
                         switch (event.which) {
+                        case 32:
+                            if (Date.now() - this._nlastTime < 400) {
+                                // 修复快速两次空格的错误问题
+                                var selection = editor.selection;
+                                util.timer(function () {
+                                    editor.setHtml(editor.getHtml());
+                                    util.timer(function () {
+                                        editor.select(selection);
+                                        editor.insertText(' ');
+                                    });
+                                });
+                                event.preventDefault();
+                                return;
+                            }
+                            this._nlastTime = Date.now();
+                            break;
                         case 37:
                             // 左方向键
                             if (event.shiftKey) {
@@ -535,7 +467,7 @@ __ControlStyle__('\
                      * @override
                      */
                     $mousedown: function (event) {
-                        ui.Control.prototype.$mousedown.call(this, event);
+                        _super.$mousedown(event);
                         if (event.target.tagName === 'CITE') {
                             if (!direction(this._oEditor.selection)) {
                                 this._UIWangEditor_oHandler = util.timer(function () {
@@ -552,7 +484,7 @@ __ControlStyle__('\
                      * @override
                      */
                     $mousemove: function (event) {
-                        ui.Control.prototype.$mousemove.call(this, event);
+                        _super.$mousemove(event);
                         this._UIWangEditor_oHandler();
                     },
 
@@ -582,33 +514,6 @@ __ControlStyle__('\
                         }
                         event.preventDefault();
                         return false;
-                    },
-
-                    /**
-                     * @override
-                     */
-                    $ready: function () {
-                        ui.Control.prototype.$ready.call(this);
-                        var el = this.getMain(),
-                            parent = this.getParent(),
-                            text = el.innerText;
-                        el.innerText = '';
-                        parent._aEditors.push(this);
-                        this._oEditor = parent.getResource(0).wangEditor.createEditor({
-                            selector: el,
-                            html: '<p><br></p>',
-                            config: {
-                                placeholder: text,
-                                onChange: function () {
-                                    return this.$change();
-                                }.bind(this),
-                                customPaste: function (editor, event) {
-                                    return this.$paste(event);
-                                }.bind(this)
-                            },
-                            mode: this._sMode || 'default'
-                        });
-                        el = null;
                     },
 
                     /**
@@ -685,12 +590,11 @@ __ControlStyle__('\
                 }
             )
         },
-        ui.Resource.declare(
+        ui.iResource.declare(
             [
-                'https://unpkg.com/@wangeditor/editor@latest/dist/index.js',
-                'https://unpkg.com/@wangeditor/editor@latest/dist/css/style.css'
-            ],
-            ['Editor', 'Toolbar', 'Cite']
+                'static/wangeditor/wangeditor.js',
+                'static/wangeditor/wangeditor.css'
+            ]
         ),
         {
             /**
@@ -698,10 +602,12 @@ __ControlStyle__('\
              * @override
              */
             $loadResource: function (text, url) {
-                var data = ui.Resource.prototype.$loadResource.call(this, text, url);
+                var data = _class.$loadResource(text, url);
                 if (data) {
-                    var removeNodes = data.wangEditor.SlateTransforms.removeNodes;
-                    data.wangEditor.SlateTransforms.removeNodes = function (editor, options) {
+                    var wangEditor = data.wangEditor,
+                        removeNodes = wangEditor.SlateTransforms.removeNodes;
+
+                    wangEditor.SlateTransforms.removeNodes = function (editor, options) {
                         removeNodes.call(this, editor, options);
                         if (options.at) {
                             var node = editor.children[options.at[0]];
@@ -715,6 +621,130 @@ __ControlStyle__('\
                         }
                         text = url = null;
                     };
+
+                    wangEditor.Boot.registerModule({
+                        renderStyle: function (node, vnode) {
+                            if (node.cite && vnode.data['data-slate-length'] !== 0) {
+                                for (var elem = vnode; elem.children; elem = elem.children[0]) {
+                                    // empty
+                                }
+                                elem.sel = 'cite';
+                                if (node.group) {
+                                    elem.data.className = node.group;
+                                }
+                            }
+                            return vnode;
+                        },
+                        styleToHtml: function (node, html) {
+                            if (node.cite) {
+                                return '<cite' + (node.group ? ' class="' + node.group + '"' : '') + (node.name ? ' data-name="' + node.name + '"' : '') + '>' + node.text.trim() + '</cite>';
+                            }
+                            return html;
+                        },
+                        preParseHtml: [{
+                            selector: 'cite',
+                            preParseHtml: function (elem) {
+                                var name = elem.getAttribute('data-name'),
+                                    ret = dom.create('span');
+                                ret.className = elem.className;
+                                ret.innerText = elem.innerText.trim();
+                                ret.setAttribute('data-type', 'cite');
+                                if (name) {
+                                    ret.setAttribute('data-name', name);
+                                }
+                                return ret;
+                            }
+                        }],
+                        parseStyleHtml: function (elem, node) {
+                            if (elem.tagName === 'SPAN' && elem.getAttribute('data-type') === 'cite') {
+                                var name = elem.getAttribute('data-name'),
+                                    ret = {
+                                        cite: true,
+                                        group: elem.className.trim(),
+                                        text: formatText(elem.innerText),
+                                        id: uid++
+                                    };
+                                if (name) {
+                                    ret.name = name;
+                                }
+                                return ret;
+                            }
+                            return node;
+                        },
+                        editorPlugin: function (editor) {
+                            var methods = Object.assign({}, editor);
+                            editor.deleteBackward = function (unit) {
+                                var point = wangEditor.SlateEditor.before(this, this.selection.focus);
+                                if (unit && point && this.selection.focus.path[0] === point.path[0] && wangEditor.SlateEditor.node(this, point)[0].cite) {
+                                    wangEditor.SlateTransforms.removeNodes(this, {at: point.path});
+                                } else {
+                                    methods.deleteBackward(unit);
+                                }
+                            };
+                            editor.deleteForward = function (unit) {
+                                var point = wangEditor.SlateEditor.after(this, this.selection.focus);
+                                if (point && wangEditor.SlateEditor.node(this, point)[0].cite) {
+                                    wangEditor.SlateTransforms.removeNodes(this, {at: point.path});
+                                } else {
+                                    methods.deleteForward(unit);
+                                }
+                            };
+                            editor.insertNode = function (nodes) {
+                                (nodes instanceof Array ? nodes : [nodes]).forEach(function (node) {
+                                    if (node.cite) {
+                                        node.id = uid++;
+                                        node.text = node.text.trim();
+                                        node.text = formatText(node.text);
+                                    }
+                                });
+                                methods.insertNode(nodes);
+                            };
+                            editor.insertText = function (text) {
+                                var node = wangEditor.SlateEditor.node(this, this.selection.focus)[0];
+                                if (node.cite && text !== '\0') {
+                                    node = Object.assign({}, node);
+                                    node.text = text;
+                                    delete node.cite;
+                                    delete node.group;
+                                    delete node.name;
+                                    delete node.id;
+                                    methods.insertNode(node);
+                                } else {
+                                    methods.insertText(text);
+                                }
+                            };
+                            editor.insertData = function (data) {
+                                var node = wangEditor.SlateEditor.node(this, this.selection.focus)[0],
+                                    offset = this.selection.focus.offset,
+                                    text = data.getData('application/x-slate-node');
+
+                                if (node.cite) {
+                                    if (offset > node.text.length - offset) {
+                                        offset = node.text.length;
+                                    } else {
+                                        offset = 0;
+                                    }
+                                    this.select({
+                                        anchor: {path: this.selection.focus.path, offset: offset},
+                                        focus: {path: this.selection.focus.path, offset: offset}
+                                    });
+                                }
+
+                                if (text) {
+                                    this.insertNode(JSON.parse(text));
+                                } else {
+                                    methods.insertData(data);
+                                    methods.insertText(' ');
+                                    methods.deleteBackward();
+                                }
+                                text = JSON.parse(JSON.stringify(this.selection));
+                                util.timer(function () {
+                                    this.select(text);
+                                }, 0, this);
+                            };
+                            return editor;
+                        }
+                    });
                 }
                 return data;
             }

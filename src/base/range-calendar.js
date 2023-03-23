@@ -14,8 +14,7 @@ _uTo    - 下一个月视图控件
 //{if 0}//
     var core = ecui,
         dom = core.dom,
-        ui = core.ui,
-        util = core.util;
+        ui = core.ui;
 //{/if}//
     /**
      * 月视图控件刷新，改变选中区域的样式。
@@ -29,18 +28,17 @@ _uTo    - 下一个月视图控件
         monthview._aCells.slice(7).forEach(function (item) {
             if (!item.isExtra()) {
                 var el = item.getMain(),
-                    type = item.getClass(),
                     date = item.getDate();
 
-                dom.removeClass(el, type + '-start ' + type + '-end ' + type + '-mid');
+                dom.removeClass(el, 'ui-date-start ui-date-end ui-date-mid');
                 if (end - start > 0) {
                     // TDOD 重复代码待优化
                     if (date - start > 0 && date - end < 0) {
-                        dom.addClass(el, type + '-mid');
+                        dom.addClass(el, 'ui-date-mid');
                     } else if (date - start === 0) {
-                        dom.addClass(el, type + '-start');
+                        dom.addClass(el, 'ui-date-start');
                     } else if (date - end === 0) {
-                        dom.addClass(el, type + '-end');
+                        dom.addClass(el, 'ui-date-end');
                     }
                 }
             }
@@ -56,20 +54,24 @@ _uTo    - 下一个月视图控件
         ui.Control,
         'ui-range-calendar',
         function (el, options) {
-            ui.Control.call(this, el, options);
+            _super(el, options);
             var html = '<div class="' + this.getUnitClass(ui.RangeCalendar, 'monthview') + this.MonthView.CLASS + '"></div>';
             el.innerHTML =
                 '<div class="' + this.getUnitClass(ui.RangeCalendar, 'header') + '">' +
                     '<div class="' + this.getUnitClass(ui.RangeCalendar, 'title') + '"></div>' +
+                    '<div class="' + this.getUnitClass(ui.RangeCalendar, 'prev-year') + ui.Button.CLASS + '">上一年</div>' +
                     '<div class="' + this.getUnitClass(ui.RangeCalendar, 'prev') + ui.Button.CLASS + '">上个月</div>' +
                     '<div class="' + this.getUnitClass(ui.RangeCalendar, 'next') + ui.Button.CLASS + '">下个月</div>' +
+                    '<div class="' + this.getUnitClass(ui.RangeCalendar, 'next-year') + ui.Button.CLASS + '">下一年</div>' +
                 '</div>' + html + html;
 
             this._uTitle = core.$fastCreate(ui.Control, el.firstChild.firstChild, this);
-            this._uPrev = core.$fastCreate(this.Button, el.firstChild.firstChild.nextSibling, this, { move: -1 });
-            this._uNext = core.$fastCreate(this.Button, el.firstChild.lastChild, this, { move: 1 });
-            this._uFrom = core.$fastCreate(this.MonthView, el.firstChild.nextSibling, this);
-            this._uTo = core.$fastCreate(this.MonthView, el.lastChild, this);
+            this._uPrevYear = core.$fastCreate(this.Button, el.firstChild.firstChild.nextSibling, this, { move: -12 });
+            this._uPrev = core.$fastCreate(this.Button, el.firstChild.firstChild.nextSibling.nextSibling, this, { move: -1 });
+            this._uNext = core.$fastCreate(this.Button, el.firstChild.lastChild.previousElementSibling, this, { move: 1 });
+            this._uNextYear = core.$fastCreate(this.Button, el.firstChild.lastChild, this, { move: 12 });
+            this._uFrom = core.$fastCreate(this.MonthView, el.firstChild.nextSibling, this, { begin: options.begin, end: options.end, date: options.date });
+            this._uTo = core.$fastCreate(this.MonthView, el.lastChild, this, { begin: options.begin, end: options.end });
         },
         {
             /**
@@ -82,14 +84,14 @@ _uTo    - 下一个月视图控件
                 ui.Button,
                 function (el, options) {
                     this._nMove = +options.move;
-                    ui.Button.call(this, el, options);
+                    _super(el, options);
                 },
                 {
                     /**
                      * @override
                      */
                     $click: function (event) {
-                        ui.Button.prototype.$click.call(this, event);
+                        _super.$click(event);
                         this.getParent().move(this._nMove);
                     }
                 }
@@ -111,7 +113,7 @@ _uTo    - 下一个月视图控件
                          * @override
                          */
                         $mouseover: function (event) {
-                            ui.MonthView.prototype.Cell.prototype.$mouseover.call(this, event);
+                            _super.$mouseover(event);
                             var calendar = this.getParent().getParent();
                             if (this.isExtra()) {
                                 // 扩展日期区域直接使用系统的区域设定
@@ -134,16 +136,15 @@ _uTo    - 下一个月视图控件
                      */
                     $dateclick: function (event) {
                         if (!event.item.isExtra()) {
-                            ui.MonthView.prototype.$dateclick.call(this, event);
+                            _super.$dateclick(event);
                             var calendar = this.getParent();
                             if (calendar._oStart && calendar._oEnd) {
                                 // 时间区域已经选择，清空之前的选择
-                                calendar._oStart = calendar._oEnd = null;
+                                calendar._oEnd = null;
                                 refresh(calendar._uFrom);
                                 refresh(calendar._uTo);
-                            }
-
-                            if (calendar._oStart) {
+                                calendar._oStart = event.item.getDate();
+                            } else if (calendar._oStart) {
                                 // 未选择结束时间，选择后根据情况处理是否与开始时间交换
                                 var date = event.item.getDate();
                                 if (calendar._oStart <= date) {
@@ -155,7 +156,12 @@ _uTo    - 下一个月视图控件
                             } else {
                                 // 选择开始时间，清空另一个月视图的日期选择信息
                                 calendar._oStart = event.item.getDate();
-                                calendar[this === calendar._uFrom ? '_uTo' : '_uFrom'].setDate();
+                                calendar = calendar[this === calendar._uFrom ? '_uTo' : '_uFrom'];
+                                // 如果有选中时间则重置选中时间，没有的就不重置，否则会将视图刷回当前年月
+                                if (calendar.getDate()) {
+                                    calendar.setDate(calendar.getDate());
+                                }
+                                calendar.setSelected();
                             }
                         }
                     },
@@ -164,12 +170,44 @@ _uTo    - 下一个月视图控件
                      * @override
                      */
                     setView: function (year, month) {
-                        ui.MonthView.prototype.setView.call(this, year, month);
+                        _super.setView(year, month);
                         var calendar = this.getParent();
                         refresh(this, calendar._oStart, calendar._oEnd);
                     }
                 }
             ),
+
+            /**
+             * @override
+             */
+            $ready: function () {
+                _super.$ready();
+                this._uFrom.$ready();
+                this._uTo.$ready();
+                this._uTo.setDate(new Date(this._uFrom.getYear(), this._uFrom.getMonth(), 1));
+                this._uTo.setSelected();
+                this.move();
+            },
+
+            /**
+             * 获取有效日期区间的开始。
+             * @public
+             *
+             * @return {Date} 有效日期区间的开始
+             */
+            getBegin: function () {
+                return this._uFrom.getBegin();
+            },
+
+            /**
+             * 获取有效日期区间的结束。
+             * @public
+             *
+             * @return {Date} 有效日期区间的结束
+             */
+            getEnd: function () {
+                return this._uFrom.getEnd();
+            },
 
             /**
              * 日历显示移动指定的月份数。
@@ -207,7 +245,20 @@ _uTo    - 下一个月视图控件
 
                 this._uFrom.setView(year, month);
                 this._uTo.setView(year, month + 1);
-                this.move(0);
+                this.move();
+            },
+
+            /**
+             * 设置日历控件的有效日期范围。
+             * 不在有效日期范围的时间单无格都会处于 disabled 状态。
+             * @public
+             *
+             * @param {Date} begin 开始日期，默认表示不限制开始日期
+             * @param {Date} end 结束日期，默认表示不限制结束日期
+             */
+            setRange: function (begin, end) {
+                this._uFrom.setRange(begin, end);
+                this._uTo.setRange(begin, end);
             }
         }
     );

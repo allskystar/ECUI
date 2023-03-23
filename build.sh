@@ -15,31 +15,62 @@ fi
 js_write_repl="sed -e \"s/document.write('<script type=\\\"text\/javascript\\\" src=\([^>]*\)><\/script>');/\/\/{include file=\1}\/\//g\""
 js_merge=$assign_js' java -jar $libpath/smarty4j.jar --left //{ --right }// --charset utf-8'
 # js_compress="uglifyjs -c -m | sed -e \"s/\\.super\([^A-Za-z0-9_\$]\)/['super']\1/g\" | sed -e \"s/\\.this\([^A-Za-z0-9_\$]\)/['this']\1/g\" | sed -e \"s/\\.extends\([^A-Za-z0-9_\$]\)/['extends']\1/g\" | sed -e \"s/\\.for\([^A-Za-z0-9_\$]\)/['for']\1/g\""
-busi_js_compress='uglifyjs -c -m'
+js_parse='node $libpath/tools/parse.js'
+busi_js_compress=$js_parse' | uglifyjs -c -m'
 js_compress='java -jar $libpath/webpacker.jar --charset utf-8'
 css_merge=$assign_css' java -jar $libpath/smarty4j.jar --left /\*{ --right }\*/ --charset utf-8'
 css_compile='lessc - --plugin=less-plugin-clean-css | python $libpath/less-funcs.py "$3"'
 html_merge=$assign_html' java -jar $libpath/smarty4j.jar --left \<!--{ --right }--\> --charset utf-8'
 html_compress="sed -e \"s/stylesheet\/less[^\\\"]*/stylesheet/g\" -e \"s/[[:space:]]/ /g\" -e \"s/^ *//g\" -e \"s/ *$//g\" -e \"/^ *$/d\" -e \"/<script>window.onload=/d\""
 
+build_core() {
+    if [ $2 ]
+    then
+        version='-'$2
+    fi
+    echo "process ecui.js"
+    cat ecui.js | eval $js_write_repl | eval $js_merge | eval $js_parse | eval $js_compress > $1'/ecui'$version'.js'
+    echo "process ecui.css"
+    cat ecui.css | eval $css_compile > $1'/ecui'$version'.css'
+    echo "//{assign var=css value=true}//
+ecui.__ControlStyle__('
+@import (less) 'ecui.css';
+');
+" | cat - ecui.js | eval $js_write_repl | eval $js_merge | sed -n -e "/ecui\.__ControlStyle__('/,/');/p" | sed -n -e 'H;${x;s/\\\n//g;p;}' | sed -e "s/ecui\.__ControlStyle__('//g" -e "s/');//g" | eval $css_compile >> $1'/ecui'$version'.css'
+    echo "process options.js"
+    cat options.js | eval $busi_js_compress > "$1/options.js"
+    for file in `find static -name "*.js"`
+    do
+        echo "process file-$file"
+        if [ ! -d "$1/${file%/*}"} ]
+        then
+            mkdir -p "$1/${file%/*}"
+        fi
+        cat $file | eval $js_write_repl | eval $js_merge | eval $busi_js_compress > "$1/$file"
+    done
+    for file in `find static -name "*.css"`
+    do
+        echo "process file-$file"
+        if [ ! -d "$1/${file%/*}"} ]
+        then
+            mkdir -p "$1/${file%/*}"
+        fi
+        cat $file | eval $css_compile > "$1/$file"
+    done
+}
+
 if [ $1 ]
 then
     if [ $1 = 'ecui' ]
     then
+        echo "build ecui-2.0.0"
+        libpath="."
         if [ ! -d release ]
         then
             mkdir release
         fi
-        echo "build ecui-2.0.0"
-        libpath="."
-        cat ecui.css | eval $css_compile > release/ecui-2.0.0.css
-        echo "//{assign var=css value=true}//
-__ControlStyle__('
-@import (less) 'ecui.css';
-');
-" | cat - ecui.js | eval $js_write_repl | eval $js_merge | sed -n -e "/__ControlStyle__('/,/');/p" | sed -n -e 'H;${x;s/\\\n//g;p;}' | sed -e "s/__ControlStyle__('//g" -e "s/');//g" | eval $css_compile >> release/ecui-2.0.0.css
-        cat ecui.js | eval $js_write_repl | eval $js_merge > release/ecui-2.0.0-all.js
-	cat release/ecui-2.0.0-all.js | eval $js_compress > release/ecui-2.0.0.js
+        cat ecui.js | eval $js_write_repl | eval $js_merge | eval $js_parse > release/ecui-2.0.0-all.js
+        build_core 'release' '2.0.0'
         exit 0
     fi
 
@@ -52,7 +83,7 @@ __ControlStyle__('
         echo "build ecui-svg-min"
         libpath="."
         cat svg.css | eval $css_compile > release/ecui-svg-min.css
-        cat svg.js | eval $js_write_repl | eval $js_merge | eval $js_compress > release/ecui-svg-min.js
+        cat svg.js | eval $js_write_repl | eval $js_merge | eval $js_parse | eval $js_compress > release/ecui-svg-min.js
         exit 0
     fi
 
@@ -104,7 +135,7 @@ do
                 exit -1;
             fi
             base=${base%/*}
-            module=${module%_}"-"${module##*_}
+            module=${module%_*}"-"${module##*_}
         done
     fi
     name=${file##*layer.}
@@ -114,6 +145,7 @@ do
     layer_repl="-e \"s/ui=\\\"type:NS\\./ui=\\\"type:ecui.ns._${module}.ui./g\" -e \"s/<header/<div style=\\\"display:none\\\"/g\" -e \"s/<\/header/<\/div/g\" -e \"s/<container\([^>]*\)>/<div id=\\\"${module}${name}\\\" ui=\\\"type:ecui.esr.AppLayer\\\" style=\\\"display:none\\\"\1>"
     eval "sed -e \"s/<\!--/<<</g\" -e \"s/-->/>>>/g\" $layer_repl<\!--/g\" -e \"s/<\/container/--><\/div/g\" $file" >> .layers.html
 done
+
 
 find . -type f -name "layer.*.css" | awk '{input=$1;sub(/\/layer\./,"/");gsub(/(^\.\/|\.css$)/,"");gsub(/[\._]/,"-");gsub(/\//,"_");print "#"$1" {\n    @import (less) \""input"\";\n}"}' > .layers.css
 
@@ -206,7 +238,7 @@ do
 
     if [ -f "_define_.html" ]
     then
-        cat _define_.html > "$outpath/${module}_define_.html"
+        cat _define_.html | sed -e "s/ui=\"type:NS\./ui=\"type:ecui.ns._$ns.ui./g" | eval $html_compress > "$outpath/${module}_define_.html"
     fi
 
     echo "$text" | awk '{if(gsub(/(.*ecui\.esr\.loadRoute\("|"\)([,;])*$)/,"")){match($1,/.*\./);value=$1;gsub(/\./,"/");print "//{include file=\""substr($1,1,RLENGTH)"route."substr($1,RLENGTH+1)".html\" assign=\"tpl\"}////{\$tpl|regex_replace:\"<!--\\s*target:\\s*([^>]+)\\s*-->\":\"<!-- target: "substr(value,1,RLENGTH)"\$1 -->\"}//"}else{print $0}}' | sed -e "s/.*ecui.esr.loadRoute(\"\([^\"]*\)\").*/\/\/{include file='route.\1.html'}\/\//g" | eval $js_merge | sed -e "s/ui=\"type:NS\./ui=\"type:ecui.ns._$ns.ui./g" | eval $html_compress >> "$outpath/${module}_define_.html"
@@ -280,20 +312,7 @@ cp -R $lib/images/* "$output/images/"
 if [ $1 ]
 then
     cd $lib
-    mkdir "../$output/js"
-    for file in `ls ecui.js js/ | grep js$ | awk '{if(NR>1){printf "ls/"}print}'`
-    do
-        echo "process file-$file"
-        cat $file | eval $js_write_repl | eval $js_merge | eval $js_compress > "$output/$file"
-    done
-    file=ecui.css
-    echo "process file-$file"
-    cat $file | eval $css_compile > "$output/$file"
-    echo "//{assign var=css value=true}//
-__ControlStyle__('
-@import (less) 'ecui.css';
-');
-" | cat - ecui.js | eval $js_write_repl | eval $js_merge | sed -n -e "/__ControlStyle__('/,/');/p" | sed -n -e 'H;${x;s/\\\n//g;p;}' | sed -e "s/__ControlStyle__('//g" -e "s/');//g" | eval $css_compile >> "$output/$file"
+    build_core $output
 
     cd ..
     cd $1

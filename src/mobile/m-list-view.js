@@ -1,5 +1,5 @@
 //{if $css}//
-__ControlStyle__('\
+ecui.__ControlStyle__('\
 .ui-mobile-listview {\
     touch-action: none !important;\
 \
@@ -28,6 +28,7 @@ __ControlStyle__('\
 </ul>
 
 @fields
+_bOptimize     - 是否开启性能优化
 _eHeader       - 顶部 DOM 元素
 _eFooter       - 底部 DOM 元素
 _sStatus       - 控件当前状态
@@ -42,9 +43,7 @@ _nBottomIndex  - 下部隐藏的选项序号
         dom = core.dom,
         effect = core.effect,
         ui = core.ui,
-        util = core.util,
-
-        ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined;
+        util = core.util;
 //{/if}//
     function setEnterAndLeave() {
         if (this._bComplete) {
@@ -76,38 +75,29 @@ _nBottomIndex  - 下部隐藏的选项序号
 
     /**
      * 移动端列表展示控件。
+     * options 属性：
+     * optimize   性能优化，数据量非常大时，使用此选项优化性能，默认不开启。
      * @control
      */
     ui.MListView = core.inherits(
         ui.Control,
         'ui-mobile-listview',
-        [
-            function (el, options) {
-                var body = this.getBody();
-                this._eHeader = dom.insertBefore(dom.create({className: this.getUnitClass(ui.MListView, 'header'), innerHTML: '<div></div>'}), body);
-                if (this._eTitle) {
-                    this._eHeader.appendChild(this._eTitle);
-                }
-                this._eFooter = dom.insertAfter(dom.create({className: this.getUnitClass(ui.MListView, 'footer')}), body);
-                dom.insertAfter(this._eEmpty, body);
-                this._oHandle = util.blank;
-            },
-            function (el, options) {
-                if (options.customEmpty) {
-                    dom.addClass(this._eEmpty = dom.remove(dom.last(el)), this.getUnitClass(ui.MListView, 'empty-body'));
-                } else {
-                    this._eEmpty = dom.create({className: this.getUnitClass(ui.MListView, 'empty-body')});
-                }
-                var first = dom.first(el);
-                if (first && first.tagName === 'STRONG') {
-                    this._eTitle = first;
-                    el.removeChild(first);
-                    dom.addClass(first, this.getUnitClass(ui.MListView, 'title'));
-                }
-                ui.Control.call(this, el, options);
-                this._sStatus = '';
+        function (el, options) {
+            if (options.customEmpty) {
+                dom.addClass(this._eEmpty = dom.remove(el.lastElementChild), this.getUnitClass(ui.MListView, 'empty-body'));
+            } else {
+                this._eEmpty = dom.create({ className: this.getUnitClass(ui.MListView, 'empty-body') });
             }
-        ],
+            var first = el.firstElementChild;
+            if (first && first.tagName === 'STRONG') {
+                this._eTitle = first;
+                el.removeChild(first);
+                dom.addClass(first, this.getUnitClass(ui.MListView, 'title'));
+            }
+            _super(el, options);
+            this._sStatus = '';
+            this._bOptimize = !!options.optimize;
+        },
         {
             HTML_LOADING: '正在加载...',
             HTML_REFRESH: '下拉刷新',
@@ -126,7 +116,7 @@ _nBottomIndex  - 下部隐藏的选项序号
              * @override
              */
             $alterItems: function () {
-                if (ieVersion < 9) {
+                if (this._bOptimize) {
                     // 第一次进来使用缓存的数据，第二次进来取实际数据
                     if (this.isReady()) {
                         var items = this.getItems(),
@@ -180,8 +170,7 @@ _nBottomIndex  - 下部隐藏的选项序号
                     }
                 } else {
                     if (this.isReady()) {
-                        var items = this.getItems();
-                        this.alterStatus(items.length ? '-empty' : '+empty');
+                        this.alterStatus(this.getItems().length ? '-empty' : '+empty');
                     }
 
                     this.$$bodyHeight = this.getBody().offsetHeight;
@@ -193,10 +182,10 @@ _nBottomIndex  - 下部隐藏的选项序号
              * @override
              */
             $cache: function (style) {
-                ui.Control.prototype.$cache.call(this, style);
+                _super.$cache(style);
                 var body = this.getBody();
-                style = dom.getStyle(body);
-                this.$$bodyPadding = [util.toNumber(style.paddingTop), util.toNumber(style.paddingRight), util.toNumber(style.paddingBottom), util.toNumber(style.paddingLeft)];
+                style = window.getComputedStyle(body);
+                this.$$bodyPadding = [dom.toPixel(style.paddingTop), dom.toPixel(style.paddingRight), dom.toPixel(style.paddingBottom), dom.toPixel(style.paddingLeft)];
                 this.$$headerHeight = this._eHeader.offsetHeight;
                 this.$$titleHeight = this._eTitle ? this._eTitle.offsetHeight : 0;
                 this.$$footerHeight = this._eFooter.offsetHeight;
@@ -206,10 +195,25 @@ _nBottomIndex  - 下部隐藏的选项序号
             /**
              * @override
              */
+            $create: function (options) {
+                _super.$create(options);
+                var body = this.getBody();
+                this._eHeader = dom.insertBefore(dom.create({className: this.getUnitClass(ui.MListView, 'header'), innerHTML: '<div></div>'}), body);
+                if (this._eTitle) {
+                    this._eHeader.appendChild(this._eTitle);
+                }
+                this._eFooter = dom.insertAfter(dom.create({className: this.getUnitClass(ui.MListView, 'footer')}), body);
+                dom.insertAfter(this._eEmpty, body);
+                this._oHandle = util.blank;
+            },
+
+            /**
+             * @override
+             */
             $dispose: function () {
                 this._oHandle();
+                _super.$dispose();
                 this._eHeader = this._eFooter = this._eTitle = this._eEmpty = null;
-                ui.Control.prototype.$dispose.call(this);
             },
 
             /**
@@ -274,7 +278,7 @@ _nBottomIndex  - 下部隐藏的选项序号
              * @override
              */
             $initStructure: function (width, height) {
-                ui.Control.prototype.$initStructure.call(this, width, height);
+                _super.$initStructure(width, height);
                 this.alterStatus(this.getLength() ? '-empty' : '+empty');
                 this.alterStatus(this.getLength() ? '-init' : '+init');
                 if (this.isReady()) {
@@ -294,7 +298,7 @@ _nBottomIndex  - 下部隐藏的选项序号
              * @override
              */
             $ready: function () {
-                ui.Control.prototype.$ready.call(this);
+                _super.$ready();
                 this._nTopHidden = this._nBottomHidden = 0;
                 this._nTopIndex = 0;
                 this._nBottomIndex = this.getLength();
@@ -356,17 +360,7 @@ _nBottomIndex  - 下部隐藏的选项序号
              * @param {Array} data 数据源
              */
             reload: function (data) {
-                this._nTopHidden = this._nBottomHidden = 0;
-                this._nTopIndex = this._nBottomIndex = 0;
-                this.preventAlterItems();
-                this.getItems().forEach(
-                    function (item) {
-                        ui.Items.remove.call(this, item);
-                        item.dispose();
-                    },
-                    this
-                );
-                this.premitAlterItems();
+                this.removeAll(true);
                 this.add(data);
                 this._eHeader.firstChild.innerHTML = this.HTML_REFRESHED;
                 this.reset();
@@ -397,6 +391,7 @@ _nBottomIndex  - 下部隐藏的选项序号
                         this._oHandle = effect.grade(
                             'this.setPosition(0,#$.y->' + (this.$$titleHeight + window.scrollY) + '#)',
                             400,
+                            this,
                             options
                         );
                     } else if (status === 'footer') {
@@ -405,22 +400,23 @@ _nBottomIndex  - 下部隐藏的选项序号
                             // 'this.setPosition(0,#$.y->' + (main.clientHeight - core.getKeyboardHeight() - main.scrollHeight + this.$$footerHeight - this._nTopHidden + this.$$headerHeight + window.scrollY) + '#)',
                             'this.setPosition(0,#$.y->' + (main.clientHeight - core.getKeyboardHeight() - this.getBody().clientHeight - this._nTopHidden + window.scrollY) + '#)',
                             400,
+                            this,
                             options
                         );
                     }
                 }
             }
         },
-        ui.MScroll,
-        ui.Items,
+        ui.iMScroll,
+        ui.iItems,
         {
             /**
              * @override
              */
             $activate: function (event) {
                 if (!this._bLoading || this._sStatus !== 'headercomplete') {
-                    ui.MScroll.$activate.call(this, event);
-                    if (!(ieVersion < 9)) {
+                    _class.$activate(event);
+                    if (!this._bOptimize) {
                         core.drag(
                             this,
                             {
@@ -436,7 +432,7 @@ _nBottomIndex  - 下部隐藏的选项序号
              * @override
              */
             $dragend: function (event) {
-                ui.MScroll.$dragend.call(this, event);
+                _class.$dragend(event);
                 if (!this._bLoading) {
                     if (this._sStatus === 'headercomplete') {
                         // 可以选择是否需要防止重复提交
@@ -455,7 +451,7 @@ _nBottomIndex  - 下部隐藏的选项序号
              * @override
              */
             $dragstart: function (event) {
-                ui.MScroll.$dragstart.call(this, event);
+                _class.$dragstart(event);
                 this._oHandle();
                 if (!this._bLoading) {
                     this._sStatus = '';
@@ -469,7 +465,7 @@ _nBottomIndex  - 下部隐藏的选项序号
             add: function (item, index) {
                 this._bLoading = false;
                 var oldLength = this.getLength();
-                ui.Items.add.call(this, item, index);
+                _class.add(item, index);
                 setEnterAndLeave.call(this);
                 if (this.isReady()) {
                     if (oldLength === this.getLength()) {
@@ -486,7 +482,7 @@ _nBottomIndex  - 下部隐藏的选项序号
              * @override
              */
             getY: function () {
-                return ui.MScroll.getY.call(this) - this._nTopHidden + this.$$headerHeight;
+                return _class.getY() - this._nTopHidden + this.$$headerHeight;
             },
 
             /**
@@ -503,7 +499,7 @@ _nBottomIndex  - 下部隐藏的选项序号
              * @override
              */
             remove: function (item) {
-                if (ieVersion < 9) {
+                if (this._bOptimize) {
                     var index = typeof item === 'number' ? item : this.getItems().indexOf(item);
                     item = this.getItem(index);
                     if (item) {
@@ -516,10 +512,10 @@ _nBottomIndex  - 下部隐藏的选项序号
                         }
                         this._nBottomIndex--;
                         this.$$bodyHeight -= height;
-                        ui.Items.remove.call(this, item);
-                        this.setPosition(0, this.getY());
                     }
                 }
+                _class.remove(item);
+                this.setPosition(0, this.getY());
             },
 
             /**
@@ -528,8 +524,8 @@ _nBottomIndex  - 下部隐藏的选项序号
             setPosition: function (x, y) {
                 this.preventAlterItems();
 
-                if (ieVersion < 9 && (!this.$MScrollData.scrolling || this.$MScrollData.inertia)) {
-                    var top = ui.MScroll.getY.call(this);
+                if (this._bOptimize && (!this.isScrolling() || this.isInertia())) {
+                    var top = _class.getY();
 
                     if (top < -screen.availHeight * 1.5) {
                         for (; top < -screen.availHeight * 1.5;) {
@@ -576,7 +572,7 @@ _nBottomIndex  - 下部隐藏的选项序号
 
                 this._eHeader.style.transform = 'translateY(' + (y - this.$$headerHeight) + 'px)';
                 this._eFooter.style.transform = 'translateY(' + (y + this._nTopHidden - this.$$headerHeight) + 'px)';
-                ui.MScroll.setPosition.call(this, x, y + this._nTopHidden - this.$$headerHeight);
+                _class.setPosition(x, y + this._nTopHidden - this.$$headerHeight);
 
                 top = this.getHeight() - core.getKeyboardHeight() - this.$$bodyHeight;
                 if (y > window.scrollY) {

@@ -24,8 +24,9 @@ data - 数据变化监听插件，代码位于esr.js中，这里写针对不同�
             Class: ui.Table,
 
             init: function () {
-                return etpl.compile('<tr>' + this._aHeadCells.map(function (item) {
-                    return '<td>' + (item.$getOptions().etpl || '${' + item.getClass() + '}') + '</td>';
+                return core.esr.getEngine().compile('<tr>' + this._aHeadCells.map(function (item) {
+                    var etpl = item.$getOptions().etpl;
+                    return '<td>' + (etpl ? etpl.replace(/{{/g, '<!--').replace(/}}/g, '-->') : '${' + item.getClass() + '}') + '</td>';
                 }).join('') + '</tr>');
             },
 
@@ -43,17 +44,24 @@ data - 数据变化监听插件，代码位于esr.js中，这里写针对不同�
                     }
                 });
 
-                dom.children(dom.create({
-                    innerHTML: '<table><tbody>' + data.map(renderer).join('') + '</tbody></table>'
-                }).lastChild.lastChild).forEach(function (row) {
-                    if (hideCells.length) {
-                        var cells = dom.children(row);
-                        hideCells.forEach(function (index) {
-                            cells[index].style.display = 'none';
-                        });
-                    }
-                    return this.$addRow(row);
-                }, this);
+                if (data.length) {
+                    dom.children(dom.create({
+                        innerHTML: '<table><tbody>' + data.map(renderer).join('') + '</tbody></table>'
+                    }).lastChild.lastChild).forEach(function (row) {
+                        if (hideCells.length) {
+                            var cells = dom.children(row);
+                            hideCells.forEach(function (index) {
+                                cells[index].style.display = 'none';
+                            });
+                        }
+                        return this.$addRow(row);
+                    }, this);
+                } else {
+                    var el = dom.create({ innerHTML: '<table><tbody><tr><td colspan="' + (this.getHCells().length - hideCells.length) + '"><div class="no-result">暂无相关结果</div></td></tr></tbody></table>' });
+                    this.$addRow(el.lastChild.lastChild.lastChild);
+                }
+
+                core.init(this.getMain());
 
                 if (ready) {
                     this.cache(true);
@@ -63,10 +71,39 @@ data - 数据变化监听插件，代码位于esr.js中，这里写针对不同�
         },
 
         {
+            Class: ui.Pagination,
+
+            init: function () {},
+
+            setData: function (data) {
+                var el = this.getMain(),
+                    lastEl = el.lastElementChild.lastElementChild;
+                this._nTotal = data.total;
+
+                this.setPagination(data.pageNo, data.totalPage);
+                if (this._uPageSize) {
+                    this._uPageSize.setValue(data.pageSize.toString());
+                }
+                if (this._uSkipInput) {
+                    this._uSkipInput.setValue(data.pageNo);
+                }
+                lastEl.innerHTML = lastEl.innerHTML.replace(/(\d+)/g, data.total);
+                lastEl = lastEl.previousElementSibling;
+                lastEl.innerHTML = lastEl.innerHTML.replace(/(\d+)/g, data.totalPage);
+                if (this._nTotal > 0) {
+                    this.show();
+                } else {
+                    this.hide();
+                }
+            }
+        },
+
+        {
             Class: ui.Select,
 
             init: function (options) {
-                return etpl.compile('<div ui="value:${value}">' + (options.etpl || '${text}') + '</div>');
+                var etpl = options.etpl;
+                return core.esr.getEngine().compile('<div ui="value:${value}">' + (etpl ? etpl.replace(/{{/g, '<!--').replace(/}}/g, '-->') : '${text}') + '</div>');
             },
 
             setData: function (data, renderer) {
@@ -91,7 +128,8 @@ data - 数据变化监听插件，代码位于esr.js中，这里写针对不同�
             Class: ui.TreeView,
 
             init: function (options) {
-                return etpl.compile('<li>' + (options.etpl || '${text}') + '</li>');
+                var etpl = options.etpl;
+                return core.esr.getEngine().compile('<li>' + (etpl ? etpl.replace(/{{/g, '<!--').replace(/}}/g, '-->') : '${text}') + '</li>');
             },
 
             setData: function (data, renderer) {
@@ -115,14 +153,15 @@ data - 数据变化监听插件，代码位于esr.js中，这里写针对不同�
             Class: ui.Multilevel,
 
             init: function (options) {
-                return options.etpl ? etpl.compile(options.etpl) : null;
+                var etpl = options.etpl;
+                return etpl ? core.esr.getEngine().compile(etpl.replace(/{{/g, '<!--').replace(/}}/g, '-->')) : null;
             },
 
             setData: function (data, renderer) {
                 // eslint-disable-next-line no-shadow
                 function copy(data) {
                     var ret = Object.assign({}, data);
-                    ret[this.TEXTNAME || '#text'] = renderer(data);
+                    ret[core.TEXTNAME] = renderer(data);
                     if (data.children) {
                         ret.children = data.children.map(copy);
                     }

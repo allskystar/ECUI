@@ -7,7 +7,6 @@
 @fields
 _sFormat     - 格式化字符串
 _aOptions    - 选项框数组
-_eText       - 文本框
 */
 //{if 0}//
 (function () {
@@ -23,23 +22,18 @@ _eText       - 文本框
      * format  选中时的字符串格式
      */
     ui.MMultiOptions = core.inherits(
-        ui.InputControl,
+        ui.abstractInput,
         function (el, options) {
             var popupEl = dom.create({
-                    className: this.getUnitClass(ui.MMultiOptions, 'popup') + ' ui-popup ui-hide'
+                    className: this.getUnitClass(ui.MMultiOptions, 'popup') + ' ui-mobile-popup ui-hide'
                 }),
                 children = dom.children(el).filter(function (item) {
                     return item.tagName !== 'INPUT';
                 });
 
-            el.appendChild(dom.create({
-                className: this.getUnitClass(ui.MMultiOptions, 'text')
-            }));
-            this._eText = el.lastChild;
+            _super(el, options);
 
-            ui.InputControl.call(this, el, Object.assign({inputType: 'hidden'}, options));
-
-            this.setPopup(core.$fastCreate(this.Popup, popupEl, this));
+            this.setPopup(core.$fastCreate(this.Popup, popupEl, this, options));
 
             this._aOptions = [];
             children.forEach(
@@ -50,24 +44,11 @@ _eText       - 文本框
                 },
                 this
             );
-
-            var source = this._sFormat = options.format || '',
-                des = '';
-            this._aMap = [];
-
-            for (;;) {
-                if (/\{([0-9]+)\}/.test(source)) {
-                    source = RegExp.rightContext;
-                    this._aMap.push(+RegExp.$1);
-                    var text = RegExp.leftContext;
-                    des += util.encodeRegExp(text) + '(.*)';
-                } else {
-                    des += util.encodeRegExp(source);
-                    break;
-                }
-            }
-
-            this._oRegExp = new RegExp(des);
+            var map = this._aMap = [];
+            this._oRegExp = new RegExp(util.encodeRegExp(this._sFormat = options.format || '').replace(/\\\{([0-9]+)\\\}/g, function (match, index) {
+                map.push(+index);
+                return '(.*)';
+            }));
 
             options.enter = 'bottom';
             options.mask = 0.5;
@@ -83,14 +64,24 @@ _eText       - 文本框
                     /**
                      * @override
                      */
+                    $show: function () {
+                        _super.$show();
+                        this.getParent()._aOptions.forEach(function (item) {
+                            core.dispatchEvent(item, 'show');
+                        });
+                    },
+
+                    /**
+                     * @override
+                     */
                     cache: function (force) {
+                        _super.cache(force);
                         this.getParent()._aOptions.forEach(function (item) {
                             item.cache(force);
                         });
-                        ui.Control.prototype.cache.call(this, force);
                     }
                 },
-                ui.MConfirm
+                ui.iMConfirm
             ),
 
             /**
@@ -98,70 +89,59 @@ _eText       - 文本框
              * @unit
              * options 属性：
              * format  文本用于显示的样式
+             * values  值，格式为aaa-bbb:step|mask，例如1-12:1|00，这样1的值会被处理成01
              */
             Options: core.inherits(
-                ui.Control,
-                [
-                    function (el, options) {
-                        if (options.value !== undefined) {
-                            this.setValue(options.value);
-                        }
-                    },
-                    function (el, options) {
-                        ui.Control.call(this, el, options);
+                ui.Options,
+                function (el, options) {
+                    _super(el, options);
 
-                        var values = options.values;
-                        this._sPrefix = '';
+                    var values = options.values;
+                    this._sMask = '';
 
-                        if (typeof values === 'string') {
-                            if (values.indexOf(',') < 0) {
-                                var ret = /^([0-9]+)-([0-9]+)(:([0-9]+))?(\|(.+))?$/.exec(values);
-                                this._sPrefix = ret[6] || '';
-                                ret = [+ret[1], +ret[2], +ret[4] || 1];
-                                values = [];
-                                for (var i = ret[0]; i <= ret[1]; i += ret[2]) {
-                                    values.push(i);
-                                }
-                            } else {
-                                values = values.split(',');
+                    if (typeof values === 'string') {
+                        if (values.indexOf(',') < 0) {
+                            var ret = /^([0-9]+)-([0-9]+)(:([0-9]+))?(\|(.+))?$/.exec(values);
+                            this._sMask = ret[6] || '';
+                            ret = [+ret[1], +ret[2], +ret[4] || 1];
+                            values = [];
+                            for (var i = ret[0]; i <= ret[1]; i += ret[2]) {
+                                values.push(i);
                             }
+                        } else {
+                            values = values.split(',');
                         }
-
-                        this.getBody().innerHTML = values.map(
-                            function (item) {
-                                return '<div ui="value:' + (this._sPrefix + item).slice(-this._sPrefix.length) + '" class="' + this.getUnitClass(ui.MMultiOptions.prototype.Options, 'item') + ' ui-item">' + (options.format ? util.formatString(options.format, item) : item) + '</div>';
-                            },
-                            this
-                        ).join('');
-
-                        this.setOptionSize(3);
-
                     }
-                ],
+
+                    this.getBody().innerHTML = values.map(
+                        function (item) {
+                            return '<div ui="value:' + (this._sMask + item).slice(-this._sMask.length) + '" class="' + this.getUnitClass(ui.MMultiOptions.prototype.Options, 'item') + ' ui-item">' + (options.format ? util.formatString(options.format, item) : item) + '</div>';
+                        },
+                        this
+                    ).join('');
+                    this.setOptionSize(3);
+                },
                 {
                     /**
                      * 选项部件。
                      * @unit
                      */
                     Item: core.inherits(
-                        ui.Item,
+                        ui.Options.prototype.Item,
                         function (el, options) {
-                            ui.Item.call(this, el, options);
+                            _super(el, options);
                             this._sValue = options.value || this.getContent();
                         }
                     ),
 
                     /**
-                     * @override
+                     * 选项改变事件的默认处理。
+                     * @event
                      */
-                    $alterItems: util.blank,
-
-                    /**
-                     * @override
-                     */
-                    $initStructure: function (width, height) {
-                        ui.Control.prototype.$initStructure.call(this, width, height);
-                        this.setPosition(0, (3 - this.getItems().indexOf(this.getSelected())) * this.$$itemHeight);
+                    $propertychange: function (event) {
+                        if (event.name === 'selecting') {
+                            core.dispatchEvent(this.getParent(), 'change', event);
+                        }
                     },
 
                     /**
@@ -171,8 +151,11 @@ _eText       - 文本框
                      * @return {string} 选中控件的值
                      */
                     getValue: function () {
-                        var selected = this.getSelected();
-                        return selected ? selected._sValue : '';
+                        var item = this.getSelecting();
+                        if (!item || !item.isShow()) {
+                            item = this.getSelected();
+                        }
+                        return item ? item._sValue : '';
                     },
 
                     /**
@@ -182,12 +165,9 @@ _eText       - 文本框
                      * @param {string} value 控件的值
                      */
                     setValue: function (value) {
-                        value = (this._sPrefix + value).slice(-this._sPrefix.length);
+                        value = (this._sMask + value).slice(-this._sMask.length);
                         for (var i = 0, item; (item = this.getItem(i)); i++) {
                             if (item._sValue === value) {
-                                if (this.isCached()) {
-                                    this.setPosition(0, (3 - i) * this.$$itemHeight);
-                                }
                                 this.setSelected(item);
                                 return;
                             }
@@ -195,34 +175,23 @@ _eText       - 文本框
                         this.setSelected();
                     }
                 },
-                ui.MOptions,
-                ui.Items,
-                {
-                    /**
-                     * @override
-                     */
-                    $dragend: function (event) {
-                        ui.MScroll.$dragend.call(this, event);
-                        core.dispatchEvent(this.getParent(), 'change');
-                    }
-                }
-            )
-        },
-        {
+                ui.iMOptions
+            ),
+
             /**
              * @override
              */
             $blur: function (event) {
                 this.getPopup().hide();
-                ui.InputControl.prototype.$blur.call(this, event);
+                _super.$blur(event);
             },
 
             /**
              * @override
              */
             $click: function (event) {
-                ui.InputControl.prototype.$click.call(this, event);
-                if (dom.contain(this.getMain(), event.target)) {
+                _super.$click(event);
+                if (this.getMain().contains(event.target)) {
                     var ret = this._oRegExp.exec(this.getValue());
                     if (ret) {
                         ret.slice(1).forEach(
@@ -242,42 +211,10 @@ _eText       - 文本框
             $confirm: function () {
                 var oldValue = this.getValue(),
                     value = this.getOptionsValue();
-
                 if (oldValue !== value) {
                     this.setValue(value);
                     core.dispatchEvent(this, 'change');
                 }
-            },
-
-            /**
-             * @override
-             */
-            $dispose: function () {
-                this._eText = null;
-                ui.InputControl.prototype.$dispose.call(this);
-            },
-
-            /**
-             * @override
-             */
-            init: function () {
-                ui.InputControl.prototype.init.call(this);
-                var value = this.getOptionsValue();
-                this.setValue(value);
-            },
-
-            /**
-             * @override
-             */
-            $setValue: function (value) {
-                ui.InputControl.prototype.$setValue.call(this, value);
-                if (value) {
-                    this.alterStatus('-placeholder');
-                } else {
-                    this.alterStatus('+placeholder');
-                    value = dom.getAttribute(this.getInput(), 'placeholder') || '';
-                }
-                this._eText.innerHTML = util.encodeHTML(value);
             },
 
             /**
@@ -306,7 +243,7 @@ _eText       - 文本框
                 );
             }
         },
-        ui.MPopup
+        ui.iMPopup
     );
 //{if 0}//
 })();

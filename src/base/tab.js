@@ -1,5 +1,5 @@
 //{if $css}//
-__ControlStyle__('\
+ecui.__ControlStyle__('\
 .ui-tab {\
     position: relative;\
 \
@@ -25,8 +25,8 @@ __ControlStyle__('\
     <strong ui="selected:true">标题2</strong>
 </div>
 */
-(function () {
 //{if 0}//
+(function () {
     var core = ecui,
         dom = core.dom,
         ui = core.ui,
@@ -40,19 +40,8 @@ __ControlStyle__('\
      * @control
      */
     ui.Tab = core.inherits(
-        ui.$AbstractTab,
+        ui.abstractTab,
         'ui-tab',
-        function (el, options) {
-            ui.$AbstractTab.call(this, el, options);
-
-            var selectedIndex = +options.selected || 0;
-            this.setSelected = function (index) {
-                selectedIndex = 'number' === typeof index ? index : Math.max(0, this.getItems().indexOf(index));
-            };
-            this.getSelected = function () {
-                return this.getItem(selectedIndex) || selectedIndex;
-            };
-        },
         {
             /**
              * 选项部件。
@@ -61,13 +50,12 @@ __ControlStyle__('\
              * @unit
              */
             Item: core.inherits(
-                ui.$AbstractTab.prototype.Item,
+                ui.abstractTab.prototype.Item,
                 'ui-tab-item',
                 function (el, options) {
-                    ui.$AbstractTab.prototype.Item.call(this, el, options);
-
+                    _super(el, options);
                     if (options.selected && options.parent) {
-                        options.parent.setSelected(options.index);
+                        options.parent.setSelected(this);
                     }
                 }
             ),
@@ -80,8 +68,18 @@ __ControlStyle__('\
             /**
              * @override
              */
+            $create: function (options) {
+                _super.$create(options);
+                if (!this.getSelected()) {
+                    this.setSelected(+options.selected || 0);
+                }
+            },
+
+            /**
+             * @override
+             */
             $itemclick: function (event) {
-                if (dom.contain(event.item.getBody(), event.target)) {
+                if (event.item.getBody().contains(event.target)) {
                     if (core.dispatchEvent(this, 'titleclick', event)) {
                         if (event.item !== this.getSelected()) {
                             this.setSelected(event.item);
@@ -126,20 +124,11 @@ __ControlStyle__('\
                     this.setSelected(index === list.length - 1 ? index - 1 : index + 1);
                 }
 
-                ui.$AbstractTab.prototype.$remove.call(this, event);
-            },
-
-            /**
-             * @override
-             */
-            init: function () {
-                ui.$AbstractTab.prototype.init.call(this);
-                var selected = this.getSelected();
-                delete this.setSelected;
-                delete this.getSelected;
-                this.setSelected(selected);
+                _super.$remove(event);
             }
         },
         ui.Control.defineProperty('selected')
     );
+//{if 0}//
 })();
+//{/if}//

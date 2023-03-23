@@ -30,11 +30,11 @@ _eContainer      - 容器 DOM 元素
      * 每一个选项卡都包含一个头部区域与容器区域，选项卡控件存在互斥性，只有唯一的一个选项卡能被选中并显示容器区域。
      * @control
      */
-    ui.$AbstractTab = core.inherits(
+    ui.abstractTab = core.inherits(
         ui.Control,
         function (el, options) {
-            var titleEl = dom.create({className: this.getUnitClass(ui.$AbstractTab, 'title')}),
-                containerEl = dom.create({className: this.getUnitClass(ui.$AbstractTab, 'container')});
+            var titleEl = dom.create({className: this.getUnitClass(ui.abstractTab, 'title')}),
+                containerEl = dom.create({className: this.getUnitClass(ui.abstractTab, 'container')});
 
             for (; el.firstChild;) {
                 titleEl.appendChild(el.firstChild);
@@ -42,7 +42,7 @@ _eContainer      - 容器 DOM 元素
             el.appendChild(titleEl);
             this._eContainer = el.appendChild(containerEl);
 
-            ui.Control.call(this, el, options);
+            _super(el, options);
 
             this.$setBody(titleEl);
         },
@@ -59,14 +59,14 @@ _eContainer      - 容器 DOM 元素
                 function (el, options) {
                     if (el.tagName !== 'STRONG') {
                         var containerEl = el;
-                        el = dom.first(el);
+                        el = el.firstElementChild;
                     }
 
-                    ui.Item.call(this, el, options);
+                    _super(el, options);
 
                     if (containerEl) {
                         if (options.parent) {
-                            if (dom.parent(containerEl)) {
+                            if (containerEl.parentElement) {
                                 options.parent.getBody().insertBefore(el, containerEl);
                             } else {
                                 options.parent.getBody().appendChild(el);
@@ -93,11 +93,11 @@ _eContainer      - 容器 DOM 元素
                      * @override
                      */
                     $dispose: function () {
+                        _super.$dispose();
                         if (this._eContainer) {
                             this._eContainer.getControl = null;
                             this._eContainer = null;
                         }
-                        ui.Item.prototype.$dispose.call(this);
                     },
 
                     /**
@@ -106,14 +106,14 @@ _eContainer      - 容器 DOM 元素
                     $setParent: function (parent) {
                         if (parent) {
                             var container = parent.getContainer();
-                            if (this._eContainer && dom.parent(this._eContainer) !== container) {
+                            if (this._eContainer && this._eContainer.parentElement !== container) {
                                 container.appendChild(this._eContainer);
                             }
                         } else {
                             removeContainer.call(this);
                         }
 
-                        ui.Item.prototype.$setParent.call(this, parent);
+                        _super.$setParent(parent);
                     },
 
                     /**
@@ -153,8 +153,8 @@ _eContainer      - 容器 DOM 元素
              * @override
              */
             $dispose: function () {
+                _super.$dispose();
                 this._eContainer = null;
-                ui.Control.prototype.$dispose.call(this);
             },
 
             /**
@@ -167,6 +167,6 @@ _eContainer      - 容器 DOM 元素
                 return this._eContainer;
             }
         },
-        ui.Items
+        ui.iItems
     );
 })();

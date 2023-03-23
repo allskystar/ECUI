@@ -4,12 +4,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 	<meta charset="utf-8">
 	<title>Demo</title>
-    <!--[if lte IE 8]>
-        <script type="text/javascript" src="ie-es5.js"></script>
-    <![endif]-->
+    <script type="text/javascript" src="compatible-2.0.0.js"></script>
     <link rel="stylesheet/less" type="text/css" href="ecui.css" />
-    <link rel="stylesheet/less" type="text/css" href="common.css">
-    <script type="text/javascript" src="options.js"></script>
+    <link rel="stylesheet/less" type="text/css" href="css/default.css" />
     <script type="text/javascript" src="ecui.js"></script>
     <style>
         @keyframes test {
@@ -24,7 +21,7 @@
         .test {
             animation: test 1000ms;
         }
-        .ui-wang-editor-editor {
+        .ui-wang-editor {
             height: 500px;
         }
         cite.var {
@@ -35,11 +32,35 @@
             color: red;
             background: yellow;
         }
+        .ui-dialog-title {
+            background: yellow;
+            height: 20px;
+        }
+        .ui-select {
+            width: 100px;
+            height: 20px;
+            border: 1px solid black;
+        }
     </style>
 </head>
 <body style="overflow: auto;content:'pointer-events:none'">
+    <div ui="type:pyramid-tree">
+        <ul ui="collapsed:false">
+            <li>根节点</li>
+    
+            <li>子节点一</li>
+            <li>子节点二</li>
+            <ul class="ui-hide">
+                <li>子节点三</li>
+    
+                <li>孙节点一</li>
+                <li>孙节点二</li>
+                <li>孙节点三</li>
+            </ul>
+        </ul>
+    </div>
+    <div id="test" style="width:100px;height:100px;z-index:500" ui="type:dialog"></div>
     <!-- ecui.esr.setData('list',[{name:'百度',url:'www.baidu.com',address:'中关村',year:1999},{name:'新浪',url:'www.sina.com.cn',address:'中关村',year:1990}]); -->
-    <div style="position:absolute;top:0px;left:0px;width:100px;height:100px;background:red" id="ttt"></div>
     <div ui="type:table;ext-data:list">
         <table>
         <!-- 表头区域 -->
@@ -72,7 +93,7 @@
     </div>
     <div ui="type:WangEditorArea;id:test2">
         <div ui="type:@cite;name:var1;group:var">变量1</div><div ui="type:@cite;name:arch1;group:arch">公式1</div>
-        <div ui="type:@toolbar;mode:simple"></div>
+        <div ui="type:@toolbar"></div>
         <div ui="type:@editor;mode:simple" style="height:500px">请输入</div>
     </div>
 </body>

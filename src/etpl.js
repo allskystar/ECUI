@@ -18,6 +18,7 @@
         io = core.io,
         util = core.util,
 
+        iosVersion = /(iPhone|iPad).*?OS (\d+(_\d+)?)/i.test(navigator.userAgent) ? +(RegExp.$2.replace('_', '.')) : undefined,
         ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined;
 //{/if}//
     /**
@@ -115,7 +116,7 @@
          * @return {string} 替换结果串
          */
         date: function (source, format) {
-            return (new Date(source).toString() === 'Invalid Date') ? source : util.formatDate(new Date(source), format);
+            return util.formatDate(new Date(source), format || 'yyyy-MM-dd');
         },
 
         /**
@@ -1561,7 +1562,7 @@
             commandClose: '>>>'
         });
 
-        for (var el = document.body.firstChild; el; el = nextSibling) {
+        for (var el = iosVersion ? document.body.firstChild.firstChild : document.body.firstChild; el; el = nextSibling) {
             var nextSibling = el.nextSibling;
             if (el.nodeType === 8) {
                 etpl.compile(el.textContent || el.nodeValue);
@@ -1585,7 +1586,7 @@
     core.ready(function () {
         var tplList = [];
 
-        for (var el = document.body.firstChild; el; el = el.nextSibling) {
+        for (var el = iosVersion ? document.body.firstChild.firstChild : document.body.firstChild; el; el = el.nextSibling) {
             if (el.nodeType === 8) {
                 if (/^\s*import:\s*([A-Za-z0-9.-_\-]+)\s*$/.test(el.textContent || el.nodeValue)) {
                     tplList.push([el, RegExp.$1]);

@@ -3,15 +3,14 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
 */
 //{if 0}//
 (function () {
+    var patch = window.ecui;
 //{/if}//
     var //{if 1}//undefined,//{/if}//
         //{if 1}//JAVASCRIPT = 'javascript',//{/if}//
-        patch = ecui,
         fontSizeCache = [],
         //{if 1}//isMac = /Macintosh/i.test(navigator.userAgent),//{/if}//
         isToucher = document.ontouchstart !== undefined,
         //{if 1}//isPointer = !!window.PointerEvent, // 使用pointer事件序列，请一定在需要滚动的元素上加上touch-action:none//{/if}//
-        isStrict = document.compatMode === 'CSS1Compat',
         isWebkit = /webkit/i.test(navigator.userAgent),
         iosVersion = /(iPhone|iPad).*?OS (\d+(_\d+)?)/i.test(navigator.userAgent) ? +RegExp.$2.replace('_', '.') : undefined,
         isUCBrowser = /ucbrowser/i.test(navigator.userAgent),
@@ -21,7 +20,6 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
         operaVersion = /opera\/(\d+\.\d)/i.test(navigator.userAgent) ? +RegExp.$1 : undefined,
         safariVersion = !chromeVersion && !isUCBrowser && /(\d+\.\d)(\.\d)?\s+.*safari/i.test(navigator.userAgent) ? +RegExp.$1 : undefined,
         isWebview = iosVersion && !chromeVersion && !isUCBrowser ? !/\)\s*Version\//.test(navigator.userAgent) : !safariVersion && /\)\s*Version\//.test(navigator.userAgent);
-
 
     ecui = {
 //{if 0}//
@@ -38,7 +36,6 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
             return document.getElementById(id);
         },
 
-        strict: isStrict,
         webkit: isWebkit,
         chrome: chromeVersion,
         ie: ieVersion,
@@ -49,14 +46,18 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
 
         dom: {
             /**
-             * 为 DOM 对象添加新的样式。为了提高效率，对于可能重复添加的属性，请自行判断是否已经存在，或者先使用 dom.removeClass 方法删除之前的样式。
+             * 为 DOM 对象添加新的样式。
              * @public
              *
-             * @param {HTMLElement} el DOM 对象
+             * @param {HTMLElement} elem DOM 对象
              * @param {string} className 样式名，可以是多个，中间使用空格分隔
              */
-            addClass: function (el, className) {
-                el.className += ' ' + className;
+            addClass: function (elem, className) {
+                className = className.trim();
+                if (className) {
+                    // classList.add 添加空串会报错
+                    elem.classList.add.apply(elem.classList, className.split(/\s+/));
+                }
             },
 
             /**
@@ -67,9 +68,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              * @param {string} type 事件类型
              * @param {function} fn 事件处理函数
              */
-            addEventListener: ieVersion < 9 ? function (obj, type, fn) {
-                obj.attachEvent('on' + type, fn);
-            } : function (obj, type, fn) {
+            addEventListener: function (obj, type, fn) {
                 obj.addEventListener(type, fn, { passive: false });
             },
 
@@ -89,36 +88,14 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
             },
 
             /**
-             * 获取所有父 DOM 对象的子 DOM 对象集合，参见 dom.parent 方法。
+             * 获取所有父 DOM 对象的子 DOM 对象数组。
              * @public
              *
-             * @param {HTMLElement} el 父 DOM 对象
+             * @param {HTMLElement} elem 父 DOM 对象
              * @return {Array} 子 DOM 对象集合
              */
-            children: ieVersion < 9 ? function (el) {
-                var ret = [];
-                for (el = el.firstChild; el; el = el.nextSibling) {
-                    if (el.nodeType === 1) {
-                        ret.push(el);
-                    }
-                }
-                return ret;
-            } : function (el) {
-                return dom.toArray(el.children);
-            },
-
-            /**
-             * 判断一个 DOM 对象是否包含另一个 DOM 对象，两个相同的 DOM 对象相互包含。
-             * @public
-             *
-             * @param {HTMLElement} container 包含的 DOM 对象
-             * @param {HTMLElement} contained 被包含的 DOM 对象
-             * @return {boolean} true/false，二者之间在 DOM 树上是/否有包含关系
-             */
-            contain: firefoxVersion ? function (container, contained) {
-                return container === contained || !!(container.compareDocumentPosition(contained) & 16);
-            } : function (container, contained) {
-                return container.contains(contained);
+            children: function (elem) {
+                return dom.toArray(elem.children);
             },
 
             /**
@@ -130,29 +107,13 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              * @return {HTMLElement} 创建的 DOM 对象
              */
             create: function (tagName, options) {
-                function assign(des, src) {
-                    for (var key in src) {
-                        if (src.hasOwnProperty(key)) {
-                            if (src[key]) {
-                                if (typeof src[key] === 'object') {
-                                    assign(des[key], src[key]);
-                                } else {
-                                    des[key] = src[key];
-                                }
-                            }
-                        }
-                    }
-                }
-
-                if (typeof tagName === 'object') {
+                if (!tagName) {
+                    tagName = 'DIV';
+                } else if (typeof tagName === 'object') {
                     options = tagName;
                     tagName = 'DIV';
                 }
-                var el = document.createElement(tagName);
-                if (options) {
-                    assign(el, options);
-                }
-                return el;
+                return Object.assign(document.createElement(tagName), options);
             },
 
             /**
@@ -160,217 +121,136 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              * @public
              *
              * @param {string} cssText css文本
-             * @return {HTMLStyleElement} 创建的 <style> 标签对象
+             * @return {HTMLStyleElement} 创建的 <style> 标签对象，如果需要去除这个样式，对 style 对象执行 dom.remove 即可
              */
             createStyleSheet: function (cssText) {
-                var el = document.createElement('STYLE');
-                el.type = 'text/css';
-
-                if (ieVersion < 10) {
-                    var reg = ieVersion > 6 ? new RegExp('[_' + (ieVersion > 7 ? '*+' : '') + '][\\w-]+:[^;}]+[;}]', 'g') : null;
-                    if (reg) {
-                        cssText = cssText.replace(
-                            reg,
-                            function (match) {
-                                return match.slice(-1) === '}' ? '}' : '';
-                            }
-                        );
-                    }
-                    el.styleSheet.cssText = cssText;
-                } else {
-                    el.innerHTML = cssText;
-                }
-
-                document.head.appendChild(el);
-
+                var elem = document.head.appendChild(dom.create('STYLE', { type: 'text/css', innerHTML: cssText }));
                 util.adjustFontSize([document.styleSheets[document.styleSheets.length - 1]]);
-
-                return el;
-            },
-
-            /**
-             * 获取父 DOM 对象的第一个子 DOM 对象，参见 dom.children。
-             * @public
-             *
-             * @param {HTMLElement} el 父 DOM 对象
-             * @return {HTMLElement} 第一个子 DOM 对象，如果不存在返回 null
-             */
-            first: ieVersion < 9 ? function (el) {
-                for (el = el.firstChild; el; el = el.nextSibling) {
-                    if (el.nodeType === 1) {
-                        return el;
-                    }
-                }
-                return null;
-            } : function (el) {
-                return el.firstElementChild;
-            },
-
-            /**
-             * 获取 DOM 对象的属性值。在 IE 下，DOM 对象的属性可以通过名称直接访问，效率是 getAttribute 方式的两倍。
-             * @public
-             *
-             * @param {HTMLElement} el DOM 对象
-             * @param {string} name 属性名称
-             * @return {string} 属性值
-             */
-            getAttribute: ieVersion < 8 ? function (el, name) {
-                return el[name] || '';
-            } : function (el, name) {
-                return el.getAttribute(name) || '';
+                return elem;
             },
 
             /**
              * 获取 DOM 对象的页面位置。
              * @public
              *
-             * @param {HTMLElement} el DOM 对象
+             * @param {HTMLElement} elem DOM 对象
              * @return {object} 位置信息。{left: X轴坐标, top: Y轴坐标}
              */
-            getPosition: function (el) {
-                var top = 0,
-                    left = 0,
-                    body = document.body,
-                    html = dom.parent(body),
-                    style;
+            getPosition: function (elem) {
+                var body = document.body,
+                    html = body.parentElement,
+                    bound = elem.getBoundingClientRect();
 
-                if (el.getBoundingClientRect) {
-                    if (ieVersion && !isStrict) {
-                        style = dom.getStyle(body);
-                        if (isNaN(top = util.toNumber(style.borderTopWidth))) {
-                            top = -2;
-                        }
-                        if (isNaN(left = util.toNumber(style.borderLeftWidth))) {
-                            left = -2;
-                        }
-                    }
+                return {
+                    top: html.scrollTop + body.scrollTop - html.clientTop + Math.round(bound.top),
+                    left: html.scrollLeft + body.scrollLeft - html.clientLeft + Math.round(bound.left)
+                };
+            },
 
-                    var bound = el.getBoundingClientRect();
-                    top += html.scrollTop + body.scrollTop - html.clientTop + Math.round(bound.top);
-                    left += html.scrollLeft + body.scrollLeft - html.clientLeft + Math.round(bound.left);
-                } else if (el === body) {
-                    top = -html.scrollTop;
-                    left = -html.scrollLeft;
-                } else if (el !== html) {
-                    for (var parent = el, childStyle = dom.getStyle(el); parent; parent = parent.offsetParent) {
-                        top += parent.offsetTop;
-                        left += parent.offsetLeft;
-                        // safari里面，如果遍历到了一个fixed的元素，后面的offset都不准了
-                        if (isWebkit && dom.getStyle(parent, 'position') === 'fixed') {
-                            left += body.scrollLeft;
-                            top += body.scrollTop;
-                            break;
-                        }
-                    }
+            /**
+             * 获取当前当前选区的结束位置。
+             * @public
+             *
+             * @param {HTMLElement} elem DOM 对象
+             * @return {number} 输入框当前选区的结束位置
+             */
+            getSelectionEnd: function (elem) {
+                var type = elem.type,
+                    ret;
 
-                    if (operaVersion || (isWebkit && dom.getStyle(el, 'position') === 'absolute')) {
-                        top -= body.offsetTop;
-                    }
-
-                    for (parent = dom.parent(el); parent !== html; parent = dom.parent(parent)) {
-                        left -= parent.scrollLeft;
-                        if (!operaVersion) {
-                            style = dom.getStyle(parent);
-                            // 以下解决firefox下特殊的布局引发的双倍border边距偏移的问题
-                            var ratio = firefoxVersion && style.overflow !== 'visible' && childStyle.position === 'absolute' ? 2 : 1;
-                            top += util.toNumber(style.borderTopWidth) * ratio - parent.scrollTop;
-                            left += util.toNumber(style.borderLeftWidth) * ratio;
-                            childStyle = style;
-                        } else if (parent.tagName !== 'TR') {
-                            top -= parent.scrollTop;
-                        }
-                    }
-                    //                    top -= html.scrollTop;
-                    //                    left -= html.scrollLeft;
+                if (typeof elem.selectionEnd === 'number') {
+                    return elem.selectionEnd;
                 }
+                elem.type = 'text';
+                ret = elem.selectionEnd;
+                elem.type = type;
+                return ret;
+            },
 
-                return { top: top, left: left };
+            /**
+             * 获取当前当前选区的开始位置。
+             * @public
+             *
+             * @param {HTMLElement} elem DOM 对象
+             * @return {number} 输入框当前选区的开始位置
+             */
+            getSelectionStart: function (elem) {
+                var type = elem.type,
+                    ret;
+
+                if (typeof elem.selectionStart === 'number') {
+                    return elem.selectionStart;
+                }
+                elem.type = 'text';
+                ret = elem.selectionStart;
+                elem.type = type;
+                return ret;
             },
 
             /**
              * 获取 DOM 对象的 CssStyle 对象或者是指定的样式值。
-             * getStyle 方法如果不指定样式名称，将返回 DOM 对象的当前 CssStyle 对象。
+             * getStyle 方法如果不指定样式名称，将返回 DOM 对象的当前 CssStyle 对象。通过与 dom.setStyle 配合，允许设置自定义样式。
              * @public
              *
-             * @param {HTMLElement} el DOM 对象
-             * @param {string} name 样式名称
-             * @return {CssStyle|object} CssStyle 对象或样式值
+             * @param {HTMLElement|CSSStyle} elem DOM 对象或样式对象
+             * @param {string|object} name 样式名称或样式的读写对象
+             * @return {object} CssStyle 样式值
              */
-            getStyle: function (el, name) {
-                var style = getComputedStyle(el, null);
+            getStyle: function (elem, name) {
+                var style = elem instanceof HTMLElement ? window.getComputedStyle(elem, null) : elem,
+                    styleName = util.toCamelCase(name),
+                    fixerName = styleName.charAt(0).toUpperCase() + styleName.substring(1),
+                    value = style[styleName] || style['webkit' + fixerName] || style['moz' + fixerName] || style['ms' + fixerName];
 
-                if (name) {
-                    var styleName = util.toCamelCase(name),
-                        fixer = __ECUI__StyleFixer[styleName] || styleName;
-
-                    if (fixer.get) {
-                        return fixer.get(el, style);
-                    }
-
-                    fixer = style[fixer];
-                    if (fixer !== undefined) {
-                        return fixer;
-                    }
-
-                    name = util.toStyleCase(name);
-                    return (ieVersion < 9 ?
-                        // 获取自定义样式。标签自身的 content 样式没有意义，所以可以用于自定义样式的扩展。在 IE 9 以下浏览器中，使用 filter 自定义样式。
-                        new RegExp('(^|\\s+)' + name + '\\s*\\(([^;]+)\\)(;|$)').test(style.filter) :
-                        new RegExp('("|\\s+)' + name + '\\s*:([^;]+)(;|")').test(style.content)
-                    ) ? (RegExp.$2 || '').trim() : null;
+                if (value !== undefined) {
+                    return value;
                 }
 
-                if (ieVersion < 8) {
-                    try {
-                        var list = style.borderWidth.split(' ');
-                        style.borderTopWidth = list[0];
-                        style.borderRightWidth = list[1] || list[0];
-                        style.borderBottomWidth = list[2] || list[0];
-                        style.borderLeftWidth = list[3] || list[1] || list[0];
-                        list = style.padding.split(' ');
-                        style.paddingTop = list[0];
-                        style.paddingRight = list[1] || list[0];
-                        style.paddingBottom = list[2] || list[0];
-                        style.paddingLeft = list[3] || list[1] || list[0];
-                        list = style.margin.split(' ');
-                        style.marginTop = list[0];
-                        style.marginRight = list[1] || list[0];
-                        style.marginBottom = list[2] || list[0];
-                        style.marginLeft = list[3] || list[1] || list[0];
-                    } catch (ignore) {}
-                }
-                return style;
+                name = util.toStyleCase(name);
+                return (ieVersion < 9 ?
+                    // 获取自定义样式。标签自身的 content 样式没有意义，所以可以用于自定义样式的扩展。在 IE 9 以下浏览器中，使用 filter 自定义样式。
+                    new RegExp('(^|\\s+)' + name + '\\s*\\(([^;]+)\\)(;|$)').test(style.filter) :
+                    new RegExp('("|\\s+)' + name + '\\s*:([^;]+)(;|")').test(style.content)
+                ) ? (RegExp.$2 || '').trim() : '';
             },
 
             /**
-             * 获取 DOM 对象的文本。
+             * 获取浏览器可视区域的相关信息。
+             * getView 方法将返回浏览器可视区域的信息。属性如下：
+             * top        {number} 可视区域最小X轴坐标
+             * right      {number} 可视区域最大Y轴坐标
+             * bottom     {number} 可视区域最大X轴坐标
+             * left       {number} 可视区域最小Y轴坐标
+             * width      {number} 可视区域的宽度
+             * height     {number} 可视区域的高度
+             * pageWidth  {number} 页面的宽度
+             * pageHeight {number} 页面的高度
              * @public
              *
-             * @param {HTMLElement} el DOM 对象
-             * @return {string} DOM 对象的文本
+             * @return {object} 浏览器可视区域信息
              */
-            getText: ieVersion < 9 ? function (el) {
-                return el.innerText;
-            } : function (el) {
-                return el.textContent;
+            getView: function () {
+                var body = document.body,
+                    html = body.parentElement,
+                    scrollTop = html.scrollTop + body.scrollTop,
+                    scrollLeft = html.scrollLeft + body.scrollLeft,
+                    clientWidth = html.clientWidth,
+                    clientHeight = html.clientHeight;
+
+                return {
+                    top: scrollTop,
+                    right: scrollLeft + clientWidth,
+                    bottom: scrollTop + clientHeight,
+                    left: scrollLeft,
+                    width: clientWidth,
+                    height: clientHeight,
+                    pageWidth: Math.max(html.scrollWidth, body.scrollWidth, clientWidth),
+                    pageHeight: Math.max(html.scrollHeight, body.scrollHeight, clientHeight)
+                };
             },
 
             /**
-             * 判断指定的样式是否包含在 DOM 对象中。
-             * @public
-             *
-             * @param {HTMLElement} el DOM 对象
-             * @param {string} className 样式名称
-             * @return {boolean} true/false，DOM 对象是/否包含样式
-             */
-            hasClass: ieVersion < 10 ? function (el, className) {
-                return el.className.split(/\s+/).indexOf(className) >= 0;
-            } : function (el, className) {
-                return el.classList.contains(className);
-            },
-
-            /**
-             * 图片加载成功一定被调用的函数。
+             * 图片加载回调定义。
              * @public
              *
              * @param {HTMLImageElement} img <img> 对象
@@ -403,13 +283,13 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              * 如果指定的 DOM 对象没有父 DOM 对象，相当于 dom.remove 操作。
              * @public
              *
-             * @param {HTMLElement} el 需要插入的 DOM 对象
+             * @param {HTMLElement} elem 需要插入的 DOM 对象
              * @param {HTMLElement} target 目标 DOM 对象
              * @return {HTMLElement} 需要插入的 DOM 对象
              */
-            insertAfter: function (el, target) {
-                var parent = dom.parent(target);
-                return parent ? parent.insertBefore(el, target.nextSibling) : dom.remove(el);
+            insertAfter: function (elem, target) {
+                var parent = target.parentElement;
+                return parent ? parent.insertBefore(elem, target.nextSibling) : dom.remove(elem);
             },
 
             /**
@@ -417,47 +297,13 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              * 如果指定的 DOM 对象没有父 DOM 对象，相当于 dom.remove 操作。
              * @public
              *
-             * @param {HTMLElement} el 需要插入的 DOM 对象
+             * @param {HTMLElement} elem 需要插入的 DOM 对象
              * @param {HTMLElement} target 目标 DOM 对象
              * @return {HTMLElement} 需要插入的 DOM 对象
              */
-            insertBefore: function (el, target) {
-                var parent = dom.parent(target);
-                return parent ? parent.insertBefore(el, target) : dom.remove(el);
-            },
-
-            /**
-             * 向指定的 DOM 对象内插入一段 html 代码。
-             * @public
-             *
-             * @param {HTMLElement} el DOM 对象
-             * @param {string} position 插入 html 的位置信息，取值为 beforeBegin,afterBegin,beforeEnd,afterEnd
-             * @param {string} html 要插入的 html 代码
-             */
-            insertHTML: firefoxVersion ? (function () {
-                var HTMLPosition = {
-                    AFTERBEGIN: 'selectNodeContents',
-                    BEFOREEND: 'selectNodeContents',
-                    BEFOREBEGIN: 'setStartBefore',
-                    AFTEREND: 'setEndAfter'
-                };
-
-                return function (el, position, html) {
-                    var name = HTMLPosition[position.toUpperCase()],
-                        range = document.createRange();
-
-                    range[name](el);
-                    range.collapse(position.length > 9);
-                    range.insertNode(range.createContextualFragment(html));
-                };
-            })() : ieVersion === 10 ? function (el, position, html) {
-                var parent = dom.parent(el);
-                if (!parent) {
-                    dom.create().appendChild(el);
-                }
-                el.insertAdjacentHTML(position, html);
-            } : function (el, position, html) {
-                el.insertAdjacentHTML(position, html);
+            insertBefore: function (elem, target) {
+                var parent = target.parentElement;
+                return parent ? parent.insertBefore(elem, target) : dom.remove(elem);
             },
 
             /**
@@ -471,8 +317,8 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                 if ((target.tagName === 'INPUT' && target.type !== 'radio' && target.type !== 'checkbox') || target.tagName === 'TEXTAREA') {
                     return true;
                 }
-                for (; target; target = dom.parent(target)) {
-                    if (target.getAttribute && dom.getAttribute(target, 'contenteditable')) {
+                for (; target; target = target.parentElement) {
+                    if (target.getAttribute && target.getAttribute('contenteditable')) {
                         return true;
                     }
                 }
@@ -480,136 +326,73 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
             },
 
             /**
-             * 判断一个对象是否为 DOM 对象。
+             * 设置页面加载完毕后自动执行的方法。
              * @public
              *
-             * @param {object} obj 对象
-             * @return {boolean} true/false，是/否为 DOM 对象
+             * @param {function} func 需要自动执行的方法
              */
-            isElement: ieVersion < 9 ? function (obj) {
-                // 通过检测nodeType是否只读来判断是不是 DOM 对象
-                if (!obj.hasOwnProperty && obj.nodeType === 1) {
-                    try {
-                        obj.nodeType = 2;
-                    } catch (e) {
-                        return true;
+            ready: (function () {
+                function loadedHandler() {
+                    if (!hasReady) {
+                        if (patch) {
+                            patch();
+                            patch = undefined;
+                        }
+
+                        // 在处理的过程中，可能又有新的dom.ready函数被添加，需要添加到最后而不是直接执行
+                        for (var i = 0, func; (func = list[i++]);) {
+                            func();
+                        }
+                        list = [];
+                        hasReady = true;
                     }
                 }
-                return false;
-            } : function (obj) {
-                return obj instanceof HTMLElement;
-            },
 
-            /**
-             * 获取 DOM 对象的最后一个子 DOM 对象，参见 dom.children。
-             * @public
-             *
-             * @param {HTMLElement} el DOM 对象
-             * @return {HTMLElement} 最后一个子 DOM 对象，如果不存在返回 null
-             */
-            last: ieVersion < 9 ? function (el) {
-                for (el = el.lastChild; el; el = el.previousSibling) {
-                    if (el.nodeType === 1) {
-                        return el;
-                    }
+                var hasReady = false,
+                    list = [];
+
+                if (!operaVersion) {
+                    document.addEventListener('DOMContentLoaded', loadedHandler);
                 }
-                return null;
-            } : function (el) {
-                return el.lastElementChild;
-            },
+                window.addEventListener('load', loadedHandler);
 
-            /**
-             * 获取 DOM 对象的下一个兄弟 DOM 对象。
-             * @public
-             *
-             * @param {HTMLElement} el DOM 对象
-             * @return {HTMLElement} 下一个兄弟 DOM 对象，如果不存在返回 null
-             */
-            next: ieVersion < 9 ? function (el) {
-                for (el = el.nextSibling; el; el = el.nextSibling) {
-                    if (el.nodeType === 1) {
-                        return el;
+                return function (func) {
+                    list.push(func);
+                    if (hasReady) {
+                        // 在一次处理的过程中防止重入
+                        hasReady = false;
+                        loadedHandler();
                     }
-                }
-                return null;
-            } : function (el) {
-                return el.nextElementSibling;
-            },
-
-            /**
-             * 获取 DOM 对象的父 DOM 对象。
-             * 在 IE DOM 对象被 removeChild 方法移除时，parentNode 仍然指向原来的父 DOM 对象，与 W3C 标准兼容的属性应该是 parentElement。
-             * @public
-             *
-             * @param {HTMLElement} el DOM 对象
-             * @return {HTMLElement} 父 DOM 对象，如果没有，返回 null
-             */
-            parent: function (el) {
-                return el.tagName === 'HTML' ? null : el.parentElement;
-            },
-
-            /**
-             * 获取 DOM 对象的上一个兄弟 DOM 对象。
-             * @public
-             *
-             * @param {HTMLElement} el DOM 对象
-             * @return {HTMLElement} 上一个兄弟 DOM 对象，如果不存在返回 null
-             */
-            previous: ieVersion < 9 ? function (el) {
-                for (el = el.previousSibling; el; el = el.previousSibling) {
-                    if (el.nodeType === 1) {
-                        return el;
-                    }
-                }
-                return null;
-            } : function (el) {
-                return el.previousElementSibling;
-            },
+                };
+            })(),
 
             /**
              * 从父 DOM 对象中移除 DOM 对象，参见 dom.parent。
              * @public
              *
-             * @param {HTMLElement} el DOM 对象
+             * @param {HTMLElement} elem DOM 对象
              * @return {HTMLElement} 被移除的 DOM 对象
              */
-            remove: function (el) {
-                var parent = dom.parent(el);
+            remove: function (elem) {
+                var parent = elem.parentElement;
                 if (parent) {
-                    parent.removeChild(el);
+                    parent.removeChild(elem);
                 }
-                return el;
+                return elem;
             },
 
             /**
              * 删除 DOM 对象中的样式。
              * @public
              *
-             * @param {HTMLElement} el DOM 对象
+             * @param {HTMLElement} elem DOM 对象
              * @param {string} className 样式名，可以是多个，中间用空白符分隔
              */
-            removeClass: ieVersion < 10 ? function (el, className) {
-                var oldClasses = el.className.split(/\s+/).sort(),
-                    newClasses = className.split(/\s+/).sort(),
-                    i = oldClasses.length,
-                    j = newClasses.length;
-
-                for (; i && j;) {
-                    if (oldClasses[i - 1] === newClasses[j - 1]) {
-                        oldClasses.splice(--i, 1);
-                    } else if (oldClasses[i - 1] < newClasses[j - 1]) {
-                        j--;
-                    } else {
-                        i--;
-                    }
+            removeClass: function (elem, className) {
+                className = className.trim();
+                if (className) {
+                    elem.classList.remove.apply(elem.classList, className.split(/\s+/));
                 }
-                el.className = oldClasses.join(' ');
-            } : function (el, className) {
-                className.split(/\s+/).forEach(function (item) {
-                    if (item) {
-                        el.classList.remove(item);
-                    }
-                });
             },
 
             /**
@@ -620,9 +403,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              * @param {string} type 事件类型
              * @param {function} fn 事件处理函数
              */
-            removeEventListener: ieVersion < 9 ? function (obj, type, fn) {
-                obj.detachEvent('on' + type, fn);
-            } : function (obj, type, fn) {
+            removeEventListener: function (obj, type, fn) {
                 obj.removeEventListener(type, fn, { passive: false });
             },
 
@@ -632,11 +413,12 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              *
              * @param {object} obj 响应事件的对象，大多数情况下就是 DOM 对象
              * @param {object} events 事件类型与处理函数的映射对象
+             * @param {object} options 事件监听参数
              */
-            removeEventListeners: function (obj, events) {
+            removeEventListeners: function (obj, events, options) {
                 for (var key in events) {
                     if (events.hasOwnProperty(key)) {
-                        dom.removeEventListener(obj, key, events[key]);
+                        dom.removeEventListener(obj, key, events[key], options);
                     }
                 }
             },
@@ -645,111 +427,137 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              * 如果元素不在可视区域，将元素滚动到可视区域。
              * @public
              *
-             * @param {HTMLInputElement|HTMLTextAreaElement} el 输入框对象
+             * @param {HTMLInputElement|HTMLTextAreaElement} elem 输入框对象
              * @param {boolean} isMiddle true - 默认值，居中显示 / false - 靠最近的可视区域显示
              */
-            scrollIntoViewIfNeeded: function (el, isMiddle) {
-                if (el.scrollIntoViewIfNeeded) {
-                    el.scrollIntoViewIfNeeded(isMiddle);
+            scrollIntoViewIfNeeded: function (elem, isMiddle) {
+                if (elem.scrollIntoViewIfNeeded) {
+                    elem.scrollIntoViewIfNeeded(isMiddle);
                 } else {
-                    var top = dom.getPosition(el).top,
-                        height = el.offsetHeight,
-                        view = util.getView();
+                    var top = dom.getPosition(elem).top,
+                        height = elem.offsetHeight,
+                        view = dom.getView();
 
-                    if ((top >= view.top && top + height <= view.bottom) || (top < view.top && top + height > view.top) || (top + height > view.bottom && top < view.bottom)) {
+                    if (isMiddle === undefined) {
+                        isMiddle = true;
+                    } else if ((top >= view.top && top + height <= view.bottom) || (top < view.top && top + height > view.top) || (top + height > view.bottom && top < view.bottom)) {
                         // 部分在屏幕外或者指定非居中，靠最近的可视区域显示
                         isMiddle = false;
-                    } else if (isMiddle === undefined) {
-                        isMiddle = true;
                     }
-                    for (el = dom.parent(el); el !== document.body; el = dom.parent(el)) {
-                        if (el.clientHeight !== el.scrollHeight) {
-                            var clientTop = dom.getPosition(el).top + util.toNumber(dom.getStyle(el).borderTopWidth),
-                                clientHeight = el.clientHeight,
+                    for (elem = elem.parentElement; elem !== document.body; elem = elem.parentElement) {
+                        if (elem.clientHeight !== elem.scrollHeight) {
+                            var clientTop = dom.getPosition(elem).top + dom.toPixel(dom.getStyle(elem, 'borderTopWidth')),
+                                clientHeight = elem.clientHeight,
                                 distance;
 
                             if (isMiddle || height > clientHeight) {
                                 // 高度不够居中显示
-                                distance = top + el.scrollTop;
-                                el.scrollTop = distance - clientTop + (height - clientHeight) / 2;
-                                top = distance - el.scrollTop;
+                                distance = top + elem.scrollTop;
+                                elem.scrollTop = distance - clientTop + (height - clientHeight) / 2;
+                                top = distance - elem.scrollTop;
                             } else if (top < clientTop) {
                                 // 高度足够靠最近的位置
-                                el.scrollTop -= clientTop - top;
+                                elem.scrollTop -= clientTop - top;
                                 top = clientTop;
                             } else if (top + height > clientTop + clientHeight) {
                                 // 高度足够靠最近的位置
-                                el.scrollTop += top + height - clientTop - clientHeight;
+                                elem.scrollTop += top + height - clientTop - clientHeight;
                                 top = clientTop + clientHeight - height;
                             }
                         }
                     }
 
                     top -= view.top;
-                    if (isMiddle || height > el.clientHeight) {
+                    if (isMiddle || height > view.height) {
                         // 高度不够居中显示
-                        window.scroll(0, top + (height - el.clientHeight) / 2);
+                        window.scrollBy(0, top + (height - view.height) / 2);
                     } else if (top < 0) {
                         // 在上部靠顶显示
-                        window.scroll(0, top);
-                    } else if (top + height > el.clientHeight) {
+                        window.scrollBy(0, top);
+                    } else if (top + height > view.height) {
                         // 在下部靠底显示
-                        window.scroll(0, top + height - el.clientHeight);
+                        window.scrollBy(0, top + height - view.height);
                     }
                 }
             },
 
             /**
-             * 设置 DOM 对象的样式值。
+             * 设置输入框选中的区域，如果不指定结束的位置，将直接设置光标的位置。
              * @public
              *
-             * @param {HTMLElement} el DOM 对象
+             * @param {HTMLElement} elem DOM 对象
+             * @param {number} startPos 选中区域开始位置索引
+             * @param {number} endPos 选中区域结束位置索引，如果省略，等于开始的位置
+             */
+            setSelection: function (elem, startPos, endPos) {
+                endPos = endPos === undefined ? startPos : Math.max(startPos, endPos);
+
+                var type = elem.type;
+                if (typeof elem.selectionStart === 'number') {
+                    elem.setSelectionRange(startPos, endPos);
+                } else {
+                    // 部分input类型无法获取选择区域信息
+                    elem.type = 'text';
+                    elem.setSelectionRange(startPos, endPos);
+                    elem.type = type;
+                }
+            },
+
+            /**
+             * 设置 DOM 对象的样式值，允许设置自定义样式。
+             * @public
+             *
+             * @param {HTMLElement} elem DOM 对象
              * @param {string} name 样式名称
              * @param {string} value 样式值
              */
-            setStyle: function (el, name, value) {
-                var styleName = util.toCamelCase(name),
-                    fixer = __ECUI__StyleFixer[styleName] || styleName;
+            setStyle: function (elem, name, value) {
+                var style = elem.style,
+                    styleName = util.toCamelCase(name),
+                    fixerName = styleName.charAt(0).toUpperCase() + styleName.substring(1);
 
-                if (fixer.set) {
-                    fixer.set(el, value);
-                } else if (el.style[fixer] !== undefined) {
-                    el.style[fixer] = value;
+                if (style[styleName] !== undefined) {
+                    style[styleName] = value;
+                } else if (style['webkit' + fixerName] !== undefined) {
+                    style['webkit' + fixerName] = value;
+                } else if (style['moz' + fixerName] !== undefined) {
+                    style['moz' + fixerName] = value;
+                } else if (style['ms' + fixerName] !== undefined) {
+                    style['ms' + fixerName] = value;
                 } else {
                     // 设置自定义样式。标签自身的 content 样式没有意义，所以可以用于自定义样式的扩展。在 IE 9 以下浏览器中，使用 filter 自定义样式。
                     name = util.toStyleCase(name);
                     if (ieVersion < 9) {
-                        fixer = el.style.filter.replace(
+                        fixerName = style.filter.replace(
                             new RegExp('(^|\\s+)' + name + '\\s*\\(([^;]+)\\)(;|$)'),
                             function (match, $1, $2, $3) {
                                 return $1 + name + '(' + value + ')' + $3;
                             }
                         );
-                        el.style.filter = fixer !== el.style.filter ? fixer : name + '(' + value + ');' + el.style.filter;
+                        style.filter = fixerName !== style.filter ? fixerName : name + '(' + value + ');' + style.filter;
                     } else {
-                        fixer = el.style.content.replace(
+                        fixerName = style.content.replace(
                             new RegExp('("|\\s+)' + name + '\\s*:([^;]+)(;|$)'),
                             function (match, $1, $2, $3) {
-                                return $1 + name + ':' + util.encodeJS(value) + $3;
+                                return value ? $1 + name + ':' + util.encodeJS(value) + $3 : '';
                             }
                         );
-                        el.style.content = fixer !== el.style.content ? fixer : '"' + name + ':' + util.encodeJS(value) + ';' + fixer.substring(1);
+                        style.content = fixerName !== style.content ? fixerName : '"' + name + ':' + util.encodeJS(value) + ';' + fixerName.substring(1);
                     }
                 }
-
             },
 
             /**
              * 设置 DOM 对象的一组样式值。
              * @public
              *
-             * @param {HTMLElement} el DOM 对象
+             * @param {HTMLElement} elem DOM 对象
              * @param {object} styles 样式组
              */
-            setStyles: function (el, styles) {
+            setStyles: function (elem, styles) {
                 for (var name in styles) {
                     if (styles.hasOwnProperty(name)) {
-                        dom.setStyle(el, name, styles[name]);
+                        dom.setStyle(elem, name, styles[name]);
                     }
                 }
             },
@@ -762,12 +570,27 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              * @return {Array} DOM 数组
              */
             toArray: function (elements) {
-                for (var i = 0, ret = [], el; (el = elements[i++]);) {
-                    ret.push(el);
+                if (elements) {
+                    if (elements instanceof HTMLElement) {
+                        return [elements];
+                    }
+                    return Array.prototype.slice.call(elements);
                 }
-                return ret;
-            // } : function (elements) {
-            //     return elements && elements.length === undefined ? [elements] : Array.prototype.slice.call(elements);
+                return [];
+            },
+
+            /**
+             * 将长度单位统一转换成像素单位。
+             * @public
+             *
+             * @param {string} value 需要转换的长度单位
+             * @return {number} 像素单位
+             */
+            toPixel: function (value) {
+                if (value && value.slice(-3) === 'rem') {
+                    return Math.round(core.fontSize * +value.slice(0, -3));
+                }
+                return parseFloat(value) || 0;
             }
         },
         effect: {
@@ -859,231 +682,22 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
             },
 
             /**
-             * CSS3动画模拟。
-             * @public
-             *
-             * @param {HTMLElement} el DOM 元素
-             * @param {string} name keyframes 动画名称，通过 effect.createKeyframes 方法初始化
-             * @param {number} duration 动画持续时间，单位ms
-             * @param {string|Array|function} timingFn 时间函数，默认 ease
-             * @param {number} delay 启动延迟，单位 ms，默认无延迟
-             * @param {number} count 重复次数，默认一次
-             * @param {boolean} alternate 是否往返，默认否
-             * @param {function} callback 回调函数
-             * @return {function} 用于停止动画的函数
-             */
-            animate: function (el, name, duration, timingFn, delay, count, alternate, callback) {
-                var keyframes = __ECUI__Keyframes[name],
-                    data = keyframes.init(
-                        el,
-                        function (value) {
-                            value = __ECUI__Colors[value] || value;
-                            if (value.charAt(0) === '#') {
-                                if (value.length === 4) {
-                                    return [
-                                        parseInt(value.charAt(1) + value.charAt(1), 16),
-                                        parseInt(value.charAt(2) + value.charAt(2), 16),
-                                        parseInt(value.charAt(3) + value.charAt(3), 16)
-                                    ];
-                                }
-                                return [
-                                    parseInt(value.slice(1, 3), 16),
-                                    parseInt(value.slice(3, 5), 16),
-                                    parseInt(value.slice(5), 16)
-                                ];
-                            }
-                            if (value.indexOf('rgb') === 0) {
-                                value = value.split(/(\(|\s*,\s*|\))/);
-                                return [+value[2], +value[4], +value[6]];
-                            }
-                            return +(/[0-9.]+/.exec(value))[0];
-                        }
-                    );
-
-                if (typeof timingFn !== 'function') {
-                    timingFn = effect.FN_CubicBezier.apply(null, __ECUI__CubicBezier[timingFn || 'ease'] || timingFn);
-                }
-                delay = delay || 0;
-                count = count || 1;
-                callback = callback || util.blank;
-
-                var startTime = Date.now(),
-                    fn = keyframes.forward,
-                    stop = util.timer(
-                        function () {
-                            var actualDuration = Date.now() - startTime - delay;
-
-                            if (actualDuration >= 0) {
-                                fn(
-                                    el,
-                                    actualDuration >= duration ? 1 : timingFn(actualDuration / duration),
-                                    function (key, index, percent) {
-                                        var start = data[key][fn === keyframes.forward ? index - 1 : index + 1],
-                                            end = data[key][index];
-                                        if (typeof start === 'number') {
-                                            return data['$' + key].replace('#', start + ((end - start) * percent));
-                                        }
-                                        return 'rgb(' + Math.round(start[0] + ((end[0] - start[0]) * percent)) + ',' + Math.round(start[1] + ((end[1] - start[1]) * percent)) + ',' + Math.round(start[2] + ((end[2] - start[2]) * percent)) + ')';
-                                    }
-                                );
-
-                                if (actualDuration >= duration) {
-                                    if (--count) {
-                                        count = Math.max(-1, count);
-                                        if (alternate) {
-                                            fn = fn === keyframes.forward ? keyframes.reverse : keyframes.forward;
-                                        }
-                                        startTime += duration;
-                                    } else {
-                                        stop();
-                                        callback();
-                                        callback = null;
-                                    }
-                                }
-                            }
-                        },
-                        -1
-                    );
-
-                return function () {
-                    if (callback) {
-                        stop();
-                        callback = null;
-                    }
-                };
-            },
-
-            /**
-             * CSS3动画关键帧对象生成。
-             * @public
-             *
-             * @param {string} source @keyframes 等价的定义，不支持样式名缩写，支持 @xxx 的当前值访问
-             */
-            createKeyframes: function (source) {
-                function parse(exp, first) {
-                    return exp.replace(
-                        /@(\w+)/g,
-                        function (match, name) {
-                            return '"+' + (first ? 'ecui.dom.getStyle(e,"' + name + '")' : 'd.' + name + '[0]') + '+"';
-                        }
-                    ).replace(
-                        /@\((.+)\)/g,
-                        function (match, value) {
-                            return '"+(' + value.replace(
-                                /[A-Za-z]+/g,
-                                function (name) {
-                                    return 'ecui.util.toNumber(' + (first ? 'ecui.dom.getStyle(e,"' + name + '")' : 'd.' + name + '[0]') + ')';
-                                }
-                            ) + ')+"';
-                        }
-                    );
-                }
-
-                var times = [],
-                    keyframes = [],
-                    initCodes = [],
-                    forwardCodes = [],
-                    reverseCodes = [],
-                    name;
-
-                source.replace(
-                    /(\d+%|from|to)\{([^}]+)\}/g,
-                    function (keyframe, selector, cssText) {
-                        if (selector === 'from') {
-                            selector = 0;
-                        } else if (selector === 'to') {
-                            selector = 1;
-                        } else {
-                            selector = +selector.slice(0, -1) / 100;
-                        }
-
-                        if (selector && !keyframes.length) {
-                            keyframes[0] = {};
-                            times.push(0);
-                        }
-
-                        keyframe = {};
-                        keyframes.push(keyframe);
-                        times.push(selector);
-
-                        cssText.split(';').forEach(function (item) {
-                            item = item.split(':');
-                            if ((name = util.toCamelCase(item[0]))) {
-                                keyframe[name] = '"' + item[1] + '"';
-                                if (selector && !keyframes[0][name]) {
-                                    keyframes[0][name] = '"@' + name + '"';
-                                }
-                            }
-                        });
-                    }
-                );
-
-                initCodes.push('var d={},v;');
-                for (name in keyframes[0]) {
-                    if (keyframes[0].hasOwnProperty(name)) {
-                        initCodes.push('v=f(' + parse(keyframes[0][name], true) + ');');
-                        initCodes.push('d.$' + name + '=RegExp.leftContext+"#"+RegExp.rightContext;');
-                        initCodes.push('d.' + name + '=[v];');
-                        for (var i = 1, keyframe; (keyframe = keyframes[i]); i++) {
-                            if (keyframe[name]) {
-                                initCodes.push('v=' + parse(keyframe[name]) + ';');
-                                initCodes.push('d.' + name + '[' + i + ']=f(v);');
-                            } else {
-                                initCodes.push('d.' + name + '[' + i + ']=d.' + name + '[' + (i - 1) + ']' + ';');
-                            }
-                        }
-                    }
-                }
-                initCodes.push('return d');
-
-                for (i = 0; (keyframe = keyframes[i]); i++) {
-                    keyframes[i] = [];
-                    for (name in keyframe) {
-                        if (keyframe.hasOwnProperty(name)) {
-                            if (__ECUI__StyleFixer[name]) {
-                                keyframes[i].push('ecui.dom.setStyle($,"' + name + '",f("' + name + '",i,p));');
-                            } else {
-                                keyframes[i].push('$.style.' + name + '=f("' + name + '",i,p);');
-                            }
-                        }
-                    }
-                    keyframes[i] = keyframes[i].join('');
-                }
-
-                for (i = 1; (keyframe = keyframes[i]); i++) {
-                    forwardCodes.push('else if(p<=' + times[i] + '){i=' + i + ';p=(p-' + times[i - 1] + ')/' + (times[i] - times[i - 1]) + ';');
-                    forwardCodes.push(keyframe);
-                    forwardCodes.push('}');
-                }
-
-                for (i = keyframes.length - 1; i--;) {
-                    reverseCodes.push('else if(p<=' + (1 - times[i]) + '){i=' + i + ';p=(p-' + (1 - times[i + 1]) + ')/' + (times[i + 1] - times[i]) + ';');
-                    reverseCodes.push(keyframes[Math.max(0, i - 1)]);
-                    reverseCodes.push('}');
-                }
-
-                __ECUI__Keyframes[source.substring(0, source.indexOf('{')).trim()] = {
-                    init: new Function('e', 'f', initCodes.join('')),
-                    forward: new Function('$', 'p', 'f', 'i', forwardCodes.join('').slice(5)),
-                    reverse: new Function('$', 'p', 'f', 'i', reverseCodes.join('').slice(5))
-                };
-            },
-
-            /**
              * 渐变处理。
              * @public
              *
              * @param {function|string} fn 处理渐变的函数或函数体，字符串描述的格式例如 this.style.left=#0->100%#，一次改变多少个，使用;号分隔
              * @param {number} duration 渐变的总时长
+             * @param {object} thisArg fn 函数使用的 this 指针
              * @param {object} options 渐变的参数，一般用于描述渐变的信息
              * @param {function} transition 时间线函数
              * @return {function} 停止渐变或直接执行渐变到最后的函数，传入参数是true表示直接执行最后的渐变，否则停止渐变处理。
              */
-            grade: function (fn, duration, options, transition) {
+            grade: function (fn, duration, thisArg, options, transition) {
+                options = options || {};
                 if (typeof fn === 'string') {
                     var elements = [],
                         css;
-                    if (!options.onstep &&
+                    if (!(ieVersion < 9) && !options.onstep &&
                             !fn.replace(
                                 /([^;]+\.style\.)[^;]+=[^;]+(;|$)/g,
                                 function (item, name) {
@@ -1099,6 +713,11 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                         'p',
                         '$',
                         fn.replace(
+                            /(^|;)\s*([\w.]+)\s*->\s*(\w+)\s*(;|$)/g,
+                            function (match, start, left, right, end) {
+                                return start + left + '=#' + left + '->' + right + '#' + end;
+                            }
+                        ).replace(
                             /#.+?#/g,
                             function (item) {
                                 item = item.slice(1, -1);
@@ -1112,7 +731,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                                     list[0] = value[1];
                                 }
 
-                                var currValue = new Function('$', 'return ' + list[0]).call(options.$, options);
+                                var currValue = new Function('$', 'return ' + list[0]).call(thisArg, options);
                                 /-?[0-9]+(\.[0-9]+)?/.test(currValue);
                                 currValue = +RegExp['$&'];
 
@@ -1125,21 +744,21 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                     );
 
                     if (css) {
-                        fn.call(options.$, 0, options);
+                        fn.call(thisArg, 0, options);
                         util.timer(
                             // 延后执行，否则浏览器会进行优化合并0/1的设置
                             function () {
-                                new Function('$', elements.join('transition="all ' + duration + 'ms ' + (transition || 'ease') + '";')).call(options.$, options);
-                                fn.call(options.$, 1, options);
+                                new Function('$', elements.join('transition="all ' + duration + 'ms ' + (transition || 'ease') + '";')).call(thisArg, options);
+                                fn.call(thisArg, 1, options);
                             },
                             20
                         );
                         // 延后执行后浏览器还是出现了优化合并0/1的设置，所以暂时往后延迟超过一帧的时间（20ms）保证动画正常执行，问题，稍有20ms的延后
                         util.timer(
                             function () {
-                                new Function('$', elements.join('transition="";')).call(options.$, options);
+                                new Function('$', elements.join('transition="";')).call(thisArg, options);
                                 if (options.onfinish) {
-                                    options.onfinish.call(options.$, options);
+                                    options.onfinish.call(thisArg, options);
                                 }
                             },
                             duration + 20
@@ -1159,17 +778,18 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                             } else {
                                 percent = transition(currTime / duration);
                             }
-                            // 保存引用防止调用时options对象已经被释放
-                            var tmpOptions = options;
-                            fn.call(tmpOptions.$, percent, tmpOptions);
-                            if (tmpOptions.onstep) {
-                                tmpOptions.onstep.call(tmpOptions.$, percent, tmpOptions);
-                            }
-                            if (percent >= 1) {
-                                if (tmpOptions.onfinish) {
-                                    tmpOptions.onfinish.call(tmpOptions.$, tmpOptions);
+                            // 保存引用防止调用时 thisArg / options 对象已经被释放
+                            if (transition) {
+                                fn.call(thisArg, percent, options);
+                                if (options.onstep) {
+                                    options.onstep.call(thisArg, percent, options);
                                 }
-                                fn = options = transition = null;
+                                if (percent >= 1) {
+                                    if (options.onfinish) {
+                                        options.onfinish.call(thisArg, options);
+                                    }
+                                    fn = thisArg = options = transition = null;
+                                }
                             }
                         },
                         -1
@@ -1183,16 +803,18 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                     if (fn) {
                         stop();
                         if (toFinish) {
-                            fn.call(options.$, 1, options);
+                            fn.call(thisArg, 1, options);
                             if (options.onstep) {
-                                options.onstep.call(options.$, 1, options);
+                                options.onstep.call(thisArg, 1, options);
                             }
                             if (options.onfinish) {
-                                options.onfinish.call(options.$, options);
+                                options.onfinish.call(thisArg, options);
                             }
                         }
                     }
-                    fn = options = transition = null;
+                    util.timer(function () {
+                        fn = thisArg = options = transition = null;
+                    });
                 };
             }
         },
@@ -1206,7 +828,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              * data      {string}   需要发送的数据，主要用于POST
              * headers   {object}   要设置的http request header
              * timeout   {number}   超时时间
-             * nocache   {boolean}  是否需要缓存，默认为false(缓存)
+             * cache     {boolean}  是否需要缓存，默认为false(缓存)
              * onupload  {function} 如果xhr支持upload.onprogress，上传过程中触发
              * onsuccess {function} 请求成功时触发
              * onerror   {function} 请求发生错误时触发
@@ -1274,22 +896,13 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                     async = options.async !== false,
                     method = (options.method || 'GET').toUpperCase(),
                     headers = options.headers || {},
-                    xhrFields = options.xhrFields || {},
                     onerror = options.onerror || util.blank,
                     // 基本的逻辑来自lili同学提供的patch
                     stop,
                     xhr;
 
                 try {
-                    if (window.ActiveXObject) {
-                        try {
-                            xhr = new ActiveXObject('Msxml2.XMLHTTP');
-                        } catch (e) {
-                            xhr = new ActiveXObject('Microsoft.XMLHTTP');
-                        }
-                    } else {
-                        xhr = new XMLHttpRequest();
-                    }
+                    xhr = new XMLHttpRequest();
 
                     if (options.onupload && xhr.upload) {
                         xhr.upload.onprogress = options.onupload;
@@ -1318,13 +931,6 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                     for (var key in headers) {
                         if (headers.hasOwnProperty(key)) {
                             xhr.setRequestHeader(key, headers[key]);
-                        }
-                    }
-
-                    // Apply custom fields if provided
-                    for (key in xhrFields) {
-                        if (xhrFields.hasOwnProperty(key)) {
-                            xhr[key] = xhrFields[key];
                         }
                     }
 
@@ -1419,9 +1025,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                     scr.setAttribute('charset', options.charset);
                 }
                 scr.setAttribute('src', url);
-                if (!(ieVersion < 9)) {
-                    scr.onerror = options.onerror;
-                }
+                scr.onerror = options.onerror;
                 document.head.appendChild(scr);
             },
 
@@ -1546,13 +1150,13 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
         ui: {},
         util: {
             /*
-             * 自适应调整字体大小。
+             * 自适应调整字体大小，防止rem换算px得出来小数。
              * @public
              *
              * @param {Array} sheets 样式对象列表
              */
             adjustFontSize: function (sheets) {
-                var fontSize = core.fontSize = util.toNumber(dom.getStyle(dom.parent(document.body), 'font-size'));
+                var fontSize = core.fontSize = parseInt(dom.getStyle(document.body.parentElement, 'font-size'), 10);
                 sheets.forEach(function (item) {
                     if (ieVersion) {
                         for (i = 0, rule = item.rules || item.cssRules, item = []; (value = rule[i++]);) {
@@ -1581,7 +1185,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
 
             /*
              * 空函数。
-             * blank 方法不应该被执行，也不进行任何处理，它用于提供给不需要执行操作的事件方法进行赋值，与 blank 类似的用于给事件方法进行赋值，而不直接被执行的方法还有 cancel。
+             * blank 方法不应该被执行，也不进行任何处理，它用于提供给不需要执行操作的事件方法进行赋值。
              * @public
              */
             blank: new Function(),
@@ -1618,35 +1222,33 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              * @param {function} callback 复制成功的回调函数
              */
             clipboard: function (text, callback) {
-                var result;
-
                 __ECUI__ClipboardHandle();
-                if (ieVersion < 9) {
-                    result = window.clipboardData.setData('Text', text);
-                } else {
-                    if (typeof text === 'string') {
-                        core.$('ECUI-CLIPBOARD').value = text;
-                        text = core.$('ECUI-CLIPBOARD');
+                if (typeof text === 'string') {
+                    var elem = core.$('ECUI-CLIPBOARD');
+                    if (!elem) {
+                        elem = document.body.appendChild(dom.create('TEXTAREA', { id: 'ECUI-CLIPBOARD' }));
                     }
-
-                    var active = document.activeElement;
-                    if (active !== document.body) {
-                        var start = active.selectionStart,
-                            end = active.selectionEnd;
-                    }
-
-                    text.select();
-                    if (iosVersion && safariVersion) {
-                        text.setSelectionRange(0, 999999999);
-                    }
-                    result = document.execCommand('copy');
-
-                    if (active !== document.body) {
-                        active.focus();
-                        active.setSelectionRange(start, end);
-                    }
+                    elem.value = text;
+                    text = elem;
                 }
-                if (result) {
+
+                var active = document.activeElement;
+                if (active !== document.body) {
+                    var start = active.selectionStart,
+                        end = active.selectionEnd;
+                }
+
+                text.select();
+                if (iosVersion && safariVersion) {
+                    text.setSelectionRange(0, 999999999);
+                }
+                var ret = document.execCommand('copy');
+
+                if (active !== document.body) {
+                    active.focus();
+                    active.setSelectionRange(start, end);
+                }
+                if (ret) {
                     if (callback) {
                         callback();
                     }
@@ -1906,7 +1508,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              * 金融数字格式化。
              * @public
              *
-             * @param {number} num 需要格式化的数字
+             * @param {string|number} num 需要格式化的数字
              * @return {string} 格式化结果
              */
             formatFinance: function (num) {
@@ -1955,39 +1557,14 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
             },
 
             /**
-             * 获取浏览器可视区域的相关信息。
-             * getView 方法将返回浏览器可视区域的信息。属性如下：
-             * top        {number} 可视区域最小X轴坐标
-             * right      {number} 可视区域最大Y轴坐标
-             * bottom     {number} 可视区域最大X轴坐标
-             * left       {number} 可视区域最小Y轴坐标
-             * width      {number} 可视区域的宽度
-             * height     {number} 可视区域的高度
-             * pageWidth  {number} 页面的宽度
-             * pageHeight {number} 页面的高度
+             * 获取本地存储的信息。
              * @public
              *
-             * @return {object} 浏览器可视区域信息
+             * @param {string} key 数据的键值
+             * @return {object} 数据对象
              */
-            getView: function () {
-                var body = document.body,
-                    html = dom.parent(body),
-                    client = isStrict ? html : body,
-                    scrollTop = html.scrollTop + body.scrollTop,
-                    scrollLeft = html.scrollLeft + body.scrollLeft,
-                    clientWidth = client.clientWidth,
-                    clientHeight = client.clientHeight;
-
-                return {
-                    top: scrollTop,
-                    right: scrollLeft + clientWidth,
-                    bottom: scrollTop + clientHeight,
-                    left: scrollLeft,
-                    width: clientWidth,
-                    height: clientHeight,
-                    pageWidth: Math.max(html.scrollWidth, body.scrollWidth, clientWidth),
-                    pageHeight: Math.max(html.scrollHeight, body.scrollHeight, clientHeight)
-                };
+            getLocalStorage: function (key) {
+                return window.localStorage.getItem(location.pathname + '#' + key);
             },
 
             /**
@@ -2010,7 +1587,6 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              *
              * @param {function} subClass 子类
              * @param {function} superClass 父类
-             * @return {object} subClass 的 prototype 属性
              */
             inherits: function (subClass, superClass) {
                 var oldPrototype = subClass.prototype,
@@ -2019,7 +1595,24 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                 Clazz.prototype = superClass.prototype;
                 Object.assign(subClass.prototype = new Clazz(), oldPrototype);
                 subClass.prototype.constructor = subClass;
-                subClass['super'] = superClass;
+                subClass.SUPER = superClass;
+            },
+
+            /**
+             * 判断类是否有继承关系。
+             * @public
+             *
+             * @param {function} subClass 子类
+             * @param {function} superClass 父类
+             * @return {boolean} subClass 的继承关系
+             */
+            isInherits: function (subClass, superClass) {
+                for (var clazz = subClass; clazz; clazz = clazz.SUPER) {
+                    if (clazz === superClass) {
+                        return true;
+                    }
+                }
+                return false;
             },
 
             /**
@@ -2052,13 +1645,27 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
             },
 
             /**
-             * 从数组中移除对象。
+             * 从数组中移除一个对象。
              * @public
              *
              * @param {Array} array 数组对象
              * @param {object} obj 需要移除的对象
              */
             remove: function (array, obj) {
+                var index = array.indexOf(obj);
+                if (index >= 0) {
+                    array.splice(index, 1);
+                }
+            },
+
+            /**
+             * 从数组中移除对象。
+             * @public
+             *
+             * @param {Array} array 数组对象
+             * @param {object} obj 需要移除的对象
+             */
+            removeAll: function (array, obj) {
                 for (var i = array.length; i--;) {
                     if (array[i] === obj) {
                         array.splice(i, 1);
@@ -2080,6 +1687,17 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                     cookie += ('; expires=' + exp.toGMTString());
                 }
                 document.cookie = cookie;
+            },
+
+            /**
+             * 设置本地存储的信息。
+             * @public
+             *
+             * @param {string} key 数据的键值
+             * @param {object} value 数据对象
+             */
+            setLocalStorage: function (key, value) {
+                window.localStorage.setItem(location.pathname + '#' + key, value);
             },
 
             /**
@@ -2124,7 +1742,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                 function build() {
                     return delay === -1 ?
                         window.requestAnimationFrame(callFunc) :
-                        (delay < 0 ? setInterval : setTimeout)(callFunc, Math.abs(delay));
+                        (delay < 0 ? window.setInterval : window.setTimeout)(callFunc, Math.abs(delay));
                 }
 
                 if (delay === -1) {
@@ -2149,7 +1767,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                     if (delay === -1) {
                         window.cancelAnimationFrame(handle);
                     } else {
-                        (delay < 0 ? clearInterval : clearTimeout)(handle);
+                        (delay < 0 ? window.clearInterval : window.clearTimeout)(handle);
                     }
                     if (pause) {
                         if (pausing) {
@@ -2183,21 +1801,6 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
             },
 
             /**
-             * 将对象转换成数值，如果是rem数值统一转换为px数值。
-             * toNumber 方法会省略数值的符号，例如字符串 9px 将当成数值的 9，不能识别的数值将默认为 0。
-             * @public
-             *
-             * @param {object} obj 需要转换的对象
-             * @return {number} 对象的数值
-             */
-            toNumber: function (obj) {
-                if (obj && obj.slice(-3) === 'rem') {
-                    return Math.round(core.fontSize * +obj.slice(0, -3));
-                }
-                return parseFloat(obj, 10) || 0;
-            },
-
-            /**
              * 样式命名法转换。
              * toStyleCase 方法将 xxxXxx 字符串转换成 xxx-xxx。
              * @public
@@ -2221,76 +1824,8 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
         //{if 1}//ui = core.ui,//{/if}//
         util = core.util;
 
-    var __ECUI__Keyframes = {};
     var __ECUI__ClipboardHandle = util.blank;
     var __ECUI__Base64Table = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
-    // 读写特殊的 css 属性操作
-    var __ECUI__StyleFixer = {
-        clip: ieVersion < 8 ? {
-            set: function (el, value) {
-                el.style.clip = value === 'auto' ? 'rect(0,100%,100%,0)' : value;
-            }
-        } : undefined,
-
-        display: ieVersion < 8 ? {
-            get: function (el, style) {
-                return style.display === 'inline' && style.zoom === '1' ? 'inline-block' : style.display;
-            },
-
-            set: function (el, value) {
-                if (value === 'inline-block') {
-                    value = 'inline';
-                    el.style.zoom = 1;
-                }
-                el.style.display = value;
-            }
-        } : undefined,
-        opacity: ieVersion < 9 ? {
-            get: function (el, style) {
-                if (/\(opacity=(\d+)/.test(style.filter)) {
-                    return +RegExp.$1 / 100;
-                }
-                return 1;
-            },
-
-            set: function (el, value) {
-                el.style.filter =
-                    el.style.filter.replace(/(progid:DXImageTransform\.Microsoft\.)?alpha\([^\)]*\)/gi, '') +
-                    (value === '' ? '' :
-                        /*ignore*/
-                        (
-                            ieVersion < 8 ? 'alpha' : /*end*/ 'progid:DXImageTransform.Microsoft.Alpha'
-                            /*ignore*/
-                        ) /*end*/ + '(opacity=' + value * 100 + ')'
-                    );
-            }
-        } : undefined,
-
-        userSelect: iosVersion ? 'webkitUserSelect' : 'userSelect',
-        transform: iosVersion < 9 ? 'webkitTransform' : undefined,
-
-        'float': ieVersion ? 'styleFloat' : 'cssFloat'
-    };
-    // 缺省颜色代码
-    var __ECUI__Colors = {
-        aqua: '#00FFFF',
-        black: '#000000',
-        blue: '#0000FF',
-        fuchsia: '#FF00FF',
-        gray: '#808080',
-        green: '#008000',
-        lime: '#00FF00',
-        maroon: '#800000',
-        navy: '#000080',
-        olive: '#808000',
-        orange: '#FFA500',
-        purple: '#800080',
-        red: '#FF0000',
-        silver: '#C0C0C0',
-        teal: '#008080',
-        white: '#FFFFFF',
-        yellow: '#FFFF00'
-    };
     // 渐变函数的贝塞尔曲线参数
     var __ECUI__CubicBezier = {
         linear: [0, 0, 1, 1],
@@ -2300,134 +1835,24 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
         'ease-in-out': [0.42, 0, 0.58, 1]
     };
 
-    /**
-     * 设置页面加载完毕后自动执行的方法。
-     * @public
-     *
-     * @param {function} func 需要自动执行的方法
-     */
-    dom.ready = (function () {
-        function loadedHandler() {
-            if (!hasReady) {
-                // 在处理的过程中，可能又有新的dom.ready函数被添加，需要添加到最后而不是直接执行
-                for (var i = 0, func; (func = list[i++]);) {
-                    func();
-                }
-                list = [];
-                hasReady = true;
-            }
-        }
-
-        function checkLoaded() {
-            try {
-                document.documentElement.doScroll('left');
-                loadedHandler();
-            } catch (e) {
-                setTimeout(checkLoaded, 50);
-            }
-        }
-
-        var hasReady = false,
-            list = [];
-
-        if (document.addEventListener && !operaVersion) {
-            dom.addEventListener(document, 'DOMContentLoaded', loadedHandler);
-        } else if (ieVersion && window === top) {
-            checkLoaded();
-        }
-
-        dom.addEventListener(window, 'load', loadedHandler);
-
-        return function (func) {
-            list.push(func);
-            if (hasReady) {
-                // 在一次处理的过程中防止重入
-                hasReady = false;
-                loadedHandler();
-            }
-        };
-    })();
-
-    if (ieVersion < 9) {
-        document.head = document.getElementsByTagName('HEAD')[0];
-    }
-
-    if (!window.getComputedStyle) {
-        window.getComputedStyle = function (el) {
-            return el.currentStyle || el.style;
-        };
-    }
-
     try {
         document.execCommand('BackgroundImageCache', false, true);
     } catch (ignore) {}
-
-    if (!Object.assign) {
-        // es6 部分函数兼容
-        Object.assign = function (target) {
-            Array.prototype.slice.call(arguments, 1).forEach(function (source) {
-                if (source) {
-                    for (var key in source) {
-                        if (source.hasOwnProperty(key)) {
-                            target[key] = source[key];
-                        }
-                    }
-                }
-            });
-            return target;
-        };
-        /* eslint no-extend-native: [2, { "exceptions": ["String"] }] */
-        String.prototype.startsWith = function (s) {
-            return this.indexOf(s) === 0;
-        };
-
-        String.prototype.endsWith = function (s) {
-            return this.lastIndexOf(s) === this.length - s.length;
-        };
-    }
 //{if 0}//
     if (isToucher) {
         dom.addEventListener(document, 'contextmenu', util.preventEvent);
     }
-//{/if}//
-    if (window.localStorage) {
-        util.getLocalStorage = function (key) {
-            return window.localStorage.getItem(location.pathname + '#' + key);
-        };
-        util.setLocalStorage = function (key, value) {
-            window.localStorage.setItem(location.pathname + '#' + key, value);
-        };
-        if (!(ieVersion < 9)) {
-            dom.ready(function () {
-                document.body.appendChild(dom.create('TEXTAREA', { id: 'ECUI-CLIPBOARD' }));
-            });
-        }
-    } else {
-        dom.ready(function () {
-            dom.insertHTML(document.body, 'beforeEnd', '<input type="hidden">');
-            var localStorage = document.body.lastChild;
-            localStorage.addBehavior('#default#userData');
+    ecui.__ControlStyle__ = function (cssText) {
+        cssText = '@import (less) \'ecui.css\';\n' + cssText;
 
-            util.getLocalStorage = function (key) {
-                localStorage.load('ECUI');
-                return localStorage.getAttribute(key);
-            };
-            util.setLocalStorage = function (key, value) {
-                localStorage.setAttribute(key, value);
-                localStorage.save('ECUI');
-            };
-        })();
-    }
-
-    (function () {
-        if (patch) {
-            Object.assign(core.dom, patch.dom);
-            Object.assign(core.ext, patch.ext);
-            Object.assign(core.io, patch.io);
-            Object.assign(core.util, patch.util);
-            patch = null;
+        var el = document.createElement('STYLE');
+        el.setAttribute('type', 'text/less');
+        if (ecui.ie < 10) {
+            el.setAttribute('lessText', cssText);
+        } else {
+            el.innerHTML = cssText;
         }
-    })();
-//{if 0}//
+        document.head.appendChild(el);
+    };
 })();
 //{/if}//

@@ -71,21 +71,21 @@ _aChildren     - 子控件集合
 
                 if (options.collapsed) {
                     dom.addClass(el, 'ui-hide');
-                } else if (dom.hasClass(el, 'ui-hide')) {
+                } else if (el.classList.contains('ui-hide')) {
                     this._bCollapsed = true;
                 }
 
                 this._eContainer = el;
-                el = dom.insertBefore(dom.first(el), el);
+                el = dom.insertBefore(el.firstElementChild, el);
             }
 
-            ui.Control.call(this, el, options);
+            _super(el, options);
 
             if (this._eContainer) {
                     // 初始化子控件
                 this._aChildren = dom.children(this._eContainer).map(
                     function (item) {
-                        return core.$fastCreate(this.constructor, item, this, Object.assign({}, options, {id: undefined}, core.getOptions(item) || {}));
+                        return core.$fastCreate(this.constructor, item, this, Object.assign({}, options, {id: undefined, ext: undefined}, core.getOptions(item) || {}));
                     },
                     this
                 );
@@ -93,7 +93,6 @@ _aChildren     - 子控件集合
                 this._aChildren = options.children ? options.children instanceof Array ? options.children : +options.children : [];
                 if (this._aChildren > 0 || this._aChildren[0]) {
                     this._eContainer = dom.create('UL', {className: this.getUnitClass(ui.TreeView, 'children')});
-                    this._bCollapsed = true;
                 }
             }
 
@@ -105,7 +104,7 @@ _aChildren     - 子控件集合
              * @override
              */
             $click: function (event) {
-                ui.Control.prototype.$click.call(this, event);
+                _super.$click(event);
 
                 for (var control = event.getControl(); control !== this; control = control.getParent()) {
                     if (control instanceof ui.TreeView) {
@@ -129,11 +128,11 @@ _aChildren     - 子控件集合
              * @override
              */
             $dispose: function () {
-                if (this._eContainer && !dom.contain(document.body, this._eContainer)) {
+                if (this._eContainer) {
                     core.dispose(this._eContainer);
                 }
+                _super.$dispose();
                 this._eContainer = null;
-                ui.Control.prototype.$dispose.call(this);
             },
 
             /**
@@ -157,7 +156,7 @@ _aChildren     - 子控件集合
              * @override
              */
             $hide: function () {
-                ui.Control.prototype.$hide.call(this);
+                _super.$hide();
 
                 if (this._eContainer) {
                     dom.addClass(this._eContainer, 'ui-hide');
@@ -175,10 +174,10 @@ _aChildren     - 子控件集合
              * @override
              */
             $mouseout: function (event) {
-                ui.Control.prototype.$mouseout.call(this, event);
+                _super.$mouseout(event);
 
                 if (hovered) {
-                    if (!this.contain(hovered)) {
+                    if (!this.contains(hovered)) {
                         return;
                     }
                     for (var control = event.getControl(); control; control = control.getParent()) {
@@ -196,10 +195,10 @@ _aChildren     - 子控件集合
              * @override
              */
             $mouseover: function (event) {
-                ui.Control.prototype.$mouseover.call(this, event);
+                _super.$mouseover(event);
 
                 if (hovered) {
-                    if (this.contain(hovered)) {
+                    if (this.contains(hovered)) {
                         return;
                     }
                     core.dispatchEvent(hovered, 'nodeout', event);
@@ -216,14 +215,12 @@ _aChildren     - 子控件集合
                 if (this._eContainer) {
                     if (this.isCollapsed()) {
                         this.expand();
-                        core.dispatchEvent(this, 'expand');
                     } else {
                         this.collapse();
-                        core.dispatchEvent(this, 'collapse');
                     }
                 }
 
-                this.getRoot().setSelected(this);
+                this.getRoot().setActived(this);
             },
 
             /**
@@ -251,8 +248,8 @@ _aChildren     - 子控件集合
             $setParent: function (parent) {
                 var root = this.getRoot();
                 if (root !== this) {
-                    if (this.contain(root.getSelected())) {
-                        root.setSelected();
+                    if (this.contains(root.getActived())) {
+                        root.setActived();
                     }
 
                     var oldParent = this.getParent();
@@ -260,7 +257,7 @@ _aChildren     - 子控件集合
                     refresh(oldParent);
                 }
 
-                ui.Control.prototype.$setParent.call(this, parent);
+                _super.$setParent(parent);
 
                 // 将子树区域显示在主元素之后
                 if (this._eContainer) {
@@ -273,7 +270,7 @@ _aChildren     - 子控件集合
              * @override
              */
             $show: function () {
-                ui.Control.prototype.$show.call(this);
+                _super.$show();
 
                 if (this._eContainer && !this._bCollapsed) {
                     dom.removeClass(this._eContainer, 'ui-hide');
@@ -294,9 +291,10 @@ _aChildren     - 子控件集合
                     initChildren(this);
 
                     if (!(item instanceof ui.TreeView)) {
-                        if (!item.main) {
-                            item.main = dom.create('LI', {innerHTML: item[this.TEXTNAME || '#text']});
-                            item.main.title = item[this.TEXTNAME || '#text'];
+                        if (typeof item === 'string') {
+                            item = { main: dom.create('LI', { innerHTML: item }) };
+                        } else if (!item.main) {
+                            item.main = dom.create('LI', {innerHTML: item[core.TEXTNAME]});
                         }
                         item = core.$fastCreate(this.constructor, item.main, null, Object.assign({}, item, {id: ''}));
                     }
@@ -310,7 +308,6 @@ _aChildren     - 子控件集合
 
                     if (item.getParent()) {
                         var el = item.getMain();
-                        util.remove(this._aChildren, item);
                         if (this._aChildren[index]) {
                             dom.insertBefore(el, this._aChildren[index].getMain());
                             this._aChildren.splice(index, 0, item);
@@ -353,15 +350,19 @@ _aChildren     - 子控件集合
              * 遍历所有的树控件节点。
              * @public
              *
-             * @param {Function} fn 遍历时用于节点处理的函数
+             * @param {Function} fn 遍历时用于节点处理的函数，不返回值正常遍历，返回 false 时不遍历当前节点的子节点，返回其它值时直接终止遍历并返回结果。
              * @param {object} thisArg this指针
              */
             forEach: function (fn, thisArg) {
                 for (var i = 0, nodes = [this], floor = 0, len = 1, node; (node = nodes[i++]);) {
-                    fn.call(thisArg, node, floor);
-                    if (node._aChildren instanceof Array) {
-                        initChildren(node);
-                        Array.prototype.push.apply(nodes, node._aChildren);
+                    var ret = fn.call(thisArg, node, floor);
+                    if (ret === undefined) {
+                        if (node._aChildren instanceof Array) {
+                            initChildren(node);
+                            Array.prototype.push.apply(nodes, node._aChildren);
+                        }
+                    } else if (ret !== false) {
+                        return ret;
                     }
                     if (i === len) {
                         len = nodes.length;
@@ -418,7 +419,7 @@ _aChildren     - 子控件集合
                 // 这里需要考虑Tree位于上一个Tree的节点内部
                 for (var control = this, parent;; control = parent) {
                     parent = control.getParent();
-                    if (!(parent instanceof ui.TreeView) || parent._aChildren.indexOf(control) < 0) {
+                    if (!(parent instanceof ui.TreeView) || parent.getChildren().indexOf(control) < 0) {
                         break;
                     }
                 }
@@ -461,20 +462,24 @@ _aChildren     - 子控件集合
              * 移除所有子选项控件。
              * @public
              *
-             * @param {boolean} dispose 选项控件是否在移除过程中自动释放
+             * @param {boolean} dispose 子控件是否在移除过程中自动释放
              */
             removeAll: function (dispose) {
                 if (this._aChildren[0] instanceof ui.TreeView) {
-                    this._aChildren.forEach(function (item) {
-                        item.setParent();
-                        if (dispose) {
-                            item.dispose();
+                    if (dispose) {
+                        if (this._eContainer) {
+                            core.dispose(this._eContainer);
+                            this._eContainer.innerHTML = '';
                         }
-                    });
+                    } else {
+                        this._aChildren.slice().forEach(function (item) {
+                            item.setParent();
+                        });
+                    }
                 }
                 this._aChildren = [];
             }
         },
-        ui.Control.defineProperty('selected')
+        ui.Control.defineProperty('actived')
     );
 })();

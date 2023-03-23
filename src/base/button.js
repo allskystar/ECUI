@@ -1,5 +1,5 @@
 //{if $css}//
-__ControlStyle__('\
+ecui.__ControlStyle__('\
 .ui-button {\
     .inline-block();\
 }\
@@ -16,7 +16,6 @@ __ControlStyle__('\
 //{if 0}//
 (function () {
     var core = ecui,
-        dom = core.dom,
         ui = core.ui;
 //{/if}//
     /**
@@ -28,7 +27,7 @@ __ControlStyle__('\
         ui.Control,
         'ui-button',
         function (el, options) {
-            ui.Control.call(this, el, Object.assign({userSelect: false}, options));
+            _super(el, Object.assign({userSelect: false}, options));
         },
         {
             /**
@@ -42,7 +41,7 @@ __ControlStyle__('\
                 if (el.tagName === 'BUTTON' || el.tagName === 'INPUT') {
                     return el.form;
                 }
-                for (; el; el = dom.parent(el)) {
+                for (; el; el = el.parentElement) {
                     if (el.tagName === 'FORM') {
                         return el;
                     }

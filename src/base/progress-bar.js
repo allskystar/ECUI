@@ -1,13 +1,13 @@
 //{if $css}//
-__ControlStyle__('\
+ecui.__ControlStyle__('\
 .ui-progress-bar {\
-    .ui-progress-bar-text,\
+    position: relative;\
     .ui-progress-bar-mask {\
         position: absolute !important;\
         top: 0px !important;\
         left: 0px !important;\
-        .width100rate();\
-        .height100rate();\
+        width: 100% !important;\
+        height: 100% !important;\
     }\
 }\
 ');
@@ -33,9 +33,10 @@ _eMask   - 完成的进度比例内容区域
         ui.Progress,
         'ui-progress-bar',
         function (el, options) {
-            ui.Progress.call(this, el, options);
+            _super(el, options);
 
-            el.innerHTML = '<div class="' + this.getUnitClass(ui.ProgressBar, 'text') + '"></div><div class="' + this.getUnitClass(ui.ProgressBar, 'mask') + '"></div>';
+            this._sFormat = el.innerHTML;
+            el.innerHTML = '<div class="' + this.getUnitClass(ui.ProgressBar, 'text') + '">' + this._sFormat + '</div><div class="' + this.getUnitClass(ui.ProgressBar, 'mask') + '"></div>';
             this._eText = el.firstChild;
             this._eMask = el.lastChild;
         },
@@ -44,17 +45,19 @@ _eMask   - 完成的进度比例内容区域
              * @override
              */
             $dispose: function () {
-                this._eText = null;
-                this._eMask = null;
-                ui.Progress.prototype.$dispose.call(this);
+                _super.$dispose();
+                this._eText = this._eMask = null;
             },
 
             /**
              * @override
              */
             $progress: function () {
+                var value = this.getValue() / this.getMax() * 100;
+                this.setText(this._sFormat.replace(/{\d+}/g, function (match) {
+                    return value.toFixed(+match.slice(1, -1));
+                }));
                 this._eMask.style.clip = 'rect(0px,' + Math.round(this.getValue() * this.getWidth() / this.getMax()) + 'px,' + this.getHeight() + 'px,0px)';
-                this.setText((this.getValue() / this.getMax() * 100).toFixed(2) + '%');
             },
 
             /**

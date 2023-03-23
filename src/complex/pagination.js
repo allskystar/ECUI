@@ -26,36 +26,35 @@ _nTotalPage       - 总页数
         ui.Control,
         'ui-pagination',
         function (el, options) {
-            ui.Control.call(this, el, options);
+            _super(el, options);
             // page值的形式: offset,total,pageSize,totalPage
             var page = options.page.split(',');
             // 定义当前页数
-            this._nCurrentPage = Math.ceil((+page[0] + 1) / +page[2]);
+            this._nCurrentPage = Math.ceil((+page[0] + 1) / +page[2]) || 0;
             // 定义总页数
-            this._nTotalPage = +page[3];
+            this._nTotalPage = +page[3] || 0;
+            // 定义总条数
+            this._nTotal = +page[1] || 0;
 
             el.innerHTML = '<div class="pagination"></div>' +
                             '<div class="pagination-msgBox clearfix">' +
-                            (options.hasPageSize ? this.pageSizes : '') +
+                            (options.hasPageSize ? this.pageSizes : '<input type="hidden">') +
                             (options.skipInput ? '<div class="pagination-msg">跳至<input class="ui-text ui-input" value="' + this._nCurrentPage + '" />页</div>' : '') +
                             '<div class="pagination-msg">共' + this._nTotalPage + '页</div>' +
-                            '<div class="pagination-msg">共' + page[1] + '条</div>' +
+                            '<div class="pagination-msg">共' + this._nTotal + '条</div>' +
                             '</div>';
 
-            this.$setBody(dom.first(el));
-            var childrens = dom.children(el);
-            if (options.hasPageSize) {
-                core.$fastCreate(
-                    this.Select,
-                    dom.first(childrens[1]),
-                    this,
-                    { value: page[2] }
-                );
-            }
+            this.$setBody(el = el.firstElementChild);
+            this._uPageSize = core.$fastCreate(
+                options.hasPageSize ? this.Select : ui.FormInput,
+                el = el.nextElementSibling.firstElementChild,
+                this,
+                { value: page[2] }
+            );
             if (options.skipInput) {
-                core.$fastCreate(
+                this._uSkipInput = core.$fastCreate(
                     this.Number,
-                    dom.first(options.hasPageSize ? dom.children(childrens[1])[1] : dom.first(childrens[1])),
+                    el.nextElementSibling.firstElementChild,
                     this,
                     { min: 1, max: +page[3] }
                 );
@@ -66,8 +65,8 @@ _nTotalPage       - 总页数
                 ui.Select,
                 {
                     $change: function (event) {
-                        ui.Select.prototype.$change.call(this, event);
-                        this.getParent().go(null, +this.getValue());
+                        _super.$change(event);
+                        this.getParent().go(null, +this.getFormValue());
                     }
                 }
             ),
@@ -76,7 +75,7 @@ _nTotalPage       - 总页数
                 ui.Number,
                 {
                     $keydown: function (event) {
-                        ui.Number.prototype.$keydown.call(this, event);
+                        _super.$keydown(event);
                         if (event.which === 13) {
                             // 回车跳转到指定页
                             this.go();
@@ -84,13 +83,13 @@ _nTotalPage       - 总页数
                     },
 
                     $blur: function (event) {
-                        ui.Number.prototype.$blur.call(this, event);
+                        _super.$blur(event);
                         this.go();
                     },
                     go: function () {
                         var parent = this.getParent();
                         parent.setPagination(+this.getValue());
-                        parent.go(parent._nCurrentPage);
+                        parent.go(parent._nCurrentPage, parent._uPageSize.getFormValue());
                     }
                 }
             ),
@@ -119,12 +118,12 @@ _nTotalPage       - 总页数
              * @override
              */
             $click: function (event) {
-                ui.Control.prototype.$click.call(this, event);
+                _super.$click(event);
                 var target = event.target;
                 // 对处于disalbed的按钮、空白区域、按钮的margin区域以外的分页按钮进行点击事件处理
                 if (target.tagName === 'SPAN') {
                     // 获取target的内容
-                    var text = dom.getText(target);
+                    var text = target.textContent;
                     switch (text) {
                     case '<<':
                         this._nCurrentPage = 1;
@@ -143,7 +142,7 @@ _nTotalPage       - 总页数
                         break;
                     }
 
-                    if (this.go(this._nCurrentPage) !== false) {
+                    if (this.go(this._nCurrentPage, this._uPageSize.getFormValue()) !== false) {
                         this.setPagination();
                     }
                 }
@@ -153,7 +152,7 @@ _nTotalPage       - 总页数
              * @override
              */
             $ready: function (options) {
-                ui.Control.prototype.$ready.call(this, options);
+                _super.$ready(options);
                 // 填充数字按钮区域
                 this.setPagination();
 

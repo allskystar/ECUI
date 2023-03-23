@@ -1,5 +1,5 @@
 //{if $css}//
-__ControlStyle__('\
+ecui.__ControlStyle__('\
 .ui-dialog {\
     position: absolute !important;\
 \
@@ -25,12 +25,11 @@ __ControlStyle__('\
 _uTitle     - 标题栏
 _uClose     - 关闭按钮
 */
-(function () {
 //{if 0}//
+(function () {
     var core = ecui,
         dom = core.dom,
-        ui = core.ui,
-        util = core.util;
+        ui = core.ui;
 //{/if}//
     /**
      * 窗体控件。
@@ -42,7 +41,7 @@ _uClose     - 关闭按钮
         'ui-dialog',
         function (el, options) {
             var bodyEl = dom.create({className: this.getUnitClass(ui.Dialog, 'body')}),
-                titleEl = dom.first(el),
+                titleEl = el.firstElementChild,
                 closeEl;
 
             if (titleEl && titleEl.tagName === 'STRONG') {
@@ -61,7 +60,7 @@ _uClose     - 关闭按钮
             el.appendChild(titleEl);
             el.appendChild(bodyEl);
 
-            ui.Layer.call(this, el, options);
+            _super(el, options);
 
             this._uClose = core.$fastCreate(this.Cancel, closeEl, this);
             this._uTitle = core.$fastCreate(this.Title, titleEl, this, {userSelect: false});
@@ -81,7 +80,7 @@ _uClose     - 关闭按钮
                      * @override
                      */
                     $click: function (event) {
-                        ui.Button.prototype.$click.call(this, event);
+                        _super.$click(event);
                         for (var parent = this.getParent(); parent; parent = parent.getParent()) {
                             if (parent instanceof ui.Dialog) {
                                 core.dispatchEvent(parent, 'cancel', event);
@@ -106,7 +105,7 @@ _uClose     - 关闭按钮
                      * @override
                      */
                     $click: function (event) {
-                        ui.Button.prototype.$click.call(this, event);
+                        _super.$click(event);
                         for (var parent = this.getParent(); parent; parent = parent.getParent()) {
                             if (parent instanceof ui.Dialog) {
                                 core.dispatchEvent(parent, 'submit', event);
@@ -129,7 +128,7 @@ _uClose     - 关闭按钮
                      * @override
                      */
                     $activate: function (event) {
-                        ui.Control.prototype.$activate.call(this, event);
+                        _super.$activate(event);
                         core.drag(this.getParent(), event);
                     }
                 }
@@ -139,10 +138,10 @@ _uClose     - 关闭按钮
              * @override
              */
             $cache: function (style) {
-                ui.Layer.prototype.$cache.call(this, style);
-                style = dom.getStyle(this.getBody());
-                this.$$bodyBorder = [util.toNumber(style.borderTopWidth), util.toNumber(style.borderRightWidth), util.toNumber(style.borderBottomWidth), util.toNumber(style.borderLeftWidth)];
-                this.$$bodyPadding = [util.toNumber(style.paddingTop), util.toNumber(style.paddingRight), util.toNumber(style.paddingBottom), util.toNumber(style.paddingLeft)];
+                _super.$cache(style);
+                style = window.getComputedStyle(this.getBody());
+                this.$$bodyBorder = [dom.toPixel(style.borderTopWidth), dom.toPixel(style.borderRightWidth), dom.toPixel(style.borderBottomWidth), dom.toPixel(style.borderLeftWidth)];
+                this.$$bodyPadding = [dom.toPixel(style.paddingTop), dom.toPixel(style.paddingRight), dom.toPixel(style.paddingBottom), dom.toPixel(style.paddingLeft)];
                 this.$$titleHeight = this._uTitle.getMain().offsetHeight;
             },
 
@@ -150,14 +149,14 @@ _uClose     - 关闭按钮
              * @override
              */
             getMinimumHeight: function () {
-                return ui.Layer.prototype.getMinimumHeight.call(this) + this.$$bodyBorder[0] + this.$$bodyBorder[2] + this.$$bodyPadding[0] + this.$$bodyPadding[2] + this.$$titleHeight;
+                return _super.getMinimumHeight() + this.$$bodyBorder[0] + this.$$bodyBorder[2] + this.$$bodyPadding[0] + this.$$bodyPadding[2] + this.$$titleHeight;
             },
 
             /**
              * @override
              */
             getMinimumWidth: function () {
-                return ui.Layer.prototype.getMinimumWidth.call(this) + this.$$bodyBorder[1] + this.$$bodyBorder[3] + this.$$bodyPadding[1] + this.$$bodyPadding[3];
+                return _super.getMinimumWidth() + this.$$bodyBorder[1] + this.$$bodyBorder[3] + this.$$bodyPadding[1] + this.$$bodyPadding[3];
             },
 
             /**
@@ -171,4 +170,6 @@ _uClose     - 关闭按钮
             }
         }
     );
+//{if 0}//
 })();
+//{/if}//

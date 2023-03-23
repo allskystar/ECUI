@@ -1,5 +1,5 @@
 //{if $css}//
-__ControlStyle__('\
+ecui.__ControlStyle__('\
 .ui-mobile-panel {\
     overflow: hidden !important;\
 }\
@@ -28,17 +28,20 @@ __ControlStyle__('\
     ui.MPanel = core.inherits(
         ui.Control,
         'ui-mobile-panel',
-        [
-            function (el) {
-                dom.addClass(el, 'ui-mobile-panel-location');
-            }
-        ],
         {
             /**
              * @override
              */
+            $create: function (options) {
+                _super.$create(options);
+                dom.addClass(this.getMain(), 'ui-mobile-panel-location');
+            },
+
+            /**
+             * @override
+             */
             $initStructure: function (width, height) {
-                ui.Control.prototype.$initStructure.call(this, width, height);
+                _super.$initStructure(width, height);
                 this.$setSize(width, height);
                 dom.removeClass(this.getMain(), 'ui-mobile-panel-location');
             },
@@ -47,10 +50,10 @@ __ControlStyle__('\
              * @override
              */
             $restoreStructure: function () {
-                ui.Control.prototype.$restoreStructure.call(this);
+                _super.$restoreStructure();
                 dom.addClass(this.getMain(), 'ui-mobile-panel-location');
             }
         },
-        ui.MScroll
+        ui.iMScroll
     );
 })();

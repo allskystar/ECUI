@@ -52,15 +52,15 @@ _fModal      - 用于关闭mask层的函数s
                     // 窗口处于显示状态，需要强制关闭
                     this.$hide();
                 }
-                ui.Control.prototype.$dispose.call(this);
+                _super.$dispose();
             },
 
             /**
              * 窗体控件获得焦点时需要将自己置于所有窗体控件的顶部。
              * @override
              */
-            $focus: function () {
-                ui.Control.prototype.$focus.call(this);
+            $focus: function (event) {
+                _super.$focus(event);
                 refresh(this);
             },
 
@@ -82,7 +82,7 @@ _fModal      - 用于关闭mask层的函数s
                 }
 
                 this._bCenter = false;
-                ui.Control.prototype.$hide.call(this);
+                _super.$hide();
             },
 
             /**
@@ -90,7 +90,7 @@ _fModal      - 用于关闭mask层的函数s
              * @override
              */
             $initStructure: function () {
-                ui.Control.prototype.$initStructure.call(this);
+                _super.$initStructure();
                 if (this._bCenter) {
                     this.center();
                 }
@@ -100,9 +100,9 @@ _fModal      - 用于关闭mask层的函数s
              * @override
              */
             $ready: function () {
-                ui.Control.prototype.$ready.call(this);
+                _super.$ready();
                 if (this.isCached()) {
-                    layers.push(this);
+                    refresh(this);
                 }
             },
 
@@ -112,7 +112,7 @@ _fModal      - 用于关闭mask层的函数s
              */
             $show: function () {
                 layers.push(this);
-                ui.Control.prototype.$show.call(this);
+                _super.$show();
                 core.setFocused(this);
             },
 
@@ -121,7 +121,7 @@ _fModal      - 用于关闭mask层的函数s
              * @override
              */
             center: function (top) {
-                ui.Control.prototype.center.call(this, top);
+                _super.center(top);
                 this._bCenter = true;
             },
 
@@ -130,7 +130,7 @@ _fModal      - 用于关闭mask层的函数s
              * @override
              */
             setPosition: function (x, y) {
-                ui.Control.prototype.setPosition.call(this, x, y);
+                _super.setPosition(x, y);
                 this._bCenter = false;
             },
 
@@ -138,7 +138,7 @@ _fModal      - 用于关闭mask层的函数s
              * @override
              */
             show: function () {
-                var result = ui.Control.prototype.show.call(this);
+                var result = _super.show();
                 refresh(this);
                 return result;
             },

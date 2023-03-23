@@ -1,5 +1,5 @@
 //{if $css}//
-__ControlStyle__('\
+ecui.__ControlStyle__('\
 .ui-progress {\
     position: relative;\
     overflow: hidden !important;\
@@ -18,8 +18,7 @@ _nMax    - 进度最大值
 //{if 0}//
 (function () {
     var core = ecui,
-        ui = core.ui,
-        util = core.util;
+        ui = core.ui;
 //{/if}//
     /**
      * 进度控件。
@@ -30,9 +29,8 @@ _nMax    - 进度最大值
      */
     ui.Progress = core.inherits(
         ui.Control,
-        'ui-progress',
         function (el, options) {
-            ui.Control.call(this, el, options);
+            _super(el, options);
             this._nMax = options.max || 100;
             this._nValue = options.value || 0;
         },
@@ -41,8 +39,8 @@ _nMax    - 进度最大值
              * @override
              */
             $ready: function () {
-                ui.Control.prototype.$ready.call(this);
-                core.dispatchEvent(this, 'progress');
+                _super.$ready();
+                this.setValue(this._nValue);
             },
 
             /**
@@ -88,10 +86,8 @@ _nMax    - 进度最大值
              */
             setValue: function (value) {
                 value = Math.max(Math.min(this._nMax, value), 0);
-                if (this._nValue !== value) {
-                    this._nValue = value;
-                    core.dispatchEvent(this, 'progress');
-                }
+                this._nValue = value;
+                core.dispatchEvent(this, 'progress');
             }
         }
     );

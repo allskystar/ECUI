@@ -1,5 +1,5 @@
 //{if $css}//
-__ControlStyle__('\
+ecui.__ControlStyle__('\
 .ui-messagebox-origin {\
     visibility: hidden !important;\
     .width100rate();\
@@ -89,7 +89,7 @@ __ControlStyle__('\
 
         delete instance.onkeyup;
 
-        if (!dom.parent(outer)) {
+        if (!outer.parentElement) {
             // 单例控件被释放时只是从节点上移除
             document.body.appendChild(outer);
         }
@@ -228,7 +228,7 @@ __ControlStyle__('\
             elContent = instance.getBody(),
             outer = instance.getMain();
 
-        if (!dom.parent(outer)) {
+        if (!outer.parentElement) {
             // 单例控件被释放时只是从节点上移除
             document.body.appendChild(outer);
         }

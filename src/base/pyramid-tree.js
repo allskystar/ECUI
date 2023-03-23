@@ -1,94 +1,3 @@
-//{if $css}//
-__ControlStyle__('\
-.ui-pyramid-tree {\
-    position: relative;\
-    text-align: left;\
-    font-size: 0;\
-    white-space: nowrap;\
-\
-    ul,\
-    li {\
-        position: relative;\
-        display: inline-block;\
-        vertical-align: top;\
-        white-space: nowrap;\
-    }\
-    ul {\
-        padding: 30px 0px;\
-    }\
-    ul:before {\
-        content: " ";\
-        position: absolute;\
-        top: 0;\
-        left: 0;\
-        height: 1px;\
-        width: 100%;\
-    }\
-    li:first-child:last-child:after,\
-    li:before {\
-        content: " ";\
-        position: absolute;\
-        top: -30px;\
-        left: 0;\
-        width: 100%;\
-        height: 1px;\
-        z-index: 1;\
-    }\
-    li:first-child:before {\
-        width: 50%;\
-        z-index: 2;\
-    }\
-    li:last-child:before {\
-        width: calc(~"50% - 1px");\
-        right: 0;\
-        left: unset;\
-        z-index: 2;\
-    }\
-    li:first-child:last-child:after {\
-        width: calc(~"50% - 1px");\
-        right: 0;\
-        z-index: 2;\
-    }\
-}\
-.ui-pyramid-tree-reverse {\
-\
-    ul,\
-    li {\
-        vertical-align: bottom;\
-    }\
-    li:before {\
-        bottom: -30px;\
-        top: unset;\
-    }\
-\
-    li:first-child:last-child:after {\
-        bottom: -30px;\
-        top: unset;\
-    }\
-    .ui-pyramid-tree-floor-0 {\
-        .tree-item:before {\
-            display: block;\
-        }\
-        .tree-item:after {\
-            display: none;\
-        }\
-    }\
-    .tree-item:before {\
-        top: -31px;\
-    }\
-    .tree-item:after {\
-        bottom: -31px;\
-    }\
-\
-    ul:before {\
-        top: unset;\
-        bottom: 0;\
-    }\
-}\
-');
-//{/if}//
-
-
 /*
 @example
 <div ui="type:pyramid-tree">
@@ -129,15 +38,15 @@ _aFloors  - 层元素的数组
                 lastNode = null;
 
             nodes[floor] = [];
-            
+
             dom.children(root.getParent()._aFloors[floor]).forEach(function (ul) {
-                if (!dom.hasClass(ul, 'ui-hide')) {
+                if (!ul.classList.contains('ui-hide')) {
                     for (var i = 0, list = dom.children(ul), li; li = list[i]; i++) {
                         nodes[floor].push(li.getControl());
                     }
                 }
             });
-            
+
             nodes[floor].forEach(function (currNode) {
                 if (lastNode) {
                     // 如果子节点重叠，需要向右移动
@@ -201,9 +110,9 @@ _aFloors  - 层元素的数组
             // eslint-disable-next-line no-loop-func
             nodes[floor].forEach(function (currNode) {
                 var el = currNode.getMain(),
-                    parent = dom.parent(el);
+                    parent = el.parentElement;
                 // 计算整个树的位置，将整个树移动到可见区域
-                if (dom.first(parent) === el) {
+                if (parent.firstElementChild === el) {
                     el = parent;
                 }
                 el.style.marginLeft = currNode._nPos - (lastNode ? lastNode._nPos + lastNode.getWidth() : minPos) + 'px';
@@ -229,13 +138,15 @@ _aFloors  - 层元素的数组
         ui.Control,
         'ui-pyramid-tree',
         function (el, options) {
-            ui.Control.call(this, el, options);
+            _super(el, options);
             this._bReverse = !!options.reverse;
             if (options.reverse) {
                 dom.addClass(el, 'ui-pyramid-tree-reverse');
             }
-            el = dom.first(el);
-            this._uTree = core.$fastCreate(this.TreeView, el, this, Object.assign({}, core.getOptions(el)));
+            el = el.firstElementChild;
+            el.insertAdjacentHTML('afterEnd', '<div class="ui-pyramid-tree-floor ui-pyramid-tree-floor-0"><ul></ul></div>');
+            this._aFloors = [el.nextSibling];
+            this._uTree = core.$fastCreate(this.TreeView, el, this, Object.assign({}, core.getOptions(el), { root: this, floor: 0 }));
         },
         {
             /**
@@ -247,18 +158,13 @@ _aFloors  - 层元素的数组
                 function (el, options) {
                     if (options.root) {
                         options.floor++;
-                    } else {
-                        options.root = core.findControl(dom.parent(el));
-                        dom.insertHTML(el, 'afterEnd', '<div class="ui-pyramid-tree-floor ui-pyramid-tree-floor-0"><ul></ul></div>');
-                        options.root._aFloors = [el.nextSibling];
-                        options.floor = 1;
                     }
 
                     if (el.tagName === 'UL') {
                         initFloor(options.root, options.floor);
                     }
 
-                    ui.TreeView.call(this, el, options);
+                    _super(el, options);
 
                     if (options.floor === 1) {
                         options.root._aFloors[0].lastChild.appendChild(this.getMain());
@@ -273,7 +179,7 @@ _aFloors  - 层元素的数组
                      * @override
                      */
                     $collapse: function () {
-                        ui.TreeView.prototype.$collapse.call(this);
+                        _super.$collapse();
                         refresh(this);
                         this.getChildren().forEach(function (item) {
                             item.collapse();
@@ -284,7 +190,7 @@ _aFloors  - 层元素的数组
                      * @override
                      */
                     $dispose: function () {
-                        ui.TreeView.prototype.$dispose.call(this);
+                        _super.$dispose();
                         this._aFloors = null;
                     },
 
@@ -292,7 +198,7 @@ _aFloors  - 层元素的数组
                      * @override
                      */
                     $expand: function () {
-                        ui.TreeView.prototype.$expand.call(this);
+                        _super.$expand();
                         refresh(this);
                     },
 
@@ -301,7 +207,7 @@ _aFloors  - 层元素的数组
                      */
                     $hide: function () {
                         this.forEach(function (item) {
-                            ui.TreeView.prototype.$hide.call(item);
+                            item.$hide();
                         });
                     },
 
@@ -328,11 +234,11 @@ _aFloors  - 层元素的数组
                                 root.forEach(function (node, floor) {
                                     if (list === undefined) {
                                         // 找到当前层的第一个节点
-                                        if (this.contain(node)) {
+                                        if (this.contains(node)) {
                                             list = [floor, node];
                                         }
                                     } else if (list[0] === floor) {
-                                        if (this.contain(node)) {
+                                        if (this.contains(node)) {
                                             // 找到当前层的所有节点
                                             list.push(node);
                                         } else if ((node = node.getContainer())) {
@@ -361,7 +267,7 @@ _aFloors  - 层元素的数组
              * @override
              */
             $ready: function () {
-                ui.Control.prototype.$ready.call(this);
+                _super.$ready();
                 refresh(this._uTree);
             }
         }

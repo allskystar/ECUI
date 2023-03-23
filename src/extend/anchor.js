@@ -76,7 +76,7 @@ anchor - 锚点插件，使用ext-anchor的方式引用，指定的锚点名称�
             for (var key in anchors) {
                 if (anchors.hasOwnProperty(key)) {
                     for (var i = 0, item; (item = anchors[key][i++]);) {
-                        if (!owner || owner.contain(item)) {
+                        if (!owner || owner.contains(item)) {
                             ret.push(key);
                             break;
                         }

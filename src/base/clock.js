@@ -5,8 +5,8 @@
 @fields
 _sFormat        - 显示格式
 */
-(function () {
 //{if 0}//
+(function () {
     var core = ecui,
         ui = core.ui,
         util = core.util;
@@ -14,14 +14,15 @@ _sFormat        - 显示格式
     /**
      * 时钟控件。
      * options 属性：
-     * format      显示格式，{0}表示时，{1}表示分，{2}表示秒，{3}表示毫秒
+     * format      显示格式，{0}表示时，{1}表示分，{2}表示秒
      * @control
      */
     ui.Clock = core.inherits(
         ui.Control,
+        'ui-clock',
         function (el, options) {
+            _super(el, options);
             this._sFormat = options.format || this.FORMAT;
-            ui.Control.call(this, el, options);
         },
         {
             FORMAT: 'HH:mm:ss',
@@ -31,14 +32,14 @@ _sFormat        - 显示格式
              */
             $dispose: function () {
                 this.stop();
-                ui.Control.prototype.$dispose.call(this);
+                _super.$dispose();
             },
 
             /**
              * @override
              */
-            init: function () {
-                ui.Control.prototype.init.call(this);
+            $ready: function () {
+                _super.$ready();
                 this.start();
             },
 
@@ -65,4 +66,6 @@ _sFormat        - 显示格式
             stop: util.blank
         }
     );
+//{if 0}//
 })();
+//{/if}//

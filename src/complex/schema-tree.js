@@ -2,12 +2,11 @@
 //{if 0}//
     var core = ecui,
         dom = core.dom,
-        ui = core.ui,
-        util = core.util;
+        ui = core.ui;
 //{/if}//
     function refresh(control) {
-        var upLeft = window.parseInt(dom.first(control._uUp._aFloors[0]).style.marginLeft),
-            downLeft = window.parseInt(dom.first(control._uDown._aFloors[0]).style.marginLeft);
+        var upLeft = window.parseInt(control._uUp._aFloors[0].firstElementChild.style.marginLeft),
+            downLeft = window.parseInt(control._uDown._aFloors[0].firstElementChild.style.marginLeft);
         if (upLeft < downLeft) {
             control._uUp.getMain().style.left = downLeft - upLeft + 'px';
             control._uDown.getMain().style.left = '';
@@ -21,19 +20,19 @@
         ui.Control,
         'ui-schema-tree',
         function (el, options) {
-            ui.Control.call(this, el, options);
+            _super(el, options);
 
-            el = dom.first(el);
+            el = el.firstElementChild;
             dom.addClass(el, ui.PyramidTree.CLASS);
             this._uUp = core.$fastCreate(ui.PyramidTree, el, this, {reverse: true});
 
-            el = dom.next(el);
+            el = el.nextElementSibling;
             dom.addClass(el, ui.PyramidTree.CLASS);
             this._uDown = core.$fastCreate(ui.PyramidTree, el, this);
         },
         {
             $click: function (event) {
-                ui.Control.prototype.$click.call(this, event);
+                _super.$click(event);
                 for (var control = event.getControl(); control; control = control.getParent()) {
                     if (control instanceof ui.TreeView) {
                         refresh(this);
@@ -42,7 +41,7 @@
                 }
             },
             $ready: function (event) {
-                ui.Control.prototype.$ready.call(this, event);
+                _super.$ready(event);
                 this._uUp._uTree.getRoot().expand();
                 this._uUp._uTree.getRoot().setCapturableStatus(false);
                 this._uUp.$ready(event);

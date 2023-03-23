@@ -37,10 +37,10 @@ _eContainer   - 容器 DOM 元素
      * @control
      */
     ui.Steps = core.inherits(
-        ui.$AbstractTab,
+        ui.abstractTab,
         'ui-steps',
         function (el, options) {
-            ui.$AbstractTab.call(this, el, options);
+            _super(el, options);
             if (options.container) {
                 this._eContainer = core.$(options.container);
             }
@@ -54,7 +54,7 @@ _eContainer   - 容器 DOM 元素
              * @unit
              */
             Item: core.inherits(
-                ui.$AbstractTab.prototype.Item,
+                ui.abstractTab.prototype.Item,
                 'ui-steps-item'
             ),
 
@@ -66,8 +66,8 @@ _eContainer   - 容器 DOM 元素
             /**
              * @override
              */
-            init: function () {
-                ui.$AbstractTab.prototype.init.call(this);
+            $ready: function () {
+                _super.$ready();
                 this._nStep = Math.min(this._nStep, this.getLength() - 1);
                 for (var i = 0; i <= this._nStep; i++) {
                     var item = this.getItem(i);
@@ -79,7 +79,8 @@ _eContainer   - 容器 DOM 元素
             },
 
             /**
-             * 下一步
+             * 下一步。
+             * @public
              */
             next: function () {
                 if (this._nStep < this.getLength() - 1) {
@@ -91,7 +92,8 @@ _eContainer   - 容器 DOM 元素
             },
 
             /**
-             * 上一步
+             * 上一步。
+             * @public
              */
             prev: function () {
                 if (this._nStep > 0) {

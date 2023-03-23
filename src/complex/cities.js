@@ -7,7 +7,6 @@ cities - 地区联动下拉框控件。
 <div ui="type:b-cities;mutli:2"></div>
 省市区三级联动：
 <div ui="type:cities"></div>
-
 */
 (function () {
 //{if 0}//
@@ -24,30 +23,22 @@ cities - 地区联动下拉框控件。
     ui.Cities = core.inherits(
         ui.Multilevel,
         'ui-cities',
-        function (el, options) {
-            // if (options.value === null || options.value === undefined) {
-            //     options.value = '';
-            // }
-            // var pClass = options.primary ? options.primary + '-province' : 'province',
-            //     cClass = options.primary ? options.primary + '-city' : 'city',
-            //     aClass = options.primary ? options.primary + '-area' : 'area',
-            //     optionSize = options.optionSize || 10;
-            // el.innerHTML = '<select class="' + pClass + '" ui="optionSize:' + optionSize + '"></select><select class="' + cClass + '"   ui="optionSize:' + optionSize + '"></select>' + (options.multi === '3' ? '<select class="' + aClass + '" ui="optionSize:' + optionSize + '"></select>' : '')  + '<input name="' + (options.name || '') + '" class="ui-hide">';
-
-            // this._eInput = ecui.dom.last(el);
-            // this._eInput.value = options.value;
-            ui.Multilevel.call(this, el, options);
-        },
         {
+            /**
+             * @override
+             */
             $ready: function () {
-                ui.Multilevel.prototype.$ready.call(this);
-                this.setData(this.getResource('ecui/cities-data.js'));
+                _super.$ready();
+                this.setData(this.getResource(0));
             }
         },
-        ui.Resource.declare('ecui/cities-data.js'),
+        ui.iResource.declare('static/js/cities-data.js'),
         {
+            /**
+             * @override
+             */
             $loadResource: function (text, url) {
-                var cities = ui.Resource.prototype.$loadResource(text, url),
+                var cities = _class.$loadResource(text, url),
                     data = [{value: '000000', '#text': '全部省', children: [{value: '000000', '#text': '全部市', children: [{value: '000000', '#text': '全部区'}]}]}];
 
                 for (var value in cities) {
@@ -83,11 +74,11 @@ cities - 地区联动下拉框控件。
                     }
                 }
 
-                util.remove(data, undefined);
+                util.removeAll(data, undefined);
                 data.forEach(function (provinceItem) {
-                    util.remove(provinceItem.children, undefined);
+                    util.removeAll(provinceItem.children, undefined);
                     provinceItem.children.forEach(function (cityItem) {
-                        util.remove(cityItem.children, undefined);
+                        util.removeAll(cityItem.children, undefined);
                     });
                 });
                 return data;

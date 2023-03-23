@@ -1,50 +1,3 @@
-/*(function () {
-    var oldDisposeFn = ecui.ui.InputControl.prototype.$dispose,
-        oldReadyFn = ecui.ui.InputControl.prototype.$ready;
-
-    function setData(name, value) {
-        if (localStorage[name] !== value) {
-            localStorage[name] = value;
-        }
-    }
-
-    ecui.ui.InputControl.prototype.$dispose = function () {
-        if (this.getName()) {
-            var name = ecui.esr.getLocation() + '_debug_' + this.getName();
-
-            if (this._eInput) {
-                if (this instanceof ecui.ui.Radio) {
-                    if (this.isChecked()) {
-                        setData(name, this.getValue());
-                    }
-                } else if (this instanceof ecui.ui.Checkbox) {
-                    setData(name, this.isChecked() ? '1' : '');
-                } else {
-                    setData(name, this.getValue());
-                }
-            }
-        }
-        oldDisposeFn.call(this);
-    };
-
-    ecui.ui.InputControl.prototype.$ready = function (options) {
-        var name = ecui.esr.getLocation() + '_debug_' + this.getName();
-
-        if (localStorage[name]) {
-            if (this instanceof ecui.ui.Radio) {
-                if (localStorage[name] === this.getValue()) {
-                    this.setChecked(true);
-                }
-            } else if (this instanceof ecui.ui.Checkbox) {
-                this.setChecked(!!localStorage[name]);
-            } else {
-                this.$setValue(localStorage[name]);
-            }
-        }
-        oldReadyFn.call(this, options);
-    };
-})();*/
-
 (function () {
     /**
      * 动态加载模块，用于测试。
@@ -58,14 +11,19 @@
         loc = location.href + '#',
         waits = {},
         oldLoadScriptFn = function (url, callback, options) {
-            options.onsuccess = function (text) {
-                eval('(function(NS){' + text + '}(ecui.ns._' + moduleName.replace(/[._]/g, '-').replace(/\//g, '_') + '));');
-                callback();
-            };
-            options.onerror = function () {
-                callback();
-            };
-            ecui.io.ajax(url, options);
+            if (nginx_debug) {
+                options.onsuccess = callback;
+                loadScript(url + '?ECUI_MODULE=_' + moduleName.replace(/[._]/g, '-').replace(/\//g, '_'), options);
+            } else {
+                options.onsuccess = function (text) {
+                    eval('(function(NS){' + text + '}(ecui.ns["_' + moduleName.replace(/[._]/g, '-').replace(/\//g, '_') + '"]));');
+                    callback();
+                };
+                options.onerror = function () {
+                    callback();
+                };
+                ecui.io.ajax(url, options);
+            }
         };
 
     loc = loc.slice(0, loc.indexOf('#'));
@@ -244,9 +202,9 @@
                         text = text.replace('<container', '<div ui="type:ecui.esr.AppLayer" style="display:none" id="' + moduleName.replace(/[._]/g, '-').replace(/\//g, '_') + filename.replace(/[._]/g, '-') + '"');
                         text = text.replace('</header>', '</div>');
                         text = text.replace('</container>', '</div>');
-                        var el = ecui.dom.last(ecui.dom.first(ecui.$('ECUI-FIXED-BODY') || document.body));
-                        ecui.dom.insertHTML(el, 'beforeEnd', etpl.compile(text.replace(/ui="type:NS\./g, 'ui="type:ecui.ns._' + moduleName.replace(/[._]/g, '-').replace(/\//g, '_') + '.ui.'))(ecui.esr.getContext()));
-                        ecui.dom.previous(el).appendChild(ecui.dom.last(el).header = ecui.dom.previous(ecui.dom.last(el)));
+                        var el = (ecui.$('ECUI-FIXED-BODY') || document.body).firstElementChild.lastElementChild;
+                        el.insertAdjacentHTML('beforeEnd', etpl.compile(text.replace(/ui="type:NS\./g, 'ui="type:ecui.ns._' + moduleName.replace(/[._]/g, '-').replace(/\//g, '_') + '.ui.'))(ecui.esr.getContext()));
+                        el.previousElementSibling.appendChild(el.lastElementChild.header = el.lastElementChild.previousElementSibling);
                         ecui.init(el.parentNode);
 
                         ecui.io.ajax(url + '.css', {
@@ -309,6 +267,17 @@
         moduleLoads.push(['route', filename]);
     };
 
+    var nginx_debug;
+    ecui.pause();
+    ecui.io.ajax('/debug_before', {
+        onsuccess: function () {
+            nginx_debug = true;
+            ecui.resume();
+        },
+        onerror: function () {
+            ecui.resume();
+        }
+    });
     // var lastUpdate;
     // ecui.util.timer(function () {
     //     ecui.io.ajax('update.html', {

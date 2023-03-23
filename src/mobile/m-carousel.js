@@ -1,5 +1,5 @@
 //{if $css}//
-__ControlStyle__('\
+ecui.__ControlStyle__('\
 .ui-mobile-carousel {\
     white-space: nowrap !important;\
 \
@@ -40,8 +40,8 @@ _nDelay   - 延迟时间，如果不自动轮播这个值为0
         this.stop = effect.grade(
             'this.setPosition(#round:' + x + '->' + (x - this.getClientWidth()) + '#,0)',
             1000,
+            this,
             {
-                $: this,
                 onfinish: function () {
                     this.start();
                     refresh(this);
@@ -95,8 +95,7 @@ _nDelay   - 延迟时间，如果不自动轮播这个值为0
     }
 
     /**
-     * 按钮控件。
-     * 缺省设置不可选中内容。
+     * 按钮控件。缺省设置不可选中内容。
      * options 属性：
      * delay   轮播延时，单位s
      * @control
@@ -105,7 +104,7 @@ _nDelay   - 延迟时间，如果不自动轮播这个值为0
         ui.MPanel,
         'ui-mobile-carousel',
         function (el, options) {
-            ui.MPanel.call(this, el, options);
+            _super(el, options);
 
             el = this.getBody();
 
@@ -130,7 +129,7 @@ _nDelay   - 延迟时间，如果不自动轮播这个值为0
              */
             $activate: function (event) {
                 if (dom.children(this.getBody()).length > 3) {
-                    ui.MPanel.prototype.$activate.call(this, event);
+                    _super.$activate(event);
                     if (this._nDelay) {
                         this.stop();
                     }
@@ -141,7 +140,7 @@ _nDelay   - 延迟时间，如果不自动轮播这个值为0
              * @override
              */
             $cache: function (style) {
-                ui.MPanel.prototype.$cache.call(this, style);
+                _super.$cache(style);
                 this.setRange({
                     stepX: this.getClientWidth()
                 });
@@ -152,15 +151,15 @@ _nDelay   - 延迟时间，如果不自动轮播这个值为0
              */
             $dispose: function () {
                 this.stop();
+                _super.$dispose();
                 this._eCurrImage = null;
-                ui.MPanel.prototype.$dispose.call(this);
             },
 
             /**
              * @override
              */
             $dragend: function (event) {
-                ui.MPanel.prototype.$dragend.call(this, event);
+                _super.$dragend(event);
                 var el = this.getBody();
                 if (el.firstChild !== el.lastChild) {
                     this.start();
@@ -172,7 +171,7 @@ _nDelay   - 延迟时间，如果不自动轮播这个值为0
              * @override
              */
             $initStructure: function (width, height) {
-                ui.MPanel.prototype.$initStructure.call(this, width, height);
+                _super.$initStructure(width, height);
 
                 var el = this.getBody();
                 if (el.firstChild !== el.lastChild) {
@@ -188,8 +187,8 @@ _nDelay   - 延迟时间，如果不自动轮播这个值为0
             /**
              * @override
              */
-            $ready: function (event) {
-                ui.MPanel.prototype.$ready.call(this, event);
+            $ready: function () {
+                _super.$ready();
                 var el = this.getBody();
                 if (el.firstChild !== el.lastChild) {
                     this.start();
@@ -200,7 +199,7 @@ _nDelay   - 延迟时间，如果不自动轮播这个值为0
              * @override
              */
             $restoreStructure: function () {
-                ui.MPanel.prototype.$restoreStructure.call(this);
+                _super.$restoreStructure();
 
                 var el = this.getBody();
                 if (el.firstChild !== el.lastChild) {

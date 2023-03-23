@@ -1,14 +1,12 @@
 /*
 @example
-<div ui="type:options;name:test">
+<div ui="type:options">
     <div>选项一</div>
     <div>选项二</div>
     <div>选项三</div>
 </div>
 
 @fields
-_nValue  - 进度值
-_nMax    - 进度最大值
 */
 //{if 0}//
 (function () {
@@ -35,7 +33,7 @@ _nMax    - 进度最大值
                      * @override
                      */
                     $click: function (event) {
-                        ui.Item.prototype.$click.call(this, event);
+                        _super.$click(event);
                         var parent = this.getParent();
                         if (parent.getSelected() !== this) {
                             parent.setSelected(this);
@@ -46,7 +44,7 @@ _nMax    - 进度最大值
             ),
             $alterItems: util.blank
         },
-        ui.Items,
+        ui.iItems,
         ui.Control.defineProperty('selected')
     );
 //{if 0}//

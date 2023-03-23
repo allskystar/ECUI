@@ -1,5 +1,5 @@
 //{if $css}//
-__ControlStyle__('\
+ecui.__ControlStyle__('\
 .ui-m-tab {\
 \
     .ui-m-tab-title {\
@@ -78,7 +78,7 @@ _eBar            - 下划线 DOM 元素
      * @param {ECUIEvent} event ECUI 事件对象
      */
     function swipe(event) {
-        if (!dom.contain(this.getMain(), event.target)) {
+        if (!this.getMain().contains(event.target)) {
             return;
         }
         if (this._bIsTitle) {
@@ -124,7 +124,7 @@ _eBar            - 下划线 DOM 元素
         ui.Tab,
         'ui-m-tab',
         function (el, options) {
-            ui.Tab.call(this, el, options);
+            _super(el, options);
             if (options.bar) {
                 this._eBar = dom.create({className: this.getUnitClass(ui.MTab, 'bar')});
             }
@@ -141,13 +141,13 @@ _eBar            - 下划线 DOM 元素
              * @override
              */
             $activate: function (event) {
-                ui.Tab.prototype.$activate.call(this, event);
+                _super.$activate(event);
 
                 var clientWidth = this.getClientWidth(),
                     title = this.getBody(),
                     options = {top: 0, bottom: 0, absolute: true};
 
-                if (dom.contain(title, event.target)) {
+                if (title.contains(event.target)) {
                     this._bIsTitle = true;
                     options.left = Math.min(0, clientWidth - title.scrollWidth);
                     options.right = 0;
@@ -166,9 +166,9 @@ _eBar            - 下划线 DOM 元素
              * @override
              */
             $dispose: function () {
-                this._eBar = null;
                 core.removeGestureListeners(this);
-                ui.Tab.prototype.$dispose.call(this);
+                _super.$dispose();
+                this._eBar = null;
             },
 
             /**
@@ -183,7 +183,7 @@ _eBar            - 下划线 DOM 元素
                     }
                 }
                 delete this._bIsTitle;
-                ui.Tab.prototype.$dragend.call(this, event);
+                _super.$dragend(event);
             },
 
             /**
@@ -193,7 +193,7 @@ _eBar            - 下划线 DOM 元素
              * @return {number} container延x轴方向移动的距离
              */
             $getXByContainer: function () {
-                return util.toNumber(dom.getStyle(this.getContainer(), 'transform').split(',')[4]);
+                return dom.toPixel(dom.getStyle(this.getContainer(), 'transform').split(',')[4]);
             },
 
             /**
@@ -203,14 +203,14 @@ _eBar            - 下划线 DOM 元素
              * @return {number} title延x轴方向移动的距离
              */
             $getXByTitle: function () {
-                return util.toNumber(dom.getStyle(this.getBody(), 'transform').split(',')[4]);
+                return dom.toPixel(dom.getStyle(this.getBody(), 'transform').split(',')[4]);
             },
 
             /**
              * @override
              */
             $initStructure: function (width, height) {
-                ui.Tab.prototype.$initStructure.call(this, width, height);
+                _super.$initStructure(width, height);
 
                 var item = this.getSelected();
                 if (item) {
@@ -295,7 +295,7 @@ _eBar            - 下划线 DOM 元素
                 if (item && this._cSelected !== item && this._eBar) {
                     if (this.isReady()) {
                         var main = this.getBody(),
-                            parent = dom.parent(this._eBar),
+                            parent = this._eBar.parentElement,
                             left = this._eBar.offsetLeft,
                             top = this._eBar.offsetTop - this._eBar.clientHeight,
                             width = this._eBar.offsetWidth;
@@ -321,7 +321,7 @@ _eBar            - 下划线 DOM 元素
                     }
                 }
 
-                ui.Tab.prototype.setSelected.call(this, item);
+                _super.setSelected(item);
 
                 if (this.isCached()) {
                     this.move(item ? this.getItems().indexOf(item) : 0);
