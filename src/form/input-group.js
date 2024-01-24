@@ -78,13 +78,15 @@ _sLabel  -  输入项标题
                             core.$callExtend(item, ext.clear);
                         }
                     });
-                    el.insertBefore(
-                        dom.create(
-                            'DIV',
-                            { className: 'ui-input-label', innerHTML: (required ? '<span class="ui-input-required">*</span>' : '') + this._sLabel }
-                        ),
-                        el.firstChild
-                    );
+                    if (!el.querySelector('.ui-input-label')) {
+                        el.insertBefore(
+                            dom.create(
+                                'DIV',
+                                { className: 'ui-input-label', innerHTML: (required ? '<span class="ui-input-required">*</span>' : '') + this._sLabel }
+                            ),
+                            el.firstChild
+                        );
+                    }
                 }
                 this._eTip = el.appendChild(dom.create('DIV', { className: 'ui-input-tip' }));
             }
