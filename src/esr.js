@@ -2368,7 +2368,10 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
     // eslint-disable-next-line no-shadow
     esr.TableListRoute.prototype.onbeforerender = function (context) {
         var name = this._sPageUrl.split('@')[0];
-        var data = util.parseValue(name + '.data', context);
+        var data = util.parseValue(name, context);
+        if (data.data) {
+            data = data.data;
+        }
         context[name + 'Page'] = util.formatString('{0},{1},{2},{3}', data.offset, data.total, data.pageSize, data.totalPage);
         this.setSearchParams();
         context.searchParam = this.searchParam;
