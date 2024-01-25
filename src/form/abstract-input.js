@@ -74,6 +74,27 @@ _eInput        - INPUT对象
             },
 
             /**
+             * 拖拽内容首次进入输入框时的事件处理。
+             * @private
+             *
+             * @param {Event} event 事件对象
+             */
+            dragenter: function (event) {
+                var el = event.target.getControl().getMain();
+                if (!el.classList.contains('ui-drag-over')) {
+                    dom.addClass(el, 'ui-drag-over');
+                }
+            },
+            /**
+             * 拖拽内容移出输入框时的事件处理。
+             * @private
+             *
+             * @param {Event} event 事件对象
+             */
+            dragleave: function (event) {
+                dom.removeClass(event.target.getControl().getMain(), 'ui-drag-over');
+            },
+            /**
              * 拖拽内容到输入框的事件处理。
              * 为了增加可控性，阻止该行为。[todo] firefox下无法阻止，后续升级
              * @private
@@ -81,6 +102,10 @@ _eInput        - INPUT对象
              * @param {Event} event 事件对象
              */
             dragover: function (event) {
+                var el = event.target.getControl().getMain();
+                if (!el.classList.contains('ui-drag-over')) {
+                    dom.addClass(el, 'ui-drag-over');
+                }
                 core.wrapEvent(event).exit();
             },
 
@@ -91,6 +116,7 @@ _eInput        - INPUT对象
              * @param {Event} event 事件对象
              */
             drop: function (event) {
+                dom.removeClass(event.target.getControl().getMain(), 'ui-drag-over');
                 event.clipboardData = event.dataTransfer;
                 events.paste(event);
             },
@@ -150,6 +176,9 @@ _eInput        - INPUT对象
              * @private
              */
             paste: function (event) {
+                if (event.type === 'drop') {
+                    return;
+                }
                 event = core.wrapEvent(event);
                 var control = event.target.getControl();
 
