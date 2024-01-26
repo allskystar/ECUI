@@ -46,6 +46,79 @@ _sUploadName 文件上传字段名称
         }
     }
 
+
+    /**
+     * 移动端滚动接口。修复默认手势识别与 iOS/Android 软键盘的支持。
+     * options 属性：
+     * overflow     拖动时的额外滑动区间
+     * @interface
+     */
+    ui.iDragSort = core.interfaces('DragSort', {
+        constructor: function (el, options) {
+
+        },
+
+        /**
+         * @override
+         */
+        $activate: function (event) {
+            _class.$activate(event);
+            this.cache();
+
+            if (!this.getParent()._bDragSort) {
+                return;
+            }
+            this._nTop = dom.getPosition(this.getParent().getMain()).top - dom.getView().top;
+            this._nLeft = dom.getPosition(this.getParent().getMain()).left - dom.getView().left;
+
+            core.drag(
+                this,
+                event,
+                {
+                    x: 0,
+                    y: 0,
+                    left: 0,
+                    right: this.getParent().getWidth(),
+                    top: 0,
+                    bottom: this.getParent().getHeight()
+                }
+            );
+        },
+        /**
+         * @override
+         */
+        $dragend: function (event) {
+            _class.$dragend(event);
+            var eCloneNode = this._eCloneNode;
+            util.timer(function () {
+                dom.remove(eCloneNode);
+                this.getParent().moveDragItem();
+            }, 0, this);
+        },
+
+        /**
+         * @override
+         */
+        $dragstart: function (event) {
+            _class.$dragstart(event);
+            this._eCloneNode = this.getMain().cloneNode(true);
+            this._eCloneNode.style.position = 'fixed';
+            dom.addClass(this._eCloneNode, 'ui-item-clone');
+            dom.insertAfter(this._eCloneNode, this.getMain());
+            this.getParent()._uDragItem = this;
+        },
+
+        onmouseup: function (event) {
+            this.getParent()._uDragTargetItem = this;
+        },
+
+        setPosition: function (x, y) {
+            if (this._eCloneNode) {
+                this._eCloneNode.style.top = this._nTop + y + 'px';
+                this._eCloneNode.style.left = this._nLeft + x + 'px';
+            }
+        }
+    });
     /**
      * 文件上传控件。
      * 内部必须包含<input type="file">的标签，可以包含或不包含进度控件，如果包含就会自动设置进度控件参数。
@@ -58,6 +131,7 @@ _sUploadName 文件上传字段名称
         'ui-upload',
         function (el, options) {
             _super(el, options);
+            this._bDragSort = options.dragSort;
             el = this.getInput();
             this._sName = el.name;
             el.name = '';
@@ -120,7 +194,8 @@ _sUploadName 文件上传字段名称
                             this._eText.lastChild.innerHTML = (value * 100 / this.getMax()).toFixed(0) + '%';
                         }
                     }
-                }
+                },
+                ui.iDragSort
             ),
 
             /**
@@ -172,7 +247,8 @@ _sUploadName 文件上传字段名称
                             _super.setValue(value);
                         }
                     }
-                }
+                },
+                ui.iDragSort
             ),
 
             /**
@@ -263,6 +339,14 @@ _sUploadName 文件上传字段名称
                         event.item.setValue(result.data.id);
                     }
                 } catch (e) {}
+            },
+
+            moveDragItem: function () {
+                if (this._uDragItem && this._uDragItem !== this._uDragTargetItem) {
+                    dom.insertBefore(this._uDragItem.getMain(), this._uDragTargetItem ? this._uDragTargetItem.getMain() : this.getBody());
+                }
+                this._uDragTargetItem = null;
+                this._uDragItem = null;
             }
         }
     );
