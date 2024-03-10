@@ -68,6 +68,14 @@ _aValue      控件的值对象
                 }).join('|') + ')$');
             }
             dom.addEventListener(el, 'change', changeHandler);
+
+            if (options.files && options.files instanceof Array) {
+                options.files.forEach(function (file) {
+                    var progress = this.$createSelected(file);
+                    progress._eInput.name = this._sName;
+                    progress.setValue(file.id);
+                }, this);
+            }
         },
         {
             MAXSIZE: 5 * 1024 * 1024,
