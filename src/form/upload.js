@@ -135,10 +135,18 @@ _sUploadName 文件上传字段名称
             el = this.getInput();
             this._sName = el.name;
             el.name = '';
-            options = options.action.split(':');
-            this._sUploadName = options[0];
-            this._sAction = options.slice(1).join(':');
+            var action = options.action.split(':');
+            this._sUploadName = action[0];
+            this._sAction = action.slice(1).join(':');
             this._nCount = 0;
+
+            if (options.files && options.files instanceof Array) {
+                options.files.forEach(function (file) {
+                    var progress = this.$createSelected(file);
+                    progress._eInput.name = this._sName;
+                    progress.setValue(file.id);
+                }, this);
+            }
         },
         {
 
