@@ -139,7 +139,6 @@ _sUploadName 文件上传字段名称
             this._sUploadName = action[0];
             this._sAction = action.slice(1).join(':');
             this._nCount = 0;
-
             if (options.files && options.files instanceof Array) {
                 options.files.forEach(function (file) {
                     var progress = this.$createSelected(file);
@@ -215,9 +214,9 @@ _sUploadName 文件上传字段名称
                 'ui-upload-progress',
                 function (el, options) {
                     var filename = util.encodeHTML(options.file.name);
-                    el.innerHTML = util.formatString('<div class="ui-img-fill"><img></div><div class="ui-upload-file-icon {0}"></div><div class="ui-upload-name">{1}</div>', filename.split('.').pop(), filename);
+                    el.innerHTML = util.formatString('<div class="ui-img-fill"><img src="{2}"></div><div class="ui-upload-file-icon {0}"></div><div class="ui-upload-name">{1}</div>', filename.split('.').pop(), filename, options.file.url);
                     this._eInput = dom.create('input', { 'type': 'hidden' });
-                    this._cImgFill = core.$fastCreate(ui.ImgFill, el.firstChild, this);
+                    this._cImgFill = core.$fastCreate(ui.ImgFill, el.firstChild, this, options.file);
                     el.title = options.file.name;
                     _super(el, options);
                 },

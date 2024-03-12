@@ -30,11 +30,12 @@ ecui.__ControlStyle__('\
         function (el, options) {
             _super(el, options);
             this._eImg = el.getElementsByTagName('img')[0];
+            var imgUrl = options.src || options.url;
             if (!this._eImg) {
-                el.insertAdjacentHTML('beforeEnd', '<img src="' + (options.src || '') + '">');
+                el.insertAdjacentHTML('beforeEnd', '<img src="' + (imgUrl || '') + '">');
                 this._eImg = el.getElementsByTagName('img')[0];
             }
-            if (this._eImg.src) {
+            if (imgUrl) {
                 dom.imgLoad(this._eImg, this.$initStructure.bind(this));
             }
         },
