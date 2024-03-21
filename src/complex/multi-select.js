@@ -5,7 +5,16 @@ ecui.__ControlStyle__('\
     position: relative;\
 \
     .ui-multi-select-text {\
+        position: relative !important;\
+        z-index: 2 !important;\
         overflow: hidden !important;\
+        display: flex !important;\
+        flex: auto;\
+        flex-wrap: wrap;\
+        .ui-search-text-input {\
+            position: relative !important;\
+            flex: 1;\
+        }\
     }\
 \
     input {\
@@ -109,21 +118,8 @@ _eInput - 选项对应的input，form提交时使用
                     SearchInput: core.inherits(
                         ui.Text,
                         {
-                            $input: function () {
-                                this.searchItems();
-                            },
-                            searchItems: function () {
-                                var value = this.getValue(),
-                                    parent = this.getParent(),
-                                    uOptions = parent._uOptions;
-
-                                uOptions.getItems().forEach(function (item) {
-                                    if (item.getBody().innerText.indexOf(value) >= 0) {
-                                        item.show();
-                                    } else {
-                                        item.hide();
-                                    }
-                                });
+                            oninput: function () {
+                                this.getParent().searchItems(this.getValue())
                             }
                         }
                     ),
@@ -151,12 +147,28 @@ _eInput - 选项对应的input，form提交时使用
                                 }
                             )
                         }
-                    )
+                    ),
+                    searchItems: function (text) {
+                        this._uOptions.getItems().forEach(function (item) {
+                            if (item.getBody().innerText.indexOf(text) >= 0) {
+                                item.show();
+                            } else {
+                                item.hide();
+                            }
+                        });
+                    }
                 }
             ),
 
             Options: ecui.inherits(
                 ui.Control,
+                function (el, options) {
+                    _super(el, options);
+                    this._eText = dom.create('DIV', { 'className': 'ui-search-text-input' });
+                    el.appendChild(this._eText);
+                    this._uSearchInput = core.$fastCreate(this.SearchInput, el.firstElementChild, this);
+                    this._uSearchInput.getInput().placeholder = '搜索内容';
+                },
                 {
                     /**
                      * 选项部件。
@@ -195,6 +207,14 @@ _eInput - 选项对应的input，form提交时使用
                             )
                         }
                     ),
+                    SearchInput: core.inherits(
+                        ui.Text,
+                        {
+                            oninput: function () {
+                                this.getParent().getParent().getPopup().searchItems(this.getValue())
+                            }
+                        }
+                    ),
                     $alterItems: util.blank
                 },
                 ui.iItems
@@ -204,7 +224,15 @@ _eInput - 选项对应的input，form提交时使用
              * @event
              */
             $change: function (event) {
+                this.changeHandler();
+            },
+            /**
+             * 选项改变事件。
+             * @event
+             */
+            changeHandler: function (event) {
                 var value = [], data = [], items = this._uText.getItems();
+                var popup = this.getPopup();
                 this.getSelected().forEach(function (item) {
                     value.push(item.getValue());
 
@@ -218,7 +246,7 @@ _eInput - 选项对应的input，form提交时使用
                         this._uText.add({
                             code: event.item.getBody().innerText.trim(),
                             value: event.item.getValue()
-                        });
+                        }, this._uText.getItems().length - 2);
                     } else {
                         var _item = items.filter(function (item) { return item._sValue === event.item.getValue(); });
                         _item.forEach(function (item) {
@@ -232,6 +260,9 @@ _eInput - 选项对应的input，form提交时使用
                 this.$setValue(value.join(','));
                 this.$setPlaceholder();
                 this.$correct();
+                this._uText.getBody().appendChild(this._uText._uSearchInput.getMain());
+                this.repaint();
+                core.dispatchEvent(this.getPopup(), 'resize');
             },
 
             /**
@@ -245,17 +276,17 @@ _eInput - 选项对应的input，form提交时使用
             /**
              * @override
              */
-            $ready: function (event) {
-                _super.$ready(event);
-                var values = this.getValue();
-                this.getOptions().getItems().forEach(function (item) {
-                    if (values.indexOf(item.getValue()) > -1) {
-                        item.setSelected(true);
-                    }
-                });
+            init: function () {
+                _super.init();
                 util.timer(function () {
-                    this.$change();
-                }, 0, this);
+                    var values = this.getValue();
+                    this.getOptions().getItems().forEach(function (item) {
+                        if (values.indexOf(item.getValue()) > -1) {
+                            item.setSelected(true);
+                        }
+                    });
+                    this.changeHandler();
+                }, 10, this);
             },
 
             /**

@@ -105,11 +105,11 @@ _sUploadName 文件上传字段名称
             this._eCloneNode.style.position = 'fixed';
             dom.addClass(this._eCloneNode, 'ui-item-clone');
             dom.insertAfter(this._eCloneNode, this.getMain());
-            this.getParent()._uDragItem = this;
+            this.getParent()._uDragItem = this.getMain();
         },
 
         onmouseup: function (event) {
-            this.getParent()._uDragTargetItem = this;
+            this.getParent()._uDragTargetItem = this.getMain();
         },
 
         setPosition: function (x, y) {
@@ -350,7 +350,7 @@ _sUploadName 文件上传字段名称
 
             moveDragItem: function () {
                 if (this._uDragItem && this._uDragItem !== this._uDragTargetItem) {
-                    dom.insertBefore(this._uDragItem.getMain(), this._uDragTargetItem ? this._uDragTargetItem.getMain() : this.getBody());
+                    dom.insertBefore(this._uDragItem, this._uDragTargetItem ? this._uDragTargetItem : this.getBody());
                 }
                 this._uDragTargetItem = null;
                 this._uDragItem = null;
