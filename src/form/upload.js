@@ -75,12 +75,12 @@ _sUploadName 文件上传字段名称
                 this,
                 event,
                 {
-                    x: 0,
-                    y: 0,
+                    x: this.getMain().offsetLeft,
+                    y: this.getMain().offsetTop,
                     left: 0,
-                    right: this.getParent().getWidth(),
+                    right: this.getParent().getMain().scrollWidth,
                     top: 0,
-                    bottom: this.getParent().getHeight()
+                    bottom: this.getParent().getMain().scrollHeight
                 }
             );
         },
