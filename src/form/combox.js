@@ -203,7 +203,7 @@ _sRequest   - 当前正在请求的值
                 } else {
                     this.popup();
                     options.getItems().forEach(function (item) {
-                        if (item.getContent() === text) {
+                        if (item.getContent() === text && !item.isDisabled()) {
                             selected = item;
                         }
                     });
