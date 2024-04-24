@@ -22,7 +22,7 @@ ecui.__ControlStyle__('\
         top: 0;\
         left: 0;\
         z-index: 1;\
-        display: none;\
+        display: none !important;\
     }\
     &.ui-input-placeholder {\
         input {\
