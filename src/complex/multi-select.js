@@ -194,14 +194,17 @@ _eInput - 选项对应的input，form提交时使用
                                 {
                                     onclick: function (event) {
                                         var item = this.getParent(),
-                                            mulitSelect = item.getParent().getParent();
+                                            mulitSelect = item.getParent().getParent(),
+                                            value = item._sValue;
                                         mulitSelect.getOptions().getItems().forEach(function (_item) {
-                                            if (_item.getValue() === item._sValue) {
+                                            if (_item.getValue() === value) {
                                                 _item.setSelected(false);
                                             }
                                         });
                                         item.getParent().remove(item);
+                                        event.value = value;
                                         core.dispatchEvent(mulitSelect, 'change', event);
+                                        event.stopPropagation();
                                     }
                                 }
                             )
@@ -224,38 +227,53 @@ _eInput - 选项对应的input，form提交时使用
              * @event
              */
             $change: function (event) {
-                this.changeHandler();
+                if (event.item) {
+                    if (event.item.isSelected()) {
+
+                    } else {
+
+                    }
+                } else {
+                    // 删除按钮
+                }
+                this.changeHandler(event);
             },
             /**
              * 选项改变事件。
              * @event
              */
-            changeHandler: function (event) {
-                var value = [], data = [], items = this._uText.getItems();
+            changeHandler: function (event, isInit) {
+                var value = this.getValue(), data = [], items = this._uText.getItems(), dataMap = {};
                 var popup = this.getPopup();
-                this.getSelected().forEach(function (item) {
-                    value.push(item.getValue());
-
-                    data.push({
+                this.getOptions().getItems().forEach(function (item) {
+                    dataMap[item.getValue()] = {
                         code: item.getBody().innerText.trim(),
                         value: item.getValue()
-                    });
+                    };
                 });
-                if (event && event.item) {
-                    if (event.item.isSelected()) {
-                        this._uText.add({
-                            code: event.item.getBody().innerText.trim(),
-                            value: event.item.getValue()
-                        }, this._uText.getItems().length - 2);
-                    } else {
-                        var _item = items.filter(function (item) { return item._sValue === event.item.getValue(); });
+                if (event) {
+                    var deleteValue = '';
+                    if (event.item) {
+                        if (event.item.isSelected()) {
+                            value.push(event.item.getValue());
+                            this._uText.add({
+                                code: event.item.getBody().innerText.trim(),
+                                value: event.item.getValue()
+                            }, this._uText.getItems().length);
+                        } else {
+                            deleteValue = event.item.getValue();
+                        }
+                    } else if (event.value) {
+                        deleteValue = event.value;
+                    }
+
+                    if (deleteValue) {
+                        value.splice(value.indexOf(deleteValue), 1);
+                        var _item = items.filter(function (item) { return item._sValue === deleteValue; });
                         _item.forEach(function (item) {
                             this._uText.remove(item);
                         }, this);
                     }
-                } else {
-                    this._uText.removeAll();
-                    this._uText.add(data);
                 }
                 this.$setValue(value.join(','));
                 this.$setPlaceholder();
@@ -280,12 +298,26 @@ _eInput - 选项对应的input，form提交时使用
                 _super.init();
                 util.timer(function () {
                     var values = this.getValue();
+                    var valueMap = {};
                     this.getOptions().getItems().forEach(function (item) {
-                        if (values.indexOf(item.getValue()) > -1) {
+                        valueMap[item.getValue()] = {
+                            code: item.getBody().innerText.trim(),
+                            value: item.getValue()
+                        };
+                        if (values.includes(item.getValue())) {
                             item.setSelected(true);
                         }
                     });
-                    this.changeHandler();
+                    values = values.map(function (item) {
+                        return valueMap[item];
+                    });
+                    // this.changeHandler(null, true);
+
+                    // this._uText.removeAll();
+                    this._uText.add(values);
+                    this._uText.getBody().appendChild(this._uText._uSearchInput.getMain());
+                    this.repaint();
+                    core.dispatchEvent(this.getPopup(), 'resize');
                 }, 10, this);
             },
 
