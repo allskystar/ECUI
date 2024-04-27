@@ -310,7 +310,7 @@ _eInput - 选项对应的input，form提交时使用
                     });
                     values = values.map(function (item) {
                         return valueMap[item];
-                    });
+                    }).filter(function (_item) { return !!_item });
                     // this.changeHandler(null, true);
 
                     // this._uText.removeAll();
