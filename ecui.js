@@ -102,10 +102,10 @@
     document.write('<script type="text/javascript" src="src/extend/link.js"></script>');
     document.write('<script type="text/javascript" src="src/extend/ceiling.js"></script>');
     document.write('<script type="text/javascript" src="src/extend/data.js"></script>');
+    document.write('<script type="text/javascript" src="src/extend/fullscreen.js"></script>');
     document.write('<script type="text/javascript" src="src/extend/ios-fixed.js"></script>');
 
     document.write('<script type="text/javascript" src="src/messagebox.js"></script>');
-    document.write('<script type="text/javascript" src="src/fullscreen.js"></script>');
 //{if 0}//
     var ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined;
     document.write('<script type="text/javascript" src="tools/debug.js"></script>');

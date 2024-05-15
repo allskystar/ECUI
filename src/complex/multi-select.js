@@ -14,6 +14,9 @@ ecui.__ControlStyle__('\
         .ui-search-text-input {\
             position: relative !important;\
             flex: 1;\
+            input {\
+                display: block !important;\
+            }\
         }\
     }\
 \
