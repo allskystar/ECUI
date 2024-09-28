@@ -125,7 +125,7 @@ _aValue      控件的值对象
              * @return {ecui.ui.File.prototype.Selected} 文件选择控件
              */
             $createSelected: function (file) {
-                var selected = core.$create(this.Selected, { file: file, ext: this._nMax > 1 ? { clear: '' } : {} });
+                var selected = core.$create(this.Selected, { file: file, ext: { clear: '' } });
                 selected.$setParent(this);
                 dom.insertBefore(selected.getMain(), this.getBody());
                 return selected;
