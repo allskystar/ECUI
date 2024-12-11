@@ -26,7 +26,7 @@ _uDate   - 日部件
             if (!options.year) {
                 options.year = '2000-' + new Date().getFullYear();
             }
-            el.insertAdjacentHTML('beforeEnd', '<div ui="values:' + options.year + '"></div><div ui="values:1-12|00"></div><div ui="values:1-31|00"></div>');
+            el.insertAdjacentHTML('afterBegin', '<div ui="values:' + options.year + ';format:{0}年"></div><div ui="values:1-12|00;format:{0}月"></div><div ui="values:1-31|00;format:{0}日"></div>');
             // if (!options.value) {
             //     options.value = util.formatDate(new Date(), 'yyyy-MM-dd');
             // }

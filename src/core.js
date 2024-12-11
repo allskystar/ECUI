@@ -1754,8 +1754,8 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             namedControls[options.id] = control;
             control.$ID = options.id;
         }
-
         if (options.ext) {
+
             for (var key in options.ext) {
                 if (options.ext.hasOwnProperty(key)) {
                     var extend = ext[key];
