@@ -76,8 +76,8 @@ _uText        - 下拉框的文本框
             _super(el, options);
             optionsEl.className = this.getUnitClass(ui.abstractSelect, 'options');
 
-            this._uText = core.$fastCreate(ui.Item, el.firstChild, this, {capturable: false});
-            options = core.$fastCreate(this.Options, optionsEl, this, {focusable: false});
+            this._uText = core.$fastCreate(ui.Item, el.firstChild, this, {capturable: false, title: options.title});
+            options = core.$fastCreate(this.Options, optionsEl, this, {focusable: false, title: options.title});
 
             el = this.getInput();
             if (el.getAttribute('placeholder') === null) {

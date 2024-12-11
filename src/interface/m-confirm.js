@@ -59,7 +59,7 @@ ecui.__ControlStyle__('\
         constructor: function (el, options) {
             var title = dom.create({
                     className: 'ui-mobile-confirm-title',
-                    innerHTML: '<div class="confirm-cancel">取消</div><div class="confirm-title">' + (options.confirm || '') + '</div><div class="confirm-sure">确定</div>'
+                    innerHTML: '<div class="confirm-cancel">取消</div><div class="confirm-title">' + (options.title || '') + '</div><div class="confirm-sure">确定</div>'
                 }),
                 layout = dom.create({
                     className: 'ui-mobile-confirm-layout'
