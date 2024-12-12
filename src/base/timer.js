@@ -21,7 +21,7 @@ _sFormat        - 显示格式
      * @private
      */
     function refresh(timer) {
-        timer.getBody().innerHTML = util.formatDate(new Date(timer._nResidual + offset), timer._sFormat.replace('/{\$}/g', Math.floor(timer._nResidual / 1000)));
+        timer.getBody().innerHTML = util.formatDate(new Date(timer._nResidual + offset), timer._sFormat.replace(/{\$}/g, Math.floor(timer._nResidual / 1000)));
     }
 
     /**
