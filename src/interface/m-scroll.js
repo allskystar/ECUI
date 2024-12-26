@@ -214,6 +214,15 @@ ecui.__ControlStyle__('\
         return y;
     }
 
+    function toggleHideBody (isShow) {
+        // 解决 ios17.2 系统，在软键盘弹起的时候，设置 body 的 visibility 属性为 hidden 软件盘会立刻收起
+        if (iosVersion >= 17) {
+            document.body.style.opacity = isShow ? '' : '0';
+        } else {
+            document.body.style.visibility = isShow ? '' : 'hidden';
+        }
+    }
+
     /**
      * 移动端滚动接口。修复默认手势识别与 iOS/Android 软键盘的支持。
      * options 属性：
@@ -845,11 +854,11 @@ ecui.__ControlStyle__('\
                             } else {
                                 // 第一次触发，开始测试软键盘高度
                                 var lastScrollY = window.scrollY;
-                                document.body.style.visibility = 'hidden';
+                                toggleHideBody();
 
                                 util.timer(
                                     function () {
-                                        document.body.style.visibility = '';
+                                        toggleHideBody(true);
                                     },
                                     500
                                 );
@@ -862,7 +871,7 @@ ecui.__ControlStyle__('\
                                     window.scrollTo(0, 0);
                                 } else {
                                     keyboardHeight = window.scrollY - statusHeight;
-                                    document.body.style.visibility = '';
+                                    toggleHideBody(true);
                                     window.scrollTo(0, Math.min(lastScrollY, keyboardHeight));
                                 }
 
