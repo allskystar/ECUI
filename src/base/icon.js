@@ -25,11 +25,14 @@
             _super(el, options);
             if (icons[options.name]) {
                 var size = options.size || '20';
+                if (options.size === 'auto') {
+                    size = '';
+                }
                 var viewBox = options.viewbox;
                 if (!viewBox) {
                     viewBox = '0 0 ' + size + ' ' + size;
                 }
-                el.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" role="img" width="' + size + '" height="' + size + '" preserveAspectRatio="xMidYMid meet" viewBox="' + viewBox + '"><path fill="currentColor" d="' + icons[options.name] + '"></path></svg>';
+                el.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" role="img" ' + (size ? 'width="' + size + '" height="' + size + '"' : '') + ' preserveAspectRatio="xMidYMid meet" viewBox="' + viewBox + '"><path fill="currentColor" d="' + icons[options.name] + '"></path></svg>';
             }
         }
     );

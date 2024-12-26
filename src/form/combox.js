@@ -125,6 +125,7 @@ _sRequest   - 当前正在请求的值
             this._eTextInput = el.lastChild;
             this.$bindEvent(this._eTextInput);
             this._bCustom = options.custom !== false;
+            this._sUrl = options.url;
         },
         {
             /**
