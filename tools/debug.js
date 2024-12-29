@@ -113,7 +113,7 @@
                     var moduleClasses = document.body.className,
                         newModuleClass = 'module-' +moduleName.slice(0, -1).replace(/[._]/g, '-').replace(/\//g, '_');
 
-                    document.body.className = moduleClasses.replace(/module-[^\s]*/g, '') + ' ' + newModuleClass;
+                    // document.body.className = moduleClasses.replace(/module-[^\s]*/g, '') + ' ' + newModuleClass;
                     createStyle('.' + newModuleClass + '{' + cssText + '}');
                     ecui.io.ajax(moduleName + '_define_.html', {
                         cache: true,
