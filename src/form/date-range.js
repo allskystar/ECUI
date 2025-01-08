@@ -41,6 +41,9 @@ _uText  - 时间区域表示的文本
                                 calendar.getParent().setValue(
                                     util.formatDate(calendar._oStart, 'yyyy-MM-dd') + ',' + util.formatDate(calendar._oEnd, 'yyyy-MM-dd')
                                 );
+                                event.start = calendar._oStart;
+                                event.end = calendar._oEnd;
+                                ecui.dispatchEvent(calendar.getParent(), 'change', event);
                                 calendar.hide();
                             }
                         }
