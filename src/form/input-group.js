@@ -36,6 +36,18 @@ _sLabel  -  输入项标题
         function (el, options) {
             _super(el, options);
             this._sLabel = options.label;
+            if (this._sLabel) {
+                if (!el.querySelector('.ui-input-label')) {
+                    el.insertBefore(
+                        dom.create(
+                            'DIV',
+                            { className: 'ui-input-label', innerHTML: this._sLabel }
+                        ),
+                        el.firstChild
+                    );
+                }
+            }
+            this._eTip = el.appendChild(dom.create('DIV', { className: 'ui-input-tip' }));
         },
         {
             /**
@@ -78,17 +90,10 @@ _sLabel  -  输入项标题
                             core.$callExtend(item, ext.clear);
                         }
                     });
-                    if (!el.querySelector('.ui-input-label')) {
-                        el.insertBefore(
-                            dom.create(
-                                'DIV',
-                                { className: 'ui-input-label', innerHTML: (required ? '<span class="ui-input-required">*</span>' : '') + this._sLabel }
-                            ),
-                            el.firstChild
-                        );
+                    if (required) {
+                        el.firstChild.insertAdjacentHTML('afterBegin', '<span class="ui-input-required">*</span>');
                     }
                 }
-                this._eTip = el.appendChild(dom.create('DIV', { className: 'ui-input-tip' }));
             }
         }
     );
