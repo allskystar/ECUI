@@ -65,6 +65,13 @@ ecui.__ControlStyle__('\
         },
 
         /**
+         * @override
+         */
+        $activate: function (event) {
+            _class.$activate(event);
+            event.stopPropagation();
+        },
+        /**
          * 选项控件发生变化的处理。
          * @protected
          */

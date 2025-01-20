@@ -39,6 +39,37 @@ _uDate   - 日部件
             // 默认的输出格式
             FORMAT: '{0}-{1}-{2}',
 
+            Popup: ecui.inherits(
+                ui.MMultiOptions.prototype.Popup,
+                {
+                    /**
+                     * @override
+                     */
+                    $show: function (event) {
+                        _super.$show(event);
+                        var parent = this.getParent();
+                        if (!parent.getValue()) {
+                            var date = new Date();
+                            parent._aOptions.forEach(function (options, index) {
+                                var items = options.getItems();
+                                if (index === 0) {
+                                    var item = items.find(function (item) { return item._sValue === util.formatDate(date, 'yyyy'); });
+                                } else if (index === 1) {
+                                    var item = items.find(function (item) { return item._sValue === util.formatDate(date, 'MM'); });
+                                } else if (index === 2) {
+                                    var item = items.find(function (item) { return item._sValue === util.formatDate(date, 'dd'); });
+                                }
+                                if (item) {
+                                    options.setSelecting(item);
+                                    options.setPosition(0, options.getItemHeight() * options.getOptionSize() - (item ? item.getMain().offsetTop : 0));
+                                }
+                            });
+                        }
+        
+                    },
+                }
+            ),
+
             /**
              * 选项改变事件的默认处理。
              * @event
