@@ -1559,9 +1559,10 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
          * @private
          *
          * @param {string} loc location位置
+         * @param {boolean} denyHistory 清除缓存重定向
          */
-        redirect: function (loc) {
-            if (esrOptions.history) {
+        redirect: function (loc, denyHistory) {
+            if (esrOptions.history && !denyHistory) {
                 location.hash = calcUrl(loc);
             } else {
                 location.replace('#' + calcUrl(loc));

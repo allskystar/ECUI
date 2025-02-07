@@ -19,7 +19,7 @@ js_parse='node $libpath/tools/parse.js'
 busi_js_compress=$js_parse' | uglifyjs -c -m'
 js_compress='java -jar $libpath/webpacker.jar --charset utf-8'
 css_merge=$assign_css' java -jar $libpath/smarty4j.jar --left /\*{ --right }\*/ --charset utf-8'
-css_compile='lessc - --plugin=less-plugin-clean-css | python $libpath/less-funcs.py "$3"'
+css_compile='lessc - --plugin=less-plugin-clean-css | python3 $libpath/less-funcs.py "$3"'
 html_merge=$assign_html' java -jar $libpath/smarty4j.jar --left \<!--{ --right }--\> --charset utf-8'
 html_compress="sed -e \"s/stylesheet\/less[^\\\"]*/stylesheet/g\" -e \"s/[[:space:]]/ /g\" -e \"s/^ *//g\" -e \"s/ *$//g\" -e \"/^ *$/d\" -e \"/<script>window.onload=/d\""
 

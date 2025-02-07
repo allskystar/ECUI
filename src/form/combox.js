@@ -26,7 +26,7 @@ ecui.__ControlStyle__('\
 \
 /* 为不支持placeholder的浏览器提供兼容样式 */\
 .ui-combox-placeholder {\
-    input {\
+    input.ie-input {\
         .opacity0();\
         background-color: transparent;\
     }\
@@ -121,7 +121,7 @@ _sRequest   - 当前正在请求的值
             el = this.$getSection('Text').getBody();
             var placeholder = options.placeholder || this.getInput().getAttribute('placeholder') || '';
             this.getInput().setAttribute('placeholder', placeholder);
-            el.innerHTML = ieVersion < 10 ? '<div class="ui-placeholder">' + placeholder + '</div><input>' : '<input placeholder="' + util.encodeHTML(placeholder) + '">';
+            el.innerHTML = ieVersion < 10 ? '<div class="ui-placeholder">' + placeholder + '</div><input class="ie-input">' : '<input placeholder="' + util.encodeHTML(placeholder) + '">';
             this._eTextInput = el.lastChild;
             this.$bindEvent(this._eTextInput);
             this._bCustom = options.custom !== false;
@@ -244,9 +244,7 @@ _sRequest   - 当前正在请求的值
              * @override
              */
             $setPlaceholder: function () {
-                if (ieVersion < 10) {
-                    this.alterStatus(this.getValue() ? '-placeholder' : '+placeholder');
-                }
+                this.alterStatus(this.getValue() ? '-placeholder' : '+placeholder');
             },
 
             /**
