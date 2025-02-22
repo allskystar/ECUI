@@ -103,6 +103,8 @@ _aStatus            - 控件当前的状态集合
      * disabled    是否失效，如果设置失效，控件忽略所有事件，缺省值为 false
      * focusable   是否允许获取焦点，如果设置不允许获取焦点，控件的交互事件不会改变当前拥有焦点的控件，用于自定义滚动条，缺省值为 true
      * userSelect  是否允许选中内容，缺省值为 true
+     * data        控件缓存数据对象
+     * item        控件缓存数据对象
      * @control
      */
     ui.Control = core.inherits(
@@ -120,6 +122,8 @@ _aStatus            - 控件当前的状态集合
             this._bCapturable = options.capturable !== false;
             this._bUserSelect = options.userSelect !== false;
             this._bFocusable = options.focusable;
+            this._oData = options.data;
+            this._oItem = options.item;
             this._bGesture = true;
             this._sSubType = '';
             this._aStatus = ['', ' '];

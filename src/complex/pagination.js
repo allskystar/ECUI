@@ -67,6 +67,7 @@ _nTotalPage       - 总页数
                     $change: function (event) {
                         _super.$change(event);
                         this.getParent().go(null, +this.getFormValue());
+                        ecui.dispatchEvent(this.getParent(), 'pageSizeChange', event);
                     }
                 }
             ),
