@@ -1545,7 +1545,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
             });
 
             if (firstUnvalid) {
-                dom.scrollIntoViewIfNeeded(firstUnvalid);
+                dom.scrollIntoViewIfNeeded(firstUnvalid.getControl().getMain());
                 return false;
             }
             if (!useDefault && validate !== false) {
@@ -1703,7 +1703,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                     headers['x-enum-version'] = metaVersion;
                 }
 
-                var isFormDefault = method[0] === 'FORM:DEFAULT' ? true : method[0] === 'FORM' ? false : undefined;
+                var isFormDefault = method[0] === 'FORM:DEFAULT' ? true : (method[0] === 'FORM' || method[0] === 'FORM:GET') ? false : undefined;
                 if (method[0] === 'JSON' || isFormDefault !== undefined) {
                     var url = method[1].split('?'),
                         data = {},
@@ -1714,12 +1714,14 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                         item = item.split('=');
                         if (item.length > 1) {
                             setCacheData(data, item[0], replace(decodeURIComponent(item[1])));
-                        } else if (isFormDefault !== undefined) {
+                        } else if (method[0].indexOf('FORM') === 0) {
                             var form = document.forms[item[0]];
-                            if (form.getAttribute('enctype') === 'multipart/form-data') {
-                                isApplicationJson = false;
+                            if (form) {
+                                if (form.getAttribute('enctype') === 'multipart/form-data') {
+                                    isApplicationJson = false;
+                                }
+                                valid = esr.parseObject(form, data, true, isFormDefault) && valid;
                             }
-                            valid = esr.parseObject(form, data, true, isFormDefault) && valid;
                         } else {
                             Object.assign(data, replace(item[0]));
                         }
@@ -1832,6 +1834,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                 var err = [],
                     metaUpdate,
                     callback = onsuccess || util.blank,
+                    errorCallback = onerror || util.blank,
                     onafterrequest = function () {
                         if (requestVersion === version && esr.onafterrequest) {
                             esr.onafterrequest(context);
@@ -1881,7 +1884,13 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                     }
                 };
 
-                onerror = onerror || esr.onrequesterror || util.blank;
+                onerror = function (err) {
+                    var res = errorCallback(err);
+                    if (esr.onrequesterror) {
+                        esr.onrequesterror(err);
+                    }
+                    return res;
+                };
 
                 if (esr.onbeforerequest) {
                     esr.onbeforerequest(context);

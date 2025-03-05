@@ -173,7 +173,7 @@ _ePlaceHolder - 为空时的提示信息标签
                     }
                     return;
                 }
-                if (this._oFilter && !event.ctrlKey && !event.altKey && !event.metaKey) {
+                if (this._oFilter && !event.ctrlKey && !event.altKey && !event.metaKey && event.which !== 9) {
                     if (event.key) {
                         item = event.key;
                     } else {
