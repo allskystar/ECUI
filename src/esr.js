@@ -17,7 +17,7 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
 使用示例：
 <body data-ecui="load:esr">
 支持的参数：
-esr(cache=500,meta=true,history=false)
+esr(cache=500,meta=[url],history=false)
 cache参数可以用于页面数据缓存区的大小，默认为1000
 
 ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价于<a>标签，callRoute不会记录url信息，等价于传统的ajax调用，change用于参数的部分改变，一般用于翻页操作仅改变少量页码信息。
@@ -1687,6 +1687,13 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                 }
             }
 
+            function setMeta() {
+//{if 1}//                util.setLocalStorage('esr_meta', meta, function () {//{/if}//
+//{if 1}//                    util.setLocalStorage('esr_meta_version', metaVersion);//{/if}//
+//{if 1}//                });//{/if}//
+                esr.setData('META', meta);
+            }
+
             function request(varUrl, varName) {
                 var method = varUrl.split(' '),
                     headers = {},
@@ -1699,8 +1706,8 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                     Object.assign(xhrFields, esr.xhrFields);
                 }
 
-                if (esrOptions.meta) {
-                    headers['x-enum-version'] = metaVersion;
+                if (esrOptions.meta && metaVersion) {
+                    headers['x-meta-tag'] = metaVersion;
                 }
 
                 var isFormDefault = method[0] === 'FORM:DEFAULT' ? true : (method[0] === 'FORM' || method[0] === 'FORM:GET') ? false : undefined;
@@ -1767,17 +1774,46 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                     xhrFields: xhrFields,
                     timeout: esr.timeout,
                     data: data,
-                    onsuccess: function (text) {
+                    onsuccess: function (text, xhr) {
+                        function deepAssign(data, obj) {
+                            for (var key in obj) {
+                                if (obj.hasOwnProperty(key)) {
+                                    if (obj[key] === null) {
+                                        // 空指针数据表示需要删除
+                                        delete data[key];
+                                    } else if (Array.isArray(obj[key])) {
+                                        // 如果是数组因为序号无法对齐需要直接复制
+                                        data[key] = obj[key];
+                                    } else if (typeof obj[key] === 'object') {
+                                        data[key] = data[key] || {};
+                                        deepAssign(data[key], obj[key]);
+                                    } else {
+                                        data[key] = obj[key];
+                                    }
+                                }
+                            }
+                            return data;
+                        }
+
                         count--;
                         try {
                             // eslint-disable-next-line no-shadow
                             var data = JSON.parse(text),
+                                header = xhr.getResponseHeader('x-meta-tag'),
                                 key;
 
-                            // 枚举常量管理
+                            // 元数据管理
                             if (esrOptions.meta) {
-                                if (data.meta) {
+                                if (header === 'unknown') {
                                     metaUpdate = true;
+                                } else if (data.meta) {
+                                    if (header) {
+                                        metaVersion = header;
+                                    }
+                                    deepAssign(meta, data.meta);
+                                    setMeta();
+                                } else {
+                                    context.META = meta;
                                 }
                             }
                             context[varName ? varName + '_CODE' : 'CODE'] = data.code;
@@ -1848,26 +1884,15 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
 
                 onsuccess = function () {
                     if (metaUpdate) {
-                        // 枚举常量管理
+                        metaUpdate = false;
+                        // 元数据管理
                         io.ajax(
                             esrOptions.meta,
                             {
-                                headers: {'x-enum-version': metaVersion},
-                                onsuccess: function (text) {
-                                    var data = JSON.parse(text);
-                                    for (var key in data.meta.record) {
-                                        if (data.meta.record.hasOwnProperty(key)) {
-                                            meta[key] = meta[key] || {};
-                                            for (var i = 0, items = data.meta.record[key], item; (item = items[i++]);) {
-                                                meta[key][item.id] = item;
-                                            }
-                                        }
-                                    }
-                                    if (data.meta.version) {
-                                        metaVersion = data.meta.version;
-                                    }
-                                    util.setLocalStorage('esr_meta', JSON.stringify(meta));
-                                    util.setLocalStorage('esr_meta_version', metaVersion);
+                                onsuccess: function (text, xhr) {
+                                    metaVersion = xhr.getResponseHeader('x-meta-tag');
+                                    meta = JSON.parse(text);
+                                    setMeta();
                                     handle();
                                 },
                                 onerror: function () {
@@ -2095,14 +2120,22 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                 });
             }
 
-            esrOptions = JSON.parse('{' + decodeURIComponent(value.replace(/(\w+)\s*=\s*(["A-Za-z0-9_]+)\s*($|,)/g, '"$1":$2$3')) + '}');
+            esrOptions = JSON.parse('{' + decodeURIComponent(value.replace(/(\w+)\s*=\s*([^,]+)\s*($|,)/g, '"$1":"$2$3"')) + '}');
 
-            esrOptions.history =/*ignore*/ ieVersion < 7 ||/*end*/ esrOptions.history !== false;
-            esrOptions.cache = esrOptions.cache || 1000;
+            esrOptions.history =/*ignore*/ ieVersion < 7 ||/*end*/ esrOptions.history !== 'false';
+            esrOptions.cache = +esrOptions.cache || 1000;
 
             if (esrOptions.meta) {
-                metaVersion = util.getLocalStorage('esr_meta_version') || '0';
-                meta = JSON.parse(util.getLocalStorage('esr_meta')) || {};
+                core.pause();
+                core.pause();
+                util.getLocalStorage('esr_meta_version', function (value) {
+                    metaVersion = value || '';
+                    core.resume();
+                });
+                util.getLocalStorage('esr_meta', function (value) {
+                    meta = value || {};
+                    core.resume();
+                });
             }
 //{if 0}//
             etpl.ready(function () {

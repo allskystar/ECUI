@@ -1561,10 +1561,22 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              * @public
              *
              * @param {string} key 数据的键值
-             * @return {object} 数据对象
+             * @param {function} handle 获取数据后的处理
              */
-            getLocalStorage: function (key) {
-                return window.localStorage.getItem(location.pathname + '#' + key);
+            getLocalStorage: function (key, handle) {
+                if (window.indexedDB) {
+                    var request = indexedDB.open('ECUIDB', 1);
+                    request.onupgradeneeded = request.onsuccess = function (event) {
+                        var db = event.target.result,
+                            table = db.objectStoreNames.contains('ECUITable') ? db.transaction('ECUITable', 'readwrite').objectStore('ECUITable') : db.createObjectStore('ECUITable', {keyPath: 'key'});
+                        table.get(key).onsuccess = function (event) {
+                            handle(event.target.result.value);
+                        };
+                    };
+                } else {
+                    key = window.localStorage.getItem(location.pathname + '#' + key);
+                    handle(key && JSON.parse(key));
+                }
             },
 
             /**
@@ -1695,9 +1707,24 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              *
              * @param {string} key 数据的键值
              * @param {object} value 数据对象
+             * @param {function} handle 设置成功的回调函数
              */
-            setLocalStorage: function (key, value) {
-                window.localStorage.setItem(location.pathname + '#' + key, value);
+            setLocalStorage: function (key, value, handle) {
+                if (window.indexedDB) {
+                    var request = indexedDB.open('ECUIDB', 1);
+                    request.onupgradeneeded = request.onsuccess = function (event) {
+                        var db = event.target.result,
+                            table = db.objectStoreNames.contains('ECUITable') ? db.transaction('ECUITable', 'readwrite').objectStore('ECUITable') : db.createObjectStore('ECUITable', {keyPath: 'key'});
+                        if (value !== undefined) {
+                            table.put({key: key, value: value}).onsuccess = handle;
+                        } else {
+                            table.delete(key).onsuccess = handle;
+                        }
+                    };
+                } else {
+                    window.localStorage.setItem(location.pathname + '#' + key, JSON.stringify(value));
+                    handle();
+                }
             },
 
             /**
